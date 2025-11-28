@@ -4,8 +4,6 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     |03/10/2017| Chamado 21705.Revisão de fontes de Ativo Fixo: Revisão de cabeçalho; Revisão de Mensagens ITMsg();
-              |          | Inclusão de controle de log de acesso LogAcs()
 Lucas Borges  |26/09/2019| Revisão do fonte. Chamado 28346
 Lucas Borges  |26/06/2025| Chamado 50617. Revisões diversas visando padronizar os fontes
 ===============================================================================================================================
