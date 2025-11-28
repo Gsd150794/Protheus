@@ -2,36 +2,24 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                              Motivo                                                          
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Igor Melgaco      | 11/01/2023 | Chamado 42331. Mudança layout e exclusão de compensação.
-Igor Melgaço      | 11/07/2023 | Chamado 44438. Ajustes para Reintegração quando o Status for Não Integrado.
-Igor Melgaço      | 08/12/2023 | Chamado 45694. Ajustes para configuração da não integração do título no financeiro e integração por lote.
-Igor Melgaço      | 24/04/2024 | Chamado 46970. Ajustes para correção de processo de reintegração.
-Igor Melgaço      | 31/05/2024 | Chamado 47373. Ajustes para correção de query.
-====================================================================================================================================================
-Analista         - Programador       - Inicio     - Envio      - Chamado - Motivo da Alteração
-----------------------------------------------------------------------------------------------------------------------------------------------------
-Antônio Ramos    - Igor Melgaço      - 03/07/2027 -            - 51062   - Ajustes para validação do Fornecedor e da Filial posicionada antes da integração.
-====================================================================================================================================================
+Igor Melgaço  |24/04/2024| Chamado 46970. Ajustes para correção de processo de reintegração.
+Igor Melgaço  |31/05/2024| Chamado 47373. Ajustes para correção de query.
+Igor Melgaço  |03/07/2025| Chamado 51062. Ajustes para validação do Fornecedor e da Filial posicionada antes da integração.
+===============================================================================================================================
 */
 
-#INCLUDE "FWMBROWSE.CH"
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "TOPCONN.CH"
-#INCLUDE "RWMAKE.CH"
+#Include "FWMVCDEF.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: AFIN031
 Autor-------------: Igor Melgaço
 Data da Criacao---: 28/12/2021
-===============================================================================================================================
 Descrição---------: Monitor Paytrack. Chamado: 42331 
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------:  
 ===============================================================================================================================
 */ 
@@ -63,18 +51,15 @@ BLACK  – Para a cor Preta
 PINK   – Para a cor Rosa
 WHITE  – Para a cor Branca
 */
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MenuDef
 Autor-------------: Igor Melgaço
 Data da Criacao---: 28/12/2022
-===============================================================================================================================
 Descrição---------: Rotina de definição automática do menu via MVC
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: aRotina - Definições do menu principal da Rotina.
 ===============================================================================================================================
 */
@@ -95,11 +80,8 @@ Return( _aRotina )
 Programa----------: ModelDef
 Autor-------------: Igor Melgaço
 Data da Criacao---: 28/12/2022
-===============================================================================================================================
 Descrição---------: Rotina de definição do Modelo de Dados do MVC
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: _oModel - Objeto do modelo de dados do MVC 
 ===============================================================================================================================
 */ 
@@ -198,11 +180,8 @@ Return _oModel
 Programa----------: ViewDef
 Autor-------------: Igor Melgaço
 Data da Criacao---: 28/12/2022
-===============================================================================================================================
 Descrição---------: Rotina de definição da View do MVC
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: _oView - Objeto de exibição do MVC  
 ===============================================================================================================================
 */ 
@@ -351,11 +330,8 @@ Return _oView
 Programa----------: AFIN031F
 Autor-------------: Igor Melgaço
 Data da Criacao---: 28/12/2022
-===============================================================================================================================
 Descrição---------: Rotina de Visualização de Titulo a Pagar
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------:   
 ===============================================================================================================================
 */ 
@@ -363,31 +339,26 @@ User Function AFIN031F()
 Local _nRecnoSE2 := 0 As Numeric
 Local _cErro := "Não encontrado o Titulo no Contas a Pagar." As Character
 
-    DbSelectArea("SE2")
-    DbSetOrder(1)
+    DBSelectArea("SE2")
+    DBSetOrder(1)
     If DBSeek(Z29->Z29_FILIAL+Z29->Z29_PREFIX+Z29->Z29_NUM+Z29->Z29_PARCEL+Z29->Z29_TIPO+Z29->Z29_FORNEC+Z29->Z29_LOJA)
         cCadastro:= "Visualização do Titulo"
         _nRecnoSE2 := SE2->(Recno())
         DBSelectArea("SE2")
         AxVisual("SE2",_nRecnoSE2,2)
     Else
-        U_ITMSG(_cErro,"Atenção","",3 , , , .T.)
+        U_ITMsg(_cErro,"Atenção","",3 , , , .T.)
     EndIf
 
 Return 
-
-
 
 /*
 ===============================================================================================================================
 Programa----------: AFIN031I
 Autor-------------: Igor Melgaço
 Data da Criacao---: 28/12/2022
-===============================================================================================================================
 Descrição---------: Realiza de Integração
-===============================================================================================================================
 Parametros--------: _cOper - Operação I - Inclusão E - Exclusão
-===============================================================================================================================
 Retorno-----------: _lReturn => Confirmação de Execução
 ===============================================================================================================================
 */ 
@@ -401,7 +372,7 @@ _cJson := Z26->Z26_PAYLOA
 _lContinua := U_MFIN021I(Z26->Z26_PAYLOA,@_cErro,_lRest,@_cJson,_cOper)
 
 If !_lContinua
-    U_ITMSG(_cErro,"Atenção","",3 , , , .T.)
+    U_ITMsg(_cErro,"Atenção","",3 , , , .T.)
 EndIf
 
 Return _lContinua
@@ -411,11 +382,8 @@ Return _lContinua
 Programa----------: AFIN031G
 Autor-------------: Igor Melgaço
 Data da Criacao---: 07/12/2023
-===============================================================================================================================
 Descrição---------: Realiza de Integração em lote
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------:
 ===============================================================================================================================
 */ 
@@ -428,15 +396,15 @@ Local _cTitAux := "Integração Paytrack" As Character
 
 MV_PAR01 := U_MFIN021VEN(dDatabase)
 _aTipos:={"1-Reembolso de Viagem Italac","2-Adiantamento de Viagem Italac"}
-AADD( _aParAux , { 1 , "Data de Pagamento", MV_PAR01, "@D", "", ""	, "" , 050 , .F.  })
-AADD( _aParAux , { 2 , "Tipo"            , MV_PAR02,_aTipos, 120   ,".T.",.T. ,".T."}) 
+aAdd( _aParAux , { 1 , "Data de Pagamento", MV_PAR01, "@D", "", ""	, "" , 050 , .F.  })
+aAdd( _aParAux , { 2 , "Tipo"            , MV_PAR02,_aTipos, 120   ,".T.",.T. ,".T."}) 
 
 For nA := 1 To Len( _aParAux )
     aAdd( _aParRet , _aParAux[nA][03] )
 Next
                          //aParametros, cTitle                                , @aRet    ,[bOk], [ aButtons ] [ lCentered ] [ nPosX ] [ nPosy ] [ oDlgWizard ] [ cLoad ] [ lCanSave ] [ lUserSave ] 
 If ParamBox( _aParAux , _cTitAux, @_aParRet, _bOK, /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
-   FWMSGRUN(,{|oproc|  AFIN031H(oproc) },'Aguarde processamento...','Lendo dados...')
+   FWMsgRun(,{|oproc|  AFIN031H(oproc) },'Aguarde processamento...','Lendo dados...')
 EndIf
 
 Return
@@ -445,11 +413,8 @@ Return
 Programa----------: AFIN031G
 Autor-------------: Igor Melgaço
 Data da Criacao---: 06/12/2023
-===============================================================================================================================
 Descrição---------: Rotina de Integração
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------:   
 ===============================================================================================================================
 */ 
@@ -470,7 +435,7 @@ Local _aDadosZ29 := {} As Array
 Local _nI := 0 As Numeric
 Local _aButtons := {} As Array
 
-    _cPrefixo := Iif(Subs(MV_PAR02,1,1) = "2","AVI","RVI','CVI")
+    _cPrefixo := IIf(Subs(MV_PAR02,1,1) = "2","AVI","RVI','CVI")
     _cZ29Temp := GetNextAlias()
     
     BeginSql Alias _cZ29Temp
@@ -484,27 +449,27 @@ Local _aButtons := {} As Array
 
     EndSql
 
-    (_cZ29Temp)->(Dbgotop())
+    (_cZ29Temp)->(DBGoTop())
 
     If (_cZ29Temp)->(!Eof())
 
-        AADD(_aCabec,"")
-        AADD(_aCabec,"Filial")
-        AADD(_aCabec,"Prefixo")
-        AADD(_aCabec,"Numero")
-        AADD(_aCabec,"CPF/CNPJ")
-        AADD(_aCabec,"Cod Fornecedor")
-        AADD(_aCabec,"Loja")
-        AADD(_aCabec,"Mome Fornecedor")
-        AADD(_aCabec,"Emissão")
-        AADD(_aCabec,"Vencimento")
-        AADD(_aCabec,"Valor")
-        AADD(_aCabec,"Recno")
+        aAdd(_aCabec,"")
+        aAdd(_aCabec,"Filial")
+        aAdd(_aCabec,"Prefixo")
+        aAdd(_aCabec,"Numero")
+        aAdd(_aCabec,"CPF/CNPJ")
+        aAdd(_aCabec,"Cod Fornecedor")
+        aAdd(_aCabec,"Loja")
+        aAdd(_aCabec,"Mome Fornecedor")
+        aAdd(_aCabec,"Emissão")
+        aAdd(_aCabec,"Vencimento")
+        aAdd(_aCabec,"Valor")
+        aAdd(_aCabec,"Recno")
 
         DBSelectArea("Z29")
-        Do While ( (_cZ29Temp)->(!Eof()) )
+        While ( (_cZ29Temp)->(!Eof()) )
 
-            AADD(_aDadosZ29,{.F.,;
+            aAdd(_aDadosZ29,{.F.,;
             (_cZ29Temp)->Z29_FILIAL,;
             (_cZ29Temp)->Z29_PREFIX,;
             (_cZ29Temp)->Z29_NUM,;
@@ -512,12 +477,12 @@ Local _aButtons := {} As Array
             (_cZ29Temp)->Z29_FORNEC,;
             (_cZ29Temp)->Z29_LOJA,;
             (_cZ29Temp)->Z29_NOMFOR,;
-            DTOC(STOD((_cZ29Temp)->Z29_EMISSA)),;
-            DTOC(STOD((_cZ29Temp)->Z29_VENCTO)),;
-            ALLTRIM(Transform((_cZ29Temp)->Z29_VALOR,"@E 999,999,999,999,999.99")),;
+            DToC(SToD((_cZ29Temp)->Z29_EMISSA)),;
+            DToC(SToD((_cZ29Temp)->Z29_VENCTO)),;
+            AllTrim(Transform((_cZ29Temp)->Z29_VALOR,"@E 999,999,999,999,999.99")),;
             (_cZ29Temp)->RECNOZ29 })
 
-            (_cZ29Temp)->(dbSkip())
+            (_cZ29Temp)->(DBSkip())
 
         EndDo
 
@@ -538,9 +503,9 @@ Local _aButtons := {} As Array
 
                         lContinua := .T.
         				//Valida Fornecedor
-        				DbSelectArea("SA2")
-        				DbSetOrder(1)
-        				If Dbseek(xFilial("SA2")+Z29->(Z29_FORNEC+Z29_LOJA))
+        				DBSelectArea("SA2")
+        				DBSetOrder(1)
+        				If DBSeek(xFilial("SA2")+Z29->(Z29_FORNEC+Z29_LOJA))
                             If SA2->A2_MSBLQL == '1'
                                 lContinua := .F.
                                 _cErro := "Cadastro do Fornecedor " + Z29->Z29_FORNEC + " Loja " + Z29->Z29_LOJA + " esta bloqueado!"
@@ -554,8 +519,8 @@ Local _aButtons := {} As Array
 
                         If lContinua 
                             If Z29->Z29_PREFIX == "AVI"
-                                DbSelectArea("Z26")
-                                DbSetOrder(1)
+                                DBSelectArea("Z26")
+                                DBSetOrder(1)
                                 If Z26->(DBSeek(Z29->Z29_IDINTE))
                                     If Z26->Z26_EXCLUI
                                         lBuscaComp := .T.
@@ -564,15 +529,15 @@ Local _aButtons := {} As Array
                                     EndIf
                                 EndIf
                                 
-                                If lBuscaComp .And. !Empty(Alltrim(Z29->Z29_IDCOMP)) .AND. Z26->(DBSeek(Z29->Z29_IDCOMP))
+                                If lBuscaComp .And. !Empty(AllTrim(Z29->Z29_IDCOMP)) .And. Z26->(DBSeek(Z29->Z29_IDCOMP))
                                     If Z26->Z26_EXCLUI
                                         _cNrIntegr := Z29->Z29_IDCOMP
                                     EndIf
                                 EndIf
                             EndIf
 
-                            DbSelectArea("Z26")
-                            DbSetOrder(1)
+                            DBSelectArea("Z26")
+                            DBSetOrder(1)
                             If Z26->(DBSeek(_cNrIntegr)) //posiciono no ultimo registro de integração para realizar sua inclusão posteriormente 
                                 _cJson := ""
 
@@ -580,7 +545,7 @@ Local _aButtons := {} As Array
 
                                     If !Empty(Z26->Z26_PAYLOA)
 
-                                        oProc:cCaption := ("Processando registro "+Alltrim(Str(_nLin))+" de "+Alltrim(Str(_nTotal))+".")
+                                        oProc:cCaption := ("Processando registro "+AllTrim(Str(_nLin))+" de "+AllTrim(Str(_nTotal))+".")
                                         ProcessMessages()
                                         
                                         _cErro := ""
@@ -603,7 +568,7 @@ Local _aButtons := {} As Array
 
                 If Len(_aLog) > 0
                 	_aButtons := {}
-                    AADD(_aButtons,{"LEGENDA",{||  U_AFIN031Y() },"Legenda", "Legenda" }) 
+                    aAdd(_aButtons,{"LEGENDA",{||  U_AFIN031Y() },"Legenda", "Legenda" }) 
 
                     _cTitAux := 'Log de Processamento da Integração'
                     _aCabec  := {"Status","Prefixo","Numero","Emissao","Fornecedor","ID Integração","Erro","Json" }
@@ -616,13 +581,13 @@ Local _aButtons := {} As Array
                 EndIf
             EndIf
         Else
-            U_ITMSG("Não encontrado registros para integração!","Atenção","",3 , , , .T.)
+            U_ITMsg("Não encontrado registros para integração!","Atenção","",3 , , , .T.)
         EndIf
     Else
-        U_ITMSG("Não encontrado registros para integração!","Atenção","",3 , , , .T.)
+        U_ITMsg("Não encontrado registros para integração!","Atenção","",3 , , , .T.)
     EndIf
 
-    (_cZ29Temp)->(DbCloseArea())
+    (_cZ29Temp)->(DBCloseArea())
 
 Return _lContinua
 
@@ -631,11 +596,8 @@ Return _lContinua
 Programa----------: AFIN031R
 Autor-------------: Igor Melgaço
 Data da Criacao---: 28/12/2022
-===============================================================================================================================
 Descrição---------: Rotina de Reintegração
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------:   
 ===============================================================================================================================
 */ 
@@ -644,13 +606,13 @@ User Function AFIN031R() As Logical
         
     Begin Transaction
 
-        DbSelectArea("Z26")
-        DbSetOrder(1)
+        DBSelectArea("Z26")
+        DBSetOrder(1)
         If DBSeek(Z29->Z29_IDINTE) //posiciono no ultimo registro de integração para realizar sua inclusão posteriormente 
             
             _lContinua := .T.
 
-            If Z29->Z29_STATUS == "E" .OR. Z29->Z29_STATUS == "N" 
+            If Z29->Z29_STATUS == "E" .Or. Z29->Z29_STATUS == "N" 
                 _lContinua := U_AFIN031I("E") //Exclusão
             EndIf
 
@@ -658,7 +620,7 @@ User Function AFIN031R() As Logical
                 _lContinua := U_AFIN031I("R") //Reintegração
             EndIf
         Else
-            U_ITMSG("Não encontrado registro de integração!","Atenção","",3 , , , .T.)
+            U_ITMsg("Não encontrado registro de integração!","Atenção","",3 , , , .T.)
         EndIf
 
     End Transaction
@@ -671,11 +633,8 @@ Return _lContinua
 Programa----------: AFIN031L
 Autor-------------: Igor Melgaço
 Data da Criacao---: 28/12/2022
-===============================================================================================================================
 Descrição---------: Rotina para reorno da cor da Legenda
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: _cRetorno => Cor referente a legenda
 ===============================================================================================================================
 */ 
@@ -701,11 +660,8 @@ Return _cRetorno
 Programa----------: AFIN031X
 Autor-------------: Igor Melgaço
 Data da Criacao---: 11/01/2023
-===============================================================================================================================
 Descrição---------: Exclusão do CVI
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: _lReturn => Confirmação de Execução
 ===============================================================================================================================
 */ 
@@ -719,9 +675,9 @@ Local _cIdInte    := _oModelCZ26:GetValue("Z26_IDINTE") As Character
 Local _cStatus    := _oModelCZ26:GetValue("Z26_STATUS") As Character
 Local _oView      := Nil As Object
 
-If _cStatus == "I" .OR. _cStatus == "R"
-    DbSelectArea("Z26")
-    DbSetOrder(1)
+If _cStatus == "I" .Or. _cStatus == "R"
+    DBSelectArea("Z26")
+    DBSetOrder(1)
     If DBSeek(_cIdInte)
         _lReturn := U_MFIN021I("",@_cErro,.F.,"","X")
     Else
@@ -744,7 +700,7 @@ If _lReturn
     _oModel:DeActivate()
     _oModel:Activate()
 Else
-    U_ITMSG(_cErro,"Atenção","",3 , , , .T.)
+    U_ITMsg(_cErro,"Atenção","",3 , , , .T.)
 EndIf
 
 RestOrd(_aOrd)
@@ -756,25 +712,22 @@ Return _lReturn
 Programa----------: AFIN31L2
 Autor-------------: Igor Melgaço
 Data da Criacao---: 07/10/2023
-===============================================================================================================================
 Descrição---------: Monta Legenda
-===============================================================================================================================
 Parametros--------: _aCol,_nLinha
-===============================================================================================================================
 Retorno-----------: cRet
 ===============================================================================================================================
 */
-USER Function AFIN31L2(_aCol As Array, _nLinha As Numeric) As Object
+User Function AFIN31L2(_aCol As Array, _nLinha As Numeric) As Object
     Local oVerm := LoadBitmap( , "BR_VERMELHO") As Object // VERMELHO TEM QUE GERA REPOSICAO .F. CRITICO
     Local oVerd := LoadBitmap( , "BR_VERDE"   ) As Object // VERDE ESTOQUE TUDO OK .T.
 
-    IF _aCol[_nLinha,1]
-        RETURN oVerd
-    ELSE
-        RETURN oVerm
-    ENDIF
+    If _aCol[_nLinha,1]
+        Return oVerd
+    Else
+        Return oVerm
+    EndIf
 
-RETURN oVerm
+Return oVerm
 
 
 /*
@@ -782,11 +735,8 @@ RETURN oVerm
 Programa----------: AFIN031VPA
 Autor-------------: Igor Melgaço
 Data da Criacao---: 07/05/2024
-===============================================================================================================================
 Descrição---------: Rotina validação de data de pagamento na integração
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: lRet 
 ===============================================================================================================================
 */ 
@@ -794,7 +744,7 @@ Static Function AFIN031VPA() As Logical
 Local lRet := .T. As Logical
 
 If MV_PAR01 < dDatabase
-    U_ITMSG("Data de pagamento inválida!","Atenção","Selecione uma data maior ou igual a data atual.",3 , , , .T.)
+    U_ITMsg("Data de pagamento inválida!","Atenção","Selecione uma data maior ou igual a data atual.",3 , , , .T.)
     lRet := .F.
 EndIf
 
@@ -805,11 +755,8 @@ Return lRet
 Programa----------: AFIN031L
 Autor-------------: Igor Melgaço
 Data da Criacao---: 12/10/2023
-===============================================================================================================================
 Descrição---------: Monta Legenda
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: .T.
 ===============================================================================================================================
 */

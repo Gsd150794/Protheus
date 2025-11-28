@@ -11,7 +11,7 @@ Lucas Borges      | 15/10/2019 | Removidos os Warning na compilação da release 1
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#include "protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -33,8 +33,8 @@ User Function AOMS053()
 	
 	Private cString := "ZZM"
 	
-	dbSelectArea(cString)
-	dbSetOrder(1)
+	DBSelectArea(cString)
+	DBSetOrder(1)
 	
 	AxCadastro(cString,"Cadastro de Filiais",cVldExc,cVldAlt)
 
@@ -77,8 +77,8 @@ If Inclui
 		      %Exp:_cFiltro%	
 	EndSql
 
-	dbSelectArea(_cAlias)           
-	(_cAlias)->(dbGoTop())
+	DBSelectArea(_cAlias)           
+	(_cAlias)->(DBGoTop())
 	
 	If (_cAlias)->NUMREG > 0
 	   
@@ -87,8 +87,8 @@ If Inclui
 	
 	EndIf
 	
-	dbSelectArea(_cAlias)           
-	(_cAlias)->(dbCloseArea())
+	DBSelectArea(_cAlias)           
+	(_cAlias)->(DBCloseArea())
 
 EndIf
 

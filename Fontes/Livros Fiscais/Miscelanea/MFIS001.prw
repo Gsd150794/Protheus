@@ -2,40 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alexandre V.  | 10/03/2015 | Correção de referência à variável de ambiente na montagem do SQL de consulta para o relatório
-			  |            | que estava apresentando erro durante a execução. Chamado 9281
--------------------------------------------------------------------------------------------------------------------------------
-Alexandre V.  | 23/03/2016 | Ajuste para padronizar a utilização de rotinas de consultas customizadas. Chamado 14774
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 17/09/2019 | Retirada chamada da função itputx1. Chamado 28346 
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 28/10/2021 | Criada uma Mensagem para quando não tiver dados. Chamado 38121
--------------------------------------------------------------------------------------------------------------------------------
-Igor Melgaço  | 03/04/2024 | Inclusão de parametros de filtro. Chamado 46774
+Alex Wallauer |28/10/2021| Chamado 38121. Criada uma Mensagem para quando não tiver dados.
+Igor Melgaço  |03/04/2024| Chamado 46774. Inclusão de parametros de filtro.
+Julio Paz     |07/07/2025| Chamado 51084. Inclusão de duas novas colunas conforme tipo de movimentação: D1_QUANT(Entrada)/ D2_QUANT (Saída).
 ===============================================================================================================================
- Analista     - Programador  - Inicio   - Envio    - Chamado - Motivo da Alteração
-=====================================================================================================================================================================================
-Antônio Ramos - Julio Paz    - 04/07/25 - 07/07/25 - 51084   - Inclusão de duas novas colunas conforme tipo de movimentação: D1_QUANT (Entrada) e D2_QUANT (Saída).
-=====================================================================================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MFIS001
 Autor-------------: Lucas Borges
 Data da Criacao---: 12/04/2012
-===============================================================================================================================
 Descrição---------: Função para gerar relação de documentos fiscais para conferência externa - SPED PIS/COFINS
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -43,26 +26,23 @@ User Function MFIS001()
 
 Local _cPerg := "MFIS001"
 
-DO WHILE .T.
+While .T.
    If Pergunte( _cPerg )
    	  Processa( {|| MFIS001PRC() } , 'Aguarde!' , 'Iniciando o processamento...' )
-   	  LOOP
+   	  Loop
    EndIf
-   EXIT
-ENDDO
+   Exit
+EndDo
 
-Return()
+Return
                           
 /*
 ===============================================================================================================================
 Programa----------: MFIS001PRC
 Autor-------------: Lucas Borges
 Data da Criacao---: 12/04/2012
-===============================================================================================================================
-Descrição---------: Função que processa a leitura e organização dos dados
-===============================================================================================================================
+Descrição---------: Função que Processa a leitura e organização dos dados
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -90,10 +70,10 @@ _aHeader := {	"Tipo Mov."			, "Codigo Filial"			, "Filial"			, "Data Emissao"	, 
 // Verifica o filtro por Filiais - Incluido por Carlos Cleber 23/12/13
 //====================================================================================================
 If !Empty( MV_PAR01 )
-_cFiltro += " AND FT.FT_FILIAL  IN "+ FormatIn( Alltrim(MV_PAR01) , ";" )
+_cFiltro += " AND FT.FT_FILIAL  IN "+ FormatIn( AllTrim(MV_PAR01) , ";" )
 EndIf
 
-_cFiltro += " AND FT.FT_ENTRADA BETWEEN '"+ DTOS( MV_PAR02 ) +"' AND '"+ DTOS(MV_PAR03) +"' "
+_cFiltro += " AND FT.FT_ENTRADA BETWEEN '"+ DToS( MV_PAR02 ) +"' AND '"+ DToS(MV_PAR03) +"' "
 
 If !Empty( MV_PAR06 )
    _cFiltro += " AND FT.FT_CSTPIS = '" +  MV_PAR06 + "' " 
@@ -143,7 +123,7 @@ If MV_PAR04 == 1 // Entradas
 		      FT.FT_TNATREC		AS TABELA_NATUREZA_RECEITA,
 		      FT.FT_CNATREC		AS CODIGO_NATUREZA_RECEITA,
 			  D1.D1_QUANT		AS QUANTNF
-		FROM %table:SD1% D1 , %table:SB1% B1 , %table:SA2% A2 , %table:SFT% FT   
+		FROM %Table:SD1% D1 , %Table:SB1% B1 , %Table:SA2% A2 , %Table:SFT% FT   
 		WHERE
 		    D1.%notDel%
 		AND B1.%notDel%
@@ -201,7 +181,7 @@ If MV_PAR04 == 1 // Entradas
 		      FT.FT_TNATREC		AS TABELA_NATUREZA_RECEITA,
 		      FT.FT_CNATREC		AS CODIGO_NATUREZA_RECEITA,
 			  D1.D1_QUANT		AS QUANTNF
-		FROM %table:SD1% D1 , %table:SB1% B1 , %table:SA1% A1 , %table:SFT% FT
+		FROM %Table:SD1% D1 , %Table:SB1% B1 , %Table:SA1% A1 , %Table:SFT% FT
 		WHERE
 		    D1.%notDel%
 		AND B1.%notDel%
@@ -265,7 +245,7 @@ Else
 		      FT.FT_TNATREC		AS TABELA_NATUREZA_RECEITA,
 		      FT.FT_CNATREC		AS CODIGO_NATUREZA_RECEITA,
 			  D2.D2_QUANT		AS QUANTNF
-		FROM %table:SD2% D2 , %table:SB1% B1 , %table:SA2% A2 , %table:SFT% FT
+		FROM %Table:SD2% D2 , %Table:SB1% B1 , %Table:SA2% A2 , %Table:SFT% FT
 		WHERE
 		    D2.%notDel%
 		AND B1.%notDel%
@@ -323,7 +303,7 @@ Else
 		      FT.FT_TNATREC		AS TABELA_NATUREZA_RECEITA,
 		      FT.FT_CNATREC		AS CODIGO_NATUREZA_RECEITA,
 			  D2.D2_QUANT		AS QUANTNF
-		FROM %table:SD2% D2 , %table:SB1% B1 , %table:SA1% A1 , %table:SFT% FT
+		FROM %Table:SD2% D2 , %Table:SB1% B1 , %Table:SA1% A1 , %Table:SFT% FT
 		WHERE
 		    D2.%notDel%
 		AND B1.%notDel%
@@ -352,23 +332,23 @@ Else
 EndIf
 
 DBSelectArea(_cAlias)
-(_cAlias)->( DBGotop() )
+(_cAlias)->( DBGoTop() )
 Count to _nReg
 
 ProcRegua(_nReg)
 
 DBSelectArea(_cAlias)
-(_cAlias)->( DBGotop() )
+(_cAlias)->( DBGoTop() )
 
 While (_cAlias)->( !Eof() )
 
-	IncProc( "Processando dados da Filial: " + AllTrim( (_cAlias)->CODIGO_FILIAL ) + ' - DATA: ' + DTOC( STOD( (_cAlias)->DATA_ENTRADA ) ) )
+	IncProc( "Processando dados da Filial: " + AllTrim( (_cAlias)->CODIGO_FILIAL ) + ' - DATA: ' + DToC( SToD( (_cAlias)->DATA_ENTRADA ) ) )
 	
 	aAdd( _aDados , {					(_cAlias)->ENTRADA_SAIDA   				,;
 										(_cAlias)->CODIGO_FILIAL   				,; 
 						FWFilialName(,	(_cAlias)->CODIGO_FILIAL ) 				,;
-						DTOC( STOD(		(_cAlias)->DATA_EMISSAO ) )				,;
-						DTOC( STOD(		(_cAlias)->DATA_ENTRADA ) )				,;
+						DToC( SToD(		(_cAlias)->DATA_EMISSAO ) )				,;
+						DToC( SToD(		(_cAlias)->DATA_ENTRADA ) )				,;
 										(_cAlias)->TIPO							,;
 										(_cAlias)->ESPECIE						,;      
 										(_cAlias)->SERIE						,;
@@ -404,24 +384,21 @@ EndDo
 
 (_cAlias)->( DBCloseArea() )
 
-IF LEN(_aDados) > 0 
+If Len(_aDados) > 0 
    U_ITListBox( 'MFIS001 - Lista de Registros Fiscais' , _aHeader , _aDados , .T. , 1 ) 
-ELSE
-   U_ITMSG("Não foram encontrados dados para esses filtros",'Atenção!',"Tente novamente com outros filtros",3)
-ENDIF
+Else
+   U_ITMsg("Não foram encontrados dados para esses filtros",'Atenção!',"Tente novamente com outros filtros",3)
+EndIf
 
-Return()   
+Return   
 
 /*
 ===============================================================================================================================
 Programa----------: MFIS001RC
 Autor-------------: Lucas Borges
 Data da Criacao---: 12/04/2012
-===============================================================================================================================
 Descrição---------: Função para remover caracteres especiais do texto
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */

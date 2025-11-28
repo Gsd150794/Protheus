@@ -1,32 +1,24 @@
 /*
 ===============================================================================================================================
-                                    ATUALIZACOES SOFRIDAS DESDE A CONSTRUÇAO INICIAL
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                            
--------------------------------:-----------------------------------------------------------------------------------------------
- Erich Buttner	  | 29/01/2019 | Migração para tReport e incluída seleção de vários setores. Chamado 27636
--------------------------------:-----------------------------------------------------------------------------------------------
- Lucas B. Ferreira| 04/02/2019 | Retirados campos desnecessários. Chamado 27636
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Lucas B. Ferreira| 26/07/2019 | Corrigida a barra de progresso. Help 28346
+Erich Buttner |29/01/2019| Chamado 27636. Migração para tReport e incluída seleção de vários setores.
+Lucas Borges  |04/02/2019| Chamado 27636. Retirados campos desnecessários.
+Lucas Borges  |26/07/2019| Chamado 28346. Corrigida a barra de progresso.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT021
 Autor-------------: Renato de Morcerf
 Data da Criacao---: 27/01/2009
-===============================================================================================================================
 Descrição---------: Relação Rota/Linha
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Erich Buttner
 Data da Criacao---: 26/03/2013
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -113,11 +102,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Erich Buttner
 Data da Criacao---: 26/03/2013
-===============================================================================================================================
 Descrição---------: Processa dados do relatório
-===============================================================================================================================
 Parametros--------: oReport, _aOrdem
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -202,11 +188,11 @@ oReport:Section(1):Section(3):EndQuery(/*Array com os parametros do tipo Range*/
 //==========================================================================
 // Trata as células a serem exibidas pela primeira vez
 //==========================================================================
-oReport:Section(1):Section(1):Cell("cPeriodo"):SetValue(SUBSTR(DTOS(MV_PAR04),7,2)+"/"+SUBSTR(DTOS(MV_PAR04),5,2)+"/"+SUBSTR(DTOS(MV_PAR04),1,4)+" Á "+SUBSTR(DTOS(MV_PAR05),7,2)+"/"+SUBSTR(DTOS(MV_PAR05),5,2)+"/"+SUBSTR(DTOS(MV_PAR05),1,4))
+oReport:Section(1):Section(1):Cell("cPeriodo"):SetValue(SubStr(DToS(MV_PAR04),7,2)+"/"+SubStr(DToS(MV_PAR04),5,2)+"/"+SubStr(DToS(MV_PAR04),1,4)+" Á "+SubStr(DToS(MV_PAR05),7,2)+"/"+SubStr(DToS(MV_PAR05),5,2)+"/"+SubStr(DToS(MV_PAR05),1,4))
 oReport:Section(1):Section(1):Cell("LINROT"):SetValue((_cAlias)->LINROT)
 oReport:Section(1):Section(1):Cell("ZL3_KM"):SetValue((_cAlias)->ZL3_KM)
 oReport:Section(1):Section(1):Cell("ZL3_VLRFRT"):SetValue((_cAlias)->ZL3_VLRFRT)
-oReport:Section(1):Section(1):Cell("ZL3_FRMPG"):SetValue(IF((_cAlias)->ZL3_FRMPG == "L","Por Litro",IF((_cAlias)->ZL3_FRMPG == "K","Por Km",IF((_cAlias)->ZL3_FRMPG == "F","Mensal",IF((_cAlias)->ZL3_FRMPG == "V","Viagem","")))))
+oReport:Section(1):Section(1):Cell("ZL3_FRMPG"):SetValue(If((_cAlias)->ZL3_FRMPG == "L","Por Litro",If((_cAlias)->ZL3_FRMPG == "K","Por Km",If((_cAlias)->ZL3_FRMPG == "F","Mensal",If((_cAlias)->ZL3_FRMPG == "V","Viagem","")))))
 oReport:Section(1):Section(2):Cell("cTransp"):SetValue((_cAlias)->ZL3_FRETIS+" "+(_cAlias)->ZL3_FRETLJ+" - "+(_cAlias)->NOMEFRET)
 
 //===========================
@@ -222,7 +208,7 @@ oReport:Section(1):Section(2):Finish()
 
 oReport:Section(1):Section(3):Init()
 
-nInc	:= reccount()
+nInc	:= RecCount()
 oReport:SetMeter(nInc)
 
 _cUltLin := ""
@@ -231,20 +217,20 @@ _cUltLin := ""
 //Impressao do Relatorio
 //=======================================================================
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	_nMedDia := (_cAlias)->VOLUME/((MV_PAR05-MV_PAR04)+1)
 	_cUltLin := (_cAlias)->ZLD_LINROT
 	_nKMRodado := u_getkm((_cAlias)->ZLD_FILIAL,(_cAlias)->ZLD_SETOR,(_cAlias)->ZLD_LINROT,,,MV_PAR04,MV_PAR05)
 	
 	oReport:Section(1):Section(3):PrintLine()
 	oReport:IncMeter()
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 	
-	If _cUltLin <> (_cAlias)->ZLD_LINROT .And. (_cAlias)->(!EOF())        
+	If _cUltLin <> (_cAlias)->ZLD_LINROT .And. (_cAlias)->(!Eof())        
 		_nDensidade := (_cAlias)->VOLUME/_nKMRodado
 		_nCusFret   := (_cAlias)->ZL3_VLRFRT*_nKMRodado/(_cAlias)->VOLUME
 
@@ -259,7 +245,7 @@ While !oReport:Cancel() .And. (_cAlias)->(!EOF())
 		oReport:Section(1):Section(1):Cell("LINROT"):SetValue((_cAlias)->LINROT)
 		oReport:Section(1):Section(1):Cell("ZL3_KM"):SetValue((_cAlias)->ZL3_KM)
 		oReport:Section(1):Section(1):Cell("ZL3_VLRFRT"):SetValue((_cAlias)->ZL3_VLRFRT)
-		oReport:Section(1):Section(1):Cell("ZL3_FRMPG"):SetValue(IF((_cAlias)->ZL3_FRMPG == "L","Por Litro",IF((_cAlias)->ZL3_FRMPG == "K","Por Km",IF((_cAlias)->ZL3_FRMPG == "F","Mensal",IF((_cAlias)->ZL3_FRMPG == "V","Viagem","")))))
+		oReport:Section(1):Section(1):Cell("ZL3_FRMPG"):SetValue(If((_cAlias)->ZL3_FRMPG == "L","Por Litro",If((_cAlias)->ZL3_FRMPG == "K","Por Km",If((_cAlias)->ZL3_FRMPG == "F","Mensal",If((_cAlias)->ZL3_FRMPG == "V","Viagem","")))))
 		oReport:Section(1):Section(1):PrintLine()
 		oReport:Section(1):Section(1):Finish()
 		//Sessão 02

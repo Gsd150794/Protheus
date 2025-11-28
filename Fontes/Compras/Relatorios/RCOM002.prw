@@ -4,20 +4,18 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |13/10/2024| Chamado 48465. Retirada da função de conout
+Alex Wallauer |06/05/2025| Chamado 50525. Ajuste para remoção de diretório Local C:\SMARTCLIENT\.
+Alex Wallauer |09/06/2025| Chamado 50934. Ajuste no tratamento da descrição do corpo do e-mail.
 Lucas Borges  |09/05/2025| Chamado 50617. Corrigir chamada estática no nome das tabelas do sistema
-===============================================================================================================================
-Analista       - Programador     - Inicio     - Envio    - Chamado - Motivo de Alteração
-===============================================================================================================================
-Lucas          - Alex Wallauer   - 02/05/2025 - 06/05/25 - 50525   - Ajuste para remoção de diretório local C:\SMARTCLIENT\.
-Andre          - Alex Wallauer   - 09/06/2025 - 09/06/25 - 50934   - Ajuste no tratamento da descrição do corpo do e-mail.
+Igor Melgaço  |30/10/2025| Chamado 52779. Ajuste no corpo do e-mail para inclusão de comunicado sobre Reforma Tributária.
+Igor Melgaço  |31/10/2025| Chamado 52779. Ajuste no corpo do e-mail nas clausulas de atenção 5 e 6.
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "RPTDEF.CH"
-#INCLUDE "FONT.CH"
-#INCLUDE "FWPrintSetup.ch"
+#Include "TOTVS.ch"
+#Include "RPTDEF.CH"
+#Include "FONT.CH"
+#Include "FWPrintSetup.ch"
 
 /*
 ===============================================================================================================================
@@ -32,20 +30,21 @@ Parametros--------: _cAlias		- Alias da Tabela
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function RCOM002()
-PRIVATE _aArea:= SC7->(GetArea())//Private pq uso para restaurar o SC7 para imprimir o rodape
-PRIVATE cPathSrv:=GETMV("MV_RELT")
+User Function RCOM002
+
+Private _aArea:= SC7->(GetArea())//Private pq uso para restaurar o SC7 para imprimir o rodape
+Private cPathSrv:=GETMV("MV_RELT")
 
 //Grava log de utilização
 u_itlogacs()
 
-If SC7->C7_CONAPRO == "L" .OR. IsInCallStack("U_RCOM006")
-	FwMsgRun(,{|oProc| RCOM002E(oProc)},,"Aguarde, gerando arquivo PDF...")
+If SC7->C7_CONAPRO == "L" .Or. IsInCallStack("U_RCOM006")
+	FWMsgRun(,{|oProc| RCOM002E(oProc)},,"Aguarde, gerando arquivo PDF...")
 Else
-	u_itmsg("PC não autorizado para envio de e-mail ao Fornecedor. Pedido não liberado.","Pedido Inválido",,1)
+	U_ITMsg("PC não autorizado para envio de e-mail ao Fornecedor. Pedido não liberado.","Pedido Inválido",,1)
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -60,7 +59,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function RCOM002E(oProc)
-Local _aArea2  := GetArea()
+Local _aArea2  := FWGetArea()
 Local _cNumPC  := SC7->C7_NUM  , nI
 Local _aParRet :={}
 Local _aParAux :={} 
@@ -80,90 +79,91 @@ If IsInCallStack("U_RCOM006")
 	lImpObs := .T.
 	//Pode: BRANCO E BRANCO , PREENCHIDO E BRANCO , PREENCHIDO E PREENCHIDO
 	
-	AADD( _aParAux , { 1 , "No. PC de" , MV_PAR01, "@!"  , ""    , ""        , "" , 060 , .F. } )
-	AADD( _aParAux , { 1 , "No. PC ate", MV_PAR02, "@!"  , ""    , ""        , "" , 060 , .F. } )
+	aAdd( _aParAux , { 1 , "No. PC de" , MV_PAR01, "@!"  , ""    , ""        , "" , 060 , .F. } )
+	aAdd( _aParAux , { 1 , "No. PC ate", MV_PAR02, "@!"  , ""    , ""        , "" , 060 , .F. } )
 	
 	For nI := 1 To Len( _aParAux )
 		aAdd( _aParRet , _aParAux[nI][03] )
 	Next nI
-   DO WHILE .T.
+   While .T.
 
-      IF !ParamBox( _aParAux , "Seleção de dados do Relação de Titulos CLAIMs" , @_aParRet ,)
+      If !ParamBox( _aParAux , "Seleção de dados do Relação de Titulos CLAIMs" , @_aParRet ,)
          Return .T.
        EndIf
 
 	   //Pode: BRANCO E BRANCO , PREENCHIDO E BRANCO , PREENCHIDO E PREENCHIDO
 	   //NÃO Pode: BRANCO E PREENCHIDO E O PRIMEIRO > SEGUNDO
-	   IF  !EMPTY(MV_PAR02) .AND. (MV_PAR01 > MV_PAR02)
-           U_ITMSG("Intervalo INVALIDO",'No. Titulo ' ,"Tente novamente com um Intervalo Valido",3)
-           LOOP
-       ELSEIF EMPTY(MV_PAR01) .AND. !EMPTY(MV_PAR02)
-           U_ITMSG("Intervalo INVALIDO",'No. Titulo ' ,'Quando preencher campo "No. PC ate" obrigatoriamente deve se preencher o campo "No. PC de" ',3)
-           LOOP
-       ENDIF
-       EXIT
-   ENDDO
+	   If  !Empty(MV_PAR02) .And. (MV_PAR01 > MV_PAR02)
+           U_ITMsg("Intervalo INVALIDO",'No. Titulo ' ,"Tente novamente com um Intervalo Valido",3)
+           Loop
+       ElseIf Empty(MV_PAR01) .And. !Empty(MV_PAR02)
+           U_ITMsg("Intervalo INVALIDO",'No. Titulo ' ,'Quando preencher campo "No. PC ate" obrigatoriamente deve se preencher o campo "No. PC de" ',3)
+           Loop
+       EndIf
+       Exit
+   EndDo
 
-   IF EMPTY(MV_PAR01) .AND. EMPTY(MV_PAR02)
+   If Empty(MV_PAR01) .And. Empty(MV_PAR02)
 	  MV_PAR01:=SC7->C7_NUM
 	  MV_PAR02:=SC7->C7_NUM
 	  _cNumPC :=SC7->C7_NUM
-   ENDIF	  
+   EndIf	  
 
-ELSEIF MsgYesNo("Deseja Imprimir OBSERVAÇÃO para o FORNECEDOR ?")   
+ElseIf MsgYesNo("Deseja Imprimir OBSERVAÇÃO para o FORNECEDOR ?")   
    lImpObs := .T.
 EndIf  
 
 cFileName := "pedido_compras_" + Lower(MV_PAR01) + "_" + _cFilial + ".pdf"
 
-IF IsInCallStack("U_RCOM006")//cFilePrintert,[nDevice],lAdjustToLegacy, cPathInServer, lDisabeSetup,lTReport,@oPrintSetup,cPrinter],lServer], [ lPDFAsPNG], [ lRaw], [ lViewPDF], [ nQtdCopy] 
+If IsInCallStack("U_RCOM006")//cFilePrintert,[nDevice],lAdjustToLegacy, cPathInServer, lDisabeSetup,lTReport,@oPrintSetup,cPrinter],lServer], [ lPDFAsPNG], [ lRaw], [ lViewPDF], [ nQtdCopy] 
 	oPrint := FWMSPrinter():New( cFileName   , IMP_PDF , .F.           , cPathSrv     , .F.         ,        ,            ,         , .F.    , )
 	If !(oPrint:nModalResult == PD_OK)
 		oPrint:Deactivate() 
 		Return
 	EndIf
-ENDIF
+EndIf
 
-IF MV_PAR01 == MV_PAR02
+If MV_PAR01 == MV_PAR02
 	
    RCOM002Imp(oProc,MV_PAR01)
 	
-ELSE
+Else
 
 	cQry := "SELECT DISTINCT C7_NUM  "
 	cQry += "FROM " + RetSqlName("SC7") + " "
 	cQry += "WHERE C7_FILIAL = '" + _cFilial + "' "
-	IF !EMPTY(MV_PAR02)
+	If !Empty(MV_PAR02)
 		cQry += " AND C7_NUM BETWEEN '" + MV_PAR01 + "' AND '" + MV_PAR02 + "'"
-	ELSEIF !EMPTY(MV_PAR01)
+	ElseIf !Empty(MV_PAR01)
 		cQry += " AND C7_NUM >= '" + MV_PAR01 + "'"
-	ENDIF
+	EndIf
 	cQry += "  AND D_E_L_E_T_ = ' ' "
 	cQry := ChangeQuery(cQry)
 	_cAlias := GetNextAlias()
 	MPSysOpenQuery( cQry , _cAlias )
 	
-	(_cAlias)->(dbGoTop())
+	(_cAlias)->(DBGoTop())
 
 	nConta:=0
-	DO WHILE !(_cAlias)->(Eof())
-		IF nConta >= 50
-           U_ITMSG("Limite de Geração de PDF atingido: "+ALLTRIM(STR(nConta)),'Atenção!',;
+	While !(_cAlias)->(Eof())
+		If nConta >= 50
+           U_ITMsg("Limite de Geração de PDF atingido: "+AllTrim(Str(nConta)),'Atenção!',;
                     "Utilize / Limpe os PFDs ["+cPathSrv+"] gerados e entre novamente e continue o intervalo de onde parou",3)
-		   EXIT
-		ENDIF
+		   Exit
+		EndIf
 		nConta++
 		RCOM002Imp(oProc,(_cAlias)->C7_NUM)
 		
-		(_cAlias)->(DBSKIP())
+		(_cAlias)->(DBSkip())
 		
-	ENDDO
+	EndDo
 	
-ENDIF
+EndIf
 
-RestArea(_aArea2)
+FWRestArea(_aArea2)
 
-RETURN .T.
+Return .T.
+
 /*
 ===============================================================================================================================
 Programa----------: RCOM002Imp
@@ -175,6 +175,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function RCOM002Imp(oProc,_cNumPC)
+
 Local _cAnexo		:= ""
 Local _cEmail		:= ""
 Local _cCc			:= ""
@@ -254,17 +255,17 @@ RCOM002G()
 MaFisEnd()
 R002FIniPC(_cNumPC,,,cFiltro,_cFilial,oProc)
 
-dbSelectArea("SC7")
-SC7->(dbSetOrder(1))
-SC7->(dbSeek(_cFilial + _cNumPC))
+DBSelectArea("SC7")
+SC7->(DBSetOrder(1))
+SC7->(DBSeek(_cFilial + _cNumPC))
 
 ltemmil		:= .F. //zera flag de produto grupo 1000-servicos
 
-DO While !SC7->(Eof()) .And. SC7->C7_FILIAL == _cFilial .And. SC7->C7_NUM == _cNumPC
+While !SC7->(Eof()) .And. SC7->C7_FILIAL == _cFilial .And. SC7->C7_NUM == _cNumPC
 
-	If posicione("SB1",1,xfilial("SB1")+SC7->C7_PRODUTO,'B1_GRUPO') == '1000' .and. SC7->C7_FILIAL = '01'
+	If Posicione("SB1",1,xFilial("SB1")+SC7->C7_PRODUTO,'B1_GRUPO') == '1000' .And. SC7->C7_FILIAL = '01'
 		ltemmil := .T.
-	Endif
+	EndIf
 	
 	oProc:cCaption := ("2-Lendo Item: "+SC7->C7_PRODUTO)
 	ProcessMessages()
@@ -316,7 +317,7 @@ DO While !SC7->(Eof()) .And. SC7->C7_FILIAL == _cFilial .And. SC7->C7_NUM == _cN
 		EndIf
 
   		If lImpObs
-			cObs += Alltrim(SC7->C7_OBS)+" "
+			cObs += AllTrim(SC7->C7_OBS)+" "
 		Else
 			cObs := ""
 		EndIf  
@@ -350,9 +351,9 @@ DO While !SC7->(Eof()) .And. SC7->C7_FILIAL == _cFilial .And. SC7->C7_NUM == _cN
 		oPrint:SayAlign( (nLinAux-8),(nColIni+695),_cValor	,oFont08, 55, 14, CLR_BLACK, 1, 0 )
 		//	oPrint:SayAlign( (nLinAux-8),(nColIni+695),Transform(SC7->C7_ICMSRET, PesqPict("SC7","C7_ICMSRET"))	,oFont08, 55, 14, CLR_BLACK, 1, 0 )
 		
-		oPrint:Say( (nLinAux) , (nColIni+770) , DtoC(SC7->C7_DATPRF)	, oFont08 )
+		oPrint:Say( (nLinAux) , (nColIni+770) , DToC(SC7->C7_DATPRF)	, oFont08 )
 		
-		If (Len(Alltrim(cDescPro))) > 70
+		If (Len(AllTrim(cDescPro))) > 70
 			RCOM002A(cDescPro)//Descricao do produto
 		Else
 			oPrint:Say( (nLinAux) , (nColIni+100) , AllTrim(cDescPro), oFont08 )
@@ -368,18 +369,18 @@ DO While !SC7->(Eof()) .And. SC7->C7_FILIAL == _cFilial .And. SC7->C7_NUM == _cN
 	   //nTotIpi   := MaFisRet(,'NF_VALIPI')
 	   _nVALORIPI  := MaFisRet(nConta,"IT_VALIPI")
 	   _nVALORICMS := MaFisRet(nConta,"IT_VALICM")
-	   IF SB1->(dbSeek( xFilial("SB1")+SC7->C7_PRODUTO)) 
-	   	  IF SB1->B1_TIPO = "SV"
+	   If SB1->(DBSeek( xFilial("SB1")+SC7->C7_PRODUTO)) 
+	   	  If SB1->B1_TIPO = "SV"
 	   	  	 nTotIpi += 0
 	   	  	 nTotIcms+= 0
 
 	   		 MaFisLoad("IT_VALIPI",0,nConta)
 	   		 MaFisLoad("IT_VALICM",0,nConta)
-	   	  ELSEIF !SB1->B1_TIPO $ "IN/EM/PA" .AND. _nVALORIPI <> 0
+	   	  ElseIf !SB1->B1_TIPO $ "IN/EM/PA" .And. _nVALORIPI <> 0
 	           
 	   		_nBASEICM  := MaFisRet(nConta,"IT_BASEICM")
 	   		_nALIQICM  := MaFisRet(nConta,"IT_ALIQICM")	   		
-	   		_nVALORICMS:= ROUND((_nVALORIPI+_nBASEICM)*(_nALIQICM/100),2)
+	   		_nVALORICMS:= Round((_nVALORIPI+_nBASEICM)*(_nALIQICM/100),2)
    
 	   		nTotIpi    += _nVALORIPI 
 	   		nTotIcms   += _nVALORICMS 
@@ -387,30 +388,30 @@ DO While !SC7->(Eof()) .And. SC7->C7_FILIAL == _cFilial .And. SC7->C7_NUM == _cN
 	   		MaFisLoad("IT_BASEICM",(_nVALORIPI+_nBASEICM),nConta)
 	   		MaFisLoad("IT_VALICM" ,_nVALORICMS,nConta)
 
-	   	  ELSE
+	   	  Else
 	   	  	nTotIpi    += _nVALORIPI
 	   	  	nTotIcms   += _nVALORICMS
-	   	  ENDIF
-	   ELSE
+	   	  EndIf
+	   Else
 	   	  nTotIcms	:= MaFisRet(,'NF_VALICM')
 	   	  nTotDesp	:= MaFisRet(,'NF_DESPESA')
-	   ENDIF
+	   EndIf
 	   nTotFrete	:= MaFisRet(,'NF_FRETE')
 	   nTotSeguro	:= MaFisRet(,'NF_SEGURO')
 	   aValIVA		:= MaFisRet(,"NF_VALIMP")
 	EndIf
 
-	SC7->(dbSkip())
+	SC7->(DBSkip())
 
-ENDDO
+EndDo
 
-SC7->(dbSeek(_cFilial + _cNumPC))//volta para o PC 
+SC7->(DBSeek(_cFilial + _cNumPC))//volta para o PC 
 nTam:=185
-IF !EMPTY(cObs)
+If !Empty(cObs)
 	oPrint:Say((nLinAux),(nColIni+020),"OBSERVAÇÕES DOS ITENS:" ,oFont08N)
     nLinAux+= 10
-ENDIF   
-DO While !EMPTY(cObs) .AND. !SC7->(Eof()) .And. SC7->C7_FILIAL == _cFilial .And. SC7->C7_NUM == _cNumPC
+EndIf   
+While !Empty(cObs) .And. !SC7->(Eof()) .And. SC7->C7_FILIAL == _cFilial .And. SC7->C7_NUM == _cNumPC
 	
 	oProc:cCaption := ("2-Lendo Item: "+SC7->C7_PRODUTO)
 	ProcessMessages()
@@ -437,24 +438,24 @@ DO While !EMPTY(cObs) .AND. !SC7->(Eof()) .And. SC7->C7_FILIAL == _cFilial .And.
 		   RCOM002Cab(_cNumPC,_cFilial,nLinIni,nColIni)
 		EndIf
 		
-        IF !EMPTY(SC7->C7_OBS)
+        If !Empty(SC7->C7_OBS)
 		   oPrint:Say((nLinAux),(nColIni+020),SC7->C7_ITEM,oFont08 )
-		   IF LEN(ALLTRIM(SC7->C7_OBS)) > nTam
-	          oPrint:Say((nLinAux),(nColIni+045),+MEMOLINE(ALLTRIM(SC7->C7_OBS),nTam,1),oFont08)
+		   If Len(AllTrim(SC7->C7_OBS)) > nTam
+	          oPrint:Say((nLinAux),(nColIni+045),+MEMOLINE(AllTrim(SC7->C7_OBS),nTam,1),oFont08)
 	          nLinAux+= 10
-	          oPrint:Say((nLinAux),(nColIni+045),+MEMOLINE(ALLTRIM(SC7->C7_OBS),nTam,2),oFont08)
-	       ELSE
-	          oPrint:Say((nLinAux),(nColIni+045),+ALLTRIM(SC7->C7_OBS),oFont08)
-	       ENDIF
+	          oPrint:Say((nLinAux),(nColIni+045),+MEMOLINE(AllTrim(SC7->C7_OBS),nTam,2),oFont08)
+	       Else
+	          oPrint:Say((nLinAux),(nColIni+045),+AllTrim(SC7->C7_OBS),oFont08)
+	       EndIf
 	       nLinAux+= 10
-	    ENDIF   
+	    EndIf   
 		
 	EndIf
 
-	SC7->(dbSkip())
+	SC7->(DBSkip())
 
-ENDDO
-SC7->(dbSeek(_cFilial + _cNumPC))//volta para o PC 
+EndDo
+SC7->(DBSeek(_cFilial + _cNumPC))//volta para o PC 
 
 
 oProc:cCaption := ("3-Imprimindo Dados...")
@@ -486,27 +487,27 @@ ProcessMessages()
 
 oPrint:EndPage()
 
-IF IsInCallStack("U_RCOM006")
+If IsInCallStack("U_RCOM006")
    oPrint:lViewPDF := .F.
-ELSE
+Else
    oPrint:lViewPDF := .F.
-ENDIF   
+EndIf   
 
 LjMsgRun( "Gravando PDF: "+_cOrigem , "Aguarde!" , {|| oPrint:Preview() } )//Visualiza antes de imprimir
 
 FreeObj(oPrint)
 
-IF !IsInCallStack("U_RCOM006")
+If !IsInCallStack("U_RCOM006")
 
     _cAnexo1  :=_cOrigem
 	If FILE(_cOrigem) 
-	   _cDestino:=ALLTRIM(GETMV("MV_RELT",,"\SPOOL\"))
-	   IF !_cDestino $ _cOrigem//sENÃO Esta no \SPOOL\ senão deixa
+	   _cDestino:=AllTrim(GETMV("MV_RELT",,"\SPOOL\"))
+	   If !_cDestino $ _cOrigem//sENÃO Esta no \SPOOL\ senão deixa
 	      CPYT2S(_cOrigem,_cDestino,.F.) // Terminal To Server
-	   ENDIF
+	   EndIf
 	   _cAnexo1  :=_cDestino+cFileName
-	ENDIF
-    _cAnexo:=_cAnexo1+";\workflow\htm\aviso_importante.pdf"
+	EndIf
+    _cAnexo:=_cAnexo1+";\workflow\htm\aviso_importante.pdf;\workflow\htm\comunicado_reforma_tributaria.pdf"
 	
 	_cAssunto := "PC - " + _cNumPC + " - " + SubStr(AllTrim(SM0->M0_CIDCOB),1,50) + " - " + AllTrim(SM0->M0_ESTCOB) + ":" + cNReduz + Space(30)
 	
@@ -518,29 +519,29 @@ IF !IsInCallStack("U_RCOM006")
     RCOM002D(cPathSrv +cFileName)
     RCOM002D(_cAnexo1)
 
-ELSE
+Else
 
 	cGetAnx := cPathSrv +cFileName///spool
 	_cPathLocal:=GetTempPath()
 	If File(cGetAnx)
 		//Copia arquivo da spool para estação local
-		IF !CpyS2T(cGetAnx,_cPathLocal)
-			U_ITMSG("Não foi possivel copiar o arquivo "+cGetAnx+" para "+_cPathLocal,'Atenção!',"Feche o arquivo "+cGetAnx+", caso aberto,e tente novamente",1)
-		ELSE
+		If !CpyS2T(cGetAnx,_cPathLocal)
+			U_ITMsg("Não foi possivel copiar o arquivo "+cGetAnx+" para "+_cPathLocal,'Atenção!',"Feche o arquivo "+cGetAnx+", caso aberto,e tente novamente",1)
+		Else
 
             _cOrigem2:=StrTran( _cOrigem, cPathSrv,_cPathLocal ) 
 	        
 	        ShellExecute("open", _cOrigem2, "", _cPathLocal, 1) 
 
-   	        U_ITMSG("O arquivo  "+UPPER(cFileName)+"  foi gerado na PASTA: "+CHR(13)+CHR(10)+_cPathLocal,'Atenção!',,2)
+   	        U_ITMsg("O arquivo  "+Upper(cFileName)+"  foi gerado na PASTA: "+CHR(13)+CHR(10)+_cPathLocal,'Atenção!',,2)
 
-		ENDIF
+		EndIf
 
-	ELSE	
-	    U_ITMSG("Não foi possivel copiar o arquivo "+cGetAnx+" para "+_cPathLocal,'Atenção!',"Arquivo "+cGetAnx+" não existe.",1)
+	Else	
+	    U_ITMsg("Não foi possivel copiar o arquivo "+cGetAnx+" para "+_cPathLocal,'Atenção!',"Arquivo "+cGetAnx+" não existe.",1)
 	EndIf
 
-ENDIF
+EndIf
 
 Return
 
@@ -554,7 +555,8 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function RCOM002G()
+Static Function RCOM002G
+
 Local nLinIni		:= 0		// Linha Lateral (inicial) Esquerda
 Local nColIni		:= 0		// Coluna Lateral (inicial) Esquerda
 Local nLinMax		:= 0600		// Para implementar layout A4
@@ -621,6 +623,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function RCOM002T(nColMax, nLinIni, nColIni, cTpFrt, cFrete, cObsAp, cCodTra, cLojTra, nTotal, nTotMerc, nTotDesc, nTotIpi, nTotFrete, nTotIcms, nTotDesp, nTotSeguro, dEmissao, cCompra, cCond, cObs,oProc)
+
 Local cTpFrete	:= ""
 Local nLinMax	:= 0600		// Para implementar layout A4
 
@@ -630,16 +633,16 @@ ProcessMessages()
 oPrint:Say( (nLinIni+490) , (nColIni+020) , "Condição de Pagamento: "													, oFont08 )
 oPrint:Say( (nLinIni+499) , (nColIni+020) , cCond																		, oFont08 )
 
-IF SC7->C7_MOEDA <> 1
-	oPrint:Say( (nLinIni+511) , (nColIni+020) ,"Valores do Pedido em : "+UPPER(ALLTRIM(GETMV("MV_MOEDA"+ALLTRIM(STR(SC7->C7_MOEDA))))), oFont08 )
-	oPrint:Say( (nLinIni+520) , (nColIni+020) ,"Data da Taxa : "+DTOC(SC7->C7_EMISSAO)										, oFont08 )
-	oPrint:Say( (nLinIni+529) , (nColIni+020) ,"Taxa : "+ALLTRIM(Transform(SC7->C7_TXMOEDA,PesqPict("SC7","C7_TXMOEDA"))), oFont08 )
-ENDIF
+If SC7->C7_MOEDA <> 1
+	oPrint:Say( (nLinIni+511) , (nColIni+020) ,"Valores do Pedido em : "+Upper(AllTrim(GETMV("MV_MOEDA"+AllTrim(Str(SC7->C7_MOEDA))))), oFont08 )
+	oPrint:Say( (nLinIni+520) , (nColIni+020) ,"Data da Taxa : "+DToC(SC7->C7_EMISSAO)										, oFont08 )
+	oPrint:Say( (nLinIni+529) , (nColIni+020) ,"Taxa : "+AllTrim(Transform(SC7->C7_TXMOEDA,PesqPict("SC7","C7_TXMOEDA"))), oFont08 )
+EndIf
 
 oPrint:Say( (nLinIni+490) , (nColIni+180) , "Comprador:"																, oFont08 )
 oPrint:Say( (nLinIni+499) , (nColIni+180) , cCompra																		, oFont08 )
 oPrint:Say( (nLinIni+490) , (nColIni+300) , "Data de Emissão:"															, oFont08 )
-oPrint:Say( (nLinIni+499) , (nColIni+300) , DtoC(dEmissao)																, oFont08 )
+oPrint:Say( (nLinIni+499) , (nColIni+300) , DToC(dEmissao)																, oFont08 )
 
 oPrint:Say( (nLinIni+490) , (nColIni+440) , "Total das Mercadorias:"													, oFont08 )
 oPrint:Say( (nLinIni+500) , (nColIni+440) , "Total com Impostos:"														, oFont08 )
@@ -684,7 +687,7 @@ If !Empty(cCodTra) .And. !Empty(cLojTra)
 
 EndIf
 
-RestArea(_aArea)//volta SC7 de quando entro no programa
+FWRestArea(_aArea)//volta SC7 de quando entro no programa
 nLarg:=99
 nCol1:=730
 _cTotais:=MCOM002Totais(SC7->C7_MOEDA,SC7->C7_TXMOEDA,nTotal,.F.)
@@ -729,11 +732,11 @@ oPrint:Line( nLinIni + 492 , nColIni + 438 , nLinIni + 492 , nColMax	)
 //=================
 // Linha Horizontal
 //=================
-IF SC7->C7_MOEDA <> 1
+If SC7->C7_MOEDA <> 1
    oPrint:Line( nLinIni + 502 , nColIni + 010 , nLinIni + 502 , nColMax	)
-ELSE
+Else
    oPrint:Line( nLinIni + 502 , nColIni + 438 , nLinIni + 502 , nColMax	)
-ENDIF
+EndIf
 
 //===============
 // Linha Vertical
@@ -792,6 +795,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function RCOM002M(_cAnexo,_cEmail,_cCc,_cAssunto,_cMens,cMailCom,cNReduz,_cFilial,_cNumPC,cCidUni,cNomUsr)
+
 Local oAnexo
 Local oAssunto
 Local oButCan
@@ -800,39 +804,30 @@ Local oCc
 Local oGetAnx
 Local oGetAssun
 Local oGetCc
-//Local oGetMens
 Local oGetPara
 Local oMens
 Local oPara
-//Local oMemo
 Local _csetor := ""
-
 Local _aConfig	:= U_ITCFGEML('')
 Local _cEmlLog	:= ""
 Local cHtml		:= ""
 Local nOpcA		:= 2
-
 Local cGetAnx	:= _cAnexo
 Local cGetAssun	:= _cAssunto
 Local cGetCc	:= Space(100)
-//Local cGetMens	:= ""
 Local cGetPara	:= _cEmail + Space(80)
 
 Private oDlgMail
 
 
-If (Len(PswRet()) # 0) // Quando nao for rotina automatica do configurador
-
+If (Len(PswRet()) # 0) // Quando nao For rotina automatica do configurador
 	_csetor	:= AllTrim(PswRet()[1][12])		// Pega departamento do usuario
-   
-Endif
+EndIf
 
 
-If empty(alltrim(_csetor))
- 
+If Empty(AllTrim(_csetor))
  	_csetor := "Suprimentos"
- 	
-Endif
+EndIf
 
 cHtml := 'À '+ cNReduz +','
 cHtml += '<br><br>'
@@ -851,16 +846,20 @@ cHtml += '<font color="#FF0000"><b>4)</b> A Italac <b>não autoriza</b> os descon
 cHtml += 'não devem ser oferecidos a cessão/descontos/negociações perante qualquer terceiro, sejam eles instituição financeiras/factoring ou não. '
 cHtml += 'Fica ressalvado ainda que, na ocorrência da indevida cessão/descontos/negociação dos mesmos, estes terão sua recusa formalizada.</font>'
 cHtml += '<br><br>'
- 
+
 //Se tem produto grupo 1000 adiciona mensagem de retenção de iss
 If ltemmil		
-
-	cHtml += '<font color="#FF0000"><b>5)</b> É obrigatório informar nos documentos que <b>o local da retenção/incidência do ISSQN</b> dar-se-á no Município de Corumbaíba-GO, a alíquota '
+	cHtml += '<font color="#FF0000"><b>5)</b> É obrigatório informar nos documentos que <b>o Local da retenção/incidência do ISSQN</b> dar-se-á no Município de Corumbaíba-GO, a alíquota '
 	cHtml += 'a ser aplicada de 3,00%. Em ato contínuo, iremos promover as referidas retenções, direcionando estes recolhimentos aos cofres do referido Município. Os fornecedores'
 	cHtml += 'optantes pelo regime Simples Nacional deverão informar no próprio documento fiscal o percentual de ISS para a faixa de receita bruta que estiver sujeito'
-	cHtml += 'no mês anterior ao da prestação, para nossa retenção do percentual correspondente. Caso não informado será aplicado a alíquota local de 3,00%</font>'
+	cHtml += 'no mês anterior ao da prestação, para nossa retenção do percentual correspondente. Caso não informado será aplicado a alíquota Local de 3,00%</font>'
 	cHtml += '<br><br>'
 
+	cHtml += '<font color="#FF0000"><b>6)</b> <b>ATENÇÃO:</b> A Reforma Tributária terá início em 1º de janeiro de 2026. Segue anexo comunicado importante. '
+	cHtml += '<br><br>'
+Else
+	cHtml += '<font color="#FF0000"><b>5)</b> <b>ATENÇÃO:</b> A Reforma Tributária terá início em 1º de janeiro de 2026. Segue anexo comunicado importante. '
+	cHtml += '<br><br>'
 EndIf
 
 cHtml += '&nbsp;&nbsp;&nbsp;A disposição!'
@@ -915,8 +914,8 @@ cHtml +=             '<b><span style="font-size:12.0pt;font-family:'+"'"+'Times 
 cHtml +=             '<span style="font-size:12.0pt;font-family:'+"'"+'Times New Roman'+"'"+','+"'"+'serif'+"'"+';mso-fareast-language:PT-BR"></span></p>
 cHtml +=             '<p class=MsoNormal style="mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;text-align:justify">'
 cHtml +=             '<span style="font-size:7.5pt;font-family:'+"'"+'Times New Roman'+"'"+','+"'"+'serif'+"'"+';color:#1D2668;mso-fareast-language:PT-BR">
-cHtml +=                 'Esta mensagem é destinada exclusivamente para fins profissionais, para a(s) pessoa(s) a quem for dirigida, podendo conter informação confidencial e legalmente privilegiada. '
-cHtml +=                 'Ao recebê-la, se você não for destinatário desta mensagem, fica automaticamente notificado de abster-se a divulgar, copiar, distribuir, examinar ou, de qualquer forma, utilizar '
+cHtml +=                 'Esta mensagem é destinada exclusivamente para fins profissionais, para a(s) pessoa(s) a quem For dirigida, podendo conter informação confidencial e legalmente privilegiada. '
+cHtml +=                 'Ao recebê-la, se você não For destinatário desta mensagem, fica automaticamente notificado de abster-se a divulgar, copiar, distribuir, examinar ou, de qualquer forma, utilizar '
 cHtml +=                 'sua informação, por configurar ato ilegal. Caso você tenha recebido esta mensagem indevidamente, solicitamos que nos retorne este e-mail, promovendo, concomitantemente sua '
 cHtml +=                 'eliminação de sua base de dados, registros ou qualquer outro sistema de controle. Fica desprovida de eficácia e validade a mensagem que contiver vínculos obrigacionais, expedida '
 cHtml +=                 'por quem não detenha poderes de representação, bem como não esteja legalmente habilitado para utilizar o referido endereço eletrônico, configurando falta grave conforme nossa '
@@ -933,31 +932,31 @@ DEFINE MSDIALOG oDlgMail TITLE "E-Mail" FROM 000, 000  TO 415, 584 COLORS 0, 167
 	//======
 	// Para:
 	//======
-	@ 005, 006 SAY oPara PROMPT "Para:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+	@ 005, 006 Say oPara PROMPT "Para:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
 	@ 005, 030 MSGET oGetPara VAR cGetPara SIZE 256, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 PIXEL
 
 	//===========
 	// Com cópia:
 	//===========
-	@ 021, 006 SAY oCc PROMPT "Cc:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+	@ 021, 006 Say oCc PROMPT "Cc:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
 	@ 021, 030 MSGET oGetCc VAR cGetCc SIZE 256, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 PIXEL
 
 	//=========
 	// Assunto:
 	//=========
-	@ 037, 006 SAY oAssunto PROMPT "Assunto:" SIZE 022, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+	@ 037, 006 Say oAssunto PROMPT "Assunto:" SIZE 022, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
 	@ 037, 030 MSGET oGetAssun VAR cGetAssun SIZE 256, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 PIXEL
 
 	//======
 	// Anexo
 	//======
-	@ 053, 006 SAY oAnexo PROMPT "Anexo:" SIZE 019, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+	@ 053, 006 Say oAnexo PROMPT "Anexo:" SIZE 019, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
 	@ 053, 030 MSGET oGetAnx VAR cGetAnx SIZE 256, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 READONLY PIXEL
 
 	//==========
 	// Mensagem:
 	//==========
-	@ 069, 006 SAY oMens PROMPT "Mensagem:" SIZE 030, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+	@ 069, 006 Say oMens PROMPT "Mensagem:" SIZE 030, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
 //	_oFont		:= TFont():New( 'Courier new' ,, 12 , .F. )
 	_oScrAux	:= TSimpleEditor():New( 080 , 006 , oDlgMail , 285 , 105 ,,,,, .T. )
     _cHtml:=cHtml
@@ -967,33 +966,33 @@ DEFINE MSDIALOG oDlgMail TITLE "E-Mail" FROM 000, 000  TO 415, 584 COLORS 0, 167
 
 
 		//Copia anexo para estação local
-		IF !CpyS2T(_cOrigem,_cPathLocal)
+		If !CpyS2T(_cOrigem,_cPathLocal)
 		    _cPathLocal:=""
-			U_ITMSG("Não foi possivel copiar o arquivo "+_cOrigem+" para "+_cPathLocal,'Atenção!',"Feche o arquivo "+_cOrigem+", caso aberto, tente novamente",1)
-		ENDIF
-	ELSE	
-	    U_ITMSG("Não foi possivel copiar o arquivo "+_cOrigem+" para "+_cPathLocal,'Atenção!',"Arquivo "+_cOrigem+" não existe.",1)
+			U_ITMsg("Não foi possivel copiar o arquivo "+_cOrigem+" para "+_cPathLocal,'Atenção!',"Feche o arquivo "+_cOrigem+", caso aberto, tente novamente",1)
+		EndIf
+	Else	
+	    U_ITMsg("Não foi possivel copiar o arquivo "+_cOrigem+" para "+_cPathLocal,'Atenção!',"Arquivo "+_cOrigem+" não existe.",1)
 	EndIf
 
     _cOrigem2:=StrTran( _cOrigem, cPathSrv, _cPathLocal ) 
 	
-    IF !EMPTY(_cPathLocal)
+    If !Empty(_cPathLocal)
 	   @ 189, 156 BUTTON oButEnv PROMPT "&Visualizar"	SIZE 037, 012 OF oDlgMail ACTION ( ShellExecute("open", _cOrigem2, "", _cPathLocal, 1) ) PIXEL
-	ENDIF
+	EndIf
 	@ 189, 201 BUTTON oButEnv PROMPT "&Enviar"		SIZE 037, 012 OF oDlgMail ACTION ( nOpcA := 1 , cHtml := _oScrAux:RetText() , oDlgMail:End() ) PIXEL
 	@ 189, 245 BUTTON oButCan PROMPT "&Cancelar"	SIZE 037, 012 OF oDlgMail ACTION ( nOpcA := 2 , oDlgMail:End() ) PIXEL
 
 ACTIVATE MSDIALOG oDlgMail CENTERED
 
 If nOpcA == 1
-   If Empty(cHtml) .OR. cHtml = NIL
+   If Empty(cHtml) .Or. cHtml = NIL
       cHtml:=_cHtml
    EndIf
 	//====================================
 	// Chama a função para envio do e-mail
 	//====================================
-	cGetPara:=STRTRAN( cGetPara, ";", "," )
-	cGetCc  :=STRTRAN( cGetCc  , ";", "," )
+	cGetPara:=StrTran( cGetPara, ";", "," )
+	cGetCc  :=StrTran( cGetCc  , ";", "," )
 
 	U_ITENVMAIL( Lower(AllTrim(UsrRetMail(RetCodUsr()))), cGetPara, cGetCc, cMailCom, cGetAssun, cHtml, cGetAnx, _aConfig[01], _aConfig[02], _aConfig[03], _aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog )
 
@@ -1001,15 +1000,15 @@ If nOpcA == 1
 		//=====================================================================
 		// Chama função para gravação do campo de envio de e-mail na tabela SC7
 		//=====================================================================
-		IF !IsInCallStack("U_RCOM006") .AND. "SUCESSO" $ UPPER(_cEmlLog)
+		If !IsInCallStack("U_RCOM006") .And. "SUCESSO" $ Upper(_cEmlLog)
 		   RCOM002I(_cFilial, _cNumPC)
-		ENDIF   
+		EndIf   
 
-		U_ITMSG( _cEmlLog+CHR(13)+CHR(10)+"E-mail para: "+ALLTRIM(cGetPara)+CHR(13)+CHR(10)+"CC: "+cGetCc , 'Término do processamento!' , ,3 )
+		U_ITMsg( _cEmlLog+CHR(13)+CHR(10)+"E-mail para: "+AllTrim(cGetPara)+CHR(13)+CHR(10)+"CC: "+cGetCc , 'Término do processamento!' , ,3 )
 	EndIf
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1022,12 +1021,13 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function RCOM002D(cFile)
+
 Local nRet := 0
 
 If File(cFile)
 	nRet := fErase(cFile)
 	If nRet <> 0
-		FWLogMsg("ERROR"/*cSeverity*/, /*cTransactionId*/, "RCOM002"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "RCOM00201"/*cMsgId*/, "RCOM00201 - Erro ao excluir o arquivo: " + cFile + " - Erro: " + str(FError())/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+		FWLogMsg("ERROR"/*cSeverity*/, /*cTransactionId*/, "RCOM002"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "RCOM00201"/*cMsgId*/, "RCOM00201 - Erro ao excluir o arquivo: " + cFile + " - Erro: " + Str(FError())/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 	Else
 		FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "RCOM002"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "RCOM00202"/*cMsgId*/, "RCOM00202 - Arquivo: " + cFile + " foi excluído com sucesso."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 	EndIf
@@ -1046,12 +1046,13 @@ Retorno-----------: cCampFormat	- Retorna o campo formatado conforme CPF/CNPJ
 ===============================================================================================================================
 */
 Static Function formCPFCNPJ(cCPFCNPJ)
+
 Local cCampFormat := ""	//Armazena o CPF ou CNPJ formatado
    
 If Len(AllTrim(cCPFCNPJ)) == 11			//CPF
 	cCampFormat:=SubStr(cCPFCNPJ,1,3) + "." + SubStr(cCPFCNPJ,4,3) + "." + SubStr(cCPFCNPJ,7,3) + "-" + SubStr(cCPFCNPJ,10,2) 
 Else									//CNPJ
-	cCampFormat:=Substr(cCPFCNPJ,1,2)+"."+Substr(cCPFCNPJ,3,3)+"."+Substr(cCPFCNPJ,6,3)+"/"+Substr(cCPFCNPJ,9,4)+"-"+ Substr(cCPFCNPJ,13,2)
+	cCampFormat:=SubStr(cCPFCNPJ,1,2)+"."+SubStr(cCPFCNPJ,3,3)+"."+SubStr(cCPFCNPJ,6,3)+"/"+SubStr(cCPFCNPJ,9,4)+"-"+ SubStr(cCPFCNPJ,13,2)
 EndIf
 	
 Return cCampFormat
@@ -1069,7 +1070,7 @@ Retorno-----------: Nenhum
 */
 Static Function R002FIniPC(cPedido,cItem,cSequen,cFiltro,cFilScr,oProc)
 
-Local aArea		:= GetArea() , D
+Local aArea		:= FWGetArea() , D
 Local aAreaSC7	:= SC7->(GetArea())
 Local cValid	:= ""
 Local nPosRef	:= 0
@@ -1082,13 +1083,13 @@ Default cSequen	:= ""
 
 _aSC7 := SC7->(DBSTRUCT())
 
-dbSelectArea("SC7")
-SC7->(dbSetOrder(1))
-If SC7->(dbSeek(xFilial("SC7")+cPedido+cItemDe+Alltrim(cSequen)))
+DBSelectArea("SC7")
+SC7->(DBSetOrder(1))
+If SC7->(DBSeek(xFilial("SC7")+cPedido+cItemDe+AllTrim(cSequen)))
 	MaFisEnd()
 	MaFisIni(SC7->C7_FORNECE,SC7->C7_LOJA,"F","N","R",{})
-	While !Eof() .AND. SC7->C7_FILIAL+SC7->C7_NUM == xFilial("SC7")+cPedido .AND. ;
-			SC7->C7_ITEM <= cItemAte .AND. (Empty(cSequen) .OR. cSequen == SC7->C7_SEQUEN)
+	While !Eof() .And. SC7->C7_FILIAL+SC7->C7_NUM == xFilial("SC7")+cPedido .And. ;
+			SC7->C7_ITEM <= cItemAte .And. (Empty(cSequen) .Or. cSequen == SC7->C7_SEQUEN)
 
         oProc:cCaption := ("1-Lendo Item: "+SC7->C7_ITEM)
         ProcessMessages()
@@ -1096,8 +1097,8 @@ If SC7->(dbSeek(xFilial("SC7")+cPedido+cItemDe+Alltrim(cSequen)))
 		// Nao processar os Impostos se o item possuir residuo eliminado
 		//==============================================================  
 		If  SC7->C7_RESIDUO = "S"		
-			dbSelectArea('SC7')
-			dbSkip()
+			DBSelectArea('SC7')
+			DBSkip()
 			Loop
 		EndIf
             
@@ -1105,26 +1106,26 @@ If SC7->(dbSeek(xFilial("SC7")+cPedido+cItemDe+Alltrim(cSequen)))
 		nItem++
 		MaFisIniLoad(nItem)
 
-		FOR D := 1 TO LEN(_aSC7)
+		For D := 1 TO Len(_aSC7)
 		    _cCampo := _aSC7[D][1]
-			cValid	:= StrTran(UPPER(Getsx3cache(_cCampo,"X3_VALID") )," ","")
+			cValid	:= StrTran(Upper(Getsx3cache(_cCampo,"X3_VALID") )," ","")
 			cValid	:= StrTran(cValid,"'",'"')
 			If "MAFISREF" $ cValid
 				nPosRef  := AT('MAFISREF("',cValid) + 10
-				cRefCols := Substr(cValid,nPosRef,AT('","MT120",',cValid)-nPosRef )
+				cRefCols := SubStr(cValid,nPosRef,AT('","MT120",',cValid)-nPosRef )
 				// Carrega os valores direto do SC7.           
 				MaFisLoad(cRefCols,&("SC7->"+_cCampo),nItem)
 			EndIf
-		NEXT D
+		Next D
 
 		MaFisEndLoad(nItem,2)
-		dbSelectArea('SC7')
-		dbSkip()
+		DBSelectArea('SC7')
+		DBSkip()
 	End
 EndIf
 
-RestArea(aAreaSC7)
-RestArea(aArea)
+FWRestArea(aAreaSC7)
+FWRestArea(aArea)
 
 Return .T.
 
@@ -1140,22 +1141,24 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function RCOM002I(_cFilial, _cNumPC)
-Local aArea	:= GetArea()  
 
-dbSelectArea("SC7")
-SC7->(dbSetOrder(1))
-SC7->(dbSeek(_cFilial + _cNumPC))
+Local aArea	:= FWGetArea()  
+
+DBSelectArea("SC7")
+SC7->(DBSetOrder(1))
+SC7->(DBSeek(_cFilial + _cNumPC))
 
 While !SC7->(Eof()) .And. SC7->C7_FILIAL == _cFilial .And. SC7->C7_NUM == _cNumPC
 
 	RecLock("SC7", .F.)
 		Replace SC7->C7_I_ENVIO With Soma1(SC7->C7_I_ENVIO)
-	MsUnLock()
+	MSUnLock()
 
-	SC7->(dbSkip())
+	SC7->(DBSkip())
 End
 
-RestArea(aArea)
+FWRestArea(aArea)
+
 Return
 
 /*
@@ -1174,15 +1177,15 @@ Static Function RCOM002A(cTexto)
 Local nCont        := 1        
 Local cTextoQbr   := "" 
 
-cTexto:=STRTRAN( AllTrim(cTexto) , CHR(13)+CHR(10), " ")
+cTexto:=StrTran( AllTrim(cTexto) , CHR(13)+CHR(10), " ")
              
 While nCont <= Len(cTexto)              
 	                            
 	cTextoQbr:= AllTrim(SubStr(cTexto,nCont,65))
-	IF !EMPTY(cTextoQbr)
+	If !Empty(cTextoQbr)
 	   oPrint:Say((nLinAux),(nColIni+100),cTextoQbr,oFont08)
 	   nLinAux+= 10
-	ENDIF
+	EndIf
 	nCont+= 65
 
 EndDo                    
@@ -1199,36 +1202,36 @@ Parametros--------: _nMoedaSC7,_nTxMoeSC7
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC Function MCOM002Totais(_nMoedaSC7,_nTxMoeSC7,nTotMerc,_lSimbolo)
+Static Function MCOM002Totais(_nMoedaSC7,_nTxMoeSC7,nTotMerc,_lSimbolo)
 
-STATIC _aAllmoedas:= {}
-DEFAULT _lSimbolo:=.T.
+Static _aAllmoedas:= {}
+Default _lSimbolo:=.T.
 
-IF LEN(_aAllmoedas) = 0 .AND. _nMoedaSC7 > 1
-   AADD(_aAllmoedas, ALLTRIM(GETMV("MV_SIMB1")) )
-   AADD(_aAllmoedas, ALLTRIM(GETMV("MV_SIMB2")) )
-   AADD(_aAllmoedas, ALLTRIM(GETMV("MV_SIMB3")) )
-   AADD(_aAllmoedas, "€" )//ALLTRIM(GETMV("MV_SIMB4"))
-   AADD(_aAllmoedas, ALLTRIM(GETMV("MV_SIMB5")) )
-ENDIF   
+If Len(_aAllmoedas) = 0 .And. _nMoedaSC7 > 1
+   aAdd(_aAllmoedas, AllTrim(GETMV("MV_SIMB1")) )
+   aAdd(_aAllmoedas, AllTrim(GETMV("MV_SIMB2")) )
+   aAdd(_aAllmoedas, AllTrim(GETMV("MV_SIMB3")) )
+   aAdd(_aAllmoedas, "€" )//AllTrim(GETMV("MV_SIMB4"))
+   aAdd(_aAllmoedas, AllTrim(GETMV("MV_SIMB5")) )
+EndIf   
 
-IF _nMoedaSC7 > 1 .AND. _nMoedaSC7 < 6
-   IF _nTxMoeSC7 <> 0// NA MOEDA / EM REAL
-      RETURN  _aAllmoedas[_nMoedaSC7]+" "+ALLTRIM(Transform(nTotMerc,PesqPict("SC7","C7_TOTAL")))+" / R$ "+ALLTRIM(Transform( (nTotMerc*_nTxMoeSC7) ,PesqPict("SC7","C7_TOTAL")))
-   ELSE//SÓ NA MOEDA
-       IF VALTYPE(nTotMerc) = "N"
-          RETURN _aAllmoedas[_nMoedaSC7]+" "+ALLTRIM(Transform(nTotMerc,PesqPict("SC7","C7_TOTAL")))// NA MOEDA
-       ELSE
-          RETURN _aAllmoedas[_nMoedaSC7]+" "+ALLTRIM(nTotMerc)// NA MOEDA
-       ENDIF   
-   ENDIF   
-ELSE//EM REAL
-   IF VALTYPE(nTotMerc) = "N"
-      RETURN IF(_lSimbolo,"R$ ","")+ALLTRIM(Transform( nTotMerc ,PesqPict("SC7","C7_TOTAL")))//EM REAL
-   ELSE   
-      RETURN IF(_lSimbolo,"R$ ","")+ALLTRIM(nTotMerc)
-   ENDIF   
-ENDIF
+If _nMoedaSC7 > 1 .And. _nMoedaSC7 < 6
+   If _nTxMoeSC7 <> 0// NA MOEDA / EM REAL
+      Return  _aAllmoedas[_nMoedaSC7]+" "+AllTrim(Transform(nTotMerc,PesqPict("SC7","C7_TOTAL")))+" / R$ "+AllTrim(Transform( (nTotMerc*_nTxMoeSC7) ,PesqPict("SC7","C7_TOTAL")))
+   Else//SÓ NA MOEDA
+       If ValType(nTotMerc) = "N"
+          Return _aAllmoedas[_nMoedaSC7]+" "+AllTrim(Transform(nTotMerc,PesqPict("SC7","C7_TOTAL")))// NA MOEDA
+       Else
+          Return _aAllmoedas[_nMoedaSC7]+" "+AllTrim(nTotMerc)// NA MOEDA
+       EndIf   
+   EndIf   
+Else//EM REAL
+   If ValType(nTotMerc) = "N"
+      Return If(_lSimbolo,"R$ ","")+AllTrim(Transform( nTotMerc ,PesqPict("SC7","C7_TOTAL")))//EM REAL
+   Else   
+      Return If(_lSimbolo,"R$ ","")+AllTrim(nTotMerc)
+   EndIf   
+EndIf
 
 Return
 
@@ -1242,22 +1245,22 @@ Parametros--------: _cNumPC , _cFilial
 etorno-----------: .T.
 ===============================================================================================================================
 */
-STATIC FUNCTION RCOM002Cab(_cNumPC,_cFilial,nLinIni,nColIni)
+Static Function RCOM002Cab(_cNumPC,_cFilial,nLinIni,nColIni)
 
-IF SC7->C7_I_APLIC == "I"
+If SC7->C7_I_APLIC == "I"
    oPrint:Say( (nLinIni+030) , (nColIni+300) , "PEDIDO DE COMPRAS ** INVESTIMENTO **" , oFont14 )
-   oPrint:Say( (nLinIni+045) , (nColIni+300) , ALLTRIM(Posicione("ZZI",1,xFilial("ZZI")+SC7->C7_I_CDINV, "ZZI_DESINV")) , oFont08 )
-ELSEIF SC7->(FIELDPOS("C7_I_CLAIM")) <> 0 .AND. SC7->C7_I_CLAIM = "1"
+   oPrint:Say( (nLinIni+045) , (nColIni+300) , AllTrim(Posicione("ZZI",1,xFilial("ZZI")+SC7->C7_I_CDINV, "ZZI_DESINV")) , oFont08 )
+ElseIf SC7->(FIELDPOS("C7_I_CLAIM")) <> 0 .And. SC7->C7_I_CLAIM = "1"
    oPrint:Say( (nLinIni+035) , (nColIni+375) , "PEDIDO DE COMPRAS ** CLAIM **" , oFont14 )
-ELSE
+Else
    oPrint:Say( (nLinIni+035) , (nColIni+375) , "PEDIDO DE COMPRAS" , oFont14 )
-ENDIF
+EndIf
 
 oPrint:Say( (nLinIni+050) , (nColIni+730) , "Nº" , oFont14 )
 oPrint:Say( (nLinIni+070) , (nColIni+715) , _cNumPC , oFont14 )
 
-SM0->(dbSetOrder(1))
-SM0->(dbSeek(cEmpAnt + _cFilial))
+SM0->(DBSetOrder(1))
+SM0->(DBSeek(cEmpAnt + _cFilial))
 
 oPrint:Say( (nLinIni+080) , (nColIni+020) , AllTrim(SM0->M0_NOMECOM) , oFont08 )
 oPrint:Say( (nLinIni+090) , (nColIni+020) , AllTrim(SM0->M0_ENDCOB) , oFont08 )
@@ -1266,8 +1269,8 @@ oPrint:Say( (nLinIni+110) , (nColIni+020) , 'TEL:(' + SubStr(SM0->M0_TEL,4,2) + 
 oPrint:Say( (nLinIni+120) , (nColIni+020) , "CNPJ/CPF:" + formCPFCNPJ(SM0->M0_CGC) , oFont08 )
 oPrint:Say( (nLinIni+130) , (nColIni+020) , "I.E:" + AllTrim(SM0->M0_INSC) , oFont08 )
 
-SA2->(dbSetOrder(1))
-SA2->(dbSeek(xFilial("SA2") + SC7->C7_FORNECE + SC7->C7_LOJA))
+SA2->(DBSetOrder(1))
+SA2->(DBSeek(xFilial("SA2") + SC7->C7_FORNECE + SC7->C7_LOJA))
 
 oPrint:Say( (nLinIni+080) , (nColIni+260) , AllTrim(SA2->A2_NOME) + " - " + SA2->A2_COD + "/" + SA2->A2_LOJA , oFont08 )
 oPrint:Say( (nLinIni+090) , (nColIni+260) ,  AllTrim(SA2->A2_END) , oFont08 )
@@ -1290,4 +1293,4 @@ oPrint:Say( (nLinIni+160) , (nColIni+770) , "Dt.Entrega"	, oFont08 )
 
 nLinAux := nLinIni + 180
 
-RETURN .T.
+Return .T.

@@ -1,23 +1,19 @@
-/* 
+/*
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 13/08/2024 | Chamado 47782. Jerry. Incluir nova coluna para exibir o novo campo Tipo Averb. Carga (A2_I_TPAVE) 
-Lucas Borges  | 10/12/2024 | Chamado 49331. Modificada regra para validar o campo A2_INCLTMG.
-Lucas Borges  | 28/04/2025 | Chamado 50533. Criada validação para o mesmo produtor não ter configurações de impostos diferentes
+Lucas Borges  |10/12/2024| Chamado 49331. Modificada regra para validar o campo A2_INCLTMG.
+Lucas Borges  |28/04/2025| Chamado 50533. Criada validação para o mesmo produtor não ter configurações de impostos diferentes
+Lucas Borges  |25/11/2025| Chamado 53126. Validado se o parâmetro LT_REGINCP está preenchido para evitar o posicionamento errado
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "Parmtype.ch"
 
-STATIC _aLogDif:={}
+Static _aLogDif:={}
 
 /*
 ===============================================================================================================================
@@ -25,19 +21,19 @@ Programa----------: CUSTOMERVENDOR
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 13/03/2019
 Descrição---------: Ponto de Entrada padrão MVC no cadastro de Fornecedor
-Parametros--------: PARAMIXB
+Parametros--------: ParamIXB
 Retorno-----------: Lógico - Define se passou pela validação
 ===============================================================================================================================
 */
 User Function CUSTOMERVENDOR
 
-Local aParam	:= PARAMIXB
+Local aParam	:= ParamIXB
 Local _lRet		:= .T.
 Local oObj		:= ""
 Local cIdPonto	:= ""
 Local cIdModel	:= ""
 Local lIsGrid	:= .F.
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cAlias	:= GetNextAlias()
 Local _cMsg		:= ""
 Local _cCodMsg	:= ""
@@ -108,7 +104,7 @@ If aParam <> NIL
 		EndIf
 		If Left(oObj:GetValue('A2_COD'),1) == "P"
 		
-			//Sempre que for produtor, marca para envio ao SmartQuestion
+			//Sempre que For produtor, marca para envio ao SmartQuestion
 			oObj:SetValue('A2_L_SMQST','P')
 
 			//Valida preenchimento de campos obrigatórios do Leite			
@@ -129,12 +125,12 @@ If aParam <> NIL
 			EndIf
 		EndIf
 		//Validações para Transportador
-		If _lRet .And. oObj:GetValue('A2_L_TIPPR') == "A" .AND. (Empty(oObj:GetValue('A2_L_ATRCO')) .OR. Empty(oObj:GetValue('A2_L_ATRLO',)))
+		If _lRet .And. oObj:GetValue('A2_L_TIPPR') == "A" .And. (Empty(oObj:GetValue('A2_L_ATRCO')) .Or. Empty(oObj:GetValue('A2_L_ATRLO',)))
 			_cCodMsg:= "CUSTOMERVENDOR02"
 			_cMsg	:= "Para o Produtor do tipo A - Atravessador deve ser informado os campos de "+AllTrim(GetSx3Cache("A2_L_ATRCO","X3_TITULO"))+" e "+AllTrim(GetSx3Cache("A2_L_ATRLO","X3_TITULO"))+" na Aba Gestão do Leite."
 			_cSolMsg:= "Revise conteúdo do campo informado."
 			_lRet 	:= .F.
-		ElseIf _lRet .And. !(oObj:GetValue('A2_L_TIPPR') $ "A") .AND. (!Empty(oObj:GetValue('A2_L_ATRCO')) .OR. !Empty(oObj:GetValue('A2_L_ATRLO')))
+		ElseIf _lRet .And. !(oObj:GetValue('A2_L_TIPPR') $ "A") .And. (!Empty(oObj:GetValue('A2_L_ATRCO')) .Or. !Empty(oObj:GetValue('A2_L_ATRLO')))
 			_cCodMsg:= "CUSTOMERVENDOR03"
 			_cMsg	:= "Para o Produtor que NÃO é do tipo A=Atravessador NÃO deve ser informado os campos de "+AllTrim(GetSx3Cache("A2_L_ATRCO", "X3_TITULO"))+" e "+AllTrim(GetSx3Cache("A2_L_ATRLO", "X3_TITULO"))+" na Aba Gestão do Leite."
 			_cSolMsg:= "Revise conteúdo do campo informado."
@@ -144,9 +140,9 @@ If aParam <> NIL
 			_cMsg	:= "Transportador de leite a Granel pessoa jurídica deve ter o Campo "+AllTrim(GetSx3Cache("A2_L_CTRC", "X3_TITULO"))+" informado com Sim."
 			_cSolMsg:= "Revise conteúdo do campo informado."
 			_lRet := .F.
-		ElseIf _lRet .And. oObj:GetValue('A2_L_TIPPR') = "A" .AND. (!Empty(oObj:GetValue('A2_L_ATRCO')) .AND. !Empty(oObj:GetValue('A2_L_ATRLO')))
+		ElseIf _lRet .And. oObj:GetValue('A2_L_TIPPR') = "A" .And. (!Empty(oObj:GetValue('A2_L_ATRCO')) .And. !Empty(oObj:GetValue('A2_L_ATRLO')))
 		     _nRecSA2:=SA2->(RECNO())
-		     If SA2->(DBSeek(xFilial("SA2")+oObj:GetValue('A2_L_ATRCO')+oObj:GetValue('A2_L_ATRLO'))) .AND. (!(SA2->A2_L_TIPPR $ "P") .OR. !(SA2->A2_I_CLASS $ "P"))
+		     If SA2->(DBSeek(xFilial("SA2")+oObj:GetValue('A2_L_ATRCO')+oObj:GetValue('A2_L_ATRLO'))) .And. (!(SA2->A2_L_TIPPR $ "P") .Or. !(SA2->A2_I_CLASS $ "P"))
 				_cCodMsg:= "CUSTOMERVENDOR05"
 				_cMsg	:= "Os campos de Cod.Atravessador e Loja Atravessador devem ser da Classificacao: P-PRODUTOR e do Tipo: P-PRODUTOR."
 				_cSolMsg:= "Revise conteúdo do campo informado."
@@ -156,17 +152,17 @@ If aParam <> NIL
 		EndIf
 		
 		//Validações referente à impostos
-		If _lRet .And. Left(oObj:GetValue('A2_COD',),1) == "P" .And. oObj:GetValue('A2_TIPO') == "J" .AND. !Empty(oObj:GetValue('A2_TIPORUR'))
+		If _lRet .And. Left(oObj:GetValue('A2_COD',),1) == "P" .And. oObj:GetValue('A2_TIPO') == "J" .And. !Empty(oObj:GetValue('A2_TIPORUR'))
 			_cCodMsg:= "CUSTOMERVENDOR06"
 			_cMsg	:= "O campo" + AllTrim(GetSX3Cache("A2_TIPORUR","X3_TITULO")) + "é de uso exclusivo para Pessoa Física na geração do Reinf."
 			_cSolMsg:= "Revise conteúdo do campo informado."
 			_lRet := .F.
-		ElseIf _lRet .And. Left(oObj:GetValue('A2_COD',),1) == "P" .And. oObj:GetValue('A2_TIPO') == "J" .AND. !Empty(oObj:GetValue('A2_INDCP'))
+		ElseIf _lRet .And. Left(oObj:GetValue('A2_COD',),1) == "P" .And. oObj:GetValue('A2_TIPO') == "J" .And. !Empty(oObj:GetValue('A2_INDCP'))
 			_cCodMsg:= "CUSTOMERVENDOR07"
 			_cMsg	:= "O campo" + AllTrim(GetSX3Cache("A2_INDCP","X3_TITULO")) + "é de uso exclusivo para Pessoa Física na geração do Reinf."
 			_cSolMsg:= "Revise conteúdo do campo informado."
 			_lRet := .F.
-		ElseIf _lRet .And. Left(oObj:GetValue('A2_COD',),1) == "P" .And. oObj:GetValue('A2_TIPO') == "J" .AND. oObj:GetValue('A2_RECINSS') == 'S'
+		ElseIf _lRet .And. Left(oObj:GetValue('A2_COD',),1) == "P" .And. oObj:GetValue('A2_TIPO') == "J" .And. oObj:GetValue('A2_RECINSS') == 'S'
 			_cCodMsg:= "CUSTOMERVENDOR08"
 			_cMsg	:= "O campo" + AllTrim(GetSX3Cache("A2_RECINSS","X3_TITULO")) + "é de uso exclusivo para Pessoa Física na geração do Reinf."
 			_cSolMsg:= "Revise conteúdo do campo informado."
@@ -176,23 +172,23 @@ If aParam <> NIL
 			_cMsg	:="Para o Produtor Pessoa Física, os campos "+AllTrim(GetSx3Cache("A2_INDCP", "X3_TITULO"))+" e "+AllTrim(GetSx3Cache("A2_TIPORUR", "X3_TITULO"))+" devem ser preenchidos para correta geração do Reinf." 
 			_cSolMsg:= "Revise conteúdo do campo informado."
 			_lRet := .F.
-		ElseIf _lRet .And. oObj:GetValue('A2_TIPO') == "F" .And. oObj:GetValue('A2_INDCP') == "2" .AND. !oObj:GetValue('A2_RECINSS') == 'N'
+		ElseIf _lRet .And. oObj:GetValue('A2_TIPO') == "F" .And. oObj:GetValue('A2_INDCP') == "2" .And. !oObj:GetValue('A2_RECINSS') == 'N'
 			_cCodMsg:= "CUSTOMERVENDOR10"
 			_cMsg	:= "Para o Fornecedor Pessoa Física que opte pelo desconto em folha do INSS e Gilrat, o campo "+AllTrim(GetSx3Cache("A2_RECINSS", "X3_TITULO"))+" não podem calcular o imposto para correta geração do Reinf." 
 			_cSolMsg:= "Revise conteúdo do campo informado."
 			_lRet := .F.
-		ElseIf _lRet .And. oObj:GetValue('A2_TIPO') == "F" .And. oObj:GetValue('A2_INDCP') == "1" .AND. oObj:GetValue('A2_RECINSS') <> 'S'
+		ElseIf _lRet .And. oObj:GetValue('A2_TIPO') == "F" .And. oObj:GetValue('A2_INDCP') == "1" .And. oObj:GetValue('A2_RECINSS') <> 'S'
 			_cCodMsg:= "CUSTOMERVENDOR11"
 			_cMsg	:= "Para o Fornecedor Pessoa Física que Não opte pelo desconto em folha do INSS e Gilrat, o campo "+AllTrim(GetSx3Cache("A2_RECINSS", "X3_TITULO"))+" deve calcular o imposto para correta geração do Reinf." 
 			_cSolMsg:= "Revise conteúdo do campo informado."
 			_lRet := .F.
 		ElseIf _lRet .And. ((oObj:GetValue('A2_TIPO') == "F" .And. oObj:GetValue('A2_TIPORUR') == "J") .Or. (oObj:GetValue('A2_TIPO') == "J" .And. oObj:GetValue('A2_TIPORUR') $ "F/8L"))
 			_cCodMsg:= "CUSTOMERVENDOR12"
-			_cMsg	:= "O campo "+ AllTrim(GetSX3Cache("A2_TIPORUR","X3_TITULO")) +" só deve ser preenchido com F-Física / L-Familiar quando o fornecedor for Pessoa Física e J-Jurídica quando por Pessoa Jurídica para correta geração do Reinf."
+			_cMsg	:= "O campo "+ AllTrim(GetSX3Cache("A2_TIPORUR","X3_TITULO")) +" só deve ser preenchido com F-Física / L-Familiar quando o fornecedor For Pessoa Física e J-Jurídica quando por Pessoa Jurídica para correta geração do Reinf."
 			_cSolMsg:= "Revise conteúdo do campo informado."
 			_lRet := .F.
 		ElseIf _lRet .And. oObj:GetValue('A2_INCLTMG') <> '1' .And. Left(oObj:GetValue('A2_COD'),1) == 'P' .And. oObj:GetValue('A2_TIPO') == 'F' .And.;
-			F22->(DBSeek(xFilial("F22")+SuperGetMV("LT_REGINCP",.F.,"")+"1"))
+			!Empty(SuperGetMV("LT_REGINCP",.F.,"")) .And. F22->(DBSeek(xFilial("F22")+SuperGetMV("LT_REGINCP",.F.,"")+"1"))
 			If oObj:GetValue('A2_INCLTMG') <> '1'
 				MsgAlert("O campo "+ AllTrim(GetSX3Cache("A2_INCLTMG","X3_TITULO")) +" deve ser preenchido como 1-Sim para que seja calculado o Incentivo à Produção de Leite-MG. Seu conteúdo foi ajustado."+;
 						"Dúvidas procurar departamento FISCAL.","CUSTOMERVENDOR13")
@@ -203,7 +199,7 @@ If aParam <> NIL
 			If Altera
 				_cFiltro := "% AND R_E_C_N_O_ <> " + CValToChar(SA2->(RECNO())) + " %"
 			EndIf
-			BeginSQL Alias _cAlias
+			BeginSql Alias _cAlias
 				SELECT A2_TIPO, A2_TIPORUR, A2_INDCP, A2_RECINSS, A2_INCLTMG
 				FROM %Table:SA2%
 				WHERE D_E_L_E_T_ =' '
@@ -217,9 +213,9 @@ If aParam <> NIL
 				OR A2_RECINSS <> %exp:oObj:GetValue('A2_RECINSS')%
 				OR A2_INCLTMG <> %exp:oObj:GetValue('A2_INCLTMG')%)
 				AND ROWNUM = 1
-			EndSQL
+			EndSql
 			_cMsg := ""
-			If !(_cAlias)->(EOF())
+			If !(_cAlias)->(Eof())
 				If (_cAlias)->A2_TIPO <> oObj:GetValue('A2_TIPO')
 					_cMsg += AllTrim(GetSX3Cache("A2_TIPO","X3_TITULO")) + "/ "
 				EndIf
@@ -244,7 +240,7 @@ If aParam <> NIL
 		//Validação para Autônomos
 		If _lRet .And. !Empty(oObj:GetValue('A2_I_FAUTA')) .And. !Empty(oObj:GetValue('A2_I_AUTAV'))
 			_cAlias := GetNextAlias()
-			BeginSQL Alias _cAlias
+			BeginSql Alias _cAlias
 				SELECT A2_COD,A2_LOJA,A2_NOME
 				FROM %Table:SA2%
 				WHERE D_E_L_E_T_ =' '
@@ -252,9 +248,9 @@ If aParam <> NIL
 				AND R_E_C_N_O_ <> %exp:SA2->(RECNO())%
 				AND A2_I_FAUTA = %exp:oObj:GetValue('A2_I_FAUTA')%
 				AND A2_I_AUTAV = %exp:oObj:GetValue('A2_I_AUTAV')%
-			EndSQL
+			EndSql
 		
-			If !(_cAlias)->(EOF())
+			If !(_cAlias)->(Eof())
 				_cCodMsg:= "CUSTOMERVENDOR14"
 				_cMsg	:= "O Autonomo indicado já se encontra amarrado ao Fornecedor: " + (_cAlias)->A2_COD + "/" + (_cAlias)->A2_LOJA + "-" + AllTrim((_cAlias)->A2_NOME)+" para geração do RPA avulso."
 				_cSolMsg:= "Informe outro Autônomo ou corrija o cadastro do Fornecedor informado."
@@ -266,14 +262,14 @@ If aParam <> NIL
 			_cAlias := GetNextAlias()			
 			BeginSql alias _cAlias
 				SELECT A3_COD, A3_FORNECE, A3_LOJA, A3_MSBLQL
-				FROM %table:SA3%
+				FROM %Table:SA3%
 				WHERE D_E_L_E_T_ =' '
 				AND A3_FILIAL = %xFilial:SA3%
 				AND A3_FORNECE = %exp:oObj:GetValue('A2_COD')%
 				AND A3_LOJA = %exp:oObj:GetValue('A2_LOJA')%
 			EndSql
 				
-			If !(_cAlias)->(EOF()) .and. (_cAlias)->A3_MSBLQL != '1'
+			If !(_cAlias)->(Eof()) .And. (_cAlias)->A3_MSBLQL != '1'
 				_cCodMsg:= "CUSTOMERVENDOR15"
 				_cMsg	:= "O Fornecedor não pode ter seu cadastro bloqueado pois está associado a um cadastro de vendedor ativo: " + (_cAlias)->A3_COD
 				_cSolMsg:= "Bloquei primeiramente o Vendedor ou desassocie os dois."
@@ -284,7 +280,7 @@ If aParam <> NIL
 		//Informativo para campos importantes quando não vier do GPE
 		If _lRet .And. !IsInCallStack("U_GP010VALPE") .And. !IsInCallStack("U_GP265VALPE")
 			If Empty(oObj:GetValue('A2_INSCR'))
-				MsgAlert("O campo "+ AllTrim(GetSX3Cache("A2_INSCR","X3_TITULO")) +" está vazio. Preencher como ISENTO quando for dispensado de IE e deixar em branco quando for não contribuinte do ICMS."+;
+				MsgAlert("O campo "+ AllTrim(GetSX3Cache("A2_INSCR","X3_TITULO")) +" está vazio. Preencher como ISENTO quando For dispensado de IE e deixar em branco quando For não contribuinte do ICMS."+;
 				"Dúvidas procurar departamento FISCAL.","CUSTOMERVENDOR16")
 			EndIf
 				
@@ -393,7 +389,7 @@ If aParam <> NIL
 				    _lRet := .F.
 				    Exit
 				EndIf
-				(_cAlias)->(DbCloseArea())
+				(_cAlias)->(DBCloseArea())
 			Next _nX
 		EndIf	
         
@@ -412,32 +408,32 @@ If aParam <> NIL
 */	  
 //--------------------------------------------------------------------------------------------------//	  
         If oObj:GetOperation() == 4 .And. SA2->A2_I_CLASS == "P" .And. SA2->A2_I_ENVCL == "N" 
-           Aadd(_aCampLeit,"A2_ENDCOMP")   // complemento              
-           Aadd(_aCampLeit,"A2_END")       // endereco                  
-           Aadd(_aCampLeit,"A2_BAIRRO")    // bairro                    
-           Aadd(_aCampLeit,"A2_CEP")       // cep                       
-           Aadd(_aCampLeit,"A2_MUN")       // municipio  
-           Aadd(_aCampLeit,"A2_EST")       // estado        
-           Aadd(_aCampLeit,"A2_COD_MUN")   // codigo_ibge
-           Aadd(_aCampLeit,"A2_BANCO")     // Codigo do Banco
-           Aadd(_aCampLeit,"A2_AGENCIA")   // Codigo da Agencia
-           Aadd(_aCampLeit,"A2_NUMCON")    // Numero da Conta      
-           Aadd(_aCampLeit,"A2_EMAIL")     // email                     
-           Aadd(_aCampLeit,"A2_TEL")       // telefone1                 
-           Aadd(_aCampLeit,"A2_L_FAZEN")   // nome_propriedade_rural    
-           Aadd(_aCampLeit,"A2_L_NIRF")    // NIRF  
-           Aadd(_aCampLeit,"A2_L_TANQ")    // tipo_tanque 
-           Aadd(_aCampLeit,"A2_L_MARTQ")   // Marca do Tanque
-           Aadd(_aCampLeit,"A2_L_CLASS")   // Classificação Produtor
-           Aadd(_aCampLeit,"A2_L_CAPTQ")   // capacidade_tanque         
-           Aadd(_aCampLeit,"A2_L_LATIT")   // latitude_propriedade      
-           Aadd(_aCampLeit,"A2_L_LONGI")   // longitude_propriedade     
-           Aadd(_aCampLeit,"A2_L_FREQU")   // frequencia_coleta         
-           Aadd(_aCampLeit,"A2_L_CAPAC")   // Capacidade resfriamento
-           Aadd(_aCampLeit,"A2_L_ATIVO")   // Ativo ou Inativo
-           Aadd(_aCampLeit,"A2_L_TANLJ")   // Loja do Tanque
-           Aadd(_aCampLeit,"A2_L_RESFR")   // Tipo de Resfriamento
-           Aadd(_aCampLeit,"A2_L_LI_RO")   // codigo_linha_laticinio
+           aAdd(_aCampLeit,"A2_ENDCOMP")   // complemento              
+           aAdd(_aCampLeit,"A2_END")       // endereco                  
+           aAdd(_aCampLeit,"A2_BAIRRO")    // bairro                    
+           aAdd(_aCampLeit,"A2_CEP")       // cep                       
+           aAdd(_aCampLeit,"A2_MUN")       // municipio  
+           aAdd(_aCampLeit,"A2_EST")       // estado        
+           aAdd(_aCampLeit,"A2_COD_MUN")   // codigo_ibge
+           aAdd(_aCampLeit,"A2_BANCO")     // Codigo do Banco
+           aAdd(_aCampLeit,"A2_AGENCIA")   // Codigo da Agencia
+           aAdd(_aCampLeit,"A2_NUMCON")    // Numero da Conta      
+           aAdd(_aCampLeit,"A2_EMAIL")     // email                     
+           aAdd(_aCampLeit,"A2_TEL")       // telefone1                 
+           aAdd(_aCampLeit,"A2_L_FAZEN")   // nome_propriedade_rural    
+           aAdd(_aCampLeit,"A2_L_NIRF")    // NIRF  
+           aAdd(_aCampLeit,"A2_L_TANQ")    // tipo_tanque 
+           aAdd(_aCampLeit,"A2_L_MARTQ")   // Marca do Tanque
+           aAdd(_aCampLeit,"A2_L_CLASS")   // Classificação Produtor
+           aAdd(_aCampLeit,"A2_L_CAPTQ")   // capacidade_tanque         
+           aAdd(_aCampLeit,"A2_L_LATIT")   // latitude_propriedade      
+           aAdd(_aCampLeit,"A2_L_LONGI")   // longitude_propriedade     
+           aAdd(_aCampLeit,"A2_L_FREQU")   // frequencia_coleta         
+           aAdd(_aCampLeit,"A2_L_CAPAC")   // Capacidade resfriamento
+           aAdd(_aCampLeit,"A2_L_ATIVO")   // Ativo ou Inativo
+           aAdd(_aCampLeit,"A2_L_TANLJ")   // Loja do Tanque
+           aAdd(_aCampLeit,"A2_L_RESFR")   // Tipo de Resfriamento
+           aAdd(_aCampLeit,"A2_L_LI_RO")   // codigo_linha_laticinio
            
 		   For _nX := 1 To Len(_aCampLeit)
                If oObj:GetValue(_aCampLeit[_nX]) <> SA2->&(_aCampLeit[_nX])
@@ -501,13 +497,13 @@ If aParam <> NIL
 			EndIf
      		
 		EndIf
-		//Dispara na inclusão ou quando o produtor for trocado de Setor. Uso o campo de linha que terá o mesmo efeito
+		//Dispara na inclusão ou quando o produtor For trocado de Setor. Uso o campo de linha que terá o mesmo efeito
 		If oObj:GetOperation() == 3 .Or. oObj:IsFieldUpdated("SA2MASTER","A2_L_LI_RO") == .T.
 			//================================================================================
 			// Cria item contábil para o novo fornecedor
 			//================================================================================
-			CTD->(Dbsetorder(1))
-			If !CTD->(Dbseek(xFilial("CTD")+"SA2"+ oObj:GetValue("SA2MASTER","A2_COD")))
+			CTD->(DBSetOrder(1))
+			If !CTD->(DBSeek(xFilial("CTD")+"SA2"+ oObj:GetValue("SA2MASTER","A2_COD")))
 				_aDadosCTD:= {	{'CTD_ITEM',"SA2" + oObj:GetValue("SA2MASTER","A2_COD"), Nil},;	// Especifica qual o Código do item contabil
 								{'CTD_CLASSE',"2", Nil},;	// Especifica a classe do Centro de Custo, que  poderá ser: - Sintética: Centros de Custo totalizadores dos Centros de Custo Analíticos - Analítica: Centros de Custo que recebem os valores dos lançamentos contábeis
 								{'CTD_DESC01',oObj:GetValue("SA2MASTER","A2_NOME"), Nil},; // Indica a Nomenclatura do item contabil na Moeda 1
@@ -530,10 +526,10 @@ If aParam <> NIL
 			//=====================================================================================
 			// Cria cadastro no configurador de tributos para o cálculo do Incentivo a produção MG
 			//=====================================================================================			
-			cFilAnt:= Substr(oObj:GetValue("SA2MASTER","A2_L_LI_RO"),1,2)
+			cFilAnt:= SubStr(oObj:GetValue("SA2MASTER","A2_L_LI_RO"),1,2)
 			If Left(oObj:GetValue("SA2MASTER","A2_COD"),1) == "P" .And. oObj:GetValue("SA2MASTER","A2_TIPO") == 'F';
-				.And. F28->(DbSeek(xFilial('F28')+SuperGetMV("LT_INCINCP",.F.,"")));
-				.And. !F22->(DbSeek(xFilial("F22")+SuperGetMV("LT_REGINCP",.F.,"")+"1"+oObj:GetValue("SA2MASTER","A2_COD")+oObj:GetValue("SA2MASTER","A2_LOJA")))
+				.And. F28->(DBSeek(xFilial('F28')+SuperGetMV("LT_INCINCP",.F.,"")));
+				.And. !F22->(DBSeek(xFilial("F22")+SuperGetMV("LT_REGINCP",.F.,"")+"1"+oObj:GetValue("SA2MASTER","A2_COD")+oObj:GetValue("SA2MASTER","A2_LOJA")))
 				FSA164GF22(SuperGetMV("LT_REGINCP",.F.,"")/*cCodPerfil*/, "INCLUI"/*cOper*/, "1"/*cTpPart*/,oObj:GetValue("SA2MASTER","A2_COD")/*cCliFor*/,oObj:GetValue("SA2MASTER","A2_LOJA")/*cLoja*/)
 			EndIf
 			cFilAnt:= _cFilOld
@@ -559,7 +555,7 @@ EndIf
 If !Empty(_cCodMsg)
 	Help(NIL, NIL, _cCodMsg, NIL, _cMsg, 1, 0, NIL, NIL, NIL, NIL, NIL, {_cSolMsg})
 EndIf
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return _lRet
 
@@ -577,7 +573,7 @@ Retorno-----------: lRet     : Valida se pode ou não prosseguir com o cadastro
 */
 Static Function ITGeraCF(oObj)
 
-Local _aArea    := GetArea()
+Local _aArea    := FWGetArea()
 Local _cAlias	:= GetNextAlias()
 Local _cCodigo  := ""
 Local _cFiltro	:= ""
@@ -588,14 +584,14 @@ Local _lTroca	:= .F.
 // Verifica se o Código de Fornecedor informado já foi utilizado
 //================================================================================
 If oObj:GetValue("A2_TIPO") == "J" .And. !oObj:GetValue("A2_I_CLASS") == 'Z'
-	_cFiltro := "% AND SUBSTR(A2_CGC,1,8) <> '"+ Left(oObj:GetValue("A2_CGC"),8) +"' %"
+	_cFiltro := "% AND SubStr(A2_CGC,1,8) <> '"+ Left(oObj:GetValue("A2_CGC"),8) +"' %"
 Else
-	_cFiltro := "% AND A2_CGC  <> '"+ Alltrim(oObj:GetValue("A2_CGC")) +"' %"
+	_cFiltro := "% AND A2_CGC  <> '"+ AllTrim(oObj:GetValue("A2_CGC")) +"' %"
 EndIf
 _cAlias := GetNextAlias()			
 BeginSql alias _cAlias
 	SELECT DISTINCT A2_COD CODIGO
-	FROM %table:SA2%
+	FROM %Table:SA2%
 	WHERE D_E_L_E_T_ =' '
 	%exp:_cFiltro%
 	AND A2_COD = %exp:oObj:GetValue("A2_COD")%
@@ -614,20 +610,20 @@ EndIf
 //================================================================================
 
 If oObj:GetValue("A2_TIPO") == "J" .And. !oObj:GetValue("A2_I_CLASS") == 'Z'
-	_cFiltro := "% AND SUBSTR(A2_CGC,1,8) = '"+ Left(oObj:GetValue("A2_CGC"),8) +"' %"
+	_cFiltro := "% AND SubStr(A2_CGC,1,8) = '"+ Left(oObj:GetValue("A2_CGC"),8) +"' %"
 Else
-	_cFiltro := "% AND A2_CGC  = '"+ Alltrim(oObj:GetValue("A2_CGC")) +"' %"
+	_cFiltro := "% AND A2_CGC  = '"+ AllTrim(oObj:GetValue("A2_CGC")) +"' %"
 EndIf
 _cAlias := GetNextAlias()			
 BeginSql alias _cAlias
 	SELECT A2_COD CODIGO, MAX(A2_LOJA) LOJA
-	FROM %table:SA2%
+	FROM %Table:SA2%
 	WHERE D_E_L_E_T_ =' '
 	%exp:_cFiltro%
 	GROUP BY A2_COD
 EndSql
 
-If (_cAlias)->( !EOF() ) // Existe codigo para o CGC atual
+If (_cAlias)->( !Eof() ) // Existe codigo para o CGC atual
 	While (_cAlias)->( !Eof() )
 		If ( SubStr( (_cAlias)->CODIGO , 1 , 1 ) == oObj:GetValue("A2_I_CLASS") ) //Validar se ja existe codigo para a classe
 			_cCodigo := (_cAlias)->CODIGO
@@ -641,7 +637,7 @@ If (_cAlias)->( !EOF() ) // Existe codigo para o CGC atual
 						" a mesma codificação utilizada na outra classe, selecione [NÃO].", "CUSTOMERVENDOR22")
 			_lNew := .T.
 		Else
-			(_cAlias)->( DBGotop() )
+			(_cAlias)->( DBGoTop() )
 			_cCodigo	:= (_cAlias)->CODIGO
 			_lTroca		:= .F.
 			_lNew		:= .F.
@@ -654,13 +650,13 @@ EndIf
 //================================================================================
 // Verifica se o Código de Fornecedor informado já foi utilizado
 //================================================================================
-If _lTroca .Or. _lNew .OR. (oObj:GetValue("A2_EST") == 'EX' .AND. oObj:GetValue("A2_CGC") = '00000000000000')  //Se for fornecedor externo gera código novo com cgc zerado
+If _lTroca .Or. _lNew .Or. (oObj:GetValue("A2_EST") == 'EX' .And. oObj:GetValue("A2_CGC") = '00000000000000')  //Se For fornecedor externo gera código novo com cgc zerado
 	_cAlias := GetNextAlias()			
 	BeginSql alias _cAlias
 		SELECT MAX(A2_COD) CODIGO
-		FROM %table:SA2%
+		FROM %Table:SA2%
 		WHERE D_E_L_E_T_ =' '
-		AND SUBSTR(A2_COD,1,1) = %exp:oObj:GetValue("A2_I_CLASS")%
+		AND SubStr(A2_COD,1,1) = %exp:oObj:GetValue("A2_I_CLASS")%
 	EndSql
 	If (_cAlias)->( !Eof() )
 		_cCodigo := oObj:GetValue("A2_I_CLASS") + Soma1(Right((_cAlias)->CODIGO,5))
@@ -676,7 +672,7 @@ If _lTroca .Or. _lNew .OR. (oObj:GetValue("A2_EST") == 'EX' .AND. oObj:GetValue(
 	
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 If _lTroca
 	MsgAlert("O código do fornecedor foi trocado para ["+ _cCodigo +"] pois já havia um registro na base com o código anterior.", "CUSTOMERVENDOR23")

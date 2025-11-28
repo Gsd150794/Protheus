@@ -10,7 +10,7 @@ Lucas Borges  |12/06/2025| Chamado 51021. Corrigido error.log quando XML está co
 ===============================================================================================================================
 */
 
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -59,12 +59,12 @@ Local oMemo     := Nil As Object
 
 DEFINE MSDIALOG oDlgKey TITLE "Manutenção XML" FROM 0,0 TO 190,350 PIXEL OF GetWndDefault()
 
-@ 12,008 SAY "1- Possibilida alterar as chaves informadas no CT-e. Necessário "+ CRLF +;
+@ 12,008 Say "1- Possibilida alterar as chaves informadas no CT-e. Necessário "+ CRLF +;
 "para situações onde a chave informada foi recusada ou está errada." PIXEL OF oDlgKey
-@ 25,008 SAY  "2- Possibilita indicar se a NF-e será processada como Cliente ou "+ CRLF +;
+@ 25,008 Say  "2- Possibilita indicar se a NF-e será processada como Cliente ou "+ CRLF +;
 "Fornecedor. " PIXEL OF oDlgKey
-@ 38,008 SAY  "3- Manutenção completa do XML. " PIXEL OF oDlgKey
-@ 51,008 SAY  "Informe a Chave de acesso do documento a ser corrigido: " PIXEL OF oDlgKey
+@ 38,008 Say  "3- Manutenção completa do XML. " PIXEL OF oDlgKey
+@ 51,008 Say  "Informe a Chave de acesso do documento a ser corrigido: " PIXEL OF oDlgKey
 @ 63,015 MSGET _cChaveNFe SIZE 140,10 PIXEL OF oDlgKey
 
 @ 79,030 BUTTON oBtnCon PROMPT "&Buscar" SIZE 38,11 PIXEL ACTION (IIf(!Empty(_cChaveNFe),_nOpc := 1,;
@@ -77,16 +77,16 @@ ACTIVATE DIALOG oDlgKey CENTERED
 
 If _nOpc == 1 .Or. _nOpc == 2
     _lRet := .T.
-    If Substr(_cChaveNFe,21,2) == '55'
+    If SubStr(_cChaveNFe,21,2) == '55'
         _cTipo := '109'
-    ElseIf Substr(_cChaveNFe,21,2) == '57'
+    ElseIf SubStr(_cChaveNFe,21,2) == '57'
         _cTipo := '214'
     EndIf
     DBSelectArea('CKO')
-    CKO->(DbSetOrder(1))
-    SDS->(dbSetorder(2))
+    CKO->(DBSetOrder(1))
+    SDS->(DBSetOrder(2))
     If !Empty(_cChaveNFe) .And. CKO->(DBSeek(_cTipo+_cChaveNFe+".xml")) .And. CKO->CKO_FLAG <> '9' .And. CKO->CKO_FILPRO == cFilAnt
-        If SDS->(dbSeek(cFilAnt+_cChaveNFe)) .And. SDS->DS_STATUS == 'P'
+        If SDS->(DBSeek(cFilAnt+_cChaveNFe)) .And. SDS->DS_STATUS == 'P'
             FWAlertWarning("Pre-nota já gerada. Exclua o documento da rotina Documento de entrada", "MCOM01902")
         Else
             _cXML := AllTrim(CKO->CKO_XMLRET)
@@ -96,14 +96,14 @@ If _nOpc == 1 .Or. _nOpc == 2
 
                     DEFINE MSDIALOG oDlgKey TITLE "Ajusta Tipo NF-e" FROM 0,0 TO 100,300 OF oDlgKey PIXEL
                                                                                             
-                        _cTipoNF := TComboBox():New(10,28,{|u|if(PCount()>0,_cTipoNF:=u,_cTipoNF)}, _aTipoNF,100,20,oDlgKey,,,,,,.T.,,,,,,,,,'_cTipoNF')
+                        _cTipoNF := TComboBox():New(10,28,{|u|If(PCount()>0,_cTipoNF:=u,_cTipoNF)}, _aTipoNF,100,20,oDlgKey,,,,,,.T.,,,,,,,,,'_cTipoNF')
                         @ 30,38 BUTTON oBtnCon PROMPT "&OK" SIZE 38,11 PIXEL ACTION (_lRet := .T., oDlgKey:End())
                         @ 30,78 BUTTON oBtnOut PROMPT "&Cancelar" SIZE 38,11 PIXEL ACTION oDlgKey:End()
 
                     ACTIVATE MSDIALOG oDlgKey 
                     //O MATA140I descarta o PE quando o tipo é C, logo, preciso alterar o XML e não usar o campo customizado
                     If _cTipoNF <> Nil .And. _cTipoNF == "C"
-                        _cXMLNew := Substr(_cXML,1,At("<finNFe>",_cXML)+7)+"2"+ Substr(_cXML,At("</finNFe>",_cXML),Len(_cXML))
+                        _cXMLNew := SubStr(_cXML,1,At("<finNFe>",_cXML)+7)+"2"+ SubStr(_cXML,At("</finNFe>",_cXML),Len(_cXML))
                         _cTipoNF := Nil
                     EndIf
                 ElseIf _cTipo == '214'
@@ -136,7 +136,7 @@ If _nOpc == 1 .Or. _nOpc == 2
                         EndIf
                         
                         //-- Verifica se CTe é do tipo complementar
-                        If Valtype(XmlChildEx(_oXml:_InfCte,"_INFCTECOMP")) != "U"
+                        If ValType(XmlChildEx(_oXml:_InfCte,"_INFCTECOMP")) != "U"
                             _lComp := .T.
                         EndIf
                         _cTpCte := If(ValType(XmlChildEx(_oXML:_InfCte,"_IDE")) == "O",AllTrim(_oXML:_InfCte:_Ide:_tpCTe:Text),"") //-- Armazena o tipo do CT-e.
@@ -151,7 +151,7 @@ If _nOpc == 1 .Or. _nOpc == 2
                                 FWAlertInfo("Situação não tratada. Favor acionar a TI.","MCOM01904" )
                             EndIf
                         ElseIf _oXML:_InfCte:_Versao:Text >= "2.00"
-                            If Valtype(XmlChildEx(_oXml:_InfCte,"_INFCTENORM")) != "U"
+                            If ValType(XmlChildEx(_oXml:_InfCte,"_INFCTENORM")) != "U"
                                 If ValType(XmlChildEx(_oXML:_InfCte:_InfCTeNorm,"_INFDOC")) != "U" .And. ValType(XmlChildEx(_oXML:_InfCte:_InfCTeNorm:_InfDoc,"_INFNF")) != "U"
                                     _aAux := If(ValType(_oXML:_InfCte:_InfCTeNorm:_InfDoc:_INFNF) == "O",{_oXML:_InfCte:_InfCTeNorm:_InfDoc:_INFNF},_oXML:_InfCte:_InfCTeNorm:_InfDoc:_INFNF)
                                 ElseIf ValType(XmlChildEx(_oXML:_InfCte:_InfCTeNorm,"_INFDOC")) != "U" .And. ValType(XmlChildEx(_oXML:_InfCte:_InfCTeNorm:_InfDoc,"_INFNFE")) != "U"
@@ -171,9 +171,9 @@ If _nOpc == 1 .Or. _nOpc == 2
                         //Trata os documentos referenciados de acordo com o formato enviado (NF-e)
                         For _nX :=1 To Len(_aAux1)
                             If ValType(XmlChildEx(_aAux1[_nX],"_CHAVE")) == "O"
-                                aAdd(_aItens,{Padr(AllTrim(_aAux1[_nX]:_chave:Text),TamSX3("F1_CHVNFE")[1]),Padr(AllTrim(_aAux1[_nX]:_chave:Text),TamSX3("F1_CHVNFE")[1])})
+                                aAdd(_aItens,{PadR(AllTrim(_aAux1[_nX]:_chave:Text),TamSX3("F1_CHVNFE")[1]),PadR(AllTrim(_aAux1[_nX]:_chave:Text),TamSX3("F1_CHVNFE")[1])})
                             ElseIf ValType(XmlChildEx(_aAux1[_nX],"_CHCTE")) == "O"
-                                aAdd(_aItens,{Padr(AllTrim(_aAux1[_nX]:_chCTE:Text),TamSX3("F1_CHVNFE")[1]),Padr(AllTrim(_aAux1[_nX]:_chCTE:Text),TamSX3("F1_CHVNFE")[1])})
+                                aAdd(_aItens,{PadR(AllTrim(_aAux1[_nX]:_chCTE:Text),TamSX3("F1_CHVNFE")[1]),PadR(AllTrim(_aAux1[_nX]:_chCTE:Text),TamSX3("F1_CHVNFE")[1])})
                             EndIf
                         Next _nX
 
@@ -184,7 +184,7 @@ If _nOpc == 1 .Or. _nOpc == 2
                         Next _nX
 
                         //Adiciono sempre uma linha em branco para situações onde precisa incluir mais uma chave
-                        aAdd(_aItens,{Padr(' ',TamSX3("F1_CHVNFE")[1]),Padr(' ',TamSX3("F1_CHVNFE")[1])})
+                        aAdd(_aItens,{PadR(' ',TamSX3("F1_CHVNFE")[1]),PadR(' ',TamSX3("F1_CHVNFE")[1])})
 
                         //Monta tela para troca dos documentos referenciados
                         If Len(_aItens) > 0
@@ -233,13 +233,13 @@ If _nOpc == 1 .Or. _nOpc == 2
                         Next _nX
 
                         If _lRet
-                            _cXMLNew := Substr(_cXML,1,At("<infDoc>",_cXML)+7)
+                            _cXMLNew := SubStr(_cXML,1,At("<infDoc>",_cXML)+7)
                             If Len(_aItens) > 0
-                                DbSelectArea("SF1")
-                                SF1->(DbSetOrder(8))
+                                DBSelectArea("SF1")
+                                SF1->(DBSetOrder(8))
                                 For _nX:=1 To Len(_aItens)
                                     If !Empty(_aItens[_nX][02])
-                                        If CKO->(dbSeek(IIf(Substr(_aItens[_nX][02],21,2)=='55','109','214')+_aItens[_nX][02]+'.xml')) .Or. SF1->(DBSeek(xFilial("SF1")+_aItens[_nX][02]))
+                                        If CKO->(DBSeek(IIf(SubStr(_aItens[_nX][02],21,2)=='55','109','214')+_aItens[_nX][02]+'.xml')) .Or. SF1->(DBSeek(xFilial("SF1")+_aItens[_nX][02]))
                                             _cXMLNew += _cTagIni + _aItens[_nX][02] + _cTagFim//grava nova chave
                                         Else
                                             MsgStop("O XML da chave "+AllTrim(_aItens[_nX][02])+" não foi recebido e/ou escriturado e a chave será ignorada.", "MCOM01903")
@@ -248,7 +248,7 @@ If _nOpc == 1 .Or. _nOpc == 2
                                     EndIf
                                 Next _nX
                             EndIf
-                            _cXMLNew += Substr(_cXML,At("</infDoc>",_cXML),Len(_cXML))
+                            _cXMLNew += SubStr(_cXML,At("</infDoc>",_cXML),Len(_cXML))
                         Else
                             FWAlertInfo("Não foi identificada necessidade de alteração das chaves. Revise os dados informados.", "MCOM01907")
                         EndIf
@@ -260,7 +260,7 @@ If _nOpc == 1 .Or. _nOpc == 2
                 _cXMLNew := _cXML
 
                 DEFINE MSDIALOG oDlgKey TITLE "Manutenção XML" FROM 0,0 TO 555,650 OF oDlgKey PIXEL
-                    @ 010,008 SAY  "Chave: " + _cChaveNFe PIXEL OF oDlgKey
+                    @ 010,008 Say  "Chave: " + _cChaveNFe PIXEL OF oDlgKey
                     @ 020, 008 GET oMemo VAR _cXMLNew MEMO SIZE 310, 240 OF oDlgKey PIXEL
                     @ 263,120 BUTTON oBtnCon PROMPT "&OK" SIZE 38,11 PIXEL ACTION (_lRet := .T., oDlgKey:End())
                     @ 263,165 BUTTON oBtnOut PROMPT "&Cancelar" SIZE 38,11 PIXEL ACTION (_lRet := .F., oDlgKey:End())
@@ -270,20 +270,20 @@ If _nOpc == 1 .Or. _nOpc == 2
 
             If _lRet
                 Begin Transaction
-                SDT->(dbSetorder(3))
-                If SDS->(dbSeek(cFilAnt+_cChaveNFe)) .And. SDS->DS_STATUS <> 'P'
+                SDT->(DBSetOrder(3))
+                If SDS->(DBSeek(cFilAnt+_cChaveNFe)) .And. SDS->DS_STATUS <> 'P'
                     //-- Deleta itens do documento 
-                    SDT->(dbSeek(SDS->(DS_FILIAL+DS_FORNEC+DS_LOJA+DS_DOC+DS_SERIE)))
+                    SDT->(DBSeek(SDS->(DS_FILIAL+DS_FORNEC+DS_LOJA+DS_DOC+DS_SERIE)))
                     RecLock("SDS",.F.)
-                    While !SDT->(EOF()) .And. SDT->(DT_FILIAL+DT_FORNEC+DT_LOJA+DT_DOC+DT_SERIE) == SDS->(DS_FILIAL+DS_FORNEC+DS_LOJA+DS_DOC+DS_SERIE)
+                    While !SDT->(Eof()) .And. SDT->(DT_FILIAL+DT_FORNEC+DT_LOJA+DT_DOC+DT_SERIE) == SDS->(DS_FILIAL+DS_FORNEC+DS_LOJA+DS_DOC+DS_SERIE)
                         RecLock("SDT",.F.)
                         SDT->(dbDelete())
-                        SDT->(MsUnLock())		
-                        SDT->(dbSkip())
+                        SDT->(MSUnLock())		
+                        SDT->(DBSkip())
                     EndDo
                     //-- Deleta cabecalho do documento
                     SDS->(dbDelete())
-                    SDS->(MsUnLock())
+                    SDS->(MSUnLock())
                 EndIf
                 CKO->(DBSeek(_cTipo+_cChaveNFe+".xml"))
                 RecLock("CKO", .F.)
@@ -298,7 +298,7 @@ If _nOpc == 1 .Or. _nOpc == 2
                         CKO->CKO_I_TIPO := _cTipoNF
                     EndIf
                     CKO->CKO_FLAG = '0'
-                CKO->(MsUnlock())
+                CKO->(MSUnLock())
                 End Transaction
             EndIf
         EndIf

@@ -13,7 +13,7 @@
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include "Protheus.Ch"
+#Include "TOTVS.ch"
 
 #Define TITULO "Bloqueio de Clientes Inativos"
 
@@ -125,7 +125,7 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],000 to aSize[6],aSize[5] Of o
 	
 ACTIVATE MSDIALOG oDlg CENTERED
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -179,7 +179,7 @@ DBUseArea( .T. , "TOPCONN" , TCGenQry(,,cQuery) , cAlias , .F. , .T. )
 
 DBSelectArea(cAlias)
 (cAlias)->(DBGoTop()) 
-(cAlias)->( dbEval( { || nTotReg++ } ) )
+(cAlias)->( DBEval( { || nTotReg++ } ) )
 
 ProcRegua(nTotReg)
 cTotReg := StrZero( nTotReg , 6 )
@@ -191,9 +191,9 @@ While !(cAlias)->(Eof())
 	aAdd( aLbxAux , {	(cAlias)->LOTE				 					,; //01
 						(cAlias)->CHAVE				 					,; //02
 						(cAlias)->CLIENTE			 					,; //03
-		DtoC(	StoD(	(cAlias)->DATINI ) )		 					,; //04
-		DtoC(	StoD(	(cAlias)->DATFIM ) )		 					,; //05
-		DtoC(	StoD(	(cAlias)->DT_PRO ) ) +" - "+ (cAlias)->HR_PRO	,; //06
+		DToC(	SToD(	(cAlias)->DATINI ) )		 					,; //04
+		DToC(	SToD(	(cAlias)->DATFIM ) )		 					,; //05
+		DToC(	SToD(	(cAlias)->DT_PRO ) ) +" - "+ (cAlias)->HR_PRO	,; //06
 			U_ITRetBox(	(cAlias)->ACAO		, "Z03_ACAO"	)			,; //07
 			U_ITRetBox(	(cAlias)->STS_AUX	, "Z01_STATUS"	)			}) //08
 	
@@ -221,7 +221,7 @@ If	Len(aLbxAux) > 0 .And. ValType(oLbxAux) == "O"
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -271,8 +271,8 @@ If	nReg == Nil
 
 	uRetorno := {}
 	
-	Aadd( uRetorno , { 'Z00->Z00_OPERAC == "002" '	, aLegenda[1][1] } )
-	Aadd( uRetorno , { 'Z00->Z00_OPERAC == "001" '	, aLegenda[2][1] } )
+	aAdd( uRetorno , { 'Z00->Z00_OPERAC == "002" '	, aLegenda[1][1] } )
+	aAdd( uRetorno , { 'Z00->Z00_OPERAC == "001" '	, aLegenda[2][1] } )
 
 Else
 	BrwLegenda(cCadastro, "Legenda",aLegenda)

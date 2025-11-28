@@ -2,27 +2,21 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 18/06/2018 | Alterado produto padrão para todas a operações. Chamado 25235
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 10/01/2019 | Incluído tratamento para CTeOS. Chamado 23984
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 28/04/2022 | Tratamento para demais tags de fornecedores. Chamado 39923
+Lucas Borges  |18/06/2018| Chamado 25235. Alterado produto padrão para todas a operações.
+Lucas Borges  |10/01/2019| Chamado 23984. Incluído tratamento para CTeOS.
+Lucas Borges  |28/04/2022| Chamado 39923. Tratamento para demais tags de fornecedores.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa--------: A116PRDF
 Autor-----------: Lucas Borges Ferreira
 Data da Criacao-: 21/05/2018
-===============================================================================================================================
 Descrição-------: Ponto de entrada utilizado na rotina de importação de XML de nota fiscal eletrônica, referente ao conhecimento
 				 do transporte, para alterar o código do produto que identifica o  frete que será gravado na nota fiscal de 
 				 entrada.
@@ -30,17 +24,14 @@ Descrição-------: Ponto de entrada utilizado na rotina de importação de XML de n
 				 nas tabelas SDS e SDT.
 				 EM QUE PONTO: Após a leitura do arquivo na pasta xmlnfe/new e identificação se a Empresa é remetente ou desti-
 				 natária da nota. Chamado 13990
-===============================================================================================================================
 Parametros------: oXML := Objeto contendo a estrutura do arquivo XML referente ao conhecimento do transporte
-===============================================================================================================================
 Retorno---------: cPrdFrete - Retorna o código do produto que deve ser considerado para gravação da nota fiscal de entrada.
 ===============================================================================================================================
 */
+User Function A116PRDF
 
-User function A116PRDF()    
-
-Local _aArea 	:= GetArea()
-Local _oXML 	:= PARAMIXB[1]
+Local _aArea 	:= FWGetArea()
+Local _oXML 	:= ParamIXB[1]
 Local _aPrdFrete:= {}
 Local _cPrdFrete:= ""
 Local _aAux1	:= {}
@@ -95,16 +86,16 @@ Else //CTe
 		If !Empty( _aAux1 )
 			For _nI := 1 To Len( _aAux1 )
 				If ValType(XmlChildEx(_aAux1[_nI],"_CHAVE")) == "O"
-					_cChaveNF := Padr( AllTrim( _aAux1[_nI]:_chave:Text ) , TamSX3("F1_CHVNFE")[1] )
+					_cChaveNF := PadR( AllTrim( _aAux1[_nI]:_chave:Text ) , TamSX3("F1_CHVNFE")[1] )
 				ElseIf ValType(XmlChildEx(_aAux1[_nI],"_CHCTE")) == "O"
-					_cChaveNF := Padr( AllTrim( _aAux1[_nI]:_chCTE:Text ) , TamSX3("F1_CHVNFE")[1] )
-				EndIF
+					_cChaveNF := PadR( AllTrim( _aAux1[_nI]:_chCTE:Text ) , TamSX3("F1_CHVNFE")[1] )
+				EndIf
 				//====================================================================================================
 				// Se alguma chave estiver referenciada no documento de saída, é um frete sobre venda.
 				// Não é necessário se preocupar com a filial nesse PE. Produto 10000000005
 				//====================================================================================================
 				_cAlias := GetNextAlias()
-				BeginSQL Alias _cAlias
+				BeginSql Alias _cAlias
 					SELECT COUNT(1) QTDREG
 					  FROM %Table:SF2% SF2
 					 WHERE SF2.D_E_L_E_T_ = ' '
@@ -122,6 +113,6 @@ Else //CTe
 EndIf
 
 _cPrdFrete := PadR(_cPrdFrete,TamSX3("B1_COD")[1])
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return _cPrdFrete

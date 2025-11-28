@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-     Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Julio Paz         | 12/09/2019 | Correção de error log na emissão do relatório. Chamado 30478.
--------------------------------------------------------------------------------------------------------------------------------
-Lucas B. Ferreira | 17/09/2019 | Retirada chamada da função itputx1. Chamado 28346 
--------------------------------------------------------------------------------------------------------------------------------
-Lucas B. Ferreira | 02/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Julio Paz     |12/09/2019| Chamado 30478. Correção de error log na emissão do relatório.
+Lucas Borges  |17/09/2019| Chamado 28346. Retirada chamada da função itputx1.
+Lucas Borges  |02/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa--------: RGPE008
 Autor-----------: Erich Buttner
 Data da Criacao-: 19/07/2013
-===============================================================================================================================
 Descrição-------: Relatório da Média Verba - Lançamento Mensal
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -41,10 +33,10 @@ Private FILIAL, SETOR, MATRICULA, VERBA
 
 Public _cPerg := "RGPE008"
 
-_cSelectSX5:="SELECT X5_CHAVE CHAVE, X5_DESCRI DESCRI FROM "+RETSQLNAME("SX5")+" WHERE D_E_L_E_T_ <> '*' AND X5_TABELA = '28' AND TRIM(X5_CHAVE) NOT IN ('0','1','2','3','4','5','6','7','8','9') ORDER BY X5_CHAVE " 
+_cSelectSX5:="SELECT X5_CHAVE CHAVE, X5_DESCRI DESCRI FROM "+RETSQLNAME("SX5")+" WHERE D_E_L_E_T_ = ' ' AND X5_TABELA = '28' AND TRIM(X5_CHAVE) NOT IN ('0','1','2','3','4','5','6','7','8','9') ORDER BY X5_CHAVE " 
 
 //AD(_aItalac_F3,{"MV_PAR10",_cTabela   ,_nCpoChave                      , _nCpoDesc              ,_bCondTab , _cTitAux            , _nTamChv , _aDados  , _nMaxSel , _lFilAtual,_cMVRET,_bValida})
-AADD(_aItalac_F3,{"MV_PAR07",_cSelectSX5,{|Tab| Left((Tab)->CHAVE,1)} ,{|Tab|(Tab)->DESCRI} ,          ,"Lista de Categorias", 1        ,          ,    } ) 
+aAdd(_aItalac_F3,{"MV_PAR07",_cSelectSX5,{|Tab| Left((Tab)->CHAVE,1)} ,{|Tab|(Tab)->DESCRI} ,          ,"Lista de Categorias", 1        ,          ,    } ) 
 
 If Pergunte( _cPerg , .T. )
 
@@ -52,21 +44,18 @@ If Pergunte( _cPerg , .T. )
 	oReport	:PrintDialog()
 
 Else
-	U_ITMSG(  'Operação cancelada pelo usuário!' , 'Atenção!' ,,1 )
+	U_ITMsg(  'Operação cancelada pelo usuário!' , 'Atenção!' ,,1 )
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: RGPE008PRT
 Autor-----------: Erich Buttner
 Data da Criacao-: 19/07/2013
-===============================================================================================================================
 Descrição-------: Função que imprime o relatório conforme parametrização do usuário
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -228,11 +217,8 @@ Return oReport
 Programa--------: RGPE008PTM
 Autor-----------: Erich Buttner
 Data da Criacao-: 19/07/2013
-===============================================================================================================================
 Descrição-------: Função que imprime os dados do relatório
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -323,7 +309,7 @@ If MV_PAR11 == 1
 		AND RA.%notdel%
 		AND RV.%notdel%
 		%Exp:_cFiltro%
-		AND RD.RD_MAT BETWEEN %Exp:mv_par02% AND %Exp:mv_par03%
+		AND RD.RD_MAT BETWEEN %Exp:MV_PAR02% AND %Exp:MV_PAR03%
 		GROUP BY RD.RD_FILIAL, RD.RD_MAT, RA.RA_NOME, RD.RD_PD, RV.RV_DESC, RA.RA_SALARIO 
 		ORDER BY RD.RD_FILIAL,RD.RD_PD,RD.RD_MAT
 	
@@ -345,7 +331,7 @@ If MV_PAR11 == 1
 		AND RA.%notdel%
 		AND RV.%notdel% 
 		%Exp:_cFiltroL%                
-		AND RC.RC_MAT BETWEEN %Exp:mv_par02% AND %Exp:mv_par03%
+		AND RC.RC_MAT BETWEEN %Exp:MV_PAR02% AND %Exp:MV_PAR03%
 		GROUP BY RC.RC_FILIAL, RC.RC_MAT, RA.RA_NOME, RC.RC_PD, RV.RV_DESC, RA.RA_SALARIO         
 		ORDER BY RC.RC_FILIAL,RC.RC_PD,RC.RC_MAT	 		
 
@@ -366,7 +352,7 @@ If MV_PAR11 == 1
 	oReport:Section(1):Section(4):Init()
 		
 	While (cAliasQRY)->(!Eof())
-		nMeses := If ( ALLTRIM(MV_PAR08) == ALLTRIM(MV_PAR09), 1,If(Val(SubStr(ALLTRIM(MV_PAR09),1,2)) - Val(SubStr(ALLTRIM(MV_PAR08),1,2)) == 1, 2 ,INT((((LASTDAY(CTOD("01/"+MV_PAR09))-(CTOD("01/"+MV_PAR08)))/30)/12)*10)+1))
+		nMeses := If ( AllTrim(MV_PAR08) == AllTrim(MV_PAR09), 1,If(Val(SubStr(AllTrim(MV_PAR09),1,2)) - Val(SubStr(AllTrim(MV_PAR08),1,2)) == 1, 2 ,INT((((LASTDAY(CTOD("01/"+MV_PAR09))-(CTOD("01/"+MV_PAR08)))/30)/12)*10)+1))
 		nMedHr  := (cAliasQRY)->TOTHR/nMeses
 		nMedVlr := (cAliasQRY)->VLRTOT/nMeses
 			
@@ -409,7 +395,7 @@ If MV_PAR11 == 1
 			
 			oReport:Section(1):Section(4):PrintLine()
 			
-			(cAliasQRY)->(dbSkip())
+			(cAliasQRY)->(DBSkip())
 		EndDo
 	
 ElseIf MV_PAR11 == 2
@@ -427,7 +413,7 @@ ElseIf MV_PAR11 == 2
 		AND RA.%notdel%
 		AND RV.%notdel%
 		%Exp:_cFiltro%
-		AND RD.RD_MAT BETWEEN %Exp:mv_par02% AND %Exp:mv_par03%
+		AND RD.RD_MAT BETWEEN %Exp:MV_PAR02% AND %Exp:MV_PAR03%
 		GROUP BY RD.RD_FILIAL, RD.RD_MAT, RA.RA_NOME, RD.RD_PD, RV.RV_DESC, RA.RA_SALARIO , RA_I_SETOR 
 		ORDER BY RD.RD_FILIAL,RA_I_SETOR,RD.RD_PD,RD.RD_MAT
 		
@@ -449,7 +435,7 @@ ElseIf MV_PAR11 == 2
 		AND RA.%notdel%
 		AND RV.%notdel%   
 		%Exp:_cFiltroL%                 
-		AND RC.RC_MAT BETWEEN %Exp:mv_par02% AND %Exp:mv_par03%  
+		AND RC.RC_MAT BETWEEN %Exp:MV_PAR02% AND %Exp:MV_PAR03%  
 		GROUP BY RC.RC_FILIAL, RC.RC_MAT, RA.RA_NOME, RC.RC_PD, RV.RV_DESC, RA.RA_SALARIO, RA_I_SETOR         
 		ORDER BY RC.RC_FILIAL,RA_I_SETOR,RC.RC_PD,RC.RC_MAT 	
 
@@ -482,7 +468,7 @@ ElseIf MV_PAR11 == 2
 
 	While (cAliasQRY)->(!Eof())
 	
-		nMeses := If ( ALLTRIM(MV_PAR08) == ALLTRIM(MV_PAR09), 1,If(Val(SubStr(ALLTRIM(MV_PAR09),1,2)) - Val(SubStr(ALLTRIM(MV_PAR08),1,2)) == 1, 2 ,INT((((LASTDAY(CTOD("01/"+MV_PAR09))-(CTOD("01/"+MV_PAR08)))/30)/12)*10)+1))
+		nMeses := If ( AllTrim(MV_PAR08) == AllTrim(MV_PAR09), 1,If(Val(SubStr(AllTrim(MV_PAR09),1,2)) - Val(SubStr(AllTrim(MV_PAR08),1,2)) == 1, 2 ,INT((((LASTDAY(CTOD("01/"+MV_PAR09))-(CTOD("01/"+MV_PAR08)))/30)/12)*10)+1))
 		nMedHr  := (cAliasQRY)->TOTHR/nMeses
 		nMedVlr := (cAliasQRY)->VLRTOT/nMeses
 			
@@ -574,7 +560,7 @@ ElseIf MV_PAR11 == 2
 				
 			oReport:Section(1):Section(4):PrintLine()
 			
-			(cAliasQRY)->(dbSkip())
+			(cAliasQRY)->(DBSkip())
 		EndDo
 Else
 
@@ -591,7 +577,7 @@ Else
 		AND RA.%notdel%
 		AND RV.%notdel%
 		%Exp:_cFiltro%
-		AND RD.RD_MAT BETWEEN %Exp:mv_par02% AND %Exp:mv_par03%
+		AND RD.RD_MAT BETWEEN %Exp:MV_PAR02% AND %Exp:MV_PAR03%
 		GROUP BY RD.RD_FILIAL, RD.RD_MAT, RA.RA_NOME, RD.RD_PD, RV.RV_DESC, RA.RA_SALARIO , RA_I_SETOR 
 		ORDER BY RD.RD_FILIAL,RA_I_SETOR,RD.RD_MAT,RD.RD_PD
 		
@@ -613,7 +599,7 @@ Else
 		AND RA.%notdel%
 		AND RV.%notdel%   
 		%Exp:_cFiltroL%                 
-		AND RC.RC_MAT BETWEEN %Exp:mv_par02% AND %Exp:mv_par03%  
+		AND RC.RC_MAT BETWEEN %Exp:MV_PAR02% AND %Exp:MV_PAR03%  
 		GROUP BY RC.RC_FILIAL, RC.RC_MAT, RA.RA_NOME, RC.RC_PD, RV.RV_DESC, RA.RA_SALARIO, RA_I_SETOR         
 		ORDER BY RC.RC_FILIAL,RA_I_SETOR,RC.RC_MAT,RC.RC_PD	
 
@@ -623,7 +609,7 @@ Else
 		
 	EndIf
 	
-	(cAliasQRY)->(dbGotop())
+	(cAliasQRY)->(DBGoTop())
 
 	SAL1BASE := 0
 	TOT1HR := 0
@@ -648,7 +634,7 @@ Else
 
 	While (cAliasQRY)->(!Eof())
 	
-		nMeses := If ( ALLTRIM(MV_PAR08) == ALLTRIM(MV_PAR09), 1,If(Val(SubStr(ALLTRIM(MV_PAR09),1,2)) - Val(SubStr(ALLTRIM(MV_PAR08),1,2)) == 1, 2 ,INT((((LASTDAY(CTOD("01/"+MV_PAR09))-(CTOD("01/"+MV_PAR08)))/30)/12)*10)+1))
+		nMeses := If ( AllTrim(MV_PAR08) == AllTrim(MV_PAR09), 1,If(Val(SubStr(AllTrim(MV_PAR09),1,2)) - Val(SubStr(AllTrim(MV_PAR08),1,2)) == 1, 2 ,INT((((LASTDAY(CTOD("01/"+MV_PAR09))-(CTOD("01/"+MV_PAR08)))/30)/12)*10)+1))
 		nMedHr  := (cAliasQRY)->TOTHR/nMeses
 		nMedVlr := (cAliasQRY)->VLRTOT/nMeses
 			
@@ -752,12 +738,12 @@ Else
 				
 			oReport:Section(1):Section(4):PrintLine()
 			
-			(cAliasQRY)->(dbSkip())
+			(cAliasQRY)->(DBSkip())
 		EndDo
 
 EndIf
 
-(cAliasQRY)->(dbCloseArea())
+(cAliasQRY)->(DBCloseArea())
 
 oReport:Section(1):Section(4):Finish()
 oReport:Section(1):Section(4):Init()
@@ -778,11 +764,8 @@ Return
 Programa--------: RGPE008FCM
 Autor-----------: Erich Buttner
 Data da Criacao-: 19/07/2013
-===============================================================================================================================
 Descrição-------: Função que formata o conteúdo de um campo
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */

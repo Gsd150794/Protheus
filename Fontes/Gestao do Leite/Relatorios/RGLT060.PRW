@@ -2,16 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 19/06/2019 | Chamado 28346. Revisão de fontes
-Lucas Borges  | 27/09/2019 | Chamado 28346. Revisão de fontes
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |19/06/2019| Chamado 28346. Revisão de fontes
+Lucas Borges  |27/09/2019| Chamado 28346. Revisão de fontes
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 ===============================================================================================================================
 */
 
-#Include "Protheus.Ch"
-#Include "Fileio.Ch"
+#Include "TOTVS.ch"
 
 #Define TITULO	"Plataformas - Fechamento Quinzenal"
 
@@ -63,7 +62,7 @@ Else
 	MsgInfo( 'Operação cancelada pelo usuário!' , 'RGLT06002' )
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -92,7 +91,7 @@ If MV_PAR01 == 1
 	_cDtFim := SubStr( MV_PAR02 , 3 , 4 ) + SubStr( MV_PAR02 , 1 , 2 ) + '15'
 Else
 	_cDtIni := SubStr( MV_PAR02 , 3 , 4 ) + SubStr( MV_PAR02 , 1 , 2 ) + '16'
-	_cDtFim := DtoS( LastDay( StoD( SubStr( MV_PAR02 , 3 , 4 ) + SubStr( MV_PAR02 , 1 , 2 ) + '01' ) ) )
+	_cDtFim := DToS( LastDay( SToD( SubStr( MV_PAR02 , 3 , 4 ) + SubStr( MV_PAR02 , 1 , 2 ) + '01' ) ) )
 EndIf
 
 If !Empty(MV_PAR03)
@@ -107,7 +106,7 @@ If !Empty(MV_PAR03)
 EndIf
 
 BeginSql alias _cAlias
-	SELECT CASE WHEN SUBSTR(SA2.A2_COD, 1, 1) = 'Z' THEN 'PLATAFORMA' END ORIGEM,
+	SELECT Case WHEN SubStr(SA2.A2_COD, 1, 1) = 'Z' THEN 'PLATAFORMA' END ORIGEM,
 	%exp:_cCampos% SA2.A2_COD, SA2.A2_LOJA, SA2.A2_NOME, SA2.A2_NREDUZ,
 	 RTRIM(SA2.A2_DDD) || '-' || SA2.A2_TEL TELEFONE,
 	 RTRIM(SA2.A2_END) || ',' || RTRIM(SA2.A2_NR_END) || SA2.A2_ENDCOMP ENDERECO,
@@ -120,7 +119,7 @@ BeginSql alias _cAlias
 	   AND SA2.A2_FILIAL = %xFilial:SA2% 
 	   AND SA2.A2_COD BETWEEN %exp:MV_PAR04% AND %exp:MV_PAR06%
 	   AND SA2.A2_LOJA BETWEEN %exp:MV_PAR05% AND %exp:MV_PAR07%
-	   AND SUBSTR(SA2.A2_COD, 1, 1) = 'Z'
+	   AND SubStr(SA2.A2_COD, 1, 1) = 'Z'
 	   AND ZLX.ZLX_DATAEN <> ' '
 	   AND ZLX.ZLX_DTENTR BETWEEN %exp:_cDtIni% AND %exp:_cDtFim%
 	   AND ZLX.ZLX_FORNEC = SA2.A2_COD
@@ -240,8 +239,8 @@ For _nI := 1 To Len( _aDados )
 	_nLinha := 5000
 	RGLT060VPG( @_oPrint , @_nLinha , ( _nI > 1 ) )
 	
-	_oPrint:Say( _nLinha , 060 , "> Fechamento: "+ cValToChar( MV_PAR01 ) +"ª quinzena / "+ MesExtenso( substr(alltrim(MV_PAR02),1,2 ));
-								 +" "+ substr(alltrim(MV_PAR02),3,4 ) +" - "+ _aDados[_nI][01] , _oFont01 )
+	_oPrint:Say( _nLinha , 060 , "> Fechamento: "+ cValToChar( MV_PAR01 ) +"ª quinzena / "+ MesExtenso( SubStr(AllTrim(MV_PAR02),1,2 ));
+								 +" "+ SubStr(AllTrim(MV_PAR02),3,4 ) +" - "+ _aDados[_nI][01] , _oFont01 )
 	_nLinha += 070
 	
 	//====================================================================================================
@@ -280,9 +279,9 @@ For _nI := 1 To Len( _aDados )
 	_cAlias	:= GetNextAlias()
 	
 	BeginSql alias _cAlias
-		SELECT ZLX.ZLX_DATAEN, ZLX.ZLX_HRENTR, SUBSTR(ZLX.ZLX_DTENTR, 7, 2) DIA_MOV, ZLX.ZLX_NRONF, ZLX.ZLX_VOLNF,
+		SELECT ZLX.ZLX_DATAEN, ZLX.ZLX_HRENTR, SubStr(ZLX.ZLX_DTENTR, 7, 2) DIA_MOV, ZLX.ZLX_NRONF, ZLX.ZLX_VOLNF,
 		       ZLX.ZLX_VOLREC, ZLX.ZLX_DIFVOL, ZLX.ZLX_VLRNF, ZLX.ZLX_ICMSNF, ZLX.ZLX_PRCNF,
-		       NVL(ROUND((SELECT SUM(ZAP_GORD) / COUNT(1)
+		       NVL(Round((SELECT SUM(ZAP_GORD) / COUNT(1)
 		                   FROM %Table:ZAP% ZAP
 		                  WHERE ZAP.D_E_L_E_T_ = ' '
 		                    AND ZAP.ZAP_FILIAL = ZLX.ZLX_FILIAL
@@ -331,7 +330,7 @@ For _nI := 1 To Len( _aDados )
 			
 		EndIf		
 		
-		aAdd( _aItnAux , {	DtoC( StoD( (_cAlias)->ZLX_DATAEN ) ) +" | "+ (_cAlias)->ZLX_HRENTR			  										,;
+		aAdd( _aItnAux , {	DToC( SToD( (_cAlias)->ZLX_DATAEN ) ) +" | "+ (_cAlias)->ZLX_HRENTR			  										,;
 							StrZero( Val( (_cAlias)->DIA_MOV ) , 2 )															  				,;
 							AllTrim( (_cAlias)->ZLX_NRONF )																		  				,;
 							AllTrim( Transform( (_cAlias)->ZLX_VOLNF 									, '@E 999,999,999,999' ) ) +' L'		,;
@@ -357,7 +356,7 @@ For _nI := 1 To Len( _aDados )
 		
 		For _nX := 1 To Len( _aColItn )
 		
-			_oPrint:Say( _nLinha , _aColItn[_nX] , _aItnAux[Len(_aItnAux)][_nX] , _oFont03 ,,,, IIF( StrZero(_nX,2) $ '04,05,06,07,08,09,10,11' , 1 , 0 ) )
+			_oPrint:Say( _nLinha , _aColItn[_nX] , _aItnAux[Len(_aItnAux)][_nX] , _oFont03 ,,,, IIf( StrZero(_nX,2) $ '04,05,06,07,08,09,10,11' , 1 , 0 ) )
 			_oPrint:Line( _nLinha - 30 , _aColDiv[_nX] , _nLinha + 30 , _aColDiv[_nX] )
 			
 		Next _nX
@@ -408,21 +407,21 @@ For _nI := 1 To Len( _aDados )
 	_cAlias	:= GetNextAlias()
 	BeginSql alias _cAlias
 		SELECT ZLX.ZLX_NRONF NUMERO,
-		       SUBSTR(ZLX.ZLX_DTENTR, 7, 2) DIA_MOV,
+		       SubStr(ZLX.ZLX_DTENTR, 7, 2) DIA_MOV,
 		       ZLX.ZLX_CTE CTE, SA2.A2_NREDUZ NREDUZ, ZLX.ZLX_PLACA PLACA,
-		       CASE
+		       Case
 		         WHEN ZLX.ZLX_VLRKM > 0 THEN
 		          ZLX.ZLX_VLRKM
 		         WHEN ZZU.ZZU_KMFORN > 0 THEN
 		          (ZLX.ZLX_VLRFRT / ZZU.ZZU_KMFORN)
-		         ELSE
+		         Else
 		          0
 		       END VLRKM,
 		       ZLX.ZLX_VLRFRT VLRFRT, ZLX.ZLX_PEDAGI PEDAGI, ZLX.ZLX_ICMSFR ICMSFR, ZLX.ZLX_TVLFRT TVLFRT,
-		       CASE
+		       Case
 		         WHEN ZLX.ZLX_VOLREC > 0 THEN
 		          ((ZLX.ZLX_VLRFRT + ZLX.ZLX_PEDAGI) / ZLX.ZLX_VOLREC)
-		         ELSE
+		         Else
 		          0
 		       END CUSTO,
 		       ZLX.ZLX_TRANSP || ZLX.ZLX_LJTRAN CHAVE, ZLX.ZLX_VOLREC VOLUME
@@ -646,7 +645,7 @@ Next _nI
 //====================================================================================================
 _oPrint:Preview()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -672,10 +671,10 @@ If _nLinha > _nLimPag
 	//====================================================================================================
 	// Verifica se encerra a página atual
 	//====================================================================================================
-	IF _lFinPag
+	If _lFinPag
 		_oPrint:EndPage()
 		_lRet := .T.
-	EndIF
+	EndIf
 	
 	//====================================================================================================
 	// Inicializa a nova página e o posicionamento
@@ -709,6 +708,6 @@ If _nLinha > _nLimPag
 	
 	_nLinha := 230
 	
-EndIF
+EndIf
 
 Return( _lRet )

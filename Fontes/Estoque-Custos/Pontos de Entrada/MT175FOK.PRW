@@ -1,19 +1,16 @@
 /*
-====================================================================================================================================================================================================
-                                    ATUALIZACOES SOFRIDAS DESDE A CONSTRUÇAO INICIAL
 ===============================================================================================================================
-       Autor          Data                                                 Motivo                                            
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+===============================================================================================================================
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-André Lisboa	  05/01/2017  Ajustar os saldos para considerar somente 3 casas decimais - Chamado 18252				       
-Lucas Borges F.	  22/02/2017  Incluída regra para realizar validações apenas se produto movimentar Seg UM - Chamado 18959	   
-====================================================================================================================================================================================================
-Analista  - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
-====================================================================================================================================================================================================
-Andre     - Alex Walaluer - 17/01/25 - 20/01/25 - 49616   - Ajuste para pegar as decimais do campo D7_SALDO
-====================================================================================================================================================================================================
+André Lisboa  |05/01/2017| Chamado 18252 Ajustar os saldos para considerar somente 3 casas decimais
+Lucas Borges  |22/02/2017| Chamado 18959 Incluída regra para realizar validações apenas se produto movimentar Seg UM
+Alex Walaluer |20/01/2025| Chamado 49616. Ajuste para pegar as decimais do campo D7_SALDO
+===============================================================================================================================
 */
 
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -38,28 +35,28 @@ User Function MT175FOK() as Logical
  Local _nDec    := GetSX3Cache("D7_SALDO","X3_DECIMAL") As Numeric
  
  If !Empty(SB1->B1_SEGUM)
-     If round(_nSaldo2,_nDec) > 0 .and. _nQtsegum = 0 .and. Empty(_cEstorn) .and. _cTipo <> 0
+     If Round(_nSaldo2,_nDec) > 0 .And. _nQtsegum = 0 .And. Empty(_cEstorn) .And. _cTipo <> 0
          _lRet := .F.                                                                                       	
-         xmaghelpfis("Atenção!", "Não permitido! A quantidade informada na 2a.UM é zero.",;
+         xMagHelpFis("Atenção!", "Não permitido! A quantidade informada na 2a.UM é zero.",;
                                 "Favor informar a quantidade da 2a.UM.")
-     Endif
+     EndIf
      
-     If round(_nsaldo,_nDec) = 0 .and. round(_nSaldo2,_nDec) <> 0
+     If Round(_nsaldo,_nDec) = 0 .And. Round(_nSaldo2,_nDec) <> 0
          _lRet := .F.                                                                                       	
-         xmaghelpfis("Atenção!", "Não permitido! O saldo da quantidade da 2a.UM não zerou.",;
+         xMagHelpFis("Atenção!", "Não permitido! O saldo da quantidade da 2a.UM não zerou.",;
                                 "Favor informar a quantidade da 2a.UM.")
      
-     ElseIf round(_nSaldo,_nDec) <> 0 .and. round(_nSaldo2,_nDec) = 0
+     ElseIf Round(_nSaldo,_nDec) <> 0 .And. Round(_nSaldo2,_nDec) = 0
          _lRet := .F.                                                                                       	
-         xmaghelpfis("Atenção!", "Não permitido! O saldo da quantidade da 2a.UM zerou, porém ainda existe saldo da 1a.UM.",;
+         xMagHelpFis("Atenção!", "Não permitido! O saldo da quantidade da 2a.UM zerou, porém ainda existe saldo da 1a.UM.",;
                                 "Favor verificar os lançamentos (Liberações e rejeições).")
-     Endif
+     EndIf
  EndIf
  
- If _cTipo == 2 .and. Empty(_cMotRej) .and. Empty(_nNumseq)
+ If _cTipo == 2 .And. Empty(_cMotRej) .And. Empty(_nNumseq)
      _lRet := .F. 
-     xmaghelpfis("Atenção!", "Não permitido! Quando o produto for REJEITADO é obrigatório o preenchimento do motivo da rejeição",;
+     xMagHelpFis("Atenção!", "Não permitido! Quando o produto For REJEITADO é obrigatório o preenchimento do motivo da rejeição",;
                                 "Favor verificar o conteúdo do campo 'Motivo da Rejeição'.")	
- Endif
+ EndIf
 
 Return _lRet

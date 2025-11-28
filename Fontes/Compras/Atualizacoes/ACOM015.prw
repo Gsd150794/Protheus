@@ -4,20 +4,15 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |24/09/2024| Chamado 48465. Sanado problemas apresentados no Code Analysis
-Lucas Borges  |09/10/2024| Chamado 48465. Retirada da função de conout
 Lucas Borges  |27/05/2025| Chamado 50617. Revisões diversas visando padronizar os fontes
 Lucas Borges  |29/05/2025| Chamado 50853. Corrigido error.log
-==================================================================================================================================================================================================================
-Analista        - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
-==================================================================================================================================================================================================================
-Andre           - Alex Wallauer - 24/06/25 - 24/06/25 -  51083 - Retirada da limitação de largura das colunas do FWMarkBrowse().
-==================================================================================================================================================================================================================
+Alex Wallauer |24/06/2025| Chamado 51083. Retirada da limitação de largura das colunas do FWMarkBrowse().
+===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
-#INCLUDE "FWBROWSE.CH"
-#INCLUDE 'FWMVCDEF.CH'
+#Include "TOTVS.ch"
+#Include "FWBROWSE.CH"
+#Include 'FWMVCDEF.CH'
 
 Static cAliasMrk	:= ""
 
@@ -47,9 +42,9 @@ Private _oTemp      := Nil As Object
 Private cTempTab    := GetNextAlias() As Character
 Private oMrkBrowse  := Nil As Object
 
-dbSelectArea("ZZL")
-ZZL->(dbSetOrder(3))
-If !ZZL->(dbSeek(xFilial("ZZL") + __cUserID))
+DBSelectArea("ZZL")
+ZZL->(DBSetOrder(3))
+If !ZZL->(DBSeek(xFilial("ZZL") + __cUserId))
 	FWAlertInfo("Usuário não tem permissão para utilizar esta funcionalidade. "+;
 			"Por favor comunicar a área de Compras que é responsável por solicitar para TI a liberação desta funcionalidade.","Liberação PC - Gestor de Compras - ACOM01501")
 	Return(.T.)
@@ -61,23 +56,23 @@ Else
 	EndIf
 EndIf
 
-_cFilSel:=cFilAnt:=_cFilSalva//POR CAUSA DO LOOP
+_cFilSel:=cFilAnt:=_cFilSalva//POR CAUSA DO Loop
 If !Pergunte(cPerg,.T.)
-	RETURN .F.
+	Return .F.
 EndIf
 
-IF MV_PAR14 = 2
+If MV_PAR14 = 2
 	_cFilSel:=FWPesqSM0()
-	IF EMPTY(_cFilSel) 
-	RETURN .F.
-	ENDIF
-ENDIF
+	If Empty(_cFilSel) 
+	Return .F.
+	EndIf
+EndIf
 
-IF !_cFilSel $ cFilPC
+If !_cFilSel $ cFilPC
 	FWAlertInfo("Rotina não habilitada para filial: "+"[ "+_cFilSel+" ] "+" selecionada. "+;
 			"Por favor comunicar a área de Compras que é responsável por solicitar para TI a liberação desta filial.","Liberação PC - Gestor de Compras - ACOM01503")
-	RETURN .F.
-ENDIF
+	Return .F.
+EndIf
 cFilAnt:=_cFilSel
 
 aAlias	 := {}
@@ -99,7 +94,7 @@ aAlias	 := {}
 		oMrkBrowse:SetFieldMark("C7_OK")
 		oMrkBrowse:SetDescription("")
 		oMrkBrowse:AddLegend( '(B1_TIPO = "SV")'		, 'BLUE'	, 'Serviços')				
-		oMrkBrowse:AddLegend( '(((C7_PRECO *100) / BZ_UPRC) - 100 >= (-nPTol) .And. ((C7_PRECO * 100) / BZ_UPRC) - 100 <= nPTol) .Or. (BZ_UPRC = 0 .AND. B1_TIPO <> "SV") '		, 'GREEN'	, 'Dentro da Tolerância')
+		oMrkBrowse:AddLegend( '(((C7_PRECO *100) / BZ_UPRC) - 100 >= (-nPTol) .And. ((C7_PRECO * 100) / BZ_UPRC) - 100 <= nPTol) .Or. (BZ_UPRC = 0 .And. B1_TIPO <> "SV") '		, 'GREEN'	, 'Dentro da Tolerância')
 		oMrkBrowse:AddLegend( '(((C7_PRECO * 100) / BZ_UPRC) - 100) > nPTol'														, 'RED'   	, 'Acima da Tolerância'		)
 		oMrkBrowse:AddLegend( '(((C7_PRECO *100) / BZ_UPRC) - 100) < (-nPTol)'														, 'YELLOW'  , 'Abaixo da Tolerância'	)
 		oMrkBrowse:SetColumns(aColumns)
@@ -110,13 +105,13 @@ aAlias	 := {}
 	EndIf
 	
 	If !Empty (cAliasMrk)
-		(cAliasMrk)->(dbCloseArea())
+		(cAliasMrk)->(DBCloseArea())
 		Ferase(cAliasMrk+GetDBExtension())
 		Ferase(cAliasMrk+OrdBagExt())
 		cAliasMrk := ""
-		dbSelectArea("SC7")
-		SC7->(dbSetOrder(1))
-	Endif
+		DBSelectArea("SC7")
+		SC7->(DBSetOrder(1))
+	EndIf
 
 cFilAnt:=_cFilSalva
 
@@ -139,19 +134,19 @@ Local aFields		:= {'C7_FILIAL', 'C7_NUM', 'C7_ITEM', 'C7_QUANT', 'C7_PRECO', 'C7
 Local cSelect		:= "" As Character
 Local aStructSC7	:= SC7->(DBSTRUCT()) As Array
 Local aColumns		:= {} As Array
-Local dEmissIni		:= mv_par01 As Date
-Local dEmissFim		:= mv_par02 As Date
-Local cFornecIni	:= mv_par03 As Character
-Local cLojaIni		:= mv_par04 As Character
-Local cFornecFim	:= mv_par05 As Character
-Local cLojaFim		:= mv_par06 As Character
-Local cPedidoIni	:= mv_par07 As Character
-Local cPedidoFim	:= mv_par08 As Character
-Local cCompraIni	:= mv_par09 As Character
-Local cCompraFim	:= mv_par10 As Character
-Local cUrgente		:= mv_par11 As Character
-Local cAplic		:= mv_par12 As Character
-Local cInvest		:= mv_par13 As Character
+Local dEmissIni		:= MV_PAR01 As Date
+Local dEmissFim		:= MV_PAR02 As Date
+Local cFornecIni	:= MV_PAR03 As Character
+Local cLojaIni		:= MV_PAR04 As Character
+Local cFornecFim	:= MV_PAR05 As Character
+Local cLojaFim		:= MV_PAR06 As Character
+Local cPedidoIni	:= MV_PAR07 As Character
+Local cPedidoFim	:= MV_PAR08 As Character
+Local cCompraIni	:= MV_PAR09 As Character
+Local cCompraFim	:= MV_PAR10 As Character
+Local cUrgente		:= MV_PAR11 As Character
+Local cAplic		:= MV_PAR12 As Character
+Local cInvest		:= MV_PAR13 As Character
 
 //Variaveis utilizadas para montar o where da query, referente aos filtros preenchidos pelo usuario.
 Local cWFilial		:= "" As Character
@@ -161,7 +156,7 @@ Local _nJ, nX, _nI	:= 0 As Numeric
 Local _cCmpTemp		:= '' As Character
 Local _cCmpSC7		:= '' As Character
 Local _nTotRegSC7	:= 0 As Numeric
-LOcal _cNomeCampo	:= '' As Character
+Local _cNomeCampo	:= '' As Character
 
 ProcRegua(0)
 IncProc('Inicializando a rotina...')
@@ -208,19 +203,19 @@ If !Empty(cInvest)
 EndIf
 cWFilial += "%"
 
-BeginSQL alias cAliasTrb
+BeginSql alias cAliasTrb
 
 SELECT C7_OK, C7_FILIAL, C7_NUM, C7_EMISSAO, C7_FORNECE, C7_LOJA, A2_NREDUZ, C7_I_URGEN, C7_I_APLIC, C7_ITEM, C7_PRODUTO, C7_DESCRI, C7_UM, C7_QUANT, C7_PRECO, C7_TOTAL, C7_VLDESC, 
        C7_I_DTFAT, C7_I_CDINV, ZZI_DESINV, C7_OBS, SC7.R_E_C_N_O_ SC7RECNO, Y1_USER, Y1_NOME, Y1_COD, B1_TIPO,  
-       CASE WHEN BZ_UPRC > 0 AND B1_TIPO <> 'SV' THEN (((C7_PRECO - BZ_UPRC) / BZ_UPRC) * 100) WHEN BZ_UPRC = 0 THEN 0 END C7_TOLERAN,
-       CASE WHEN BZ_UPRC > 0 AND B1_TIPO = 'SV'  THEN 0 ELSE BZ_UPRC END BZ_UPRC,
+       Case WHEN BZ_UPRC > 0 AND B1_TIPO <> 'SV' THEN (((C7_PRECO - BZ_UPRC) / BZ_UPRC) * 100) WHEN BZ_UPRC = 0 THEN 0 END C7_TOLERAN,
+       Case WHEN BZ_UPRC > 0 AND B1_TIPO = 'SV'  THEN 0 Else BZ_UPRC END BZ_UPRC,
         BZ_UCOM
-FROM %table:SC7% SC7                                                                                        
-JOIN %table:SA2% SA2 ON A2_FILIAL = %xFilial:SA2% AND A2_COD = C7_FORNECE AND A2_LOJA = C7_LOJA AND SA2.%notDel%
-JOIN %table:SY1% SY1 ON Y1_FILIAL = %xFilial:SY1% AND (Y1_COD BETWEEN %exp:cCompraIni% AND %exp:cCompraFim%) AND SY1.%notDel%    
-JOIN %table:SB1% SB1 ON B1_FILIAL = %xFilial:SB1% AND B1_COD = C7_PRODUTO AND SB1.%notDel%
-LEFT JOIN %table:ZZI% ZZI ON ZZI_FILIAL = %xFilial:ZZI% AND ZZI_CODINV = C7_I_CDINV AND ZZI.%notDel%
-LEFT JOIN %table:SBZ% SBZ ON  BZ_FILIAL = %xFilial:SBZ% AND     BZ_COD = C7_PRODUTO AND SBZ.%notDel%
+FROM %Table:SC7% SC7                                                                                        
+JOIN %Table:SA2% SA2 ON A2_FILIAL = %xFilial:SA2% AND A2_COD = C7_FORNECE AND A2_LOJA = C7_LOJA AND SA2.%notDel%
+JOIN %Table:SY1% SY1 ON Y1_FILIAL = %xFilial:SY1% AND (Y1_COD BETWEEN %exp:cCompraIni% AND %exp:cCompraFim%) AND SY1.%notDel%    
+JOIN %Table:SB1% SB1 ON B1_FILIAL = %xFilial:SB1% AND B1_COD = C7_PRODUTO AND SB1.%notDel%
+LEFT JOIN %Table:ZZI% ZZI ON ZZI_FILIAL = %xFilial:ZZI% AND ZZI_CODINV = C7_I_CDINV AND ZZI.%notDel%
+LEFT JOIN %Table:SBZ% SBZ ON  BZ_FILIAL = %xFilial:SBZ% AND     BZ_COD = C7_PRODUTO AND SBZ.%notDel%
 WHERE
 	%Exp:cWFilial%
 	AND C7_EMISSAO BETWEEN %exp:dEmissIni% AND %exp:dEmissFim%
@@ -252,20 +247,20 @@ EndIf
 _aStructQry := (cAliasTrb)->(DbStruct())
 
 For _nI := 1 To Len(aStructSC7)
-    _nJ := AsCan(_aStructQry,{|x| AllTrim(x[1]) == AllTrim(aStructSC7[_nI,1])})
+    _nJ := aScan(_aStructQry,{|x| AllTrim(x[1]) == AllTrim(aStructSC7[_nI,1])})
     If _nJ == 0
-       Aadd(_aStructQry , aStructSC7[_nI])
+       aAdd(_aStructQry , aStructSC7[_nI])
     EndIf
 Next _nI
 
-For _ni := 1 to len(_aStructQry)
-    If _astructqry[_ni][2] == "N" //Garante que tamanho dos campos numéricos está igual ao do SX3
-  		_astructqry[_ni][3] := 18	
-   		_astructqry[_ni][4] := 2
-    Endif	
-Next _ni
+For _nI := 1 to Len(_aStructQry)
+    If _astructqry[_nI][2] == "N" //Garante que tamanho dos campos numéricos está igual ao do SX3
+  		_astructqry[_nI][3] := 18	
+   		_astructqry[_nI][4] := 2
+    EndIf	
+Next _nI
 
-Aadd(_aStructQry, {"DELETED"   ,"L" ,1  ,0})
+aAdd(_aStructQry, {"DELETED"   ,"L" ,1  ,0})
    
 _oTemp := FWTemporaryTable():New( cTempTab,  _aStructQry )
    
@@ -277,16 +272,16 @@ _oTemp:Create()
 
 IncProc('Lendo os dados...')
 
-(cAliasTrb)->(DbGoTop())
+(cAliasTrb)->(DBGoTop())
 
 _nTotRegSC7 := (cAliasTrb)->(FCount()) 
-cTot:=ALLTRIM(STR(_nTotRegSC7))
+cTot:=AllTrim(Str(_nTotRegSC7))
 nConta:=0
 ProcRegua(_nTotRegSC7)
 
-Do While ! (cAliasTrb)->(Eof())
+While ! (cAliasTrb)->(Eof())
    nConta++
-   IncProc('Lendo: '+ALLTRIM(STR(nConta))+" de "+cTot )
+   IncProc('Lendo: '+AllTrim(Str(nConta))+" de "+cTot )
    
    (cTempTab)->(DBAPPEND())
 
@@ -297,14 +292,14 @@ Do While ! (cAliasTrb)->(Eof())
        &(_cCmpTemp) := &(_cCmpSC7)
    Next _nI
    
-   (cAliasTrb)->(DbSkip())
+   (cAliasTrb)->(DBSkip())
 EndDo
 
 //=========================================================
 // Fecha a Tabela da Query após gravar tabela temporaria.
 //=========================================================
 If ( Select( cAliasTrb ) > 0 )
-   (cAliasTrb)->(DbCloseArea())
+   (cAliasTrb)->(DBCloseArea())
 EndIf
 
 nConta:=0
@@ -314,7 +309,7 @@ DBSelectArea(cTempTab)
 (cTempTab)->( DBGoTop() )
 While (cTempTab)->(!Eof())
 	nConta++
-	IncProc('Lendo: '+ALLTRIM(STR(nConta))+" de "+cTot )
+	IncProc('Lendo: '+AllTrim(Str(nConta))+" de "+cTot )
 	aAdd( aRegsAll , { (cTempTab)->C7_FILIAL, (cTempTab)->C7_NUM, (cTempTab)->C7_ITEM } )
 	
 	(cTempTab)->( DBSkip() )
@@ -324,9 +319,9 @@ EndDo
 
 For nX := 1 To Len(aFields)
 	If	!aFields[nX] == "SC7_OK" .And. aFields[nX] $ cSelect
-		AAdd(aColumns,FWBrwColumn():New())
+		aAdd(aColumns,FWBrwColumn():New())
 		If aFields[nX] == "C7_EMISSAO" .Or. aFields[nX] == "C7_I_DTFAT" .Or. aFields[nX] == "BZ_UCOM"
-			aColumns[Len(aColumns)]:SetData( &("{||StoD(" + aFields[nX] + ")}") )
+			aColumns[Len(aColumns)]:SetData( &("{||SToD(" + aFields[nX] + ")}") )
 		Else
 			aColumns[Len(aColumns)]:SetData( &("{||" + aFields[nX] + "}") )
 		EndIf
@@ -409,9 +404,9 @@ aAdd(aRotina,{"Imprimir"		,"A120Impri"	, 0, 2, 0, Nil }) //"Imprimir"
 aAdd(aRotina,{"Legenda"			,"A120Legend"	, 0, 2, 0, .F. }) //"Legenda"
 aAdd(aRotina,{"Conhecimento"	,"MsDocument"	, 0, 4, 0, Nil }) //"Conhecimento" 
 
-dbSelectArea("SC7")
-SC7->(dbSetOrder(1))
-SC7->(dbSeek(aRegsAll[oMrkBrowse:OBROWSE:NAT][1] + aRegsAll[oMrkBrowse:OBROWSE:NAT][2] + aRegsAll[oMrkBrowse:OBROWSE:NAT][3]))
+DBSelectArea("SC7")
+SC7->(DBSetOrder(1))
+SC7->(DBSeek(aRegsAll[oMrkBrowse:OBROWSE:NAT][1] + aRegsAll[oMrkBrowse:OBROWSE:NAT][2] + aRegsAll[oMrkBrowse:OBROWSE:NAT][3]))
 
 A120Pedido("SC7",SC7->(Recno()),2)
 
@@ -461,25 +456,25 @@ Private oMSNewApr	:= Nil As Object
 
 aRegsSC7 := {}
 
-(cAliasMrk)->( DbGotop() )
+(cAliasMrk)->( DBGoTop() )
 Count to _nfim
-(cAliasMrk)->( DbGotop() )
+(cAliasMrk)->( DBGoTop() )
 
 _cmark := oMrkBrowse:Mark()
 
-SC7->(dbSetOrder(1))
+SC7->(DBSetOrder(1))
 
 For _niz := 1 to _nfim
 	If oMrkBrowse:IsMark(_cmark)
-		_npro := Ascan(aRegsSC7,{|x| alltrim(x[2]) = (cAliasMrk)->C7_NUM } )
+		_npro := aScan(aRegsSC7,{|x| AllTrim(x[2]) = (cAliasMrk)->C7_NUM } )
 		If _npro == 0
-           IF SC7->(dbSeek((cAliasMrk)->C7_FILIAL+(cAliasMrk)->C7_NUM))
+           If SC7->(DBSeek((cAliasMrk)->C7_FILIAL+(cAliasMrk)->C7_NUM))
 			  aAdd( aRegsSC7 , { (cAliasMrk)->C7_FILIAL, (cAliasMrk)->C7_NUM , SC7->(RECNO()) }  )
-		   ENDIF  
-		Endif
-	Endif
+		   EndIf  
+		EndIf
+	EndIf
 	
-	(cAliasMrk)->(  Dbskip() )
+	(cAliasMrk)->(  DBSkip() )
 Next _niz
 
 If Len(aRegsSC7) > 0
@@ -489,7 +484,7 @@ If Len(aRegsSC7) > 0
 		aCols:={}
 		//   FillGetDados(nOpc>,cAlias>,[nOrder],cSeekKey],bSeekWhile],uSeekFor],aNoFields],aYesFields]lOnlyYes], cQuery],bMontCols], [ lEmpty], [ aHeaderAux], [ aColsAux], [ bAfterCols], [ bBeforeCols], [ bAfterHeader], [ cAliasQry], [ bCriaVar], [ lUserFields], [ aYesUsado] )
 		//     FillGetDados(    2,"SAL"   ,1      ,         ,           ,{||.T.}  ,          ,           ,        ,        ,          ,.T.)
-		For nUsado := 1 to len(aFields)
+		For nUsado := 1 to Len(aFields)
 			_cCampo:=aFields[nUsado]
 			_cUsado:=Getsx3cache(_cCampo,"X3_USADO")
 			If X3USO(_cUsado)
@@ -503,34 +498,34 @@ If Len(aRegsSC7) > 0
 				                 Getsx3cache(_cCampo,"X3_TIPO") ,;
 				                 Getsx3cache(_cCampo,"X3_F3") ,;
 				                 Getsx3cache(_cCampo,"X3_CONTEXT") })
-			Endif
+			EndIf
 		Next
 
        _aHeadAux := AClone(aHeader)
        aHeader:={}
        
        //                             1                2                 3              4               5                6               7          8              9              10        
-       //Aadd(aHeader, {	AllTrim(X3Titulo()), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL ,SX3->X3_VALID, SX3->X3_USADO, SX3->X3_TIPO, SX3->X3_CONTEXT, SX3->X3_CBOX})
+       //aAdd(aHeader, {	AllTrim(X3Titulo()), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL ,SX3->X3_VALID, SX3->X3_USADO, SX3->X3_TIPO, SX3->X3_CONTEXT, SX3->X3_CBOX})
        
        For nX := 1 to Len(aFields)
-           nY := Ascan(_aHeadAux, {|x| AllTrim(x[2]) == AllTrim(aFields[nX])})
+           nY := aScan(_aHeadAux, {|x| AllTrim(x[2]) == AllTrim(aFields[nX])})
            If nY > 0
               If _aHeadAux[nY, 9] <> "V" .Or. AllTrim(_aHeadAux[nY, 2]) == 'AL_NOME'
-                 Aadd(aHeader,_aHeadAux[nY])
+                 aAdd(aHeader,_aHeadAux[nY])
                  If _aHeadAux[nY, 8] == "C" 
-			        Aadd(aColsAux, "")
+			        aAdd(aColsAux, "")
 				 ElseIf _aHeadAux[nY, 8] == "N" 
-	                Aadd(aColsAux, 0)
+	                aAdd(aColsAux, 0)
 				 ElseIf _aHeadAux[nY, 8] == "D" 
-	                Aadd(aColsAux, StoD(""))
+	                aAdd(aColsAux, SToD(""))
 				 EndIf
 			  EndIf
            EndIf
         Next nX
 	   
 		// Define field properties
-		Aadd(aColsAux, .F.)
-		Aadd(aCols, aColsAux)
+		aAdd(aColsAux, .F.)
+		aAdd(aCols, aColsAux)
         nLin:=260
 		nCol:=600
 		nLin1:=110
@@ -541,25 +536,25 @@ If Len(aRegsSC7) > 0
 			
 		DEFINE MSDIALOG oDlgApr TITLE "Grupos de Aprovação" FROM 000, 000  TO nLin, nCol COLORS 0, 16777215 PIXEL
 
-			@ 005, 006 SAY   oSayGrpA PROMPT "Grupo Aprovador" SIZE 044, 007 OF oDlgApr COLORS 0, 16777215 PIXEL
+			@ 005, 006 Say   oSayGrpA PROMPT "Grupo Aprovador" SIZE 044, 007 OF oDlgApr COLORS 0, 16777215 PIXEL
 			@ 005, 054 MSGET cGetGrpA SIZE 032, 010 OF oDlgApr COLORS 0, 16777215 F3 "SAL" VALID {|| ACOM015Z(cGetGrpA, @cGetGrpN)} PIXEL
 			@ 017, 054 MSGET cGetGrpN SIZE 158, 010 OF oDlgApr COLORS 0, 16777215 PIXEL
 
 			@ 031, 003 GROUP oGroupA TO nLin2, nCol2 PROMPT "Aprovadores" OF oDlgApr PIXEL
 			oMSNewApr := MsNewGetDados():New( 038, 007, nLin1, nCol1, 0, "AllwaysTrue", "AllwaysTrue", "", aAlterFields,, 999, "AllwaysTrue", "", "AllwaysTrue", oDlgApr, aHeader, aCols)
 
-			DEFINE SBUTTON oSButtonOk FROM nLin3, 091 TYPE 01 OF oDlgApr ENABLE Action (nOpca := 1, oDlgApr:End())
-			DEFINE SBUTTON oSButton1  FROM nLin3, 170 TYPE 02 OF oDlgApr ENABLE Action oDlgApr:End()
+			DEFINE SBUTTON oSButtonOk FROM nLin3, 091 Type 01 OF oDlgApr ENABLE Action (nOpca := 1, oDlgApr:End())
+			DEFINE SBUTTON oSButton1  FROM nLin3, 170 Type 02 OF oDlgApr ENABLE Action oDlgApr:End()
 			
 		ACTIVATE MSDIALOG oDlgApr CENTERED
 						
 		If nOpca == 1
-			dbSelectArea("SC7")
-			SC7->(dbSetOrder(1))
+			DBSelectArea("SC7")
+			SC7->(DBSetOrder(1))
 		
 			For nY := 1 To Len(aRegsSC7)
-				SC7->(Dbgotop())
-				If SC7->(dbSeek(aRegsSC7[nY][1] + aRegsSC7[nY][2]))
+				SC7->(DBGoTop())
+				If SC7->(DBSeek(aRegsSC7[nY][1] + aRegsSC7[nY][2]))
 					_nTotPed:=0
 					_nItem:=0
 					MaFisEnd()
@@ -567,7 +562,7 @@ If Len(aRegsSC7) > 0
 					aStru	:= FWFormStruct(3,"SC7")[1]
 					_cMens:=""
 					Begin Transaction
-						DO While (!EOF()) .And. aRegsSC7[nY][1] == SC7->C7_FILIAL .And. aRegsSC7[nY][2] == SC7->C7_NUM
+						While (!Eof()) .And. aRegsSC7[nY][1] == SC7->C7_FILIAL .And. aRegsSC7[nY][2] == SC7->C7_NUM
 							MaFisIni(SC7->C7_FORNECE,SC7->C7_LOJA,"F","N","R",aRefImp)						
 					        MaFisIniLoad(1)
 							_nItem++
@@ -575,8 +570,8 @@ If Len(aRegsSC7) > 0
 					        	nPos := aScan(aStru,{|x| AllTrim(x[3]) == AllTrim(aRefImp[nA][2])})
 					        	If nPos > 0 .And. !aStru[nPos,14]
 					        		MaFisLoad(aRefImp[nA][3],SC7->(&(aRefImp[nA][2])),1)
-									_cMens+=SC7->C7_NUM+";("+STRZERO(_nItem,3)+");"+aRefImp[nA][3]+";"+aRefImp[nA][2]+";"+CValToChar(SC7->(&(aRefImp[nA][2])))+CHR(13)+CHR(10)
-					        	Endif
+									_cMens+=SC7->C7_NUM+";("+StrZero(_nItem,3)+");"+aRefImp[nA][3]+";"+aRefImp[nA][2]+";"+CValToChar(SC7->(&(aRefImp[nA][2])))+CHR(13)+CHR(10)
+					        	EndIf
 					        Next nA
 							MaFisRecal("",1)
 					        MaFisEndLoad(1)
@@ -589,46 +584,46 @@ If Len(aRegsSC7) > 0
 
 							SC7->(RecLock("SC7",.F.))
 							SC7->C7_APROV	:= cGetGrpA
-							SC7->C7_I_GCOM	:= __cUserID
+							SC7->C7_I_GCOM	:= __cUserId
 							SC7->C7_I_DTLIB	:= Date()
 							SC7->C7_I_HRLIB	:= Time()
-							SC7->(MsUnLock())
-							SC7->(dbSkip())
+							SC7->(MSUnLock())
+							SC7->(DBSkip())
 						End
-                        _cMens:=STRTRAN(_cMens,".",",")
+                        _cMens:=StrTran(_cMens,".",",")
 					
 						If cFilPC + cNumPC <> aRegsSC7[nY][1] + aRegsSC7[nY][2]
 							cFilPC := aRegsSC7[nY][1]
 							cNumPC := aRegsSC7[nY][2]
 							
 							//Inclui linhas de aprovador no SCR
-							SAL->(Dbsetorder(2))//AL_FILIAL+AL_COD+AL_NIVEL
-							If SAL->(Dbseek(xfilial("SAL")+cGetGrpA))
+							SAL->(DBSetOrder(2))//AL_FILIAL+AL_COD+AL_NIVEL
+							If SAL->(DBSeek(xFilial("SAL")+cGetGrpA))
 								nConta:=0		
-								Do while !(SAL->(Eof())) .and. alltrim(cGetGrpA) == SAL->AL_COD
-									IF SAL->AL_MSBLQL = '1' 
-										SAL->(Dbskip())  
-										LOOP									   
-									ENDIF
+								While !(SAL->(Eof())) .And. AllTrim(cGetGrpA) == SAL->AL_COD
+									If SAL->AL_MSBLQL = '1' 
+										SAL->(DBSkip())  
+										Loop									   
+									EndIf
 									nConta++
-									SCR->(Reclock("SCR",.T.))
+									SCR->(RecLock("SCR",.T.))
 									SCR->CR_FILIAL 	:= aRegsSC7[nY][1]
 									SCR->CR_num 	:= aRegsSC7[nY][2]
 									SCR->CR_TIPO 	:= "PC"
 									SCR->CR_USER	:= SAL->AL_USER
 									SCR->CR_APROV	:= SAL->AL_APROV
 									SCR->CR_NIVEL	:= SAL->AL_NIVEL
-									SCR->CR_STATUS	:= IF(nConta > 1 ,'01','02')//Não olhamos o nivel mais pq o aprovador anterior pode esta bloqueado
+									SCR->CR_STATUS	:= If(nConta > 1 ,'01','02')//Não olhamos o nivel mais pq o aprovador anterior pode esta bloqueado
 									SCR->CR_EMISSAO := DDATABASE
 									SCR->CR_MOEDA	:= 1
 									SCR->CR_TXMOEDA	:= 1
 									SCR->CR_GRUPO  	:= cGetGrpA
 									SCR->CR_TOTAL 	:= nTotLib
-									SCR->(Msunlock())
+									SCR->(MSUnLock())
 									
-									SAL->(Dbskip())
-								Enddo
-							Endif
+									SAL->(DBSkip())
+								EndDo
+							EndIf
 						EndIf
 					End Transaction
 				EndIf
@@ -677,7 +672,7 @@ Retorno-----------: Nenhum
 */
 Static Function ACOM015Z(cGetGrpA As Character, cGetGrpN As Character)
 
-Local aArea		:= GetArea() As Array
+Local aArea		:= FWGetArea() As Array
 Local cQuery	:= "" As Character
 Local cAlias	:= GetNextAlias() As Character
 Local nX		:= 0 As Numeric
@@ -686,7 +681,7 @@ Local aForaLim	:= {} As Array
 Local lRet		:= .T. As Logical
 Local _cNome,nY,_cObs:="" As Character
 Local _cAlias   := GetNextAlias() As Character
-LOCAL _cPV      := SC7->C7_NUM As Character
+Local _cPV      := SC7->C7_NUM As Character
 Local _bGetMv   := {|x| GETMV("MV_SIMB"+x )} As Codeblock
 
 cQuery := "SELECT R_E_C_N_O_ SALREC " 
@@ -699,61 +694,61 @@ cQuery += "  ORDER BY AL_COD, AL_NIVEL  "
 cQuery := ChangeQuery(cQuery)
 MPSysOpenQuery(cQuery,cAlias)
     
-(cAlias)->( dbGotop() )
+(cAlias)->( DBGoTop() )
 
 If (cAlias)->( !Eof() )
 	For nY := 1 To Len(aRegsSC7)
-		SC7->(Dbgoto(aRegsSC7[nY][3]))
+		SC7->(DBGoTo(aRegsSC7[nY][3]))
 		_cPV:=SC7->C7_NUM
 		
-		BeginSQL Alias _cAlias
+		BeginSql Alias _cAlias
 			SELECT SUM(SC7.C7_TOTAL) C7TOTAL
 			FROM %Table:SC7% SC7
 			WHERE SC7.C7_FILIAL = %xFilial:SC7% AND	SC7.C7_NUM = %Exp:_cPV% AND ;
 			SC7.%NotDel%
-		EndSQL
+		EndSql
 		_nTotal:=(_cAlias)->C7TOTAL
-		(_cAlias)->(dbCloseArea())
-		DHL->(dbSetOrder(1))
+		(_cAlias)->(DBCloseArea())
+		DHL->(DBSetOrder(1))
 		
-		(cAlias)->( dbGotop() )
-		DO While (cAlias)->( !Eof() )
+		(cAlias)->( DBGoTop() )
+		While (cAlias)->( !Eof() )
 			
-			SAL->(DBGOTO( (cAlias)->SALREC) )
+			SAL->(DBGoTo( (cAlias)->SALREC) )
 			_cNome:=Posicione("SAK",2,xFilial("SAK")+SAL->AL_USER,"AK_NOME")
 			
 			_nLimPerfil:=0
-			_cMoePV :=ALLTRIM(Eval(_bGetMv, STR(SC7->C7_MOEDA,1)))
+			_cMoePV :=AllTrim(Eval(_bGetMv, Str(SC7->C7_MOEDA,1)))
 			_cMoeDHL:=""
-			IF DHL->(MsSeek(xFilial("DHL")+SAL->AL_PERFIL))//Perfil
+			If DHL->(MsSeek(xFilial("DHL")+SAL->AL_PERFIL))//Perfil
 				_nLimPerfil:=DHL->DHL_LIMMAX
-				_cMoeDHL:=ALLTRIM(Eval(_bGetMv, STR(DHL->DHL_MOEDA,1)))
+				_cMoeDHL:=AllTrim(Eval(_bGetMv, Str(DHL->DHL_MOEDA,1)))
 				_cObs:=""
-				IF _nTotal > _nLimPerfil
+				If _nTotal > _nLimPerfil
 					_cObs:=" - Acima do Limite"
-				ENDIF
-				IF SC7->C7_MOEDA <> DHL->DHL_MOEDA
+				EndIf
+				If SC7->C7_MOEDA <> DHL->DHL_MOEDA
 					_cObs+=" - Moeda diferente"
-				ENDIF
-			ELSE
+				EndIf
+			Else
 				_cObs:=" - Perfil não encontrado nessa filial: "+xFilial("DHL")+" "+SAL->AL_PERFIL
-			ENDIF
+			EndIf
 			
-            IF !EMPTY(_cObs)
-				AADD(aForaLim,{.F. , _cNome , _cMoeDHL+" "+STR(_nLimPerfil,15,2) ,SC7->C7_FILIAL+"-"+_cPV, _cMoePV+" "+STR(_nTotal,15,2), _cObs})
+            If !Empty(_cObs)
+				aAdd(aForaLim,{.F. , _cNome , _cMoeDHL+" "+Str(_nLimPerfil,15,2) ,SC7->C7_FILIAL+"-"+_cPV, _cMoePV+" "+Str(_nTotal,15,2), _cObs})
 				lRet := .F.
-			ELSE
-				AADD(aForaLim,{.T. , _cNome , _cMoeDHL+" "+STR(_nLimPerfil,15,2) ,SC7->C7_FILIAL+"-"+_cPV, _cMoePV+" "+STR(_nTotal,15,2), " - OK" })
-			ENDIF
+			Else
+				aAdd(aForaLim,{.T. , _cNome , _cMoeDHL+" "+Str(_nLimPerfil,15,2) ,SC7->C7_FILIAL+"-"+_cPV, _cMoePV+" "+Str(_nTotal,15,2), " - OK" })
+			EndIf
 			
-			(cAlias)->(dbSkip())
-		ENDDO
-	NEXT nY
+			(cAlias)->(DBSkip())
+		EndDo
+	Next nY
 	
 	oMSNewApr:aCols := {}
-	(cAlias)->( dbGotop() )
-	DO While (cAlias)->( !Eof() ) .AND. lRet
-		SAL->(DBGOTO( (cAlias)->SALREC) )
+	(cAlias)->( DBGoTop() )
+	While (cAlias)->( !Eof() ) .And. lRet
+		SAL->(DBGoTo( (cAlias)->SALREC) )
 		cGetGrpN := SAL->AL_DESC
 		
 		aColsAux := {}
@@ -762,33 +757,33 @@ If (cAlias)->( !Eof() )
 				_cNome:=Posicione("SAK",2,xFilial("SAK")+SAL->AL_USER,"AK_NOME")
 				aAdd(aColsAux, _cNome)
 			ElseIf aHeader[nX,8]  == "D" // SX3->X3_TIPO == "D"
-				aAdd(aColsAux, StoD(SAL->&(aHeader[nX,2])))
+				aAdd(aColsAux, SToD(SAL->&(aHeader[nX,2])))
 			Else
 				aAdd(aColsAux, SAL->&(aHeader[nX,2]) )
 			EndIf
 		Next nX
-		Aadd(aColsAux, .F.)
-		Aadd(oMSNewApr:aCols, aColsAux)
+		aAdd(aColsAux, .F.)
+		aAdd(oMSNewApr:aCols, aColsAux)
 		
-		(cAlias)->(dbSkip())
-	ENDDO
+		(cAlias)->(DBSkip())
+	EndDo
 Else
 	FWAlertInfo("Grupo informado não existe, favor informar um código de grupo existente.","Liberação PC - Gestor de Compras - ACOM01508")
 	lRet := .F.
 EndIf
 
-IF LEN(aForaLim) > 0 .AND. !lRet
+If Len(aForaLim) > 0 .And. !lRet
 	bBloco:={|| U_ITListBox('Lista de aprovadores com limite de aprovação',;
 	{" ",'Aprovador','Limite',"Pedido",'Total PV',"Observação"},aForaLim,.F.,4,,,;
 	{ 10,         90,      50,      30,        50,         90}) }
 	
-	U_ITMSG("A indicação não poderá ser feita para este grupo de aprovação...",'Atenção!',;
+	U_ITMsg("A indicação não poderá ser feita para este grupo de aprovação...",'Atenção!',;
 	"Pois existe aprovador que não tem limite suficiente para aprovar o valor do pedido ou a moeda do perfil é diferente: VER Mais Detalhes",1,,,,,,bBloco)
 	
 	lRet := .F.
-ENDIF
+EndIf
 
-(cAlias)->( dbCloseArea() )	
+(cAlias)->( DBCloseArea() )	
 
 oMSNewApr:oBrowse:Refresh()
 oMSNewApr:Refresh()
@@ -852,25 +847,25 @@ If _lCriaAmb
 	//========================================================================================
 	// Mensagem que ficara armazenada no arquivo totvsconsole.log para posterior monitoramento
 	//======================================================================================== 
-    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "ACOM015"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "ACOM01509"/*cMsgId*/, "ACOM01509 - Gerando envio de e-mail ao aprovador na data: " + Dtoc(DATE()) + " - " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "ACOM015"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "ACOM01509"/*cMsgId*/, "ACOM01509 - Gerando envio de e-mail ao aprovador na data: " + DToC(DATE()) + " - " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
 EndIf
 
 _aConfig	:= U_ITCFGEML('')
 _cHostWF 	:= SuperGetMV("IT_WFHOSTS",.F.,"http://wfteste.italac.com.br:4034/")
-_dDtIni		:= DtoS(SuperGetMV("IT_WFDTINI",.F.,"26/11/2025"))
+_dDtIni		:= DToS(SuperGetMV("IT_WFDTINI",.F.,"26/11/2025"))
 
 If _lCriaAmb
 	_aAlias := aCom015M(_lCriaAmb)
 Else
-	FwMsgRun(,{|| _aAlias := aCom015M(_lCriaAmb)},,"Aguarde, gerando e processando e-mail...")
+	FWMsgRun(,{|| _aAlias := aCom015M(_lCriaAmb)},,"Aguarde, gerando e processando e-mail...")
 EndIf
 
 _cAlias		:= _aAlias[1]
 _aColumns 	:= _aAlias[2]
 
-dbSelectArea(_cAlias)
-(_cAlias)->(dbGoTop())
+DBSelectArea(_cAlias)
+(_cAlias)->(DBGoTop())
             
 _cNumPC		:= (_cAlias)->C7_NUM
 _cFilial	:= (_cAlias)->C7_FILIAL
@@ -884,7 +879,7 @@ _cHtml += '<meta name="author" content="Hege Refsnes">'
 _cHtml += '<title>Pedido de Compras</title>'
 _cHtml += '</head>'
 
-_cHtml += '<style type="text/css"><!--'
+_cHtml += '<style Type="text/css"><!--'
 _cHtml += 'table.bordasimples { border-collapse: collapse; }'
 _cHtml += 'table.bordasimples tr td { border:1px solid #777777; }'
 _cHtml += 'td.grupos	{ font-family:VERDANA; font-size:20px; V-align:middle; background-color: #C6E2FF; color:#000080; }'
@@ -935,14 +930,14 @@ While !(_cAlias)->(Eof())
 
 	_cHtml += '<tr>'
 	_cHtml +=     '<td valign="top" align="center"	class="itens">' + (_cAlias)->C7_FILIAL + " - " + AllTrim(FwFilialName(cEmpAnt, (_cAlias)->C7_FILIAL)) + '</td>'
-    _cHtml +=     '<td valign="top" align="center"	class="itens">' + DtoC((_cAlias)->C7_EMISSAO) + '</td>'
+    _cHtml +=     '<td valign="top" align="center"	class="itens">' + DToC((_cAlias)->C7_EMISSAO) + '</td>'
 	_cHtml +=     '<td valign="top" align="left"	class="itens">' + (_cAlias)->C7_NUM + '</td>'
 	_cHtml +=     '<td valign="top" align="right"	class="itens">' + Transform((_cAlias)->C7_TOTAL, PesqPict("SC7","C7_TOTAL")) + '</td>'
 	_cHtml +=     '<td valign="top" align="left"	class="itens">' + SubStr(U_Acom015N((_cAlias)->C7_USER), 1, At(" ", U_Acom015N((_cAlias)->C7_USER))-1) + '</td>'
 	_cHtml +=     '<td valign="top" align="center"	class="itens">' + (_cAlias)->C7_GRUPCOM + '</td>'
 	_cHtml +=     '<td valign="top" align="left"	class="itens">' + (_cAlias)->C7_FORNECE + " - " + AllTrim((_cAlias)->A2_NREDUZ) + '</td>'
-    _cHtml +=     '<td valign="top" align="center"	class="itens">' + DtoC((_cAlias)->C7_DATPRF) + '</td>'
-	_cHtml +=     '<td valign="top" align="center"	class="itens">' + DtoC((_cAlias)->C7_I_DTFAT) + '</td>'
+    _cHtml +=     '<td valign="top" align="center"	class="itens">' + DToC((_cAlias)->C7_DATPRF) + '</td>'
+	_cHtml +=     '<td valign="top" align="center"	class="itens">' + DToC((_cAlias)->C7_I_DTFAT) + '</td>'
 	_cHtml +=     '<td valign="top" align="center"	class="itens">' + (_cAlias)->C7_I_CMPDI + '</td>'
 	_cHtml +=     '<td valign="top" align="center"	class="itens">' + (_cAlias)->C7_I_URGEN + '</td>'
 	_cHtml +=     '<td valign="top" align="center"	class="itens">' + (_cAlias)->C7_I_APLIC + '</td>'
@@ -955,7 +950,7 @@ While !(_cAlias)->(Eof())
 	_cHtml +=     '<td valign="top" align="left" colspan="13">&nbsp;</td>'
 	_cHtml += '</tr>'
 
-	(_cAlias)->(dbSkip())
+	(_cAlias)->(DBSkip())
 End
 
 _cHtml += '</table>'
@@ -989,15 +984,15 @@ If _lCriaAmb
 	_cQry := ChangeQuery(_cQry)
 	MPSysOpenQuery(_cQry,"TRBZZL")
 
-	TRBZZL->(dbGoTop())
+	TRBZZL->(DBGoTop())
 	
 	While !TRBZZL->(Eof())
 		cTo += AllTrim(TRBZZL->ZZL_EMAIL) + ","
-		TRBZZL->(dbSkip())
+		TRBZZL->(DBSkip())
 	EndDo
 
 	cTo := SubStr(cTo,1,Len(cTo)-1)
-	TRBZZL->(dbCloseArea())
+	TRBZZL->(DBCloseArea())
 Else
 	cTo      := Lower(AllTrim(UsrRetMail(RetCodUsr())))  
 EndIf      
@@ -1031,7 +1026,7 @@ If !_lCriaAmb
    Processa( {|| aAlias := aCom015Q() } , 'Aguarde!' , 'Verificando os registros...' ) 
    cAliasMrk:= aAlias[1]
    aColumns := aAlias[2]
-ENDIF
+EndIf
 aRegsSC7	:= {}
 
 //----------------------
@@ -1041,7 +1036,7 @@ If Type("oMrkBrowse") = "O"
    oMrkBrowse:SetAlias(cAliasMrk)    
    oMrkBrowse:Refresh()
    oMrkBrowse:Gotop()
-ENDIF   
+EndIf   
 
 Return
 
@@ -1090,19 +1085,19 @@ ProcRegua(0)
 IncProc('Inicializando a rotina...')
 
 If !_lCriaAmb
-	dEmissIni	:= mv_par01
-	dEmissFim	:= mv_par02
-	cFornecIni	:= mv_par03
-	cLojaIni	:= mv_par04
-	cFornecFim	:= mv_par05
-	cLojaFim	:= mv_par06
-	cPedidoIni	:= mv_par07
-	cPedidoFim	:= mv_par08
-	cCompraIni	:= mv_par09
-	cCompraFim	:= mv_par10
-	cUrgente	:= mv_par11
-	cAplic		:= mv_par12
-	cInvest		:= mv_par13
+	dEmissIni	:= MV_PAR01
+	dEmissFim	:= MV_PAR02
+	cFornecIni	:= MV_PAR03
+	cLojaIni	:= MV_PAR04
+	cFornecFim	:= MV_PAR05
+	cLojaFim	:= MV_PAR06
+	cPedidoIni	:= MV_PAR07
+	cPedidoFim	:= MV_PAR08
+	cCompraIni	:= MV_PAR09
+	cCompraFim	:= MV_PAR10
+	cUrgente	:= MV_PAR11
+	cAplic		:= MV_PAR12
+	cInvest		:= MV_PAR13
 EndIf
 
 For nX := 1 To Len(aFields)
@@ -1111,17 +1106,17 @@ Next nX
 
 If _lCriaAmb
 
-	dEmissIni := DtoS(SuperGetMV("IT_WFDTINI",.F.,"26/11/2025"))
-	dEmissFim := DtoS(Date())
+	dEmissIni := DToS(SuperGetMV("IT_WFDTINI",.F.,"26/11/2025"))
+	dEmissFim := DToS(Date())
 
-	BeginSQL alias cAliasTrb
+	BeginSql alias cAliasTrb
 	
 	SELECT	C7_FILIAL, C7_EMISSAO, C7_NUM, SUM(C7_TOTAL) C7_TOTAL, C7_USER, C7_GRUPCOM, C7_FORNECE, C7_LOJA, A2_NREDUZ, MIN(C7_DATPRF) C7_DATPRF, C7_I_CMPDI, C7_I_URGEN, C7_I_APLIC, C7_I_CDINV, 
 			MIN(C7_I_DTFAT) C7_I_DTFAT, ZZI_DESINV, Y1_USER, Y1_NOME, Y1_COD 
-	FROM %table:SC7% SC7
-	JOIN %table:SA2% SA2 ON A2_FILIAL = %xFilial:SA2% AND A2_COD = C7_FORNECE AND A2_LOJA = C7_LOJA AND SA2.%notDel%
-	JOIN %table:SY1% SY1 ON Y1_FILIAL = %xFilial:SY1% AND (Y1_COD BETWEEN %exp:cCompraIni% AND %exp:cCompraFim%) AND SY1.%notDel%
-	LEFT JOIN %table:ZZI% ZZI ON ZZI_FILIAL = %xFilial:ZZI% AND ZZI_CODINV = C7_I_CDINV AND ZZI.%notDel%
+	FROM %Table:SC7% SC7
+	JOIN %Table:SA2% SA2 ON A2_FILIAL = %xFilial:SA2% AND A2_COD = C7_FORNECE AND A2_LOJA = C7_LOJA AND SA2.%notDel%
+	JOIN %Table:SY1% SY1 ON Y1_FILIAL = %xFilial:SY1% AND (Y1_COD BETWEEN %exp:cCompraIni% AND %exp:cCompraFim%) AND SY1.%notDel%
+	LEFT JOIN %Table:ZZI% ZZI ON ZZI_FILIAL = %xFilial:ZZI% AND ZZI_CODINV = C7_I_CDINV AND ZZI.%notDel%
 	WHERE
 		C7_EMISSAO BETWEEN %exp:dEmissIni% AND %exp:dEmissFim%
 		AND C7_USER = Y1_USER
@@ -1175,14 +1170,14 @@ Else
 	EndIf
 	cWFilial += "%"
 	
-	BeginSQL alias cAliasTrb
+	BeginSql alias cAliasTrb
 	
 	SELECT	C7_FILIAL, C7_EMISSAO, C7_NUM, SUM(C7_TOTAL) C7_TOTAL, C7_USER, C7_GRUPCOM, C7_FORNECE, C7_LOJA, A2_NREDUZ, MIN(C7_DATPRF) C7_DATPRF, C7_I_CMPDI, C7_I_URGEN, C7_I_APLIC, C7_I_CDINV, 
 			MIN(C7_I_DTFAT) C7_I_DTFAT, ZZI_DESINV, Y1_USER, Y1_NOME, Y1_COD 
-	FROM %table:SC7% SC7
-	JOIN %table:SA2% SA2 ON A2_FILIAL = %xFilial:SA2% AND A2_COD = C7_FORNECE AND A2_LOJA = C7_LOJA AND SA2.%notDel%
-	JOIN %table:SY1% SY1 ON Y1_FILIAL = %xFilial:SY1% AND (Y1_COD BETWEEN %exp:cCompraIni% AND %exp:cCompraFim%) AND SY1.%notDel%
-	LEFT JOIN %table:ZZI% ZZI ON ZZI_FILIAL = %xFilial:ZZI% AND ZZI_CODINV = C7_I_CDINV AND ZZI.%notDel%
+	FROM %Table:SC7% SC7
+	JOIN %Table:SA2% SA2 ON A2_FILIAL = %xFilial:SA2% AND A2_COD = C7_FORNECE AND A2_LOJA = C7_LOJA AND SA2.%notDel%
+	JOIN %Table:SY1% SY1 ON Y1_FILIAL = %xFilial:SY1% AND (Y1_COD BETWEEN %exp:cCompraIni% AND %exp:cCompraFim%) AND SY1.%notDel%
+	LEFT JOIN %Table:ZZI% ZZI ON ZZI_FILIAL = %xFilial:ZZI% AND ZZI_CODINV = C7_I_CDINV AND ZZI.%notDel%
 	WHERE
 		%Exp:cWFilial%
 		AND C7_EMISSAO BETWEEN %exp:dEmissIni% AND %exp:dEmissFim%
@@ -1204,9 +1199,9 @@ EndIf
 _aStructQry := (cAliasTrb)->(DbStruct())
 
 For _nI := 1 To Len(_aStructQry)
-    _nJ := AsCan(aStructSC7,{|x| AllTrim(x[1]) == AllTrim(_aStructQry[_nI,1])})
+    _nJ := aScan(aStructSC7,{|x| AllTrim(x[1]) == AllTrim(_aStructQry[_nI,1])})
     If _nJ == 0
-       Aadd(aStructSC7 , _aStructQry[_nI])
+       aAdd(aStructSC7 , _aStructQry[_nI])
     EndIf
 Next 
 
@@ -1215,7 +1210,7 @@ TCSetField(cAliasTrb,"C7_I_DTFAT","D",08,0)
 TCSetField(cAliasTrb,"C7_DATPRF" ,"D",08,0)
 TCSetField(cAliasTrb,"C7_TOTAL"  ,"N",18,2)
 
-Aadd(_aStructQry, {"DELETED"   ,"L" ,1  ,0})
+aAdd(_aStructQry, {"DELETED"   ,"L" ,1  ,0})
    
 _oTemp := FWTemporaryTable():New( cTempTab,  aStructSC7 )
    
@@ -1227,21 +1222,21 @@ _oTemp:Create()
 
 If !_lCriaAmb
    IncProc('Lendo os dados...')
-ENDIF   
+EndIf   
 
-(cAliasTrb)->(DBGOTOP())
+(cAliasTrb)->(DBGoTop())
 nConta:=0
 COUNT TO nConta
-FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "ACOM015"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "ACOM01513"/*cMsgId*/, "ACOM01513 - Registros lidos "+ALLTRIM(STR(nConta))/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "ACOM015"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "ACOM01513"/*cMsgId*/, "ACOM01513 - Registros lidos "+AllTrim(Str(nConta))/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
-(cAliasTrb)->(DbGoTop())
+(cAliasTrb)->(DBGoTop())
 
 _nTotRegSC7 := SC7->(FCount())
 
-Do While ! (cAliasTrb)->(Eof())
+While ! (cAliasTrb)->(Eof())
    (cTempTab)->(RecLock(cTempTab,.T.))
    For _nI := 1 To _nTotRegSC7
-       _cNomeCampo := ALLTRIM(SC7->(FieldName(_nI)))
+       _cNomeCampo := AllTrim(SC7->(FieldName(_nI)))
        If (cAliasTrb)->(FieldPos(_cNomeCampo)) == 0
           Loop      
        EndIf
@@ -1249,14 +1244,14 @@ Do While ! (cAliasTrb)->(Eof())
        _cCmpSC7  := cAliasTrb + "->" + SC7->(FieldName(_nI)) 
        &(_cCmpTemp) := &(_cCmpSC7)
    Next _nI
-   (cAliasTrb)->(DbSkip())
+   (cAliasTrb)->(DBSkip())
 EndDo
 
 //=========================================================
 // Fecha a Tabela da Query após gravar tabela temporaria.
 //=========================================================
 If ( Select( cAliasTrb ) > 0 )
-   (cAliasTrb)->(DbCloseArea())
+   (cAliasTrb)->(DBCloseArea())
 EndIf
 
 If !_lCriaAmb
@@ -1264,9 +1259,9 @@ If !_lCriaAmb
 
 	For nX := 1 To Len(aFields)
 		If	!aFields[nX] == "SC7_OK" .And. aFields[nX] $ cSelect
-			AAdd(aColumns,FWBrwColumn():New())
+			aAdd(aColumns,FWBrwColumn():New())
 			If aFields[nX] == "C7_EMISSAO" .Or. aFields[nX] == "C7_I_DATPRF"
-				aColumns[Len(aColumns)]:SetData( &("{||StoD(" + aFields[nX] + ")}") )
+				aColumns[Len(aColumns)]:SetData( &("{||SToD(" + aFields[nX] + ")}") )
 			Else
 				aColumns[Len(aColumns)]:SetData( &("{||" + aFields[nX] + "}") )
 			EndIf
@@ -1284,7 +1279,7 @@ If !_lCriaAmb
 			EndIf
 		EndIf
 	Next nX
-ENDIF
+EndIf
 
 Return( { cTempTab , aColumns } )
 
@@ -1328,8 +1323,8 @@ Local aLogPla	:= {} As Array
 Local nCont		:= 1 As Numeric
 
 
-dbSelectArea(cAliasMrk)
-(cAliasMrk)->(dbGoTop())
+DBSelectArea(cAliasMrk)
+(cAliasMrk)->(DBGoTop())
 
 While !(cAliasMrk)->(Eof())
 	aAdd( aLogPla , {	StrZero(nCont++,4),;																		//[1]Índice
@@ -1340,7 +1335,7 @@ While !(cAliasMrk)->(Eof())
 						AllTrim(Transform((cAliasMrk)->C7_PRECO,PesqPict("SC7","C7_PRECO"))),;						//[6]Preço Unitário
 						AllTrim(Transform((cAliasMrk)->C7_TOTAL,PesqPict("SC7","C7_TOTAL"))),;						//[7]Valor Total
 						AllTrim(Transform((cAliasMrk)->BZ_UPRC,PesqPict("SBZ","BZ_UPRC"))),;						//[8]Último Preço
-						StoD((cAliasMrk)->C7_EMISSAO),;																//[9]Emissão
+						SToD((cAliasMrk)->C7_EMISSAO),;																//[9]Emissão
 						(cAliasMrk)->C7_I_URGEN,;												  					//[10]Urgente
 						(cAliasMrk)->C7_I_APLIC,;												  					//[11]Aplicação
 						(cAliasMrk)->C7_PRODUTO,;																	//[12]Produto
@@ -1348,7 +1343,7 @@ While !(cAliasMrk)->(Eof())
 						(cAliasMrk)->C7_UM,;																		//[14]Unidade
 						(cAliasMrk)->C7_FORNECE,;										   							//[15]Fornecedor
 						(cAliasMrk)->A2_NREDUZ,;										   							//[16]Nome Reduzido
-						StoD((cAliasMrk)->C7_I_DTFAT),;											 					//[17]Dt Faturado
+						SToD((cAliasMrk)->C7_I_DTFAT),;											 					//[17]Dt Faturado
 						(cAliasMrk)->C7_I_CDINV,;												 					//[18]Código Investimento
 						(cAliasMrk)->ZZI_DESINV,;												 					//[19]Descrição Investimento
 						(cAliasMrk)->C7_OBS,;														   				//[20]Observação
@@ -1356,7 +1351,7 @@ While !(cAliasMrk)->(Eof())
 						(cAliasMrk)->Y1_NOME,;														   				//[22]Nome do Usuário
 						(cAliasMrk)->Y1_COD})												   						//[23]Descrição Detalhada
 
-	(cAliasMrk)->(dbSkip())
+	(cAliasMrk)->(DBSkip())
 End
 
 U_ITListBox( 'Geração Planilha' , aCampPla , aLogPla , .T. , 1 )
@@ -1388,16 +1383,16 @@ Local nPosPrc	:= aScan(aHeader,{|x| AllTrim(x[2]) == "C7_PRECO"}) As Numeric
 Local nPosPro	:= aScan(aHeader,{|x| AllTrim(x[2]) == "C7_PRODUTO"}) As Numeric
 
 If "C7_PRECO" $ cCampo
-	dbSelectArea("SB1")
-	SB1->(dbSetOrder(1))
-	SB1->(dbSeek(xFilial("SB1") + aCols[n][nPosPro]))
+	DBSelectArea("SB1")
+	SB1->(DBSetOrder(1))
+	SB1->(DBSeek(xFilial("SB1") + aCols[n][nPosPro]))
 	
 	If !(SB1->B1_TIPO $ cTipo)
 	
 		If aCols[n][nPosPrc] > aCols[n][nPosUlt]
 			nDiff := ((aCols[n][nPosPrc] - aCols[n][nPosUlt]) / aCols[n][nPosUlt]) * 100
 			If nDiff > nPtol
-				If !U_ITMSG("O valor unitário informado, está maior que a tolerância do último preço de compra. Gostaria de continuar assim mesmo ?","Atenção",,3)
+				If !U_ITMsg("O valor unitário informado, está maior que a tolerância do último preço de compra. Gostaria de continuar assim mesmo ?","Atenção",,3)
 					lRet := .F.
 				EndIf
 			EndIf

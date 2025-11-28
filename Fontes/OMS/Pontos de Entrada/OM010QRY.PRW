@@ -13,9 +13,9 @@
 //==============================p======================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include 'Protheus.ch'
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "TBICONN.CH"
+#Include "TOTVS.ch"
+#Include "FWMVCDEF.CH"
+#Include "TBICONN.CH"
 
 /*
 ===============================================================================================================================
@@ -40,8 +40,8 @@ Local cDesProA	:= Space(50)
 Local cMix   	:= Space(2)
 Local cGrupoD	:= Space(TamSX3("DA1_GRUPO")[1])
 Local cGrupoA	:= Space(TamSX3("DA1_GRUPO")[1])
-Local dVigenD	:= StoD("")
-Local dVigenA	:= StoD("")
+Local dVigenD	:= SToD("")
+Local dVigenA	:= SToD("")
 Local cQryDA1	:= ""
 Local 	cQuery := "SELECT DA1.*,DA1.R_E_C_N_O_ DA1RECNO, B1_DESC, B1_PRV1 FROM "
 		
@@ -55,17 +55,17 @@ Local 	cQuery := "SELECT DA1.*,DA1.R_E_C_N_O_ DA1RECNO, B1_DESC, B1_PRV1 FROM "
 		cQuery += "  AND DA1.D_E_L_E_T_ = ' ' "
 		cQuery += "ORDER BY "+SqlOrder(DA1->(IndexKey()))
 
-//Se for exclusão não faz filtro
+//Se For exclusão não faz filtro
 
-If type("_lexclui") == "L"
+If Type("_lexclui") == "L"
 
 	If _lexclui
 
 		Return cQuery
 		
-	Endif
+	EndIf
 	
-Endif
+EndIf
 
 Private _apergs	:= {}
 
@@ -102,7 +102,7 @@ If ParamBox(_apergs ,"Parametros",aRet,,,,,,,,.T.,.T.)
 			cQryDA1 += "  AND DA1_GRUPO BETWEEN '" + aRet[5] + "' AND '" + aRet[6] + "' "
 		EndIf
 		If !Empty(aRet[7]) .Or. !Empty(aRet[8])
-			cQryDA1 += "  AND DA1_DATVIG BETWEEN '" + DtoS(aRet[7]) + "' AND '" + DtoS(aRet[8]) + "' "
+			cQryDA1 += "  AND DA1_DATVIG BETWEEN '" + DToS(aRet[7]) + "' AND '" + DToS(aRet[8]) + "' "
 		EndIf
 		If !Empty(aRet[9])
 			cQryDA1 += "  AND DA1_I_MIX = '" + (aRet[9]) + "' " 
@@ -127,8 +127,8 @@ If ParamBox(_apergs ,"Parametros",aRet,,,,,,,,.T.,.T.)
 
 Else
 	
-		u_itmsg("Filtro cancelado, abrindo toda a tabela","Atenção",,3)
+		U_ITMsg("Filtro cancelado, abrindo toda a tabela","Atenção",,3)
 			
-Endif
+EndIf
 	
 Return cquery

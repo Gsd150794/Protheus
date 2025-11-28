@@ -20,8 +20,8 @@ Vanderlei Alves - Igor Melgaço  - 10/01/24 - 26/06/25 -  49552 - Ajustes para no
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#INCLUDE "Protheus.ch"
-#INCLUDE "RwMake.ch"
+#Include "TOTVS.ch"
+#Include "RwMake.ch"
 
 /*
 ===============================================================================================================================
@@ -35,11 +35,11 @@ Retorno-----------: .T. - Permite seleção .F. - Não permite a seleção
 */
 User Function OMSA200P()
 
- Local _aArea	:=GetArea()            //Salva area geral
+ Local _aArea	:=FWGetArea()            //Salva area geral
  Local _lRet		:= .T.
  Local _cmens	:= ""
- Local _aret		:= {}
- Local _cCodUsr	:= ALLTRIM(RetCodUsr())
+ Local _aRet		:= {}
+ Local _cCodUsr	:= AllTrim(RetCodUsr())
  
  If Type("_lAutomatico") == "U"
     Private _lAutomatico := .F.
@@ -50,47 +50,47 @@ User Function OMSA200P()
  EndIf
  
  //Posiciona carga
- dbselectarea("DAI")
- DAI->( dbsetorder(1) )
+ DBSelectArea("DAI")
+ DAI->( DBSetOrder(1) )
  
- If DAI->( dbseek( xfilial("DAI")+ alltrim(paramixb[1])+ alltrim(paramixb[2])))
+ If DAI->( DBSeek( xFilial("DAI")+ AllTrim(ParamIXB[1])+ AllTrim(ParamIXB[2])))
  
-     If POSICIONE("SC5",1,xFilial("SC5") + alltrim(DAI->DAI_PEDIDO),"SC5->C5_TIPO") == 'N'
+     If Posicione("SC5",1,xFilial("SC5") + AllTrim(DAI->DAI_PEDIDO),"SC5->C5_TIPO") == 'N'
  
-         DbSelectArea("SC6")
-         DbSetOrder(1)
+         DBSelectArea("SC6")
+         DBSetOrder(1)
  
-         If DbSeek(xFilial("SC6")+alltrim(DAI->DAI_PEDIDO))
+         If DBSeek(xFilial("SC6")+AllTrim(DAI->DAI_PEDIDO))
  
-             Do while alltrim(DAI->DAI_PEDIDO) == alltrim(SC6->C6_NUM)
+             While AllTrim(DAI->DAI_PEDIDO) == AllTrim(SC6->C6_NUM)
  
                  //============================================
                  //Valida armazémxprodutoxfilialxusuário
                  //============================================
-                 _aRet := U_ACFG004E(_cCodUsr, alltrim(xFilial("SC6")), alltrim(SC6->C6_LOCAL),alltrim(SC6->C6_PRODUTO), .F.)
+                 _aRet := U_ACFG004E(_cCodUsr, AllTrim(xFilial("SC6")), AllTrim(SC6->C6_LOCAL),AllTrim(SC6->C6_PRODUTO), .F.)
  
                  //se ainda está valido verifica se não teve erro
                  If _lRet
  
                        _lRet:= _aRet[1]
  
-                 Endif
+                 EndIf
  
                  // adiciona armazens com problema se ainda não estiver na mensagem
-                 if empty(_cmens)
+                 If Empty(_cmens)
  
                      _cmens += _aRet[2]
  
-                 elseif !(_aRet[2]$_cmens) .and. !(Empty(_aRet[2]))
+                 ElseIf !(_aRet[2]$_cmens) .And. !(Empty(_aRet[2]))
  
                      _cmens += ", " + _aRet[2]
  
-                 Endif
+                 EndIf
  
  
-                 SC6->( Dbskip() )
+                 SC6->( DBSkip() )
  
-             Enddo
+             EndDo
  
              //============================================
              //Mostra lista de armazéns com problema
@@ -103,11 +103,11 @@ User Function OMSA200P()
                    _cMsgEstorno := 'Usuário sem acesso ao(s) armazém(éns) abaixo nessa filial: ' + _cmens
  
                 EndIf
-             Endif
+             EndIf
  
-         Endif
+         EndIf
  
-     Endif
+     EndIf
  
  Else
  
@@ -121,10 +121,10 @@ User Function OMSA200P()
  
      _lRet:= .F.
  
- Endif
+ EndIf
  // O Envio do e-mail foi para dentro da funcao U_OM20MNUE no ponto de entrada OM200MNU.prw ==> U_OM200Email(.T.,_aPVs_DAI)//AWF - 14/07/2016
  
- IF _lRet
+ If _lRet
     If ! _lAutomatico
        Processa( {|| _lRet:=OMS200DelPV() } )
     Else
@@ -132,20 +132,20 @@ User Function OMSA200P()
     EndIf
  EndIf
  
- If _lRet .AND. DAK->DAK_I_TMS == 'M' .AND. DAK->DAK_ACECAR == "2" .AND. DAK->DAK_ACEFIN == "2"
+ If _lRet .And. DAK->DAK_I_TMS == 'M' .And. DAK->DAK_ACECAR == "2" .And. DAK->DAK_ACEFIN == "2"
     _lRet := U_ITMa521Mbrow("DAK")
  EndIf
 
- Restarea(_aArea) //-- Restaura a posição da tabela corrente
+ FWRestArea(_aArea) //-- Restaura a posição da tabela corrente
 
  If _lRet .And. _lAutomatico
     Os200ProcEst(DAK->DAK_COD)
     _lRet := .F.
  EndIf
  
- Restarea(_aArea) //-- Restaura a posição da tabela corrente
+ FWRestArea(_aArea) //-- Restaura a posição da tabela corrente
 
-Return IF(_lret,NIL,.F.)//nao pode retornar um valor logico se for .T. pq ele mata a validacao padrao se for .F.
+Return If(_lRet,NIL,.F.)//nao pode retornar um valor logico se For .T. pq ele mata a validacao padrao se For .F.
 
 /*
 ===============================================================================================================================
@@ -156,67 +156,67 @@ Descrição-------: Apaga os pedidos de pallet gerados na montagem de carga
 Retorno---------: Lógico (.T.) Se apagou / (.F.) Se nao apagou
 ===============================================================================================================================
 */
-STATIC FUNCTION OMS200DelPV(_lOMSA200P As Logical) As Logical
+Static Function OMS200DelPV(_lOMSA200P As Logical) As Logical
 
-LOCAL _aPeds_Pallet := {} As Array
-LOCAL _cPVs := "" As Char
-LOCAL C As Numeric
-LOCAL _lOK := .T. As Logical
+Local _aPeds_Pallet := {} As Array
+Local _cPVs := "" As Char
+Local C As Numeric
+Local _lOK := .T. As Logical
 
 SC5->(DBSetOrder(1))
 
 If ! _lAutomatico
-   ProcRegua(LEN(_aPVs_DAI))
+   ProcRegua(Len(_aPVs_DAI))
 EndIf
 
-_aFatPedCarga:={}//private do rdmake OM200MNU.PRW
+_aFatPedCarga:={}//Private do rdmake OM200MNU.PRW
 
-FOR C := 1 TO LEN(_aPVs_DAI)
-    DAI->( DBGOTO( _aPVs_DAI[C,3] ))
+For C := 1 TO Len(_aPVs_DAI)
+    DAI->( DBGoTo( _aPVs_DAI[C,3] ))
 
     If ! _lAutomatico
        IncProc("Lendo Pedido: "+DAI->DAI_PEDIDO)
     EndIf
 
-    IF !SC5->( DbSeek( xFilial("SC5") + _aPVs_DAI[C,1] ) )
-       LOOP
-    ENDIF
-    If !EMPTY(DAI->DAI_I_QTPA)//DAI->DAI_I_TIPC $ "1,3,4" .AND. - AWF 29/12/2016 - Retirei o tipo pq se entrar novos tipos não precisa alterar mais aqui
-       IF EMPTY(SC5->C5_I_PDFT)//Se tiver preenchido é pq já gerou a Nota do pedido de carregamento e esta tentando estornar a carga do fatura/mento dai nao entra aqui
-          IF SC5->C5_I_PEDPA = 'S' .AND. SC5->C5_I_PEDGE # 'S' .AND. !EMPTY(SC5->C5_I_NPALE)//Se é Pedido de Pallet (Tem Dupla) e se não é o Pedido gerador de Pallet que esta na carga
+    If !SC5->( DBSeek( xFilial("SC5") + _aPVs_DAI[C,1] ) )
+       Loop
+    EndIf
+    If !Empty(DAI->DAI_I_QTPA)//DAI->DAI_I_TIPC $ "1,3,4" .And. - AWF 29/12/2016 - Retirei o tipo pq se entrar novos tipos não precisa alterar mais aqui
+       If Empty(SC5->C5_I_PDFT)//Se tiver preenchido é pq já gerou a Nota do pedido de carregamento e esta tentando estornar a carga do fatura/mento dai nao entra aqui
+          If SC5->C5_I_PEDPA = 'S' .And. SC5->C5_I_PEDGE # 'S' .And. !Empty(SC5->C5_I_NPALE)//Se é Pedido de Pallet (Tem Dupla) e se não é o Pedido gerador de Pallet que esta na carga
                       //Recno do Pedido de Pallet , Pedido que gerou o Pallet ,DAI  ,Pedido de Pallet
-             AADD(_aPeds_Pallet, { SC5->(RECNO()) , SC5->C5_I_NPALE , DAI->(RECNO()) , _aPVs_DAI[C,1] })
-          ENDIF
-       ENDIF
-    ENDIF
-    IF !EMPTY(SC5->C5_I_PDFT)//Quando esta estornando a carga gerada automatica na filial de faturamento
-       AADD(_aFatPedCarga,{SC5->(RECNO()),SC5->C5_I_FLFNC+SC5->C5_I_PDPR,"",SC5->C5_I_CARGA})//Guarda o Pedido da Carga Gerada para voltar o antigo
-    ENDIF
-NEXT
+             aAdd(_aPeds_Pallet, { SC5->(RECNO()) , SC5->C5_I_NPALE , DAI->(RECNO()) , _aPVs_DAI[C,1] })
+          EndIf
+       EndIf
+    EndIf
+    If !Empty(SC5->C5_I_PDFT)//Quando esta estornando a carga gerada automatica na filial de faturamento
+       aAdd(_aFatPedCarga,{SC5->(RECNO()),SC5->C5_I_FLFNC+SC5->C5_I_PDPR,"",SC5->C5_I_CARGA})//Guarda o Pedido da Carga Gerada para voltar o antigo
+    EndIf
+Next
 
 //BEGIN Transaction // foi para a chamada do programa no rdmake OM200MNU.PRW
 
    _lOK:=.T.
    _cPVs:=""
    If ! _lAutomatico
-      ProcRegua(LEN(_aPeds_Pallet))
+      ProcRegua(Len(_aPeds_Pallet))
    EndIf
 
-   FOR C := 1 TO LEN(_aPeds_Pallet)
+   For C := 1 TO Len(_aPeds_Pallet)
 
-       IF !OMS200Apaga(_aPeds_Pallet[C,1],_aPeds_Pallet[C,2],_aPeds_Pallet[C,3])
-          SC5->( DBGOTO( _aPeds_Pallet[C,1] ))
+       If !OMS200Apaga(_aPeds_Pallet[C,1],_aPeds_Pallet[C,2],_aPeds_Pallet[C,3])
+          SC5->( DBGoTo( _aPeds_Pallet[C,1] ))
           _cPVs+=SC5->C5_NUM+", "
           _lOK:=.F.
-       ENDIF
+       EndIf
 
-   NEXT
+   Next
 
-   IF !_lOK
+   If !_lOK
 
       DisarmTransaction()
-      _lUsuConfirmou:=.F.//Variavel PRIVATE usada no rdmake OM200MNU.PRW para saber se o usuario confirmou o estorno
-      _cPVs:=LEFT(_cPVs,LEN(_cPVs)-2)
+      _lUsuConfirmou:=.F.//Variavel Private usada no rdmake OM200MNU.PRW para saber se o usuario confirmou o estorno
+      _cPVs:=LEFT(_cPVs,Len(_cPVs)-2)
 
       If ! _lAutomatico
          MessageBox( "Nao foi possivel excluir o(s) Pedido(s) de Pallet: "+_cPVs+CRLF+;
@@ -227,11 +227,11 @@ NEXT
                          " Verifique o(s) Pedido(s) de Pallet conforme Mensage(ns) de erro(s) apresentada(s),"+;
                          " depois tente estornar essa Carga novamente."
       EndIf
-   ENDIF
+   EndIf
 
 //END Transaction // foi para a chamada do programa no rdmake OM200MNU.PRW
 
-RETURN _lOK
+Return _lOK
 
 /*
 ===============================================================================================================================
@@ -244,18 +244,18 @@ Descrição-------: _nRecPedPallet: Recno do Pedido de Pallet
 Retorno---------: Lógico (.T.) Se apagou / (.F.) Se nao apagou
 ===============================================================================================================================
 */
-STATIC FUNCTION OMS200Apaga(_nRecPedPallet As Numeric, _cPedGerou As Char, _nRecDAI As Numeric) As Logical
+Static Function OMS200Apaga(_nRecPedPallet As Numeric, _cPedGerou As Char, _nRecDAI As Numeric) As Logical
 
-LOCAL _aCabPV  := {} As Array
-LOCAL _aItemPV := {} As Array
-LOCAL _aItensPV:= {} As Array
+Local _aCabPV  := {} As Array
+Local _aItemPV := {} As Array
+Local _aItensPV:= {} As Array
 Local _cPedidoP As Char
 
-IF _nRecPedPallet # 0
-   SC5->( DBGOTO( _nRecPedPallet ))
-ELSE
-   RETURN .F.
-ENDIF
+If _nRecPedPallet # 0
+   SC5->( DBGoTo( _nRecPedPallet ))
+Else
+   Return .F.
+EndIf
 
 If ! _lAutomatico
    IncProc("Lendo Pedido: "+SC5->C5_NUM)
@@ -263,93 +263,93 @@ EndIf
 
 //====================================================================================================
 // Limpa a carga do DAI para nao dar mensagem de erro customizada no estorno da liberacao
-DAI->( DBGOTO( _nRecDAI ))
-DAI->(RECLOCK("DAI",.F.))
+DAI->( DBGoTo( _nRecDAI ))
+DAI->(RecLock("DAI",.F.))
 DAI->(DBDELETE())
-DAI->(MSUNLOCK())
+DAI->(MSUnLock())
 //====================================================================================================
 
 //====================================================================================================
 // Limpa a carga do SC9 para nao dar mensagem de erro padrao no estorno do Pedido de Pallet
 SC9->( DBSeek( SC5->C5_FILIAL + SC5->C5_NUM ) )
-DO While SC9->( !EOF() ) .And. SC9->( C9_FILIAL + C9_PEDIDO) == SC5->C5_FILIAL + SC5->C5_NUM
+While SC9->( !Eof() ) .And. SC9->( C9_FILIAL + C9_PEDIDO) == SC5->C5_FILIAL + SC5->C5_NUM
 
    SC9->( RecLock('SC9',.F.) )
    SC9->C9_CARGA:=""
    SC9->C9_SEQCAR:=""
    SC9->C9_SEQENT:=""
-   SC9->( MsUnlock() )
+   SC9->( MSUnLock() )
    SC9->( DBSkip() )
 
-ENDDO
+EndDo
 //====================================================================================================
 
 _aCabPV  :={}
 _aItemPV :={}
 _aItensPV:={}
-_dDtEnt	 := IF(SC5->C5_I_DTENT < DATE(),DATE(),SC5->C5_I_DTENT)//Para nao travar a alteracao do Pedido de Pallet
+_dDtEnt	 := If(SC5->C5_I_DTENT < DATE(),DATE(),SC5->C5_I_DTENT)//Para nao travar a alteracao do Pedido de Pallet
 
 //====================================================================================================
 // Monta o cabeçalho do pedido
-Aadd( _aCabPV, { "C5_FILIAL"	,SC5->C5_FILIAL  , Nil})//filial
-Aadd( _aCabPV, { "C5_NUM"    	,SC5->C5_NUM	 , Nil})
-Aadd( _aCabPV, { "C5_TIPO"	    ,SC5->C5_TIPO    , Nil})//Tipo de pedido
-Aadd( _aCabPV, { "C5_I_OPER"	,SC5->C5_I_OPER  , Nil})//Tipo da operacao
-Aadd( _aCabPV, { "C5_CLIENTE"	,SC5->C5_CLIENTE , NiL})//Codigo do cliente
-Aadd( _aCabPV, { "C5_CLIENT" 	,SC5->C5_CLIENT	 , Nil})
-Aadd( _aCabPV, { "C5_LOJAENT"	,SC5->C5_LOJAENT , NiL})//Loja para entrada
-Aadd( _aCabPV, { "C5_LOJACLI"	,SC5->C5_LOJACLI , NiL})//Loja do cliente
-Aadd( _aCabPV, { "C5_EMISSAO"	,SC5->C5_EMISSAO , NiL})//Data de emissao
-Aadd( _aCabPV, { "C5_TRANSP" 	,SC5->C5_TRANSP	 , Nil})
-Aadd( _aCabPV, { "C5_CONDPAG"	,SC5->C5_CONDPAG , NiL})//Codigo da condicao de pagamanto*
-Aadd( _aCabPV, { "C5_VEND1"  	,SC5->C5_VEND1	 , Nil})
-Aadd( _aCabPV, { "C5_MOEDA"	    ,SC5->C5_MOEDA   , Nil})//Moeda
-Aadd( _aCabPV, { "C5_MENPAD" 	,SC5->C5_MENPAD	 , Nil})
-Aadd( _aCabPV, { "C5_LIBEROK"	,SC5->C5_LIBEROK , NiL})//Liberacao Total
-Aadd( _aCabPV, { "C5_TIPLIB"  	,SC5->C5_TIPLIB  , Nil})//Tipo de Liberacao
-Aadd( _aCabPV, { "C5_TIPOCLI"	,SC5->C5_TIPOCLI , NiL})//Tipo do Cliente
-Aadd( _aCabPV, { "C5_I_NPALE"	,SC5->C5_I_NPALE , NiL})//Numero que originou a pedido de palete
-Aadd( _aCabPV, { "C5_I_PEDPA"	,SC5->C5_I_PEDPA , NiL})//Pedido Refere a um pedido de Pallet
-Aadd( _aCabPV, { "C5_I_DTENT"	,_dDtEnt         , Nil})//Dt de Entrega foi alterado para data do dia
-Aadd( _aCabPV, { "C5_I_TRCNF"   ,SC5->C5_I_TRCNF , Nil})
-Aadd( _aCabPV, { "C5_I_BLPRC"   ,SC5->C5_I_BLPRC , Nil})
-Aadd( _aCabPV, { "C5_I_FILFT"   ,SC5->C5_I_FILFT , Nil})
-Aadd( _aCabPV, { "C5_I_FLFNC"   ,SC5->C5_I_FLFNC , Nil})
+aAdd( _aCabPV, { "C5_FILIAL"	,SC5->C5_FILIAL  , Nil})//filial
+aAdd( _aCabPV, { "C5_NUM"    	,SC5->C5_NUM	 , Nil})
+aAdd( _aCabPV, { "C5_TIPO"	    ,SC5->C5_TIPO    , Nil})//Tipo de pedido
+aAdd( _aCabPV, { "C5_I_OPER"	,SC5->C5_I_OPER  , Nil})//Tipo da operacao
+aAdd( _aCabPV, { "C5_CLIENTE"	,SC5->C5_CLIENTE , NiL})//Codigo do cliente
+aAdd( _aCabPV, { "C5_CLIENT" 	,SC5->C5_CLIENT	 , Nil})
+aAdd( _aCabPV, { "C5_LOJAENT"	,SC5->C5_LOJAENT , NiL})//Loja para entrada
+aAdd( _aCabPV, { "C5_LOJACLI"	,SC5->C5_LOJACLI , NiL})//Loja do cliente
+aAdd( _aCabPV, { "C5_EMISSAO"	,SC5->C5_EMISSAO , NiL})//Data de emissao
+aAdd( _aCabPV, { "C5_TRANSP" 	,SC5->C5_TRANSP	 , Nil})
+aAdd( _aCabPV, { "C5_CONDPAG"	,SC5->C5_CONDPAG , NiL})//Codigo da condicao de pagamanto*
+aAdd( _aCabPV, { "C5_VEND1"  	,SC5->C5_VEND1	 , Nil})
+aAdd( _aCabPV, { "C5_MOEDA"	    ,SC5->C5_MOEDA   , Nil})//Moeda
+aAdd( _aCabPV, { "C5_MENPAD" 	,SC5->C5_MENPAD	 , Nil})
+aAdd( _aCabPV, { "C5_LIBEROK"	,SC5->C5_LIBEROK , NiL})//Liberacao Total
+aAdd( _aCabPV, { "C5_TIPLIB"  	,SC5->C5_TIPLIB  , Nil})//Tipo de Liberacao
+aAdd( _aCabPV, { "C5_TIPOCLI"	,SC5->C5_TIPOCLI , NiL})//Tipo do Cliente
+aAdd( _aCabPV, { "C5_I_NPALE"	,SC5->C5_I_NPALE , NiL})//Numero que originou a pedido de palete
+aAdd( _aCabPV, { "C5_I_PEDPA"	,SC5->C5_I_PEDPA , NiL})//Pedido Refere a um pedido de Pallet
+aAdd( _aCabPV, { "C5_I_DTENT"	,_dDtEnt         , Nil})//Dt de Entrega foi alterado para data do dia
+aAdd( _aCabPV, { "C5_I_TRCNF"   ,SC5->C5_I_TRCNF , Nil})
+aAdd( _aCabPV, { "C5_I_BLPRC"   ,SC5->C5_I_BLPRC , Nil})
+aAdd( _aCabPV, { "C5_I_FILFT"   ,SC5->C5_I_FILFT , Nil})
+aAdd( _aCabPV, { "C5_I_FLFNC"   ,SC5->C5_I_FLFNC , Nil})
 //====================================================================================================
 
 //====================================================================================================
 // Monta o item do pedido
 SC6->( DBSeek( SC5->C5_FILIAL + SC5->C5_NUM ) )
 
-DO While SC6->( !EOF() ) .And. SC6->( C6_FILIAL + C6_NUM ) == SC5->C5_FILIAL + SC5->C5_NUM
+While SC6->( !Eof() ) .And. SC6->( C6_FILIAL + C6_NUM ) == SC5->C5_FILIAL + SC5->C5_NUM
 
     _aItemPV:={}
 
-    AAdd( _aItemPV , { "C6_FILIAL"  ,SC6->C6_FILIAL  , Nil }) // FILIAL
-    AAdd( _aItemPV , { "C6_NUM"    	,SC6->C6_NUM	 , Nil })
-    AAdd( _aItemPV , { "C6_ITEM"    ,SC6->C6_ITEM    , Nil }) // Numero do Item no Pedido
-    AAdd( _aItemPV , { "C6_PRODUTO" ,SC6->C6_PRODUTO , Nil }) // Codigo do Produto
-    AAdd( _aItemPV , { "C6_QTDVEN"  ,SC6->C6_QTDVEN  , Nil }) // Quantidade Vendida
-    AAdd( _aItemPV , { "C6_PRCVEN"  ,SC6->C6_PRCVEN  , Nil }) // Preco Unitario Liquido
-    AAdd( _aItemPV , { "C6_PRUNIT"  ,SC6->C6_PRUNIT  , Nil }) // Preco Unitario Liquido
-    AAdd( _aItemPV , { "C6_ENTREG"  ,SC6->C6_ENTREG  , Nil }) // Data da Entrega
-    AAdd( _aItemPV , { "C6_LOJA"   	,SC6->C6_LOJA	 , Nil })
-    AAdd( _aItemPV , { "C6_SUGENTR" ,SC6->C6_SUGENTR , Nil }) // Data da Entrega
-    AAdd( _aItemPV , { "C6_VALOR"   ,SC6->C6_VALOR   , Nil }) // valor total do item
-    AAdd( _aItemPV , { "C6_UM"      ,SC6->C6_UM      , Nil }) // Unidade de Medida Primar.
-    AAdd( _aItemPV , { "C6_TES"    	,SC6->C6_TES	 , Nil })
-    AAdd( _aItemPV , { "C6_LOCAL"   ,SC6->C6_LOCAL   , Nil }) // Almoxarifado
-    AAdd( _aItemPV , { "C6_CF"     	,SC6->C6_CF		 , Nil })
-    AAdd( _aItemPV , { "C6_DESCRI"  ,SC6->C6_DESCRI  , Nil }) // Descricao
-    AAdd( _aItemPV , { "C6_QTDLIB"  ,SC6->C6_QTDLIB  , Nil }) // Quantidade Liberada
-    AAdd( _aItemPV , { "C6_PEDCLI" 	,SC6->C6_PEDCLI	 , Nil })
-    AAdd( _aItemPV , { "C6_I_BLPRC"	,SC6->C6_I_BLPRC , Nil })
+    aAdd( _aItemPV , { "C6_FILIAL"  ,SC6->C6_FILIAL  , Nil }) // FILIAL
+    aAdd( _aItemPV , { "C6_NUM"    	,SC6->C6_NUM	 , Nil })
+    aAdd( _aItemPV , { "C6_ITEM"    ,SC6->C6_ITEM    , Nil }) // Numero do Item no Pedido
+    aAdd( _aItemPV , { "C6_PRODUTO" ,SC6->C6_PRODUTO , Nil }) // Codigo do Produto
+    aAdd( _aItemPV , { "C6_QTDVEN"  ,SC6->C6_QTDVEN  , Nil }) // Quantidade Vendida
+    aAdd( _aItemPV , { "C6_PRCVEN"  ,SC6->C6_PRCVEN  , Nil }) // Preco Unitario Liquido
+    aAdd( _aItemPV , { "C6_PRUNIT"  ,SC6->C6_PRUNIT  , Nil }) // Preco Unitario Liquido
+    aAdd( _aItemPV , { "C6_ENTREG"  ,SC6->C6_ENTREG  , Nil }) // Data da Entrega
+    aAdd( _aItemPV , { "C6_LOJA"   	,SC6->C6_LOJA	 , Nil })
+    aAdd( _aItemPV , { "C6_SUGENTR" ,SC6->C6_SUGENTR , Nil }) // Data da Entrega
+    aAdd( _aItemPV , { "C6_VALOR"   ,SC6->C6_VALOR   , Nil }) // valor total do item
+    aAdd( _aItemPV , { "C6_UM"      ,SC6->C6_UM      , Nil }) // Unidade de Medida Primar.
+    aAdd( _aItemPV , { "C6_TES"    	,SC6->C6_TES	 , Nil })
+    aAdd( _aItemPV , { "C6_LOCAL"   ,SC6->C6_LOCAL   , Nil }) // Almoxarifado
+    aAdd( _aItemPV , { "C6_CF"     	,SC6->C6_CF		 , Nil })
+    aAdd( _aItemPV , { "C6_DESCRI"  ,SC6->C6_DESCRI  , Nil }) // Descricao
+    aAdd( _aItemPV , { "C6_QTDLIB"  ,SC6->C6_QTDLIB  , Nil }) // Quantidade Liberada
+    aAdd( _aItemPV , { "C6_PEDCLI" 	,SC6->C6_PEDCLI	 , Nil })
+    aAdd( _aItemPV , { "C6_I_BLPRC"	,SC6->C6_I_BLPRC , Nil })
 
-    AAdd( _aItensPV ,_aItemPV )
+    aAdd( _aItensPV ,_aItemPV )
 
     SC6->( DBSkip() )
 
-ENDDO
+EndDo
 //====================================================================================================
 
 //====================================================================================================
@@ -359,57 +359,57 @@ lMsErroAuto:=.F.
 MSExecAuto( {|x,y,z| Mata410(x,y,z) } , _aCabPV , _aItensPV , 4 )
 
 lErroSC9:=.F.
-SC9->( DbSetOrder(1) )
+SC9->( DBSetOrder(1) )
 
 _cPedidoP := AllTrim(SC5->C5_NUM)
 
-If lMsErroAuto .OR. ( lErroSC9:=SC9->( DBSeek( SC5->C5_FILIAL+SC5->C5_NUM ) ))//Se liberou o estoque nao pode achar no SC9, portanto se char é um erro
+If lMsErroAuto .Or. ( lErroSC9:=SC9->( DBSeek( SC5->C5_FILIAL+SC5->C5_NUM ) ))//Se liberou o estoque nao pode achar no SC9, portanto se char é um erro
 
-    IF lErroSC9
+    If lErroSC9
         If ! _lAutomatico
            MessageBox("Erro ao Estornar a liberação do pedido de Pallet, ainda tem dados de liberacao (SC9)." , 'Atenção! (OMSA200P)' , 48 )
         Else
            _cMsgEstorno := "Erro ao Estornar a liberação do pedido de Pallet, ainda tem dados de liberacao (SC9)."
         EndIf
-    ELSE
+    Else
        If ! _lAutomatico
           MostraErro()
        Else
-          _cMsgEstorno := MostraErro("\system\", "Estorno_Pedido_Pallet_"+_cPedidoP+"_"+DToc(Date())+"_"+Time()+".log")
+          _cMsgEstorno := MostraErro("\system\", "Estorno_Pedido_Pallet_"+_cPedidoP+"_"+DToC(Date())+"_"+Time()+".log")
        EndIf
-    ENDIF
+    EndIf
 
-    RETURN .F.
+    Return .F.
 
-ENDIF
+EndIf
 //====================================================================================================
 
 //====================================================================================================
 // Estorno do pedido de Pallet
 MSEXECAUTO({|x,y,z| MATA410(x,y,z)}, _aCabPV , _aItensPV ,5)
 
-IF lMSERROAUTO
+If lMSERROAUTO
    If ! _lAutomatico
       MOSTRAERRO()
    Else
-      _cMsgEstorno := MostraErro("\system\", "Estorno_Pedido_Pallet_"+_cPedidoP+"_"+DToc(Date())+"_"+Time()+".log")
+      _cMsgEstorno := MostraErro("\system\", "Estorno_Pedido_Pallet_"+_cPedidoP+"_"+DToC(Date())+"_"+Time()+".log")
    EndIf
 
-   RETURN .F.
+   Return .F.
 
-ELSE
+Else
 
    // LIMPA O NUMERO DO PEDIDO DE PALLET do Pedido que gerou o Pedido de Pallet
    SC5->(DBSetOrder(1))
-   IF SC5->( DbSeek( xFilial("SC5") + _cPedGerou ) )//Pedido que gerou o Pallet
-      SC5->(RECLOCK("SC5",.F.))
+   If SC5->( DBSeek( xFilial("SC5") + _cPedGerou ) )//Pedido que gerou o Pallet
+      SC5->(RecLock("SC5",.F.))
       SC5->C5_I_NPALE := ""
       SC5->C5_I_PEDPA := ""
       SC5->C5_I_PEDGE := ""
-      SC5->(MSUNLOCK())
-   ENDIF
+      SC5->(MSUnLock())
+   EndIf
 
-ENDIF
+EndIf
 //====================================================================================================
 
-RETURN .T.
+Return .T.

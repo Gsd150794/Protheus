@@ -2,20 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor            |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas B. Ferreira | 12/12/2021 | Migração da classe de impressão para FWMSPrinter. Chamado 38597
--------------------------------------------------------------------------------------------------------------------------------
-Lucas B. Ferreira | 16/12/2021 | Criado pergunte para informar o título do relatório. Chamado 38649
--------------------------------------------------------------------------------------------------------------------------------
-Lucas B. Ferreira | 18/03/2023 | Tramento do diretório de impressão do FWMSPrinter até a TOTVS resolver a questão. Chamado 46654
+Lucas Borges  |12/12/2021| Chamado 38597. Migração da classe de impressão para FWMSPrinter.
+Lucas Borges  |16/12/2021| Chamado 38649. Criado pergunte para informar o título do relatório.
+Lucas Borges  |18/03/2023| Chamado 46654. Tramento do diretório de impressão do FWMSPrinter até a TOTVS resolver a questão.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.Ch"
+#Include "TOTVS.ch"
 #Include "FWPrintSetup.ch" 
 #Include "RPTDEF.CH"
 #DEFINE _oFontT		TFont():New( "Verdana", 09, 09, , .T., , , , .T., .F. )//Titulo
@@ -30,11 +25,8 @@ Lucas B. Ferreira | 18/03/2023 | Tramento do diretório de impressão do FWMSPrint
 Programa----------: RGLT034
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 09/04/2009
-===============================================================================================================================
 Descrição---------: Relacao de Pagamento por Banco x Produtores com seus valores
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -51,7 +43,7 @@ Local _cValueType		:= "c:\"
 Local _cPathInServer	:= __RelDir
 Local _aOrdem			:= {"Ordem 1"} 
 Local _nFlags			:= PD_ISTOTVSPRINTER+PD_DISABLEORIENTATION+PD_DISABLEPAPERSIZE+PD_DISABLEMARGIN//PD_ISTOTVSPRINTER=1,PD_DISABLEDESTINATION=2,PD_DISABLEORIENTATION=4,PD_DISABLEPAPERSIZE=8,PD_DISABLEPREVIEW=16,PD_DISABLEMARGIN=32
-Local _cFilePrint		:= "RGLT034"//+Dtos(MSDate())+StrTran(Time(),":","")
+Local _cFilePrint		:= "RGLT034"//+DToS(MSDate())+StrTran(Time(),":","")
 Local _nOrientation		:= 1 //1-PORTRAIT - 2-LANDSCAPE
 Local _cTitulo			:= "RGLT034 - Pagto Banco"
 Local _nPaperSize		:= 2//1-"Letter 8 1/2 x 11 in" / 2-"A4 210 x 297 mm" / 3-"A3 297 x 420 mm"/ 4-"Executive 7 1/4 x 10 1/2 in" / 5-"Tabloid 11 x 17 in"
@@ -151,11 +143,8 @@ Return
 Programa----------: RUNREPORT
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 09/12/2008
-===============================================================================================================================
 Descrição---------: Funcao auxiliar chamada pela RPTSTATUS. A funcao RPTSTATUS monta a janela com a regua de processamento.
-===============================================================================================================================
 Parametros--------: _oPrinter,_cPerg,_lPreview
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -191,11 +180,11 @@ If MV_PAR12 == 1
 	_cOrder += " ZLF_FILIAL, ZLF_LINROT, %"
 EndIf
 
-BeginSQL alias _cAlias
+BeginSql alias _cAlias
 	SELECT A2_L_TPPAG, A2_COD, A2_LOJA, A2_NOME, A2_CGC, A2_BANCO, A2_AGENCIA, A2_NUMCON, %exp:_cCampos%
-	       SUM(CASE WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL ELSE 0 END) CREDITO,
-	       SUM(CASE WHEN ZLF_DEBCRE = 'D' THEN ZLF_TOTAL ELSE 0 END) DEBITO,
-	       MIN(CASE WHEN A2_L_TPPAG = 'B' THEN A2_BANCO ELSE ' ' END) XBANCO
+	       SUM(Case WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL Else 0 END) CREDITO,
+	       SUM(Case WHEN ZLF_DEBCRE = 'D' THEN ZLF_TOTAL Else 0 END) DEBITO,
+	       MIN(Case WHEN A2_L_TPPAG = 'B' THEN A2_BANCO Else ' ' END) XBANCO
 	  FROM %Table:ZLF% ZLF, %Table:SA2% SA2
 	 WHERE ZLF.D_E_L_E_T_ = ' '
 	   AND SA2.D_E_L_E_T_ = ' '
@@ -232,7 +221,7 @@ Cabec(_oPrinter,@_nLin,_aCol,_nSizePage,.T.)
 //Caso nao For quebra por Linha/Rota
 //====================================
 If MV_PAR12 == 2
-	While (_cAlias)->(!EOf())
+	While (_cAlias)->(!Eof())
 		IncProc()
 
 	    If _nLin > 750 // Salto de Página
@@ -278,7 +267,7 @@ If MV_PAR12 == 2
 
 		(_cAlias)->(DBSkip())
 	EndDo
-	(_cAlias)->(DbCloseArea())
+	(_cAlias)->(DBCloseArea())
 
 	//====================================
 	// Mostra SubTotal da ultima linha
@@ -365,7 +354,7 @@ If MV_PAR12 == 2
 		_nLin += 10
 		_oPrinter:SayAlign(_nLin,_aCol[1],"Banco: '" + MV_PAR07 + "' ao '" + MV_PAR08 + "'",_oFontL,500,100,ALIGN_H_LEFT)
 		_nLin += 20
-		_oPrinter:SayAlign(_nLin,_aCol[1],"Dia do Pagto: "+dtoc(MV_PAR09)+"   Ass: _____________________________",_oFontL,500,100,ALIGN_H_LEFT)
+		_oPrinter:SayAlign(_nLin,_aCol[1],"Dia do Pagto: "+DToC(MV_PAR09)+"   Ass: _____________________________",_oFontL,500,100,ALIGN_H_LEFT)
 		_nLin += 10
 
 		_oPrinter:Line(_nLin,_aCol[1],_nLin,_nSizePage-050,,"-4")
@@ -375,7 +364,7 @@ If MV_PAR12 == 2
 //Quebra por Linha/Rota
 //====================================
 Else
-	While (_cAlias)->(!EOf())
+	While (_cAlias)->(!Eof())
 		IncProc()
 		If _nLin > 750 // Salto de Página
 			_oPrinter:EndPage()
@@ -471,11 +460,8 @@ Return
 Programa----------: getStruct
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 09/12/2008
-===============================================================================================================================
 Descrição---------: Retorna campos dinamicos que estao na ZLF
-===============================================================================================================================
 Parametros--------: _oPrinter,_nLin,_aCol,_nSizePage
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -503,11 +489,8 @@ Return
 Programa----------: GETBCONAME
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 09/12/2008
-===============================================================================================================================
 Descrição---------: Obtem nome do Banco
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -530,11 +513,8 @@ Return _cRet
 Programa----------: resGeral
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 09/12/2008
-===============================================================================================================================
 Descrição---------: Imprime resumo
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -554,7 +534,7 @@ _nLin += 10
 
 For _nX :=1 To Len(_aResumo)
 	// Mostra Subtotal
-	If _cUltBanc != Left(_aResumo[_nX,1],3) .and. _cUltBanc != ""
+	If _cUltBanc != Left(_aResumo[_nX,1],3) .And. _cUltBanc != ""
 		_oPrinter:SayAlign(_nLin,_aCol[1],_cUltBanc,_oFontL,500,100,ALIGN_H_LEFT)
 		_oPrinter:SayAlign(_nLin,_aCol[2],getBcoName(_cUltBanc),_oFontL,500,100,ALIGN_H_LEFT)
 		_oPrinter:SayAlign(_nLin,_aCol[4]-50,TransForm(_nSubTotal,"@E 999,999,999.99"),_oFontL,500,100,ALIGN_H_RIGHT)
@@ -646,7 +626,7 @@ _oPrinter:SayAlign(_nLin,_aCol[1],"Fornecedor: '"+MV_PAR03 + "' ao '" + MV_PAR05
 _nLin += 10
 _oPrinter:SayAlign(_nLin,_aCol[1],"Banco: '" + MV_PAR07 + "' ao '" + MV_PAR08 + "'",_oFontL,500,100,ALIGN_H_LEFT)
 _nLin += 20
-_oPrinter:SayAlign(_nLin,_aCol[1],"Dia do Pagto: "+dtoc(MV_PAR09)+"   Ass: _____________________________",_oFontL,500,100,ALIGN_H_LEFT)
+_oPrinter:SayAlign(_nLin,_aCol[1],"Dia do Pagto: "+DToC(MV_PAR09)+"   Ass: _____________________________",_oFontL,500,100,ALIGN_H_LEFT)
 _nLin += 10
 
 _oPrinter:Line(_nLin,_aCol[1],_nLin,_nSizePage-050,,"-4")
@@ -659,11 +639,8 @@ Return
 Programa----------: Cabec
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/09/2021
-===============================================================================================================================
 Descrição---------: Imprimi cabeçalho do relatório
-===============================================================================================================================
 Parametros--------: _oPrinter,_nLin,_aCol,_nSizePage,_lCab
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -681,10 +658,10 @@ _nLin += 20
 _oPrinter:SayAlign(_nLin-10,0,RptFolha + cValToChar(_oPrinter:nPageCount),_oFontL,_nSizePage-050,100,,ALIGN_H_RIGHT)
 _oPrinter:SayAlign(_nLin,0,AllTrim(MV_PAR13),_oFontT,_nSizePage-050,100,,ALIGN_H_CENTER)
 _oPrinter:SayAlign(_nLin,_aCol[1],GetEnvServer()+"\"+Upper(_oPrinter:cFileName)+"/v."+cVersao,_oFontL,_nSizePage-050,100,,ALIGN_H_LEFT)
-_oPrinter:SayAlign(_nLin,0,RptDtRef + DtoC(dDataBase),_oFontL,_nSizePage-050,100,,ALIGN_H_RIGHT)
+_oPrinter:SayAlign(_nLin,0,RptDtRef + DToC(dDataBase),_oFontL,_nSizePage-050,100,,ALIGN_H_RIGHT)
 _nLin += 10
 _oPrinter:SayAlign(_nLin,_aCol[1],RptHora+ Time(),_oFontL,_nSizePage-050,100,,ALIGN_H_LEFT)
-_oPrinter:SayAlign(_nLin,0,RptEmiss + DtoC(Date()),_oFontL,_nSizePage-050,100,,ALIGN_H_RIGHT)
+_oPrinter:SayAlign(_nLin,0,RptEmiss + DToC(Date()),_oFontL,_nSizePage-050,100,,ALIGN_H_RIGHT)
 _nLin += 10
 _oPrinter:SayAlign(_nLin,_aCol[1],"Grupo de Empresa: "+FWEmpName(cEmpAnt)+"/ Filial: "+FWFilName(cEmpAnt,cFilAnt),_oFontL,_nSizePage-050,100,,ALIGN_H_LEFT)
 _nLin += 10

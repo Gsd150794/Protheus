@@ -2,43 +2,28 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZA��ES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor            |    Data    |                              Motivo                      										 
-------------------------------------------------------------------------------------------------------------------------------- 
- Alex Wallauer    | 20/04/2022 | Chamado 38857. Novo parametro: "Considera cliente broqueado?".
-------------------------------------------------------------------------------------------------------------------------------- 
- Alex Wallauer    | 29/04/2022 | Chamado 38857. Correcao de error.log.
-------------------------------------------------------------------------------------------------------------------------------- 
- Igor Melga�o     | 11/05/2022 | Chamado 38857. Ajuste para o parametro de Considera Clientes Bloqueados.
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer    | 17/05/2022 | Chamado 40128. Ajuste para aumentar o tamanho dos parametros de rede.
--------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer    | 06/06/2022 | Chamado 40372. Aumento dos tamanhos dos campos de Redes e exeto redes.
--------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer    | 26/07/2022 | Chamado 40771. Correcao do Error.log no SELECT. 
-------------------------------------------------------------------------------------------------------------------------------- 
- Igor Melga�o     | 21/10/2022 | Chamado 41379. Ajuste para envio de e-mail para vendedor e cliente.
-------------------------------------------------------------------------------------------------------------------------------- 
- Igor Melga�o     | 26/10/2022 | Chamado 41379. Ajuste para valida��o do e-mail do cliente.
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer     | 19/04/2024 | Chamado 47009. Antonio. Correcao dos parametros de login e senha do e-mail.
+Igor Melga�o  |21/10/2022| Chamado 41379. Ajuste para envio de e-mail para vendedor e cliente.
+Igor Melga�o  |26/10/2022| Chamado 41379. Ajuste para valida��o do e-mail do cliente.
+Alex Wallauer |19/04/2024| Chamado 47009. Antonio. Correcao dos parametros de login e senha do e-mail.
 ===============================================================================================================================
 */
 
-#include 'PROTHEUS.CH'
-#include 'FINA811.CH'
-#include 'FWMVCDEF.CH'
-#Include 'TBICONN.CH'
-#include 'AP5MAIL.CH'
+#Include "TOTVS.ch"
+#Include 'FINA811.CH'
+#Include 'AP5MAIL.CH'
+#Include "FWMVCDef.ch"
 
-STATIC __cMvJurTp	:= NIL
-STATIC __lMulLoj	:= NIL
-STATIC __cRe770F3	:= ''
-STATIC __cArqTrab	:= ''
-STATIC __oFIN8111
-STATIC __oFIN8112
-STATIC __oFIN8113
-STATIC __oFIN8114
-STATIC __oFIN8115
+Static __cMvJurTp	:= NIL
+Static __lMulLoj	:= NIL
+Static __cRe770F3	:= ''
+Static __cArqTrab	:= ''
+Static __oFIN8111
+Static __oFIN8112
+Static __oFIN8113
+Static __oFIN8114
+Static __oFIN8115
 //Static __lFIN811R	:= .F.
 
 
@@ -47,15 +32,12 @@ STATIC __oFIN8115
 Programa--------: AFIN030
 Autor-----------: Igor Melga�o
 Data da Criacao-: 10/03/2022
-===============================================================================================================================
 Descri��o-------: Envio de Carta de Cobranca baseado na Rotina FINA811, chamado 38857
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-STATIC a811Param := {}
+Static a811Param := {}
 
 User Function AFIN030( )//nOpcAuto As Numeric , a811Param As Array )
 	Local nX			As Numeric
@@ -65,24 +47,24 @@ User Function AFIN030( )//nOpcAuto As Numeric , a811Param As Array )
 	
 	Private _aItalac_F3 := {}
 
-	AADD(_aItalac_F3,{"MV_PAR14"     ,"ZAR"     ,ZAR->(FIELDPOS("ZAR_COD")), ZAR->(FIELDPOS("ZAR_DESC"))  ,          ,          ,          ,           , 0      ,           ,       ,        } )
+	aAdd(_aItalac_F3,{"MV_PAR14"     ,"ZAR"     ,ZAR->(FIELDPOS("ZAR_COD")), ZAR->(FIELDPOS("ZAR_DESC"))  ,          ,          ,          ,           , 0      ,           ,       ,        } )
 	
 	nX			:= 0
-	aArea		:= GetArea()
+	aArea		:= FWGetArea()
 	
-	If !TableInDic("FWP") .OR. !TableInDic("FWQ") .OR. !TableInDic("FWS") .OR. !TableInDic("FWT") 
+	If !TableInDic("FWP") .Or. !TableInDic("FWQ") .Or. !TableInDic("FWS") .Or. !TableInDic("FWT") 
         MsgNextRel() //-- É necessário a atualização do sistema para a expedição mais recente
-        Return()	
+        Return	
 	EndIf	
 
-	If !IsBlind() .AND. GetHlpLGPD({"A1_NOME", "E1_NOMCLI"})
+	If !IsBlind() .And. GetHlpLGPD({"A1_NOME", "E1_NOMCLI"})
 		Return .F.
-	Endif
+	EndIf
 	
 	//Encapsulamento da função que cria o wizard
 	U_AF030WIZ(a811Param)
 
-	RestArea(aArea)
+	FWRestArea(aArea)
 Return
 
 //-------------------------------------------------------------------
@@ -94,7 +76,7 @@ Rotina para construção do wizard de cartas de cobrança
 @version 12.1.7
 /*/
 //-------------------------------------------------------------------
-USER Function AF030WIZ( a811Param as Array )
+User Function AF030WIZ( a811Param as Array )
 	Private oStepWiz	As object
 	Private o1stPage	As Object
 	Private o2ndPage	As Object
@@ -195,7 +177,7 @@ USER Function AF030WIZ( a811Param as Array )
 		cCart       := a811Param[17]
         cRedes      := a811Param[18]
         cExRedes    := a811Param[19]
-	Endif
+	EndIf
 
 	l811Auto:=.F.
 
@@ -289,7 +271,7 @@ USER Function AF030WIZ( a811Param as Array )
 		cria_pn4()
 		cria_pn5()
 		FIN811AUTO()	
-	Endif
+	EndIf
 
 Return
 
@@ -346,62 +328,62 @@ Static Function cria_pn2( oPanel As Object )
     _lWhen:={||.F.}
 	TSay():New(10,10,{|| STR0025},oPanel,,,,,,.T.,CLR_BLACK,) //
 	//[ oWnd],                [ bSetGet], [ nRow], [ nCol], [ nWidth], [ nHeight], [ cPict]          ,bValid,nClrFore,nClrBack,oFont,uParam12,uParam13,lPixel,uParam15],uParam16,bWhen
-	TGet():New(10,90,{|u| if( PCount() > 0, cCliDe := u, cCliDe ) } ,oPanel,60,12,X3Picture('A1_COD'),      ,        ,        ,     ,        ,        ,.T.   ,         ,        ,_lWhen,,,,,,'SA1','cCliDe',,,,)
+	TGet():New(10,90,{|u| If( PCount() > 0, cCliDe := u, cCliDe ) } ,oPanel,60,12,X3Picture('A1_COD'),      ,        ,        ,     ,        ,        ,.T.   ,         ,        ,_lWhen,,,,,,'SA1','cCliDe',,,,)
 
 	TSay():New(30,10,{|| STR0026},oPanel,,,,,,.T.,CLR_BLACK,) //  
-	TGet():New(30,90,{|u| if( PCount() > 0, cLojaDe := u, cLojaDe ) } ,oPanel,60,12,X3Picture('A1_LOJA'),,,,,,,.T.   ,         ,        ,_lWhen,,,,,,,'cLojaDe',,,,)
+	TGet():New(30,90,{|u| If( PCount() > 0, cLojaDe := u, cLojaDe ) } ,oPanel,60,12,X3Picture('A1_LOJA'),,,,,,,.T.   ,         ,        ,_lWhen,,,,,,,'cLojaDe',,,,)
 
 	TSay():New(50,10,{|| STR0027},oPanel,,,,,,.T.,CLR_BLACK,) //
-	TGet():New(50,90,{|u| if( PCount() > 0, cCliAte := u, cCliAte ) } ,oPanel,60,12,X3Picture('A1_COD'),,,,,,,.T.   ,         ,        ,_lWhen,,,,,,'SA1','cCliAte',,,,)
+	TGet():New(50,90,{|u| If( PCount() > 0, cCliAte := u, cCliAte ) } ,oPanel,60,12,X3Picture('A1_COD'),,,,,,,.T.   ,         ,        ,_lWhen,,,,,,'SA1','cCliAte',,,,)
 
 	TSay():New(70,10,{|| STR0028},oPanel,,,,,,.T.,CLR_BLACK,) //
-	TGet():New(70,90,{|u| if( PCount() > 0, cLojaAte := u, cLojaAte ) } ,oPanel,60,12,X3Picture('A1_LOJA'),,,,,,,.T.   ,         ,        ,_lWhen,,,,,,,'cLojaAte',,,,)
+	TGet():New(70,90,{|u| If( PCount() > 0, cLojaAte := u, cLojaAte ) } ,oPanel,60,12,X3Picture('A1_LOJA'),,,,,,,.T.   ,         ,        ,_lWhen,,,,,,,'cLojaAte',,,,)
 
 	TSay():New(90,10,{|| STR0029},oPanel,,,,,,.T.,CLR_BLACK,) //
-	TGet():New(90,90,{|u| if( PCount() > 0, dDataDe := u, dDataDe ) } ,oPanel,60,12,,,,,,,,.T.   ,         ,        ,_lWhen,,,,,,,'dDataDe',,,,)
+	TGet():New(90,90,{|u| If( PCount() > 0, dDataDe := u, dDataDe ) } ,oPanel,60,12,,,,,,,,.T.   ,         ,        ,_lWhen,,,,,,,'dDataDe',,,,)
 
 	TSay():New(110,10,{|| STR0030},oPanel,,,,,,.T.,CLR_BLACK,) //
-	TGet():New(110,90,{|u| if( PCount() > 0, dDataAte := u, dDataAte ) } ,oPanel,60,12,,,,,,,,.T.   ,         ,        ,_lWhen,,,,,,,'dDataAte',,,,)
+	TGet():New(110,90,{|u| If( PCount() > 0, dDataAte := u, dDataAte ) } ,oPanel,60,12,,,,,,,,.T.   ,         ,        ,_lWhen,,,,,,,'dDataAte',,,,)
 
 	TSay():New(130,10,{|| STR0031},oPanel,,,,,,.T.,CLR_BLACK,) //
-	TGet():New(130,90,{|u| if( PCount() > 0, nValDe := u, nValDe ) } ,oPanel,60,12,'@E 999,999,999.99',,,,,,,.T.   ,         ,        ,_lWhen,,,,,,,'nValDe',,,,)
+	TGet():New(130,90,{|u| If( PCount() > 0, nValDe := u, nValDe ) } ,oPanel,60,12,'@E 999,999,999.99',,,,,,,.T.   ,         ,        ,_lWhen,,,,,,,'nValDe',,,,)
 
 	TSay():New(150,10,{|| STR0032},oPanel,,,,,,.T.,CLR_BLACK,) //
-	TGet():New(150,90,{|u| if( PCount() > 0, nValAte := u, nValAte ) } ,oPanel,60,12,'@E 999,999,999.99',,,,,,,.T.   ,         ,        ,_lWhen,,,,,,,'nValAte',,,,)
+	TGet():New(150,90,{|u| If( PCount() > 0, nValAte := u, nValAte ) } ,oPanel,60,12,'@E 999,999,999.99',,,,,,,.T.   ,         ,        ,_lWhen,,,,,,,'nValAte',,,,)
 
 	TSay():New(170,10,{|| STR0037},oPanel,,,,,,.T.,CLR_BLACK,) //
-	TGet():New(170,90,{|u| if( PCount() > 0, dDtRef := u, dDtRef ) } ,oPanel,60,12,,,,,,,,.T.   ,         ,        ,_lWhen,,,,,,,'dDtRef',,,,)
+	TGet():New(170,90,{|u| If( PCount() > 0, dDtRef := u, dDtRef ) } ,oPanel,60,12,,,,,,,,.T.   ,         ,        ,_lWhen,,,,,,,'dDtRef',,,,)
 
 // *************** LADO DIREITO
 	TSay():New(10,200,{|| STR0033},oPanel,,,,,,.T.,CLR_BLACK,) //
 	 //[ nRow ], [ nCol ], [ bSetGet ], [ nItens ], [ nWidth ], [ nHeight ],                 [ oWnd ],uParam8 ,bChange,bValid,nClrText,nClrBack,lPixel,oFont,uParam15,uParam16,bWhen
-	TComboBox():New(10,280,{|u| if( PCount() > 0, cComboFil := u, cComboFil ) },aOptions,60,12,oPanel,        ,       ,      ,        ,        ,.T.   ,     ,        ,        ,_lWhen,,,,,'cComboFil')
+	TComboBox():New(10,280,{|u| If( PCount() > 0, cComboFil := u, cComboFil ) },aOptions,60,12,oPanel,        ,       ,      ,        ,        ,.T.   ,     ,        ,        ,_lWhen,,,,,'cComboFil')
 
 	TSay():New(30,200,{|| STR0034},oPanel,,,,,,.T.,CLR_BLACK,) //
-	TComboBox():New(30,280,{|u| if( PCount() > 0, cSitCob := u, cSitCob ) }    ,aOptions,60,12,oPanel,,,,,,.T.   ,         ,        ,,_lWhen,,,,,'cSitCob')
+	TComboBox():New(30,280,{|u| If( PCount() > 0, cSitCob := u, cSitCob ) }    ,aOptions,60,12,oPanel,,,,,,.T.   ,         ,        ,,_lWhen,,,,,'cSitCob')
 
 	TSay():New(50,200,{|| STR0035},oPanel,,,,,,.T.,CLR_BLACK,) //
-	TComboBox():New(50,280,{|u| if( PCount() > 0, cComboVenc := u, cComboVenc ) },aOptions,60,12,oPanel,,,,,,.T.   ,         ,        ,,_lWhen,,,,,'cComboVenc')
+	TComboBox():New(50,280,{|u| If( PCount() > 0, cComboVenc := u, cComboVenc ) },aOptions,60,12,oPanel,,,,,,.T.   ,         ,        ,,_lWhen,,,,,'cComboVenc')
 
-//AADD( _aParAux , { 2 ,"Considera cliente broqueado", cCliBroq   ,aOpBloqu,                            060 ,".T.",.F. } )//17 
+//aAdd( _aParAux , { 2 ,"Considera cliente broqueado", cCliBroq   ,aOpBloqu,                            060 ,".T.",.F. } )//17 
 
 	TSay():New(70,200,{|| "Considera cliente broqueado?" },oPanel,,,,,,.T.,CLR_BLACK,) //
-	TComboBox():New(70,280,{|u| if( PCount() > 0, cCliBroq := u, cCliBroq ) },aOpBloqu,60,12,oPanel,,,,,,.T.   ,         ,        ,,_lWhen,,,,,'cCliBroq')
+	TComboBox():New(70,280,{|u| If( PCount() > 0, cCliBroq := u, cCliBroq ) },aOpBloqu,60,12,oPanel,,,,,,.T.   ,         ,        ,,_lWhen,,,,,'cCliBroq')
 
 //	TSay():New(70,200,{|| STR0037},oPanel,,,,,,.T.,CLR_BLACK,) //
-//  TGet():New(70,280,{|u| if( PCount() > 0, dDtRef := u, dDtRef ) } ,oPanel,60,12,,,,,,,,.T.   ,         ,        ,_lWhen,,,,,,,'dDtRef',,,,)
+//  TGet():New(70,280,{|u| If( PCount() > 0, dDtRef := u, dDtRef ) } ,oPanel,60,12,,,,,,,,.T.   ,         ,        ,_lWhen,,,,,,,'dDtRef',,,,)
 
 	TSay():New(90,200,{|| STR0061},oPanel,,,,,,.T.,CLR_BLACK,) //
-	TComboBox():New(90,280,{|u| if( PCount() > 0, cComboConVl := u, cComboConVl ) },aOpConVl,60,12,oPanel,,,,,,.T.   ,         ,        ,,_lWhen,,,,,'cComboConVl')
+	TComboBox():New(90,280,{|u| If( PCount() > 0, cComboConVl := u, cComboConVl ) },aOpConVl,60,12,oPanel,,,,,,.T.   ,         ,        ,,_lWhen,,,,,'cComboConVl')
 
 	TSay():New(110,200,{|| "Carteira ? (*) Todos"},oPanel,,,,,,.T.,CLR_BLACK,) //
-	TGet():New(110,280,{|u| if( PCount() > 0, cCart := u, cCart ) } ,oPanel,70,12,X3Picture('E1_I_CART'),,,,,,,.T.   ,         ,        ,_lWhen,,,,,,'F3ITLC','cCart',,,,)
+	TGet():New(110,280,{|u| If( PCount() > 0, cCart := u, cCart ) } ,oPanel,70,12,X3Picture('E1_I_CART'),,,,,,,.T.   ,         ,        ,_lWhen,,,,,,'F3ITLC','cCart',,,,)
 
 	TSay():New(130,200,{|| "Redes ?"},oPanel,,,,,,.T.,CLR_BLACK,) //
-	TGet():New(130,280,{|u| if( PCount() > 0, cRedes := u, cRedes ) } ,oPanel,70,12,X3Picture('E1_I_CART'),,,,,,,.T.   ,         ,        ,_lWhen,,,,,,'REDE50','cRedes',,,,)
+	TGet():New(130,280,{|u| If( PCount() > 0, cRedes := u, cRedes ) } ,oPanel,70,12,X3Picture('E1_I_CART'),,,,,,,.T.   ,         ,        ,_lWhen,,,,,,'REDE50','cRedes',,,,)
 
 	TSay():New(150,200,{|| "Exceto Redes ?"},oPanel,,,,,,.T.,CLR_BLACK,) //
-	TGet():New(150,280,{|u| if( PCount() > 0, cExRedes := u, cExRedes ) } ,oPanel,70,12,X3Picture('E1_I_CART'),,,,,,,.T.   ,         ,        ,_lWhen,,,,,,'REDE50','cExRedes',,,,)
+	TGet():New(150,280,{|u| If( PCount() > 0, cExRedes := u, cExRedes ) } ,oPanel,70,12,X3Picture('E1_I_CART'),,,,,,,.T.   ,         ,        ,_lWhen,,,,,,'REDE50','cExRedes',,,,)
 
 Return
 
@@ -450,7 +432,7 @@ Static Function cria_pn3( oPanel As Object )
 	cQuery += "WHERE FWP.FWP_STATUS = '1' "
 	If l811Auto
 		cQuery += "AND FWP.FWP_CODCRT = '" + cCodFWP + "' "
-	Endif	
+	EndIf	
 	cQuery += "AND FWP.D_E_L_E_T_ = ' ' "
 	cQuery += "ORDER BY "+ SqlOrder(cIndex)
 
@@ -458,7 +440,7 @@ Static Function cria_pn3( oPanel As Object )
 	If __oFIN8111 <> Nil
 		__oFIN8111:Delete()
 		__oFIN8111 := Nil
-	Endif
+	EndIf
 
 	cTrabFWP := GetNextAlias()
 
@@ -475,7 +457,7 @@ Static Function cria_pn3( oPanel As Object )
 		MsgRun(STR0066,STR0065,{||SqlToTrb(cQuery, aStruct, cTrabFWP)}) // Cria arquivo temporario
 		For nX := 1 To Len(aStruct)
 			If	aStruct[nX][1] $ 'FWP_FILIAL|FWP_CODCRT|FWP_DESCRI|FWP_ENVIO'
-				AAdd(aColumns,FWBrwColumn():New())
+				aAdd(aColumns,FWBrwColumn():New())
 				aColumns[Len(aColumns)]:SetData( &('{||'+aStruct[nX][1]+'}') )
 				aColumns[Len(aColumns)]:SetTitle(RetTitle(aStruct[nX][1]))
 				aColumns[Len(aColumns)]:SetSize(aStruct[nX][3])
@@ -487,7 +469,7 @@ Static Function cria_pn3( oPanel As Object )
 			EndIf
 		Next nX
 
-		AAdd(aSeek,{STR0060,{{"FWP_DESCRI","C",TamSX3("FWP_DESCRI")[1],0,"",""}},1})
+		aAdd(aSeek,{STR0060,{{"FWP_DESCRI","C",TamSX3("FWP_DESCRI")[1],0,"",""}},1})
 
 		oMrkLayout:= FWMarkBrowse():New()
 		oMrkLayout:oBrowse:SetEditCell(.T.)
@@ -505,9 +487,9 @@ Static Function cria_pn3( oPanel As Object )
 		oMrkLayout:Activate()
 	Else
 		SqlToTrb(cQuery, aStruct, cTrabFWP)
-	Endif
+	EndIf
 
-	DbSetOrder(0) // Fica na ordem da query
+	DBSetOrder(0) // Fica na ordem da query
 
 Return
 
@@ -551,7 +533,7 @@ Static Function cria_pn4( oPanel As Object )
 
 	cIndex := SA1->(IndexKey())
 
-	(cTrabFWP)->(dbGoTop())
+	(cTrabFWP)->(DBGoTop())
 
 	If l811Auto 
 		cCodCarta := (cTrabFWP)->FWP_CODCRT
@@ -561,11 +543,11 @@ Static Function cria_pn4( oPanel As Object )
 				cCodCarta := (cTrabFWP)->FWP_CODCRT
 				Exit
 			EndIf
-			(cTrabFWP)->(dbSkip())
+			(cTrabFWP)->(DBSkip())
 		EndDo
-	Endif
+	EndIf
 
-	RestArea(aAreaFWP)
+	FWRestArea(aAreaFWP)
 
 	cQuery += 'SELECT SA1.A1_FILIAL, SA1.A1_COD, SA1.A1_LOJA, SA1.A1_NOME, SA1.A1_END, SA1.A1_EMAIL, SA1.A1_VEND, SA1.A1_I_VEND2, SA1.A1_I_VEND3, SA1.A1_I_VEND4 FROM ' + RetSqlName('SA1') + ' SA1 '
 	/* O SA1 � COMPARTILAHDO NA ITALAC
@@ -576,34 +558,34 @@ Static Function cria_pn4( oPanel As Object )
 	EndIf */
 	
     cQuery += "WHERE SA1.D_E_L_E_T_ = ' ' "
-	IF !EMPTY(cCliAte)
+	If !Empty(cCliAte)
 	   cQuery += " AND SA1.A1_COD BETWEEN '" + cCliDe + "' AND '" + cCliAte + "' "
-	ELSEIF !EMPTY(cCliDe)
+	ElseIf !Empty(cCliDe)
 	   cQuery += " AND SA1.A1_COD >= '" + cCliDe + "' "
-	ENDIF
+	EndIf
 	
-	IF cCliBroq = "1"
+	If cCliBroq = "1"
 	   //cQuery += "WHERE SA1.A1_MSBLQL = '1' "
-	ELSEIF cCliBroq = "2"
+	ElseIf cCliBroq = "2"
 	   cQuery += " AND SA1.A1_MSBLQL <> '1' "
-    ENDIF
+    EndIf
 
-	IF !EMPTY(cLojaAte)
+	If !Empty(cLojaAte)
 	   cQuery += "AND SA1.A1_LOJA BETWEEN '" + cLojaDe + "' AND '" + cLojaAte + "' "
-	ELSEIF !EMPTY(cLojaDe)
+	ElseIf !Empty(cLojaDe)
 	   cQuery += "AND SA1.A1_LOJA >= '" + cLojaDe + "' "
-	ENDIF
+	EndIf
     
-	If !Empty(Alltrim(cRedes))
-        cQuery += "AND SA1.A1_GRPVEN IN " + FORMATIN(ALLTRIM(cRedes),";")
+	If !Empty(AllTrim(cRedes))
+        cQuery += "AND SA1.A1_GRPVEN IN " + FormatIn(AllTrim(cRedes),";")
     EndIf
-    If !Empty(Alltrim(cExRedes))
-        cQuery += "AND SA1.A1_GRPVEN NOT IN " + FORMATIN(ALLTRIM(cExRedes),";")
+    If !Empty(AllTrim(cExRedes))
+        cQuery += "AND SA1.A1_GRPVEN NOT IN " + FormatIn(AllTrim(cExRedes),";")
     EndIf
 
-	DbSelectArea('FWQ')
-	FWQ->(DbSetOrder(1))
-	If FWQ->(dbSeek(xFilial('FWQ')+cCodCarta))
+	DBSelectArea('FWQ')
+	FWQ->(DBSetOrder(1))
+	If FWQ->(DBSeek(xFilial('FWQ')+cCodCarta))
 		If !Empty(FWQ->FWQ_FILTRA)
 			cQuery += "AND " + FWQ->FWQ_FILTRA
 		EndIf
@@ -624,7 +606,7 @@ Static Function cria_pn4( oPanel As Object )
 	If __oFIN8112 <> Nil
 		__oFIN8112:Delete()
 		__oFIN8112 := Nil
-	Endif
+	EndIf
 
 	cTrabSA1 := GetNextAlias()
 
@@ -641,7 +623,7 @@ Static Function cria_pn4( oPanel As Object )
 		MsgRun(STR0067,STR0065,{||SqlToTrb(cQuery, aStruct, cTrabSA1)}) // Cria arquivo temporario
 		For nX := 1 To Len(aStruct)
 			If	AllTrim(aStruct[nX][1]) $ 'A1_FILIAL|A1_COD|A1_LOJA|A1_NOME|A1_END|A1_EMAIL|A1_VEND|A1_I_VEND2|A1_I_VEND3|A1_I_VEND4|'
-				AAdd(aColumns,FWBrwColumn():New())
+				aAdd(aColumns,FWBrwColumn():New())
 				aColumns[Len(aColumns)]:SetData( &('{||'+aStruct[nX][1]+'}') )
 				aColumns[Len(aColumns)]:SetTitle(RetTitle(aStruct[nX][1]))
 				aColumns[Len(aColumns)]:SetSize(aStruct[nX][3])
@@ -650,8 +632,8 @@ Static Function cria_pn4( oPanel As Object )
 			EndIf
 		Next nX
 
-		AAdd(aSeek,{STR0071,{{"A1_COD" ,"C",TamSX3("A1_COD")[1] ,0,"",""}},1})
-		AAdd(aSeek,{STR0072,{{"A1_NOME","C",TamSX3("A1_NOME")[1],0,"",""}},2})
+		aAdd(aSeek,{STR0071,{{"A1_COD" ,"C",TamSX3("A1_COD")[1] ,0,"",""}},1})
+		aAdd(aSeek,{STR0072,{{"A1_NOME","C",TamSX3("A1_NOME")[1],0,"",""}},2})
 
 		oMrkClient:= FWMarkBrowse():New()
 		oMrkClient:oBrowse:SetEditCell(.T.)
@@ -667,9 +649,9 @@ Static Function cria_pn4( oPanel As Object )
 		oMrkClient:Activate()
 	Else
 		SqlToTrb(cQuery, aStruct, cTrabSA1)
-	Endif
+	EndIf
 
-	(cTrabSA1)->(DbSetOrder(1))
+	(cTrabSA1)->(DBSetOrder(1))
 
 Return
 
@@ -722,18 +704,18 @@ Static Function cria_pn5( oPanel As Object )
 	lMaxLn		:= .F.
 	dBaixa		:= dDtRef
 
-	If cSitCob == '1' .AND. Empty(cCondCob)
+	If cSitCob == '1' .And. Empty(cCondCob)
 		cCondCob := F811GetSit('E1_SITUACA')
 	EndIf
 
-	(cTrabSA1)->(dbGoTop())
+	(cTrabSA1)->(DBGoTop())
 	If !l811Auto
 		MsgRun(STR0068,STR0065,{|| cTmpSA1 := U_AF030TmpCli(cTrabSA1)}) 
 	Else 
 		U_AF030TmpCli(cTrabSA1)
-	Endif
+	EndIf
 
-	RestArea(aAreaTRB)
+	FWRestArea(aAreaTRB)
 
 	cIndex := 'E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO'
 
@@ -751,32 +733,32 @@ Static Function cria_pn5( oPanel As Object )
 	cQuery += " AND E1_TIPO NOT IN " + FormatIn(MV_CRNEG,cSepNeg)
 	cQuery += " AND E1_TIPO NOT IN " + FormatIn(MVPROVIS,cSepProv)
 	cQuery += " AND E1_TIPO NOT IN " + FormatIn(MVRECANT,cSepRec)
-    If Empty(Alltrim(cCart))
+    If Empty(AllTrim(cCart))
         cQuery += " AND E1_I_CART = ' ' "
-    ELSEIf !Empty(Alltrim(cCart)) .AND. Alltrim(cCart) <> "*"
-        cQuery += " AND E1_I_CART IN " + FORMATIN(ALLTRIM(cCart),";")
+    ElseIf !Empty(AllTrim(cCart)) .And. AllTrim(cCart) <> "*"
+        cQuery += " AND E1_I_CART IN " + FormatIn(AllTrim(cCart),";")
     EndIf
-/*  If !Empty(Alltrim(cRedes))
-        cQuery += " AND E1_I_GPRVE IN " + FORMATIN(ALLTRIM(cRedes),";")
+/*  If !Empty(AllTrim(cRedes))
+        cQuery += " AND E1_I_GPRVE IN " + FormatIn(AllTrim(cRedes),";")
     EndIf
-    If !Empty(Alltrim(cExRedes))
-        cQuery += " AND E1_I_GPRVE NOT IN " + FORMATIN(ALLTRIM(cExRedes),";")
+    If !Empty(AllTrim(cExRedes))
+        cQuery += " AND E1_I_GPRVE NOT IN " + FormatIn(AllTrim(cExRedes),";")
     EndIf*/
 
 	If cComboVenc == "2"
 
 		Do Case
 			Case dDtRef == dDataAte .And. dDataAte > dDataDe
-				dDtFim := dDataAte - 1 	//Se a data de referencia for igual a data ate - retroagir 1 dia
+				dDtFim := dDataAte - 1 	//Se a data de referencia For igual a data ate - retroagir 1 dia
 			Case dDtRef < dDataAte
 				dDtFim := dDtRef		//Data de referencia menor que a data ate - assume a data até
 			Case dDtRef > dDataAte
 				dDtFim := dDataAte		//Data de referencia maior que a data ate - assume a data de referência
 		EndCase
 
-		cQuery += " AND SE1.E1_VENCREA BETWEEN '" + DtoS(dDataDe) + "' AND '" + DtoS(dDtFim) + "' "
+		cQuery += " AND SE1.E1_VENCREA BETWEEN '" + DToS(dDataDe) + "' AND '" + DToS(dDtFim) + "' "
 	Else
-		cQuery += " AND SE1.E1_VENCREA BETWEEN '" + DtoS(dDataDe) + "' AND '" + DtoS(IIf(dDtRef > dDataAte,dDtRef,dDataAte)) + "' "
+		cQuery += " AND SE1.E1_VENCREA BETWEEN '" + DToS(dDataDe) + "' AND '" + DToS(IIf(dDtRef > dDataAte,dDtRef,dDataAte)) + "' "
 	EndIf
 
 	If !Empty(cCondCob)
@@ -788,17 +770,17 @@ Static Function cria_pn5( oPanel As Object )
 	cQuery += ")"
 
 	If cComboConVl == "1"
-	   IF nValAte > 0
+	   If nValAte > 0
 		  cQuery += " AND SE1.E1_VALOR BETWEEN " + AllTrim(Str(nValDe)) + " AND " + AllTrim(Str(nValAte)) + " "
-	   ELSE
+	   Else
 		  cQuery += " AND SE1.E1_VALOR >= " + AllTrim(Str(nValDe)) 
-	   ENDIF
+	   EndIf
 	Else
-	   IF nValAte > 0
+	   If nValAte > 0
 		  cQuery += " AND SE1.E1_SALDO BETWEEN " + AllTrim(Str(nValDe)) + " AND " + AllTrim(Str(nValAte)) + " "	
-	   ELSE
+	   Else
 		  cQuery += " AND SE1.E1_SALDO >= " + AllTrim(Str(nValDe)) 
-	   ENDIF
+	   EndIf
 	EndIf
 
 	cQuery += " AND (SE1.E1_CLIENTE || SE1.E1_LOJA IN (SELECT SA1T.CLIENTE FROM " + __oFIN8115:GetRealname() + " SA1T ) ) "
@@ -815,7 +797,7 @@ Static Function cria_pn5( oPanel As Object )
 	If __oFIN8113 <> Nil
 		__oFIN8113:Delete()
 		__oFIN8113	:= Nil
-	Endif
+	EndIf
 
 	__oFIN8113 := FwTemporaryTable():New(cTrabSE1)
 
@@ -832,9 +814,9 @@ Static Function cria_pn5( oPanel As Object )
 		MsgRun(STR0068,STR0065,{||SqlToTrb(cQuery, aStruct, cTrabSE1)}) // Cria arquivo temporario
 	Else
 		SqlToTrb(cQuery, aStruct, cTrabSE1)
-	Endif
+	EndIf
 	
-	DbSetOrder(0) // Fica na ordem da query
+	DBSetOrder(0) // Fica na ordem da query
 
 	//Faz uma contagem de titulos por conta do maximo de linhas do MVC
 	COUNT TO nTotSE1
@@ -849,7 +831,7 @@ Static Function cria_pn5( oPanel As Object )
 			MsgRun(STR0069,STR0065,{|| U_AF030AtuTrb()})
 		Else
 			U_AF030AtuTrb()
-		Endif
+		EndIf
 	EndIf
 	
 	//Filtro especifico para selecao por saldo que necessita primeiro a   
@@ -863,7 +845,7 @@ Static Function cria_pn5( oPanel As Object )
 	If !l811Auto
 		For nX := 1 To Len(aStruct)
 			If	aStruct[nX][1] $ 'E1_FILIAL|E1_FILORIG|E1_NUM|E1_PREFIXO|E1_PARCELA|E1_TIPO|E1_NOMCLI|E1_CLIENTE|E1_LOJA|E1_VALOR|E1_VENCREA'
-				AAdd(aColumns,FWBrwColumn():New())
+				aAdd(aColumns,FWBrwColumn():New())
 				aColumns[Len(aColumns)]:SetData( &('{||' + aStruct[nX][1] + '}') )
 				aColumns[Len(aColumns)]:SetTitle(RetTitle(aStruct[nX][1]))
 				aColumns[Len(aColumns)]:SetSize(aStruct[nX][3])
@@ -877,7 +859,7 @@ Static Function cria_pn5( oPanel As Object )
 					aColumns[Len(aColumns)]:SetType("C")
 				EndIf
 			ElseIf AllTrim(aStruct[nX][1]) == 'E1_JUROS'
-				AAdd(aColumns,FWBrwColumn():New())
+				aAdd(aColumns,FWBrwColumn():New())
 				aColumns[Len(aColumns)]:SetData( &('{|| U_AF030TitJur(cTrabSE1) }') )
 				aColumns[Len(aColumns)]:SetTitle(RetTitle(aStruct[nX][1]))
 				aColumns[Len(aColumns)]:SetSize(aStruct[nX][3])
@@ -885,7 +867,7 @@ Static Function cria_pn5( oPanel As Object )
 				aColumns[Len(aColumns)]:SetPicture(PesqPict('SE1',aStruct[nX][1]))
 				aColumns[Len(aColumns)]:SetType("N")
 			ElseIf AllTrim(aStruct[nX][1]) == 'E1_MULTA'
-				AAdd(aColumns,FWBrwColumn():New())
+				aAdd(aColumns,FWBrwColumn():New())
 				aColumns[Len(aColumns)]:SetData( &('{|| U_AF030RMul(E1_VALOR,E1_SALDO,E1_VENCREA,dDtRef ) }') )
 				aColumns[Len(aColumns)]:SetTitle(RetTitle(aStruct[nX][1]))
 				aColumns[Len(aColumns)]:SetSize(aStruct[nX][3])
@@ -893,7 +875,7 @@ Static Function cria_pn5( oPanel As Object )
 				aColumns[Len(aColumns)]:SetPicture(PesqPict('SE1',aStruct[nX][1]))
 				aColumns[Len(aColumns)]:SetType("N")
 			ElseIf AllTrim(aStruct[nX][1]) == 'E1_SALDO'
-				AAdd(aColumns,FWBrwColumn():New())
+				aAdd(aColumns,FWBrwColumn():New())
 				aColumns[Len(aColumns)]:SetData( &('{|| E1_SALDO }') )
 				aColumns[Len(aColumns)]:SetTitle(RetTitle(aStruct[nX][1]))
 				aColumns[Len(aColumns)]:SetSize(aStruct[nX][3])
@@ -901,7 +883,7 @@ Static Function cria_pn5( oPanel As Object )
 				aColumns[Len(aColumns)]:SetPicture(PesqPict('SE1',aStruct[nX][1]))
 				aColumns[Len(aColumns)]:SetType("N")
 			ElseIf aStruct[nX][1] == 'DIASATRASO'
-				AAdd(aColumns,FWBrwColumn():New())
+				aAdd(aColumns,FWBrwColumn():New())
 				aColumns[Len(aColumns)]:SetData( &('{|| dDtRef - E1_VENCREA}') )
 				aColumns[Len(aColumns)]:SetTitle(STR0046)
 				aColumns[Len(aColumns)]:SetSize(aStruct[nX][3])
@@ -933,7 +915,7 @@ Static Function cria_pn5( oPanel As Object )
 			Help(,,"F811MAXT",,STR0076,1,0)
 			oStepWiz:PreviousPage()
 		EndIf
-	Endif
+	EndIf
 
 Return
 
@@ -1019,16 +1001,16 @@ Static Function Valid_PG2() As Logical
 	//Seleciona filiais
 	If cComboFil == "1"
 		aFilial := AdmGetFil()
-		IF LEN(aFilial) = 0
+		If Len(aFilial) = 0
 		   cComboFil:= "2"
-		ENDIF
+		EndIf
 	EndIf
 
 	If l811Auto
 		lCont := .T.
 	Else
 		lCont := o3rdPage:lConstructed
-	Endif
+	EndIf
 
 	If lCont
 		cIndex := FWP->(IndexKey())
@@ -1045,7 +1027,7 @@ Static Function Valid_PG2() As Logical
 
 		If l811Auto
 			cQuery += "AND FWP.FWP_CODCRT = '" + cCodFWP + "' "
-		Endif
+		EndIf
 
 		cQuery += "AND FWP.D_E_L_E_T_ = ' ' "
 		cQuery += "ORDER BY "+ SqlOrder(cIndex)
@@ -1055,7 +1037,7 @@ Static Function Valid_PG2() As Logical
 		If __oFIN8111 <> Nil
 			__oFIN8111:Delete()
 			__oFIN8111 := Nil
-		Endif
+		EndIf
 
 		cTrabFWP := GetNextAlias()
 				
@@ -1072,9 +1054,9 @@ Static Function Valid_PG2() As Logical
 
 			MsgRun(STR0066,STR0065,{||SqlToTrb(cQuery, aStruct, cTrabFWP)}) // Cria arquivo temporario
 
-			DbSetOrder(0) // Fica na ordem da query
+			DBSetOrder(0) // Fica na ordem da query
 
-			AAdd(aSeek,{STR0060,{{"FWP_DESCRI","C",TamSX3("FWP_DESCRI")[1],0,"",""}},1})
+			aAdd(aSeek,{STR0060,{{"FWP_DESCRI","C",TamSX3("FWP_DESCRI")[1],0,"",""}},1})
 
 			oMrkLayout:SetAlias(cTrabFWP)
 			oMrkLayout:SetProfileId("0004")
@@ -1088,9 +1070,9 @@ Static Function Valid_PG2() As Logical
 		Else	// se a rotina foi chamada pela automação de testes
 
 			SqlToTrb(cQuery, aStruct, cTrabFWP)
-			DbSetOrder(0) // Fica na ordem da query
+			DBSetOrder(0) // Fica na ordem da query
 
-		Endif 
+		EndIf 
 
 	EndIf
 
@@ -1132,7 +1114,7 @@ Static Function Valid_PG3() As Logical
 	cQueryAux	:= ''
 	aSeek		:= {}
 
-	(cTrabFWP)->(dbGoTop())
+	(cTrabFWP)->(DBGoTop())
 
 	If !l811Auto
 		While !(cTrabFWP)->(Eof())
@@ -1141,26 +1123,26 @@ Static Function Valid_PG3() As Logical
 				Exit
 			EndIf
 			
-			(cTrabFWP)->(dbSkip())
+			(cTrabFWP)->(DBSkip())
 		EndDo
 
 		If !lLoop
 			MsgAlert(STR0041,STR0011)
-			RestArea(aAreaFWP)
+			FWRestArea(aAreaFWP)
 			Return .F.
-		Endif
+		EndIf
 
 		lCont := o4thPage:lConstructed
 
 	Else
 		lCont := .T.
-	Endif
+	EndIf
 
 	If lCont
 
 		cIndex := SA1->(IndexKey())
 
-		(cTrabFWP)->(dbGoTop())
+		(cTrabFWP)->(DBGoTop())
 
 		If l811Auto
 			cCodCarta := (cTrabFWP)->FWP_CODCRT
@@ -1170,11 +1152,11 @@ Static Function Valid_PG3() As Logical
 					cCodCarta := (cTrabFWP)->FWP_CODCRT
 					Exit
 				EndIf
-				(cTrabFWP)->(dbSkip())
+				(cTrabFWP)->(DBSkip())
 			EndDo
-		Endif
+		EndIf
 
-		RestArea(aAreaFWP)
+		FWRestArea(aAreaFWP)
 
 		cQuery += 'SELECT SA1.A1_FILIAL, SA1.A1_COD, SA1.A1_LOJA, SA1.A1_NOME, SA1.A1_END, SA1.A1_EMAIL FROM ' + RetSqlName('SA1') + ' SA1 '
 		//If cComboFil == "1"
@@ -1184,26 +1166,26 @@ Static Function Valid_PG3() As Logical
 		//EndIf
 		cQuery += "	WHERE SA1.D_E_L_E_T_ = ' ' "
 
-	    IF !EMPTY(cCliAte)
+	    If !Empty(cCliAte)
 	       cQuery += " AND SA1.A1_COD BETWEEN '" + cCliDe + "' AND '" + cCliAte + "' "
-	    ELSEIF !EMPTY(cCliDe)
+	    ElseIf !Empty(cCliDe)
 	       cQuery += " AND SA1.A1_COD >= '" + cCliDe + "' "
-	    ENDIF
-	    IF !EMPTY(cLojaAte)
+	    EndIf
+	    If !Empty(cLojaAte)
 	       cQuery += "AND SA1.A1_LOJA BETWEEN '" + cLojaDe + "' AND '" + cLojaAte + "' "
-	    ELSEIF !EMPTY(cLojaDe)
+	    ElseIf !Empty(cLojaDe)
 	       cQuery += "AND SA1.A1_LOJA >= '" + cLojaDe + "' "
-	    ENDIF
+	    EndIf
 
-	    IF cCliBroq = "1"
+	    If cCliBroq = "1"
 	       //cQuery += "AND SA1.A1_MSBLQL = '1' "
-	    ELSEIF cCliBroq = "2"
+	    ElseIf cCliBroq = "2"
 	       cQuery += "AND SA1.A1_MSBLQL <> '1' "
-        ENDIF
+        EndIf
 
-		DbSelectArea('FWQ')
-		FWQ->(DbSetOrder(1))
-		If FWQ->(dbSeek(xFilial('FWQ')+cCodCarta))
+		DBSelectArea('FWQ')
+		FWQ->(DBSetOrder(1))
+		If FWQ->(DBSeek(xFilial('FWQ')+cCodCarta))
 			If !Empty(FWQ->FWQ_FILTRA)
 				cQuery += "AND " + FWQ->FWQ_FILTRA
 			EndIf
@@ -1224,7 +1206,7 @@ Static Function Valid_PG3() As Logical
 		If __oFIN8112 <> Nil
 			__oFIN8112:Delete()
 			__oFIN8112 := Nil
-		Endif
+		EndIf
 
 		cTrabSA1 := GetNextAlias()
 				
@@ -1241,12 +1223,12 @@ Static Function Valid_PG3() As Logical
 			MsgRun(STR0067,STR0065,{||SqlToTrb(cQuery, aStruct, cTrabSA1)}) // Cria arquivo temporario
 		Else
 			SqlToTrb(cQuery, aStruct, cTrabSA1) 
-		Endif
+		EndIf
 
-		(cTrabSA1)->(DbSetOrder(1))
+		(cTrabSA1)->(DBSetOrder(1))
 
-		AAdd(aSeek,{STR0071,{{"A1_COD" ,"C",TamSX3("A1_COD")[1] ,0,"",""}},1})
-		AAdd(aSeek,{STR0072,{{"A1_NOME","C",TamSX3("A1_NOME")[1],0,"",""}},2})
+		aAdd(aSeek,{STR0071,{{"A1_COD" ,"C",TamSX3("A1_COD")[1] ,0,"",""}},1})
+		aAdd(aSeek,{STR0072,{{"A1_NOME","C",TamSX3("A1_NOME")[1],0,"",""}},2})
 
 		lSA1Mrk := .F.
 
@@ -1259,7 +1241,7 @@ Static Function Valid_PG3() As Logical
 			oMrkClient:SetSeek(.T.,aSeek)
 			oMrkClient:Refresh()
 			oMrkClient:oBrowse:SetFocus()
-		Endif
+		EndIf
 
 	EndIf
 
@@ -1307,11 +1289,11 @@ Static Function Valid_PG4() As Logical
 	dDtFim		:= dDataAte
 	nTotSE1		:= 0
 
-	If cSitCob == '1' .AND. Empty(cCondCob)
+	If cSitCob == '1' .And. Empty(cCondCob)
 		cCondCob	:= F811GetSit('E1_SITUACA')
 	EndIf
 
-	(cTrabSA1)->(dbGoTop())
+	(cTrabSA1)->(DBGoTop())
 
 	While !(cTrabSA1)->(Eof())
 		If !Empty((cTrabSA1)->A1_OK)
@@ -1319,28 +1301,28 @@ Static Function Valid_PG4() As Logical
 			Exit
 		EndIf
 	
-		(cTrabSA1)->(dbSkip())
+		(cTrabSA1)->(DBSkip())
 	EndDo
 
-	RestArea(aAreaTRB)
+	FWRestArea(aAreaTRB)
 
 	If !lLoop
 		If !l811Auto
 			MsgAlert(STR0042,STR0011)
-		Endif
+		EndIf
 		Return .F.
 	EndIf
 
 	If ( o5thPage:lConstructed .And. !l811Auto ) .Or. l811Auto 
-		(cTrabSA1)->(dbGoTop())
+		(cTrabSA1)->(DBGoTop())
 	
 		If !l811Auto
 			MsgRun(STR0068,STR0065,{|| cTmpSA1 := U_AF030TmpCli(cTrabSA1)})
 		Else
 			cTmpSA1 := U_AF030TmpCli(cTrabSA1)
-		Endif
+		EndIf
 
-		RestArea(aAreaTRB)
+		FWRestArea(aAreaTRB)
 
 		cIndex := 'E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO'
 
@@ -1363,16 +1345,16 @@ Static Function Valid_PG4() As Logical
 
 			Do Case
 			Case dDtRef == dDataAte .And. dDataAte > dDataDe
-				dDtFim := dDataAte - 1 	//Se a data de referencia for igual a data ate - retroagir 1 dia
+				dDtFim := dDataAte - 1 	//Se a data de referencia For igual a data ate - retroagir 1 dia
 			Case dDtRef < dDataAte
 				dDtFim := dDtRef		//Data de referencia menor que a data ate - assume a data até
 			Case dDtRef > dDataAte
 				dDtFim := dDataAte		//Data de referencia maior que a data ate - assume a data de referência
 			EndCase
 
-			cQuery += " AND SE1.E1_VENCREA BETWEEN '" + DtoS(dDataDe) + "' AND '" + DtoS(dDtFim) + "' "
+			cQuery += " AND SE1.E1_VENCREA BETWEEN '" + DToS(dDataDe) + "' AND '" + DToS(dDtFim) + "' "
 		Else
-			cQuery += " AND SE1.E1_VENCREA BETWEEN '" + DtoS(dDataDe) + "' AND '" + DtoS(IIf(dDtRef > dDataAte,dDtRef,dDataAte)) + "' "
+			cQuery += " AND SE1.E1_VENCREA BETWEEN '" + DToS(dDataDe) + "' AND '" + DToS(IIf(dDtRef > dDataAte,dDtRef,dDataAte)) + "' "
 		EndIf
 		
 		If !Empty(cCondCob)
@@ -1403,7 +1385,7 @@ Static Function Valid_PG4() As Logical
 		If __oFIN8113 <> Nil
 			__oFIN8113:Delete()
 			__oFIN8113	:= Nil
-		Endif
+		EndIf
 
 		__oFIN8113 := FwTemporaryTable():New(cTrabSE1)
 
@@ -1420,9 +1402,9 @@ Static Function Valid_PG4() As Logical
 			MsgRun(STR0068,STR0065,{||SqlToTrb(cQuery, aStruct, cTrabSE1)}) // Cria arquivo temporario
 		Else
 			SqlToTrb(cQuery, aStruct, cTrabSE1)
-		Endif
+		EndIf
 
-		DbSetOrder(0) // Fica na ordem da query
+		DBSetOrder(0) // Fica na ordem da query
 
 		//Faz uma contagem de titulos por conta do maximo de linhas do MVC
 		COUNT TO nTotSE1
@@ -1430,7 +1412,7 @@ Static Function Valid_PG4() As Logical
 		If nTotSE1 > 9990 
 			If !l811Auto
 				Help(,,"F811MAXT",,STR0076,1,0)
-			Endif
+			EndIf
 			Return 
 		EndIf
 
@@ -1439,7 +1421,7 @@ Static Function Valid_PG4() As Logical
 			MsgRun(STR0069,STR0065,{|| U_AF030AtuTrb()})
 		Else
 			U_AF030AtuTrb()
-		Endif
+		EndIf
 
 		//Filtro especifico para selecao por saldo que necessita primeiro a   
 		//atualizacao da tabela temporaria realizada pela funcao F811AtuTrb
@@ -1469,7 +1451,7 @@ Static Function Valid_PG4() As Logical
 				oStepWiz:PreviousPage()
 			EndIf
 			
-		Endif
+		EndIf
 	EndIf
 
 Return .T.
@@ -1499,7 +1481,7 @@ Static Function Valid_PG5() As Logical
 	EndIf
 
 	If lRet
-		(cTrabSE1)->(dbGoTop())
+		(cTrabSE1)->(DBGoTop())
 
 		While !(cTrabSE1)->(Eof()) .And. lRet
 			If !Empty((cTrabSE1)->E1_MRK)
@@ -1507,10 +1489,10 @@ Static Function Valid_PG5() As Logical
 				Exit
 			EndIf
 			
-			(cTrabSE1)->(dbSkip())
+			(cTrabSE1)->(DBSkip())
 		EndDo
 
-		RestArea(aAreaTRB)
+		FWRestArea(aAreaTRB)
 
 		If !lLoop
 			MsgAlert(STR0044,STR0011)
@@ -1625,16 +1607,16 @@ Static Function MrkValid() As Logical
 	cCodCrt		:= (cTrabFWP)->FWP_CODCRT
 	aAreaFWP	:= (cTrabFWP)->(GetArea())
 
-	(cTrabFWP)->(dbGoTop())
+	(cTrabFWP)->(DBGoTop())
 
 	While !(cTrabFWP)->(Eof())
 		If (cTrabFWP)->FWP_CODCRT != cCodCrt
 			(cTrabFWP)->FWP_OK := ''
 		EndIf
-		(cTrabFWP)->(dbSkip())
+		(cTrabFWP)->(DBSkip())
 	EndDo
 
-	RestArea(aAreaFWP)
+	FWRestArea(aAreaFWP)
 Return .T.
 
 //-------------------------------------------------------------------
@@ -1725,7 +1707,7 @@ Static Function F811GrvFWT() As Logical
 	oModelFWT:SetOperation(MODEL_OPERATION_INSERT) //Inclusao
 	oModelFWT:Activate()
 
-	(cTrabFWP)->(dbGoTop())
+	(cTrabFWP)->(DBGoTop())
 
 	If l811Auto
 		cCodCarta := (cTrabFWP)->FWP_CODCRT
@@ -1737,9 +1719,9 @@ Static Function F811GrvFWT() As Logical
 				cFilLayout:= (cTrabFWP)->FWP_FILIAL
 				Exit
 			EndIf
-			(cTrabFWP)->(dbSkip())
+			(cTrabFWP)->(DBSkip())
 		EndDo
-	Endif
+	EndIf
 
 	oModelFWT:SetValue('MASTER','CODCARTA',cCodCarta)
 
@@ -1760,12 +1742,12 @@ Static Function F811GrvFWT() As Logical
 		cChaveTit	:= "(cTrabSE1)->(E1_CLIENTE + E1_LOJA)"
 	EndIf
 
-	(cTrabSA1)->(dbGoTop())
+	(cTrabSA1)->(DBGoTop())
 
 	nEnvProc := 0
 
 	If nOrder > 0 .And. !Empty(cChaveTit)
-		(cTrabSE1)->(dbSetOrder(nOrder))
+		(cTrabSE1)->(DBSetOrder(nOrder))
 		While !(cTrabSA1)->(Eof())
 
 			//Verifica a ordem de busca na SE1 pelo compartilhamento
@@ -1781,31 +1763,31 @@ Static Function F811GrvFWT() As Logical
 				lCliOk := .T.
 			Else
 				lCliOk := (cTrabSA1)->A1_OK == oMrkClient:cMark 
-			Endif
+			EndIf
 		
 			lEmitSA1 := .T.
 
 			If lCliOk 
-				(cTrabSE1)->(dbGoTop())
-				If (cTrabSE1)->(dbSeek(&(cChaveCli)))
+				(cTrabSE1)->(DBGoTop())
+				If (cTrabSE1)->(DBSeek(&(cChaveCli)))
 					cProcess := ""
 					While !(cTrabSE1)->(Eof()) .And. &(cChaveCli) == &(cChaveTit)
 						If l811Auto
 							lTitOk := .T.
 						Else
 							lTitOk := (cTrabSE1)->E1_MRK == oMrkTitle:cMark 
-						Endif
+						EndIf
 
 						If lTitOk 
 							If Empty(cProcess)
 								cProcess := FWUUIDV4()
 								nProcesso++
-							Endif
+							EndIf
 
 							If lEmitSA1
 								aAdd(aProcesso,{(cTrabSA1)->(A1_FILIAL + A1_COD + A1_LOJA),{}})
 								lEmitSA1 := .F.
-							Endif
+							EndIf
 							aAdd(aReport,{(cTrabSA1)->A1_COD,(cTrabSA1)->A1_LOJA,cProcess,cCodCarta})
 
 							If !oSubFWT:IsEmpty()
@@ -1825,17 +1807,17 @@ Static Function F811GrvFWT() As Logical
 							aAdd(aProcesso[nProcesso][2],{cProcess,cChaveFK7,(cTrabSE1)->E1_FILORIG})
 							If l811Auto
 								aAdd(aRetorno,{cProcess,cChaveFK7}) // variável aRetorno declarada no fonte FINA811TESTCASE
-							Endif 
+							EndIf 
 							nEnvProc++
 						EndIf
-						(cTrabSE1)->(dbSkip())
+						(cTrabSE1)->(DBSkip())
 					EndDo
 				EndIf
 			Else
-				(cTrabSA1)->(dbSkip())
+				(cTrabSA1)->(DBSkip())
 				Loop
 			EndIf
-			(cTrabSA1)->(dbSkip())
+			(cTrabSA1)->(DBSkip())
 		EndDo
 	EndIf
 
@@ -1849,16 +1831,16 @@ Static Function F811GrvFWT() As Logical
 			cLog += cValToChar(oModelFWT:GetErrorMessage()[6])
 		
 			Help(,,"F811CART",,cLog,1,0)
-		Endif
-	Endif
+		EndIf
+	EndIf
 
 	//Processa o envio de e-mails e/ou a exibição do relatório
 	//conforme a configuração do layout da carta selecionado
 	F811SendMail()
 
-	RestArea(aAreaTRBSE1)
-	RestArea(aAreaTRBSA1)
-	RestArea(aAreaTRBFWP)
+	FWRestArea(aAreaTRBSE1)
+	FWRestArea(aAreaTRBSA1)
+	FWRestArea(aAreaTRBFWP)
 
 Return .T.
 
@@ -1953,30 +1935,30 @@ Static Function F811SendMail() As Logical
 
 	Private dBaixa		:= dDtRef
 
-	(cTrabFWP)->(dbGoTop())
+	(cTrabFWP)->(DBGoTop())
 
 	While !(cTrabFWP)->(Eof())
 		If l811Auto 
 			lLayoutOk := .T.
 		Else
 			lLayoutOk := (cTrabFWP)->FWP_OK == oMrkLayout:cMark
-		Endif 
+		EndIf 
 		
 		If lLayoutOk
 			cFilFWP   := (cTrabFWP)->FWP_FILIAL
 			cCodCarta := (cTrabFWP)->FWP_CODCRT
-			FWP->(DbSetOrder(1))
-			FWP->(dbseek(xFilial('FWP',cFilFWP)+cCodCarta))
+			FWP->(DBSetOrder(1))
+			FWP->(DBSeek(xFilial('FWP',cFilFWP)+cCodCarta))
 			cSaudacao := FWP->FWP_TXTSAU
 			cCorpoCrt := FWP->FWP_TXTCRT
 			cConcluCrt:= FWP->FWP_TXTCON
 			cTpEnvio  := FWP->FWP_ENVIO
 			Exit
 		EndIf
-		(cTrabFWP)->(dbSkip())
+		(cTrabFWP)->(DBSkip())
 	EndDo
 
-	RestArea(aAreaFWP)
+	FWRestArea(aAreaFWP)
 
 	cAliasFWS := GetNextAlias()
 
@@ -1986,13 +1968,13 @@ Static Function F811SendMail() As Logical
 	BeginSql Alias cAliasFWS
 
 		SELECT FWS.FWS_CAMPO,FWS.FWS_DESCRI
-		FROM %TABLE:FWS% FWS
+		FROM %Table:FWS% FWS
 		WHERE FWS.FWS_FILIAL = %Exp:cFilFWS%
 		AND FWS.FWS_LAYOUT = %Exp:cCodCarta%
 		AND FWS.%NOTDEL%
 		ORDER BY FWS.FWS_SEQ
 
-	EndSQL
+	EndSql
 
 	//Montagem do array contendo
 	// - Nome do campo no SX3
@@ -2000,14 +1982,14 @@ Static Function F811SendMail() As Logical
 	// - Tipo do campo (SX3)
 	// - Picture do campo (SX3)
 	While !(cAliasFWS)->(Eof())
-		SX3->(dbSetOrder(2)) // X3_CAMPO
-		SX3->(DbSeek((cAliasFWS)->FWS_CAMPO))
+		SX3->(DBSetOrder(2)) // X3_CAMPO
+		SX3->(DBSeek((cAliasFWS)->FWS_CAMPO))
 		aAdd(aMailFld, {(cAliasFWS)->FWS_CAMPO,(cAliasFWS)->FWS_DESCRI,SX3->X3_TIPO,SX3->X3_PICTURE})
-		(cAliasFWS)->(dbSkip())
+		(cAliasFWS)->(DBSkip())
 	EndDo
 
-	dbSelectArea(cAliasFWS)
-	dbCloseArea()
+	DBSelectArea(cAliasFWS)
+	DBCloseArea()
 
 	ProcLogIni( {} , 'FINA811Proc' , , @cIdCV8 )
 
@@ -2025,9 +2007,9 @@ Static Function F811SendMail() As Logical
 
 			lCabecVenc := .T.
 
-			SA1->(DbSetOrder(1))
-			SA1->(DbSeek(aProcesso[nX][1]))
-			cTo := Alltrim(SA1->A1_EMAIL)
+			SA1->(DBSetOrder(1))
+			SA1->(DBSeek(aProcesso[nX][1]))
+			cTo := AllTrim(SA1->A1_EMAIL)
 			
 			/*
 			If lF811MAILTO
@@ -2119,23 +2101,23 @@ Static Function F811SendMail() As Logical
 
 			For nY := 1 To Len(aProcesso[nX][2])
 
-				FK7->(DbSetOrder(1))
-				FK7->(DbSeek(xFilial('FK7',aProcesso[nX][2][nY][3]) + aProcesso[nX][2][nY][2]))
-				SE1->(DbSetOrder(1))
-				SE1->(DbSeek(RTrim(FinFK7Key(FK7->FK7_CHAVE,''))))
+				FK7->(DBSetOrder(1))
+				FK7->(DBSeek(xFilial('FK7',aProcesso[nX][2][nY][3]) + aProcesso[nX][2][nY][2]))
+				SE1->(DBSetOrder(1))
+				SE1->(DBSeek(RTrim(FinFK7Key(FK7->FK7_CHAVE,''))))
 
-				IF !EMPTY(SE1->E1_VEND1) .AND. !_lVendDif
-				   IF !EMPTY(_cVendedor) .AND. SE1->E1_VEND1 <> _cVendedor
+				If !Empty(SE1->E1_VEND1) .And. !_lVendDif
+				   If !Empty(_cVendedor) .And. SE1->E1_VEND1 <> _cVendedor
 				      _lVendDif:=.T.
 					  _cMensagem:="Titulos com vendedores diferentes"
-				   ENDIF
-				   IF SE1->E1_VEND1 $ (SA1->(A1_VEND+A1_I_VEND2+A1_I_VEND3+A1_I_VEND4))
+				   EndIf
+				   If SE1->E1_VEND1 $ (SA1->(A1_VEND+A1_I_VEND2+A1_I_VEND3+A1_I_VEND4))
 				      _cVendedor:=SE1->E1_VEND1
 					  _cMensagem:=""
-				   ELSEIF EMPTY(_cVendedor)
+				   ElseIf Empty(_cVendedor)
 					  _cMensagem:="Titulos com vendedores incopativeis com o cadastro de Cliente"
-				   ENDIF
-				ENDIF
+				   EndIf
+				EndIf
 
 				nValAbat  := SomaAbat(SE1->E1_PREFIXO,SE1->E1_NUM,SE1->E1_PARCELA,"R",SE1->E1_MOEDA,dDataBase,;
 					SE1->E1_CLIENTE,SE1->E1_LOJA,xFilial('SE1',SE1->E1_FILORIG),,SE1->E1_TIPO)
@@ -2175,8 +2157,8 @@ Static Function F811SendMail() As Logical
 							cLogMsg += PadL(AllTrim(Transform(SE1->&(AllTrim(aMailFld[nZ][1])),AllTrim(aMailFld[nZ][4]))),nLenTitle) + ' | '
 						ElseIf aMailFld[nZ][3] == 'D'
 							cHtml += '<td id="data">
-							cHtml += DtoC(SE1->&(AllTrim(aMailFld[nZ][1])))
-							cLogMsg += PadR(DtoC(SE1->&(AllTrim(aMailFld[nZ][1]))),nLenTitle) + ' | '
+							cHtml += DToC(SE1->&(AllTrim(aMailFld[nZ][1])))
+							cLogMsg += PadR(DToC(SE1->&(AllTrim(aMailFld[nZ][1]))),nLenTitle) + ' | '
 						ElseIf AllTrim(aMailFld[nZ][1]) == 'E1_SALDO'
 							cHtml += '<td id="valor">
 							cHtml += Transform(SE1->E1_SALDO - nValAbat,AllTrim(aMailFld[nZ][4]))
@@ -2283,7 +2265,7 @@ Static Function F811SendMail() As Logical
 
 				For nW := 1 To Len(aAux)
 					cHtml += '<tr>'
-					SE1->(DbGoTo(aAux[nW]))
+					SE1->(DBGoTo(aAux[nW]))
 					nValAbat  := SomaAbat(SE1->E1_PREFIXO,SE1->E1_NUM,SE1->E1_PARCELA,"R",SE1->E1_MOEDA,dDataBase,;
 						SE1->E1_CLIENTE,SE1->E1_LOJA,xFilial('SE1',SE1->E1_FILORIG),,SE1->E1_TIPO)
 					For nZ := 1 To Len(aMailFld)
@@ -2293,8 +2275,8 @@ Static Function F811SendMail() As Logical
 							cLogMsg += PadL(AllTrim(Transform(SE1->&(AllTrim(aMailFld[nZ][1])),AllTrim(aMailFld[nZ][4]))),nLenTitle) + ' | '
 						ElseIf aMailFld[nZ][3] == 'D'
 							cHtml += '<td id="data">
-							cHtml += DtoC(SE1->&(AllTrim(aMailFld[nZ][1])))
-							cLogMsg += PadR(DtoC(SE1->&(AllTrim(aMailFld[nZ][1]))),nLenTitle) + ' | '
+							cHtml += DToC(SE1->&(AllTrim(aMailFld[nZ][1])))
+							cLogMsg += PadR(DToC(SE1->&(AllTrim(aMailFld[nZ][1]))),nLenTitle) + ' | '
 						ElseIf AllTrim(aMailFld[nZ][1]) == 'E1_SALDO'
 							cHtml += '<td id="valor">
 							cHtml += Transform(SE1->E1_SALDO - nValAbat,AllTrim(aMailFld[nZ][4]))
@@ -2412,20 +2394,20 @@ Static Function F811SendMail() As Logical
 
 	If !Empty(aStatus)
 		For nX := 1 To Len(aStatus)
-			FWT->(DbSetOrder(1))
-			If FWT->(DbSeek(xFilial("FWT") + aStatus[nX][03] + aStatus[nX][01]))
+			FWT->(DBSetOrder(1))
+			If FWT->(DBSeek(xFilial("FWT") + aStatus[nX][03] + aStatus[nX][01]))
 				While !FWT->(Eof()) .And. FWT->(FWT_FILIAL + FWT_LAYOUT + FWT_PROCES) == xFilial("FWT") + aStatus[nX][03] + aStatus[nX][01]
 					RecLock("FWT")
 					FWT->FWT_STATUS := aStatus[nX][02]
-					MsUnlock()
+					MSUnLock()
 				
-					FWT->(DbSkip())
+					FWT->(DBSkip())
 				EndDo
 			EndIf
 		Next nX
 	EndIf
 
-	If !l811Auto .and. cTpEnvio $ "2|3" // Tipo de Envio: Carta Física ou Ambos
+	If !l811Auto .And. cTpEnvio $ "2|3" // Tipo de Envio: Carta Física ou Ambos
 		FINR811A(.T.,cComboVenc) //// Titulos a Vencer?  1-Sim , 2-Nao
 		ProcLogAtu( 'MENSAGEM' , STR0053 , , , .T.)
 	EndIf
@@ -2459,7 +2441,7 @@ Static Function SetMrkAll( nTrab As Numeric )
 		Return
 	ElseIf nTrab == 2
 		aArea := (cTrabSA1)->(GetArea())
-		(cTrabSA1)->(DbGoTop())
+		(cTrabSA1)->(DBGoTop())
 		If lSA1Mrk
 			cMarca := ''
 			lSA1Mrk := .F.
@@ -2470,14 +2452,14 @@ Static Function SetMrkAll( nTrab As Numeric )
 
 		While !(cTrabSA1)->(Eof())
 			(cTrabSA1)->A1_OK := cMarca
-			(cTrabSA1)->(DbSkip())
+			(cTrabSA1)->(DBSkip())
 		EndDo
 
-		RestArea(aArea)
+		FWRestArea(aArea)
 		oMrkClient:Refresh()
 	ElseIf nTrab == 3
 		aArea := (cTrabSE1)->(GetArea())
-		(cTrabSE1)->(DbGoTop())
+		(cTrabSE1)->(DBGoTop())
 		If lSE1Mrk
 			cMarca := ''
 			lSE1Mrk := .F.
@@ -2488,10 +2470,10 @@ Static Function SetMrkAll( nTrab As Numeric )
 
 		While !(cTrabSE1)->(Eof())
 			(cTrabSE1)->E1_MRK := cMarca
-			(cTrabSE1)->(DbSkip())
+			(cTrabSE1)->(DBSkip())
 		EndDo
 
-		RestArea(aArea)
+		FWRestArea(aArea)
 		oMrkTitle:Refresh()
 	EndIf
 
@@ -2530,12 +2512,12 @@ User Function AF030AbatRec() As Numeric
 	cCliente	:= ''
 	cLoja		:= ''
 	cMoeda		:= ''
-	aArea		:= GetArea()
+	aArea		:= FWGetArea()
 	cAliasAux	:= ''
-	lFinr811	:= FwIsInCallStack('FINR811') .OR. FwIsInCallStack('FINR811A')
-	lRPC		:= Alltrim(Funname()) == 'RPC'
+	lFinr811	:= FWIsInCallStack('FINR811') .Or. FWIsInCallStack('FINR811A')
+	lRPC		:= AllTrim(Funname()) == 'RPC'
 
-	If lFinr811 .or. (lRPC .and. Type('cTrabSE1') == 'U')
+	If lFinr811 .Or. (lRPC .And. Type('cTrabSE1') == 'U')
 		cAliasAux	:= 'SE1'
 	Else
 		cAliasAux	:= cTrabSE1
@@ -2552,13 +2534,13 @@ User Function AF030AbatRec() As Numeric
 
 	If !lFinr811
 		//Posiciono a SE1 no registro correspondente para uso na SumAbatRec
-		SE1->(dbSetOrder(2)) //E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO
-		SE1->(dbSeek(xFilial('SE1',(cAliasAux)->E1_FILORIG) + (cAliasAux)->(E1_CLIENTE + E1_LOJA) + cPrefixo + cNum + cParcela + (cAliasAux)->E1_TIPO ))
+		SE1->(DBSetOrder(2)) //E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO
+		SE1->(DBSeek(xFilial('SE1',(cAliasAux)->E1_FILORIG) + (cAliasAux)->(E1_CLIENTE + E1_LOJA) + cPrefixo + cNum + cParcela + (cAliasAux)->E1_TIPO ))
 	EndIf
 
 	nValAbat  := SomaAbat(cPrefixo,cNum,cParcela,"R",cMoeda,dDataBase,cCliente,cLoja,cFilAbat,,cTipo)
 
-	RestArea(aArea)
+	FWRestArea(aArea)
 
 Return nValAbat
 
@@ -2584,20 +2566,20 @@ User Function AF030RMul( nValor As Numeric, nSaldo As Numeric, dDtVencRea As Dat
 
 	If __cMvJurTp == NIL
 		__cMvJurTp	:= SuperGetMv("MV_JURTIPO",,"")  // calculo de Multa do Loja , se JURTIPO == L
-	Endif
+	EndIf
 
 	If __lMulLoj == NIL
 		__lMulLoj := SuperGetMv("MV_LJINTFS", ,.F.) //Calcula multa conforme regra do loja, se integração com financial estiver habilitada
-	Endif
+	EndIf
 
 	//----------------------------------------------------------------------------------------------------------------------
 	// Verifica se o tipo de calculo de juros é igual (L)loja ou Indicacao do calculo de Multa do Loja, calcula a multa 
 	//----------------------------------------------------------------------------------------------------------------------
-	If (__cMvJurTp == "L" .OR. __lMulLoj) .and. nSaldo + U_AF030AbatRec() > 0
+	If (__cMvJurTp == "L" .Or. __lMulLoj) .And. nSaldo + U_AF030AbatRec() > 0
 
 		nMulta := 	LojxRMul(,.F.,,nSaldo,,dDtVencRea,dDtRef)
 
-	Endif
+	EndIf
 
 Return nMulta
 
@@ -2612,13 +2594,13 @@ Ajusta o valor do saldo do título, considerando seus abatimentos
 //-------------------------------------------------------------------
 User Function AF030AtuTrb()
 
-	(cTrabSE1)->(DbGoTop())
+	(cTrabSE1)->(DBGoTop())
 
 	While !(cTrabSE1)->(Eof())
 		RecLock(cTrabSE1,.F.)
 		(cTrabSE1)->E1_SALDO := (cTrabSE1)->E1_SALDO - U_AF030AbatRec()
-		MsUnlock()
-		(cTrabSE1)->(DbSkip())
+		MSUnLock()
+		(cTrabSE1)->(DBSkip())
 	EndDo
 
 Return
@@ -2648,7 +2630,7 @@ User Function AF030TmpCli( cTrabSA1 As Character ) As Character
 	If __oFIN8115 <> Nil
 		__oFIN8115:Delete()
 		__oFIN8115	:= Nil
-	Endif
+	EndIf
 
 	__oFIN8115 := FwTemporaryTable():New(cTmpSA1)
 
@@ -2663,10 +2645,10 @@ User Function AF030TmpCli( cTrabSA1 As Character ) As Character
 		If !Empty((cTrabSA1)->A1_OK) .Or. l811Auto
 			RecLock(cTmpSA1,.T.)
 			(cTmpSA1)->CLIENTE := (cTrabSA1)->A1_COD + (cTrabSA1)->A1_LOJA
-			MsUnlock()
+			MSUnLock()
 		EndIf
 
-		(cTrabSA1)->(dbSkip())
+		(cTrabSA1)->(DBSkip())
 	EndDo
 
 Return cTmpSA1
@@ -2685,7 +2667,7 @@ User Function AF030TitJur( cTrabSE1 As Character ) As Numeric
 
 	nValJur := 0
 
-	SE1->(DbSetOrder(1))
+	SE1->(DBSetOrder(1))
 	SE1->(MsSeek( (cTrabSE1)->(E1_FILIAL + E1_PREFIXO + E1_NUM + E1_PARCELA + E1_TIPO + E1_CLIENTE + E1_LOJA) ))
 
 	nValJur := fa070Juros(SE1->E1_MOEDA,SE1->E1_SALDO)
@@ -2727,7 +2709,7 @@ Return cRet
 Construção de Browse de Consulta Padrão do tipo Especifíca 
 Situação Cobrança Seleção
 NOME ORIGINAL DA FUNCAO F770FltSC
-@return cRet – Relação das situações de cobrança selecionadas pelo usuário
+@Return cRet – Relação das situações de cobrança selecionadas pelo usuário
 @author lucas.oliveira
 @since  16/05/2015
 @version 12.1.6
@@ -2760,7 +2742,7 @@ Static Function F811FltSC( cFiltro As Character, lFilFW2 As Logical ) As Logical
 	aPesq		:= {}
 
 	//Criar uma FWMarkBrowse() baseado na tabela FRV, apresentando todas as situações de cobrança e sua descrição para seleção do usuário.
-	//Caso o usuário confirme, retornar string com o código das situações selecionadas, alimentando a variável Static __cRe770F3
+	//Caso o usuário confirme, retornar string com o código das situações selecionadas, alimentando a vari�Statictatic __cRe770F3
 
 	__cRe770F3 := ''
 
@@ -2770,7 +2752,7 @@ Static Function F811FltSC( cFiltro As Character, lFilFW2 As Logical ) As Logical
 		cQuery += "WHERE FRV.FRV_FILIAL = '" + xFilial("FRV") + "' "
 		cQuery += "AND FRV.D_E_L_E_T_ = ' ' "
 
-		If lFilFW2 //Incluso IF para nao executar esse trecho quando executado pelo relatorio FINR645
+		If lFilFW2 //Incluso If para nao executar esse trecho quando executado pelo relatorio FINR645
 			cQuery += "AND FRV_CODIGO NOT IN(
 			cQuery += "Select FW2_SITUAC FROM "+ RetSqlName("FW2")
 			cQuery += " WHERE D_E_L_E_T_ = ''"
@@ -2789,7 +2771,7 @@ Static Function F811FltSC( cFiltro As Character, lFilFW2 As Logical ) As Logical
 		If __oFIN8114 <> Nil
 			__oFIN8114:Delete()
 			__oFIN8114	:= Nil
-		Endif
+		EndIf
 
 		__oFIN8114 := FwTemporaryTable():New(__cArqTrab)
 
@@ -2808,7 +2790,7 @@ Static Function F811FltSC( cFiltro As Character, lFilFW2 As Logical ) As Logical
 	//MarkBrowse
 	For nX := 1 To Len(aStru)
 		If	aStru[nX][1] $ "FRV_FILIAL|FRV_CODIGO|FRV_DESCRI|FRV_BANCO|FRV_DESCON|FRV_PROTES|FRV_PERCEN|FRV_NATIOF"
-			AAdd(aColumns,FWBrwColumn():New())
+			aAdd(aColumns,FWBrwColumn():New())
 			aColumns[Len(aColumns)]:SetData( &("{||"+aStru[nX][1]+"}") )
 			aColumns[Len(aColumns)]:SetTitle(RetTitle(aStru[nX][1]))
 			aColumns[Len(aColumns)]:SetSize(aStru[nX][3])
@@ -2818,8 +2800,8 @@ Static Function F811FltSC( cFiltro As Character, lFilFW2 As Logical ) As Logical
 	Next nX
 
 	//Regras para pesquisa na tela
-	Aadd(aPesq,{AllTrim(RetTitle("FRV_CODIGO")),{{'FRV',"C",TamSX3("FRV_CODIGO")[1],0,AllTrim(RetTitle("FRV_CODIGO")),"@!"}},1})
-	Aadd(aPesq,{AllTrim(RetTitle("FRV_DESCRI")),{{'FRV',"C",TamSX3("FRV_DESCRI")[1],0,AllTrim(RetTitle("FRV_DESCRI")),"@!"}},1})
+	aAdd(aPesq,{AllTrim(RetTitle("FRV_CODIGO")),{{'FRV',"C",TamSX3("FRV_CODIGO")[1],0,AllTrim(RetTitle("FRV_CODIGO")),"@!"}},1})
+	aAdd(aPesq,{AllTrim(RetTitle("FRV_DESCRI")),{{'FRV',"C",TamSX3("FRV_DESCRI")[1],0,AllTrim(RetTitle("FRV_DESCRI")),"@!"}},1})
 
 	If !(__cArqTrab)->(Eof())
 		aSize := MsAdvSize(,.F.,400)
@@ -2862,8 +2844,8 @@ Static Function F811SCMark( oMrkBrowse As Object, __cArqTrab As Character ) As L
 
 	cMarca := oMrkBrowse:Mark()
 
-	dbSelectArea(__cArqTrab)
-	(__cArqTrab)->(DbGoTop())
+	DBSelectArea(__cArqTrab)
+	(__cArqTrab)->(DBGoTop())
 
 	While !(__cArqTrab)->(Eof())
 	
@@ -2875,10 +2857,10 @@ Static Function F811SCMark( oMrkBrowse As Object, __cArqTrab As Character ) As L
 			(__cArqTrab)->FRV_OK := cMarca
 		EndIf
 
-		MsUnlock()
-		(__cArqTrab)->(DbSkip())
+		MSUnLock()
+		(__cArqTrab)->(DBSkip())
 	EndDo
-	(__cArqTrab)->(DbGoTop())
+	(__cArqTrab)->(DBGoTop())
 	oMrkBrowse:oBrowse:Refresh(.T.)
 
 Return .T.
@@ -2901,19 +2883,19 @@ Static Function F811GrvSC( __cArqTrab As Character ) As Logical
 	nRecno	:= 0
 	nX		:= 0
 
-	dbSelectArea(__cArqTrab)
+	DBSelectArea(__cArqTrab)
 	nRecno := (__cArqTrab)->(RecNo())
-	(__cArqTrab)->(DbGoTop())
+	(__cArqTrab)->(DBGoTop())
 	While !(__cArqTrab)->(Eof())
 		If !Empty((__cArqTrab)->FRV_OK)
-			__cRe770F3 += Iif(nX > 0, ",'" + (__cArqTrab)->FRV_CODIGO + "'", "'" + (__cArqTrab)->FRV_CODIGO + "'")
+			__cRe770F3 += IIf(nX > 0, ",'" + (__cArqTrab)->FRV_CODIGO + "'", "'" + (__cArqTrab)->FRV_CODIGO + "'")
 			nX++
 		EndIf
-		(__cArqTrab)->(DbSkip())
+		(__cArqTrab)->(DBSkip())
 	End
 
-	(__cArqTrab)->(DbGoTo(nRecno))
-	lRet := Iif(Len(__cRe770F3) > 0,.T., .F.)
+	(__cArqTrab)->(DBGoTo(nRecno))
+	lRet := IIf(Len(__cRe770F3) > 0,.T., .F.)
 
 Return lRet
 
@@ -2950,9 +2932,9 @@ Static Function FIN811AUTO() As Logical
 		// Validação dos clientes, seleção e validação dos títulos
 		//----------------------
 		Valid_PG4() 
-		(cTrabSE1)->(dbGoTop())
+		(cTrabSE1)->(DBGoTop())
 		lRet := !(cTrabSE1)->(Eof())
-	Endif
+	EndIf
 
 	If lRet
 		//----------------------
@@ -2961,7 +2943,7 @@ Static Function FIN811AUTO() As Logical
 		//----------------------
 		F811GrvFWT()
 		
-	Endif 
+	EndIf 
 
 Return lRet
 
@@ -2971,162 +2953,135 @@ Return lRet
 Programa----------: F811MAILTO
 Autor-------------: Alex Wallauer
 Data da Criacao---: 05/04/2022
-===============================================================================================================================
 Descri��o---------: Antigo PE no programa FINA811.PRW - Rotina para envio das cartas de cobranca - CHAMADO 35423
-===============================================================================================================================
 Parametros--------: _cVendedor,_cMensagem)
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC FUNCTION F811MAILTO(_cVendedor,_cMensagem)
-LOCAL cGetPara:= Alltrim(SA1->A1_EMAIL)
-LOCAL cGetCc  := AllTrim(UsrRetMail(__cUserId))
-LOCAL cGetNovo:= SPACE(1000)
-LOCAL aEmails := {}
-LOCAL nOpcA   := 0
-LOCAL nCol    := 50
-LOCAL nlin    := 06
-LOCAL cCliente:=ALLTRIM(SA1->A1_NOME)+" ( "+SA1->A1_COD + " - " + SA1->A1_LOJA +" ) "
-LOCAL cGetVend:=Posicione("SA3",1,xFilial("SA3")+_cVendedor,"A3_EMAIL")//+SPACE(1000) //
-LOCAL _lCheck := .F.
+Static Function F811MAILTO(_cVendedor,_cMensagem)
+Local cGetPara:= AllTrim(SA1->A1_EMAIL)
+Local cGetCc  := AllTrim(UsrRetMail(__cUserId))
+Local cGetNovo:= Space(1000)
+Local aEmails := {}
+Local nOpcA   := 0
+Local nCol    := 50
+Local nlin    := 06
+Local cCliente:=AllTrim(SA1->A1_NOME)+" ( "+SA1->A1_COD + " - " + SA1->A1_LOJA +" ) "
+Local cGetVend:=Posicione("SA3",1,xFilial("SA3")+_cVendedor,"A3_EMAIL")//+Space(1000) //
+Local _lCheck := .F.
 
-IF EMPTY(cGetVend)
+If Empty(cGetVend)
    _cMensagem:="Vendedor sem e-mail"
-ENDIF
+EndIf
 
-IF !EMPTY(_cMensagem)
+If !Empty(_cMensagem)
    cGetVend:=_cMensagem
-ENDIF
+EndIf
 
 
-cGetNovo := SPACE(1000)
+cGetNovo := Space(1000)
 
 
 DEFINE MSDIALOG oDlgMail TITLE "Configuracao do E-Mail" FROM 000, 000  TO 300, 650   PIXEL
 
-	@ nlin  , 006 SAY oPara PROMPT "Cliente:" SIZE 045, 007 OF oDlgMail   PIXEL
+	@ nlin  , 006 Say oPara PROMPT "Cliente:" SIZE 045, 007 OF oDlgMail   PIXEL
 	@ nlin-1, nCol MSGET cCliente SIZE 256, 010 OF oDlgMail  PIXEL WHEN .F.
     nlin+=16
 
 	// Para:
-	@ nlin  , 006 SAY oPara PROMPT "E-mail Cliente:" SIZE 045, 007 OF oDlgMail   PIXEL
+	@ nlin  , 006 Say oPara PROMPT "E-mail Cliente:" SIZE 045, 007 OF oDlgMail   PIXEL
 	@ nlin-1, nCol MSGET cGetPara SIZE 256, 010 OF oDlgMail  PIXEL WHEN .F.
     nlin+=16
 
 	// Com c�pia:
-	@ nlin  , 006 SAY oCc PROMPT "Com Copia:" SIZE 045, 007 OF oDlgMail   PIXEL
+	@ nlin  , 006 Say oCc PROMPT "Com Copia:" SIZE 045, 007 OF oDlgMail   PIXEL
 	@ nlin-1, nCol MSGET cGetCc SIZE 256, 010 OF oDlgMail  PIXEL WHEN .F.
     nlin+=16
 
 	// E-mail Novo:
-	@ nlin  , 006 SAY oAssunto PROMPT "E-Mail Novo:" SIZE 045, 007 OF oDlgMail   PIXEL
+	@ nlin  , 006 Say oAssunto PROMPT "E-Mail Novo:" SIZE 045, 007 OF oDlgMail   PIXEL
 	@ nlin-1, nCol MSGET cGetNovo SIZE 256, 010 OF oDlgMail  PIXEL VALID U_EEmail( cGetNovo ) 
     nlin+=16
 
 	// E-mail Vendedor:
-	@ nlin,006 Checkbox _lCheck PROMPT "Enviar E-Mail p/ Vendedor?"	PIXEL OF oDlgMail SIZE 200,008 WHEN EMPTY(_cMensagem) PIXEL //ON CLICK( AFIN004TPT( _lCheck , @aItens ) , oVend:Refresh() )
+	@ nlin,006 Checkbox _lCheck PROMPT "Enviar E-Mail p/ Vendedor?"	PIXEL OF oDlgMail SIZE 200,008 WHEN Empty(_cMensagem) PIXEL //ON CLICK( AFIN004TPT( _lCheck , @aItens ) , oVend:Refresh() )
     nlin+=16
-	@ nlin, 006 SAY "Vendedor: "+_cVendedor+" - "+SA3->A3_NOME OF oDlgMail   PIXEL//SIZE 045, 007 
+	@ nlin, 006 Say "Vendedor: "+_cVendedor+" - "+SA3->A3_NOME OF oDlgMail   PIXEL//SIZE 045, 007 
     nlin+=16
 	@ nlin, 06 MSGET oVend VAR cGetVend SIZE 256, 010 OF oDlgMail  PIXEL WHEN .F.//_lCheck//VALID U_EEmail( cGetVend ) 
     nlin+=17
 
-	@ nlin, nCol    BUTTON oButEnv PROMPT "&OK"		SIZE 037, 012 OF oDlgMail ACTION ( nOpcA := 1 , Iif(!Empty(Alltrim(cGetPara+cGetNovo)),oDlgMail:End(),u_itmsg("Preencha o campo E-mail Novo pois no cadastro desse cliente o campo e-mail n�o est� preenchido!","Aten��o",,3)) ) PIXEL
+	@ nlin, nCol    BUTTON oButEnv PROMPT "&OK"		SIZE 037, 012 OF oDlgMail ACTION ( nOpcA := 1 , IIf(!Empty(AllTrim(cGetPara+cGetNovo)),oDlgMail:End(),U_ITMsg("Preencha o campo E-mail Novo pois no cadastro desse cliente o campo e-mail n�o est� preenchido!","Aten��o",,3)) ) PIXEL
 	//@ 055, nCol+45 BUTTON oButCan PROMPT "&Manter"  	SIZE 037, 012 OF oDlgMail ACTION ( nOpcA := 0 , oDlgMail:End() ) PIXEL
 
 ACTIVATE MSDIALOG oDlgMail CENTERED
 
-IF !EMPTY(cGetNovo)  .AND. nOpcA = 1
-   cGetPara := Alltrim(cGetNovo)
-   if _lCheck	  
+If !Empty(cGetNovo)  .And. nOpcA = 1
+   cGetPara := AllTrim(cGetNovo)
+   If _lCheck	  
 	  aEmails := { cGetPara,cGetCc+";"+cGetVend}
-   ELSE
+   Else
 	  aEmails := { cGetNovo,cGetCc}
-   ENDIF
-ELSE
-   	if _lCheck
+   EndIf
+Else
+   	If _lCheck
 		aEmails := { cGetPara,cGetCc+";"+cGetVend}
 	Else
 		aEmails := { cGetPara,cGetCc}
 	EndIf
-ENDIF
+EndIf
 
-RETURN aEmails
-
-
-
-//-------------------------------------------------------------------
-/*/{Protheus.doc} F811RetRep
-Função atribuir valor à variável estática __lFIN811R, usada no relatório de cartas enviadas (FINR811)
-
-@param
-@author rogerio.melonio	
-@since  16/03/2018
-@version 12.1.17
-/*/
-//-------------------------------------------------------------------
-/*
-User Function ITF811RetRep( lRet811 As Logical ) As Logical
-
-	__lFIN811R := lRet811
-
-Return __lFIN811R
-*/
-
+Return aEmails
 
 /*
 ===============================================================================================================================
 Programa----------: Valid_PG1()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 05/04/2022
-===============================================================================================================================
 Descri��o---------: PE no programa FINA811.PRW - Rotina para envio das cartas de cobranca - CHAMADO 35423
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC FUNCTION Valid_PG1()
-LOCAL nI
-LOCAL aOptions := {"1 - Sim","2 - Nao"}
-LOCAL aOpConVl := {"1 - Valor Total","2 - Saldo      "}
-LOCAL aOpBloqu := {"1 - Sim  ","2 - Nao  "}
-LOCAL _aParAux := {} 
-LOCAL _aParRet := {} 
-LOCAL _bOK     := {|| .T. }
+Static Function Valid_PG1()
+Local nI
+Local aOptions := {"1 - Sim","2 - Nao"}
+Local aOpConVl := {"1 - Valor Total","2 - Saldo      "}
+Local aOpBloqu := {"1 - Sim  ","2 - Nao  "}
+Local _aParAux := {} 
+Local _aParRet := {} 
+Local _bOK     := {|| .T. }
 cComboFil  :=aOptions[1]
 cSitCob    :=aOptions[2]
 cComboVenc :=aOptions[2]
 cComboConVl:=aOpConVl[1]
 cCliBroq   :=aOpBloqu[1]
 
-AADD( _aParAux , { 1 , LEFT(STR0025,LEN(STR0025)-1),cCliDe     ,X3Picture('A1_COD')    ,"",'SA1'   	, "" , 060 , .F. } )//01
-AADD( _aParAux , { 1 , LEFT(STR0026,LEN(STR0026)-1),cLojaDe    ,X3Picture('A1_LOJA')   ,"",        	, "" , 060 , .F. } )//02
-AADD( _aParAux , { 1 , LEFT(STR0027,LEN(STR0027)-1),cCliAte    ,X3Picture('A1_COD')    ,"",'SA1'   	, "" , 060 , .F. } )//03
-AADD( _aParAux , { 1 , LEFT(STR0028,LEN(STR0028)-1),cLojaAte   ,X3Picture('A1_LOJA')   ,"",        	, "" , 060 , .F. } )//04
-AADD( _aParAux , { 1 , LEFT(STR0029,LEN(STR0029)-1),dDataDe    ,"@D"                   ,"",        	, "" , 060 , .F. } )//05
-AADD( _aParAux , { 1 , LEFT(STR0030,LEN(STR0030)-1),dDataAte   ,"@D"                   ,"",        	, "" , 060 , .F. } )//06
-AADD( _aParAux , { 1 , LEFT(STR0031,LEN(STR0031)-1),nValDe     ,'@E 999,999,999.99'    ,"",        	, "" , 060 , .F. } )//07
-AADD( _aParAux , { 1 , LEFT(STR0032,LEN(STR0032)-1),nValAte    ,'@E 999,999,999.99'    ,"",        	, "" , 060 , .F. } )//08
-AADD( _aParAux , { 2 , LEFT(STR0033,LEN(STR0033)-1),1          ,aOptions,                             060 ,".T.",.F. } )//09 
-AADD( _aParAux , { 2 , LEFT(STR0034,LEN(STR0034)-1),2          ,aOptions,                             060 ,".T.",.F. } )//10 
-AADD( _aParAux , { 2 , LEFT(STR0035,LEN(STR0035)-1),2          ,aOptions,                             060 ,".T.",.F. } )//11 
-AADD( _aParAux , { 1 , LEFT(STR0037,LEN(STR0037)-1),dDtRef     ,"@D"                   ,"",         , "" , 060 , .T. } )//12
-AADD( _aParAux , { 2 , LEFT(STR0061,LEN(STR0061)-1),1          ,aOpConVl,                             060 ,".T.",.F. } )//13 
-AADD( _aParAux , { 1 ,"Carteira ? (*) Todos"       , cCart     ,X3Picture('E1_I_CART') ,,'F3ITLC'   , "" , 060 , .F. } )//14
-AADD( _aParAux , { 1 ,"Redes"	                   , cRedes    ,"@S99"				   ,,"REDE50"   , "" , 099 , .F. } )//15
-AADD( _aParAux , { 1 ,"Exceto Redes"               , cExRedes  ,"@S99"				   ,,"REDE50"   , "" , 099 , .F. } )//16
-AADD( _aParAux , { 2 ,"Considera cliente bloqueado",1          ,aOpBloqu,                             060 ,".T.",.F. } )//17 
+aAdd( _aParAux , { 1 , LEFT(STR0025,Len(STR0025)-1),cCliDe     ,X3Picture('A1_COD')    ,"",'SA1'   	, "" , 060 , .F. } )//01
+aAdd( _aParAux , { 1 , LEFT(STR0026,Len(STR0026)-1),cLojaDe    ,X3Picture('A1_LOJA')   ,"",        	, "" , 060 , .F. } )//02
+aAdd( _aParAux , { 1 , LEFT(STR0027,Len(STR0027)-1),cCliAte    ,X3Picture('A1_COD')    ,"",'SA1'   	, "" , 060 , .F. } )//03
+aAdd( _aParAux , { 1 , LEFT(STR0028,Len(STR0028)-1),cLojaAte   ,X3Picture('A1_LOJA')   ,"",        	, "" , 060 , .F. } )//04
+aAdd( _aParAux , { 1 , LEFT(STR0029,Len(STR0029)-1),dDataDe    ,"@D"                   ,"",        	, "" , 060 , .F. } )//05
+aAdd( _aParAux , { 1 , LEFT(STR0030,Len(STR0030)-1),dDataAte   ,"@D"                   ,"",        	, "" , 060 , .F. } )//06
+aAdd( _aParAux , { 1 , LEFT(STR0031,Len(STR0031)-1),nValDe     ,'@E 999,999,999.99'    ,"",        	, "" , 060 , .F. } )//07
+aAdd( _aParAux , { 1 , LEFT(STR0032,Len(STR0032)-1),nValAte    ,'@E 999,999,999.99'    ,"",        	, "" , 060 , .F. } )//08
+aAdd( _aParAux , { 2 , LEFT(STR0033,Len(STR0033)-1),1          ,aOptions,                             060 ,".T.",.F. } )//09 
+aAdd( _aParAux , { 2 , LEFT(STR0034,Len(STR0034)-1),2          ,aOptions,                             060 ,".T.",.F. } )//10 
+aAdd( _aParAux , { 2 , LEFT(STR0035,Len(STR0035)-1),2          ,aOptions,                             060 ,".T.",.F. } )//11 
+aAdd( _aParAux , { 1 , LEFT(STR0037,Len(STR0037)-1),dDtRef     ,"@D"                   ,"",         , "" , 060 , .T. } )//12
+aAdd( _aParAux , { 2 , LEFT(STR0061,Len(STR0061)-1),1          ,aOpConVl,                             060 ,".T.",.F. } )//13 
+aAdd( _aParAux , { 1 ,"Carteira ? (*) Todos"       , cCart     ,X3Picture('E1_I_CART') ,,'F3ITLC'   , "" , 060 , .F. } )//14
+aAdd( _aParAux , { 1 ,"Redes"	                   , cRedes    ,"@S99"				   ,,"REDE50"   , "" , 099 , .F. } )//15
+aAdd( _aParAux , { 1 ,"Exceto Redes"               , cExRedes  ,"@S99"				   ,,"REDE50"   , "" , 099 , .F. } )//16
+aAdd( _aParAux , { 2 ,"Considera cliente bloqueado",1          ,aOpBloqu,                             060 ,".T.",.F. } )//17 
 
 For nI := 1 To Len( _aParAux )
 	aAdd( _aParRet , _aParAux[nI][03] )
 Next nI
 //aParametros, cTitle                           , @aRet   ,[bOk]  , [ aButtons ] [ lCentered ] [ nPosX ] [ nPosy ] [ oDlgWizard ] [ cLoad ] [ lCanSave ] [ lUserSave ] 
-IF !ParamBox( _aParAux , "Selecione os filtros" , @_aParRet,  _bOK , /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oPanel*/,/*cLoad*/,.T.         ,.T.          )
-   RETURN .F.
-ENDIF
+If !ParamBox( _aParAux , "Selecione os filtros" , @_aParRet,  _bOK , /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oPanel*/,/*cLoad*/,.T.         ,.T.          )
+   Return .F.
+EndIf
 
 cCliDe     :=MV_PAR01
 cLojaDe    :=MV_PAR02
@@ -3136,14 +3091,14 @@ dDataDe    :=MV_PAR05
 dDataAte   :=MV_PAR06
 nValDe     :=MV_PAR07
 nValAte    :=MV_PAR08
-cComboFil  :=IF(VALTYPE(MV_PAR09)="N",STR(MV_PAR09,1),LEFT(MV_PAR09,1))
-cSitCob    :=IF(VALTYPE(MV_PAR10)="N",STR(MV_PAR10,1),LEFT(MV_PAR10,1))
-cComboVenc :=IF(VALTYPE(MV_PAR11)="N",STR(MV_PAR11,1),LEFT(MV_PAR11,1))
+cComboFil  :=If(ValType(MV_PAR09)="N",Str(MV_PAR09,1),LEFT(MV_PAR09,1))
+cSitCob    :=If(ValType(MV_PAR10)="N",Str(MV_PAR10,1),LEFT(MV_PAR10,1))
+cComboVenc :=If(ValType(MV_PAR11)="N",Str(MV_PAR11,1),LEFT(MV_PAR11,1))
 dDtRef     :=MV_PAR12
-cComboConVl:=IF(VALTYPE(MV_PAR13)="N",STR(MV_PAR13,1),LEFT(MV_PAR13,1))
+cComboConVl:=If(ValType(MV_PAR13)="N",Str(MV_PAR13,1),LEFT(MV_PAR13,1))
 cCart      :=MV_PAR14
 cRedes     :=MV_PAR15
 cExRedes   :=MV_PAR16
-cCliBroq   :=IF(VALTYPE(MV_PAR17)="N",STR(MV_PAR17,1),LEFT(MV_PAR17,1))
+cCliBroq   :=If(ValType(MV_PAR17)="N",Str(MV_PAR17,1),LEFT(MV_PAR17,1))
 
-RETURN .T.
+Return .T.

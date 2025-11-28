@@ -22,8 +22,8 @@
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#INCLUDE "Protheus.ch"
-#INCLUDE "RwMake.ch"
+#Include "TOTVS.ch"
+#Include "RwMake.ch"
 
 /*
 ===============================================================================================================================
@@ -42,20 +42,20 @@ Retorno-----------: .T. - Permite Liberação .F. - Não permite a Liberação
 */
 User Function MT440AT()
 
-Local _aArea	:= GetArea()            //Salva area geral
+Local _aArea	:= FWGetArea()            //Salva area geral
 Local _lRet		:= .T.
 Local _aRet		:= {}
 Local _cmens	:= ""
-Local _cCodUsr	:= ALLTRIM(RetCodUsr())
+Local _cCodUsr	:= AllTrim(RetCodUsr())
 
 //====================================================================================================
 // Verifica se o Pedido é uma Devolução/Utiliz.Fornec. para validar o Fornecedor
 //====================================================================================================
 If SC5->C5_TIPO $ "BD"
 
-	DbSelectArea("SA2")
-	SA2->( DbSetOrder(1) )
-	If SA2->( DbSeek(xFilial("SA2") + SC5->( C5_CLIENTE + C5_LOJACLI ) ) )
+	DBSelectArea("SA2")
+	SA2->( DBSetOrder(1) )
+	If SA2->( DBSeek(xFilial("SA2") + SC5->( C5_CLIENTE + C5_LOJACLI ) ) )
 	
 		If SA2->A2_MSBLQL == '1'
 		
@@ -76,9 +76,9 @@ If SC5->C5_TIPO $ "BD"
 //====================================================================================================
 Else
 
-	DbSelectArea("SA1")
-	SA1->( DbSetOrder(1) )
-	If SA1->( DbSeek(xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI) )
+	DBSelectArea("SA1")
+	SA1->( DBSetOrder(1) )
+	If SA1->( DBSeek(xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI) )
 	
 		If SA1->A1_MSBLQL =='1'
 		
@@ -124,54 +124,54 @@ EndIf
 //=======================================================================
 //Valida se o pedido já foi liberado
 //=======================================================================
-If _lret .and. SC5->C5_LIBEROK == 'S' .and. EMPTY(SC5->C5_NOTA)
+If _lRet .And. SC5->C5_LIBEROK == 'S' .And. Empty(SC5->C5_NOTA)
 
 		_lRet:= .F.
 		MsgStop( "O pedido ["+ SC5->C5_NUM +"] já foi liberado!" , "ATENCAO" )
 
-Endif
+EndIf
 
 
 //=======================================================================
 //Valida se usuário tem acesso à todos os armazéns usados no pedido
 // e se pedido retroativo não gerará saldos negativos
 //=======================================================================
-If _lret 
+If _lRet 
 
-	DbSelectArea("SC6")
-	DbSetOrder(1)
+	DBSelectArea("SC6")
+	DBSetOrder(1)
 	
-	If DbSeek(xFilial("SC6")+SC5->C5_NUM)
+	If DBSeek(xFilial("SC6")+SC5->C5_NUM)
 
-		Do while alltrim(SC5->C5_NUM) == alltrim(SC6->C6_NUM)
+		While AllTrim(SC5->C5_NUM) == AllTrim(SC6->C6_NUM)
 
 	
 			//============================================
 			//Valida armazémxprodutoxfilialxusuário
 			//============================================
-			_aRet := U_ACFG004E(_cCodUsr, alltrim(xFilial("SC6")), alltrim(SC6->C6_LOCAL),alltrim(SC6->C6_PRODUTO), .F.)
+			_aRet := U_ACFG004E(_cCodUsr, AllTrim(xFilial("SC6")), AllTrim(SC6->C6_LOCAL),AllTrim(SC6->C6_PRODUTO), .F.)
 			
 			//se ainda está valido verifica se não teve erro
 			If _lRet
 		
 		  	_lRet:= _aRet[1]
 		
-			Endif
+			EndIf
 		
 			// adiciona armazens com problema se ainda não estiver na mensagem
-			if empty(_cmens)
+			If Empty(_cmens)
 		
 				_cmens += _aRet[2]
 			
-			elseif !(_aRet[2]$_cmens) .and. !(Empty(_aRet[2])) 
+			ElseIf !(_aRet[2]$_cmens) .And. !(Empty(_aRet[2])) 
 		
 				_cmens += ", " + _aRet[2]
 			
-			Endif		
+			EndIf		
 			
-			SC6->( Dbskip() )
+			SC6->( DBSkip() )
 		
-		Enddo
+		EndDo
 		
 		//============================================
 		//Mostra lista de armazéns com problema
@@ -181,13 +181,13 @@ If _lret
 			MessageBox( 'Usuário sem acesso ao(s) armazém(éns) abaixo nessa filial: ' + CRLF + _cmens + CRLF + CRLF+;
 					'Caso necessário solicite a manutenção à um usuário com acesso ou, se necessário, solicite o acesso à área de TI/ERP.' , 'Atenção!' , 48 )
 	
-		Endif
+		EndIf
 		
 	EndIf
 
-Endif
+EndIf
 
-Restarea(_aArea)
+FWRestArea(_aArea)
 
 Return (_lRet)
 

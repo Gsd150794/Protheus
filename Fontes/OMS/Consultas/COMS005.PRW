@@ -15,7 +15,7 @@ Josué Danich      | 26/06/2019 | Revisão para loboguara - Chamado 28886
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include "Protheus.Ch" 
+#Include "TOTVS.ch" 
 
 /*
 ===============================================================================================================================
@@ -53,13 +53,13 @@ Begin Sequence
    //================================================================================
    // Cria tabela temporária.
    //================================================================================
-   Aadd(_aCamposTab,{"C5_I_PEDOR","C",TamSX3("C5_I_PEDOR")[1],0 })
-   Aadd(_aCamposTab,{"C5_I_DTRAN","D",TamSX3("C5_I_DTRAN")[1],0 })
-   Aadd(_aCamposTab,{"C5_I_UTRAN","C",TamSX3("C5_I_UTRAN")[1],0 })
-   Aadd(_aCamposTab,{"C5_FILIAL" ,"C",TamSX3("C5_FILIAL")[1],0 })
-   Aadd(_aCamposTab,{"WKNOMEFIL" ,"C",30,0})
-   Aadd(_aCamposTab,{"C5_NUM"    ,"C",TamSX3("C5_NUM")[1],0 })
-   Aadd(_aCamposTab,{"C5_I_MTRAN","C",TamSX3("C5_I_MTRAN")[1],0 })
+   aAdd(_aCamposTab,{"C5_I_PEDOR","C",TamSX3("C5_I_PEDOR")[1],0 })
+   aAdd(_aCamposTab,{"C5_I_DTRAN","D",TamSX3("C5_I_DTRAN")[1],0 })
+   aAdd(_aCamposTab,{"C5_I_UTRAN","C",TamSX3("C5_I_UTRAN")[1],0 })
+   aAdd(_aCamposTab,{"C5_FILIAL" ,"C",TamSX3("C5_FILIAL")[1],0 })
+   aAdd(_aCamposTab,{"WKNOMEFIL" ,"C",30,0})
+   aAdd(_aCamposTab,{"C5_NUM"    ,"C",TamSX3("C5_NUM")[1],0 })
+   aAdd(_aCamposTab,{"C5_I_MTRAN","C",TamSX3("C5_I_MTRAN")[1],0 })
    
    //================================================================================
    // Verifica se ja existe um arquivo com mesmo nome, se sim deleta.
@@ -83,7 +83,7 @@ Begin Sequence
    //================================================================================
    Processa( {|| _lRet := U_COMS005D() }, "Aguarde...", "Pesquisando pedidos de vendas transferidos...",.F.)
    If ! _lRet
-      u_itmsg("Não existem dados a serem exibidos.","Atenção",,1)
+      U_ITMsg("Não existem dados a serem exibidos.","Atenção",,1)
       Break
    EndIf
    
@@ -91,13 +91,13 @@ Begin Sequence
    // Monta colunas do MsSelect()
    //================================================================================
                     //Campo        , "" , Titulo                                           , Picture   
-   AADD( _aCampos , { "C5_I_PEDOR"	, "" , Posicione("SX3",2,"C5_I_PEDOR","X3_TITULO")		, Posicione("SX3",2,"C5_I_PEDOR","X3_PICTURE") } )
-   AADD( _aCampos , { "C5_I_DTRAN"	, "" , Posicione("SX3",2,"C5_I_DTRAN","X3_TITULO")		, Posicione("SX3",2,"C5_I_DTRAN","X3_PICTURE") } )    
-   AADD( _aCampos , { "C5_I_UTRAN"	, "" , Posicione("SX3",2,"C5_I_UTRAN","X3_TITULO")		, Posicione("SX3",2,"C5_I_UTRAN","X3_PICTURE") } )
-   AADD( _aCampos , { "C5_FILIAL"	, "" , Posicione("SX3",2,"C5_FILIAL","X3_TITULO")		, Posicione("SX3",2,"C5_FILIAL" ,"X3_PICTURE")   } )
-   AADD( _aCampos , { "WKNOMEFIL"	, "" , "Nome da Filial"		                            , " "                                          } )    
-   AADD( _aCampos , { "C5_NUM"     , "" , "Pedido Atual"                                   , Posicione("SX3",2,"C5_NUM"    ,"X3_PICTURE")      } )
-   AADD( _aCampos , { "C5_I_MTRAN" , "" , Posicione("SX3",2,"C5_I_MTRAN","X3_TITULO")      , Posicione("SX3",2,"C5_I_MTRAN"  ,"X3_PICTURE")    } )   
+   aAdd( _aCampos , { "C5_I_PEDOR"	, "" , Posicione("SX3",2,"C5_I_PEDOR","X3_TITULO")		, Posicione("SX3",2,"C5_I_PEDOR","X3_PICTURE") } )
+   aAdd( _aCampos , { "C5_I_DTRAN"	, "" , Posicione("SX3",2,"C5_I_DTRAN","X3_TITULO")		, Posicione("SX3",2,"C5_I_DTRAN","X3_PICTURE") } )    
+   aAdd( _aCampos , { "C5_I_UTRAN"	, "" , Posicione("SX3",2,"C5_I_UTRAN","X3_TITULO")		, Posicione("SX3",2,"C5_I_UTRAN","X3_PICTURE") } )
+   aAdd( _aCampos , { "C5_FILIAL"	, "" , Posicione("SX3",2,"C5_FILIAL","X3_TITULO")		, Posicione("SX3",2,"C5_FILIAL" ,"X3_PICTURE")   } )
+   aAdd( _aCampos , { "WKNOMEFIL"	, "" , "Nome da Filial"		                            , " "                                          } )    
+   aAdd( _aCampos , { "C5_NUM"     , "" , "Pedido Atual"                                   , Posicione("SX3",2,"C5_NUM"    ,"X3_PICTURE")      } )
+   aAdd( _aCampos , { "C5_I_MTRAN" , "" , Posicione("SX3",2,"C5_I_MTRAN","X3_TITULO")      , Posicione("SX3",2,"C5_I_MTRAN"  ,"X3_PICTURE")    } )   
    
    //================================================================================
    // Monta a tela de dados com MSSELECT.
@@ -121,10 +121,10 @@ End Sequence
 // Exclui Tabelas Temporárias
 //================================================================================
 If Select("TRBSC5") > 0
-   TRBSC5->(DbCloseArea())
+   TRBSC5->(DBCloseArea())
 EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -185,10 +185,10 @@ Local _lRet := .T.
 
 Begin Sequence
    If Empty(_dDataFim) .And. ! Empty(_dDataIni)
-      u_itmsg("A data final deve ser preenchida.","Atenção",,1)
+      U_ITMsg("A data final deve ser preenchida.","Atenção",,1)
       _lRet := .F.
    ElseIf _dDataFim < _dDataIni
-      u_itmsg("A data inicial não pode ser superior a data final.","Atenção",,1)
+      U_ITMsg("A data inicial não pode ser superior a data final.","Atenção",,1)
       _lRet := .F.
    EndIf   
 
@@ -215,12 +215,12 @@ Local _lRet := .F.
 
 Begin Sequence
    If _cTipo == "ORIGEM"
-      TRBSC5->(DbSetOrder(1))
+      TRBSC5->(DBSetOrder(1))
    Else
-      TRBSC5->(DbSetOrder(2))
+      TRBSC5->(DBSetOrder(2))
    EndIf
       
-   TRBSC5->(DbSeek(_cPedido))
+   TRBSC5->(DBSeek(_cPedido))
      
    _oMark:oBrowse:Refresh()
    
@@ -253,25 +253,25 @@ Begin Sequence
    //================================================================================
    _cQry := "SELECT C5_I_PEDOR, C5_I_DTRAN, C5_I_UTRAN, C5_FILIAL, C5_NUM, C5_I_MTRAN "
    _cQry += " FROM "+RetSqlName("SC5")+" SC5 " 
-   _cQry += " WHERE SC5.D_E_L_E_T_ <> '*' " 
+   _cQry += " WHERE SC5.D_E_L_E_T_ = ' ' " 
    _cQry += " AND C5_I_FILOR = '"+xFilial("SC5")+"' "
    
    If ! Empty(_dDataIni)
-      _cQry += " AND C5_I_DTRAN >= '"+DTos(_dDataIni)+"' "   
+      _cQry += " AND C5_I_DTRAN >= '"+DToS(_dDataIni)+"' "   
    EndIf
    
    If ! Empty(_dDataFim)
-      _cQry += " AND C5_I_DTRAN <= '"+DTos(_dDataFim)+"' "   
+      _cQry += " AND C5_I_DTRAN <= '"+DToS(_dDataFim)+"' "   
    EndIf
    
    If Select("QRYSC5") > 0
-      QRYSC5->(DbCloseArea())
+      QRYSC5->(DBCloseArea())
    EndIf
    
    _cQry := ChangeQuery(_cQry) 
    DbUseArea(.T., "TOPCONN", TCGenQry(,,_cQry), "QRYSC5", .F., .T.)
    
-   TcSetField("QRYSC5","C5_I_DTRAN","D")
+   TCSetField("QRYSC5","C5_I_DTRAN","D")
    
    If QRYSC5->(Eof()) .Or. QRYSC5->(Bof())
       _lRet := .F.
@@ -282,7 +282,7 @@ Begin Sequence
    // Realiza a contagem de registros e posiciona no inicio da tabela temporária
    //================================================================================
    COUNT TO _nTotreg
-   QRYSC5->( dBGOTOP() )
+   QRYSC5->( DBGoTop() )
    
    //================================================================================
    // Exibe regua de processamento
@@ -293,7 +293,7 @@ Begin Sequence
    // Transfere os dados da Query para tabela temporária.
    //================================================================================
    _nI := 1
-   Do While ! QRYSC5->(Eof())
+   While ! QRYSC5->(Eof())
       IncProc("Processando registro: "+StrZero(_nI,6)+"/"+StrZero(_nTotreg,6))
       
       TRBSC5->(DbAppend())
@@ -304,9 +304,9 @@ Begin Sequence
       TRBSC5->WKNOMEFIL  := COMS005R(QRYSC5->C5_FILIAL) 
       TRBSC5->C5_NUM     := QRYSC5->C5_NUM
       TRBSC5->C5_I_MTRAN := QRYSC5->C5_I_MTRAN
-      TRBSC5->(MsUnLock())
+      TRBSC5->(MSUnLock())
       
-      QRYSC5->(DbSkip())
+      QRYSC5->(DBSkip())
    EndDo
 
 End Sequence
@@ -315,7 +315,7 @@ If Select("QRYSC5") > 0
 	QRYSC5->( DBCloseArea() )
 EndIf
 
-TRBSC5->( DBGotop() )
+TRBSC5->( DBGoTop() )
 
 Return _lRet
 
@@ -338,8 +338,8 @@ Local _cRet := Space(30)
 Local aOrd := SaveOrd({"SM0"})
 
 Begin Sequence
-   SM0->(DbSetOrder(1))
-   If SM0->(DbSeek(cEmpAnt+_cCodFil))
+   SM0->(DBSetOrder(1))
+   If SM0->(DBSeek(cEmpAnt+_cCodFil))
       _cRet := SM0->M0_FILIAL
    EndIf
    

@@ -2,60 +2,51 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 15/04/2019 | Chamado 28685. Validação p/ não permitir fracionamento de UM que são inteiras
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 06/11/2019 | Chamado 30984. Não valida fracionamento de UM quando vem do IsInCallStack("U_A010TOK")
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 19/09/2024 | Chamado 48569. Incluir a rotina de Desconto Tetra Pak nas exceções para validação de acesso
+Alex Wallauer |06/11/2019| Chamado 30984. Não valida fracionamento de UM quando vem do IsInCallStack("U_A010TOK")
+Lucas Borges  |19/09/2024| Chamado 48569. Incluir a rotina de Desconto Tetra Pak nas exceções para validação de acesso
+Lucas Borges  |19/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
+
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa--------: MT240TOK
 Autor-----------: Tiago Correa Castro
 Data da Criacao-: 25/04/2009
-===============================================================================================================================
 Descrição-------: Ponto de Entrada que valida movimento interno modelo I
-===============================================================================================================================
-Uso-------------: Italac
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Lógico, permitindo ou não a gravação o movimento
 ===============================================================================================================================
 */
 User Function MT240TOK
 
-Local _aArea      := FWGetArea()
-Local _aAreaZZL   := ZZL->(FWGetArea())
-Local _aAreaSB1   := SB1->(FWGetArea())
-Local _lRet		   :=	.T.  
-Local cTipo  	   := SuperGetMV("IT_TPMOV",.F., "")
-Local _cDados	   := {}
-Local _aSldNeg  	:= {}
-Local _cArmazens  := U_ITGetMV( 'IT_ARMCPR' , "02,04" ) 
-Local _cUMNoFrac  := U_ITGetMV("IT_UMNOFRAC","PC,UN")
-Local _lVldFr1UM  :=.T.
-Local _nX         := 0
+Local _aArea      := FWGetArea() As Array
+Local _aAreaZZL   := ZZL->(FWGetArea()) As Array
+Local _aAreaSB1   := SB1->(FWGetArea()) As Array
+Local _lRet		   :=	.T. As Logical
+Local cTipo  	   := SuperGetMV("IT_TPMOV",.F., "") As Character
+Local _cDados	   := {} As Array
+Local _aSldNeg  	:= {} As Array
+Local _cArmazens  := SuperGetMV('IT_ARMCPR',.F.,"02,04") As Character
+Local _cUMNoFrac  := SuperGetMV("IT_UMNOFRAC",.F.,"PC,UN") As Character
+Local _lVldFr1UM  :=.T. As Logical
+Local _nX         := 0 As Numeric
 
-If Substr(M->D3_COD,1,4) == "0006" .And. !IsInCallStack("U_MEST015") .And. M->D3_QTSEGUM == 0
+If SubStr(M->D3_COD,1,4) == "0006" .And. !IsInCallStack("U_MEST015") .And. M->D3_QTSEGUM == 0
    FWAlertWarning("Para esse produto e obrigatorio o preenchimento da segunda unidade de medida (Peças).",;
                   "Favor preencher a segunda unidade de medida (Peças).","MT240TOK01")
    _lRet := .F.
-ElseIf SuperGetMV("IT_BLQMOV",.F., "") .And. M->D3_EMISSAO > DATE()
+ElseIf SuperGetMV("IT_BLQMOV",.F., "") .And. M->D3_EMISSAO > Date()
    FWAlertWarning("Os movimentos com data maior que a data atual estão bloqueados.",;
                   "Entre em contato com o departamento de TI para maiores informações.","MT240TOK02")
    _lRet := .F.
 ElseIf !FWIsInCallStack("DESCTETRAE") .And. !FWIsInCallStack("DESCTETRAE") .And. !FWIsInCallStack("AGLT003G") .And. !FWIsInCallStack("MATA103")
-   ZZL->(DbSetOrder(3))
-   If ZZL->(DbSeek(xFilial("ZZL")+RetCodUsr()))
+   ZZL->(DBSetOrder(3))
+   If ZZL->(DBSeek(xFilial("ZZL")+RetCodUsr()))
       If ZZL->ZZL_AUTSIM <> 'S'
          FWAlertWarning("Usuário sem permissão para realizar movimentação simples. Não será possível realizar a movimentação. Entre em contato com o suporte do TI.", "MT240TOK03")
          _lRet := .F.
@@ -85,9 +76,7 @@ ElseIf !FWIsInCallStack("DESCTETRAE") .And. !FWIsInCallStack("DESCTETRAE") .And.
       EndIf
 EndIf
 
-//=========================================================================================
-//Só roda validações abaixo se não for execução automática de entrada de recepção de leite	
-//=========================================================================================
+//Só roda validações abaixo se não For execução automática de entrada de recepção de leite	
 If !FWIsInCallStack("AGLT003") .And. !FWIsInCallStack("MGLT002") .And. !FWIsInCallStack("AGLT021") 
    //Criado para impedir que seja feito lançamento de saída retroativo deixando o saldo negativo em alguma data posterior.
    If M->D3_TM >= "500"          //Se movimento de saída
@@ -111,11 +100,11 @@ If !FWIsInCallStack("AGLT003") .And. !FWIsInCallStack("MGLT002") .And. !FWIsInCa
       SB1->(DBSetOrder(1))
       If _lVldFr1UM .And. SB1->(DBSeek(xFilial("SB1") + M->D3_COD))
          If (SB1->B1_UM $ _cUMNoFrac .And. M->D3_QUANT <> Int(M->D3_QUANT))
-            FWAlertWarning("Não é permitido fracionar a quantidade da 1a. UM de produto onde a Unid. Medida for "+_cUMNoFrac+".",;
+            FWAlertWarning("Não é permitido fracionar a quantidade da 1a. UM de produto onde a Unid. Medida For "+_cUMNoFrac+".",;
                      "Favor informar apenas quantidades inteiras na Primeira Unidade de Medida.","MT240TOK10")
             _lRet := .F.
-         ElseIf (SB1->B1_SEGUM $ _cUMNoFrac .AND. M->D3_QTSEGUM <> Int(M->D3_QTSEGUM))//= "PC" .AND. LEFT(M->D3_COD,4)=="0006" .AND. M->D3_QTSEGUM <> Int(M->D3_QTSEGUM) )
-            FWAlertWarning("Não é permitido fracionar a quantidade da 2a. UM de produto onde a Unid. Medida for "+_cUMNoFrac+".",;//,_ntipo,_nbotao,_nmenbot,_lHelpMvc,_cbt1,_cbt2,_bMaisDetalhes
+         ElseIf (SB1->B1_SEGUM $ _cUMNoFrac .And. M->D3_QTSEGUM <> Int(M->D3_QTSEGUM))//= "PC" .And. LEFT(M->D3_COD,4)=="0006" .And. M->D3_QTSEGUM <> Int(M->D3_QTSEGUM) )
+            FWAlertWarning("Não é permitido fracionar a quantidade da 2a. UM de produto onde a Unid. Medida For "+_cUMNoFrac+".",;//,_ntipo,_nbotao,_nmenbot,_lHelpMvc,_cbt1,_cbt2,_bMaisDetalhes
                      "Favor informar apenas quantidades inteiras na Segunda Unidade de Medida.","MT240TOK11")
             _lRet := .F.
          EndIf
@@ -129,12 +118,12 @@ If _lRet
       If M->D3_TM == _cDados[_nX] .And. Empty(M->D3_CC)
          FWAlertWarning("Não é possivel fazer movimento com o centro de custo em branco. Favor preencher o campo centro de custo.","MT240TOK12")
          _lRet := .F.
-      ElseIf !Empty(M->D3_CC) // validação para preenchimento do centro de custo na tabela SCP conforme o que for baixado na tabela SD3. Chamado: 3409.
+      ElseIf !Empty(M->D3_CC) // validação para preenchimento do centro de custo na tabela SCP conforme o que For baixado na tabela SD3. Chamado: 3409.
          SCP->(RecLock("SCP",.F.))
          SCP->CP_CC     := M->D3_CC
          SCP->CP_I_MOTIV:= M->D3_I_MOTIV   //  validação para gravação do conteudo do campo CP_I_MOTIV para o campo D3_I_MOTIV.
          SCP->CP_OBS	   := M->D3_I_OBS
-         SCP->(MsUnlock())
+         SCP->(MSUnLock())
       EndIf
    Next _nX
 EndIf

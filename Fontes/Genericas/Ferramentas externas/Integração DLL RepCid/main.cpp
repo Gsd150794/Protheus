@@ -1,37 +1,37 @@
 //===========================================================================================================================
-// ATUALIZACOES SOFRIDAS DESDE A CONSTRUÇAO INICIAL
+// ATUALIZACOES SOFRIDAS DESDE A CONSTRUï¿½AO INICIAL
 //===========================================================================================================================
 //Autor        |    Data    |                              Motivo      
 //---------------------------------------------------------------------------------------------------------------------------|
-//Josué Prestes| 18/08/2017 | Revisão de conexão e mensagens - Chamado 20400 
+//Josuï¿½ Prestes| 18/08/2017 | Revisï¿½o de conexï¿½o e mensagens - Chamado 20400 
 //===========================================================================================================================
 //
 //===========================================================================================================================
 
-#include <stdio.h>
-#include <ctime>
-#include <iostream>
-#include <fstream>
-#include <string>
+#Include <stdio.h>
+#Include <ctime>
+#Include <iostream>
+#Include <fstream>
+#Include <string>
 
 
 
 #pragma region Includes
-#include <stdio.h>
-#include <comutil.h> 
+#Include <stdio.h>
+#Include <comutil.h> 
 #pragma endregion
 
 //===================================================================================================================================
 //Programa------------: integra.exe
-//Autor------------ - : Josué Danich Prestes
+//Autor------------ - : Josuï¿½ Danich Prestes
 //Data da Criacao-- - : 20/12/2016
 //===================================================================================================================================
-//Descrição-------- - : Rotina de integração com repcid.dll
+//Descriï¿½ï¿½o-------- - : Rotina de integraï¿½ï¿½o com repcid.dll
 //===================================================================================================================================
 //Parametros-------- : argv[1] - IP do equipamento que sera conectado
-//                     argv[2] - Operação a ser executada - 1 Lê AFD, 2 Inclui/Altera funcionario, 3 Deleta funcionario, 4 apaga rfid
-//                     argv[3] - Para argv[2] = 2 ou argv[2] = 3 será o PIS do funcionario 
-//								 Para argv[2] = 4 sera o rfid a ser limpo do relógio			
+//                     argv[2] - Operaï¿½ï¿½o a ser executada - 1 Lï¿½ AFD, 2 Inclui/Altera funcionario, 3 Deleta funcionario, 4 apaga rfid
+//                     argv[3] - Para argv[2] = 2 ou argv[2] = 3 serï¿½ o PIS do funcionario 
+//								 Para argv[2] = 4 sera o rfid a ser limpo do relï¿½gio			
 //                               
 //===================================================================================================================================
 //Retorno---------- - : Nenhum
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 						err = spRepCidObj->Conectar(IP, 1818, 0);
 						if (err != ErrosRep_OK)
 						{
-							//Não conseguiu conectar ao rep antigo, tenta conectar ao rep novo
+							//Nï¿½o conseguiu conectar ao rep antigo, tenta conectar ao rep novo
 							//wprintf(L"Conectando com o REP pela porta 443...");
 							spRepCidObj->iDClassPort = 443;
 							err = spRepCidObj->iDClass_Conectar(IP, "admin", "admin");
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
 							}
 						}
 
-						//atualiza data e hora em toda a comunicação
+						//atualiza data e hora em toda a comunicaï¿½ï¿½o
 						time_t t = time(NULL);
 						tm* timePtr = localtime(&t);
 
@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
 						err = spRepCidObj->Conectar(IP, 1818, 0);
 						if(err != ErrosRep_OK)
 						{
-							//Não conseguiu conectar ao rep antigo, tenta conectar ao rep novo
+							//Nï¿½o conseguiu conectar ao rep antigo, tenta conectar ao rep novo
 							wprintf(L"Conectando com o REP pela porta 443...");
 							spRepCidObj->iDClassPort = 443;
 							err = spRepCidObj->iDClass_Conectar(IP, "admin", "admin");
@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
 
 						wprintf(L" OK\n\n");
 
-						//atualiza data e hora em toda a comunicação
+						//atualiza data e hora em toda a comunicaï¿½ï¿½o
 						time_t t = time(NULL);
 						tm* timePtr = localtime(&t);
 
@@ -255,10 +255,10 @@ int main(int argc, char *argv[])
 						i = 1;
 						while (!feof(arq))
 						{
-							// Lê uma linha (inclusive com o '\n')
-							result = fgets(Linha, 100, arq);  // o 'fgets' lê até 99 caracteres ou até o '\n'
+							// Lï¿½ uma linha (inclusive com o '\n')
+							result = fgets(Linha, 100, arq);  // o 'fgets' lï¿½ atï¿½ 99 caracteres ou atï¿½ o '\n'
 							
-							if (result)  // Se foi possível ler
+							if (result)  // Se foi possï¿½vel ler
 							{
 								strtok(Linha, "\n");
 								if (i == 1)
@@ -301,8 +301,8 @@ int main(int argc, char *argv[])
 									
 									i = 1;
 
-									//Antes de gravar o usuário se rfid for maior
-									// que zero deve verificar se não tem outro
+									//Antes de gravar o usuï¿½rio se rfid for maior
+									// que zero deve verificar se nï¿½o tem outro
 									// funcionario com mesmo rfid e zerar o mesmo
 
 									long num_usuarios;
@@ -417,7 +417,7 @@ int main(int argc, char *argv[])
 					err = spRepCidObj->Conectar(IP, 1818, 0);
 					if (err != ErrosRep_OK)
 					{
-						//Não conseguiu conectar ao rep antigo, tenta conectar ao rep novo
+						//Nï¿½o conseguiu conectar ao rep antigo, tenta conectar ao rep novo
 						wprintf(L"Conectando com o REP pela porta 443...");
 						spRepCidObj->iDClassPort = 443;
 						err = spRepCidObj->iDClass_Conectar(IP, "admin", "admin");
@@ -430,7 +430,7 @@ int main(int argc, char *argv[])
 
 					wprintf(L" OK\n\n");
 
-					//atualiza data e hora em toda a comunicação
+					//atualiza data e hora em toda a comunicaï¿½ï¿½o
 					time_t t = time(NULL);
 					tm* timePtr = localtime(&t);
 
@@ -492,7 +492,7 @@ int main(int argc, char *argv[])
 		}
 
 		//=======================================================================================
-		//Bloco de Exclui rfid da base do relógio
+		//Bloco de Exclui rfid da base do relï¿½gio
 		//=======================================================================================
 		if (strcmp(argv[2], "4") == 0)
 		{
@@ -507,7 +507,7 @@ int main(int argc, char *argv[])
 			err = spRepCidObj->Conectar(IP, 1818, 0);
 			if (err != ErrosRep_OK)
 			{
-				//Não conseguiu conectar ao rep antigo, tenta conectar ao rep novo
+				//Nï¿½o conseguiu conectar ao rep antigo, tenta conectar ao rep novo
 				wprintf(L"Conectando com o REP pela porta 443...");
 				spRepCidObj->iDClassPort = 443;
 				err = spRepCidObj->iDClass_Conectar(IP, "admin", "admin");
@@ -520,7 +520,7 @@ int main(int argc, char *argv[])
 
 			wprintf(L" OK\n\n");
 
-			//atualiza data e hora em toda a comunicação
+			//atualiza data e hora em toda a comunicaï¿½ï¿½o
 			time_t t = time(NULL);
 			tm* timePtr = localtime(&t);
 
@@ -590,11 +590,11 @@ int main(int argc, char *argv[])
 		wprintf(L"\n\n");
 		printf("argv[1] - IP do equipamento que sera conectado");
 		wprintf(L"\n\n");
-		printf("argv[2] - Operação a ser executada - 1 Le AFD, 2 Inclui/Altera funcionario, 3 Deleta funcionario, 4 Exclui rfid");
+		printf("argv[2] - Operaï¿½ï¿½o a ser executada - 1 Le AFD, 2 Inclui/Altera funcionario, 3 Deleta funcionario, 4 Exclui rfid");
 		wprintf(L"\n\n");
 		printf("argv[3] - Para argv[2] = 2 ou argv[2] = 3  PIS do funcionario");
 		wprintf(L"\n\n");
-		printf("argv[3] - Para argv[2] = 4 sera o rfid a ser limpo do relógio");
+		printf("argv[3] - Para argv[2] = 4 sera o rfid a ser limpo do relï¿½gio");
 		wprintf(L"\n\n");
 		
 		return 0;

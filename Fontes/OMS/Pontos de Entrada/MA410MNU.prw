@@ -18,8 +18,8 @@ Vanderlei Alves  - Alex Wallauer   - 06/06/25   - 10/06/25 - 45229   - Retirada 
 =================================================================================================================================================================================================
 */
 
-#INCLUDE "Protheus.ch"
-#INCLUDE "RwMake.ch"
+#Include "TOTVS.ch"
+#Include "RwMake.ch"
 
 /*
 ===============================================================================================================================
@@ -61,9 +61,9 @@ aAdd( aRotina , { 'Espelho Portal'	         , 'U_MA410ESP(1)'  , 0 , 2 , 0 , NIL
 aAdd( aRotina , { 'Espelho Protheus  '	      , 'U_MA410ESP(2)'  , 0 , 2 , 0 , NIL } )
 aAdd( aRotina , { 'WF Liberacao'			      , 'U_MOMS030()', 0 , 2 , 0 , NIL } )
 aAdd( aRotina , { "Localiza PV"         	   , 'U_MA410LPV' , 0 , 1 , 0 , NIL } )
-IF cFilAnt = "91"
+If cFilAnt = "91"
    aAdd( aRotina,{'Desconto P/C ZF'			   , 'U_MA410TRO()', 0 , 2 , 0 , NIL } )//Esta nesse fonta abaixo
-ENDIF
+EndIf
 
 aAdd( aRotina,{'Solic.Ret.Pedido <== TMS', 'U_AOMS084B()', 0 , 2 , 0 , NIL } )
 aAdd( aRotina,{'Devolve Pedido ==> TMS'  , 'U_AOMS084F()', 0 , 2 , 0 , NIL } )
@@ -94,22 +94,22 @@ Retorno-----------: Nenhum
 User Function MA410Troca() 
 
 Local _lMV_DESZFPC	:=GetMv("MV_DESZFPC")
-Local _cmens 		:= "Conteudo Atual: "+IF(_lMV_DESZFPC,"Habilitado","Desabilitado")+CHR(13)+CHR(10)
-Local _cmens2 		:= "Deseja " + IF(_lMV_DESZFPC,"desabilitar","habilitar") +  " o desconto do PIS e COFINS para vendas? "
-Local _lRet := u_itmsg( _cmens + _cmens2 , "Desconto P/C Vendas Manaus (MV_DESZFPC)",,3,2 ,2 )
+Local _cmens 		:= "Conteudo Atual: "+If(_lMV_DESZFPC,"Habilitado","Desabilitado")+CHR(13)+CHR(10)
+Local _cmens2 		:= "Deseja " + If(_lMV_DESZFPC,"desabilitar","habilitar") +  " o desconto do PIS e COFINS para vendas? "
+Local _lRet := U_ITMsg( _cmens + _cmens2 , "Desconto P/C Vendas Manaus (MV_DESZFPC)",,3,2 ,2 )
 
 //grava log de acesso
 u_itlogacs()
 
-If _lRet .and. !_lMV_DESZFPC
+If _lRet .And. !_lMV_DESZFPC
 
    PutMV("MV_DESZFPC", .T. )
-   u_itmsg("Desconto P/C Vendas Manaus (MV_DESZFPC) habilitado com sucesso!","Atenção",,2)
+   U_ITMsg("Desconto P/C Vendas Manaus (MV_DESZFPC) habilitado com sucesso!","Atenção",,2)
 
-ElseIf _lRet .and. _lMV_DESZFPC
+ElseIf _lRet .And. _lMV_DESZFPC
 
    PutMV("MV_DESZFPC", .F. )
-   u_itmsg("Desconto P/C Vendas Manaus (MV_DESZFPC) desabilitado com sucesso!","Atenção",,2)
+   U_ITMsg("Desconto P/C Vendas Manaus (MV_DESZFPC) desabilitado com sucesso!","Atenção",,2)
 
 EndIf
 
@@ -128,7 +128,7 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-USER Function MA410LPV(cAlias,nReg,nOpc)
+User Function MA410LPV(cAlias,nReg,nOpc)
 
 Local _cPV   := Space(50)
 Local _cSay  := "Nr Pedido"
@@ -143,101 +143,101 @@ Local aCpoBusca := {"Nr Pedido","Pedido do Cliente","Senha do Pedido"}
 
 Private aCampos:=ARRAY( SC5->(Fcount()) )
  
-SX3->(DbSetOrder(2))
+SX3->(DBSetOrder(2))
 
-AADD( aSemSX3 , { "C5_NOTA"   	, 'C' , 9 , 0 } )
-AADD( aSemSX3 , { "C5_SERIE"   	, 'C' , 3 , 0 } )
-AADD( aSemSX3 , { "C5_FILIAL"  	, 'C' , 2 , 0 } )
-AADD( aSemSX3 , { "C5_NUM"     	, 'C' , 6 , 0 } )
-AADD( aSemSX3 , { "C5_I_FLFNC" 	, 'C' , 2 , 0 } )
-AADD( aSemSX3 , { "C5_I_PDPR"  	, 'C' , 6 , 0 } )
-AADD( aSemSX3 , { "C5_I_FILFT" 	, 'C' , 2 , 0 } )
-AADD( aSemSX3 , { "C5_I_PDFT"  	, 'C' , 6 , 0 } )
-AADD( aSemSX3 , { "C5_CLIENTE" 	, 'C' , 6 , 0 } )
-AADD( aSemSX3 , { "C5_LOJACLI" 	, 'C' , 4 , 0 } )
-AADD( aSemSX3 , { "C5_I_NOME"  	, 'C' , 50 , 0 } )
-AADD( aSemSX3 , { "C5_VEND1"  	, 'C' , 50 , 0 } )
-AADD( aSemSX3 , { "C5_I_V1NOM" 	, 'C' , 6 , 0 } )
-AADD( aSemSX3 , { "C5_I_TRCNF" 	, 'C' , 1 , 0 } )
-AADD( aSemSX3 , { "C5_I_CARGA" 	, 'C' , 6 , 0 } )
-AADD( aSemSX3 , { "C5_I_PEDPA" 	, 'C' , 6 , 0 } )
-AADD( aSemSX3 , { "C5_I_PEDGE" 	, 'C' , 6 , 0 } )
-AADD( aSemSX3 , { "C5_I_NPALE" 	, 'C' , 6 , 0 } )
-AADD( aSemSX3 , { "WK_OPERAD" 	, 'C' , 12, 0 } )
-AADD( aSemSX3 , { "A2_COD" 	   , 'C' , 6 , 0 } )
-AADD( aSemSX3 , { "A2_LOJA" 	   , 'C' , 4 , 0 } )
-AADD( aSemSX3 , { "A2_NOME" 	   , 'C' , 40, 0 } )
-AADD( aSemSX3 , { "A2_NREDUZ"    , 'C' , 20, 0 } )
-AADD( aSemSX3 , { "A2_END" 	   , 'C' , 90, 0 } )
-AADD( aSemSX3 , { "A2_CEP" 	   , 'C' , 9 , 0 } )
-AADD( aSemSX3 , { "A2_MUN" 	   , 'C' , 50, 0 } )
-AADD( aSemSX3 , { "A2_EST" 	   , 'C' , 2 , 0 } )
-AADD( aSemSX3 , { "A2_DDD" 	   , 'C' , 3 , 0 } )
-AADD( aSemSX3 , { "A2_TEL" 	   , 'C' , 50, 0 } )
-AADD( aSemSX3 , { "A2_EMAIL" 	   , 'C' ,100, 0 } )
-AADD( aSemSX3 , { "TA2_COD" 	   , 'C' , 6 , 0 } )
-AADD( aSemSX3 , { "TA2_LOJA" 	   , 'C' , 4 , 0 } )
-AADD( aSemSX3 , { "TA2_NOME" 	   , 'C' , 40, 0 } )
-AADD( aSemSX3 , { "TA2_NREDUZ"   , 'C' , 20, 0 } )
-AADD( aSemSX3 , { "TA2_END" 	   , 'C' , 90, 0 } )
-AADD( aSemSX3 , { "TA2_CEP" 	   , 'C' , 9 , 0 } )
-AADD( aSemSX3 , { "TA2_MUN" 	   , 'C' , 50, 0 } )
-AADD( aSemSX3 , { "TA2_EST" 	   , 'C' , 2 , 0 } )
-AADD( aSemSX3 , { "TA2_DDD" 	   , 'C' , 3 , 0 } )
-AADD( aSemSX3 , { "TA2_TEL" 	   , 'C' , 50, 0 } )
-AADD( aSemSX3 , { "TA2_EMAIL" 	, 'C' ,100, 0 } )
-AADD( aSemSX3 , { "TA2_OK" 	, 'C' ,2, 0 } )
+aAdd( aSemSX3 , { "C5_NOTA"   	, 'C' , 9 , 0 } )
+aAdd( aSemSX3 , { "C5_SERIE"   	, 'C' , 3 , 0 } )
+aAdd( aSemSX3 , { "C5_FILIAL"  	, 'C' , 2 , 0 } )
+aAdd( aSemSX3 , { "C5_NUM"     	, 'C' , 6 , 0 } )
+aAdd( aSemSX3 , { "C5_I_FLFNC" 	, 'C' , 2 , 0 } )
+aAdd( aSemSX3 , { "C5_I_PDPR"  	, 'C' , 6 , 0 } )
+aAdd( aSemSX3 , { "C5_I_FILFT" 	, 'C' , 2 , 0 } )
+aAdd( aSemSX3 , { "C5_I_PDFT"  	, 'C' , 6 , 0 } )
+aAdd( aSemSX3 , { "C5_CLIENTE" 	, 'C' , 6 , 0 } )
+aAdd( aSemSX3 , { "C5_LOJACLI" 	, 'C' , 4 , 0 } )
+aAdd( aSemSX3 , { "C5_I_NOME"  	, 'C' , 50 , 0 } )
+aAdd( aSemSX3 , { "C5_VEND1"  	, 'C' , 50 , 0 } )
+aAdd( aSemSX3 , { "C5_I_V1NOM" 	, 'C' , 6 , 0 } )
+aAdd( aSemSX3 , { "C5_I_TRCNF" 	, 'C' , 1 , 0 } )
+aAdd( aSemSX3 , { "C5_I_CARGA" 	, 'C' , 6 , 0 } )
+aAdd( aSemSX3 , { "C5_I_PEDPA" 	, 'C' , 6 , 0 } )
+aAdd( aSemSX3 , { "C5_I_PEDGE" 	, 'C' , 6 , 0 } )
+aAdd( aSemSX3 , { "C5_I_NPALE" 	, 'C' , 6 , 0 } )
+aAdd( aSemSX3 , { "WK_OPERAD" 	, 'C' , 12, 0 } )
+aAdd( aSemSX3 , { "A2_COD" 	   , 'C' , 6 , 0 } )
+aAdd( aSemSX3 , { "A2_LOJA" 	   , 'C' , 4 , 0 } )
+aAdd( aSemSX3 , { "A2_NOME" 	   , 'C' , 40, 0 } )
+aAdd( aSemSX3 , { "A2_NREDUZ"    , 'C' , 20, 0 } )
+aAdd( aSemSX3 , { "A2_END" 	   , 'C' , 90, 0 } )
+aAdd( aSemSX3 , { "A2_CEP" 	   , 'C' , 9 , 0 } )
+aAdd( aSemSX3 , { "A2_MUN" 	   , 'C' , 50, 0 } )
+aAdd( aSemSX3 , { "A2_EST" 	   , 'C' , 2 , 0 } )
+aAdd( aSemSX3 , { "A2_DDD" 	   , 'C' , 3 , 0 } )
+aAdd( aSemSX3 , { "A2_TEL" 	   , 'C' , 50, 0 } )
+aAdd( aSemSX3 , { "A2_EMAIL" 	   , 'C' ,100, 0 } )
+aAdd( aSemSX3 , { "TA2_COD" 	   , 'C' , 6 , 0 } )
+aAdd( aSemSX3 , { "TA2_LOJA" 	   , 'C' , 4 , 0 } )
+aAdd( aSemSX3 , { "TA2_NOME" 	   , 'C' , 40, 0 } )
+aAdd( aSemSX3 , { "TA2_NREDUZ"   , 'C' , 20, 0 } )
+aAdd( aSemSX3 , { "TA2_END" 	   , 'C' , 90, 0 } )
+aAdd( aSemSX3 , { "TA2_CEP" 	   , 'C' , 9 , 0 } )
+aAdd( aSemSX3 , { "TA2_MUN" 	   , 'C' , 50, 0 } )
+aAdd( aSemSX3 , { "TA2_EST" 	   , 'C' , 2 , 0 } )
+aAdd( aSemSX3 , { "TA2_DDD" 	   , 'C' , 3 , 0 } )
+aAdd( aSemSX3 , { "TA2_TEL" 	   , 'C' , 50, 0 } )
+aAdd( aSemSX3 , { "TA2_EMAIL" 	, 'C' ,100, 0 } )
+aAdd( aSemSX3 , { "TA2_OK" 	, 'C' ,2, 0 } )
 
 
 _otemp := FWTemporaryTable():New( "TRB", aSemSX3 )
 _otemp:Create() 
 
-Aadd(aCpoBrw,{"C5_FILIAL" ,,"Fil. Pedido"}) 
-Aadd(aCpoBrw,{"C5_NUM" ,,"Nr Pedido"}) 
-Aadd(aCpoBrw,{"C5_I_FLFNC",,"Fil. Carreg."})
-Aadd(aCpoBrw,{"C5_I_PDPR" ,,"PV Carreg."})
-Aadd(aCpoBrw,{"C5_I_FILFT",,"Fil. Fatur."})
-Aadd(aCpoBrw,{"C5_I_PDFT" ,,"PV Fatur."})
-Aadd(aCpoBrw,{"C5_NOTA",,"Nota"})
-Aadd(aCpoBrw,{"C5_CLIENTE",,"Cod. Cli."})
-Aadd(aCpoBrw,{"C5_LOJACLI",,"Loja"})
-Aadd(aCpoBrw,{"C5_I_NOME" ,,"Cliente"})
-Aadd(aCpoBrw,{"C5_VEND1"  ,,"Cod. Vend. 1"})
-Aadd(aCpoBrw,{"C5_I_V1NOM",,"Vendedor"})
-Aadd(aCpoBrw,{"C5_I_TRCNF",,"PV Troca NF?"})
-Aadd(aCpoBrw,{"C5_I_CARGA",,"Carga"})
-Aadd(aCpoBrw,{"C5_NOTA"   ,,"Nota"})
-Aadd(aCpoBrw,{"C5_SERIE"  ,,"Serie"})
-Aadd(aCpoBrw,{"C5_I_PEDPA",,"Ped. de Pallet?"})
-Aadd(aCpoBrw,{"C5_I_PEDGE",,"Ped. Gerou Pallet?"})
-Aadd(aCpoBrw,{"C5_I_NPALE",,"Pedido Pallet"})
-Aadd(aCpoBrw,{ "WK_OPERAD",,"Tipo de Operador"})
-Aadd(aCpoBrw,{ "A2_COD"   ,,"Código"})
-Aadd(aCpoBrw,{ "A2_LOJA"  ,,"Loja"})
-Aadd(aCpoBrw,{ "A2_NOME"  ,,"Razão Social"})
-Aadd(aCpoBrw,{ "A2_NREDUZ",,"Nome Reduzido"})
-Aadd(aCpoBrw,{ "A2_END"   ,,"Endereço"})
-Aadd(aCpoBrw,{ "A2_CEP"   ,,"CEP"})
-Aadd(aCpoBrw,{ "A2_MUN"   ,,"Cidade"})
-Aadd(aCpoBrw,{ "A2_EST"   ,,"Estado"})
-Aadd(aCpoBrw,{ "A2_DDD"   ,,"DDD"})
-Aadd(aCpoBrw,{ "A2_TEL"   ,,"Telefone"})
-Aadd(aCpoBrw,{ "A2_EMAIL" ,,"E-mail"})
-Aadd(aCpoBrw,{ "TA2_COD"   ,,"Cód.Transportadora"})
-Aadd(aCpoBrw,{ "TA2_LOJA"  ,,"Loja Transp."})
-Aadd(aCpoBrw,{ "TA2_NOME"  ,,"Razão Social Transp."})
-Aadd(aCpoBrw,{ "TA2_NREDUZ",,"Nome Reduzido Transp."})
-Aadd(aCpoBrw,{ "TA2_END"   ,,"Endereço Transp."})
-Aadd(aCpoBrw,{ "TA2_CEP"   ,,"CEP Transp."})
-Aadd(aCpoBrw,{ "TA2_MUN"   ,,"Cidade Transp."})
-Aadd(aCpoBrw,{ "TA2_EST"   ,,"Estado Transp."})
-Aadd(aCpoBrw,{ "TA2_DDD"   ,,"DDD Transp."})
-Aadd(aCpoBrw,{ "TA2_TEL"   ,,"Telefone Transp."})
-Aadd(aCpoBrw,{ "TA2_EMAIL" ,,"E-mail Transp."})
-Aadd(aCpoBrw,{ "TA2_OK" ,,"OK"})
+aAdd(aCpoBrw,{"C5_FILIAL" ,,"Fil. Pedido"}) 
+aAdd(aCpoBrw,{"C5_NUM" ,,"Nr Pedido"}) 
+aAdd(aCpoBrw,{"C5_I_FLFNC",,"Fil. Carreg."})
+aAdd(aCpoBrw,{"C5_I_PDPR" ,,"PV Carreg."})
+aAdd(aCpoBrw,{"C5_I_FILFT",,"Fil. Fatur."})
+aAdd(aCpoBrw,{"C5_I_PDFT" ,,"PV Fatur."})
+aAdd(aCpoBrw,{"C5_NOTA",,"Nota"})
+aAdd(aCpoBrw,{"C5_CLIENTE",,"Cod. Cli."})
+aAdd(aCpoBrw,{"C5_LOJACLI",,"Loja"})
+aAdd(aCpoBrw,{"C5_I_NOME" ,,"Cliente"})
+aAdd(aCpoBrw,{"C5_VEND1"  ,,"Cod. Vend. 1"})
+aAdd(aCpoBrw,{"C5_I_V1NOM",,"Vendedor"})
+aAdd(aCpoBrw,{"C5_I_TRCNF",,"PV Troca NF?"})
+aAdd(aCpoBrw,{"C5_I_CARGA",,"Carga"})
+aAdd(aCpoBrw,{"C5_NOTA"   ,,"Nota"})
+aAdd(aCpoBrw,{"C5_SERIE"  ,,"Serie"})
+aAdd(aCpoBrw,{"C5_I_PEDPA",,"Ped. de Pallet?"})
+aAdd(aCpoBrw,{"C5_I_PEDGE",,"Ped. Gerou Pallet?"})
+aAdd(aCpoBrw,{"C5_I_NPALE",,"Pedido Pallet"})
+aAdd(aCpoBrw,{ "WK_OPERAD",,"Tipo de Operador"})
+aAdd(aCpoBrw,{ "A2_COD"   ,,"Código"})
+aAdd(aCpoBrw,{ "A2_LOJA"  ,,"Loja"})
+aAdd(aCpoBrw,{ "A2_NOME"  ,,"Razão Social"})
+aAdd(aCpoBrw,{ "A2_NREDUZ",,"Nome Reduzido"})
+aAdd(aCpoBrw,{ "A2_END"   ,,"Endereço"})
+aAdd(aCpoBrw,{ "A2_CEP"   ,,"CEP"})
+aAdd(aCpoBrw,{ "A2_MUN"   ,,"Cidade"})
+aAdd(aCpoBrw,{ "A2_EST"   ,,"Estado"})
+aAdd(aCpoBrw,{ "A2_DDD"   ,,"DDD"})
+aAdd(aCpoBrw,{ "A2_TEL"   ,,"Telefone"})
+aAdd(aCpoBrw,{ "A2_EMAIL" ,,"E-mail"})
+aAdd(aCpoBrw,{ "TA2_COD"   ,,"Cód.Transportadora"})
+aAdd(aCpoBrw,{ "TA2_LOJA"  ,,"Loja Transp."})
+aAdd(aCpoBrw,{ "TA2_NOME"  ,,"Razão Social Transp."})
+aAdd(aCpoBrw,{ "TA2_NREDUZ",,"Nome Reduzido Transp."})
+aAdd(aCpoBrw,{ "TA2_END"   ,,"Endereço Transp."})
+aAdd(aCpoBrw,{ "TA2_CEP"   ,,"CEP Transp."})
+aAdd(aCpoBrw,{ "TA2_MUN"   ,,"Cidade Transp."})
+aAdd(aCpoBrw,{ "TA2_EST"   ,,"Estado Transp."})
+aAdd(aCpoBrw,{ "TA2_DDD"   ,,"DDD Transp."})
+aAdd(aCpoBrw,{ "TA2_TEL"   ,,"Telefone Transp."})
+aAdd(aCpoBrw,{ "TA2_EMAIL" ,,"E-mail Transp."})
+aAdd(aCpoBrw,{ "TA2_OK" ,,"OK"})
 
 
-DO WHILE .T.
+While .T.
    oBusca := Nil
    _nLinha:=5
    _lOK   := .F.
@@ -250,7 +250,7 @@ DO WHILE .T.
 
       _nLinha+=17
 
-      TRB->(DBGOTOP())
+      TRB->(DBGoTop())
     
       oMarkLPV:=MsSelect():New("TRB","TA2_OK",,aCpoBrw,.F.,"",{_nLinha,5,(_nLinha+75),  (_oDlg:nClientWidth-9)/2 })
       oMarkLPV:bMark := {|| U_MA410VPV(_oDlg)}
@@ -258,13 +258,13 @@ DO WHILE .T.
 
    Activate MSDialog _oDlg Centered
 
-   EXIT
+   Exit
 
-ENDDO
+EndDo
 
 _otemp:Delete()
 
-RETURN .F.
+Return .F.
 
 /*
 ===============================================================================================================================
@@ -279,17 +279,17 @@ Parametros--------: _cPV - numero do pedido de vendas
 Retorno-----------: lógico indicando se achou pedido de vendas
 ===============================================================================================================================
 */
-STATIC Function MA410Ler(_cPV,_cSay)
+Static Function MA410Ler(_cPV,_cSay)
 
 Local _cAliasSC5:= GetNextAlias(),lExistePV:=.F.
 Local _lTemNF, _cCod, _cLoja, _cCodTransp, _cLojaTransp
 Local _cTipoOperador
-LOCAL _cQuery  := ""
+Local _cQuery  := ""
 
-_cPV := Alltrim(_cPV)
+_cPV := AllTrim(_cPV)
 
 If !Empty(_cPV)
-   DBSELECTAREA("TRB")
+   DBSelectArea("TRB")
    ZAP
 
    If Select(_cAliasSC5) > 0
@@ -317,12 +317,12 @@ If !Empty(_cPV)
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry(,,_cQuery) , _cAliasSC5 , .T. , .F. )
 
-   SF2->(DbSetOrder(20)) // F2_FILIAL+F2_I_PEDID 
-   SA2->(DbSetOrder(1))
+   SF2->(DBSetOrder(20)) // F2_FILIAL+F2_I_PEDID 
+   SA2->(DBSetOrder(1))
 
-   Do While (_cAliasSC5)->(!EOF())
+   While (_cAliasSC5)->(!Eof())
       
-      SC5->(DBGOTO( (_cAliasSC5)->REC_SC5 ))
+      SC5->(DBGoTo( (_cAliasSC5)->REC_SC5 ))
       
       _cCodTransp  := ""
       _cLojaTransp := ""
@@ -381,19 +381,19 @@ If !Empty(_cPV)
          TRB->TA2_EMAIL  := SA2->A2_EMAIL      
       EndIf 
 
-      (_cAliasSC5)->(DBSKIP())
+      (_cAliasSC5)->(DBSkip())
        
    EndDo
 
-   TRB->(DBGOTOP())
+   TRB->(DBGoTop())
    oMarkLPV:oBrowse:Refresh()
 
-   IF !lExistePV
-      u_itmsg("A busca não encontrou dados!","Atenção",,1)
-   ENDIF
+   If !lExistePV
+      U_ITMsg("A busca não encontrou dados!","Atenção",,1)
+   EndIf
 EndIf
 
-RETURN .T.
+Return .T.
  
 /*
 ===============================================================================================================================
@@ -422,15 +422,15 @@ Begin Sequence
       U_ROMS064()
    Else   
       //Posiciona na SZW.
-      SZW->(Dbsetorder(8))
-      If SZW->(Dbseek(SC5->C5_I_IDPED))
+      SZW->(DBSetOrder(8))
+      If SZW->(DBSeek(SC5->C5_I_IDPED))
          cfilant := SZW->ZW_FILIAL
-         _aPed			:= {{alltrim(SZW->ZW_FILIAL) ,alltrim(SZW->ZW_IDPED) , alltrim(SZW->ZW_CLIENTE) , alltrim(SZW->ZW_LOJACLI) ,  SZW->ZW_VEND1 }}
-         fwmsgrun(,{|oproc| U_ROMS035R(oproc)},"Aguarde...","Imprimindo espelho do pedido...")
+         _aPed			:= {{AllTrim(SZW->ZW_FILIAL) ,AllTrim(SZW->ZW_IDPED) , AllTrim(SZW->ZW_CLIENTE) , AllTrim(SZW->ZW_LOJACLI) ,  SZW->ZW_VEND1 }}
+         FWMsgRun(,{|oproc| U_ROMS035R(oproc)},"Aguarde...","Imprimindo espelho do pedido...")
          cfilant := _cfilial   
       Else
-         u_itmsg("Não foi localizado pedido do portal vinculado e este pedido de vendas","Atenção",,1)
-      Endif
+         U_ITMsg("Não foi localizado pedido do portal vinculado e este pedido de vendas","Atenção",,1)
+      EndIf
    EndIf 
 
 End Sequence

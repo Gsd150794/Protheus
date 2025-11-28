@@ -1,70 +1,50 @@
-#include "Protheus.ch"
+/*
+===============================================================================================================================
+               ULTIMAS ATUALIZAวีES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+===============================================================================================================================
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+===============================================================================================================================
+*/
 
-#DEFINE _ENTER CHR(13)+CHR(10)
+#Include "TOTVS.ch"
 
 /*
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
-ฑฑษออออออออออัออออออออออหอออออออัอออออออออออออออออออออออหออออออออออออออออออัออออออออออออออออออออออออออออออออออออออออออออออออปฑฑ
-ฑฑบPrograma  ณF450CAES  บ Autor ณ Fabiano Dias da Silva บ Data da Criacao  ณ 20/04/2011                						บฑฑ
-ฑฑฬออออออออออุออออออออออสอออออออฯอออออออออออออออออออออออสออออออออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบDescricao ณPonto de entrada utilizada para verificar no momento de um cancelamento ou estorno de uma compensacao em      บฑฑ
-ฑฑบ			 ณcarteira se os titulos a receber geraram comissao e esta se encontra com o status fechada, para que desta		บฑฑ
-ฑฑบ			 ณforma seja inviabilizado este estorno ou cancelamento.												    	บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ 																						                        บฑฑ
-ฑฑบ          ณ                                                                                       						บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบParametrosณ                                                                                       						บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบRetorno   ณ 0 - Nao podera ser realizada a exclusao ou estorno da compensacao entre carteiras.                           บฑฑ
-ฑฑบ			 ณ 1 - Gravar o Cancelamento/Estorno														                    บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUsuario   ณ                                                                                          					บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบSetor     ณ Financeiro                                                                               					บฑฑ
-ฑฑฬออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบ            			          	ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL                   						บฑฑ
-ฑฑฬออออออออออัออออออออออัออออออออออออออออออออออออออออออออออออออออออออออออออัออออออออออออออออออออออออออออออออออัอออออออออออออนฑฑ
-ฑฑบAutor     ณ Data     ณ Motivo da Alteracao  				               ณUsuario(Filial+Matricula+Nome)    ณSetor        บฑฑ
-ฑฑบฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤฤฤฤบฑฑ
-ฑฑบ----------ณ----------ณ--------------------------------------------------ณ----------------------------------ณ-------------บฑฑ
-ฑฑศออออออออออฯออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออฯออออออออออออออออออออออออออออออออออฯอออออออออออออผฑฑ
-ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
-฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
-*/ 
-
+===============================================================================================================================
+Programa----------: F450CAES
+Autor-------------: Fabiano Dias
+Data da Criacao---: 20/04/2011
+Descri็ใo---------: Ponto de entrada utilizada para verificar no momento de um cancelamento ou estorno de uma compensacao em
+					carteira se os titulos a receber geraram comissao e esta se encontra com o status fechada, para que desta
+					forma seja inviabilizado este estorno ou cancelamento.
+Parametros--------: Nenhum
+Retorno-----------: 0 - Nao podera ser realizada a exclusao ou estorno da compensacao entre carteiras
+					1 - Gravar o Cancelamento/Estorno
+===============================================================================================================================
+*/
 User Function F450CAES()     
                                 
-Local _aArea    := GetArea()    
+Local _aArea    := FWGetArea()    
 
 Local _cAliasSE5:= ""
 Local _cAliasSE3:= ""
 
 Local _cTitComis:= ""
 
-Local _cNumComp := PARAMIXB[1]//Numero da Compensacao
-Local _nRetorno := PARAMIXB[2]//0 - Nao podera ser realizada a exclusao ou estorno da compensacao entre carteiras
+Local _cNumComp := ParamIXB[1]//Numero da Compensacao
+Local _nRetorno := ParamIXB[2]//0 - Nao podera ser realizada a exclusao ou estorno da compensacao entre carteiras
 
 If _nRetorno <> 0
-	/*
-	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
-	//ณVerifica os dados dos titulos a receber na tabela SE5 de acordoณ
-	//ณcom a compensacao informada para cancelamento ou estorno       ณ
-	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
-	*/  
+	//Verifica os dados dos titulos a receber na tabela SE5 de acordo
+	//com a compensacao informada para cancelamento ou estorno
 	_cAliasSE5:= GetNextAlias()   
 	
 	querys(1,_cAliasSE5,_cNumComp,"","","","","","")
 	
-	dbSelectArea(_cAliasSE5)
-	(_cAliasSE5)->(dbGotop())	                          	
-	/*
-	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
-	//ณPercorre todos os titulos que compoem a compensacao paraณ
-	//ณverificar o status da comissao.                         ณ
-	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
-	*/
+	DBSelectArea(_cAliasSE5)
+	(_cAliasSE5)->(DBGoTop())	                          	
+	//Percorre todos os titulos que compoem a compensacao para
+	//verificar o status da comissao.
 	While (_cAliasSE5)->(!Eof())      
 	
 		_cAliasSE3:= GetNextAlias()
@@ -72,47 +52,35 @@ If _nRetorno <> 0
 		querys(2,_cAliasSE3,"",(_cAliasSE5)->E5_NUMERO,(_cAliasSE5)->E5_PARCELA,;
 		      (_cAliasSE5)->E5_PREFIXO,(_cAliasSE5)->E5_TIPO,(_cAliasSE5)->E5_CLIFOR,(_cAliasSE5)->E5_LOJA)    
 		      
-		dbSelectArea(_cAliasSE3)		      
-		(_cAliasSE3)->(dbGoTop())		                           		
-		/*
-		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
-		//ณNao podera ser realizado o estorno ou cancelamento da compensacao      ณ
-		//ณentre carteiras uma vez que a comissao gerarada a partir da compensacaoณ
-		//ณja se encontra com o status fechada.                                   ณ
-		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
-		*/
+		DBSelectArea(_cAliasSE3)		      
+		(_cAliasSE3)->(DBGoTop())		                           		
+		//Nao podera ser realizado o estorno ou cancelamento da compensacao
+		//entre carteiras uma vez que a comissao gerarada a partir da compensacao
+		//ja se encontra com o status fechada.
 		If (_cAliasSE3)->NUMREG > 0
 		
-			_cTitComis += _ENTER + '[Filial]:'   + xFilial("SE5") +;
+			_cTitComis += CRLF + '[Filial]:'   + xFilial("SE5") +;
 			                       ' [Prefixo]:' + AllTrim((_cAliasSE5)->E5_PREFIXO) +;
 			                       ' [Tipo]:'    + AllTrim((_cAliasSE5)->E5_TIPO) +;
 			                       ' [Titulo]:'  + (_cAliasSE5)->E5_NUMERO +;
 			                       ' [Parcela]:' + (_cAliasSE5)->E5_PARCELA		
 		EndIf    		                            		
-		/*
-		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
-		//ณFinaliza a area criada anteriormente para consulta das comissoes.ณ
-		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
-		*/
-		dbSelectArea(_cAliasSE3)		      
-		(_cAliasSE3)->(dbCloseArea())
+		//Finaliza a area criada anteriormente para consulta das comissoes.
+		DBSelectArea(_cAliasSE3)		      
+		(_cAliasSE3)->(DBCloseArea())
 	     
-	(_cAliasSE5)->(dbSkip()) 
+	(_cAliasSE5)->(DBSkip()) 
 	EndDo	        	
-	/*
-	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
-	//ณFinaliza a area criada anteriormente para consulta dos dados doณ
-	//ณtitulo a receber referente a compensacao informada.            ณ
-	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
-	*/
-	dbSelectArea(_cAliasSE5)
-	(_cAliasSE5)->(dbCloseArea()) 
+	//Finaliza a area criada anteriormente para consulta dos dados do
+	//titulo a receber referente a compensacao informada.
+	DBSelectArea(_cAliasSE5)
+	(_cAliasSE5)->(DBCloseArea()) 
 	
 	If Len(AllTrim(_cTitComis)) > 0           
 
 		xMagHelpFis("INFORMAวรO",;
 		            "O(s) titulo(s) listado(s) abaixo possui(em) comissใo gerada e esta se encontra com o status fechada, desta forma nใo serแ possํvel realizar o cancelamento ou estorno da compensa็ใo entre carteiras.",;
-		            "Titulos que se encontram com problema:" + _ENTER + _cTitComis)   
+		            "Titulos que se encontram com problema:" + CRLF + _cTitComis)   
 		            
 		_nRetorno := 0   
 			Else
@@ -121,52 +89,26 @@ If _nRetorno <> 0
 
 EndIf
 
-restArea(_aArea)
+FWRestArea(_aArea)
 
 Return(_nRetorno)
 
 /*
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
-ฑฑษออออออออออัออออออออออหอออออออัอออออออออออออออออออออออหออออออออออออออออออัออออออออออออออออออออออออออออออออออออออออออออออออปฑฑ
-ฑฑบPrograma  ณquerys    บ Autor ณ Fabiano Dias da Silva บ Data da Criacao  ณ 20/04/2011                						บฑฑ
-ฑฑฬออออออออออุออออออออออสอออออออฯอออออออออออออออออออออออสออออออออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบDescricao ณ Funcao utilizada para gerar as querys do fonte F450CAES.	 												    บฑฑ
-ฑฑบ			 ณ 																										    	บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ 																						                        บฑฑ
-ฑฑบ          ณ                                                                                       						บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบParametrosณ                                                                                       						บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบRetorno   ณ 													  		                                                    บฑฑ
-ฑฑบ			 ณ														                                   						บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUsuario   ณ                                                                                          					บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบSetor     ณ Financeiro                                                                               					บฑฑ
-ฑฑฬออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบ            			          	ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL                   						บฑฑ
-ฑฑฬออออออออออัออออออออออัออออออออออออออออออออออออออออออออออออออออออออออออออัออออออออออออออออออออออออออออออออออัอออออออออออออนฑฑ
-ฑฑบAutor     ณ Data     ณ Motivo da Alteracao  				               ณUsuario(Filial+Matricula+Nome)    ณSetor        บฑฑ
-ฑฑบฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤฤฤฤบฑฑ
-ฑฑบ----------ณ----------ณ--------------------------------------------------ณ----------------------------------ณ-------------บฑฑ
-ฑฑศออออออออออฯออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออฯออออออออออออออออออออออออออออออออออฯอออออออออออออผฑฑ
-ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
-฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
-*/ 
-
+===============================================================================================================================
+Programa----------: querys
+Autor-------------: Fabiano Dias
+Data da Criacao---: 20/04/2011
+Descri็ใo---------: Funcao utilizada para gerar as querys do fonte F450CAES.
+Parametros--------: Nenhum
+Retorno-----------: Nenhum
+===============================================================================================================================
+*/
 Static Function querys(_nOpcao,_cAlias,_cNumComp,_cNumTit,_cParcela,_cPrefixo,_cTipo,_cCliente,_cLoja)  
 
 Local _cFiltro:= "%"
 
 	Do Case
-	    /*
-		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
-		//ณQuery utilizada para verificar os dados dos titulos que compoem ณ
-		//ณa compensacao.                                                  ณ
-		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
-		*/
+		//Query utilizada para verificar os dados dos titulos que compoem a compensacao.
 		Case _nOpcao == 1    
 		
 		    _cFiltro += " AND E5_FILIAL =  '"  + xFilial("SE5") + "'"
@@ -177,7 +119,7 @@ Local _cFiltro:= "%"
 				SELECT
 				      E5_NUMERO,E5_PARCELA,E5_PREFIXO,E5_TIPO,E5_CLIFOR,E5_LOJA
 				FROM
-				      %table:SE5%
+				      %Table:SE5%
 				WHERE
 				      D_E_L_E_T_ = ' '
 				      AND E5_RECPAG = 'R'
@@ -186,12 +128,8 @@ Local _cFiltro:= "%"
 					  %exp:_cFiltro%
 			EndSql
 			     				            			
-		/*
-		//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
-		//ณQuery para verifica se foi gerada comissao para o titulo correnteณ
-		//ณe se esta encontra-se com o status fechada.                      ณ
-		//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
-		*/
+		//Query para verifica se foi gerada comissao para o titulo corrente
+		//e se esta encontra-se com o status fechada.
 		Case _nOpcao == 2 	
 		
 			_cFiltro += " AND E3_FILIAL = '"  + xFilial("SE3") + "'"  
@@ -207,7 +145,7 @@ Local _cFiltro:= "%"
 				SELECT
 				      COUNT(*) NUMREG
 				FROM
-				      %table:SE3%
+				      %Table:SE3%
 				WHERE
 				      D_E_L_E_T_ = ' '
 				      AND E3_I_FECH = 'S'

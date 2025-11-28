@@ -9,10 +9,7 @@ Lucas Borges  |16/10/2024| Chamado 48867. Refatoração do fonte
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -78,7 +75,7 @@ If _oFile:Open()
 	For _nX:=2 to Len(_aAux)//Processa descartando o cabeçalho
 		aAdd( aColAux , StrTokArr2(_aAux[_nX],';',.T.))
 	Next _nx
-	IF Empty( aColAux )
+	If Empty( aColAux )
 		FWAlertWarning("Não foram encontrados registros válidos para exibir! Verifique o arquivo e tente novamente.","MGPE01103")
 	Else
 		nRegVal := Len( aColAux )
@@ -146,14 +143,14 @@ nPosVAL	:= aScan( aHeader , "VLR_PARTICIPACAO"			)
 nTotReg	:= Len( aColAux )
 
 //Verifica os posicionamentos indispensáveis do arquivo
-IF nPosMAT == 0 .Or. nPosCPF == 0 .Or. nPosDEP == 0 .Or. nPosVAL == 0
+If nPosMAT == 0 .Or. nPosCPF == 0 .Or. nPosDEP == 0 .Or. nPosVAL == 0
 	FWAlertWarning("O arquivo está vazio ou o Layout é inválido para análise! Verifique o arquivo e tente novamente.","MGPE01107")
-	Return()
-EndIF
+	Return
+EndIf
 
 DBSelectArea('RHO')
 //Ordena os dados e inicializa o processamento
-ASORT( aColAux ,,, {|x,y| x[nPosMAT] + x[nPosDEP] > y[nPosMAT] + y[nPosDEP] } )
+aSort( aColAux ,,, {|x,y| x[nPosMAT] + x[nPosDEP] > y[nPosMAT] + y[nPosDEP] } )
 _oSelf:SetRegua1(nTotReg)
 
 Begin Transaction
@@ -184,9 +181,9 @@ For nI := 1 To Len( aColAux )
 		AND	SRA.RA_CIC LIKE %exp:cCPF%
 	EndSql
 
-	IF (cAlias)->( !Eof() )
+	If (cAlias)->( !Eof() )
 		If Empty( (cAlias)->REGSRA ) .Or. Empty( (cAlias)->REGRHK )
-			aAdd( aLogDif , {cMatric,cNome,"Registro não encontrado no Protheus!",IIF(Empty((cAlias)->REGSRA),'Não','Sim'),IIF(Empty((cAlias)->REGRHK),'Não','Sim')})
+			aAdd( aLogDif , {cMatric,cNome,"Registro não encontrado no Protheus!",IIf(Empty((cAlias)->REGSRA),'Não','Sim'),IIF(Empty((cAlias)->REGRHK),'Não','Sim')})
 		Else
 			aDados := {0,0,0}
 			While nI <= Len(aColAux) .And. cFil+cMatric == PadL( AllTrim( aColAux[nI][nPosMAT] ) , TamSX3("RA_FILIAL")[01] + TamSX3("RA_MAT")[01] , "0" )
@@ -206,7 +203,7 @@ For nI := 1 To Len( aColAux )
 				If aDados[_nX] > 0
 					_cOrigem := IIf(_nX==1.Or._nX==2,'1','2')
 					_cPD	:= IIf(_nX==1,'509',IIf(_nX==2,'513','348'))
-					If RHO->(DBSeek(cFil+cMatric+DTOS(dDataBase)+'1'+'99 '+_cOrigem+_cPD+SubStr( DtoS(dDataBase) , 1 , 6 )))
+					If RHO->(DBSeek(cFil+cMatric+DToS(dDataBase)+'1'+'99 '+_cOrigem+_cPD+SubStr( DToS(dDataBase) , 1 , 6 )))
 						aAdd( aLogDif , {cMatric,cNome,"Registro já cadastrado no Protheus",,})
 					Else
 						RHO->( RecLock('RHO',.T.) )
@@ -219,16 +216,16 @@ For nI := 1 To Len( aColAux )
 						RHO->RHO_TPLAN	:= '1'
 						RHO->RHO_PD		:= _cPD
 						RHO->RHO_VLRFUN	:= aDados[_nX]
-						RHO->RHO_COMPPG	:= SubStr( DtoS(dDataBase) , 1 , 6 )
+						RHO->RHO_COMPPG	:= SubStr( DToS(dDataBase) , 1 , 6 )
 						RHO->RHO_OBSERV	:= 'Importação Automática - Arquivo Unimed'
-						RHO->( MsUnLock() )
+						RHO->( MSUnLock() )
 					EndIf
 				EndIf
 			Next _nX
 		EndIf
 	Else
-		aAdd( aLogDif , {cMatric,cNome,"Registro não encontrado no Protheus!",IIF(Empty((cAlias)->REGSRA),'Não','Sim'),IIF(Empty((cAlias)->REGRHK),'Não','Sim')})
-	EndIF
+		aAdd( aLogDif , {cMatric,cNome,"Registro não encontrado no Protheus!",IIf(Empty((cAlias)->REGSRA),'Não','Sim'),IIf(Empty((cAlias)->REGRHK),'Não','Sim')})
+	EndIf
 	(cAlias)->(DBCloseArea())
 Next nI
 

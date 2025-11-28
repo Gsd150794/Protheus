@@ -14,7 +14,7 @@ Lucas Borges      | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para 
 Antonio Ramos - Julio Paz    - 11/04/25 - 24/04/25 - 50212   - Alterar o Relatório Extrato Comissão Vendedor Para Imprimir o Nome-Cargo-RG do Aprovador na Assinatura e Junto com o Valor Total.
 ===============================================================================================================================
 */
-#include "protheus.ch"      
+#Include "TOTVS.ch"      
 #Include "RPTDEF.CH"
 #Include "FWPrintSetup.ch"
 /*
@@ -98,7 +98,7 @@ Begin Sequence
 
    //If !Pergunte( _cPerg, .T. )
   
-	//  u_itmsg( 'Operação cancelada pelo usuário!' , 'Atenção!' , , 1)
+	//  U_ITMsg( 'Operação cancelada pelo usuário!' , 'Atenção!' , , 1)
 
    //Else           
    MV_PAR01 := Space(6)
@@ -118,44 +118,44 @@ Begin Sequence
    MV_PAR15 := Space(40)
    MV_PAR16 := Space(60) 
 
-   Aadd( _aParAux , { 1 , "Mes/Ano Inicial "           , MV_PAR01, ""  , ""  , ""       , "" , 030 , .F. } )
-   Aadd( _aParAux , { 1 , "Mes/Ano Final "             , MV_PAR02, ""  , ""  , ""       , "" , 030 , .F. } )
-   Aadd( _aParAux , { 1 , "Gerente Nacional"            , MV_PAR03, "@!", ""  , 'SA3_04' , "" , 100 , .F. } )
-   Aadd( _aParAux , { 1 , "Gerente "       	           , MV_PAR04, "@!", ""  , 'LSTGER' , "" , 100 , .F. } )
-   Aadd( _aParAux , { 1 , "Coordenador "               , MV_PAR05, "@!", ""  , 'LSTSUP' , "" , 100 , .F. } )
-   Aadd( _aParAux , { 1 , "Supervisor "                , MV_PAR06, "@!", ""  , 'LSTSUI' , "" , 100 , .F. } )
-   Aadd( _aParAux , { 1 , "Representantes "            , MV_PAR07, "@!", ""  , 'LSTVEN' , "" , 100 , .F. } )
+   aAdd( _aParAux , { 1 , "Mes/Ano Inicial "           , MV_PAR01, ""  , ""  , ""       , "" , 030 , .F. } )
+   aAdd( _aParAux , { 1 , "Mes/Ano Final "             , MV_PAR02, ""  , ""  , ""       , "" , 030 , .F. } )
+   aAdd( _aParAux , { 1 , "Gerente Nacional"            , MV_PAR03, "@!", ""  , 'SA3_04' , "" , 100 , .F. } )
+   aAdd( _aParAux , { 1 , "Gerente "       	           , MV_PAR04, "@!", ""  , 'LSTGER' , "" , 100 , .F. } )
+   aAdd( _aParAux , { 1 , "Coordenador "               , MV_PAR05, "@!", ""  , 'LSTSUP' , "" , 100 , .F. } )
+   aAdd( _aParAux , { 1 , "Supervisor "                , MV_PAR06, "@!", ""  , 'LSTSUI' , "" , 100 , .F. } )
+   aAdd( _aParAux , { 1 , "Representantes "            , MV_PAR07, "@!", ""  , 'LSTVEN' , "" , 100 , .F. } )
 //---------------------------------------------------------------------------------------------------------------	  
-   Aadd( _aParAux , { 2 , "Traz Hierarquia "           , MV_PAR08,_aSimNao  , 60 , '' , .T. } )
-   Aadd( _aParAux , { 2 , "Tipo de Relatório "         , MV_PAR09,_aTipoRel , 60 , '' , .T. } )
-   Aadd( _aParAux , { 2 , "Tipo de Representante "     , MV_PAR10,_aTipoRepr, 60 , '' , .T. } )
-   Aadd( _aParAux , { 2 , "Imprime Comissões Zeradas " , MV_PAR11,_aSimNao  , 60 , '' , .T. } )
-   Aadd( _aParAux , { 2 , "Imprime Hierarquia "        , MV_PAR12,_aSimNao  , 60 , '' , .T. } )
+   aAdd( _aParAux , { 2 , "Traz Hierarquia "           , MV_PAR08,_aSimNao  , 60 , '' , .T. } )
+   aAdd( _aParAux , { 2 , "Tipo de Relatório "         , MV_PAR09,_aTipoRel , 60 , '' , .T. } )
+   aAdd( _aParAux , { 2 , "Tipo de Representante "     , MV_PAR10,_aTipoRepr, 60 , '' , .T. } )
+   aAdd( _aParAux , { 2 , "Imprime Comissões Zeradas " , MV_PAR11,_aSimNao  , 60 , '' , .T. } )
+   aAdd( _aParAux , { 2 , "Imprime Hierarquia "        , MV_PAR12,_aSimNao  , 60 , '' , .T. } )
 //----------------------------------------------------------------------------------------------------------------	  
-   Aadd( _aParAux , { 1 , "Nome do Aprovador "         , MV_pAR13, "" , ""	, "" , ""          ,080      , .F. } )
-   Aadd( _aParAux , { 1 , "RG do Aprovador "           , MV_pAR14 ,"" , ""	, "" , ""          ,040      , .F. } )
-   Aadd( _aParAux , { 1 , "Cargo do Aprovador "        , MV_pAR15, "" , ""  , "" , ""          ,080      , .F. } )
-   Aadd( _aParAux , { 1 , "Local e Data "              , MV_pAR16 ,"" , ""  , "" , ""          ,080      , .F. } )
+   aAdd( _aParAux , { 1 , "Nome do Aprovador "         , MV_PAR13, "" , ""	, "" , ""          ,080      , .F. } )
+   aAdd( _aParAux , { 1 , "RG do Aprovador "           , MV_PAR14 ,"" , ""	, "" , ""          ,040      , .F. } )
+   aAdd( _aParAux , { 1 , "Cargo do Aprovador "        , MV_PAR15, "" , ""  , "" , ""          ,080      , .F. } )
+   aAdd( _aParAux , { 1 , "Local e Data "              , MV_PAR16 ,"" , ""  , "" , ""          ,080      , .F. } )
 
-   Aadd(_aParRet,"MV_PAR01") 
-   Aadd(_aParRet,"MV_PAR02") 
-   Aadd(_aParRet,"MV_PAR03") 
-   Aadd(_aParRet,"MV_PAR04") 
-   Aadd(_aParRet,"MV_PAR05") 
-   Aadd(_aParRet,"MV_PAR06") 
-   Aadd(_aParRet,"MV_PAR07") 
-   Aadd(_aParRet,"MV_PAR08") 
-   Aadd(_aParRet,"MV_PAR09") 	  	  
-   Aadd(_aParRet,"MV_PAR10")
-   Aadd(_aParRet,"MV_PAR11") 
-   Aadd(_aParRet,"MV_PAR12")  
-   Aadd(_aParRet,"MV_PAR13") 
-   Aadd(_aParRet,"MV_PAR14") 
-   Aadd(_aParRet,"MV_PAR15") 
-   Aadd(_aParRet,"MV_PAR16") 
+   aAdd(_aParRet,"MV_PAR01") 
+   aAdd(_aParRet,"MV_PAR02") 
+   aAdd(_aParRet,"MV_PAR03") 
+   aAdd(_aParRet,"MV_PAR04") 
+   aAdd(_aParRet,"MV_PAR05") 
+   aAdd(_aParRet,"MV_PAR06") 
+   aAdd(_aParRet,"MV_PAR07") 
+   aAdd(_aParRet,"MV_PAR08") 
+   aAdd(_aParRet,"MV_PAR09") 	  	  
+   aAdd(_aParRet,"MV_PAR10")
+   aAdd(_aParRet,"MV_PAR11") 
+   aAdd(_aParRet,"MV_PAR12")  
+   aAdd(_aParRet,"MV_PAR13") 
+   aAdd(_aParRet,"MV_PAR14") 
+   aAdd(_aParRet,"MV_PAR15") 
+   aAdd(_aParRet,"MV_PAR16") 
 
    If !ParamBox( _aParAux , "Opções de Filtro para a Impressão do Extrato." , @_aParRet,,, .T. , , , , , .T. , .T. )
-      U_ItMsg( "Relatório cancelado pelo usuário!" , "Atenção!",,1 )
+      U_ITMsg( "Relatório cancelado pelo usuário!" , "Atenção!",,1 )
 
    Else 
 
@@ -218,7 +218,7 @@ If Select(_cAliasSA3) > 0
    (_cAliasSA3)->( DBCloseArea() )
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -301,13 +301,13 @@ Begin Sequence
 	  //================================================================================
 	  // Chama rotina principal com base no cadastro de vendedores.
 	  //================================================================================
-	  fwmsgrun(,{|| ROMS030QRY( _cAliasSA3, 8 ) },"Aguarde...", "Carregando dados de " + _cTitCargo + "...") 
+	  FWMsgRun(,{|| ROMS030QRY( _cAliasSA3, 8 ) },"Aguarde...", "Carregando dados de " + _cTitCargo + "...") 
 
 
-	  (_cAliasSA3)->(DbGoTop())
+	  (_cAliasSA3)->(DBGoTop())
 		
 	  //Carrega para arrays para reordenar     
-	  Do While ! (_cAliasSA3)->(Eof()) 
+	  While ! (_cAliasSA3)->(Eof()) 
 	     _cCargo := "Z"
 	   
 	     If (_cAliasSA3)->A3_I_TIPV == "V"
@@ -316,55 +316,55 @@ Begin Sequence
 	        _cCargo := "3"
 	     ElseIf (_cAliasSA3)->A3_I_TIPV == "C"
 	        _cCargo := "2"
-	     Elseif (_cAliasSA3)->A3_I_TIPV == "G"
+	     ElseIf (_cAliasSA3)->A3_I_TIPV == "G"
 	        _cCargo := "1"
-		 Elseif (_cAliasSA3)->A3_I_TIPV == "N" 
+		 ElseIf (_cAliasSA3)->A3_I_TIPV == "N" 
 	        _cCargo := "0"
-	     Endif
+	     EndIf
 
 		 //==========================================================================================
          // O array _aAgrupaD armazena as principais informações dos Gerentes, Coordenadores,
          // Supervisores e Representantes filtrados pela query principal deste relatório.
          //==========================================================================================
 	                  //      Código 1                  Tipo 2             Codigo Gerente 3        Codigo Coordenador 4     Código Supervisor 5    Tipo para Ordenação. 6 , SITUAÇAO   7    "Código Gerente Nacional 8"  "NOME DO REPRESENTANTE 9 "
-	     Aadd(_aAgrupaD, {(_cAliasSA3)->A3_COD, (_cAliasSA3)->A3_I_TIPV, (_cAliasSA3)->A3_GEREN, (_cAliasSA3)->A3_SUPER, (_cAliasSA3)->A3_I_SUPE,  _cCargo                , "NAO GRAVADO", (_cAliasSA3)->A3_I_GERNC, (_cAliasSA3)->A3_NOME } )
+	     aAdd(_aAgrupaD, {(_cAliasSA3)->A3_COD, (_cAliasSA3)->A3_I_TIPV, (_cAliasSA3)->A3_GEREN, (_cAliasSA3)->A3_SUPER, (_cAliasSA3)->A3_I_SUPE,  _cCargo                , "NAO GRAVADO", (_cAliasSA3)->A3_I_GERNC, (_cAliasSA3)->A3_NOME } )
 	     //----------------------------------------------------------------------------------------------------------------------------------------------------------------//
                      //      Código 1                  Tipo 2              Codigo Gerente 3         Codigo Coordenador 4    Código Supervisor 5     Valor Comissão 6 , Valor Bonificação 7 , Pagto Devoluções 8
 		             //      Código 1                  Tipo 2              Codigo Gerente 3         Codigo Coordenador 4    Código Supervisor 5    "Valor total recebido" 6 , "Valor total Comissão" 7 , "Valor total Devolvido" 8 , "Valor total devolvido comissão" 9 , "Valor total bonificação." 10   , "Valor total comissão bonificação. 11"  "Código Gerente Nacional 12"
-	     Aadd(_aDadosRelac, {(_cAliasSA3)->A3_COD, (_cAliasSA3)->A3_I_TIPV, (_cAliasSA3)->A3_GEREN, (_cAliasSA3)->A3_SUPER, (_cAliasSA3)->A3_I_SUPE, 0                       , 0                        , 0                         , 0                                  , 0                               , 0                                    , (_cAliasSA3)->A3_I_GERNC })
+	     aAdd(_aDadosRelac, {(_cAliasSA3)->A3_COD, (_cAliasSA3)->A3_I_TIPV, (_cAliasSA3)->A3_GEREN, (_cAliasSA3)->A3_SUPER, (_cAliasSA3)->A3_I_SUPE, 0                       , 0                        , 0                         , 0                                  , 0                               , 0                                    , (_cAliasSA3)->A3_I_GERNC })
 
 		 If (_cAliasSA3)->A3_I_TIPV == "V"
 		
-			aadd(_avenl,{(_cAliasSA3)->A3_COD,0})
+			aAdd(_avenl,{(_cAliasSA3)->A3_COD,0})
 			
 		 ElseIf (_cAliasSA3)->A3_I_TIPV == "S"
 		
-			aadd(_asupl,{(_cAliasSA3)->A3_COD,0})
+			aAdd(_asupl,{(_cAliasSA3)->A3_COD,0})
 			
 		 ElseIf (_cAliasSA3)->A3_I_TIPV == "C"
 		
-			aadd(_acoordl,{(_cAliasSA3)->A3_COD,0})
+			aAdd(_acoordl,{(_cAliasSA3)->A3_COD,0})
 			
-		 Elseif (_cAliasSA3)->A3_I_TIPV == "G"
+		 ElseIf (_cAliasSA3)->A3_I_TIPV == "G"
 		
-			aadd(_agerenl,{(_cAliasSA3)->A3_COD,0})
+			aAdd(_agerenl,{(_cAliasSA3)->A3_COD,0})
 		 
-		 Elseif (_cAliasSA3)->A3_I_TIPV == "N"  
+		 ElseIf (_cAliasSA3)->A3_I_TIPV == "N"  
 		
-			aadd(_aGerNacio,{(_cAliasSA3)->A3_COD,0})	
+			aAdd(_aGerNacio,{(_cAliasSA3)->A3_COD,0})	
 			
-		 Endif
-
-         _nX := AsCan(_aGerNC, {|x| x[1] == (_cAliasSA3)->A3_I_GERNC })
-		 If _nX == 0
-            Aadd(_aGerNC, {(_cAliasSA3)->A3_I_GERNC,0})
 		 EndIf
 
-		 (_cAliasSA3)->(DbSkip())
-		
-	  Enddo
+         _nX := aScan(_aGerNC, {|x| x[1] == (_cAliasSA3)->A3_I_GERNC })
+		 If _nX == 0
+            aAdd(_aGerNC, {(_cAliasSA3)->A3_I_GERNC,0})
+		 EndIf
 
-      ASORT(_aAgrupaD, , , { | x,y | x[6]+ x[9] < y[6] + y[9] } ) 
+		 (_cAliasSA3)->(DBSkip())
+		
+	  EndDo
+
+      aSort(_aAgrupaD, , , { | x,y | x[6]+ x[9] < y[6] + y[9] } ) 
 
 
       U_ROMS030E()
@@ -400,8 +400,8 @@ Begin Sequence
 			 For _nX := 1 To Len(_aAgrupaD)
 			     If _cCodGerNac == _aAgrupaD[_nX,1]
 				    _aAgrupaD[_nX,7] := "GRAVADO"
-                    //Aadd(_aAgrupaA, _aAgrupaD[_nX] )   
-					Aadd(_aAgrupaNac, _aAgrupaD[_nX] ) 
+                    //aAdd(_aAgrupaA, _aAgrupaD[_nX] )   
+					aAdd(_aAgrupaNac, _aAgrupaD[_nX] ) 
 					Exit 
 				 EndIf 
 			 Next 
@@ -439,7 +439,7 @@ Begin Sequence
            
                     If ! _lVinculado 
                        _aAgrupaD[_nX,7] := "GRAVADO"
-                       Aadd(_aAgrupaA, _aAgrupaD[_nX]) 
+                       aAdd(_aAgrupaA, _aAgrupaD[_nX]) 
                     EndIf
                  EndIf
              Next
@@ -464,7 +464,7 @@ Begin Sequence
                         // Grava no array _aAgrupaB registro principal do Gerente.
                         //==========================================================================================
                         _aAgrupaD[_nY,7] := "GRAVADO"
-                        Aadd(_aAgrupaB, _aAgrupaD[_nY]) 
+                        aAdd(_aAgrupaB, _aAgrupaD[_nY]) 
                   
                         //==========================================================================================
                         // Grava no array _aAgrupaB os Coordenadores vinculados ao gerente.
@@ -472,7 +472,7 @@ Begin Sequence
                         For _nJ := 1 To Len(_aAgrupaD)
                             If _aAgrupaD[_nJ,3] == _agerenl[_nX,1] .And._aAgrupaD[_nJ,7] <> "GRAVADO" .And. _aAgrupaD[_nJ,2] == "C"
                                _aAgrupaD[_nJ,7] := "GRAVADO"
-                               Aadd(_aAgrupaB, _aAgrupaD[_nJ]) 
+                               aAdd(_aAgrupaB, _aAgrupaD[_nJ]) 
                             EndIf
                         Next
                   
@@ -483,7 +483,7 @@ Begin Sequence
                         For _nJ := 1 To Len(_aAgrupaD)                                                                                  // Coordenador                         Supervisor
                             If _aAgrupaD[_nJ,3] == _agerenl[_nX,1] .And._aAgrupaD[_nJ,7] <> "GRAVADO" .And. _aAgrupaD[_nJ,2] == "S" .And. Empty(_aAgrupaD[_nJ,4]) .And. Empty(_aAgrupaD[_nJ,5])
                                _aAgrupaD[_nJ,7] := "GRAVADO"
-                               Aadd(_aAgrupaB, _aAgrupaD[_nJ]) 
+                               aAdd(_aAgrupaB, _aAgrupaD[_nJ]) 
                             EndIf
                         Next
                   
@@ -494,7 +494,7 @@ Begin Sequence
                         For _nJ := 1 To Len(_aAgrupaD)                                                                                   // Coordenador                         Supervisor
                             If _aAgrupaD[_nJ,3] == _agerenl[_nX,1] .And._aAgrupaD[_nJ,7] <> "GRAVADO" .And. _aAgrupaD[_nJ,2] == "V" .And. Empty(_aAgrupaD[_nJ,4]) .And. Empty(_aAgrupaD[_nJ,5])
                                _aAgrupaD[_nJ,7] := "GRAVADO"
-                               Aadd(_aAgrupaB, _aAgrupaD[_nJ]) 
+                               aAdd(_aAgrupaB, _aAgrupaD[_nJ]) 
                             EndIf
                         Next
                      EndIf
@@ -508,21 +508,21 @@ Begin Sequence
              // dos Gerentes e dos Coordenadores, Supervisores e Representantes que só possuem vinculos
              // ao Gerente.
              //==========================================================================================
- 	         //ASORT(_aAgrupaA, , , { | x,y | x[6]+ x[1] < y[6] + y[1] } ) 
-			 ASORT(_aAgrupaA, , , { | x,y | x[6]+ x[9] < y[6] + y[9] } ) 
+ 	         //aSort(_aAgrupaA, , , { | x,y | x[6]+ x[1] < y[6] + y[1] } ) 
+			 aSort(_aAgrupaA, , , { | x,y | x[6]+ x[9] < y[6] + y[9] } ) 
  	
              For _nX := 1 To Len(_aAgrupaA)
-                 Aadd(_aAgrupaC, _aAgrupaA[_nX])
+                 aAdd(_aAgrupaC, _aAgrupaA[_nX])
              Next
     
-	         ASORT(_aAgrupaB, , , { | x,y | x[6]+ x[9] < y[6] + y[9] } )  
+	         aSort(_aAgrupaB, , , { | x,y | x[6]+ x[9] < y[6] + y[9] } )  
 
              For _nX := 1 To Len(_aAgrupaB)
-                 Aadd(_aAgrupaC, _aAgrupaB[_nX])
+                 aAdd(_aAgrupaC, _aAgrupaB[_nX])
              Next
 
                           //      Código 1                  Tipo 2             Codigo Gerente 3        Codigo Coordenador 4     Código Supervisor 5    Tipo para Ordenação. 6 , SITUAÇAO   7
-	         // Aadd(_aAgrupaD, {(_cAliasSA3)->A3_COD, (_cAliasSA3)->A3_I_TIPV, (_cAliasSA3)->A3_GEREN, (_cAliasSA3)->A3_SUPER, (_cAliasSA3)->A3_I_SUPE,  _cCargo                , "NAO GRAVADO"}) 
+	         // aAdd(_aAgrupaD, {(_cAliasSA3)->A3_COD, (_cAliasSA3)->A3_I_TIPV, (_cAliasSA3)->A3_GEREN, (_cAliasSA3)->A3_SUPER, (_cAliasSA3)->A3_I_SUPE,  _cCargo                , "NAO GRAVADO"}) 
 
 	         //==========================================================================================
              // Após gravar os dados no array _aAgrupaC, limpamos os conteúdos dos arrays _aAgrupaA e
@@ -540,13 +540,13 @@ Begin Sequence
                           // Cod.Gerente                    Cod.Coordenador              Cod.Supervisor             Tipo
                  If Empty(_aAgrupaC[_nX, 3]) .And. Empty(_aAgrupaC[_nX, 4]) .And. Empty(_aAgrupaC[_nX, 5]) .And. _aAgrupaC[_nX, 2] <> 'G' 
                     _aAgrupaC[_nX,7] := "GRAVADO"
-                    Aadd(_aAgrupaA, _aAgrupaC[_nX])
+                    aAdd(_aAgrupaA, _aAgrupaC[_nX])
                  Else
                     //==========================================================================================
                     // Grava no array _aAgrupaA o registro do Coordenador vinculado ao Gerente posicionado.
                     //==========================================================================================
                     _aAgrupaC[_nX,7] := "GRAVADO"
-                    Aadd(_aAgrupaA, _aAgrupaC[_nX])
+                    aAdd(_aAgrupaA, _aAgrupaC[_nX])
                
                     //==========================================================================================
                     // Grava no array _aAgrupaA de forma agrupada, todos os Supervisores e Representantes
@@ -556,7 +556,7 @@ Begin Sequence
                            //         Situacao                             Cod.Gerente                                    Cod. Coordenador                      Cod. Supervisor               
                         If _aAgrupaD[_nY,7] == "NAO GRAVADO" .And. _aAgrupaC[_nX, 3] == _aAgrupaD[_nY, 3] .And. _aAgrupaC[_nX, 1] == _aAgrupaD[_nY, 4] //.And. ! Empty(_aAgrupaC[_nX, 4]) .And. Empty(_aAgrupaC[_nX, 5])
                            _aAgrupaD[_nY,7] := "GRAVADO"
-                           Aadd(_aAgrupaA, _aAgrupaD[_nY])
+                           aAdd(_aAgrupaA, _aAgrupaD[_nY])
                         EndIf
                     Next
                  EndIf
@@ -578,14 +578,14 @@ Begin Sequence
                       // Cod.Gerente                    Cod.Coordenador              Cod.Supervisor             Tipo
                 If Empty(_aAgrupaC[_nX, 3]) .And. Empty(_aAgrupaC[_nX, 4]) .And. Empty(_aAgrupaC[_nX, 5]) .And. _aAgrupaC[_nX, 2] <> 'G' 
                    _aAgrupaC[_nX,7] := "GRAVADO"
-                   Aadd(_aAgrupaA, _aAgrupaC[_nX])
+                   aAdd(_aAgrupaA, _aAgrupaC[_nX])
                 Else
                    //==========================================================================================
                    // Grava no array _aAgrupaA o registro do Supervisor vinculado ao Gerente e Coordenador 
                    // posicionado.
                    //==========================================================================================
                    _aAgrupaC[_nX,7] := "GRAVADO"
-                   Aadd(_aAgrupaA, _aAgrupaC[_nX])
+                   aAdd(_aAgrupaA, _aAgrupaC[_nX])
            
                    //==========================================================================================
                    // Grava no array _aAgrupaA de forma agrupada, todos os Representantes Representantes
@@ -595,7 +595,7 @@ Begin Sequence
                                   //         Situacao                             Cod.Gerente                                    Cod. Coordenador                      Cod. Supervisor               
                        If _aAgrupaD[_nY,7] == "NAO GRAVADO" .And. _aAgrupaC[_nX, 3] == _aAgrupaD[_nY, 3] .And. _aAgrupaC[_nX, 4] == _aAgrupaD[_nY, 4] .And. _aAgrupaC[_nX, 1] == _aAgrupaD[_nY, 5] // ! Empty(_aAgrupaC[_nX, 4]) .And. Empty(_aAgrupaC[_nX, 5])
                           _aAgrupaD[_nY,7] := "GRAVADO"
-                          Aadd(_aAgrupaA, _aAgrupaD[_nY])
+                          aAdd(_aAgrupaA, _aAgrupaD[_nY])
                        EndIf
                    Next
                 EndIf
@@ -608,11 +608,11 @@ Begin Sequence
 		   // para o próximo gerente nacional, caso exista mais de um.
 		   //==========================================================================================
 		   If Len(_aAgrupaNac) > 0  
-              Aadd(_aAgrupaE, _aAgrupaNac[1])
+              aAdd(_aAgrupaE, _aAgrupaNac[1])
 		   EndIf
 
 		   For _nX := 1 To Len(_aAgrupaC)
-               Aadd(_aAgrupaE, _aAgrupaC[_nX]) 
+               aAdd(_aAgrupaE, _aAgrupaC[_nX]) 
            Next
    
 		   _aAgrupaA   := {}
@@ -629,13 +629,13 @@ Begin Sequence
        //==========================================================================================
        For _nX := 1 To Len(_aAgrupaD)
            If _aAgrupaD[_nX,7] == "NAO GRAVADO"
-              Aadd(_aAgrupaC, _aAgrupaD[_nX]) 
+              aAdd(_aAgrupaC, _aAgrupaD[_nX]) 
            EndIf
        Next
 
      Else //traz hierarquia = NAO   
         //===================================================================================
-        // Se a pergunta Mostra Hierarquia for Não, a ordenação do 
+        // Se a pergunta Mostra Hierarquia For Não, a ordenação do 
 	    // relatório deve ser:
 		// GERENTE NACIONAL1
 		// GERENTE NACIONAL2
@@ -660,19 +660,19 @@ Begin Sequence
         //===================================================================================
 
         // Gerente Nacional - _aGerNacio
-        ASORT(_aGerNacio, , , { | x,y | x[1] < y[1] } )
+        aSort(_aGerNacio, , , { | x,y | x[1] < y[1] } )
 
         // Gerente - _aGerenl
-        ASORT(_aGerenl, , , { | x,y | x[1] < y[1] } )
+        aSort(_aGerenl, , , { | x,y | x[1] < y[1] } )
         
         // Coordenador - _aCoordl
-        ASORT(_aCoordl, , , { | x,y | x[1] < y[1] } )
+        aSort(_aCoordl, , , { | x,y | x[1] < y[1] } )
         
         // Supervisor - _aSupl
-        ASORT(_aSupl, , , { | x,y | x[1] < y[1] } )
+        aSort(_aSupl, , , { | x,y | x[1] < y[1] } )
         
         // Representante - _aVenl
-        ASORT(_aVenl, , , { | x,y | x[1] < y[1] } )
+        aSort(_aVenl, , , { | x,y | x[1] < y[1] } )
       
         //===================================================================================
         // No trecho a seguir, os dados dos Gerentes, Coordenadores, Supervisores e
@@ -683,28 +683,28 @@ Begin Sequence
 		// Gerente Nacional
         _aAgrupaC := {}
         For _nX := 1 To Len(_aGerNacio)
-            Aadd(_aAgrupaC, _aGerNacio[_nX])
+            aAdd(_aAgrupaC, _aGerNacio[_nX])
         Next
 
         // Gerente
         //_aAgrupaC := {}
         For _nX := 1 To Len(_aGerenl)
-            Aadd(_aAgrupaC, _aGerenl[_nX])
+            aAdd(_aAgrupaC, _aGerenl[_nX])
         Next
       
         // Coordenador
         For _nX := 1 To Len(_aCoordl)
-            Aadd(_aAgrupaC, _aCoordl[_nx])
+            aAdd(_aAgrupaC, _aCoordl[_nx])
         Next
       
         // Supervisor
         For _nX := 1 To Len(_aSupl)
-            Aadd(_aAgrupaC, _aSupl[_nX])
+            aAdd(_aAgrupaC, _aSupl[_nX])
         Next
       
         // Representante
         For _nX := 1 To Len(_aVenl)
-            Aadd(_aAgrupaC, _aVenl[_nX])
+            aAdd(_aAgrupaC, _aVenl[_nX])
         Next
         
      EndIf  
@@ -713,31 +713,31 @@ Begin Sequence
      // Monta lista ordenada o array _aLista.
      //=======================================================
      //                     Código 1                  Tipo 2             Codigo Gerente 3        Codigo Coordenador 4     Código Supervisor 5    Tipo para Ordenação. 6 , SITUAÇAO   7
-     // Aadd(_aAgrupaC, {(_cAliasSA3)->A3_COD, (_cAliasSA3)->A3_I_TIPV, (_cAliasSA3)->A3_GEREN, (_cAliasSA3)->A3_SUPER, (_cAliasSA3)->A3_I_SUPE,  _cCargo                , "NAO GRAVADO"}) 
+     // aAdd(_aAgrupaC, {(_cAliasSA3)->A3_COD, (_cAliasSA3)->A3_I_TIPV, (_cAliasSA3)->A3_GEREN, (_cAliasSA3)->A3_SUPER, (_cAliasSA3)->A3_I_SUPE,  _cCargo                , "NAO GRAVADO"}) 
 	
      For _nX := 1 To Len(_aAgrupaC)
-	     Aadd(_aLista,_aAgrupaC[_nX,1])
+	     aAdd(_aLista,_aAgrupaC[_nX,1])
 	
 	     //Se existe gerente do registro e está na lista de gerentes não impressos coloca na lista e marca como impresso o gerente
-	     _npos := Ascan(_agerenl,{|aVal| aVal[1] == _aAgrupaC[_nX,1] .and. aVal[2] == 0})
+	     _npos := aScan(_agerenl,{|aVal| aVal[1] == _aAgrupaC[_nX,1] .And. aVal[2] == 0})
 			
 	     If _npos > 0
 	        _agerenl[_npos][2] := 1
-	     Endif
+	     EndIf
 		
 	     //Se existe coordendador do registro e está na lista de coordenadores não impressos coloca na lista e marca como impresso o coordenador
-	     _npos := Ascan(_acoordl,{|aVal| aVal[1] == _aAgrupaC[_nX,1] .and. aVal[2] == 0})
+	     _npos := aScan(_acoordl,{|aVal| aVal[1] == _aAgrupaC[_nX,1] .And. aVal[2] == 0})
 			
 	     If _npos > 0
 	        _acoordl[_npos][2] := 1
-	     Endif
+	     EndIf
 		
 	     //Se existe supervisor do registro e está na lista de supervisores não impressos coloca na lista e marca como impresso o supervisor
-	     _npos := Ascan(_asupl,{|aVal| aVal[1] == _aAgrupaC[_nX,1] .and. aVal[2] == 0})
+	     _npos := aScan(_asupl,{|aVal| aVal[1] == _aAgrupaC[_nX,1] .And. aVal[2] == 0})
 			
 	     If _npos > 0
 		    _asupl[_npos][2] := 1
-	     Endif
+	     EndIf
      
      Next
 
@@ -787,11 +787,11 @@ Begin Sequence
 
 	 _cTipoVend := ""
 	
-	 For _nX := 1 to len(_alista) 
+	 For _nX := 1 to Len(_alista) 
          _nni := _nX  
 	
-	     SA3->(Dbsetorder(1))
-	     SA3->(Dbseek(xfilial("SA3")+_alista[_nni]))
+	     SA3->(DBSetOrder(1))
+	     SA3->(DBSeek(xFilial("SA3")+_alista[_nni]))
 	
 	     _NomeRepr := SA3->A3_NOME
 	    
@@ -807,26 +807,26 @@ Begin Sequence
 		
 		    _cTitCargo := "Coordenador"
 			
-		 Elseif SA3->A3_I_TIPV == "G"
+		 ElseIf SA3->A3_I_TIPV == "G"
 		
 		    _cTitCargo := "Gerente"
 			
-		 Elseif SA3->A3_I_TIPV == "N"
+		 ElseIf SA3->A3_I_TIPV == "N"
 		
 		    _cTitCargo := "Gerente Nacional"
-		 Endif
+		 EndIf
 		
 		 _ccodi := _alista[_nni]
 		 _cctipvi := SA3->A3_I_TIPV
-		 _ntoti := len(_alista)
+		 _ntoti := Len(_alista)
 		
          If MV_PAR09 == 'Analitico' // 1  // Relatório Analítico  // 'Analitico'  ,'Previa-Sintetic','Excel', // Impresso Novo 	
             //================================================================================
 	        // Imprime a versão Analítica do relatório Extrato Unificado de Comissões.
 	        //================================================================================
-		    fwmsgrun( ,{|| ROMS030RUN() } , 'Aguarde...' , 'Processando ' + _cTitCargo + " " + strzero(_nni,6) + ' de ' + strzero(len(_alista),6) + '...'   )
+		    FWMsgRun( ,{|| ROMS030RUN() } , 'Aguarde...' , 'Processando ' + _cTitCargo + " " + StrZero(_nni,6) + ' de ' + StrZero(Len(_alista),6) + '...'   )
 		 ElseIf MV_PAR09 == "Impresso Novo" // 4 // 'Analitico'  ,'Previa-Sintetic','Excel', // Impresso Novo 	
-               fwmsgrun( ,{|| ROMS030RNI() } , 'Aguarde...' , 'Processando ' + _cTitCargo + " " + strzero(_nni,6) + ' de ' + strzero(len(_alista),6) + '...'   )           
+               FWMsgRun( ,{|| ROMS030RNI() } , 'Aguarde...' , 'Processando ' + _cTitCargo + " " + StrZero(_nni,6) + ' de ' + StrZero(Len(_alista),6) + '...'   )           
          EndIf
      Next
    	
@@ -839,7 +839,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -891,10 +891,10 @@ _oPrint:Say( _nPosLin , _nColIni + 010 , "Representantes ?"	, _oFont14b )
 _oPrint:Say( _nPosLin , _nColIni + 900 , MV_PAR07			, _oFont14b )
 _nPosLin += 80
 _oPrint:Say( _nPosLin , _nColIni + 010 , "Traz Hierarquia?"	, _oFont14b )
-_oPrint:Say( _nPosLin , _nColIni + 900 , IIF(MV_PAR08=="Sim","SIM","NÃO"), _oFont14b ) 
+_oPrint:Say( _nPosLin , _nColIni + 900 , IIf(MV_PAR08=="Sim","SIM","NÃO"), _oFont14b ) 
 _nPosLin += 80 
 _oPrint:Say( _nPosLin , _nColIni + 010 , "Tipo de Relatorio?"	, _oFont14b )
-_oPrint:Say( _nPosLin , _nColIni + 900 , IIF(MV_PAR09=='Analitico',"ANALITICO","SINTETICO"), _oFont14b ) 
+_oPrint:Say( _nPosLin , _nColIni + 900 , IIf(MV_PAR09=='Analitico',"ANALITICO","SINTETICO"), _oFont14b ) 
 _nPosLin += 80 
 _oPrint:Say( _nPosLin , _nColIni + 010 , "Tipo de Representante ?"	, _oFont14b )
 _oPrint:Say( _nPosLin , _nColIni + 900 , MV_PAR10, _oFont14b ) 
@@ -923,7 +923,7 @@ ElseIf MV_PAR10 == 'Interno CLT' // 2 // 'Interno CLT','Externo PJ' ,'Ambos'
    _cTipoRepres := "Externo PJ"
 Else 
    _cTipoRepres := "Ambos"
-Endif
+EndIf
 
 _nPosLin += 80
 _oPrint:Say( _nPosLin , _nColIni + 010 , "Tipo Representante?"	, _oFont14b )
@@ -936,7 +936,7 @@ _nPosLin += 80
 _oPrint:Line( _nPosLin , _nColIni , _nPosLin , _nColFim )
 _oPrint:EndPage()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -952,7 +952,7 @@ Retorno-----------: Nenhum
 Static Function ROMS030CAB( _lImpNPG )
 
 Local _cPath	:= If( IsSrvUnix() , "/" , "\" )
-Local _cTitulo	:= "Pagamento de Comissão - "+ IIF( !Empty(MV_PAR01) , MesExtenso( Val( SubStr( MV_PAR01 , 1 , 2 ) ) ) + '/' + SubStr( MV_PAR01 , 3 , 4 ) , "" )
+Local _cTitulo	:= "Pagamento de Comissão - "+ IIf( !Empty(MV_PAR01) , MesExtenso( Val( SubStr( MV_PAR01 , 1 , 2 ) ) ) + '/' + SubStr( MV_PAR01 , 3 , 4 ) , "" )
 Local _cTitulo2	:= ""
 
 If MV_PAR09 == 'Analitico' // 1 // 'Analitico'  ,'Previa-Sintetic','Excel', // Impresso Novo 	
@@ -972,9 +972,9 @@ If _cTitCargo == "Repres/Superv/Coord/Geren/Geren Nac" // "Representante/Supervi
 
 Else
 
-	_cTitulo2 := "Extrato do " + _cTitCargo + " - " + _ccodi + " - " + POSICIONE("SA3",1,xfilial("SA3")+_ccodi,"A3_NOME")
+	_cTitulo2 := "Extrato do " + _cTitCargo + " - " + _ccodi + " - " + Posicione("SA3",1,xFilial("SA3")+_ccodi,"A3_NOME")
 	
-Endif
+EndIf
 
 _nPosLin := 0100
 
@@ -986,7 +986,7 @@ Else
 	_oPrint:Say( _nPosLin		, _nColFim - 600 , "ROMS030"					   										, _oFont12b )
 EndIf
 
-_oPrint:Say( _nPosLin + 050		, _nColFim - 600 , "DATA DE EMISSÃO: "+ DtoC( DATE() )										, _oFont12b )
+_oPrint:Say( _nPosLin + 050		, _nColFim - 600 , "DATA DE EMISSÃO: "+ DToC( Date() )										, _oFont12b )
 
 _nPosLin += 050
                                                    
@@ -999,7 +999,7 @@ _nPosLin+=_nSpcLin
 
 _oPrint:Line(_nPosLin,_nColIni,_nPosLin,_nColFim) 
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1032,10 +1032,10 @@ Local _cGerNac      := ""
 //================================================================================
 // Chama a rotina que monta a área temporária com os dados referentes ao Vendedor
 //================================================================================
-fwmsgrun( , {||  ROMS030QRY( _cAlias , 4 , "" , _cCodigo , "" , "" )  }, 'Aguarde...', 'Filtrando dados do ' + _cTitCargo + ' ' +  strzero(_nni,6) + " de " + strzero(_ntoti,6) + "..." )
+FWMsgRun( , {||  ROMS030QRY( _cAlias , 4 , "" , _cCodigo , "" , "" )  }, 'Aguarde...', 'Filtrando dados do ' + _cTitCargo + ' ' +  StrZero(_nni,6) + " de " + StrZero(_ntoti,6) + "..." )
 
 DBSelectArea( _cAlias )
-(_cAlias)->( DBGotop() )
+(_cAlias)->( DBGoTop() )
 
 If (_cAlias)->( !Eof() )
 	_cNome		:= (_cAlias)->A3_NOME
@@ -1052,8 +1052,8 @@ If (_cAlias)->( !Eof() )
 
 EndIf
 
-_cCGC		:= IIF( Len( AllTrim( _cCGC			) ) == 11 , Transform( _cCGC		, "@R 999.999.999-99" ) , Transform( _cCGC		, "@R! NN.NNN.NNN/NNNN-99" ) )
-_cCPFCNPJ	:= IIF( Len( AllTrim( _cCPFCNPJF	) ) == 11 , Transform( _cCPFCNPJF	, "@R 999.999.999-99" ) , Transform( _cCPFCNPJF	, "@R! NN.NNN.NNN/NNNN-99" ) )
+_cCGC		:= IIf( Len( AllTrim( _cCGC			) ) == 11 , Transform( _cCGC		, "@R 999.999.999-99" ) , Transform( _cCGC		, "@R! NN.NNN.NNN/NNNN-99" ) )
+_cCPFCNPJ	:= IIf( Len( AllTrim( _cCPFCNPJF	) ) == 11 , Transform( _cCPFCNPJF	, "@R 999.999.999-99" ) , Transform( _cCPFCNPJF	, "@R! NN.NNN.NNN/NNNN-99" ) )
 
 (_cAlias)->( DBCloseArea() )
 
@@ -1122,39 +1122,39 @@ _ccoord := ""
 _csuper := ""
 _cGerNac := ""
 
-SA3->(Dbsetorder(1))
-If SA3->(Dbseek(xfilial("SA3")+_cCodigo))
+SA3->(DBSetOrder(1))
+If SA3->(DBSeek(xFilial("SA3")+_cCodigo))
 
 _cgerente := SA3->A3_GEREN 
 _ccoord   := SA3->A3_SUPER
 _csuper   := SA3->A3_I_SUPE
 _cGerNac  := SA3->A3_I_GERNC 
 
-    If SA3->(Dbseek(xfilial("SA3")+_cGerNac))
+    If SA3->(DBSeek(xFilial("SA3")+_cGerNac))
 	
 	   _cGerNac := _cGerNac +  " - " + SA3->A3_NOME
 		
-	Endif
+	EndIf
 
-	If SA3->(Dbseek(xfilial("SA3")+_cgerente))
+	If SA3->(DBSeek(xFilial("SA3")+_cgerente))
 	
 		_cgerente := _cgerente +  " - " + SA3->A3_NOME
 		
-	Endif
+	EndIf
 	
-	If SA3->(Dbseek(xfilial("SA3")+_ccoord))
+	If SA3->(DBSeek(xFilial("SA3")+_ccoord))
 	
 		_ccoord := _ccoord +  " - " + SA3->A3_NOME
 		
-	Endif
+	EndIf
 	
-	If SA3->(Dbseek(xfilial("SA3")+_csuper))
+	If SA3->(DBSeek(xFilial("SA3")+_csuper))
 	
 		_csuper := _csuper +  " - " + SA3->A3_NOME
 		
-	Endif
+	EndIf
 
-Endif	
+EndIf	
 
 If _cTitCargo == "Gerente"
    	_oPrint:Say( _nPosLin + _nAjsLin	, _nColIni + 0020 , "Gerente Nacional...:"			, _oFont11b )
@@ -1175,7 +1175,7 @@ ElseIf _cTitCargo == "Coordenador"
 	_nPosLin += _nSpcLin
 	_nPosLin += _nSpcLin
 
-Elseif _cTitCargo == "Supervisor"
+ElseIf _cTitCargo == "Supervisor"
 
     _oPrint:Say( _nPosLin + _nAjsLin	, _nColIni + 0020 , "Gerente Nacional...:"			, _oFont11b )
 	_oPrint:Say( _nPosLin + _nAjsLin	, _nColIni + 0260 , _cGerNac					, _oFont11  )
@@ -1190,7 +1190,7 @@ Elseif _cTitCargo == "Supervisor"
 	_nPosLin += _nSpcLin
 	_nPosLin += _nSpcLin
 
-Elseif _cTitCargo == "Representante"
+ElseIf _cTitCargo == "Representante"
 
     _oPrint:Say( _nPosLin + _nAjsLin	, _nColIni + 0020 , "Gerente Nacional...:"			, _oFont11b )
 	_oPrint:Say( _nPosLin + _nAjsLin	, _nColIni + 0260 , _cGerNac					, _oFont11  )
@@ -1209,7 +1209,7 @@ Elseif _cTitCargo == "Representante"
 	_nPosLin += _nSpcLin
 	_nPosLin += _nSpcLin
 	
-Endif
+EndIf
 
 _oPrint:Box( _nLinBox , _nColIni , _nPosLin + _nSpcLin , _nColFim )
 
@@ -1220,7 +1220,7 @@ If Select(_cAlias) > 0
    (_cAlias)->( DBCloseArea() )
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1360,13 +1360,13 @@ For y:=1 to Len(_aComissao)
 		ROMS030QPG( 0 , .T. , .F. , "ROMS0304()" , "" , _cDescric )
 		
 		_oPrint:Say( _nPosLin + _nAjsLin , _nColIni + 0010 , SubStr(FWFilialName(,_aComissao[y,1]),1,30)						, _oFont11 )
-		_oPrint:Say( _nPosLin + _nAjsLin , _nColIni + 0750 , Transform(round(_aComissao[y,2],2),"@E 999,999,999,999.99")				, _oFont11 )
-		_oPrint:Say( _nPosLin + _nAjsLin , _nColIni + 1380 , Transform(round(_aComissao[y,3],2),"@E 999,999,999,999.99")				, _oFont11 )
+		_oPrint:Say( _nPosLin + _nAjsLin , _nColIni + 0750 , Transform(Round(_aComissao[y,2],2),"@E 999,999,999,999.99")				, _oFont11 )
+		_oPrint:Say( _nPosLin + _nAjsLin , _nColIni + 1380 , Transform(Round(_aComissao[y,3],2),"@E 999,999,999,999.99")				, _oFont11 )
 		_oPrint:Say( _nPosLin + _nAjsLin , _nColIni + 1980 , Transform((_aComissao[y,3]/_aComissao[y,2]) * 100,"@E 999.999")	, _oFont11 )
 		
-		_nTotReceb	+= round(_aComissao[y,2],2)
-		_nTotComis	+= round(_aComissao[y,3],2)
-		_nTotBruto  += round(_aComissao[y,3],2)
+		_nTotReceb	+= Round(_aComissao[y,2],2)
+		_nTotComis	+= Round(_aComissao[y,3],2)
+		_nTotBruto  += Round(_aComissao[y,3],2)
 		
 		_cTpComis	:= _aComissao[y,5]
 	
@@ -1375,9 +1375,9 @@ For y:=1 to Len(_aComissao)
 	//================================================================================
 	Else
 	
-		_nVlrDebCo += round(_aComissao[y,3],2)
-		_nVlrDevol += round(_aComissao[y,6],2)
-		_nTotDevol += round(_aComissao[y,2],2)
+		_nVlrDebCo += Round(_aComissao[y,3],2)
+		_nVlrDevol += Round(_aComissao[y,6],2)
+		_nTotDevol += Round(_aComissao[y,2],2)
 	
 	EndIf
 
@@ -1390,16 +1390,16 @@ _oPrint:Box( nLinInBox , _nColIni , _nPosLin , _nColFim )
 //================================================================================
 //Calcula o desconto de comissão por bonificação
 //================================================================================
-fwmsgrun(, {|| _aTotBNF := ROMS030BNF( _cCodGer ) }, "Aguarde... ", 'Filtrando bonificações para ' + _cTitCargo + ' ' + strzero(_nni,6) + " de " + strzero(_ntoti,6) + "..." )
+FWMsgRun(, {|| _aTotBNF := ROMS030BNF( _cCodGer ) }, "Aguarde... ", 'Filtrando bonificações para ' + _cTitCargo + ' ' + StrZero(_nni,6) + " de " + StrZero(_ntoti,6) + "..." )
 
 If !Empty( _aTotBNF )
   	
   	
 	For _nI := 1 To Len(_aTotBNF)
     
-    	_nTotComis	+= round(_aTotBNF[_nI][03],2)
-		_nTotCmBnf	+= round(_aTotBNF[_nI][03],2)
-		_nTotBonif	+= round(_aTotBNF[_nI][02],2)
+    	_nTotComis	+= Round(_aTotBNF[_nI][03],2)
+		_nTotCmBnf	+= Round(_aTotBNF[_nI][03],2)
+		_nTotBonif	+= Round(_aTotBNF[_nI][02],2)
 	
 	Next _nI
 	
@@ -1447,7 +1447,7 @@ ROMS030QPG( 0 , .T. , .F. , "ROMS0304()" , "" , _cDescric )
 _nLinBox2 := _nPosLin
 _oPrint:Line( _nPosLin , _nColIni + 05 , _nPosLin , _nColFim - 05 )
 
-_nTotLiqui := round(_nTotBruto,2) + round(_nVlrDebCo,2) 
+_nTotLiqui := Round(_nTotBruto,2) + Round(_nVlrDebCo,2) 
 
 _nTotComis := _nTotLiqui
 _nTotReceb := _nTotReceb - _nTotBonif - _nTotDevol
@@ -1464,11 +1464,11 @@ _aImpostos := {}
 If Val(_aComissao[1,4]) > 0 .Or. _nTotLiqui > 0  
    _aImpostos := U_C_IRRF_INSS( _aComissao[1,4] , _nTotLiqui )
 Else
-   Aadd(_aImpostos, {0,0})  
+   aAdd(_aImpostos, {0,0})  
 EndIf
 
-_nINSS := round(_aImpostos[1,1],2)
-_nIRRF := round(_aImpostos[1,2],2)
+_nINSS := Round(_aImpostos[1,1],2)
+_nIRRF := Round(_aImpostos[1,2],2)
 
 _nTotLiqui -= ( _nINSS + _nIRRF )
 
@@ -1518,7 +1518,7 @@ _oPrint:Say( _nPosLin            , _nColIni + 1450 , Transform( _nTotLiqui ,"@E 
 _nPosLin+=_nSpcLin 
 _nPosLin += _nSpcLin
 
-Return()
+Return
 
 
 /*
@@ -1535,7 +1535,7 @@ Static Function ROMS0304()
 
 _oPrint:Box( _nLinBox , _nColIni , _nPosLin , _nColFim )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1592,7 +1592,7 @@ If _nPosLin > _nLimPag
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1616,7 +1616,7 @@ ROMS030CAB( .T. ) //Chama impressão do cabecalho
 _nPosLin += _nSpcLin
 _nPosLin += _nSpcLin
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1660,13 +1660,13 @@ Do Case
 	//====================================================================================================
 	Case _nOpcao == 1
 	    If MV_PAR09 == 'Analitico' // 1   // 'Analitico'  ,'Previa-Sintetic','Excel', 'Impresso Novo' 	
-           _cWhere02 := "% AND SUBSTR(E3_EMISSAO,1,6) = '" + SubStr(_cMvMesAno,3,4) + SubStr(_cMvMesAno,1,2) + "' %" 
+           _cWhere02 := "% AND SubStr(E3_EMISSAO,1,6) = '" + SubStr(_cMvMesAno,3,4) + SubStr(_cMvMesAno,1,2) + "' %" 
 		Else
 	       If !Empty(MV_PAR01)
 		      If AllTrim(MV_PAR01) == AllTrim(MV_PAR02)
-		         _cWhere02 := "% AND SUBSTR(E3_EMISSAO,1,6) = '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' %" 
+		         _cWhere02 := "% AND SubStr(E3_EMISSAO,1,6) = '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' %" 
 		      Else
-		         _cWhere02 := "% AND SUBSTR(E3_EMISSAO,1,6) >= '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' AND SUBSTR(E3_EMISSAO,1,6) <= '" + SubStr(MV_PAR02,3,4) + SubStr(MV_PAR02,1,2) + "' %" 
+		         _cWhere02 := "% AND SubStr(E3_EMISSAO,1,6) >= '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' AND SubStr(E3_EMISSAO,1,6) <= '" + SubStr(MV_PAR02,3,4) + SubStr(MV_PAR02,1,2) + "' %" 
 		      EndIf
 		   EndIf
 		EndIf 
@@ -1684,23 +1684,23 @@ Do Case
 
 		If _cTipoRepSA3 = "V" // Extrato Vendedor 
 		   _cWhere04 := "% AND F2.F2_VEND1 = E3.E3_VEND %"
-		Endif
+		EndIf
 		
 		If _cTipoRepSA3 = "S" // Extrato Supervisor
 		   _cWhere04 := "% AND F2.F2_VEND4 = E3.E3_VEND %"
-		Endif
+		EndIf
 		
 		If _cTipoRepSA3 = "C" // Extrato Coordenador
 		   _cWhere04 := "% AND F2.F2_VEND2 = E3.E3_VEND %"
-		Endif
+		EndIf
 		
 		If _cTipoRepSA3 = "G" // Extrato Gerente
 		   _cWhere04 := "% AND F2.F2_VEND3 = E3.E3_VEND %"
-		Endif
+		EndIf
 		
         If _cTipoRepSA3 = "N" // Extrato Gerente Nacional 
 		   _cWhere04 := "% AND F2.F2_VEND5 = E3.E3_VEND %"
-		Endif
+		EndIf
 
 		BeginSql alias _cAlias
 		
@@ -1711,7 +1711,7 @@ Do Case
 			    E3.E3_I_ORIGE    AS ORIGEM  ,
 			    SUM(E3.E3_COMIS) AS COMISSAO,
 			    SUM(E3.E3_BASE)  AS VLRRECEB,
-			    CASE
+			    Case
 			        WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			        WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			        WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -1754,7 +1754,7 @@ Do Case
 			    E3.E3_VEND   ,   
 			    A3.A3_I_DEDUC,
 			    E3.E3_I_ORIGE,
-			    CASE
+			    Case
 			        WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			        WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			        WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -1769,7 +1769,7 @@ Do Case
 			    E3.E3_I_ORIGE    AS ORIGEM  ,
 			    SUM(E3.E3_COMIS) AS COMISSAO,
 			    SUM(E3.E3_BASE)  AS VLRRECEB,
-			    MIN( CASE
+			    MIN( Case
 			            WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			            WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			            WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -1823,7 +1823,7 @@ Do Case
 			    E3.E3_VEND   ,
 			    A3.A3_I_DEDUC,
 			    E3.E3_I_ORIGE,
-			    CASE
+			    Case
 			        WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			        WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			        WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -1961,39 +1961,39 @@ Do Case
 		BeginSql alias _cAlias
 			
 			SELECT
-			    COUNT( CASE
-			    	WHEN E1.E1_SALDO > 0 AND E1.E1_VENCREA BETWEEN %Exp:Dtos(DaySub(Date(),15))% AND %Exp:Dtos(Date())%
+			    COUNT( Case
+			    	WHEN E1.E1_SALDO > 0 AND E1.E1_VENCREA BETWEEN %Exp:DToS(DaySub(Date(),15))% AND %Exp:DToS(Date())%
 			    	THEN E1.E1_SALDO
 			    END ) NUMDUP15,
-			    COALESCE( SUM( CASE
-			    	WHEN E1.E1_SALDO > 0 AND E1.E1_VENCREA BETWEEN %Exp:Dtos(DaySub(Date(),15))% AND %Exp:Dtos(Date())%
+			    COALESCE( SUM( Case
+			    	WHEN E1.E1_SALDO > 0 AND E1.E1_VENCREA BETWEEN %Exp:DToS(DaySub(Date(),15))% AND %Exp:DToS(Date())%
 			    	THEN E1.E1_SALDO
 			    END ) , 0 ) VENCTO15,
-			    COUNT( CASE
-			    	WHEN E1.E1_SALDO > 0 AND E1.E1_VENCREA BETWEEN %Exp:Dtos(DaySub(Date(),30))% AND %Exp:Dtos(DaySub(Date(),16))%
+			    COUNT( Case
+			    	WHEN E1.E1_SALDO > 0 AND E1.E1_VENCREA BETWEEN %Exp:DToS(DaySub(Date(),30))% AND %Exp:DToS(DaySub(Date(),16))%
 			    	THEN E1.E1_SALDO
 			    END ) NUMDUP30,
-			    COALESCE( SUM( CASE
-			    	WHEN E1.E1_SALDO > 0 AND E1.E1_VENCREA BETWEEN %Exp:Dtos(DaySub(Date(),30))% AND %Exp:Dtos(DaySub(Date(),16))%
+			    COALESCE( SUM( Case
+			    	WHEN E1.E1_SALDO > 0 AND E1.E1_VENCREA BETWEEN %Exp:DToS(DaySub(Date(),30))% AND %Exp:DToS(DaySub(Date(),16))%
 			    	THEN E1.E1_SALDO
 			    END ) , 0 ) VENCTO30,
-			    COUNT( CASE
-			    	WHEN E1.E1_SALDO > 0 AND E1.E1_VENCREA BETWEEN %Exp:Dtos(DaySub(Date(),60))% AND %Exp:Dtos(DaySub(Date(),31))%
+			    COUNT( Case
+			    	WHEN E1.E1_SALDO > 0 AND E1.E1_VENCREA BETWEEN %Exp:DToS(DaySub(Date(),60))% AND %Exp:DToS(DaySub(Date(),31))%
 			    	THEN E1.E1_SALDO
 			    END ) NUMDUP60,
-			    COALESCE( SUM( CASE
-			    	WHEN E1.E1_SALDO > 0 AND E1.E1_VENCREA BETWEEN %Exp:Dtos(DaySub(Date(),60))% AND %Exp:Dtos(DaySub(Date(),31))%
+			    COALESCE( SUM( Case
+			    	WHEN E1.E1_SALDO > 0 AND E1.E1_VENCREA BETWEEN %Exp:DToS(DaySub(Date(),60))% AND %Exp:DToS(DaySub(Date(),31))%
 			    	THEN E1.E1_SALDO
 			    END ) , 0 ) VENCTO60,
-			    COUNT( CASE
-			    	WHEN E1.E1_SALDO > 0 AND E1.E1_VENCREA < %Exp:Dtos(DaySub(Date(),60))%
+			    COUNT( Case
+			    	WHEN E1.E1_SALDO > 0 AND E1.E1_VENCREA < %Exp:DToS(DaySub(Date(),60))%
 			    	THEN E1.E1_SALDO
 			    END ) NUMDUPACI,
-			    COALESCE( SUM( CASE
-			    	WHEN E1.E1_SALDO > 0 AND E1.E1_VENCREA < %Exp:Dtos(DaySub(Date(),60))%
+			    COALESCE( SUM( Case
+			    	WHEN E1.E1_SALDO > 0 AND E1.E1_VENCREA < %Exp:DToS(DaySub(Date(),60))%
 			    	THEN E1.E1_SALDO
 			    END ) , 0 ) VENCTOACIMA
-			FROM %table:SE1% E1, %table:SF2% F2, %table:SA3% A3
+			FROM %Table:SE1% E1, %Table:SF2% F2, %Table:SA3% A3
 
 			WHERE
 			    E1.%NotDel%
@@ -2007,7 +2007,7 @@ Do Case
             AND F2.F2_LOJA    = E1.E1_LOJA
 
 			AND E1.E1_SALDO   > 0
-			AND E1.E1_VENCREA < %Exp:Dtos( Date() )%
+			AND E1.E1_VENCREA < %Exp:DToS( Date() )%
 			AND E1.E1_ORIGEM  NOT IN ( 'FINA460' , 'FINA280' )
 			%exp:_cWhere01%
 							
@@ -2026,15 +2026,15 @@ Do Case
 		    // Seleciona os ultimos tres meses de acordo com a data de fechamento fornecida pelo usuario.
 		    //====================================================================================================
 			If MV_PAR09 == 'Analitico' // 1  // 'Analitico'  ,'Previa-Sintetic','Excel', 'Impresso Novo' 	
-                _cAnoMesIn := DtoS( MonthSub( StoD( SubStr( _cMvMesAno , 3 , 4 ) + SubStr( _cMvMesAno , 1 , 2 ) + '01' ) , 3 ) )  
-		        _cAnoMesFi := SubStr( DtoS( MonthSub( StoD( SubStr( _cMvMesAno , 3 , 4 ) + SubStr( _cMvMesAno , 1 , 2 ) + '01' ) , 1 ) ) , 1 , 6 ) + '31' 			   
+                _cAnoMesIn := DToS( MonthSub( SToD( SubStr( _cMvMesAno , 3 , 4 ) + SubStr( _cMvMesAno , 1 , 2 ) + '01' ) , 3 ) )  
+		        _cAnoMesFi := SubStr( DToS( MonthSub( SToD( SubStr( _cMvMesAno , 3 , 4 ) + SubStr( _cMvMesAno , 1 , 2 ) + '01' ) , 1 ) ) , 1 , 6 ) + '31' 			   
 			Else 
 			   If AllTrim(MV_PAR01) == AllTrim(MV_PAR02)
-		          _cAnoMesIn := DtoS( MonthSub( StoD( SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) + '01' ) , 3 ) )  
-		          _cAnoMesFi := SubStr( DtoS( MonthSub( StoD( SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) + '01' ) , 1 ) ) , 1 , 6 ) + '31' 			   
+		          _cAnoMesIn := DToS( MonthSub( SToD( SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) + '01' ) , 3 ) )  
+		          _cAnoMesFi := SubStr( DToS( MonthSub( SToD( SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) + '01' ) , 1 ) ) , 1 , 6 ) + '31' 			   
 			   Else
-			      _cAnoMesIn := DtoS( MonthSub( StoD( SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) + '01' ) , 3 ) )  
-    		      _cAnoMesFi := SubStr( DtoS( MonthSub( StoD( SubStr( MV_PAR02 , 3 , 4 ) + SubStr( MV_PAR02 , 1 , 2 ) + '01' ) , 1 ) ) , 1 , 6 ) + '31' 
+			      _cAnoMesIn := DToS( MonthSub( SToD( SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) + '01' ) , 3 ) )  
+    		      _cAnoMesFi := SubStr( DToS( MonthSub( SToD( SubStr( MV_PAR02 , 3 , 4 ) + SubStr( MV_PAR02 , 1 , 2 ) + '01' ) , 1 ) ) , 1 , 6 ) + '31' 
 		       EndIf 
 	        EndIf 
 
@@ -2052,7 +2052,7 @@ Do Case
            
 			 SELECT
 			     E3.E3_VEND             AS CODGER,
-			     SUBSTR(E3_EMISSAO,1,6) AS ANOMES,
+			     SubStr(E3_EMISSAO,1,6) AS ANOMES,
 			     SUM(E3.E3_COMIS)       AS COMISSAO
 			 FROM %Table:SE3% E3
             
@@ -2086,13 +2086,13 @@ Do Case
 			 AND E3.E3_COMIS   > 0 
 			 %Exp:_cWhere01%
 			 AND E3.E3_I_FECH = 'S' 
-			 GROUP BY E3.E3_VEND , SUBSTR(E3_EMISSAO,1,6)
+			 GROUP BY E3.E3_VEND , SubStr(E3_EMISSAO,1,6)
 			 
 			 UNION ALL 
 			 
 			 SELECT 
 			     E3.E3_VEND CODGER, 
-			     SUBSTR(E3_EMISSAO,1,6) ANOMES, 
+			     SubStr(E3_EMISSAO,1,6) ANOMES, 
 			     SUM(E3.E3_COMIS) COMISSAO 
 			 FROM %Table:SE3% E3 
 
@@ -2112,12 +2112,12 @@ Do Case
 			 ,(  SELECT DISTINCT 
 			         SE5.E5_FILIAL, 
 			         SE5.E5_DOCUMEN, 
-			         MIN( CASE 
+			         MIN( Case 
 			             WHEN F2.F2_VEND2 = ' '          THEN 'A' 
 			             WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B' 
 			             WHEN F2.F2_VEND3 <> ' '         THEN 'C' 
 			         END ) AS TIPOVENDA, 
-			         CASE 
+			         Case 
 			             WHEN F2.F2_VEND2 = ' '          THEN F2.F2_VEND1 
 			             WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN F2.F2_VEND2 
 			             WHEN F2.F2_VEND3 <> ' '         THEN F2.F2_VEND3 
@@ -2138,7 +2138,7 @@ Do Case
 			     GROUP BY 
 			         SE5.E5_FILIAL, 
 			         SE5.E5_DOCUMEN, 
-			         CASE 
+			         Case 
 			             WHEN F2.F2_VEND2 = ' '          THEN F2.F2_VEND1 
 			             WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN F2.F2_VEND2 
 			             WHEN F2.F2_VEND3 <> ' '         THEN F2.F2_VEND3 
@@ -2157,13 +2157,13 @@ Do Case
 			 %Exp:_cWhere01%
 			 AND E3.E3_I_FECH  = 'S' 
 			 
-			 GROUP BY E3.E3_VEND , SUBSTR(E3_EMISSAO,1,6) 
+			 GROUP BY E3.E3_VEND , SubStr(E3_EMISSAO,1,6) 
 			 
 			 UNION ALL 
 			 
 			 SELECT 
 			     E3.E3_VEND CODGER,  
-			     SUBSTR(E3_EMISSAO,1,6) ANOMES, 
+			     SubStr(E3_EMISSAO,1,6) ANOMES, 
 			     SUM(E3.E3_COMIS) COMISSAO    
 			 FROM %Table:SE3% E3
 			 
@@ -2201,13 +2201,13 @@ Do Case
 			                            OR ( F2.F2_VEND1 <> F2.F2_VEND2 AND F2.F2_VEND2 = E3.E3_VEND ) 
 			                            OR ( F2.F2_VEND3 = E3.E3_VEND   ) ) 
 			 ) 
-			 GROUP BY E3.E3_VEND , SUBSTR(E3_EMISSAO,1,6) 
+			 GROUP BY E3.E3_VEND , SubStr(E3_EMISSAO,1,6) 
 			 
 			 UNION ALL 
 			 
 			 SELECT 
 			     E3.E3_VEND             AS CODGER, 
-			     SUBSTR(E3_EMISSAO,1,6) AS ANOMES, 
+			     SubStr(E3_EMISSAO,1,6) AS ANOMES, 
 			     SUM(E3.E3_COMIS)       AS COMISSAO 
 			 FROM %Table:SE3% E3
 			 
@@ -2243,7 +2243,7 @@ Do Case
 			                            AND F2.F2_CLIENTE = D1.D1_FORNECE 
 			                            AND F2.F2_LOJA    = D1.D1_LOJA 
 			 ) 
-			 GROUP BY E3.E3_VEND , SUBSTR(E3_EMISSAO,1,6)
+			 GROUP BY E3.E3_VEND , SubStr(E3_EMISSAO,1,6)
 			 
 			 ORDER BY CODGER , ANOMES
 			
@@ -2263,7 +2263,7 @@ Do Case
 		   _a3MesesAn:= ROMS030S3M( _nMesAtual , _nAnoAtual , 1 )
 		
 		   _cAnoMesIn := Str( _a3MesesAn[5] , 4 ) + _a3MesesAn[2] + '01'
-		   _cAnoMesFi := dToS( LastDay( sToD( Str( _a3MesesAn[7] , 4 ) + _a3MesesAn[4] + '01' ) ) )
+		   _cAnoMesFi := DToS( LastDay( SToD( Str( _a3MesesAn[7] , 4 ) + _a3MesesAn[4] + '01' ) ) )
 		   
 		   _cWhere01 := "% AND F2.F2_VEND1 = '"+ _cCodRepSA3 + "' %" 
 
@@ -2284,7 +2284,7 @@ Do Case
 
               SELECT 
 		          E3.E3_VEND             AS CODGER, 
-		          SUBSTR(E3_EMISSAO,1,6) AS ANOMES, 
+		          SubStr(E3_EMISSAO,1,6) AS ANOMES, 
 		          SUM(E3.E3_COMIS)       AS COMISSAO 
 		      FROM %Table:SE3% E3
         		   JOIN  %Table:SF2% F2  
@@ -2305,13 +2305,13 @@ Do Case
 		           %Exp:_cWhere01%
 		           AND E3.E3_I_FECH  = 'S' 
 		           %Exp:_cWhere02%
-		           GROUP BY E3.E3_VEND , SUBSTR(E3.E3_EMISSAO,1,6) 
+		           GROUP BY E3.E3_VEND , SubStr(E3.E3_EMISSAO,1,6) 
 		           
               UNION ALL 
 		
 		      SELECT 
 		          E3.E3_VEND             AS CODGER, 
-		          SUBSTR(E3_EMISSAO,1,6) AS ANOMES, 
+		          SubStr(E3_EMISSAO,1,6) AS ANOMES, 
 		          SUM(E3.E3_COMIS)       AS COMISSAO 
 		      FROM %Table:SE3% E3 
 		          JOIN %Table:SA3% A3
@@ -2342,13 +2342,13 @@ Do Case
 		                       AND SE1.E1_FILIAL  = E3.E3_FILIAL 
 		                       AND SF2.F2_FILIAL  = E3.E3_FILIAL 
 		                       AND SE1.E1_FATURA   <> ' ' ) 
-		      GROUP BY E3.E3_VEND , SUBSTR(E3_EMISSAO,1,6) 
+		      GROUP BY E3.E3_VEND , SubStr(E3_EMISSAO,1,6) 
 		   		
               UNION ALL 
 		
 		      SELECT 
 		          E3.E3_VEND             AS CODGER, 
-		          SUBSTR(E3_EMISSAO,1,6) AS ANOMES, 
+		          SubStr(E3_EMISSAO,1,6) AS ANOMES, 
 		          SUM(E3.E3_COMIS)       AS COMISSAO 
 	          FROM %Table:SE3% E3 
 		
@@ -2391,13 +2391,13 @@ Do Case
 		                                     AND SF2.F2_FILIAL  = E1.E1_FILIAL 
 		                                     AND SE5.E5_DOCUMEN <> ' ' ) 
 		         AND E1.E1_ORIGEM = 'FINA460' 
-		         GROUP BY E3.E3_VEND , SUBSTR(E3_EMISSAO,1,6) 
+		         GROUP BY E3.E3_VEND , SubStr(E3_EMISSAO,1,6) 
 		
     	         UNION ALL 
 		
 		         SELECT 
 		             E3.E3_VEND             AS CODGER,      
-		             SUBSTR(E3_EMISSAO,1,6) AS ANOMES,       
+		             SubStr(E3_EMISSAO,1,6) AS ANOMES,       
 		             SUM(E3.E3_COMIS)       AS COMISSAO  
 	             FROM %Table:SE3% E3,
 		              %Table:SA3% A3,  
@@ -2435,13 +2435,13 @@ Do Case
 		            AND E3.E3_TIPO    = 'NCC' 
 		            AND E3.E3_I_FECH  = 'S' 
 		            %Exp:_cWhere02% 
-		         GROUP BY E3.E3_VEND , SUBSTR(E3_EMISSAO,1,6) 
+		         GROUP BY E3.E3_VEND , SubStr(E3_EMISSAO,1,6) 
 		         
 		         UNION ALL 
 		
 		         SELECT 
 		             E3.E3_VEND             AS CODGER, 
-		             SUBSTR(E3_EMISSAO,1,6) AS ANOMES, 
+		             SubStr(E3_EMISSAO,1,6) AS ANOMES, 
 		             SUM(E3.E3_COMIS)       AS COMISSAO 
 		         FROM %Table:SE3% E3  
 		         JOIN %Table:SA3% A3  
@@ -2471,13 +2471,13 @@ Do Case
 		                                      AND F2.F2_CLIENTE = D1.D1_FORNECE 
 		                                      AND F2.F2_LOJA    = D1.D1_LOJA 
 		                                       %Exp:_cWhere01% ) 
-		            GROUP BY E3.E3_VEND, SUBSTR(E3_EMISSAO,1,6)
+		            GROUP BY E3.E3_VEND, SubStr(E3_EMISSAO,1,6)
 		
 		            UNION ALL 
 		
 		            SELECT 
 		                E3.E3_VEND             AS CODGER, 
-		                SUBSTR(E3_EMISSAO,1,6) AS ANOMES, 
+		                SubStr(E3_EMISSAO,1,6) AS ANOMES, 
 		                SUM(E3.E3_COMIS)       AS COMISSAO 
 		            FROM  %Table:SE3% E3 
 		   		          JOIN %Table:SA3% A3 
@@ -2490,7 +2490,7 @@ Do Case
 		                AND E3.E3_I_ORIGE = 'MOMS015' 
 		                %Exp:_cWhere02% 
 		   
-		            GROUP BY E3.E3_VEND , SUBSTR(E3.E3_EMISSAO,1,6) 
+		            GROUP BY E3.E3_VEND , SubStr(E3.E3_EMISSAO,1,6) 
 		
 		            ORDER BY CODGER , ANOMES 
 	            
@@ -2526,8 +2526,8 @@ Do Case
 			    A3.A3_I_NOMEF,
 			    A3.A3_I_REGIS
 			    
-			FROM %table:SA3% A3
-			INNER JOIN %table:SA2% A2
+			FROM %Table:SA3% A3
+			INNER JOIN %Table:SA2% A2
 			ON
 			    A3.A3_FORNECE = A2.A2_COD
 			AND A3.A3_LOJA    = A2.A2_LOJA
@@ -2558,9 +2558,9 @@ Do Case
 		_cAnoMesIn:= Str(_a3MesesAn[5],4) + _a3MesesAn[2] + '01'
 
 		If MV_PAR09 == 'Analitico' // 1 // 'Analitico'  ,'Previa-Sintetic','Excel', 'Impresso Novo' 
-           _cAnoMesFi:= dToS(LastDay(sToD(SubStr(_cMvMesAno,3,4) + SubStr(_cMvMesAno,1,2) + '01')))                                          
+           _cAnoMesFi:= DToS(LastDay(SToD(SubStr(_cMvMesAno,3,4) + SubStr(_cMvMesAno,1,2) + '01')))                                          
 		Else 
-		   _cAnoMesFi:= dToS(LastDay(sToD(SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + '01')))                                          
+		   _cAnoMesFi:= DToS(LastDay(SToD(SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + '01')))                                          
 		EndIf 
 
 		_cFilV4   += " AND F2_EMISSAO BETWEEN '" + _cAnoMesIn + "' AND '" + _cAnoMesFi + "'" 	                 					
@@ -2614,9 +2614,9 @@ Do Case
 		    F2.F2_VEND4,
 			F2.F2_VEND5,
 		    F2.F2_VEND1,
-			SUBSTR(F2_EMISSAO,1,6) ANOMES,
+			SubStr(F2_EMISSAO,1,6) ANOMES,
 			( SUM( D2.D2_VALBRUT ) - (	SELECT COALESCE(SUM(D1.D1_TOTAL + D1.D1_ICMSRET),0)
-										FROM %table:SD1% D1
+										FROM %Table:SD1% D1
 										WHERE
 											D1.D_E_L_E_T_ = ' '
 										AND D1.D1_TIPO    = 'D'
@@ -2627,7 +2627,7 @@ Do Case
 										AND D1.D1_LOJA    = D2.D2_LOJA
 										AND D1.D1_COD     = D2.D2_COD ) ) VLRBRUT
 
-		FROM %table:SF2% F2, %table:SD2% D2, %table:SA1% A1, %table:SA3% A3
+		FROM %Table:SF2% F2, %Table:SD2% D2, %Table:SA1% A1, %Table:SA3% A3
 
 		WHERE
 		    F2.D_E_L_E_T_  = ' '
@@ -2645,7 +2645,7 @@ Do Case
 		AND A1.A1_LOJA    = D2.D2_LOJA
         %exp:_cFilV4%
         
-		GROUP BY D2.D2_FILIAL, D2.D2_DOC, D2.D2_SERIE, D2.D2_CLIENTE, D2.D2_LOJA, D2.D2_COD, F2.F2_VEND3, F2.F2_VEND2, F2.F2_VEND4, F2.F2_VEND5, F2.F2_VEND1, SUBSTR( F2_EMISSAO , 1 , 6 )
+		GROUP BY D2.D2_FILIAL, D2.D2_DOC, D2.D2_SERIE, D2.D2_CLIENTE, D2.D2_LOJA, D2.D2_COD, F2.F2_VEND3, F2.F2_VEND2, F2.F2_VEND4, F2.F2_VEND5, F2.F2_VEND1, SubStr( F2_EMISSAO , 1 , 6 )
 		
 		EndSql
 
@@ -2671,7 +2671,7 @@ Do Case
 		_cMes01		:= AllTrim( Str( _aMesesDup[6] ) ) + _aMesesDup[2] 
 		_cMes02		:= AllTrim( Str( _aMesesDup[7] ) ) + _aMesesDup[3] 
 		_cMes03		:= AllTrim( Str( _aMesesDup[8] ) ) + _aMesesDup[4]				
-		_dDtAcima	:= StoD( AllTrim( Str( _aMesesDup[9] ) ) + _aMesesDup[5] + '01' )
+		_dDtAcima	:= SToD( AllTrim( Str( _aMesesDup[9] ) ) + _aMesesDup[5] + '01' )
 		
       If _cTipoRepSA3 == 'G' 
 		   _cFilVend += " AND F2.F2_VEND3 = '" + _cCodRepSA3 + "' "
@@ -2723,45 +2723,45 @@ Do Case
 			SUM( DADOS.NUMDUPACI	) NUMDUPACI ,
 			SUM( DADOS.VENCTOACIMA	) VENCTOACIMA
 		FROM (	SELECT
-					COUNT(	CASE
-							WHEN %Exp:_cMes01% = SUBSTR(E1.E1_VENCREA,1,6)
+					COUNT(	Case
+							WHEN %Exp:_cMes01% = SubStr(E1.E1_VENCREA,1,6)
 							THEN E1.E1_SALDO
 							END ) NUMDUP01,
-					COALESCE( SUM(	CASE
-									WHEN %Exp:_cMes01% = SUBSTR(E1.E1_VENCREA,1,6)
+					COALESCE( SUM(	Case
+									WHEN %Exp:_cMes01% = SubStr(E1.E1_VENCREA,1,6)
 									THEN ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE )
 									END ) , 0 ) VENCTO01,
-					COUNT(	CASE
-							WHEN %Exp:_cMes02% = SUBSTR(E1.E1_VENCREA,1,6)
+					COUNT(	Case
+							WHEN %Exp:_cMes02% = SubStr(E1.E1_VENCREA,1,6)
 							THEN E1.E1_SALDO
 							END ) NUMDUP02,
-					COALESCE( SUM(	CASE
-									WHEN %Exp:_cMes02% = SUBSTR(E1.E1_VENCREA,1,6)
+					COALESCE( SUM(	Case
+									WHEN %Exp:_cMes02% = SubStr(E1.E1_VENCREA,1,6)
 									THEN ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE )
 									END ) , 0 ) VENCTO02,
-					COUNT(	CASE
-							WHEN %Exp:_cMes03% = SUBSTR(E1.E1_VENCREA,1,6)
+					COUNT(	Case
+							WHEN %Exp:_cMes03% = SubStr(E1.E1_VENCREA,1,6)
 							THEN E1.E1_SALDO
 							END ) NUMDUP03,
-					COALESCE( SUM(	CASE
-									WHEN %Exp:_cMes03% = SUBSTR(E1.E1_VENCREA,1,6)
+					COALESCE( SUM(	Case
+									WHEN %Exp:_cMes03% = SubStr(E1.E1_VENCREA,1,6)
 									THEN ( (E1.E1_SALDO + E1.E1_SDACRES) - E1_SDDECRE )
 									END ) , 0 ) VENCTO03,
-					COUNT(	CASE
+					COUNT(	Case
 							WHEN TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) >= TO_DATE( %Exp:_dDtAcima% , 'YYYY/MM/DD' )
 							THEN E1.E1_SALDO
 							END ) NUMDUPACI,
-					COALESCE( SUM(	CASE
+					COALESCE( SUM(	Case
 									WHEN TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) >= TO_DATE( %Exp:_dDtAcima% , 'YYYY/MM/DD' )
 									THEN ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE )
 									END ) , 0 ) VENCTOACIMA
-				FROM %table:SE1% E1, %table:SF2% F2, %table:SA3% A3
+				FROM %Table:SE1% E1, %Table:SF2% F2, %Table:SA3% A3
 				WHERE
 					E1.D_E_L_E_T_ = ' '
 				AND F2.D_E_L_E_T_ = ' '
 				AND A3.D_E_L_E_T_ = ' '
 				AND ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE ) > 0
-				AND TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) - TO_DATE( %Exp:Dtos( date() )% , 'YYYY/MM/DD' ) >= 0
+				AND TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) - TO_DATE( %Exp:DToS( Date() )% , 'YYYY/MM/DD' ) >= 0
 				AND E1.E1_ORIGEM NOT IN ( 'FINA460' , 'FINA280' )
                 AND F2.F2_FILIAL   = E1.E1_FILIAL
 				AND F2.F2_DOC      = E1.E1_NUM
@@ -2776,47 +2776,47 @@ Do Case
 				UNION ALL
 				
 				SELECT
-					COUNT(	CASE
-							WHEN %Exp:_cMes01% = SUBSTR( E1.E1_VENCREA , 1 , 6 )
+					COUNT(	Case
+							WHEN %Exp:_cMes01% = SubStr( E1.E1_VENCREA , 1 , 6 )
 							THEN E1.E1_SALDO
 							END ) NUMDUP01,
-					COALESCE( SUM(	CASE
-									WHEN %Exp:_cMes01% = SUBSTR( E1.E1_VENCREA , 1 , 6 )
+					COALESCE( SUM(	Case
+									WHEN %Exp:_cMes01% = SubStr( E1.E1_VENCREA , 1 , 6 )
 									THEN ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE )
 									END ) , 0 ) VENCTO01,
-					COUNT(	CASE
-							WHEN %Exp:_cMes02% = SUBSTR(E1.E1_VENCREA,1,6)
+					COUNT(	Case
+							WHEN %Exp:_cMes02% = SubStr(E1.E1_VENCREA,1,6)
 							THEN E1.E1_SALDO
 							END ) NUMDUP02,
-					COALESCE( SUM(	CASE
-									WHEN %Exp:_cMes02% = SUBSTR(E1.E1_VENCREA,1,6)
+					COALESCE( SUM(	Case
+									WHEN %Exp:_cMes02% = SubStr(E1.E1_VENCREA,1,6)
 									THEN ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE )
 									END ) , 0 ) VENCTO02,
-					COUNT(	CASE
-							WHEN %Exp:_cMes03% = SUBSTR(E1.E1_VENCREA,1,6)
+					COUNT(	Case
+							WHEN %Exp:_cMes03% = SubStr(E1.E1_VENCREA,1,6)
 							THEN E1.E1_SALDO
 							END ) NUMDUP03,
-					COALESCE( SUM(	CASE
-									WHEN %Exp:_cMes03% = SUBSTR(E1.E1_VENCREA,1,6)
+					COALESCE( SUM(	Case
+									WHEN %Exp:_cMes03% = SubStr(E1.E1_VENCREA,1,6)
 									THEN ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE )
 									END ) , 0 ) VENCTO03,
-					COUNT(	CASE
+					COUNT(	Case
 							WHEN TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') >= TO_DATE(%Exp:_dDtAcima%,'YYYY/MM/DD')
 							THEN E1.E1_SALDO
 							END ) NUMDUPACI,
-					COALESCE( SUM(	CASE
+					COALESCE( SUM(	Case
 									WHEN TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') >= TO_DATE(%Exp:_dDtAcima%,'YYYY/MM/DD')
 									THEN ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE )
 									END ) , 0 ) VENCTOACIMA
-				FROM %table:SE1% E1
+				FROM %Table:SE1% E1
 
 				WHERE
 					E1.D_E_L_E_T_ = ' '
 				AND E1.E1_ORIGEM  = 'FINA280'
 				AND ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE ) > 0
-				AND TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) - TO_DATE( %Exp:Dtos(date())% , 'YYYY/MM/DD' ) >= 0
+				AND TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) - TO_DATE( %Exp:DToS(date())% , 'YYYY/MM/DD' ) >= 0
 				AND E1.E1_NUM    IN (	SELECT SE1.E1_FATURA
-										FROM %table:SE1% SE1, %table:SF2% F2, %table:SA3% A3
+										FROM %Table:SE1% SE1, %Table:SF2% F2, %Table:SA3% A3
 										WHERE
 											SE1.D_E_L_E_T_ = ' '
 										AND F2.D_E_L_E_T_  = ' '
@@ -2839,46 +2839,46 @@ Do Case
 				UNION ALL
 				
 				SELECT
-					COUNT(	CASE
-							WHEN %Exp:_cMes01% = SUBSTR(E1.E1_VENCREA,1,6)
+					COUNT(	Case
+							WHEN %Exp:_cMes01% = SubStr(E1.E1_VENCREA,1,6)
 							THEN E1.E1_SALDO
 							END) NUMDUP01,
-					COALESCE( SUM(	CASE
-									WHEN %Exp:_cMes01% = SUBSTR(E1.E1_VENCREA,1,6)
+					COALESCE( SUM(	Case
+									WHEN %Exp:_cMes01% = SubStr(E1.E1_VENCREA,1,6)
 									THEN ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE )
 									END ) , 0 ) VENCTO01,
-					COUNT(	CASE
-							WHEN %Exp:_cMes02% = SUBSTR(E1.E1_VENCREA,1,6)
+					COUNT(	Case
+							WHEN %Exp:_cMes02% = SubStr(E1.E1_VENCREA,1,6)
 							THEN E1.E1_SALDO
 							END ) NUMDUP02,
-					COALESCE( SUM(	CASE
-									WHEN %Exp:_cMes02% = SUBSTR(E1.E1_VENCREA,1,6)
+					COALESCE( SUM(	Case
+									WHEN %Exp:_cMes02% = SubStr(E1.E1_VENCREA,1,6)
 									THEN ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE )
 									END ) , 0 ) VENCTO02,
-					COUNT(	CASE
-							WHEN %Exp:_cMes03% = SUBSTR(E1.E1_VENCREA,1,6)
+					COUNT(	Case
+							WHEN %Exp:_cMes03% = SubStr(E1.E1_VENCREA,1,6)
 							THEN E1.E1_SALDO
 							END ) NUMDUP03,
-					COALESCE( SUM(	CASE
-									WHEN %Exp:_cMes03% = SUBSTR(E1.E1_VENCREA,1,6)
+					COALESCE( SUM(	Case
+									WHEN %Exp:_cMes03% = SubStr(E1.E1_VENCREA,1,6)
 									THEN ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE )
 									END ) , 0 ) VENCTO03,
-					COUNT(	CASE
+					COUNT(	Case
 							WHEN TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') >= TO_DATE(%Exp:_dDtAcima%,'YYYY/MM/DD')
 							THEN E1.E1_SALDO
 							END ) NUMDUPACI,
-					COALESCE( SUM(	CASE
+					COALESCE( SUM(	Case
 									WHEN TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') >= TO_DATE(%Exp:_dDtAcima%,'YYYY/MM/DD')
 									THEN ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE )
 									END ) , 0 ) VENCTOACIMA
-				FROM %table:SE1% E1   
+				FROM %Table:SE1% E1   
 				WHERE
 					E1.D_E_L_E_T_ = ' '
 				AND E1.E1_ORIGEM  = 'FINA460'
 				AND ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE ) > 0
-				AND TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) - TO_DATE( %Exp:Dtos(date())% , 'YYYY/MM/DD' ) >= 0
+				AND TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) - TO_DATE( %Exp:DToS(date())% , 'YYYY/MM/DD' ) >= 0
 				AND E1.E1_NUMLIQ IN (	SELECT SE5.E5_DOCUMEN
-										FROM %table:SE5% SE5, %table:SF2% F2, %table:SA3% A3
+										FROM %Table:SE5% SE5, %Table:SF2% F2, %Table:SA3% A3
 										WHERE
 											SE5.D_E_L_E_T_   = ' '
 										AND F2.D_E_L_E_T_    = ' '
@@ -2898,39 +2898,39 @@ Do Case
 				UNION ALL
 				
 				SELECT
-					COUNT(	CASE
-							WHEN %Exp:_cMes01% = SUBSTR(E1.E1_VENCREA,1,6)
+					COUNT(	Case
+							WHEN %Exp:_cMes01% = SubStr(E1.E1_VENCREA,1,6)
 							THEN E1.E1_SALDO
 							END ) NUMDUP01,
-					COALESCE( SUM(	CASE
-									WHEN %Exp:_cMes01% = SUBSTR(E1.E1_VENCREA,1,6)
+					COALESCE( SUM(	Case
+									WHEN %Exp:_cMes01% = SubStr(E1.E1_VENCREA,1,6)
 									THEN ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE )
 									END ) , 0 ) VENCTO01,
-					COUNT(	CASE
-							WHEN %Exp:_cMes02% = SUBSTR(E1.E1_VENCREA,1,6)
+					COUNT(	Case
+							WHEN %Exp:_cMes02% = SubStr(E1.E1_VENCREA,1,6)
 							THEN E1.E1_SALDO
 							END ) NUMDUP02,
-					COALESCE( SUM(	CASE
-									WHEN %Exp:_cMes02% = SUBSTR(E1.E1_VENCREA,1,6)
+					COALESCE( SUM(	Case
+									WHEN %Exp:_cMes02% = SubStr(E1.E1_VENCREA,1,6)
 									THEN ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE )
 									END ) , 0 ) VENCTO02,
-					COUNT(	CASE
-							WHEN %Exp:_cMes03% = SUBSTR(E1.E1_VENCREA,1,6)
+					COUNT(	Case
+							WHEN %Exp:_cMes03% = SubStr(E1.E1_VENCREA,1,6)
 							THEN E1.E1_SALDO
 							END ) NUMDUP03,
-					COALESCE( SUM(	CASE
-									WHEN %Exp:_cMes03% = SUBSTR(E1.E1_VENCREA,1,6)
+					COALESCE( SUM(	Case
+									WHEN %Exp:_cMes03% = SubStr(E1.E1_VENCREA,1,6)
 									THEN ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE )
 									END ) , 0 ) VENCTO03,
-					COUNT(	CASE
+					COUNT(	Case
 							WHEN TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') >= TO_DATE(%Exp:_dDtAcima%,'YYYY/MM/DD')
 							THEN E1.E1_SALDO
 							END ) NUMDUPACI,
-					COALESCE( SUM(	CASE
+					COALESCE( SUM(	Case
 									WHEN TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') >= TO_DATE(%Exp:_dDtAcima%,'YYYY/MM/DD')
 									THEN ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE )
 									END ) , 0 ) VENCTOACIMA
-				FROM %table:SE1% E1, %table:SA3% A3
+				FROM %Table:SE1% E1, %Table:SA3% A3
 				WHERE
 					E1.D_E_L_E_T_   = ' '
 				AND A3.D_E_L_E_T_   = ' '	
@@ -2938,7 +2938,7 @@ Do Case
 				AND E1.E1_VEND1 <> ' '
 				AND E1.E1_ORIGEM = 'FINA040'
 				AND ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE ) > 0
-				AND TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) - TO_DATE( %Exp:Dtos(date())% , 'YYYY/MM/DD' ) >= 0
+				AND TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) - TO_DATE( %Exp:DToS(date())% , 'YYYY/MM/DD' ) >= 0
 				%exp:_cFilSE1%  
 		
 		) DADOS
@@ -3161,12 +3161,12 @@ Do Case
 		
 	    EndIf
 		
-		If !empty(_cWhere03)
+		If !Empty(_cWhere03)
 		
 		   _cWhere03 := "%" + _cWhere03 + "%"   
 		Else 
 		   _cWhere03 := "% %"	
-		Endif
+		EndIf
 			
 		//================================================================= 
 		// Se a pergunta Mostra Hierarquiva of igual a Simm a ordenação 
@@ -3184,7 +3184,7 @@ Do Case
         // ----VENDEDOR2
         // GERENTE2.... ETC
 		//
-		// Se a pergunta Mostra Hierarquia for Não, a ordenação do 
+		// Se a pergunta Mostra Hierarquia For Não, a ordenação do 
 		// relatório deve ser:
 		// GERENTE1
         // GERENTE2
@@ -3216,12 +3216,12 @@ Do Case
 	//====================================================================================================
 	Case _nOpcao == 9
 	    If MV_PAR09 == 'Analitico' // 1 // 'Analitico'  ,'Previa-Sintetic','Excel', 'Impresso Novo' 
-           _cWhere02 := "% AND SUBSTR(E3_EMISSAO,1,6) = '" + SubStr(_cMvMesAno,3,4) + SubStr(_cMvMesAno,1,2) + "' %" 
+           _cWhere02 := "% AND SubStr(E3_EMISSAO,1,6) = '" + SubStr(_cMvMesAno,3,4) + SubStr(_cMvMesAno,1,2) + "' %" 
 		Else 
 	       If AllTrim(MV_PAR01) == AllTrim(MV_PAR02) 
-		      _cWhere02 := "% AND SUBSTR(E3_EMISSAO,1,6) = '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' %"
+		      _cWhere02 := "% AND SubStr(E3_EMISSAO,1,6) = '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' %"
 		   Else 
-		      _cWhere02 := "% AND SUBSTR(E3_EMISSAO,1,6) >= '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' AND SUBSTR(E3_EMISSAO,1,6) <= '"+ SubStr(MV_PAR02,3,4) + SubStr(MV_PAR02,1,2) + "' %"
+		      _cWhere02 := "% AND SubStr(E3_EMISSAO,1,6) >= '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' AND SubStr(E3_EMISSAO,1,6) <= '"+ SubStr(MV_PAR02,3,4) + SubStr(MV_PAR02,1,2) + "' %"
 		   EndIf
 	    EndIf 
 
@@ -3238,23 +3238,23 @@ Do Case
 
 		If _cTipoRepSA3 = "V" // Extrato Vendedor
 		   _cWhere04 := "% AND F2.F2_VEND1 = E3.E3_VEND %"
-		Endif
+		EndIf
 		
 		If _cTipoRepSA3 = "S" // Extrato Supervisor
 		   _cWhere04 := "% AND F2.F2_VEND4 = E3.E3_VEND %"
-		Endif
+		EndIf
 		
 		If _cTipoRepSA3 = "C" // Extrato Coordenador
 		   _cWhere04 := "% AND F2.F2_VEND2 = E3.E3_VEND %"
-		Endif
+		EndIf
 		
 		If _cTipoRepSA3 = "G" // Extrato Gerente
 		   _cWhere04 := "% AND F2.F2_VEND3 = E3.E3_VEND %"
-		Endif
+		EndIf
 
 		If _cTipoRepSA3 = "N" // Extrato Gerente Nacional 
 		   _cWhere04 := "% AND F2.F2_VEND5 = E3.E3_VEND %"
-		Endif
+		EndIf
 		
 		BeginSql alias _cAlias
 		
@@ -3393,12 +3393,12 @@ Do Case
 	Case _nOpcao == 10
 
 		If MV_PAR09 == 'Analitico' // 1 // 'Analitico'  ,'Previa-Sintetic','Excel', 'Impresso Novo' 
-           _cWhere02 := "% AND SUBSTR(E3_EMISSAO,1,6) = '" + SubStr(_cMvMesAno,3,4) + SubStr(_cMvMesAno,1,2) + "' %"
+           _cWhere02 := "% AND SubStr(E3_EMISSAO,1,6) = '" + SubStr(_cMvMesAno,3,4) + SubStr(_cMvMesAno,1,2) + "' %"
 		Else     
 	       If AllTrim(MV_PAR01) == AllTrim(MV_PAR02) 
-		      _cWhere02 := "% AND SUBSTR(E3_EMISSAO,1,6) = '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' %"
+		      _cWhere02 := "% AND SubStr(E3_EMISSAO,1,6) = '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' %"
            Else 
-		      _cWhere02 := "% AND SUBSTR(E3_EMISSAO,1,6) >= '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' AND SUBSTR(E3_EMISSAO,1,6) <= '"+ SubStr(MV_PAR02,3,4) + SubStr(MV_PAR02,1,2) + "' %"
+		      _cWhere02 := "% AND SubStr(E3_EMISSAO,1,6) >= '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' AND SubStr(E3_EMISSAO,1,6) <= '"+ SubStr(MV_PAR02,3,4) + SubStr(MV_PAR02,1,2) + "' %"
 		   EndIf
 	    EndIf 
 		//====================================================================================================
@@ -3414,27 +3414,27 @@ Do Case
 
 		If _cTipoRepSA3 = "V" // Extrato Vendedor
 		   _cWhere04 := "% AND F2.F2_VEND1 = E3.E3_VEND %"
-		Endif
+		EndIf
 		
 		If _cTipoRepSA3 = "S" // Extrato Supervisor
 		   _cWhere04 := "% AND F2.F2_VEND4 = E3.E3_VEND %"
 		   _cWhere01 += " AND (E1.E1_VEND4 = '" + _cCodRepSA3 + "' OR (E3.E3_VEND = '" + _cCodRepSA3 + "' AND E1.E1_VEND4 = '      ')) "
-		Endif
+		EndIf
 		
 		If _cTipoRepSA3 = "C" // Extrato Coordenador
 		   _cWhere04 := "% AND F2.F2_VEND2 = E3.E3_VEND %"
 		   _cWhere01 += " AND (E1.E1_VEND2 = '" + _cCodRepSA3 + "' OR (E3.E3_VEND = '" + _cCodRepSA3 + "' AND E1.E1_VEND2 = '      ')) "
-		Endif
+		EndIf
 		
 		If _cTipoRepSA3 = "G" // Extrato Gerente
 		   _cWhere04 := "% AND F2.F2_VEND3 = E3.E3_VEND %"
 		   _cWhere01 += " AND (E1.E1_VEND3 = '" + _cCodRepSA3 + "' OR (E3.E3_VEND = '" + _cCodRepSA3 + "' AND E1.E1_VEND3 = '      ')) "
-		Endif
+		EndIf
 
 		If _cTipoRepSA3 = "N" // Extrato Gerente Nacional
 		   _cWhere04 := "% AND F2.F2_VEND5 = E3.E3_VEND %"
 		   _cWhere01 += " AND (E1.E1_VEND5 = '" + _cCodRepSA3 + "' OR (E3.E3_VEND = '" + _cCodRepSA3 + "' AND E1.E1_VEND5 = '      ')) "
-		Endif
+		EndIf
 		
 		_cWhere01 += " %"
 
@@ -3735,7 +3735,7 @@ Do Case
 
 	EndCase
 
-Return()  
+Return  
 
 /*
 ===============================================================================================================================
@@ -3777,15 +3777,15 @@ ElseIf _cTipoRepSA3 == 'V'
    _cTituloRep := "Representante"
 EndIf
 
-fwmsgrun( ,{|| _aComissao := ROMS030SEL() } , 'Aguarde!' ,  'Filtrando comissao para '+ _cTituloRep+ '-' +  _cCodRepSA3 + "..." )
+FWMsgRun( ,{|| _aComissao := ROMS030SEL() } , 'Aguarde!' ,  'Filtrando comissao para '+ _cTituloRep+ '-' +  _cCodRepSA3 + "..." )
 
 //==========================================================================================
 // Preenche o array _aComissao com valores zerados, para Gerente, Coordenador e Supervisor
 //========================================================================================== 
-If Empty(_aComissao) .And. Alltrim(_cTipoRepSA3) $ "G/C/S"   // V=VENDEDOR;C=COORDENADOR;G=GERENTE;S=SUPERVISOR 
+If Empty(_aComissao) .And. AllTrim(_cTipoRepSA3) $ "G/C/S"   // V=VENDEDOR;C=COORDENADOR;G=GERENTE;S=SUPERVISOR 
    _aComissao := U_ROMS030D(_cCodRepSA3)
    
-Endif
+EndIf
 //================================================================================
 // Verifica se existe comissao gerada para os vendedores.
 //================================================================================
@@ -3823,7 +3823,7 @@ If Len(_aComissao) > 0
 
 	_cAliasPg := GetNextAlias()  
 
-	fwMsgRun( , {|| ROMS030QRY(_cAliasPg,3,"","","",_cFilGer) } , 'Aguarde!', 'Filtrando historico de comissoes pagas para ' + _cTituloRep+ '-' +  _cCodRepSA3 + "..."  )
+	FWMsgRun( , {|| ROMS030QRY(_cAliasPg,3,"","","",_cFilGer) } , 'Aguarde!', 'Filtrando historico de comissoes pagas para ' + _cTituloRep+ '-' +  _cCodRepSA3 + "..."  )
 	
 	//================================================================================
 	// Percorre todos os vendedores para realizar a impressao de seus dados.
@@ -3851,7 +3851,7 @@ If Len(_aComissao) > 0
 
 		_cAliasDup := GetNextAlias() 
 		
-		fwMsgRun( , {||  ROMS030QRY( _cAliasDup , 2 , "", _aGerente[x,1] )  }, 'Aguarde!',"Filtrando duplicatas vencidas para " + _cTituloRep+ '-' +  _cCodRepSA3 + "..."    )
+		FWMsgRun( , {||  ROMS030QRY( _cAliasDup , 2 , "", _aGerente[x,1] )  }, 'Aguarde!',"Filtrando duplicatas vencidas para " + _cTituloRep+ '-' +  _cCodRepSA3 + "..."    )
 	
 		//======================================================================================================================
 		// Verifica as duplicatas vencidas do vendedor
@@ -3869,7 +3869,7 @@ If Len(_aComissao) > 0
 
 		_cAliasAve := GetNextAlias() 
 		
-		fwMsgRun( , {||  ROMS030QRY( _cAliasAve , 6 , "" ,  _aGerente[x,1] )  }, 'Aguarde!',"Filtrando duplicatas a vencer para " + _cTituloRep+ '-' +  _cCodRepSA3 + "..."    )
+		FWMsgRun( , {||  ROMS030QRY( _cAliasAve , 6 , "" ,  _aGerente[x,1] )  }, 'Aguarde!',"Filtrando duplicatas a vencer para " + _cTituloRep+ '-' +  _cCodRepSA3 + "..."    )
 		
 		//================================================================================
 		// Verifica as comissoes pagas do vendedor corrente.
@@ -3893,7 +3893,7 @@ If Len(_aComissao) > 0
 
 	    _cAliasVHi := GetNextAlias()
 	
-	    fwMsgRun( , {||  ROMS030QRY( _cAliasVHi , 5 , "" ,  _aGerente[x,1] , _cFilGer, "" )  }, 'Aguarde!', "Filtrando historico de vendas para " + _cTituloRep+ '-' +  _cCodRepSA3 + "..."  )
+	    FWMsgRun( , {||  ROMS030QRY( _cAliasVHi , 5 , "" ,  _aGerente[x,1] , _cFilGer, "" )  }, 'Aguarde!', "Filtrando historico de vendas para " + _cTituloRep+ '-' +  _cCodRepSA3 + "..."  )
 	    
 	    //======================================================================================================================
 		// Verifica o historico de vendas do vendedor corrente
@@ -3960,7 +3960,7 @@ If ! Empty(_cAliasVHi)
    EndIf 
 EndIf	
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -3995,17 +3995,17 @@ Local _cTituloRep
 	//====================================================================================================
 	// Chama a rotina para selecao dos registros da comissao dos vendedores
 	//====================================================================================================
-	fwMsgRun(  , {|| ROMS030QRY( _cAlias , 1 )  }, 'Aguarde!','Filtrando comissao para ' + _cTituloRep + '-' +  _cCodRepSA3 + "..."  )
+	FWMsgRun(  , {|| ROMS030QRY( _cAlias , 1 )  }, 'Aguarde!','Filtrando comissao para ' + _cTituloRep + '-' +  _cCodRepSA3 + "..."  )
 		
 	DBSelectArea( _cAlias )
-	(_cAlias)->( DBGotop() )
+	(_cAlias)->( DBGoTop() )
 	
 	COUNT TO _nNumReg
 	
 	ProcRegua(_nNumReg)      
 	
-	dbSelectArea(_cAlias)
-	(_cAlias)->(dbGotop()) 
+	DBSelectArea(_cAlias)
+	(_cAlias)->(DBGoTop()) 
     
 	While (_cAlias)->(!Eof())       
                 
@@ -4067,12 +4067,12 @@ EndIf
 //====================================================================================================
 // Seleciona os ultimos tres meses de acordo com a data de referência parametrizada
 //====================================================================================================
-aAdd( _aMesesPg , { StrZero( Month( MonthSub( StoD( _cAnoPar + _cMesPar + '01' ) , 3 ) ) , 2 ) , 0 } )
-aAdd( _aMesesPg , { StrZero( Month( MonthSub( StoD( _cAnoPar + _cMesPar + '01' ) , 2 ) ) , 2 ) , 0 } )
-aAdd( _aMesesPg , { StrZero( Month( MonthSub( StoD( _cAnoPar + _cMesPar + '01' ) , 1 ) ) , 2 ) , 0 } )
+aAdd( _aMesesPg , { StrZero( Month( MonthSub( SToD( _cAnoPar + _cMesPar + '01' ) , 3 ) ) , 2 ) , 0 } )
+aAdd( _aMesesPg , { StrZero( Month( MonthSub( SToD( _cAnoPar + _cMesPar + '01' ) , 2 ) ) , 2 ) , 0 } )
+aAdd( _aMesesPg , { StrZero( Month( MonthSub( SToD( _cAnoPar + _cMesPar + '01' ) , 1 ) ) , 2 ) , 0 } )
 
 DBSelectArea(_cAliasPg)
-(_cAliasPg)->( DBGotop() )
+(_cAliasPg)->( DBGoTop() )
 While (_cAliasPg)->( !Eof() )
 
 	//====================================================================================================
@@ -4161,7 +4161,7 @@ _nPosLin += _nSpcLin
 _oPrint:Say( _nPosLin + _nAjsLin , (_nColIni + 1280 + _nColFim) / 2 , AllTrim(MV_PAR16)  , _oFont11b , _nColFim        ,,, 2 )
 _nPosLin += _nSpcLin
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -4255,17 +4255,17 @@ Default _cCodGer	:= ''
 
 Begin Sequence
    If MV_PAR09 == 'Analitico' // 1  // 'Analitico'  ,'Previa-Sintetic','Excel', 'Impresso Novo' 
-      _cFiltrobon	+= " AND SUBSTR( F2_EMISSAO , 1 , 6 ) = '"+ SubStr( _cMvMesAno , 3 , 4 ) + SubStr( _cMvMesAno , 1 , 2 ) +"'" 
+      _cFiltrobon	+= " AND SubStr( F2_EMISSAO , 1 , 6 ) = '"+ SubStr( _cMvMesAno , 3 , 4 ) + SubStr( _cMvMesAno , 1 , 2 ) +"'" 
    Else 
       If AllTrim(MV_PAR01) == AllTrim(MV_PAR02)
-         _cFiltrobon	+= " AND SUBSTR( F2_EMISSAO , 1 , 6 ) = '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'" 
+         _cFiltrobon	+= " AND SubStr( F2_EMISSAO , 1 , 6 ) = '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'" 
       Else 
-	     _cFiltrobon	+= " AND SUBSTR( F2_EMISSAO , 1 , 6 ) >= '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' AND SUBSTR( F2_EMISSAO , 1 , 6 ) <= '"+ SubStr(MV_PAR02,3,4) + SubStr(MV_PAR02,1,2) + "' " 
+	     _cFiltrobon	+= " AND SubStr( F2_EMISSAO , 1 , 6 ) >= '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' AND SubStr( F2_EMISSAO , 1 , 6 ) <= '"+ SubStr(MV_PAR02,3,4) + SubStr(MV_PAR02,1,2) + "' " 
       EndIf
    EndIf  
 
-   SA3->(Dbsetorder(1))
-   If !(SA3->(Dbseek(xfilial("SA3")+_cCodGer)))
+   SA3->(DBSetOrder(1))
+   If !(SA3->(DBSeek(xFilial("SA3")+_cCodGer)))
 	  _aRet := {"N/C",0,0,0}
   	  Break 
    EndIf	
@@ -4346,7 +4346,7 @@ Begin Sequence
    DBSelectArea(_cAlias)
    (_cAlias)->( DBGoTop() )
 
-   Do While (_cAlias)->(!Eof())
+   While (_cAlias)->(!Eof())
 	  aAdd( _aRet , {	"N/C"	,;
 					(_cAlias)->VALTOT												,;
 					( (_cAlias)->COMIS * -1 )/100										,;
@@ -4392,9 +4392,9 @@ ElseIf _cTipoRepSA3 == 'N'
    _cTituloRep := "Gerente Nacional"
 EndIf
 
-fwMsgRun( , {||  ROMS030QRY( _cAliasMes , 7 , "" , _cCoorden , "" , "" )  } , 'Aguarde!' ,"Filtrando historico vendas mes corrente: " + _cTituloRep + '-' +  _cCodRepSA3 + "..."  ) 
+FWMsgRun( , {||  ROMS030QRY( _cAliasMes , 7 , "" , _cCoorden , "" , "" )  } , 'Aguarde!' ,"Filtrando historico vendas mes corrente: " + _cTituloRep + '-' +  _cCodRepSA3 + "..."  ) 
 DBSelectArea( _cAliasMes )
-(_cAliasMes)->( DBGotop() )
+(_cAliasMes)->( DBGoTop() )
 While (_cAliasMes)->( !Eof() )
 
 	aAdd(_aDadoVend , {	(_cAliasMes)->DESCSUB ,; // Descricao do sub-Grupo de Produtos
@@ -4449,7 +4449,7 @@ aAdd( _aHistVend , { _a3MesesVe[4]		   , 0 } )
 aAdd( _aHistVend , { StrZero(_nMesAtual,2) , 0 } )
 
 DBSelectArea(_cAliasVHi)
-(_cAliasVHi)->( DBGotop() )
+(_cAliasVHi)->( DBGoTop() )
 While (_cAliasVHi)->( !Eof() )
    _cCodVend := ""
    If _cTipoRepSA3 == 'G' 
@@ -4509,10 +4509,10 @@ _nPosLin += _nSpcLin
 _nPosLin += _nSpcLin  
 
 _oPrint:Say( _nPosLin + _nSpcLin	, _nColIni + 10		, "Mês"								, _oFont11b )
-_oPrint:Say( _nPosLin + _nSpcLin	, 0920				, PADL(_aMes[Val(_cMes1)],10," ")	, _oFont11b , 0970      ,,, 2 )
-_oPrint:Say( _nPosLin + _nSpcLin	, 1310				, PADL(_aMes[Val(_cMes2)],10," ")	, _oFont11b , 1360      ,,, 2 )
-_oPrint:Say( _nPosLin + _nSpcLin	, 1700				, PADL(_aMes[Val(_cMes3)],10," ")	, _oFont11b , 1710      ,,, 2 )
-_oPrint:Say( _nPosLin + _nSpcLin	, 2050				, PADL(_aMes[Val(_cMes4)],10," ")	, _oFont11b , _nColFim ,,, 2 )
+_oPrint:Say( _nPosLin + _nSpcLin	, 0920				, PadL(_aMes[Val(_cMes1)],10," ")	, _oFont11b , 0970      ,,, 2 )
+_oPrint:Say( _nPosLin + _nSpcLin	, 1310				, PadL(_aMes[Val(_cMes2)],10," ")	, _oFont11b , 1360      ,,, 2 )
+_oPrint:Say( _nPosLin + _nSpcLin	, 1700				, PadL(_aMes[Val(_cMes3)],10," ")	, _oFont11b , 1710      ,,, 2 )
+_oPrint:Say( _nPosLin + _nSpcLin	, 2050				, PadL(_aMes[Val(_cMes4)],10," ")	, _oFont11b , _nColFim ,,, 2 )
 
 _nPosLin += _nSpcLin
 
@@ -4541,7 +4541,7 @@ If _cTipoRepSA3 == 'V'
          _oPrint:Say( _nPosLin	, _nColFim / 2	, 'VENDAS DO MÊS - '+ IIF( !Empty(MV_PAR01) , _aMes[Val(SubStr(MV_PAR01,1,2))] +'/'+ SubStr(MV_PAR01,3,4),"") , _oFont16b , _nColFim  ,,, 2 )
 	  Else 
          _cPeriodo := 'VENDAS DO MÊS - '+ IIF( !Empty(MV_PAR01) , _aMes[Val(SubStr(MV_PAR01,1,2))] +'/'+ SubStr(MV_PAR01,3,4),"") + " Até "
-		 _cPeriodo += IIF( !Empty(MV_PAR02) , _aMes[Val(SubStr(MV_PAR02,1,2))] +'/'+ SubStr(MV_PAR02,3,4),"")
+		 _cPeriodo += IIf( !Empty(MV_PAR02) , _aMes[Val(SubStr(MV_PAR02,1,2))] +'/'+ SubStr(MV_PAR02,3,4),"")
          _oPrint:Say( _nPosLin	, _nColFim / 2	, _cPeriodo , _oFont16b , _nColFim  ,,, 2 )
 	  EndIf 
    EndIf 
@@ -4584,13 +4584,13 @@ If _cTipoRepSA3 == 'V'
 
         EndIf
 	
-	   _oPrint:Say( _nPosLin + _nSpcLin , _nColIni + 0010 , SubStr(IIF(Len(AllTrim(_aVendas[_nI,1])) == 0,'SEM GRUPO DE PRODUTOS',_aVendas[_nI,1]),1,29)									   , _oFont11 )
+	   _oPrint:Say( _nPosLin + _nSpcLin , _nColIni + 0010 , SubStr(IIf(Len(AllTrim(_aVendas[_nI,1])) == 0,'SEM GRUPO DE PRODUTOS',_aVendas[_nI,1]),1,29)									   , _oFont11 )
 	   _oPrint:Say( _nPosLin + _nSpcLin , _nColIni + 0600 , Transform(_aVendas[_nI,7],"@E 999.999") 							  			  													   , _oFont11 )
 	   _oPrint:Say( _nPosLin + _nSpcLin , _nColIni + 0600 , Transform(_aVendas[_nI,2],"@E 999,999,999,999.99")				  			  													   , _oFont11 )
 	   _oPrint:Say( _nPosLin + _nSpcLin , _nColIni + 0990 , _aVendas[_nI,3]													  			  													   , _oFont11 )
 	   _oPrint:Say( _nPosLin + _nSpcLin , _nColIni + 1040 , Transform(_aVendas[_nI,4],"@E 999,999,999,999.99")				              													   , _oFont11 )
 	   _oPrint:Say( _nPosLin + _nSpcLin , _nColIni + 1430 , _aVendas[_nI,5]       											  			  													   , _oFont11 )
-	   _oPrint:Say( _nPosLin + _nSpcLin , _nColIni + 1450 , IIF(_aVendas[_nI,2] > 0,Transform(_aVendas[_nI,6] / _aVendas[_nI,2],"@E 999,999,999,999.99"),TransForm(0,"@E 999,999,999,999.99")) , _oFont11 )
+	   _oPrint:Say( _nPosLin + _nSpcLin , _nColIni + 1450 , IIf(_aVendas[_nI,2] > 0,Transform(_aVendas[_nI,6] / _aVendas[_nI,2],"@E 999,999,999,999.99"),TransForm(0,"@E 999,999,999,999.99")) , _oFont11 )
 	   _oPrint:Say( _nPosLin + _nSpcLin , _nColIni + 1750 , Transform(_aVendas[_nI,6],"@E 999,999,999,999.99")			      			  													   , _oFont11 )
     
 	   _nTotVlrBr += _aVendas[_nI,6]
@@ -4627,13 +4627,13 @@ Else //Se não é vendedor imprime quadro relacional
    _nPosLin += _nSpcLin
 
    If MV_PAR09 == 'Analitico' //1 // 'Analitico'  ,'Previa-Sintetic','Excel', 'Impresso Novo'
-      _oPrint:Say( _nPosLin	, _nColFim / 2	, 'Relação de ' + _cTitCargo + ' - '+ IIF( !Empty(_cMvMesAno) , _aMes[Val(SubStr(_cMvMesAno,1,2))] +'/'+ SubStr(_cMvMesAno,3,4),"") , _oFont16b , _nColFim  ,,, 2 )
+	  _oPrint:Say( _nPosLin	, _nColFim / 2	, 'Relação de ' + _cTitCargo + ' - '+ IIF( !Empty(_cMvMesAno) , _aMes[Val(SubStr(_cMvMesAno,1,2))] +'/'+ SubStr(_cMvMesAno,3,4),"") , _oFont16b , _nColFim  ,,, 2 )
    Else    
       If MV_PAR01 == MV_PAR02
          _oPrint:Say( _nPosLin	, _nColFim / 2	, 'Relação de ' + _cTitCargo + ' - '+ IIF( !Empty(MV_PAR01) , _aMes[Val(SubStr(MV_PAR01,1,2))] +'/'+ SubStr(MV_PAR01,3,4),"") , _oFont16b , _nColFim  ,,, 2 )
 	  Else 
          _cPeriodo := 'Relação de ' + _cTitCargo + ' - '+ IIF( !Empty(MV_PAR01) , _aMes[Val(SubStr(MV_PAR01,1,2))] +'/'+ SubStr(MV_PAR01,3,4),"") 
-		 _cPeriodo += " Ate " + IIF( !Empty(MV_PAR02) , _aMes[Val(SubStr(MV_PAR02,1,2))] +'/'+ SubStr(MV_PAR02,3,4),"") 
+		 _cPeriodo += " Ate " + IIf( !Empty(MV_PAR02) , _aMes[Val(SubStr(MV_PAR02,1,2))] +'/'+ SubStr(MV_PAR02,3,4),"") 
          _oPrint:Say( _nPosLin	, _nColFim / 2	, _cPeriodo , _oFont16b , _nColFim  ,,, 2 )
 	  EndIf 
    EndIf 
@@ -4653,7 +4653,7 @@ Else //Se não é vendedor imprime quadro relacional
 
     _aDadosRepres := {0,0,0}
 
-	Fwmsgrun( , {||  _aDadosRepres := U_ROMS030J(_ccodi, _cctipvi /*, _aDadosRelac[_nI,1], _aDadosRelac[_nI,2] */)  }, 'Aguarde...', 'Lendo dados rede representante vinculados ao ' + _cTitCargo +  "..."  ) 	   
+	FWMsgRun( , {||  _aDadosRepres := U_ROMS030J(_ccodi, _cctipvi /*, _aDadosRelac[_nI,1], _aDadosRelac[_nI,2] */)  }, 'Aguarde...', 'Lendo dados rede representante vinculados ao ' + _cTitCargo +  "..."  ) 	   
     If Len(_aDadosRepres) > 0
 	  
 	   For _nI := 1 To Len(_aDadosRepres)
@@ -4671,7 +4671,7 @@ Else //Se não é vendedor imprime quadro relacional
 		         _cNome := Posicione("SA3",1,xFilial("SA3")+_aDadosRepres[_nI,1],"A3_NOME")
 			  EndIf
 		   
-		      Aadd(_aComGerenc,{_aDadosRepres[_nI,1], _cNome, _nValRec, _nValCom, _nPerc})
+		      aAdd(_aComGerenc,{_aDadosRepres[_nI,1], _cNome, _nValRec, _nValCom, _nPerc})
 		   EndIf
        Next
 
@@ -4724,7 +4724,7 @@ Else //Se não é vendedor imprime quadro relacional
  
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -4792,13 +4792,13 @@ Else
 EndIf 
 
 DBSelectArea(_cAliasAve)
-(_cAliasAve)->( DBGotop() )
+(_cAliasAve)->( DBGoTop() )
 
 _oPrint:Say( _nPosLin  , _nColIni + 10	, "Período"									, _oFont11b						)
-_oPrint:Say( _nPosLin  , 0930			, PADL(_aMes[val(_aMesesDup[2])],10," ")	, _oFont11b , 1200      ,,, 2	)
-_oPrint:Say( _nPosLin  , 1330			, PADL(_aMes[val(_aMesesDup[3])],10," ")	, _oFont11b , 1590      ,,, 2	)
-_oPrint:Say( _nPosLin  , 1740			, PADL(_aMes[val(_aMesesDup[4])],10," ")	, _oFont11b , 1980      ,,, 2	)
-_oPrint:Say( _nPosLin  , 2070			, PADL("Demais Meses",12," ")				, _oFont11b , _nColFim ,,, 2	)
+_oPrint:Say( _nPosLin  , 0930			, PadL(_aMes[Val(_aMesesDup[2])],10," ")	, _oFont11b , 1200      ,,, 2	)
+_oPrint:Say( _nPosLin  , 1330			, PadL(_aMes[Val(_aMesesDup[3])],10," ")	, _oFont11b , 1590      ,,, 2	)
+_oPrint:Say( _nPosLin  , 1740			, PadL(_aMes[Val(_aMesesDup[4])],10," ")	, _oFont11b , 1980      ,,, 2	)
+_oPrint:Say( _nPosLin  , 2070			, PadL("Demais Meses",12," ")				, _oFont11b , _nColFim ,,, 2	)
 
 _nPosLin += _nSpcLin
 
@@ -4829,9 +4829,9 @@ _nPosLin += _nSpcLin
 nLinInBox2 := _nPosLin
 
 _oPrint:Say( _nPosLin  , _nColIni + 10	, "Mês"								, _oFont11b	)
-_oPrint:Say( _nPosLin  , 0790			, PADL(_aMes[Val(_cMes1)],10," ")	, _oFont11b	)
-_oPrint:Say( _nPosLin  , 1320			, PADL(_aMes[Val(_cMes2)],10," ")	, _oFont11b	)
-_oPrint:Say( _nPosLin  , 1790			, PADL(_aMes[Val(_cMes3)],10," ")	, _oFont11b	)
+_oPrint:Say( _nPosLin  , 0790			, PadL(_aMes[Val(_cMes1)],10," ")	, _oFont11b	)
+_oPrint:Say( _nPosLin  , 1320			, PadL(_aMes[Val(_cMes2)],10," ")	, _oFont11b	)
+_oPrint:Say( _nPosLin  , 1790			, PadL(_aMes[Val(_cMes3)],10," ")	, _oFont11b	)
 
 _nPosLin += _nSpcLin
 
@@ -4846,7 +4846,7 @@ _oPrint:Box( nLinInBox , _nColIni , _nPosLin , _nColFim )
 
 _nPosLin += _nSpcLin
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -4861,7 +4861,7 @@ Retorno-----------: Nenhum
 Static Function ROMS030S3M( _nMesAtual , _nAno , _nOpc )
       
 Local _aMeses	:= {}
-Local _dMesAtu	:= StoD( StrZero( _nAno , 4 ) + StrZero( _nMesAtual , 2 ) + '01' )
+Local _dMesAtu	:= SToD( StrZero( _nAno , 4 ) + StrZero( _nMesAtual , 2 ) + '01' )
 
 If _nOpc == 1
 
@@ -4923,7 +4923,7 @@ Static Function ROMS030VDP(_cAliasDup)
 Local _aDupVenc := {}
 
 DBSelectArea( _cAliasDup )
-(_cAliasDup)->( DBGotop() )
+(_cAliasDup)->( DBGoTop() )
 While (_cAliasDup)->( !Eof() )
 
 	If Len(_aDupVenc) == 0		                         		     
@@ -4961,7 +4961,7 @@ While (_cAliasDup)->( !Eof() )
 (_cAliasDup)->( DBSkip() )
 EndDo
 
-(_cAliasDup)->( dbCloseArea() )
+(_cAliasDup)->( DBCloseArea() )
 
 Return( _aDupVenc )
 
@@ -4984,10 +4984,10 @@ Local _nI
 
 Begin Sequence
    For _nI := 1 To Len(_aCodFiliais)
-       Aadd(_aComisColab , { _cCodColabor , _aCodFiliais[_nI,5] , "0" , 0 , 0 , "A" , 0 } )
-       Aadd(_aComisColab , { _cCodColabor , _aCodFiliais[_nI,5] , "0" , 0 , 0 , "B" , 0 } )
-       Aadd(_aComisColab , { _cCodColabor , _aCodFiliais[_nI,5] , "0" , 0 , 0 , "C" , 0 } )
-       Aadd(_aComisColab , { _cCodColabor , _aCodFiliais[_nI,5] , "0" , 0 , 0 , "D" , 0 } )
+       aAdd(_aComisColab , { _cCodColabor , _aCodFiliais[_nI,5] , "0" , 0 , 0 , "A" , 0 } )
+       aAdd(_aComisColab , { _cCodColabor , _aCodFiliais[_nI,5] , "0" , 0 , 0 , "B" , 0 } )
+       aAdd(_aComisColab , { _cCodColabor , _aCodFiliais[_nI,5] , "0" , 0 , 0 , "C" , 0 } )
+       aAdd(_aComisColab , { _cCodColabor , _aCodFiliais[_nI,5] , "0" , 0 , 0 , "D" , 0 } )
    Next
 
 End Sequence
@@ -5017,7 +5017,7 @@ Begin Sequence
        _cCodRepSA3  := _aDadosRelac[_nI,1]
        _cTipoRepSA3 := _aDadosRelac[_nI,2]
 
-	   fwmsgrun( ,{|| _aComissao := ROMS030SEL() } , 'Aguarde!' ,  'Filtrando a comissao: '+Strzero(_nI,5)+"/"+StrZero(Len(_aDadosRelac),5) )
+	   FWMsgRun( ,{|| _aComissao := ROMS030SEL() } , 'Aguarde!' ,  'Filtrando a comissao: '+StrZero(_nI,5)+"/"+StrZero(Len(_aDadosRelac),5) )
 
        //_aComissao := ROMS030SEL()
 
@@ -5045,7 +5045,7 @@ End Sequence
 _cCodRepSA3  := _cCodRep 
 _cTipoRepSA3 := _cTipoRep
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -5090,23 +5090,23 @@ Begin Sequence
        // Soma os valores recebidos e os valores de comissão.
        //================================================================================
        If _aComissao[_nI,5] <> 'D'
-          _nTotReceb	+= round(_aComissao[_nI,2],2)
-	      _nTotComis	+= round(_aComissao[_nI,3],2)
+          _nTotReceb	+= Round(_aComissao[_nI,2],2)
+	      _nTotComis	+= Round(_aComissao[_nI,3],2)
 	   Else
-	      _nTotDevol += round(_aComissao[_nI,2],2)
-	      _nVlrDebCo += round(_aComissao[_nI,6],2)
+	      _nTotDevol += Round(_aComissao[_nI,2],2)
+	      _nVlrDebCo += Round(_aComissao[_nI,6],2)
        EndIf
    Next
 
    //================================================================================
    // Calcula o desconto de comissão por bonificação
    //================================================================================
-   fwmsgrun(, {|| _aTotBNF := ROMS030BNF( _cCodGer ) }, "Aguarde... ", 'Filtrando bonificações para ' + _cTituloRep + '-' +  _cCodRepSA3 + "..." )
+   FWMsgRun(, {|| _aTotBNF := ROMS030BNF( _cCodGer ) }, "Aguarde... ", 'Filtrando bonificações para ' + _cTituloRep + '-' +  _cCodRepSA3 + "..." )
 
    If !Empty( _aTotBNF )
  	  For _nJ := 1 To Len(_aTotBNF)
-          _nTotCmBnf	+= round(_aTotBNF[_nJ][03],2) // Valor recebido bonificação
-	      _nTotBonif	+= round(_aTotBNF[_nJ][02],2) // Valor comissão bonificação.
+          _nTotCmBnf	+= Round(_aTotBNF[_nJ][03],2) // Valor recebido bonificação
+	      _nTotBonif	+= Round(_aTotBNF[_nJ][02],2) // Valor comissão bonificação.
 	  Next _nJ
    EndIf
 
@@ -5153,22 +5153,22 @@ Begin Sequence
    _nValComiss  := 0
    _nPercComiss	:= 0
 
-   Fwmsgrun( , {||  ROMS030QRY( _cAliasGer , 10 , "" , _cCodGerenc , " " , " ",/* _cCodRepresen*/, /*_cTipoRepresen*/ ) }, 'Aguarde...', 'Calculando comissao represent. vinculados ao ' + _cCodRepSA3 /*_cCodRepresen*/ +  "..."  ) 	   
+   FWMsgRun( , {||  ROMS030QRY( _cAliasGer , 10 , "" , _cCodGerenc , " " , " ",/* _cCodRepresen*/, /*_cTipoRepresen*/ ) }, 'Aguarde...', 'Calculando comissao represent. vinculados ao ' + _cCodRepSA3 /*_cCodRepresen*/ +  "..."  ) 	   
 
-   Do While ! (_cAliasGer)->(Eof())
+   While ! (_cAliasGer)->(Eof())
       _nValComiss := 0
       _nValComiss += (_cAliasGer)->COMISSAO
 
-	  _nI := Ascan(_aDadosRepr,{|x| x[1] == (_cAliasGer)->VEND1 })
+	  _nI := aScan(_aDadosRepr,{|x| x[1] == (_cAliasGer)->VEND1 })
 
 	  If _nI == 0
-         Aadd(_aDadosRepr,{(_cAliasGer)->VEND1, _nValComiss, (_cAliasGer)->VLRRECEB})
+         aAdd(_aDadosRepr,{(_cAliasGer)->VEND1, _nValComiss, (_cAliasGer)->VLRRECEB})
 	  Else
          _aDadosRepr[_nI,2] += _nValComiss
 		 _aDadosRepr[_nI,3] += (_cAliasGer)->VLRRECEB
 	  EndIf
       
-      (_cAliasGer)->(DbSkip())
+      (_cAliasGer)->(DBSkip())
    EndDo
    
 End Sequence
@@ -5229,7 +5229,7 @@ Processa( {|| ROMS030TRUN() } , 'Aguarde!' , 'Processando o relatorio...' ) // R
 _oPrint:EndPage()
 _oPrint:Preview()
 
-Return()
+Return
            
 /*
 ===============================================================================================================================
@@ -5261,7 +5261,7 @@ _oPrint:Say( _nLinha + 100	, _nColFim - 550 , "EMPRESA: " + AllTrim(SM0->M0_NOME
 
 EndIf
 
-_oPrint:Say( _nLinha + 050	, _nColFim - 550 , "DATA DE EMISSÃO: "+ DtoC( DATE() )									, _oFont12b )
+_oPrint:Say( _nLinha + 050	, _nColFim - 550 , "DATA DE EMISSÃO: "+ DToC( Date() )									, _oFont12b )
 
 _nLinha += 050
 
@@ -5272,7 +5272,7 @@ _nLinha += _nSpcLin
 
 _oPrint:Line( _nLinha , _nColIni , _nLinha , _nColFim )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -5307,7 +5307,7 @@ _oPrint:Say( _nLinha + _nAjsLin , _nColIni + 1590 , "IRRF"				, _oFont11b )
 _oPrint:Say( _nLinha + _nAjsLin , _nColIni + 1700 , "Vlr.Comis.Liquida"	, _oFont11b )
 _oPrint:Say( _nLinha + _nAjsLin , _nColIni + 2050 , "% Vlr.Recebido"	, _oFont11b )
 
-Return()
+Return
             
 /*
 ===============================================================================================================================
@@ -5338,7 +5338,7 @@ _oPrint:Say( _nLinha + _nAjsLin , _nColIni + 1500 , Transform( _nIRRF		, "@E 999
 _oPrint:Say( _nLinha + _nAjsLin , _nColIni + 1800 , Transform( _nVlrLiq		, "@E 999,999,999.99" )	, _oFont10 )
 _oPrint:Say( _nLinha + _nAjsLin , _nColIni + 2200 , Transform( _nPorcCom	, "@E 999.999" ) + '%'	, _oFont10 )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -5371,7 +5371,7 @@ _oPrint:Say( _nLinha + _nAjsLin , _nColIni + 1500 , Transform( _nIRRF		, "@E 999
 _oPrint:Say( _nLinha + _nAjsLin , _nColIni + 1800 , Transform( _nVlrLiq		, "@E 999,999,999.99" )	, _oFont10b )
 _oPrint:Say( _nLinha + _nAjsLin , _nColIni + 2200 , Transform( _nPorcCom	, "@E 999.999" ) + '%'	, _oFont10b )
 
-Return()
+Return
            
 /*
 ===============================================================================================================================
@@ -5387,7 +5387,7 @@ Static Function ROMS030TBOX() // ROMS029BOX
 
 _oPrint:Box( _nIniBox , _nColIni , _nLinha , _nColFim )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -5449,7 +5449,7 @@ If _nLinha > _nQbrPag
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -5468,7 +5468,7 @@ _nLinha += _nSpcLin
 
 ROMS030TCDR(_cTipo) // ROMS029CDR
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -5490,9 +5490,9 @@ Local _cWhere02, _cWhere03, _cParam
 Local _cWhere04 
 
 	If AllTrim(MV_PAR01) == AllTrim(MV_PAR02)
-       _cWhere01 := "% AND SUBSTR(E3_EMISSAO,1,6) = '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' %"  
+       _cWhere01 := "% AND SubStr(E3_EMISSAO,1,6) = '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' %"  
 	Else    
-	   _cWhere01 := "% AND SUBSTR(E3_EMISSAO,1,6) >= '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' AND SUBSTR(E3_EMISSAO,1,6) <= '"+ SubStr(MV_PAR02,3,4) + SubStr(MV_PAR02,1,2) + "' %" 
+	   _cWhere01 := "% AND SubStr(E3_EMISSAO,1,6) >= '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' AND SubStr(E3_EMISSAO,1,6) <= '"+ SubStr(MV_PAR02,3,4) + SubStr(MV_PAR02,1,2) + "' %" 
 	EndIf
 
     _cParam   := ""
@@ -5567,23 +5567,23 @@ Local _cWhere04
 
 	If _nOpcao == 1 //_cTipoRepSA3 = "V" // Extrato Vendedor
 	   _cWhere04 := "% AND F2.F2_VEND1 = E3.E3_VEND %"
-	Endif
+	EndIf
 		
 	If _nOpcao == 3 // _cTipoRepSA3 = "S" // Extrato Supervisor
 	   _cWhere04 := "% AND F2.F2_VEND4 = E3.E3_VEND %"
-	Endif
+	EndIf
 		
 	If _nOpcao == 2 // _cTipoRepSA3 = "C" // Extrato Coordenador
 	   _cWhere04 := "% AND F2.F2_VEND2 = E3.E3_VEND %"
-	Endif
+	EndIf
 		
 	If _nOpcao == 4 // _cTipoRepSA3 = "G" // Extrato Gerente
 	   _cWhere04 := "% AND F2.F2_VEND3 = E3.E3_VEND %"
-	Endif
+	EndIf
 		
     If _nOpcao == 5 // _cTipoRepSA3 = "N" // Extrato Gerente Nacional 
 	   _cWhere04 := "% AND F2.F2_VEND5 = E3.E3_VEND %"
-	Endif
+	EndIf
 
 If Select(_cAlias) > 0
    (_cAlias)->( DBCloseArea() )
@@ -5606,7 +5606,7 @@ Do Case
 			    E3.E3_I_ORIGE    AS ORIGEM  ,
 			    SUM(E3.E3_COMIS) AS COMISSAO,
 			    SUM(E3.E3_BASE)  AS VLRRECEB,
-			    CASE
+			    Case
 			        WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			        WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			        WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -5651,7 +5651,7 @@ Do Case
 				A3.A3_NOME   , 
 			    A3.A3_I_DEDUC,
 			    E3.E3_I_ORIGE,
-			    CASE
+			    Case
 			        WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			        WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			        WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -5667,7 +5667,7 @@ Do Case
 			    E3.E3_I_ORIGE    AS ORIGEM  ,
 			    SUM(E3.E3_COMIS) AS COMISSAO,
 			    SUM(E3.E3_BASE)  AS VLRRECEB,
-			    MIN( CASE
+			    MIN( Case
 			            WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			            WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			            WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -5724,7 +5724,7 @@ Do Case
 				A3.A3_NOME   ,
 			    A3.A3_I_DEDUC,
 			    E3.E3_I_ORIGE,
-			    CASE
+			    Case
 			        WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			        WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			        WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -5853,7 +5853,7 @@ Do Case
 			    E3.E3_I_ORIGE    AS ORIGEM  ,
 			    SUM(E3.E3_COMIS) AS COMISSAO,
 			    SUM(E3.E3_BASE)  AS VLRRECEB,
-			    CASE
+			    Case
 			        WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			        WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			        WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -5898,7 +5898,7 @@ Do Case
 				A3.A3_NOME   , 
 			    A3.A3_I_DEDUC,
 			    E3.E3_I_ORIGE,
-			    CASE
+			    Case
 			        WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			        WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			        WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -5914,7 +5914,7 @@ Do Case
 			    E3.E3_I_ORIGE    AS ORIGEM  ,
 			    SUM(E3.E3_COMIS) AS COMISSAO,
 			    SUM(E3.E3_BASE)  AS VLRRECEB,
-			    MIN( CASE
+			    MIN( Case
 			            WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			            WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			            WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -5971,7 +5971,7 @@ Do Case
 				A3.A3_NOME   ,
 			    A3.A3_I_DEDUC,
 			    E3.E3_I_ORIGE,
-			    CASE
+			    Case
 			        WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			        WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			        WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -6100,7 +6100,7 @@ Do Case
 			    E3.E3_I_ORIGE    AS ORIGEM  ,
 			    SUM(E3.E3_COMIS) AS COMISSAO,
 			    SUM(E3.E3_BASE)  AS VLRRECEB,
-			    CASE
+			    Case
 			        WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			        WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			        WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -6145,7 +6145,7 @@ Do Case
 				A3.A3_NOME   , 
 			    A3.A3_I_DEDUC,
 			    E3.E3_I_ORIGE,
-			    CASE
+			    Case
 			        WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			        WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			        WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -6161,7 +6161,7 @@ Do Case
 			    E3.E3_I_ORIGE    AS ORIGEM  ,
 			    SUM(E3.E3_COMIS) AS COMISSAO,
 			    SUM(E3.E3_BASE)  AS VLRRECEB,
-			    MIN( CASE
+			    MIN( Case
 			            WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			            WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			            WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -6218,7 +6218,7 @@ Do Case
 				A3.A3_NOME   ,
 			    A3.A3_I_DEDUC,
 			    E3.E3_I_ORIGE,
-			    CASE
+			    Case
 			        WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			        WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			        WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -6346,7 +6346,7 @@ Do Case
 			    E3.E3_I_ORIGE    AS ORIGEM  ,
 			    SUM(E3.E3_COMIS) AS COMISSAO,
 			    SUM(E3.E3_BASE)  AS VLRRECEB,
-			    CASE
+			    Case
 			        WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			        WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			        WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -6391,7 +6391,7 @@ Do Case
 				A3.A3_NOME   , 
 			    A3.A3_I_DEDUC,
 			    E3.E3_I_ORIGE,
-			    CASE
+			    Case
 			        WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			        WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			        WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -6407,7 +6407,7 @@ Do Case
 			    E3.E3_I_ORIGE    AS ORIGEM  ,
 			    SUM(E3.E3_COMIS) AS COMISSAO,
 			    SUM(E3.E3_BASE)  AS VLRRECEB,
-			    MIN( CASE
+			    MIN( Case
 			            WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			            WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			            WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -6464,7 +6464,7 @@ Do Case
 				A3.A3_NOME   ,
 			    A3.A3_I_DEDUC,
 			    E3.E3_I_ORIGE,
-			    CASE
+			    Case
 			        WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			        WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			        WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -6593,7 +6593,7 @@ Do Case
 			    E3.E3_I_ORIGE    AS ORIGEM  ,
 			    SUM(E3.E3_COMIS) AS COMISSAO,
 			    SUM(E3.E3_BASE)  AS VLRRECEB,
-			    CASE
+			    Case
 			        WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			        WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			        WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -6638,7 +6638,7 @@ Do Case
 				A3.A3_NOME   , 
 			    A3.A3_I_DEDUC,
 			    E3.E3_I_ORIGE,
-			    CASE
+			    Case
 			        WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			        WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			        WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -6654,7 +6654,7 @@ Do Case
 			    E3.E3_I_ORIGE    AS ORIGEM  ,
 			    SUM(E3.E3_COMIS) AS COMISSAO,
 			    SUM(E3.E3_BASE)  AS VLRRECEB,
-			    MIN( CASE
+			    MIN( Case
 			            WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			            WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			            WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -6711,7 +6711,7 @@ Do Case
 				A3.A3_NOME   ,
 			    A3.A3_I_DEDUC,
 			    E3.E3_I_ORIGE,
-			    CASE
+			    Case
 			        WHEN F2.F2_VEND2 = ' '          THEN 'A'
 			        WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN 'B'
 			        WHEN F2.F2_VEND3 <> ' '         THEN 'B'
@@ -6825,14 +6825,14 @@ Do Case
 		EndSql
 EndCase
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: ROMS030TRUN // ROMS029RUN
 Autor-----------: Fabiano Dias
 Data da Criacao-: 30/03/2011
-Descrição-------: Função que processa a impressão dos dados do relatório
+Descrição-------: Função que Processa a impressão dos dados do relatório
 Parametros------: Nenhum
 Retorno---------: Nenhum
 ===============================================================================================================================
@@ -6920,8 +6920,8 @@ EndIf
 	//=================================================================================================
 	MsgRun("Aguarde....Filrando comissao dos vendedores.",,{||CursorWait(),ROMS030TQRY(_cAlias,1),CursorArrow()})  // ROMS029QRY      
 	
-	dbSelectArea(_cAlias)
-	(_cAlias)->(dbGotop())        
+	DBSelectArea(_cAlias)
+	(_cAlias)->(DBGoTop())        
 	             	
 	//=========================================================================
 	// Armazena o numero de registros encontrados. 
@@ -6930,8 +6930,8 @@ EndIf
 	
 	ProcRegua(_nCountRec)
 	
-	dbSelectArea(_cAlias)
-	(_cAlias)->( DBGotop() )
+	DBSelectArea(_cAlias)
+	(_cAlias)->( DBGoTop() )
 	
 	//=========================================================================
 	// Efetua o grupamento dos dados dos vendedores. 
@@ -7033,8 +7033,8 @@ EndIf
 	//========================================================================================
 	MsgRun("Aguarde....Filrando comissão dos coordenadores.",,{||CursorWait(),ROMS030TQRY(_cAliasVend,2),CursorArrow()})  // ROMS029QRY      
 	
-	dbSelectArea(_cAliasVend)
-	(_cAliasVend)->(dbGotop())        
+	DBSelectArea(_cAliasVend)
+	(_cAliasVend)->(DBGoTop())        
 	             	
 	//=========================================================================
 	// Armazena o numero de registros encontrados.
@@ -7044,8 +7044,8 @@ EndIf
 	
 	ProcRegua(_nCountRec)
 	
-	dbSelectArea(_cAliasVend)
-	(_cAliasVend)->(dbGotop())       
+	DBSelectArea(_cAliasVend)
+	(_cAliasVend)->(DBGoTop())       
 	               	
 	//=========================================================================
 	// Efetua o grupamento dos dados dos vendedores.
@@ -7067,11 +7067,11 @@ EndIf
 			
 			EndIf 
 					
-	(_cAliasVend)->(dbSkip())	
+	(_cAliasVend)->(DBSkip())	
     EndDo                          
 
-dbSelectArea(_cAliasVend)
-(_cAliasVend)->(dbCloseArea())     
+DBSelectArea(_cAliasVend)
+(_cAliasVend)->(DBCloseArea())     
 
 //=========================================================================
 // Verifica a necessidade de quebra de pagina.
@@ -7144,8 +7144,8 @@ EndIf
 	//========================================================================================
 	MsgRun("Aguarde....Filrando comissão dos supervisores.",,{||CursorWait(),ROMS030TQRY(_cAliasVend,3),CursorArrow()}) 
 	
-	dbSelectArea(_cAliasVend)
-	(_cAliasVend)->(dbGotop())        
+	DBSelectArea(_cAliasVend)
+	(_cAliasVend)->(DBGoTop())        
 	             	
 	//=========================================================================
 	// Armazena o numero de registros encontrados.
@@ -7155,8 +7155,8 @@ EndIf
 	
 	ProcRegua(_nCountRec)
 	
-	dbSelectArea(_cAliasVend)
-	(_cAliasVend)->(dbGotop())       
+	DBSelectArea(_cAliasVend)
+	(_cAliasVend)->(DBGoTop())       
 	               	
 	//=========================================================================
 	// Efetua o grupamento dos dados dos supervisores.
@@ -7178,11 +7178,11 @@ EndIf
 			
 			EndIf 
 					
-	   (_cAliasVend)->(dbSkip())	
+	   (_cAliasVend)->(DBSkip())	
     EndDo                          
 
-dbSelectArea(_cAliasVend)
-(_cAliasVend)->(dbCloseArea())     
+DBSelectArea(_cAliasVend)
+(_cAliasVend)->(DBCloseArea())     
 
 //=========================================================================
 // Verifica a necessidade de quebra de pagina.
@@ -7256,8 +7256,8 @@ EndIf
 	//========================================================================================
 	MsgRun("Aguarde....Filrando comissão dos gerentes.",,{||CursorWait(),ROMS030TQRY(_cAliasVend,4),CursorArrow()})  
 	
-	dbSelectArea(_cAliasVend)
-	(_cAliasVend)->(dbGotop())        
+	DBSelectArea(_cAliasVend)
+	(_cAliasVend)->(DBGoTop())        
 	             	
 	//=========================================================================
 	// Armazena o numero de registros encontrados.
@@ -7267,8 +7267,8 @@ EndIf
 	
 	ProcRegua(_nCountRec)
 	
-	dbSelectArea(_cAliasVend)
-	(_cAliasVend)->(dbGotop())       
+	DBSelectArea(_cAliasVend)
+	(_cAliasVend)->(DBGoTop())       
 	               	
 	//=========================================================================
 	// Efetua o grupamento dos dados dos vendedores.
@@ -7290,11 +7290,11 @@ EndIf
 			
 			EndIf 
 					
-	(_cAliasVend)->(dbSkip())	
+	(_cAliasVend)->(DBSkip())	
     EndDo                          
 
-dbSelectArea(_cAliasVend)
-(_cAliasVend)->(dbCloseArea())     
+DBSelectArea(_cAliasVend)
+(_cAliasVend)->(DBCloseArea())     
 
 //=========================================================================
 // Verifica a necessidade de quebra de pagina.
@@ -7367,8 +7367,8 @@ EndIf
 	//========================================================================================
 	MsgRun("Aguarde....Filrando comissão do Gerente Nacional.",,{||CursorWait(),ROMS030TQRY(_cAliasVend,5),CursorArrow()})  
 	
-	dbSelectArea(_cAliasVend)
-	(_cAliasVend)->(dbGotop())        
+	DBSelectArea(_cAliasVend)
+	(_cAliasVend)->(DBGoTop())        
 	             	
 	//=========================================================================
 	// Armazena o numero de registros encontrados.
@@ -7378,8 +7378,8 @@ EndIf
 	
 	ProcRegua(_nCountRec)
 	
-	dbSelectArea(_cAliasVend)
-	(_cAliasVend)->(dbGotop())       
+	DBSelectArea(_cAliasVend)
+	(_cAliasVend)->(DBGoTop())       
 	               	
 	//=========================================================================
 	// Efetua o grupamento dos dados dos gerentes nacionais.
@@ -7401,11 +7401,11 @@ EndIf
 			
 			EndIf 
 					
-	   (_cAliasVend)->(dbSkip())	
+	   (_cAliasVend)->(DBSkip())	
     EndDo                          
 
-dbSelectArea(_cAliasVend)
-(_cAliasVend)->(dbCloseArea())     
+DBSelectArea(_cAliasVend)
+(_cAliasVend)->(DBCloseArea())     
 
 //=========================================================================
 // Verifica a necessidade de quebra de pagina.
@@ -7609,7 +7609,7 @@ _nRet    := 0
 If _nNrMeses == 1 .Or. _nNrMeses == 0
    If ZC6->( DBSeek( xFilial('ZC6') + _cCodVen + _cDtRef ) )
 	
-	  _nRet := ROUND( ZC6->ZC6_VALLIQ * ( ZC6->ZC6_PERCOM / 100 ) , 2 )
+	  _nRet := Round( ZC6->ZC6_VALLIQ * ( ZC6->ZC6_PERCOM / 100 ) , 2 )
 	
    EndIf
 Else 
@@ -7621,7 +7621,7 @@ Else
        
 	   If ZC6->( DBSeek( xFilial('ZC6') + _cCodVen + _cDtRef ) )
 	
-	      _nRet += ROUND( ZC6->ZC6_VALLIQ * ( ZC6->ZC6_PERCOM / 100 ) , 2 )
+	      _nRet += Round( ZC6->ZC6_VALLIQ * ( ZC6->ZC6_PERCOM / 100 ) , 2 )
 	
        EndIf
 
@@ -7655,11 +7655,11 @@ Local _nRet			:= 0
 Default _cCodCor	:= ' '
 
 _cQuery := " SELECT "
-_cQuery += "     ROUND( SUM( ZC7.ZC7_VALLIQ * ( ZAE.ZAE_COMIS1 / 100 ) ) , 2 ) AS VALCMS "
+_cQuery += "     Round( SUM( ZC7.ZC7_VALLIQ * ( ZAE.ZAE_COMIS1 / 100 ) ) , 2 ) AS VALCMS "
 _cQuery += " FROM "+ RetSqlName('ZC7') +" ZC7 "
 _cQuery += " INNER JOIN "+ RetSqlName('SA3') +" SA3 "
 _cQuery += " ON "
-_cQuery += "     SA3.A3_COD     = SUBSTR( ZC7.ZC7_CHAVE , 1 , 6 ) "
+_cQuery += "     SA3.A3_COD     = SubStr( ZC7.ZC7_CHAVE , 1 , 6 ) "
 _cQuery += " INNER JOIN "+ RetSqlName('ZAE') +" ZAE "
 _cQuery += " ON "
 _cQuery += "     ZAE.ZAE_VEND   = SA3.A3_COD "
@@ -7673,22 +7673,22 @@ _cQuery += " AND ZAE.ZAE_GRPVEN = ' ' "
 _cQuery += " AND ZAE.ZAE_CLI    = ' ' "
 _cQuery += " AND ZAE.ZAE_LOJA   = ' ' "
 _cQuery += " AND ZC7.ZC7_ITEM   = '01' "
-_cQuery += " AND SUBSTR(ZC7.ZC7_CHAVE,1,6) = '"+ _cCodCor +"' "
+_cQuery += " AND SubStr(ZC7.ZC7_CHAVE,1,6) = '"+ _cCodCor +"' "
 
 If AllTrim(MV_PAR01) == AllTrim(MV_PAR02)
-   _cQuery += " AND SUBSTR(ZC7.ZC7_CHAVE,7,6) = '"+ _cDtRef  +"' "
+   _cQuery += " AND SubStr(ZC7.ZC7_CHAVE,7,6) = '"+ _cDtRef  +"' "
 Else 
-   _cQuery += " AND SUBSTR(ZC7.ZC7_CHAVE,7,6) >= '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' AND SUBSTR(ZC7.ZC7_CHAVE,7,6) <= '"+ SubStr(MV_PAR02,3,4) + SubStr(MV_PAR02,1,2) + "' "
+   _cQuery += " AND SubStr(ZC7.ZC7_CHAVE,7,6) >= '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' AND SubStr(ZC7.ZC7_CHAVE,7,6) <= '"+ SubStr(MV_PAR02,3,4) + SubStr(MV_PAR02,1,2) + "' "
 EndIf 
 
 _cQuery += " UNION ALL "
 
 _cQuery += " SELECT "
-_cQuery += "     ROUND( SUM( ZC7.ZC7_VALLIQ * ( ZAE.ZAE_COMIS2 / 100 ) ) , 2 ) AS VALCMS "
+_cQuery += "     Round( SUM( ZC7.ZC7_VALLIQ * ( ZAE.ZAE_COMIS2 / 100 ) ) , 2 ) AS VALCMS "
 _cQuery += " FROM "+ RetSqlName('ZC7') +" ZC7 "
 _cQuery += " INNER JOIN "+ RetSqlName('SA3') +" SA3 "
 _cQuery += " ON "
-_cQuery += "     SA3.A3_COD     = SUBSTR( ZC7.ZC7_CHAVE , 1 , 6 ) "
+_cQuery += "     SA3.A3_COD     = SubStr( ZC7.ZC7_CHAVE , 1 , 6 ) "
 _cQuery += " INNER JOIN "+ RetSqlName('ZAE') +" ZAE "
 _cQuery += " ON "
 _cQuery += "     ZAE.ZAE_VEND   = SA3.A3_COD "
@@ -7704,9 +7704,9 @@ _cQuery += " AND ZAE.ZAE_LOJA   = ' ' "
 _cQuery += " AND ZAE.ZAE_CODSUP = '"+ _cCodCor +"' "
 
 If AllTrim(MV_PAR01) == AllTrim(MV_PAR02)
-   _cQuery += " AND SUBSTR(ZC7.ZC7_CHAVE,7,6) = '"+ _cDtRef +"' "
+   _cQuery += " AND SubStr(ZC7.ZC7_CHAVE,7,6) = '"+ _cDtRef +"' "
 Else 
-   _cQuery += " AND SUBSTR(ZC7.ZC7_CHAVE,7,6) >= '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' AND SUBSTR(ZC7.ZC7_CHAVE,7,6) <= '"+ SubStr(MV_PAR02,3,4) + SubStr(MV_PAR02,1,2) + "' "
+   _cQuery += " AND SubStr(ZC7.ZC7_CHAVE,7,6) >= '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' AND SubStr(ZC7.ZC7_CHAVE,7,6) <= '"+ SubStr(MV_PAR02,3,4) + SubStr(MV_PAR02,1,2) + "' "
 EndIf 
 
 If Select(_cAlias) > 0
@@ -7720,7 +7720,7 @@ DBSelectArea(_cAlias)
 
 While (_cAlias)->(!Eof())
 
-   _nRet += IIF( ValType( (_cAlias)->VALCMS ) == 'N' , (_cAlias)->VALCMS , 0 )
+   _nRet += IIf( ValType( (_cAlias)->VALCMS ) == 'N' , (_cAlias)->VALCMS , 0 )
 
    (_cAlias)->( DBSkip() )
 EndDo
@@ -7777,8 +7777,8 @@ Begin Sequence
    //=================================================================================================
    MsgRun("Aguarde....Filrando comissao dos vendedores.",,{||CursorWait(),ROMS030TQRY(_cAlias,1),CursorArrow()})
 	
-   dbSelectArea(_cAlias)
-   (_cAlias)->(dbGotop())        
+   DBSelectArea(_cAlias)
+   (_cAlias)->(DBGoTop())        
 	             	
    //=========================================================================
    // Armazena o numero de registros encontrados. 
@@ -7787,13 +7787,13 @@ Begin Sequence
 	
    ProcRegua(_nCountRec)
 	
-   dbSelectArea(_cAlias)
-   (_cAlias)->( DBGotop() )
+   DBSelectArea(_cAlias)
+   (_cAlias)->( DBGoTop() )
 	
    //=========================================================================
    // Efetua o grupamento dos dados dos vendedores. 
    //=========================================================================
-   Do While (_cAlias)->( !Eof() )
+   While (_cAlias)->( !Eof() )
 	
       IncProc("Processando dados das comissoes do vendedor, favor aguardar...")
 		
@@ -7848,7 +7848,7 @@ Begin Sequence
           _nVlrComis		-= _nVlrBonif
           _nVlrLiq			:= _nVlrComis - ( _nINSS + _nIRRF )
 
-          Aadd(_aDados,{"VENDEDOR",;
+          aAdd(_aDados,{"VENDEDOR",;
 		                SubStr( _cNome , 1 , 57 ),;
                         _nVlrComis,;
                         _nINSS,;
@@ -7864,8 +7864,8 @@ Begin Sequence
    //========================================================================================
    MsgRun("Aguarde....Filrando comissão dos supervisores.",,{||CursorWait(),ROMS030TQRY(_cAliasVend,3),CursorArrow()}) 
 	
-   DbSelectArea(_cAliasVend)
-   (_cAliasVend)->(dbGotop())        
+   DBSelectArea(_cAliasVend)
+   (_cAliasVend)->(DBGoTop())        
 	             	
    //=========================================================================
    // Armazena o numero de registros encontrados.
@@ -7875,13 +7875,13 @@ Begin Sequence
 	
    ProcRegua(_nCountRec)
 	
-   DbSelectArea(_cAliasVend)
-   (_cAliasVend)->(dbGotop())       
+   DBSelectArea(_cAliasVend)
+   (_cAliasVend)->(DBGoTop())       
 	               	
    //=========================================================================
    // Efetua o grupamento dos dados dos supervisores.
    //=========================================================================
-   Do While (_cAliasVend)->(!Eof()) 
+   While (_cAliasVend)->(!Eof()) 
 		
       IncProc("Processando dados das comissoes do supervisor, favor aguardar...")
 			
@@ -7898,11 +7898,11 @@ Begin Sequence
 			
 	  EndIf 
 					
-      (_cAliasVend)->(dbSkip())	
+      (_cAliasVend)->(DBSkip())	
    EndDo                          
 
-   dbSelectArea(_cAliasVend)
-   (_cAliasVend)->(dbCloseArea())     
+   DBSelectArea(_cAliasVend)
+   (_cAliasVend)->(DBCloseArea())     
    
    //=========================================================================
    // Imprime os dados das comissoes dos supervisores.
@@ -7932,7 +7932,7 @@ Begin Sequence
 		  _nPorcCom	 := ( ( _nVlrComis - _nVlrBonif ) / _nVlrBase ) * 100
           _nVlrComis -= _nVlrBonif
           _nVlrLiq	 := _nVlrComis - ( _nINSS + _nIRRF )
-          Aadd(_aDados,{"SUPERVISOR",;
+          aAdd(_aDados,{"SUPERVISOR",;
 		                SubStr( _cNome , 1 , 57 ),;
                         _nVlrComis,;
                         _nINSS,;
@@ -7948,8 +7948,8 @@ Begin Sequence
    //========================================================================================
    MsgRun("Aguarde....Filrando comissão dos coordenadores.",,{||CursorWait(),ROMS030TQRY(_cAliasVend,2),CursorArrow()}) 
 	
-   dbSelectArea(_cAliasVend)
-   (_cAliasVend)->(dbGotop())        
+   DBSelectArea(_cAliasVend)
+   (_cAliasVend)->(DBGoTop())        
 	             	
    //=========================================================================
    // Armazena o numero de registros encontrados.
@@ -7959,13 +7959,13 @@ Begin Sequence
 	
    ProcRegua(_nCountRec)
 	
-   dbSelectArea(_cAliasVend)
-   (_cAliasVend)->(dbGotop())       
+   DBSelectArea(_cAliasVend)
+   (_cAliasVend)->(DBGoTop())       
 	               	
    //=========================================================================
    // Efetua o grupamento dos dados dos coordenadores
    //=========================================================================
-   Do While (_cAliasVend)->(!Eof()) 
+   While (_cAliasVend)->(!Eof()) 
 		
       IncProc("Processando dados das comissoes do coordenador, favor aguardar...")
 			
@@ -7981,11 +7981,11 @@ Begin Sequence
 			
       EndIf 
 					
-      (_cAliasVend)->(dbSkip())	
+      (_cAliasVend)->(DBSkip())	
    EndDo                          
 
-   DbSelectArea(_cAliasVend)
-   (_cAliasVend)->(dbCloseArea())     
+   DBSelectArea(_cAliasVend)
+   (_cAliasVend)->(DBCloseArea())     
 
    //=========================================================================
    // Imprime os dados das comissoes dos Coordenadores
@@ -8018,7 +8018,7 @@ Begin Sequence
           _nVlrComis -= _nVlrBonif
           _nVlrLiq	 := _nVlrComis - ( _nINSS + _nIRRF )
 //------------------------------------------------------------------------
-          Aadd(_aDados,{"COORDENADOR",;
+          aAdd(_aDados,{"COORDENADOR",;
 		                SubStr( _cNome , 1 , 57 ),;
                         _nVlrComis,;
                         _nINSS,;
@@ -8033,8 +8033,8 @@ Begin Sequence
    //========================================================================================
    MsgRun("Aguarde....Filrando comissão dos gerentes.",,{||CursorWait(),ROMS030TQRY(_cAliasVend,4),CursorArrow()})  
 	
-   DbSelectArea(_cAliasVend)
-   (_cAliasVend)->(dbGotop())        
+   DBSelectArea(_cAliasVend)
+   (_cAliasVend)->(DBGoTop())        
 	             	
    //=========================================================================
    // Armazena o numero de registros encontrados.
@@ -8044,13 +8044,13 @@ Begin Sequence
 	
    ProcRegua(_nCountRec)
 	
-   dbSelectArea(_cAliasVend)
-   (_cAliasVend)->(dbGotop())       
+   DBSelectArea(_cAliasVend)
+   (_cAliasVend)->(DBGoTop())       
 	               	
    //=========================================================================
    // Efetua o grupamento dos dados dos vendedores.
    //=========================================================================
-   Do While (_cAliasVend)->(!Eof()) 
+   While (_cAliasVend)->(!Eof()) 
 		
       IncProc("Processando dados das comissoes do gerente, favor aguardar...")
 			
@@ -8066,11 +8066,11 @@ Begin Sequence
          _aGerente[_nPosicao,5] += (_cAliasVend)->VLRRECEB
       EndIf 
 					
-      (_cAliasVend)->(dbSkip())	
+      (_cAliasVend)->(DBSkip())	
    EndDo                          
 
-   dbSelectArea(_cAliasVend)
-   (_cAliasVend)->(dbCloseArea())     
+   DBSelectArea(_cAliasVend)
+   (_cAliasVend)->(DBCloseArea())     
 
    //=========================================================================
    // Imprime os dados das comissoes dos gerentes
@@ -8103,7 +8103,7 @@ Begin Sequence
           _nVlrComis -= _nVlrBonif
           _nVlrLiq	 := _nVlrComis - ( _nINSS + _nIRRF )
 //------------------------------------------------------------------------
-          Aadd(_aDados,{"GERENTE",;
+          aAdd(_aDados,{"GERENTE",;
 		                SubStr( _cNome , 1 , 57 ),;
                         _nVlrComis,;
                         _nINSS,;
@@ -8120,8 +8120,8 @@ Begin Sequence
    //========================================================================================
    MsgRun("Aguarde....Filrando comissão do Gerente Nacional.",,{||CursorWait(),ROMS030TQRY(_cAliasVend,5),CursorArrow()})  
 	
-   dbSelectArea(_cAliasVend)
-   (_cAliasVend)->(dbGotop())        
+   DBSelectArea(_cAliasVend)
+   (_cAliasVend)->(DBGoTop())        
 	             	
    //=========================================================================
    // Armazena o numero de registros encontrados.
@@ -8131,13 +8131,13 @@ Begin Sequence
 	
    ProcRegua(_nCountRec)
 	
-   dbSelectArea(_cAliasVend)
-   (_cAliasVend)->(dbGotop())       
+   DBSelectArea(_cAliasVend)
+   (_cAliasVend)->(DBGoTop())       
 	               	
    //=========================================================================
    // Efetua o grupamento dos dados dos gerentes nacionais.
    //=========================================================================
-   Do While (_cAliasVend)->(!Eof()) 
+   While (_cAliasVend)->(!Eof()) 
 
       IncProc("Processando dados das comissoes do gerente nacional, favor aguardar...")
 			
@@ -8154,11 +8154,11 @@ Begin Sequence
 			
       EndIf 
 					
-      (_cAliasVend)->(dbSkip())	
+      (_cAliasVend)->(DBSkip())	
    EndDo                          
 
-   dbSelectArea(_cAliasVend)
-   (_cAliasVend)->(dbCloseArea())     
+   DBSelectArea(_cAliasVend)
+   (_cAliasVend)->(DBCloseArea())     
  
    //=========================================================================
    // Imprime os dados das comissoes dos Gerentes Nacionais
@@ -8193,7 +8193,7 @@ Begin Sequence
           _nVlrComis -= _nVlrBonif
           _nVlrLiq	 := _nVlrComis - ( _nINSS + _nIRRF )
 //------------------------------------------------------------------------
-          Aadd(_aDados,{"GERENTE NACIONAL",;
+          aAdd(_aDados,{"GERENTE NACIONAL",;
 		                SubStr( _cNome , 1 , 57 ),;
                         _nVlrComis,;
                         _nINSS,;
@@ -8205,7 +8205,7 @@ Begin Sequence
    EndIf
 
    If Len(_aDados) == 0
-      U_Itmsg( 'Não há dados para a emissão do relatório.' , 'Atenção!' , , 1)
+      U_ITMsg( 'Não há dados para a emissão do relatório.' , 'Atenção!' , , 1)
 	  
 	  Break 
    EndIf 
@@ -8230,7 +8230,7 @@ If Select(_cAliasVend) > 0
    (_cAliasVend)->( DBCloseArea() )
 EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -8275,15 +8275,15 @@ ElseIf _cTipoRepSA3 == 'V'
    _cTituloRep := "Representante"
 EndIf
 
-fwmsgrun( ,{|| _aComissao := ROMS030SEL() } , 'Aguarde!' ,  'Filtrando comissao para '+ _cTituloRep+ '-' +  _cCodRepSA3 + "..." )
+FWMsgRun( ,{|| _aComissao := ROMS030SEL() } , 'Aguarde!' ,  'Filtrando comissao para '+ _cTituloRep+ '-' +  _cCodRepSA3 + "..." )
 
 //==========================================================================================
 // Preenche o array _aComissao com valores zerados, para Gerente, Coordenador e Supervisor
 //========================================================================================== 
-If Empty(_aComissao) .And. Alltrim(_cTipoRepSA3) $ "G/C/S"   // V=VENDEDOR;C=COORDENADOR;G=GERENTE;S=SUPERVISOR 
+If Empty(_aComissao) .And. AllTrim(_cTipoRepSA3) $ "G/C/S"   // V=VENDEDOR;C=COORDENADOR;G=GERENTE;S=SUPERVISOR 
    _aComissao := U_ROMS030D(_cCodRepSA3)
    
-Endif
+EndIf
 //================================================================================
 // Verifica se existe comissao gerada para os vendedores.
 //================================================================================
@@ -8320,7 +8320,7 @@ If Len(_aComissao) > 0
 	EndIf   
 	_cAliasPg := GetNextAlias()   
 
-	fwMsgRun( , {|| ROMS030QRY(_cAliasPg,3,"","","",_cFilGer) } , 'Aguarde!', 'Filtrando historico de comissoes pagas para ' + _cTituloRep+ '-' +  _cCodRepSA3 + "..."  )
+	FWMsgRun( , {|| ROMS030QRY(_cAliasPg,3,"","","",_cFilGer) } , 'Aguarde!', 'Filtrando historico de comissoes pagas para ' + _cTituloRep+ '-' +  _cCodRepSA3 + "..."  )
 	//_lHistFiltro := .T.
 
     //================================================================================
@@ -8366,7 +8366,7 @@ If Len(_aComissao) > 0
 		   _lHistFiltro := .F.
 		   _cAliasPg := GetNextAlias()
 
-	       fwMsgRun( , {|| ROMS030QRY(_cAliasPg,3,"","","",_cFilGer) } , 'Aguarde!', 'Filtrando historico de comissoes pagas para ' + _cTituloRep+ '-' +  _cCodRepSA3 + "..."  )
+	       FWMsgRun( , {|| ROMS030QRY(_cAliasPg,3,"","","",_cFilGer) } , 'Aguarde!', 'Filtrando historico de comissoes pagas para ' + _cTituloRep+ '-' +  _cCodRepSA3 + "..."  )
 	    EndIf  
 */
 
@@ -8391,7 +8391,7 @@ If Len(_aComissao) > 0
 
 		_cAliasDup := GetNextAlias() 
 		
-		fwMsgRun( , {||  ROMS030QRY( _cAliasDup , 2 , "", _aGerente[x,1] )  }, 'Aguarde!',"Filtrando duplicatas vencidas para " + _cTituloRep+ '-' +  _cCodRepSA3 + "..."    )
+		FWMsgRun( , {||  ROMS030QRY( _cAliasDup , 2 , "", _aGerente[x,1] )  }, 'Aguarde!',"Filtrando duplicatas vencidas para " + _cTituloRep+ '-' +  _cCodRepSA3 + "..."    )
 	
 		//======================================================================================================================
 		// Verifica as duplicatas vencidas do vendedor
@@ -8409,7 +8409,7 @@ If Len(_aComissao) > 0
 
 		_cAliasAve := GetNextAlias()  
 		
-		fwMsgRun( , {||  ROMS030QRY( _cAliasAve , 6 , "" ,  _aGerente[x,1] )  }, 'Aguarde!',"Filtrando duplicatas a vencer para " + _cTituloRep+ '-' +  _cCodRepSA3 + "..."    )
+		FWMsgRun( , {||  ROMS030QRY( _cAliasAve , 6 , "" ,  _aGerente[x,1] )  }, 'Aguarde!',"Filtrando duplicatas a vencer para " + _cTituloRep+ '-' +  _cCodRepSA3 + "..."    )
 		
 		//================================================================================
 		// Verifica as comissoes pagas do vendedor corrente.
@@ -8432,7 +8432,7 @@ If Len(_aComissao) > 0
 
 	    _cAliasVHi := GetNextAlias()   
 	
-	    fwMsgRun( , {||  ROMS030QRY( _cAliasVHi , 5 , "" ,  _aGerente[x,1] , _cFilGer, "" )  }, 'Aguarde!', "Filtrando historico de vendas para " + _cTituloRep+ '-' +  _cCodRepSA3 + "..."  )
+	    FWMsgRun( , {||  ROMS030QRY( _cAliasVHi , 5 , "" ,  _aGerente[x,1] , _cFilGer, "" )  }, 'Aguarde!', "Filtrando historico de vendas para " + _cTituloRep+ '-' +  _cCodRepSA3 + "..."  )
 	    
 	    //======================================================================================================================
 		// Verifica o historico de vendas do vendedor corrente
@@ -8501,7 +8501,7 @@ If ! Empty(_cAliasVHi)
    EndIf
 EndIf 
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -8583,9 +8583,9 @@ Begin Sequence
 			
 		  EndIf
 		
-		  _nTotReceb	+= round(_aComissao[y,2],2)
-		  _nTotComis	+= round(_aComissao[y,3],2)
-		  _nTotBruto  += round(_aComissao[y,3],2)
+		  _nTotReceb	+= Round(_aComissao[y,2],2)
+		  _nTotComis	+= Round(_aComissao[y,3],2)
+		  _nTotBruto  += Round(_aComissao[y,3],2)
 		
 		  _cTpComis	:= _aComissao[y,5]
 	
@@ -8594,9 +8594,9 @@ Begin Sequence
 	      //================================================================================
 	   Else
 	
-		  _nVlrDebCo += round(_aComissao[y,3],2)
-		  _nVlrDevol += round(_aComissao[y,6],2)
-		  _nTotDevol += round(_aComissao[y,2],2)
+		  _nVlrDebCo += Round(_aComissao[y,3],2)
+		  _nVlrDevol += Round(_aComissao[y,6],2)
+		  _nTotDevol += Round(_aComissao[y,2],2)
 	
 	   EndIf
 
@@ -8605,14 +8605,14 @@ Begin Sequence
    //================================================================================
    //Calcula o desconto de comissão por bonificação
    //================================================================================
-   fwmsgrun(, {|| _aTotBNF := ROMS030BNF( _cCodGer ) }, "Aguarde... ", 'Filtrando bonificações para ' + _cTitCargo + ' ' + strzero(_nni,6) + " de " + strzero(_ntoti,6) + "..." )
+   FWMsgRun(, {|| _aTotBNF := ROMS030BNF( _cCodGer ) }, "Aguarde... ", 'Filtrando bonificações para ' + _cTitCargo + ' ' + StrZero(_nni,6) + " de " + StrZero(_ntoti,6) + "..." )
 
    If !Empty( _aTotBNF )
   	
 	  For _nI := 1 To Len(_aTotBNF)
-    	  _nTotComis	+= round(_aTotBNF[_nI][03],2)
-		  _nTotCmBnf	+= round(_aTotBNF[_nI][03],2)
-		  _nTotBonif	+= round(_aTotBNF[_nI][02],2)
+    	  _nTotComis	+= Round(_aTotBNF[_nI][03],2)
+		  _nTotCmBnf	+= Round(_aTotBNF[_nI][03],2)
+		  _nTotBonif	+= Round(_aTotBNF[_nI][02],2)
 	
 	  Next _nI
 
@@ -8634,7 +8634,7 @@ Begin Sequence
    // Verifica quebra de pagina
    //================================================================================
 
-   _nTotLiqui := round(_nTotBruto,2) + round(_nVlrDebCo,2) 
+   _nTotLiqui := Round(_nTotBruto,2) + Round(_nVlrDebCo,2) 
 
    _nTotComis := _nTotLiqui
    _nTotReceb := _nTotReceb - _nTotBonif - _nTotDevol
@@ -8646,11 +8646,11 @@ Begin Sequence
    If Val(_aComissao[1,4]) > 0 .Or. _nTotLiqui > 0  
       _aImpostos := U_C_IRRF_INSS( _aComissao[1,4] , _nTotLiqui )
    Else
-      Aadd(_aImpostos, {0,0})  
+      aAdd(_aImpostos, {0,0})  
    EndIf
 
-   _nINSS := round(_aImpostos[1,1],2)
-   _nIRRF := round(_aImpostos[1,2],2)
+   _nINSS := Round(_aImpostos[1,1],2)
+   _nIRRF := Round(_aImpostos[1,2],2)
 
    _nTotLiqui -= ( _nINSS + _nIRRF )
 
@@ -8696,9 +8696,9 @@ If _cTitCargo == "Repres/Superv/Coord/Geren/Geren Nac" // "Representante/Supervi
 
 Else
 
-	_cTitulo2 := "Extrato do " + _cTitCargo + " - " + _ccodi + " - " + POSICIONE("SA3",1,xfilial("SA3")+_ccodi,"A3_NOME")
+	_cTitulo2 := "Extrato do " + _cTitCargo + " - " + _ccodi + " - " + Posicione("SA3",1,xFilial("SA3")+_ccodi,"A3_NOME")
 	
-Endif
+EndIf
 
 _nPosLin := 0100
 
@@ -8710,7 +8710,7 @@ Else
 	_oPrint:Say( _nPosLin		, _nColFim - 600 , "ROMS030"					   										, _oFont12b )
 EndIf
 
-_oPrint:Say( _nPosLin + 050		, _nColFim - 600 , "DATA DE EMISSÃO: "+ DtoC( DATE() )										, _oFont12b )
+_oPrint:Say( _nPosLin + 050		, _nColFim - 600 , "DATA DE EMISSÃO: "+ DToC( Date() )										, _oFont12b )
 
 _nPosLin += 050
 
@@ -8730,7 +8730,7 @@ _nPosLin+=_nSpcLin
 
 _oPrint:Line(_nPosLin,_nColIni,_nPosLin,_nColFim) 
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -8784,7 +8784,7 @@ _oPrint:Say( _nPosLin , _nColIni + 010 , "Representantes ?"	, _oFont14b )
 _oPrint:Say( _nPosLin , _nColIni + 900 , MV_PAR07			, _oFont14b )
 _nPosLin += 80
 _oPrint:Say( _nPosLin , _nColIni + 010 , "Traz Hierarquia?"	, _oFont14b )
-_oPrint:Say( _nPosLin , _nColIni + 900 , IIF(MV_PAR08=="Sim","SIM","NÃO"), _oFont14b ) // IIF(MV_PAR08==1,"SIM","NÃO")
+_oPrint:Say( _nPosLin , _nColIni + 900 , IIf(MV_PAR08=="Sim","SIM","NÃO"), _oFont14b )
 _nPosLin += 80
 If MV_PAR09 == 'Analitico' //1 // 'Analitico'  ,'Previa-Sintetic','Excel', 'Impresso Novo'
    _cTipoRel := "ANALITICO"
@@ -8803,7 +8803,7 @@ ElseIf MV_PAR10 == 'Externo PJ' // 2
    _cTipoRepres := "Externo PJ"
 Else 
    _cTipoRepres := "Ambos"
-Endif
+EndIf
 
 _nPosLin += 80
 _oPrint:Say( _nPosLin , _nColIni + 010 , "Tipo Representante?"	, _oFont14b )
@@ -8816,7 +8816,7 @@ _nPosLin += 80
 _oPrint:Line( _nPosLin , _nColIni , _nPosLin , _nColFim )
 _oPrint:EndPage()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -8840,7 +8840,7 @@ ROMS30RCAB( .T. ) //Chama impressão do cabecalho
 _nPosLin += _nSpcLin
 _nPosLin += _nSpcLin
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -8874,10 +8874,10 @@ Local _cTitulo      := ""
 //================================================================================
 // Chama a rotina que monta a área temporária com os dados referentes ao Vendedor
 //================================================================================
-fwmsgrun( , {||  ROMS030QRY( _cAlias , 4 , "" , _cCodigo , "" , "" )  }, 'Aguarde...', 'Filtrando dados do ' + _cTitCargo + ' ' +  strzero(_nni,6) + " de " + strzero(_ntoti,6) + "..." )
+FWMsgRun( , {||  ROMS030QRY( _cAlias , 4 , "" , _cCodigo , "" , "" )  }, 'Aguarde...', 'Filtrando dados do ' + _cTitCargo + ' ' +  StrZero(_nni,6) + " de " + StrZero(_ntoti,6) + "..." )
 
 DBSelectArea( _cAlias )
-(_cAlias)->( DBGotop() )
+(_cAlias)->( DBGoTop() )
 
 If (_cAlias)->( !Eof() )
 	_cNome		:= (_cAlias)->A3_NOME
@@ -8894,8 +8894,8 @@ If (_cAlias)->( !Eof() )
 
 EndIf
 
-_cCGC		:= IIF( Len( AllTrim( _cCGC			) ) == 11 , Transform( _cCGC		, "@R 999.999.999-99" ) , Transform( _cCGC		, "@R! NN.NNN.NNN/NNNN-99" ) )
-_cCPFCNPJ	:= IIF( Len( AllTrim( _cCPFCNPJF	) ) == 11 , Transform( _cCPFCNPJF	, "@R 999.999.999-99" ) , Transform( _cCPFCNPJF	, "@R! NN.NNN.NNN/NNNN-99" ) )
+_cCGC		:= IIf( Len( AllTrim( _cCGC			) ) == 11 , Transform( _cCGC		, "@R 999.999.999-99" ) , Transform( _cCGC		, "@R! NN.NNN.NNN/NNNN-99" ) )
+_cCPFCNPJ	:= IIf( Len( AllTrim( _cCPFCNPJF	) ) == 11 , Transform( _cCPFCNPJF	, "@R 999.999.999-99" ) , Transform( _cCPFCNPJF	, "@R! NN.NNN.NNN/NNNN-99" ) )
 
 (_cAlias)->( DBCloseArea() )
 
@@ -8909,7 +8909,7 @@ If _cTitCargo == "Gerente" .Or. _cTitCargo == "Coordenador"
 	//_nPosLin += _nSpcLin 9
 	//_nPosLin += _nSpcLin 10
 _nLinBoxFin += ( _nPosLin * 10)
-Elseif _cTitCargo == "Supervisor"
+ElseIf _cTitCargo == "Supervisor"
 
     
 	//_nPosLin += _nSpcLin 9
@@ -8917,7 +8917,7 @@ Elseif _cTitCargo == "Supervisor"
 	//_nPosLin += _nSpcLin 11
 	_nLinBoxFin += ( _nPosLin * 11)
 
-Elseif _cTitCargo == "Representante"
+ElseIf _cTitCargo == "Representante"
 	
 	//_nPosLin += _nSpcLin 9
 	//_nPosLin += _nSpcLin 10
@@ -8925,7 +8925,7 @@ Elseif _cTitCargo == "Representante"
 	//_nPosLin += _nSpcLin 12
 	_nLinBoxFin += ( _nPosLin * 12)
 	
-Endif
+EndIf
 
 //_nLinBoxFin -= ( _nPosLin * 2)
 
@@ -9003,39 +9003,39 @@ _ccoord := ""
 _csuper := ""
 _cGerNac := ""
 
-SA3->(Dbsetorder(1))
-If SA3->(Dbseek(xfilial("SA3")+_cCodigo))
+SA3->(DBSetOrder(1))
+If SA3->(DBSeek(xFilial("SA3")+_cCodigo))
 
 _cgerente := SA3->A3_GEREN 
 _ccoord   := SA3->A3_SUPER
 _csuper   := SA3->A3_I_SUPE
 _cGerNac  := SA3->A3_I_GERNC 
 
-    If SA3->(Dbseek(xfilial("SA3")+_cGerNac))
+    If SA3->(DBSeek(xFilial("SA3")+_cGerNac))
 	
 	   _cGerNac := _cGerNac +  " - " + SA3->A3_NOME
 		
-	Endif
+	EndIf
 
-	If SA3->(Dbseek(xfilial("SA3")+_cgerente))
+	If SA3->(DBSeek(xFilial("SA3")+_cgerente))
 	
 		_cgerente := _cgerente +  " - " + SA3->A3_NOME
 		
-	Endif
+	EndIf
 	
-	If SA3->(Dbseek(xfilial("SA3")+_ccoord))
+	If SA3->(DBSeek(xFilial("SA3")+_ccoord))
 	
 		_ccoord := _ccoord +  " - " + SA3->A3_NOME
 		
-	Endif
+	EndIf
 	
-	If SA3->(Dbseek(xfilial("SA3")+_csuper))
+	If SA3->(DBSeek(xFilial("SA3")+_csuper))
 	
 		_csuper := _csuper +  " - " + SA3->A3_NOME
 		
-	Endif
+	EndIf
 
-Endif	
+EndIf	
 
 If _cTitCargo == "Gerente"
    	_oPrint:Say( _nPosLin + _nAjsLin	, _nColIni + 0020 , "Gerente Nacional...:"			, _oFont11b )
@@ -9056,7 +9056,7 @@ ElseIf _cTitCargo == "Coordenador"
 	_nPosLin += _nSpcLin
 	_nPosLin += _nSpcLin
 
-Elseif _cTitCargo == "Supervisor"
+ElseIf _cTitCargo == "Supervisor"
 
     _oPrint:Say( _nPosLin + _nAjsLin	, _nColIni + 0020 , "Gerente Nacional...:"			, _oFont11b )
 	_oPrint:Say( _nPosLin + _nAjsLin	, _nColIni + 0340 , _cGerNac					, _oFont11  )
@@ -9071,7 +9071,7 @@ Elseif _cTitCargo == "Supervisor"
 	_nPosLin += _nSpcLin
 	_nPosLin += _nSpcLin
 
-Elseif _cTitCargo == "Representante"
+ElseIf _cTitCargo == "Representante"
 
     _oPrint:Say( _nPosLin + _nAjsLin	, _nColIni + 0020 , "Gerente Nacional...:"			, _oFont11b )
 	_oPrint:Say( _nPosLin + _nAjsLin	, _nColIni + 0340 , _cGerNac					, _oFont11  )
@@ -9090,14 +9090,14 @@ Elseif _cTitCargo == "Representante"
 	_nPosLin += _nSpcLin
 	_nPosLin += _nSpcLin
 	
-Endif
+EndIf
 
 //_oPrint:Box( _nLinBox , _nColIni , _nPosLin + _nSpcLin , _nColFim ) 
 
 _nPosLin += _nSpcLin
 //_nPosLin += _nSpcLin 
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -9187,21 +9187,21 @@ Else
 EndIf 
 
 DBSelectArea(_cAliasAve)
-(_cAliasAve)->( DBGotop() )
+(_cAliasAve)->( DBGoTop() )
 
 /*
 _oPrint:Say( _nPosLin  , _nColIni + 10	, "Período"									, _oFont11b						)
-_oPrint:Say( _nPosLin  , 0930			, PADL(_aMes[val(_aMesesDup[2])],10," ")	, _oFont11b , 1200      ,,, 2	)
-_oPrint:Say( _nPosLin  , 1330			, PADL(_aMes[val(_aMesesDup[3])],10," ")	, _oFont11b , 1590      ,,, 2	)
-_oPrint:Say( _nPosLin  , 1740			, PADL(_aMes[val(_aMesesDup[4])],10," ")	, _oFont11b , 1980      ,,, 2	)
-_oPrint:Say( _nPosLin  , 2070			, PADL("Demais Meses",12," ")				, _oFont11b , _nColFim ,,, 2	)
+_oPrint:Say( _nPosLin  , 0930			, PadL(_aMes[Val(_aMesesDup[2])],10," ")	, _oFont11b , 1200      ,,, 2	)
+_oPrint:Say( _nPosLin  , 1330			, PadL(_aMes[Val(_aMesesDup[3])],10," ")	, _oFont11b , 1590      ,,, 2	)
+_oPrint:Say( _nPosLin  , 1740			, PadL(_aMes[Val(_aMesesDup[4])],10," ")	, _oFont11b , 1980      ,,, 2	)
+_oPrint:Say( _nPosLin  , 2070			, PadL("Demais Meses",12," ")				, _oFont11b , _nColFim ,,, 2	)
 */
 
 _oPrint:Say( _nPosLin  , _nColIni + 10	  , "Período"									, _oFont11b						)
-_oPrint:Say( _nPosLin  , _nColIni + 0750  , PADL(_aMes[val(_aMesesDup[2])],10," ")	, _oFont11b , 1200      ,,, 2	)
-_oPrint:Say( _nPosLin  , _nColIni + 1170  , PADL(_aMes[val(_aMesesDup[3])],10," ")	, _oFont11b , 1590      ,,, 2	)
-_oPrint:Say( _nPosLin  , _nColIni + 1500  , PADL(_aMes[val(_aMesesDup[4])],10," ")	, _oFont11b , 1980      ,,, 2	)
-_oPrint:Say( _nPosLin  , _nColIni + 1850  , PADL("Demais Meses",12," ")				, _oFont11b , _nColFim ,,, 2	)
+_oPrint:Say( _nPosLin  , _nColIni + 0750  , PadL(_aMes[Val(_aMesesDup[2])],10," ")	, _oFont11b , 1200      ,,, 2	)
+_oPrint:Say( _nPosLin  , _nColIni + 1170  , PadL(_aMes[Val(_aMesesDup[3])],10," ")	, _oFont11b , 1590      ,,, 2	)
+_oPrint:Say( _nPosLin  , _nColIni + 1500  , PadL(_aMes[Val(_aMesesDup[4])],10," ")	, _oFont11b , 1980      ,,, 2	)
+_oPrint:Say( _nPosLin  , _nColIni + 1850  , PadL("Demais Meses",12," ")				, _oFont11b , _nColFim ,,, 2	)
 _nPosLin += _nSpcLin
 
 _oPrint:Say( _nPosLin  , _nColIni + 0010 , "Quantidade de duplicatas"							, _oFont11b )
@@ -9236,9 +9236,9 @@ _nPosLin += _nSpcLin
 nLinInBox2 := _nPosLin
 
 _oPrint:Say( _nPosLin  , _nColIni + 10	, "Mês"								, _oFont11b	)
-_oPrint:Say( _nPosLin  , 0790			, PADL(_aMes[Val(_cMes1)],10," ")	, _oFont11b	)
-_oPrint:Say( _nPosLin  , 1320			, PADL(_aMes[Val(_cMes2)],10," ")	, _oFont11b	)
-_oPrint:Say( _nPosLin  , 1790			, PADL(_aMes[Val(_cMes3)],10," ")	, _oFont11b	)
+_oPrint:Say( _nPosLin  , 0790			, PadL(_aMes[Val(_cMes1)],10," ")	, _oFont11b	)
+_oPrint:Say( _nPosLin  , 1320			, PadL(_aMes[Val(_cMes2)],10," ")	, _oFont11b	)
+_oPrint:Say( _nPosLin  , 1790			, PadL(_aMes[Val(_cMes3)],10," ")	, _oFont11b	)
 
 _nPosLin += _nSpcLin
 
@@ -9253,7 +9253,7 @@ _nPosLin += _nSpcLin
 
 //_nPosLin += _nSpcLin 
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -9303,17 +9303,17 @@ _nPosLin += _nSpcLin
 _nPosLin += _nSpcLin  
 
 _oPrint:Say( _nPosLin + _nSpcLin	, _nColIni + 10		, "Mês"								, _oFont11b )
-_oPrint:Say( _nPosLin + _nSpcLin	, 0820				, PADL(_aMes[Val(_cMes1)],10," ")	, _oFont11b , 0970      ,,, 2 )
-_oPrint:Say( _nPosLin + _nSpcLin	, 1210				, PADL(_aMes[Val(_cMes2)],10," ")	, _oFont11b , 1360      ,,, 2 )
-_oPrint:Say( _nPosLin + _nSpcLin	, 1600				, PADL(_aMes[Val(_cMes3)],10," ")	, _oFont11b , 1710      ,,, 2 )
-_oPrint:Say( _nPosLin + _nSpcLin	, 1950				, PADL(_aMes[Val(_cMes4)],10," ")	, _oFont11b , _nColFim ,,, 2 )
+_oPrint:Say( _nPosLin + _nSpcLin	, 0820				, PadL(_aMes[Val(_cMes1)],10," ")	, _oFont11b , 0970      ,,, 2 )
+_oPrint:Say( _nPosLin + _nSpcLin	, 1210				, PadL(_aMes[Val(_cMes2)],10," ")	, _oFont11b , 1360      ,,, 2 )
+_oPrint:Say( _nPosLin + _nSpcLin	, 1600				, PadL(_aMes[Val(_cMes3)],10," ")	, _oFont11b , 1710      ,,, 2 )
+_oPrint:Say( _nPosLin + _nSpcLin	, 1950				, PadL(_aMes[Val(_cMes4)],10," ")	, _oFont11b , _nColFim ,,, 2 )
 
 /*
 _oPrint:Say( _nPosLin + _nSpcLin	, _nColIni + 10		, "Mês"								, _oFont11b )
-_oPrint:Say( _nPosLin + _nSpcLin	, 0920				, PADL(_aMes[Val(_cMes1)],10," ")	, _oFont11b , 0970      ,,, 2 )
-_oPrint:Say( _nPosLin + _nSpcLin	, 1310				, PADL(_aMes[Val(_cMes2)],10," ")	, _oFont11b , 1360      ,,, 2 )
-_oPrint:Say( _nPosLin + _nSpcLin	, 1700				, PADL(_aMes[Val(_cMes3)],10," ")	, _oFont11b , 1710      ,,, 2 )
-_oPrint:Say( _nPosLin + _nSpcLin	, 2050				, PADL(_aMes[Val(_cMes4)],10," ")	, _oFont11b , _nColFim ,,, 2 )
+_oPrint:Say( _nPosLin + _nSpcLin	, 0920				, PadL(_aMes[Val(_cMes1)],10," ")	, _oFont11b , 0970      ,,, 2 )
+_oPrint:Say( _nPosLin + _nSpcLin	, 1310				, PadL(_aMes[Val(_cMes2)],10," ")	, _oFont11b , 1360      ,,, 2 )
+_oPrint:Say( _nPosLin + _nSpcLin	, 1700				, PadL(_aMes[Val(_cMes3)],10," ")	, _oFont11b , 1710      ,,, 2 )
+_oPrint:Say( _nPosLin + _nSpcLin	, 2050				, PadL(_aMes[Val(_cMes4)],10," ")	, _oFont11b , _nColFim ,,, 2 )
 */
 
 _nPosLin += _nSpcLin 
@@ -9359,15 +9359,6 @@ If _cTipoRepSA3 == 'V'
    _oPrint:Say( _nPosLin + 30  , _nColFim / 2 - 200 - _nLetras , _cTitulo , _oFont16b , _nColFim ,,, 2 )
    _oPrint:Line( _nPosLin , _nColIni , _nPosLin , _nColFim )
 
-/*
-   If MV_PAR01 == MV_PAR02
-      _oPrint:Say( _nPosLin	, _nColFim / 2	, 'VENDAS DO MÊS - '+ IIF( !Empty(MV_PAR01) , _aMes[Val(SubStr(MV_PAR01,1,2))] +'/'+ SubStr(MV_PAR01,3,4),"") , _oFont16b , _nColFim  ,,, 2 )
-   Else 
-      _cPeriodo := 'VENDAS DO MÊS - '+ IIF( !Empty(MV_PAR01) , _aMes[Val(SubStr(MV_PAR01,1,2))] +'/'+ SubStr(MV_PAR01,3,4),"") + " Até "
-	  _cPeriodo += IIF( !Empty(MV_PAR02) , _aMes[Val(SubStr(MV_PAR02,1,2))] +'/'+ SubStr(MV_PAR02,3,4),"")
-      _oPrint:Say( _nPosLin	, _nColFim / 2	, _cPeriodo , _oFont16b , _nColFim  ,,, 2 )
-   EndIf 
-*/
    _nPosLin += _nSpcLin 
    _nPosLin += _nSpcLin 
    _nPosLin += _nSpcLin 
@@ -9408,13 +9399,13 @@ If _cTipoRepSA3 == 'V'
 
         EndIf
 	
-	   _oPrint:Say( _nPosLin + _nSpcLin , _nColIni + 0010 , SubStr(IIF(Len(AllTrim(_aVendas[_nI,1])) == 0,'SEM GRUPO DE PRODUTOS',_aVendas[_nI,1]),1,29)									   , _oFont11 )
+	   _oPrint:Say( _nPosLin + _nSpcLin , _nColIni + 0010 , SubStr(IIf(Len(AllTrim(_aVendas[_nI,1])) == 0,'SEM GRUPO DE PRODUTOS',_aVendas[_nI,1]),1,29)									   , _oFont11 )
 	   _oPrint:Say( _nPosLin + _nSpcLin , _nColIni + 0600 , Transform(_aVendas[_nI,7],"@E 999.999") 							  			  													   , _oFont11 )
 	   _oPrint:Say( _nPosLin + _nSpcLin , _nColIni + 0600 , Transform(_aVendas[_nI,2],"@E 999,999,999,999.99")				  			  													   , _oFont11 )
 	   _oPrint:Say( _nPosLin + _nSpcLin , _nColIni + 0990 , _aVendas[_nI,3]													  			  													   , _oFont11 )
 	   _oPrint:Say( _nPosLin + _nSpcLin , _nColIni + 1040 , Transform(_aVendas[_nI,4],"@E 999,999,999,999.99")				              													   , _oFont11 )
 	   _oPrint:Say( _nPosLin + _nSpcLin , _nColIni + 1430 , _aVendas[_nI,5]       											  			  													   , _oFont11 )
-	   _oPrint:Say( _nPosLin + _nSpcLin , _nColIni + 1450 , IIF(_aVendas[_nI,2] > 0,Transform(_aVendas[_nI,6] / _aVendas[_nI,2],"@E 999,999,999,999.99"),TransForm(0,"@E 999,999,999,999.99")) , _oFont11 )
+	   _oPrint:Say( _nPosLin + _nSpcLin , _nColIni + 1450 , IIf(_aVendas[_nI,2] > 0,Transform(_aVendas[_nI,6] / _aVendas[_nI,2],"@E 999,999,999,999.99"),TransForm(0,"@E 999,999,999,999.99")) , _oFont11 )
 	   _oPrint:Say( _nPosLin + _nSpcLin , _nColIni + 1750 , Transform(_aVendas[_nI,6],"@E 999,999,999,999.99")			      			  													   , _oFont11 )
     
 	   _nTotVlrBr += _aVendas[_nI,6]
@@ -9470,21 +9461,12 @@ Else //Se não é vendedor imprime quadro relacional
    EndIf 
 
    _oPrint:Box( _nLinBoxIni , _nColIni , _nLinBoxFin , _nColFim )
-/*
-   If MV_PAR01 == MV_PAR02
-      _oPrint:Say( _nPosLin	, _nColFim / 2	, 'Relação de ' + _cTitCargo + ' - '+ IIF( !Empty(MV_PAR01) , _aMes[Val(SubStr(MV_PAR01,1,2))] +'/'+ SubStr(MV_PAR01,3,4),"") , _oFont16b , _nColFim  ,,, 2 )
-   Else 
-      _cPeriodo := 'Relação de ' + _cTitCargo + ' - '+ IIF( !Empty(MV_PAR01) , _aMes[Val(SubStr(MV_PAR01,1,2))] +'/'+ SubStr(MV_PAR01,3,4),"") 
-	  _cPeriodo += " Ate " + IIF( !Empty(MV_PAR02) , _aMes[Val(SubStr(MV_PAR02,1,2))] +'/'+ SubStr(MV_PAR02,3,4),"") 
-      _oPrint:Say( _nPosLin	, _nColFim / 2	, _cPeriodo , _oFont16b , _nColFim  ,,, 2 )
-   EndIf 
-*/
 
    If MV_PAR01 == MV_PAR02
-      _cTitulo := 'VENDAS DO MÊS - '+ IIF( !Empty(MV_PAR01) , _aMes[Val(SubStr(MV_PAR01,1,2))] +'/'+ SubStr(MV_PAR01,3,4),"") 
+	  _cTitulo := 'VENDAS DO MÊS - '+ IIF( !Empty(MV_PAR01) , _aMes[Val(SubStr(MV_PAR01,1,2))] +'/'+ SubStr(MV_PAR01,3,4),"") 
    Else 
-      _cTitulo := 'VENDAS DO MÊS - '+ IIF( !Empty(MV_PAR01) , _aMes[Val(SubStr(MV_PAR01,1,2))] +'/'+ SubStr(MV_PAR01,3,4),"") + " Até "
-	  _cTitulo += IIF( !Empty(MV_PAR02) , _aMes[Val(SubStr(MV_PAR02,1,2))] +'/'+ SubStr(MV_PAR02,3,4),"")
+	  _cTitulo := 'VENDAS DO MÊS - '+ IIF( !Empty(MV_PAR01) , _aMes[Val(SubStr(MV_PAR01,1,2))] +'/'+ SubStr(MV_PAR01,3,4),"") + " Até "
+	  _cTitulo += IIf( !Empty(MV_PAR02) , _aMes[Val(SubStr(MV_PAR02,1,2))] +'/'+ SubStr(MV_PAR02,3,4),"")
    EndIf 
    
    _nLetras := Len(_cTitulo) / 2
@@ -9508,7 +9490,7 @@ Else //Se não é vendedor imprime quadro relacional
 
     _aDadosRepres := {0,0,0}
 
-	Fwmsgrun( , {||  _aDadosRepres := U_ROMS030J(_ccodi, _cctipvi /*, _aDadosRelac[_nI,1], _aDadosRelac[_nI,2] */)  }, 'Aguarde...', 'Lendo dados rede representante vinculados ao ' + _cTitCargo +  "..."  ) 	   
+	FWMsgRun( , {||  _aDadosRepres := U_ROMS030J(_ccodi, _cctipvi /*, _aDadosRelac[_nI,1], _aDadosRelac[_nI,2] */)  }, 'Aguarde...', 'Lendo dados rede representante vinculados ao ' + _cTitCargo +  "..."  ) 	   
     If Len(_aDadosRepres) > 0
 	  
 	   For _nI := 1 To Len(_aDadosRepres)
@@ -9526,7 +9508,7 @@ Else //Se não é vendedor imprime quadro relacional
 		         _cNome := Posicione("SA3",1,xFilial("SA3")+_aDadosRepres[_nI,1],"A3_NOME")
 			  EndIf
 		   
-		      Aadd(_aComGerenc,{_aDadosRepres[_nI,1], _cNome, _nValRec, _nValCom, _nPerc})
+		      aAdd(_aComGerenc,{_aDadosRepres[_nI,1], _cNome, _nValRec, _nValCom, _nPerc})
 		   EndIf
        Next
 
@@ -9586,7 +9568,7 @@ Else //Se não é vendedor imprime quadro relacional
  
 EndIf
 
-Return()
+Return
 
 
 /*
@@ -9647,7 +9629,7 @@ If (_nPosLin + _nSpcLin) > _nLimPag
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -9663,7 +9645,7 @@ Static Function ROMS304R()
 
 _oPrint:Box( _nLinBox , _nColIni , _nPosLin , _nColFim )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -9853,13 +9835,13 @@ For y:=1 to Len(_aComissao)
 		EndIf 
 
 		_oPrint:Say( _nPosLin + _nAjsLin , _nColIni + 0010 , SubStr(FWFilialName(,_aComissao[y,1]),1,30)						, _oFont11 )
-		_oPrint:Say( _nPosLin + _nAjsLin , _nColIni + 0750 , Transform(round(_aComissao[y,2],2),"@E 999,999,999,999.99")				, _oFont11 )
-		_oPrint:Say( _nPosLin + _nAjsLin , _nColIni + 1380 , Transform(round(_aComissao[y,3],2),"@E 999,999,999,999.99")				, _oFont11 )
+		_oPrint:Say( _nPosLin + _nAjsLin , _nColIni + 0750 , Transform(Round(_aComissao[y,2],2),"@E 999,999,999,999.99")				, _oFont11 )
+		_oPrint:Say( _nPosLin + _nAjsLin , _nColIni + 1380 , Transform(Round(_aComissao[y,3],2),"@E 999,999,999,999.99")				, _oFont11 )
 		_oPrint:Say( _nPosLin + _nAjsLin , _nColIni + 1980 , Transform((_aComissao[y,3]/_aComissao[y,2]) * 100,"@E 999.999")	, _oFont11 )
 		
-		_nTotReceb	+= round(_aComissao[y,2],2)
-		_nTotComis	+= round(_aComissao[y,3],2)
-		_nTotBruto  += round(_aComissao[y,3],2)
+		_nTotReceb	+= Round(_aComissao[y,2],2)
+		_nTotComis	+= Round(_aComissao[y,3],2)
+		_nTotBruto  += Round(_aComissao[y,3],2)
 		
 		_cTpComis	:= _aComissao[y,5]
 	
@@ -9868,9 +9850,9 @@ For y:=1 to Len(_aComissao)
 	//================================================================================
 	Else
 	
-		_nVlrDebCo += round(_aComissao[y,3],2)
-		_nVlrDevol += round(_aComissao[y,6],2)
-		_nTotDevol += round(_aComissao[y,2],2)
+		_nVlrDebCo += Round(_aComissao[y,3],2)
+		_nVlrDevol += Round(_aComissao[y,6],2)
+		_nTotDevol += Round(_aComissao[y,2],2)
 	
 	EndIf
 
@@ -9885,16 +9867,16 @@ _nPosLin += _nSpcLin
 //================================================================================
 //Calcula o desconto de comissão por bonificação
 //================================================================================
-fwmsgrun(, {|| _aTotBNF := ROMS030BNF( _cCodGer ) }, "Aguarde... ", 'Filtrando bonificações para ' + _cTitCargo + ' ' + strzero(_nni,6) + " de " + strzero(_ntoti,6) + "..." )
+FWMsgRun(, {|| _aTotBNF := ROMS030BNF( _cCodGer ) }, "Aguarde... ", 'Filtrando bonificações para ' + _cTitCargo + ' ' + StrZero(_nni,6) + " de " + StrZero(_ntoti,6) + "..." )
 
 If !Empty( _aTotBNF )
   	
   	
 	For _nI := 1 To Len(_aTotBNF)
     
-    	_nTotComis	+= round(_aTotBNF[_nI][03],2)
-		_nTotCmBnf	+= round(_aTotBNF[_nI][03],2)
-		_nTotBonif	+= round(_aTotBNF[_nI][02],2)
+    	_nTotComis	+= Round(_aTotBNF[_nI][03],2)
+		_nTotCmBnf	+= Round(_aTotBNF[_nI][03],2)
+		_nTotBonif	+= Round(_aTotBNF[_nI][02],2)
 	
 	Next _nI
 	
@@ -9978,7 +9960,7 @@ EndIf
 _nLinBox2 := _nPosLin
 //_oPrint:Line( _nPosLin , _nColIni + 05 , _nPosLin , _nColFim - 05 )
 
-_nTotLiqui := round(_nTotBruto,2) + round(_nVlrDebCo,2) 
+_nTotLiqui := Round(_nTotBruto,2) + Round(_nVlrDebCo,2) 
 
 _nTotComis := _nTotLiqui
 _nTotReceb := _nTotReceb - _nTotBonif - _nTotDevol
@@ -9997,11 +9979,11 @@ _aImpostos := {}
 If Val(_aComissao[1,4]) > 0 .Or. _nTotLiqui > 0  
    _aImpostos := U_C_IRRF_INSS( _aComissao[1,4] , _nTotLiqui )
 Else
-   Aadd(_aImpostos, {0,0})  
+   aAdd(_aImpostos, {0,0})  
 EndIf
 
-_nINSS := round(_aImpostos[1,1],2)
-_nIRRF := round(_aImpostos[1,2],2)
+_nINSS := Round(_aImpostos[1,1],2)
+_nIRRF := Round(_aImpostos[1,2],2)
 
 _nTotLiqui -= ( _nINSS + _nIRRF )
 
@@ -10086,7 +10068,7 @@ _oPrint:Say( _nPosLin            , _nColIni + 1300 , Transform( _nTotLiqui ,"@E 
 
 _nPosLin+=_nSpcLin 
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -10124,4 +10106,4 @@ _nPosCent := Len(AllTrim(MV_PAR16)) / 2 * 10
 _oPrint:Say( _nPosLin + _nAjsLin , ((_nColIni + 930 + _nColFim) / 2 ) - _nPosCent , AllTrim(MV_PAR16)  , _oFont11b , _nColFim        ,,, 2 )
 _nPosLin += _nSpcLin 
 
-Return()
+Return

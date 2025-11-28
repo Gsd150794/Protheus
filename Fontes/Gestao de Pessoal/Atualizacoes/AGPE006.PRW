@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-André Lisboa  | 23/08/2017 | Incluida chamada a rotina de logs e correções para a V12 - Chamado 20782					   
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 22/03/2019 | Ajustes/Adaptações para versão Lobo Guara. Chamado: 28571
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 18/09/2019 | Revisão do fonte - Chamado 28346 
+André Lisboa  |23/08/2017| Chamado 20782. Incluida chamada a rotina de logs e correções para a V12
+Alex Wallauer |22/03/2019| Chamado 28571. Ajustes/Adaptações para versão Lobo Guara.
+Lucas Borges  |18/09/2019| Chamado 28346. Revisão do fonte
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: AGPE006
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 13/12/2016
-===============================================================================================================================
 Descrição---------: Rotina desenvolvida para atualizar os campos da pasta Contabilização do cadastro de Verbas.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -46,9 +38,7 @@ Return
 Programa----------: MenuDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 18/09/2019
-===============================================================================================================================
 Descrição---------: Utilizacao de Menu Funcional
-===============================================================================================================================
 Parametros--------: aRotina
 					1. Nome a aparecer no cabecalho
 					2. Nome da Rotina associada
@@ -61,7 +51,6 @@ Parametros--------: aRotina
 						5 - Remove o registro corrente do Banco de Dados
 					5. Nivel de acesso
 					6. Habilita Menu Funcional
-===============================================================================================================================
 Retorno-----------: Array com opcoes da rotina
 ===============================================================================================================================
 */
@@ -78,17 +67,14 @@ Return( aRotina )
 Programa----------: AGPE006L
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 13/06/2017
-===============================================================================================================================
 Descrição---------: Função para abertura do registro de verba, para informar os campos contidos na pasta Contabilização
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AGPE006L()
 
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local _nRecno		:= SRV->(Recno())
 Local _aButtons		:= {}
 Local _aFields		:= {}
@@ -109,7 +95,7 @@ _aSRV := SRV->(DBSTRUCT())
 For nUsado := 1 To Len(_aSRV)
     _cCampo:=_aSRV[nUsado][1]
     If GetSX3Cache(_cCampo,"X3_FOLDER") = "2"   
-	   AADD( _aAlterFields , _cCampo )
+	   aAdd( _aAlterFields , _cCampo )
 	EndIf
 Next nUsado
 
@@ -145,7 +131,7 @@ If _nOpc == 1
 	For _nX := 1 To Len(_aAlterFields)
 		RecLock("SRV", .F.)
 			&("SRV->" + _aAlterFields[_nX]) := &("M->" + _aAlterFields[_nX])
-		MsUnLock()
+		MSUnLock()
 	Next _nX
 
 EndIf
@@ -153,5 +139,5 @@ EndIf
 U_ITLOGACS('AGPE006')
 aRotina := aClone(_aRotBkp)
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 Return

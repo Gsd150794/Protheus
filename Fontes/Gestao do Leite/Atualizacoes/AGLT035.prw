@@ -2,42 +2,33 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 19/04/2021 | Bloqueada a opção Desvincular para plataformas. Chamado 36267
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 22/07/2022 | Tratamento para Extrato Seco Total (EST). Chamado 40778
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 17/04/2023 | Corrigida validação de exclusão. Chamado 43593
+Lucas Borges  |22/07/2022| Chamado 40778. Tratamento para Extrato Seco Total (EST).
+Lucas Borges  |17/04/2023| Chamado 43593. Corrigida validação de exclusão.
+Lucas Borges  |30/09/2025| Chamado 52144. Incluído tratamento para o campo ZLX_PEDANT - Pedágio Antecipado
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "RWMAKE.CH"
+#Include "TOTVS.ch"
+#Include "FWMVCDEF.CH"
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT035
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Rotina para processamento da Recepção do Leite de Terceiros
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AGLT035()
+User Function AGLT035
 
-Local _oBrowse		:= Nil
-Private _aRecnosZLD := {}
-Private _nTotVolume := 0
-Private _cSalvaForn := ""
+Local _oBrowse		:= Nil As Object
+Private _aRecnosZLD := {} As Array
+Private _nTotVolume := 0 As Numeric
+Private _cSalvaForn := "" As Character
 
 //====================================================================================================
 // Configura e inicializa a Classe do Browse
@@ -55,24 +46,21 @@ _oBrowse:AddLegend( "ZLX_STATUS == '3' "	, "RED"		, "Fechada"			)
 
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MenuDef
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Rotina para configuração do menu na tela inicial
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function MenuDef()
+Static Function MenuDef() As Array
 
-Local _aRet	:= {}
+Local _aRet	:= {} As Array
 
 ADD OPTION _aRet Title 'Visualizar'		Action 'VIEWDEF.AGLT035'	OPERATION 2 ACCESS 0
 ADD OPTION _aRet Title 'Incluir'   		Action 'VIEWDEF.AGLT035'	OPERATION 3 ACCESS 0
@@ -89,19 +77,16 @@ Return( _aRet )
 Programa----------: ModelDef
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Rotina para construção do modelo de dados das telas de processamento
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function ModelDef()
+Static Function ModelDef() As Object
 
-Local _oStruZLX	:= FWFormStruct( 1 , 'ZLX' )
-Local _oModel	:= NIL
-Local _aGatAux	:= {}
+Local _oStruZLX	:= FWFormStruct( 1 , 'ZLX' ) As Object
+Local _oModel	:= NIL As Object
+Local _aGatAux	:= {} As Array
 
 //====================================================================================================
 // Monta a configuração de Gatilhos // FwStruTrigger: ( cDom, cCDom, cRegra, lSeek, cAlias, nOrdem, cChave, cCondic )
@@ -164,12 +149,12 @@ _oStruZLX:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] 
 _aGatAux := FwStruTrigger( 'ZLX_PESOCA'	, 'ZLX_DIFVOL'	, 'M->( ZLX_VOLREC - ZLX_VOLNF )' , .F.													)
 _oStruZLX:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZLX_PESOCA'	, 'ZLX_BALCAP'	, 'M->ZLX_VOLREC - VAL(Posicione("ZZV",2,xFilial("ZZV")+M->(ZLX_TRANSP+ZLX_LJTRAN+ZLX_PLACA),"ZZV_CAPACI"))' , .F.	)
+_aGatAux := FwStruTrigger( 'ZLX_PESOCA'	, 'ZLX_BALCAP'	, 'M->ZLX_VOLREC - Val(Posicione("ZZV",2,xFilial("ZZV")+M->(ZLX_TRANSP+ZLX_LJTRAN+ZLX_PLACA),"ZZV_CAPACI"))' , .F.	)
 _oStruZLX:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 ////'ZLX_PESOCA'
 
 ////'ZLX_MEDVAZ'
-_aGatAux := FwStruTrigger( 'ZLX_PESOLI'	, 'ZLX_MEDVAZ'	, 'IF(M->ZLX_PESOLI=0,M->ZLX_MEDVAZ,0)' , .F.	)
+_aGatAux := FwStruTrigger( 'ZLX_PESOLI'	, 'ZLX_MEDVAZ'	, 'If(M->ZLX_PESOLI=0,M->ZLX_MEDVAZ,0)' , .F.	)
 _oStruZLX:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 _aGatAux := FwStruTrigger( 'ZLX_MEDVAZ'	, 'ZLX_VOLREC'	, 'M->ZLX_MEDVAZ' , .F.	)
@@ -178,7 +163,7 @@ _oStruZLX:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] 
 _aGatAux := FwStruTrigger( 'ZLX_MEDVAZ'	, 'ZLX_DIFVOL'	, 'M->( ZLX_VOLREC - ZLX_VOLNF )' , .F.													)
 _oStruZLX:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZLX_MEDVAZ'	, 'ZLX_BALCAP'	, 'M->ZLX_VOLREC - VAL(Posicione("ZZV",2,xFilial("ZZV")+M->(ZLX_TRANSP+ZLX_LJTRAN+ZLX_PLACA),"ZZV_CAPACI"))' , .F.	)
+_aGatAux := FwStruTrigger( 'ZLX_MEDVAZ'	, 'ZLX_BALCAP'	, 'M->ZLX_VOLREC - Val(Posicione("ZZV",2,xFilial("ZZV")+M->(ZLX_TRANSP+ZLX_LJTRAN+ZLX_PLACA),"ZZV_CAPACI"))' , .F.	)
 _oStruZLX:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 ////'ZLX_MEDVAZ'
@@ -191,7 +176,7 @@ _oStruZLX:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] 
 _aGatAux := FwStruTrigger( 'ZLX_PESOVA'	, 'ZLX_DIFVOL'	, 'M->( ZLX_VOLREC - ZLX_VOLNF )' , .F.													)
 _oStruZLX:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZLX_PESOVA'	, 'ZLX_BALCAP'	, 'M->ZLX_VOLREC - VAL(Posicione("ZZV",2,xFilial("ZZV")+M->(ZLX_TRANSP+ZLX_LJTRAN+ZLX_PLACA),"ZZV_CAPACI"))' , .F.	)
+_aGatAux := FwStruTrigger( 'ZLX_PESOVA'	, 'ZLX_BALCAP'	, 'M->ZLX_VOLREC - Val(Posicione("ZZV",2,xFilial("ZZV")+M->(ZLX_TRANSP+ZLX_LJTRAN+ZLX_PLACA),"ZZV_CAPACI"))' , .F.	)
 _oStruZLX:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 _aGatAux := FwStruTrigger( 'ZLX_PGFRT'	, 'ZLX_PEDAGI'	, '0' , .F.																				)
@@ -248,9 +233,9 @@ _oStruZLX:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] 
 _aGatAux := FwStruTrigger( 'ZLX_CTE'	, 'ZLX_CTE'		, 'U_ITZERESQ( M->ZLX_CTE , "ZLX_CTE" , "ZLXMASTER" )' , .F.							)
 _oStruZLX:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_oStruZLX:SetProperty( 'ZLX_VOLNF'   , MODEL_FIELD_WHEN, FWBuildFeature( STRUCT_FEATURE_WHEN, "Empty(M->ZLX_NRONF) .AND. Empty(FwFldGet('ZLX_LISTA'))" ) )
-_oStruZLX:SetProperty( 'ZLX_FORNEC'  , MODEL_FIELD_WHEN, FWBuildFeature( STRUCT_FEATURE_WHEN, "Empty(M->ZLX_NRONF) .AND. Empty(FwFldGet('ZLX_LISTA'))" ) )
-_oStruZLX:SetProperty( 'ZLX_LJFORN'  , MODEL_FIELD_WHEN, FWBuildFeature( STRUCT_FEATURE_WHEN, "Empty(M->ZLX_NRONF) .AND. Empty(FwFldGet('ZLX_LISTA'))" ) )
+_oStruZLX:SetProperty( 'ZLX_VOLNF'   , MODEL_FIELD_WHEN, FWBuildFeature( STRUCT_FEATURE_WHEN, "Empty(M->ZLX_NRONF) .And. Empty(FwFldGet('ZLX_LISTA'))" ) )
+_oStruZLX:SetProperty( 'ZLX_FORNEC'  , MODEL_FIELD_WHEN, FWBuildFeature( STRUCT_FEATURE_WHEN, "Empty(M->ZLX_NRONF) .And. Empty(FwFldGet('ZLX_LISTA'))" ) )
+_oStruZLX:SetProperty( 'ZLX_LJFORN'  , MODEL_FIELD_WHEN, FWBuildFeature( STRUCT_FEATURE_WHEN, "Empty(M->ZLX_NRONF) .And. Empty(FwFldGet('ZLX_LISTA'))" ) )
 
 _oStruZLX:SetProperty( 'ZLX_VOLNF'   , MODEL_FIELD_VALID, FWBuildFeature( STRUCT_FEATURE_VALID, 'U_AGLT035V(4)' ) )
 
@@ -272,19 +257,16 @@ Return( _oModel )
 Programa----------: AGLT035
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Rotina para construção da View para exibição dos componentes
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function ViewDef()
+Static Function ViewDef() As Object
 
-Local _oStruZLX	:= FWFormStruct( 2 , 'ZLX' )
-Local _oModel	:= FwLoadModel( 'AGLT035' )
-Local _oView	:= FwFormView():New()
+Local _oStruZLX	:= FWFormStruct( 2 , 'ZLX' ) As Object
+Local _oModel	:= FwLoadModel( 'AGLT035' ) As Object
+Local _oView	:= FwFormView():New() As Object
 
 //-- Agrupamento dos Campos --//
 _oStruZLX:AddGroup( 'GRUPO01' , 'Dados da Recepção'				, '' , 2 )
@@ -342,6 +324,7 @@ _oStruZLX:SetProperty( 'ZLX_ICMSFR'	, MVC_VIEW_GROUP_NUMBER , 'GRUPO03' )
 _oStruZLX:SetProperty( 'ZLX_TVLFRT'	, MVC_VIEW_GROUP_NUMBER , 'GRUPO03' )
 _oStruZLX:SetProperty( 'ZLX_OBS'	, MVC_VIEW_GROUP_NUMBER , 'GRUPO03' )
 _oStruZLX:SetProperty( 'ZLX_MEDVAZ'	, MVC_VIEW_GROUP_NUMBER , 'GRUPO03' )
+_oStruZLX:SetProperty( 'ZLX_PEDANT'	, MVC_VIEW_GROUP_NUMBER , 'GRUPO03' )
 
 //-- Definicao dos Campos para o Grupo 04 --//
 _oStruZLX:SetProperty( "ZLX_TICKET"	, MVC_VIEW_GROUP_NUMBER , 'GRUPO04' )//Ticket/Viagem
@@ -366,57 +349,46 @@ Return( _oView )
 Programa----------: AGLT035A
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Rotina auxiliar para retornar a média de Gordura/Extrato Seco Total das análises do Leite de Terceiros
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AGLT035A( _cAnalise, _nTipo)
+User Function AGLT035A(_cAnalise As Character,_nTipo As Numeric) As Numeric
 
-Local _nRet		:= 0
-Local _nQuant	:= 0
-Local _nValor	:= 0
+Local _nRet		:= 0 As Numeric
+Local _nQuant	:= 0 As Numeric
+Local _nValor	:= 0 As Numeric
 
 DBSelectArea("ZAP")
 ZAP->( DBSetOrder(1) )
 If ZAP->( DBSeek( xFilial("ZAP") + _cAnalise ) )
-
-    While !ZAP->( EOF() ) .AND. ZAP->ZAP_CODIGO == _cAnalise
-    
+    While !ZAP->( Eof() ) .And. ZAP->ZAP_CODIGO == _cAnalise
        _nQuant++
        _nValor += IIf(_nTipo == 1, ZAP->ZAP_GORD, ZAP->ZAP_EST)
-       
     ZAP->( DBSkip() )
     EndDo
-    
     _nRet := Round( _nValor/_nQuant , 2 )
-    
-EndIF
+EndIf
 
-Return( _nRet )
+Return _nRet
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT035C
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Rotina auxiliar para retornar o valor do frete pela configuração na tabela de frete
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AGLT035C( _nOpc , _cVeic , _cFornec , _cLojaF , _cTransp , _cLojaT , _nValAdc )
+User Function AGLT035C(_nOpc As Numeric,_cVeic As Character,_cFornec As Character,_cLojaF As Character,_cTransp As Character,_cLojaT As Character,_nValAdc As Numeric) As Numeric
 
-Local _oModel 		:= FWModelActive()
-Local _lCobFrt		:= ( _oModel:GetValue( 'ZLXMASTER' , 'ZLX_PGFRT' ) == "S" )
-Local _cCapc 		:= "" 
-Local _nFrete		:= 0
+Local _oModel 		:= FWModelActive() As Object
+Local _lCobFrt		:= ( _oModel:GetValue( 'ZLXMASTER' , 'ZLX_PGFRT' ) == "S" ) As Logical
+Local _cCapc 		:= "" As Character
+Local _nFrete		:= 0 As Numeric
 
 Default _nValAdc	:= 0
 
@@ -445,6 +417,7 @@ If _lCobFrt
 					_nFrete := ZZU->ZZU_VLRKM
                     _oModel:LoadValue( 'ZLXMASTER' , 'ZLX_VLRKM' , _nFrete)
 				EndIf
+				_oModel:LoadValue( 'ZLXMASTER' , 'ZLX_PEDANT' , ZZU->ZZU_PEDANT)
 			EndIf
 		EndIf
 	EndIf
@@ -455,31 +428,28 @@ If _nOpc == 1
     _oModel:LoadValue( 'ZLXMASTER' , 'ZLX_VLRFRT' , _nFrete )
 EndIf
 
-Return( _nFrete )
+Return _nFrete
               
 /*
 ===============================================================================================================================
 Programa----------: AGLT035E
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Rotina auxiliar para retornar o valor de ICMS referente ao Frete
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AGLT035E( _cVeic , _cFornec , _cLojaF , _cTransp , _cLojaT , _nValAdc , _nValPed )
+User Function AGLT035E(_cVeic As Character,_cFornec As Character,_cLojaF As Character,_cTransp As Character,_cLojaT As Character,_nValAdc As Numeric,_nValPed As Numeric) As Numeric
 
-Local _oModel 		:= FWModelActive()
-Local _lCobFrt		:= ( _oModel:GetValue( 'ZLXMASTER' , 'ZLX_PGFRT' ) == "S" )
-Local _lIcmPed		:= .F.
-Local _cCapc		:= ""
-Local _nFrete		:= 0
-Local _nAlqICM		:= 0
-Local _nAux			:= 0
-Local _nTtFrt		:= 0
+Local _oModel 		:= FWModelActive() As Object
+Local _lCobFrt		:= ( _oModel:GetValue( 'ZLXMASTER' , 'ZLX_PGFRT' ) == "S" ) As Logical
+Local _lIcmPed		:= .F. As Logical
+Local _cCapc		:= "" As Character
+Local _nFrete		:= 0 As Numeric
+Local _nAlqICM		:= 0 As Numeric
+Local _nAux			:= 0 As Numeric
+Local _nTtFrt		:= 0 As Numeric
 
 If _lCobFrt
 	DBSelectArea("ZZV")
@@ -491,7 +461,7 @@ If _lCobFrt
 		If ZZT->( DBSeek( xFilial("ZZT") + _cTransp + _cLojaT + _cCapc ) )
 			DBSelectArea("ZZU")
 			ZZU->( DBSetOrder(1) )
-			IF ZZU->( DBSeek( xFilial("ZZU") + _cTransp + _cLojaT + PadR( _cCapc , TamSX3('ZZU_CAPACI')[01] ) + _cFornec + _cLojaF ) )
+			If ZZU->( DBSeek( xFilial("ZZU") + _cTransp + _cLojaT + PadR( _cCapc , TamSX3('ZZU_CAPACI')[01] ) + _cFornec + _cLojaF ) )
 				If ZZU->ZZU_VLRKM <> 0
 					_nFrete := Round( ( ZZU->ZZU_VLRKM * ZZU->ZZU_KMFORN ) , 2 )
 				ElseIf ZZU->ZZU_VLRCOM <> 0
@@ -504,16 +474,13 @@ If _lCobFrt
 	EndIf
 EndIf
 
-_nFrete += _nValAdc + IIF( _lIcmPed , _nValPed , 0 )
+_nFrete += _nValAdc + IIf( _lIcmPed , _nValPed , 0 )
 
 If _nFrete > 0 
-
 	_nAux			:= ( 100 - _nAlqICM ) / 100
 	_nTtFrt			:= _nFrete / _nAux
 	_nAlqICM		:= _nTtFrt - _nFrete
-	
 	M->ZLX_TVLFRT	:= _nTtFrt
-
 EndIf
 
 Return( _nAlqICM )
@@ -523,24 +490,21 @@ Return( _nAlqICM )
 Programa----------: AGLT035T
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Rotina auxiliar para retornar o valor total do Frete
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AGLT035T( _cVeic , _cFornec , _cLojaF , _cTransp , _cLojaT , _nValAdc , _nValPed )
+User Function AGLT035T(_cVeic As Character,_cFornec As Character,_cLojaF As Character,_cTransp As Character,_cLojaT As Character,_nValAdc As Numeric,_nValPed As Numeric) As Numeric
 
-Local _oModel 		:= FWModelActive()
-Local _lCobFrt		:= ( _oModel:GetValue( 'ZLXMASTER' , 'ZLX_PGFRT' ) == "S" )
-Local _cCapc		:= ""
-Local _nFrete		:= 0
-Local _nAlqICM		:= 0
-Local _nAux			:= 0
-Local _nTtFrt		:= 0
-Local _lIcmPed		:= .F.
+Local _oModel 		:= FWModelActive() As Object
+Local _lCobFrt		:= ( _oModel:GetValue( 'ZLXMASTER' , 'ZLX_PGFRT' ) == "S" ) As Logical
+Local _cCapc		:= "" As Character
+Local _nFrete		:= 0 As Numeric
+Local _nAlqICM		:= 0 As Numeric
+Local _nAux			:= 0 As Numeric
+Local _nTtFrt		:= 0 As Numeric
+Local _lIcmPed		:= .F. As Logical
 
 Default _nValAdc	:= 0
 
@@ -554,7 +518,7 @@ If _lCobFrt
 		If ZZT->( DBSeek( xFilial("ZZT") + _cTransp + _cLojaT + _cCapc ) )
 			DBSelectArea("ZZU")
 			ZZU->( DBSetOrder(1) )
-			IF ZZU->( DBSeek( xFilial("ZZU") + _cTransp + _cLojaT + PadR( _cCapc , TamSX3('ZZU_CAPACI')[01] ) + _cFornec + _cLojaF ) )
+			If ZZU->( DBSeek( xFilial("ZZU") + _cTransp + _cLojaT + PadR( _cCapc , TamSX3('ZZU_CAPACI')[01] ) + _cFornec + _cLojaF ) )
 				If ZZU->ZZU_VLRKM <> 0
 					_nFrete := Round( ( ZZU->ZZU_VLRKM * ZZU->ZZU_KMFORN ) , 2 )
 				ElseIf ZZU->ZZU_VLRCOM <> 0
@@ -567,13 +531,11 @@ If _lCobFrt
 	EndIf
 EndIf
 
-_nFrete += _nValAdc + IIF( _lIcmPed , _nValPed , 0 )
+_nFrete += _nValAdc + IIf( _lIcmPed , _nValPed , 0 )
 
 If _nFrete > 0
-
 	_nAux	:= ( 100 - _nAlqICM ) / 100
-	_nTtFrt	:= ( _nFrete / _nAux ) + IIF( _lIcmPed , 0 , _nValPed )
-
+	_nTtFrt	:= ( _nFrete / _nAux ) + IIf( _lIcmPed , 0 , _nValPed )
 EndIf
 
 Return( _nTtFrt )
@@ -583,22 +545,19 @@ Return( _nTtFrt )
 Programa----------: AGLT035G
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Rotina auxiliar para retornar o código do CTE com Zeros à Esquerda
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AGLT035G()
+User Function AGLT035G() As Character
 
-Local _aArea	:= GetArea()
-LOCAL _cCte		:= ''
+Local _aArea	:= FWGetArea() As Array
+Local _cCte		:= '' As Character
 
-_cCte := STRZERO( Val( M->ZLX_CTE ) , 9 )
+_cCte := StrZero( Val( M->ZLX_CTE ) , 9 )
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _cCte )
 
@@ -607,30 +566,27 @@ Return( _cCte )
 Programa----------: AGLT035H
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Rotina auxiliar para validar o cadastro da Análise do Leite de Terceiros
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AGLT035H()
+User Function AGLT035H() As Logical
 
-Local _aArea	:= GetArea()
-Local _lRet		:= .F.
-Local _cAlias	:= GetNextAlias()
+Local _aArea	:= FWGetArea() As Array
+Local _lRet		:= .F. As Logical
+Local _cAlias	:= GetNextAlias() As Character
 
 BeginSql alias _cAlias
 SELECT ZZX_CODIGO
-  FROM %table:ZZX%
+  FROM %Table:ZZX%
  WHERE D_E_L_E_T_ = ' '
    AND ZZX_FILIAL = %xFilial:ZZX%
    AND ZZX_FORNEC = %exp:M->ZLX_FORNEC%
    AND ZZX_LJFORN = %exp:M->ZLX_LJFORN%
    AND ZZX_CODIGO = %exp:M->ZLX_CODANA%
    AND NOT EXISTS (SELECT ZLX.ZLX_CODIGO
-          FROM %table:ZLX% ZLX
+          FROM %Table:ZLX% ZLX
          WHERE ZLX.D_E_L_E_T_ = ' '
                  AND ZLX_FILIAL = ZZX_FILIAL
                  AND ZLX.ZLX_CODANA = ZZX_CODIGO)
@@ -643,30 +599,27 @@ EndIf
 
 (_cAlias)->( DBCloseArea() )
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
-Return( _lRet )
+Return _lRet
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT035F
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Rotina auxiliar para validar os dados de Datas e Horas de Entrada x Saída
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AGLT035F()
+User Function AGLT035F() As Logical
 
-Local _lRet		:= .T.
-Local _nHorEnt	:= 0
-Local _nHorSai	:= 0
+Local _lRet		:= .T. As Logical
+Local _nHorEnt	:= 0 As Numeric
+Local _nHorSai	:= 0 As Numeric
 
-If !Empty(M->ZLX_DTSAID) .and. !Empty(M->ZLX_DATAEN)
+If !Empty(M->ZLX_DTSAID) .And. !Empty(M->ZLX_DATAEN)
 	If M->ZLX_DTSAID == M->ZLX_DATAEN
 		_nHorEnt := ( Val( SubStr( M->ZLX_HRENTR , 1 , 2 ) ) * 60 ) + Val( SubStr( M->ZLX_HRENTR , 4 , 2 ) )
 		_nHorSai := ( Val( SubStr( M->ZLX_HRSAID , 1 , 2 ) ) * 60 ) + Val( SubStr( M->ZLX_HRSAID , 4 , 2 ) )
@@ -677,34 +630,31 @@ If !Empty(M->ZLX_DTSAID) .and. !Empty(M->ZLX_DATAEN)
 	EndIf
 EndIf
 
-Return( _lRet )
+Return _lRet
 
 /*
 ===============================================================================================================================
 Programa----------: VALIDCOMIT
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Rotina auxiliar para validar os dados na confirmação da tela
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function VALIDCOMIT(oModel)
+Static Function VALIDCOMIT(oModel As Object) As Logical
 
-Local _nOper		:= oModel:GetOperation() //O valor 3 quando e uma inclusao
-                                             //O valor 4 quando e uma alteracao
-                                             //O valor 5 quando e uma exclusao.
-Local _oModel		:= oModel:GetModel()
-Local _lRet			:= .T.
-Local _lFecha		:= ( _oModel:GetValue( 'ZLXMASTER' , 'ZLX_STATUS' ) == '3' )
-Local _cCodFor		:= _oModel:GetValue( 'ZLXMASTER' , 'ZLX_FORNEC'	)
-Local _cLojFor		:= _oModel:GetValue( 'ZLXMASTER' , 'ZLX_LJFORN'	)
-Local _cCodAna		:= _oModel:GetValue( 'ZLXMASTER' , 'ZLX_CODANA'	)
-Local _aArea		:= GetArea()
-Private _cCodigo	:= _oModel:GetValue( 'ZLXMASTER' , 'ZLX_CODIGO'	)
+Local _nOper		:= oModel:GetOperation() As Numeric //O valor 3 quando e uma inclusao
+														//O valor 4 quando e uma alteracao
+														//O valor 5 quando e uma exclusao.
+Local _oModel		:= oModel:GetModel() As Object
+Local _lRet			:= .T. As Logical
+Local _lFecha		:= ( _oModel:GetValue( 'ZLXMASTER' , 'ZLX_STATUS' ) == '3' ) As Logical
+Local _cCodFor		:= _oModel:GetValue( 'ZLXMASTER' , 'ZLX_FORNEC'	) As Character
+Local _cLojFor		:= _oModel:GetValue( 'ZLXMASTER' , 'ZLX_LJFORN'	) As Character
+Local _cCodAna		:= _oModel:GetValue( 'ZLXMASTER' , 'ZLX_CODANA'	) As Character
+Local _aArea		:= FWGetArea() As Array
+Private _cCodigo	:= _oModel:GetValue( 'ZLXMASTER' , 'ZLX_CODIGO'	) As Character
 
 DBSelectArea('SA2')
 SA2->( DBSetOrder(1) )
@@ -723,8 +673,8 @@ If _lRet
 		Return( .F. )
 	EndIf
 
-	If _nOper == 3 .or. _nOper == 4
-		If !Empty(_oModel:GetValue('ZLXMASTER','ZLX_LISTA')) .AND. _nTotVolume # 0 .AND. (_oModel:GetValue('ZLXMASTER','ZLX_VOLNF') # _nTotVolume .OR. (_cCodFor+_cLojFor) # _cSalvaForn)
+	If _nOper == 3 .Or. _nOper == 4
+		If !Empty(_oModel:GetValue('ZLXMASTER','ZLX_LISTA')) .And. _nTotVolume # 0 .And. (_oModel:GetValue('ZLXMASTER','ZLX_VOLNF') # _nTotVolume .Or. (_cCodFor+_cLojFor) # _cSalvaForn)
 			Help(NIL, NIL, "AGLT03506", NIL, "O Campo Volume NF não pode ser modifiado", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Retire os vinculos com os Tickets para modifica-lo."})
        EndIf
 
@@ -734,7 +684,7 @@ If _lRet
 			If ZZX->ZZX_FORNEC == _cCodFor .And. ZZX->ZZX_LJFORN == _cLojFor
 				RecLock("ZZX",.F.)
 		       	ZZX->ZZX_ANAUSE := .T.
-		 	    ZZX->(MsUnLock())
+		 	    ZZX->(MSUnLock())
 				ZZX->(DBCommit())
 			Else
 				Help(NIL, NIL, "AGLT03507", NIL, "Não será possível confirmar a operação atual!", 1, 0, NIL, NIL, NIL, NIL, NIL, {"A análise de qualidade informada está registrada para outro Fornecedor."})
@@ -749,7 +699,7 @@ If _lRet
 				If ZZX->( DBSeek( xFilial("ZZX") + ZLX->ZLX_CODANA ) ) .And. ZLX->ZLX_CODANA <> _cCodAna
 					RecLock("ZZX",.F.)
 					ZZX->ZZX_ANAUSE := .F.
-			 	    ZZX->( MsUnLock() )
+			 	    ZZX->( MSUnLock() )
 					ZZX->( DBCommit() )
 			    EndIf
 			EndIf
@@ -764,48 +714,46 @@ If _lRet
 			If ZZX->( DBSeek( xFilial("ZZX") + ZLX->ZLX_CODANA ) )
 				RecLock("ZZX",.F.)
 			    ZZX->ZZX_ANAUSE := .F.
-			    ZZX->( MsUnLock() )
+			    ZZX->( MSUnLock() )
 				ZZX->( DBCommit() )
 		    EndIf
 		EndIf
 	EndIf
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
-Return( _lRet )
+Return _lRet
 
 /*
 ===============================================================================================================================
 Programa----------: F3ZZXLT
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Rotina auxiliar que monta a tela de consulta dos resultados de Análises de Leite de terceiros
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function F3ZZXLT()
+User Function F3ZZXLT() As Logical
 
-Local _oModel	:= FWModelActive()
-Local _oBrwAux	:= Nil
-Local _lRet		:= .F.
+Local _oModel	:= FWModelActive() As Object
+Local _oBrwAux	:= Nil As Object
+Local _lRet		:= .F. As Logical
 
-Local _cTitulo  := 'Consulta - Análises de Leite de Terceiros'
-Local _cFornec	:= _oModel:GetValue( 'ZLXMASTER' , 'ZLX_FORNEC' )
-Local _cLjForn	:= _oModel:GetValue( 'ZLXMASTER' , 'ZLX_LJFORN' )
-Local _cCodPrd	:= _oModel:GetValue( 'ZLXMASTER' , 'ZLX_PRODLT' )
-Local _cTipo	:= ''
-Local _bView	:= {|| FWExecView( "Análise - ["+ ZZX->ZZX_CODIGO +"]" , "AGLT029" , MODEL_OPERATION_VIEW ,, {||.T.} , {||.T.} ) }
+Local _cTitulo  := 'Consulta - Análises de Leite de Terceiros' As Character
+Local _cFornec	:= _oModel:GetValue( 'ZLXMASTER' , 'ZLX_FORNEC' ) As Character
+Local _cLjForn	:= _oModel:GetValue( 'ZLXMASTER' , 'ZLX_LJFORN' ) As Character
+Local _cCodPrd	:= _oModel:GetValue( 'ZLXMASTER' , 'ZLX_PRODLT' ) As Character
+Local _cTipo	:= '' As Character
+Local _bView	:= {|| FWExecView( "Análise - ["+ ZZX->ZZX_CODIGO +"]" , "AGLT029" , MODEL_OPERATION_VIEW ,, {||.T.} , {||.T.} ) } As Codeblock
 
-Local _bInc 	:= {|| FWExecView( "Inclusão"                            , "AGLT029" , 3 ,, {||.T.} , {||.T.} ),U_F3QRYZZX(_cFornec, _cLjForn, _cTipo, _cCodPrd),U_AGLT035N() } // 3 - Inserção
-Local _bAlt	    := {|| FWExecView( "Alteração - ["+ ZZX->ZZX_CODIGO +"]" , "AGLT029" , 4 ,, {||.T.} , {||.T.} ),U_F3QRYZZX(_cFornec, _cLjForn, _cTipo, _cCodPrd),U_AGLT035N() } // 4 - Atualização
-Local _bExc     := {|| FWExecView( "Exclusão  - ["+ ZZX->ZZX_CODIGO +"]" , "AGLT029" , 5 ,, {||.T.} , {||.T.} ),U_F3QRYZZX(_cFornec, _cLjForn, _cTipo, _cCodPrd),U_AGLT035N() } // 5 - Exclusão
+Local _bInc 	:= {|| FWExecView( "Inclusão"                            , "AGLT029" , 3 ,, {||.T.} , {||.T.} ),U_F3QRYZZX(_cFornec, _cLjForn, _cTipo, _cCodPrd),U_AGLT035N() } As Codeblock // 3 - Inserção
+Local _bAlt	    := {|| FWExecView( "Alteração - ["+ ZZX->ZZX_CODIGO +"]" , "AGLT029" , 4 ,, {||.T.} , {||.T.} ),U_F3QRYZZX(_cFornec, _cLjForn, _cTipo, _cCodPrd),U_AGLT035N() } As Codeblock // 4 - Atualização
+Local _bExc     := {|| FWExecView( "Exclusão  - ["+ ZZX->ZZX_CODIGO +"]" , "AGLT029" , 5 ,, {||.T.} , {||.T.} ),U_F3QRYZZX(_cFornec, _cLjForn, _cTipo, _cCodPrd),U_AGLT035N() } As Codeblock // 5 - Exclusão
 
-Private _aDados   := {{"","","","","","","","","","","",""}}, _oLbx := Nil
+Private _aDados := {{"","","","","","","","","","","",""}} As Array
+Private _oLbx 	:= Nil As Object
 
 U_F3QRYZZX(_cFornec, _cLjForn, _cTipo, _cCodPrd)
 
@@ -853,19 +801,16 @@ Return(_lRet)
 Programa----------: AGLT035P
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Rotina auxiliar para retornar o código do CTE com Zeros à Esquerda
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AGLT035P( _cCodPrd , _nVlMin )
+User Function AGLT035P(_cCodPrd As Character,_nVlMin As Numeric) As Logical
 
-Local _lRet		:= .T.
-Local _cValMin	:= ''
-Local _cValMax	:= ''
+Local _lRet		:= .T. As Logical
+Local _cValMin	:= '' As Character
+Local _cValMax	:= '' As Character
 
 DBSelectArea('ZA7')
 ZA7->( DBSetOrder(1) )
@@ -885,24 +830,21 @@ Else
 	EndIf
 EndIf
 
-Return( _lRet )
+Return _lRet
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT035D
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Rotina auxiliar para desvincular uma recepção da Análise de Qualidade
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AGLT035D()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea() As Array
 
 If ZLX->ZLX_STATUS == '3'
 	MsgStop('Não é permitido desvincular uma Análise de uma Recepção que esteja com o Status de "Fechamento Concluído"!',"AGLT03510")
@@ -918,14 +860,14 @@ Else
 		If ZZX->( DBSeek( xFilial('ZZX') + ZLX->ZLX_CODANA ) )
 			RecLock( 'ZZX' , .F. )
 			ZZX->ZZX_ANAUSE := .F.
-			ZZX->( MsUnLock() )
+			ZZX->( MSUnLock() )
 			
 			RecLock( 'ZLX' , .F. )
 			ZLX->ZLX_CODANA := ''
 			ZLX->ZLX_STATUS	:= '1'
 			ZLX->ZLX_TEORAN	:= 0
 			ZLX->ZLX_TEOEST	:= 0
-			ZLX->ZLX_DATAEN	:= STOD('')
+			ZLX->ZLX_DATAEN	:= SToD('')
 			ZLX->ZLX_HRENTR	:= ''
 			ZLX->ZLX_PLACA	:= ''
 			ZLX->ZLX_VLRFRT	:= 0
@@ -933,44 +875,39 @@ Else
 			ZLX->ZLX_TRANSP	:= ''
 			ZLX->ZLX_LJTRAN	:= ''
 			ZLX->ZLX_ICMSFR	:= 0
-			ZLX->( MsUnLock() )
+			ZLX->( MSUnLock() )
 		Else
 			MsgStop("Não será possível desvincular a Análise pois a mesma não foi encontrada! Verifique os dados das Análises para tentar novamente.","AGLT03512")
 		EndIf
 		
 		End Transaction
-		
 	EndIf
-
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT035I
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Rotina auxiliar para verificar o cálculo e a aplicação do ICMS ao valor do pedágio
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AGLT035I( _nOpcao , _nValOrg , _nValAdc , _nValPed , _cCodTra , _cLojTra , _cCodFor , _cLojFor , _cPlaca )
+User Function AGLT035I(_nOpcao As Numeric,_nValOrg As Numeric,_nValAdc As Numeric,_nValPed As Numeric,_cCodTra As Character,_cLojTra As Character,_cCodFor As Character,_cLojFor As Character,_cPlaca As Character)
 
-Local _nRet		:= 0
-Local _cICMPED	:= Posicione('ZZU',2,xFilial('ZZU')+_cCodTra+_cLojTra+_cCodFor+_cLojFor,'ZZU_ICMPED') // Order 2 = ZZU_FILIAL+ZZU_TRANSP+ZZU_LJTRAN+ZZU_FORNEC+ZZU_LJFORN
+Local _nRet		:= 0 As Numeric
+Local _cICMPED	:= Posicione('ZZU',2,xFilial('ZZU')+_cCodTra+_cLojTra+_cCodFor+_cLojFor,'ZZU_ICMPED') As Character// Order 2 = ZZU_FILIAL+ZZU_TRANSP+ZZU_LJTRAN+ZZU_FORNEC+ZZU_LJFORN
 
 If _nOpcao == 1 .And. (  Empty(_cICMPED) .Or.  _cICMPED <> "S" )
 	_nRet += _nValPed
 EndIf
 
-_nRet += U_AGLT035C( _cPlaca , _cCodFor , _cLojFor , _cCodTra , _cLojTra , _nValAdc )
+_nRet += U_AGLT035C(_nOpcao, _cPlaca , _cCodFor , _cLojFor , _cCodTra , _cLojTra , _nValAdc )
 
 Return( _nRet )
 
@@ -979,41 +916,38 @@ Return( _nRet )
 Programa----------: MenuDef
 Autor-------------: Alexandre Villar
 Data da Criacao---: 08/12/2014
-===============================================================================================================================
 Descrição---------: Rotina para montar o menu da tela principal com as funcionalidades da rotina
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function AGLT035VLD( _oModel )
+Static Function AGLT035VLD(_oModel As Object) As Logical
 
-Local _lRet		:= .T.
-Local _nX		:= 0
-Local _nOper	:= _oModel:GetOperation()//O valor 3 quando e uma inclusao;O valor 4 quando e uma alteracao; O valor 5 quando e uma exclusao.
-LOCAL _oAux     := _oModel:GetModel('ZLXMASTER')
-LOCAL _oStruct  := _oAux:GetStruct()      
-LOCAL _aFields  := {"ZLX_FORNEC","ZLX_LJFORN","ZLX_DTENTR","ZLX_CODANA","ZLX_DTSAID","ZLX_HRSAID","ZLX_VOLNF","ZLX_PESOCA","ZLX_PESOVA",;
-                    "ZLX_CTE"   ,"ZLX_CTESER","ZLX_PEDAGI","ZLX_MEDVAZ"	}
+Local _lRet		:= .T. As Logical
+Local _nX		:= 0 As  Numeric
+Local _nOper	:= _oModel:GetOperation() As Numeric//O valor 3 quando e uma inclusao;O valor 4 quando e uma alteracao; O valor 5 quando e uma exclusao.
+Local _oAux     := _oModel:GetModel('ZLXMASTER') As Object
+Local _oStruct  := _oAux:GetStruct() As Object
+Local _aFields  := {"ZLX_FORNEC","ZLX_LJFORN","ZLX_DTENTR","ZLX_CODANA","ZLX_DTSAID","ZLX_HRSAID","ZLX_VOLNF","ZLX_PESOCA","ZLX_PESOVA",;
+                    "ZLX_CTE"   ,"ZLX_CTESER","ZLX_PEDAGI","ZLX_MEDVAZ"	} As Array
 
 If _nOper <> MODEL_OPERATION_INSERT .And. _nOper <> 1
 
-	If !Empty(ZLX->ZLX_STATUS) .AND. ZLX->ZLX_STATUS <> '1'
+	If !Empty(ZLX->ZLX_STATUS) .And. ZLX->ZLX_STATUS <> '1'
 		Help(NIL, NIL, "AGLT03513", NIL, "O registro atual encontra-se bloqueado!", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Para realizar essa operação é necessário estornar o Fechamento e/ou a Classificação."})
 		_lRet := .F.
-	ElseIf !Empty(ZLX->ZLX_ORIGEM) .AND. _nOper = 5 .AND. ZLX->ZLX_ORIGEM <> '1'//não pode exluir linhas com origem 2 3 
+	ElseIf !Empty(ZLX->ZLX_ORIGEM) .And. _nOper = 5 .And. ZLX->ZLX_ORIGEM <> '1'//não pode exluir linhas com origem 2 3 
 		Help(NIL, NIL, "AGLT03514", NIL, "A Recepção não pode ser excluida.", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Só pode ser excluido pela origem que gerou 2 ou 3 : "+ZLX->ZLX_ORIGEM})
 		_lRet := .F.
-	ElseIf Empty(ZLX->ZLX_ORIGEM) .AND. _nOper = 5  .AND. !Empty(ZLX->ZLX_CODANA)//não pode exluir se tiver análise vinculada
+	ElseIf Empty(ZLX->ZLX_ORIGEM) .And. _nOper = 5  .And. !Empty(ZLX->ZLX_CODANA)//não pode exluir se tiver análise vinculada
 		Help(NIL, NIL, "AGLT03540", NIL, "A Recepção não pode ser excluida.", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Para excluir a recepção, retire a análise vinculada."})
 		_lRet := .F.
-	ElseIf !Empty(ZLX->ZLX_ORIGEM) .AND. _nOper = 4 .AND. ZLX->ZLX_ORIGEM $ '2,3'//Pode alterar somente OBS , Paga Frete , Acréscimos ou Desconto
+	ElseIf !Empty(ZLX->ZLX_ORIGEM) .And. _nOper = 4 .And. ZLX->ZLX_ORIGEM $ '2,3'//Pode alterar somente OBS , Paga Frete , Acréscimos ou Desconto
        //Setores Primários
 	   For _nX := 1 To Len(_aFields)
            _oStruct:SetProperty( _aFields[_nX], MODEL_FIELD_WHEN, {||.F.} )
 	   Next _nX
-	ElseIf !Empty(ZLX->ZLX_LISTA) .AND. _nOper = 4 
+	ElseIf !Empty(ZLX->ZLX_LISTA) .And. _nOper = 4 
        //Setores Secundários
        _nTotVolume:=ZLX->ZLX_VOLNF
        _cSalvaForn:=ZLX->ZLX_FORNEC+ZLX->ZLX_LJFORN
@@ -1028,31 +962,28 @@ Else
 	Next _nX
 EndIf
 
-Return( _lRet )
+Return _lRet
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT035X
 Autor-------------: Alexandre Villar
 Data da Criacao---: 08/12/2014
-===============================================================================================================================
 Descrição---------: Rotina para classificação das recepções
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AGLT035X( _nOpca )
+User Function AGLT035X(_nOpca As Numeric)
 
-Local _aCampos	:= {}
-Local _aRecep	:= {}
-Local _cPerg	:= 'AGLT035X'
-Local _cAlias	:= ''
-Local _nRegOk	:= 0
-Local _nI		:= 0
-Local _nSel		:= 0
-Local _cCodUsr	:= RetCodUsr()
+Local _aCampos	:= {} As Array
+Local _aRecep	:= {} As Array
+Local _cPerg	:= 'AGLT035X' As Character
+Local _cAlias	:= '' As Character
+Local _nRegOk	:= 0 As Numeric
+Local _nI		:= 0 As Numeric
+Local _nSel		:= 0 As Numeric
+Local _cCodUsr	:= RetCodUsr() As Character
 
 If _nOpca == 2
 
@@ -1062,10 +993,10 @@ If _nOpca == 2
 		
 		ZLX->ZLX_STATUS := '1'
 		ZLX->ZLX_USRCLS	:= _cCodUsr
-		ZLX->ZLX_DTCLAS	:= DATE()
-		ZLX->ZLX_HRCLAS	:= TIME()
+		ZLX->ZLX_DTCLAS	:= Date()
+		ZLX->ZLX_HRCLAS	:= Time()
 		
-		ZLX->( MsUnLock() )
+		ZLX->( MSUnLock() )
 		Help(NIL, NIL, "AGLT03515", NIL, "Estorno da classificação realizado com sucesso!", 1, 0, NIL, NIL, NIL, NIL, NIL, {""})
 	Else
 		
@@ -1117,9 +1048,9 @@ If _nOpca == 2
 							RecLock( 'ZLX' , .F. )
 								ZLX->ZLX_STATUS := '1'
 								ZLX->ZLX_USRCLS	:= _cCodUsr
-								ZLX->ZLX_DTCLAS	:= DATE()
-								ZLX->ZLX_HRCLAS	:= TIME()
-							ZLX->( MsUnLock() )
+								ZLX->ZLX_DTCLAS	:= Date()
+								ZLX->ZLX_HRCLAS	:= Time()
+							ZLX->( MSUnLock() )
 						
 						EndIf
 					
@@ -1224,10 +1155,10 @@ ElseIf _nOpca == 1
 							
 							ZLX->ZLX_STATUS := '2'
 							ZLX->ZLX_USRCLS	:= _cCodUsr
-							ZLX->ZLX_DTCLAS	:= DATE()
-							ZLX->ZLX_HRCLAS	:= TIME()
+							ZLX->ZLX_DTCLAS	:= Date()
+							ZLX->ZLX_HRCLAS	:= Time()
 							
-							ZLX->( MsUnLock() )
+							ZLX->( MSUnLock() )
 							
 							_nRegOk++
 						
@@ -1269,16 +1200,14 @@ Else
 	Help(NIL, NIL, "AGLT03525", NIL, "Não é possível realizar essa operação no registro selecionado", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Verifique o registro atual e tente novamente."})
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: AGLT035C
 Autor-----------: Alexandre Villar
 Data da Criacao-: 08/12/2014
-===============================================================================================================================
 Descrição-------: Rotina para validação da amarração CTE/NF
-===============================================================================================================================
 Parametros------: _cCTE		- Número do CTE
 ----------------: _cCTESer	- Série do CTE
 ----------------: _cTransp	- Código do Transportador
@@ -1287,14 +1216,13 @@ Parametros------: _cCTE		- Número do CTE
 ----------------: _cNFSer		- Série da NF
 ----------------: _cFornec	- Fornecedor da NF
 ----------------: _cLjForn	- Loja do Fornecedor da NF
-===============================================================================================================================
 Retorno---------: _lRet		- Valida se a amarração está correta
 ===============================================================================================================================
 */
-User Function ALGT035C( _cCodRec , _cCTE , _cCTESer )
+User Function ALGT035C(_cCodRec As Character,_cCTE As Character,_cCTESer As Character) As Logical
 
-Local _lRet			:= .T.
-Local _cAlias		:= GetNextAlias()
+Local _lRet			:= .T. As Logical
+Local _cAlias		:= GetNextAlias() As Character
 
 Default _cCodRec	:= ''
 Default _cCTE		:= ''
@@ -1324,40 +1252,37 @@ If !Empty(_cCodRec) .And. !Empty(_cCTE) .And. !Empty(_cCTESer)
 
 EndIf
 
-Return( _lRet )
+Return _lRet
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT035V
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Rotina para validação do código de Fornecedor digitado na tela
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AGLT035V( _nCampo )
+User Function AGLT035V(_nCampo As Numeric) As Logical
 
-Local _aArea	:= GetArea()
-Local _lRet		:= .T.
-Local _oModel	:= FWModelActive()
-Local _cCodFor	:= ''
-Local _cLojFor	:= ''
+Local _aArea	:= FWGetArea() As Array
+Local _lRet		:= .T. As Logical
+Local _oModel	:= FWModelActive() As Object
+Local _cCodFor	:= '' As Character
+Local _cLojFor	:= '' As Character
 
 If _nCampo = 3
 	_nZLX_MEDVAZ:=_oModel:GetValue( 'ZLXMASTER' , 'ZLX_MEDVAZ' )
 	_nZLX_PESOLI:=_oModel:GetValue( 'ZLXMASTER' , 'ZLX_PESOLI' )
-	If _nZLX_PESOLI # 0 .AND. _nZLX_MEDVAZ # 0 
+	If _nZLX_PESOLI # 0 .And. _nZLX_MEDVAZ # 0 
 		Help(NIL, NIL, "AGLT03527", NIL, "Medidor de Vazão não pode ser preenchido", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Zere o campo de Peso Liquido para poder usa-lo."})
 		Return .F.
 	EndIf
 	Return .T.
 ElseIf _nCampo = 4
 	M->ZLX_VOLNF:=_oModel:GetValue('ZLXMASTER','ZLX_VOLNF')
-	If !Empty(_oModel:GetValue('ZLXMASTER','ZLX_LISTA')) .AND. _nTotVolume <> 0 .AND. (M->ZLX_VOLNF <> _nTotVolume)
+	If !Empty(_oModel:GetValue('ZLXMASTER','ZLX_LISTA')) .And. _nTotVolume <> 0 .And. (M->ZLX_VOLNF <> _nTotVolume)
 		Help(NIL, NIL, "AGLT03528", NIL, "O Campo Volume NF não pode ser modifiado.", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Retire os vinculos com os Tickets para modifica-lo."})
 		_oModel:LoadValue( 'ZLXMASTER' , 'ZLX_VOLNF' , _nTotVolume)
 		M->ZLX_VOLNF:=_nTotVolume
@@ -1368,7 +1293,7 @@ ElseIf _nCampo = 1
 	_cCodFor	:= _oModel:GetValue( 'ZLXMASTER' , 'ZLX_FORNEC' )
 	_cLojFor	:= _oModel:GetValue( 'ZLXMASTER' , 'ZLX_LJFORN' )
 	M->ZLX_LISTA:= _oModel:GetValue( 'ZLXMASTER' , 'ZLX_LISTA'  )
-	If !Empty(M->ZLX_LISTA) .AND. !Empty(_cSalvaForn) .AND. _cCodFor+_cLojFor # _cSalvaForn
+	If !Empty(M->ZLX_LISTA) .And. !Empty(_cSalvaForn) .And. _cCodFor+_cLojFor # _cSalvaForn
 		Help(NIL, NIL, "AGLT03529", NIL, "O Fornecedor não pode ser modifiado.", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Retire os vinculos com os Tickets para modifica-lo."})
 	    Return .F.
 	EndIf
@@ -1386,136 +1311,126 @@ Else
 	_lRet := .F.
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
-Return( _lRet )
+Return _lRet
 
 /*
 ===============================================================================================================================
 Programa----------: F3QRYZZX
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 19/02/2018
-===============================================================================================================================
 Descrição---------: Roda a query de dados para a cosulta específica F3ZZXLT.
-===============================================================================================================================
 Parametros--------: _cFornec = Codigo do fornecedor
                     _cLjForn = Loja do fornecedor
                     _cTipo   = Tipo de produto
                     _cCodPrd = Código do produto.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function F3QRYZZX(_cFornec, _cLjForn, _cTipo, _cCodPrd)
-Local _cAlias	:= GetNextAlias()
-Local _cFiltro	:=""
-Begin Sequence
-   _aDados := {}
-   
-	BeginSql alias _cAlias
-		SELECT DISTINCT ZA7_TIPPRD
-		FROM %table:ZA7%
-		WHERE D_E_L_E_T_ =' '
-		AND ZA7_FILIAL = %xFilial:ZA7%
-		AND ZA7_CODPRD = %exp:_cCodPrd%
-	EndSql
+User Function F3QRYZZX(_cFornec As Character,_cLjForn As Character,_cTipo As Character,_cCodPrd As Character)
 
-   While (_cAlias)->( !Eof() )
-	  _cTipo += (_cAlias)->ZA7_TIPPRD +';'
-      (_cAlias)->( DBSkip() )
-   EndDo
+Local _cAlias	:= GetNextAlias() As Character
+Local _cFiltro	:="" As Character
 
-   (_cAlias)->( DBCloseArea() )
+_aDados := {}
 
-   If !Empty(_cTipo)
-	  _cTipo := SubStr( _cTipo , 1 , Len(_cTipo) - 1 )
-   EndIf
-	_cFiltro:= "% AND ZZX.ZZX_CODPRD IN " +FormatIn(_cTipo, ';')+ " %"
-	_cAlias	:= GetNextAlias()
-	BeginSql alias _cAlias
-		SELECT ZZX.ZZX_CODIGO, ZZX.ZZX_DATA, ZZX.ZZX_HORA, ZZX.ZZX_FORNEC, ZZX.ZZX_LJFORN, A2F.A2_NREDUZ FORNECE,
-		       ZZX.ZZX_PLACA, ZZX.ZZX_TRANSP, ZZX.ZZX_LJTRAN, A2T.A2_NREDUZ TRANSPO, ZZX.ZZX_DENSID, ZZX.R_E_C_N_O_ REGZZX
-		  FROM %Table:ZZX% ZZX, %Table:SA2% A2F, %Table:SA2% A2T
-		 WHERE ZZX.D_E_L_E_T_ = ' '
-		   AND A2F.D_E_L_E_T_ = ' '
-		   AND A2T.D_E_L_E_T_ = ' '
-		   AND ZZX.ZZX_FILIAL = %xFilial:ZZX%
-		   AND A2F.A2_COD = ZZX.ZZX_FORNEC
-		   AND A2F.A2_LOJA = ZZX.ZZX_LJFORN
-		   AND A2T.A2_COD = ZZX.ZZX_TRANSP
-		   AND A2T.A2_LOJA = ZZX.ZZX_LJTRAN
-		   AND ZZX.ZZX_FORNEC = %exp:_cFornec%
-		   AND ZZX.ZZX_LJFORN = %exp:_cLjForn%
-		   AND NOT EXISTS (SELECT ZLX.ZLX_CODIGO
-		          FROM %Table:ZLX% ZLX
-		         WHERE ZLX.D_E_L_E_T_ = ' '
-		           AND ZZX.ZZX_FILIAL = ZLX.ZLX_FILIAL
-		           AND ZLX.ZLX_CODANA = ZZX.ZZX_CODIGO)
-		   %exp:_cFiltro%
-		 ORDER BY ZZX_CODIGO
-    EndSql
-    
-	While (_cAlias)->( !Eof() )
+BeginSql alias _cAlias
+	SELECT DISTINCT ZA7_TIPPRD
+	FROM %Table:ZA7%
+	WHERE D_E_L_E_T_ =' '
+	AND ZA7_FILIAL = %xFilial:ZA7%
+	AND ZA7_CODPRD = %exp:_cCodPrd%
+EndSql
 
-		aAdd( _aDados , {	(_cAlias)->ZZX_CODIGO	,;
-						DtoC( StoD(	(_cAlias)->ZZX_DATA ) )	,;
-   				 		(_cAlias)->ZZX_HORA		,;
-   				 		(_cAlias)->ZZX_FORNEC	,;
-   				 		(_cAlias)->ZZX_LJFORN	,;
-   				 		(_cAlias)->FORNECE		,;
-   				 		(_cAlias)->ZZX_PLACA	,;
-   				 		(_cAlias)->ZZX_TRANSP	,;
-   				 		(_cAlias)->ZZX_LJTRAN	,;
-   				 		(_cAlias)->TRANSPO		,;
-   				 		(_cAlias)->ZZX_DENSID	,;
-   				 		(_cAlias)->REGZZX		})
+While (_cAlias)->( !Eof() )
+	_cTipo += (_cAlias)->ZA7_TIPPRD +';'
+	(_cAlias)->( DBSkip() )
+EndDo
 
-      (_cAlias)->( DBSkip() )
-   EndDo
+(_cAlias)->( DBCloseArea() )
 
-   (_cAlias)->( DBCloseArea() )
+If !Empty(_cTipo)
+	_cTipo := SubStr( _cTipo , 1 , Len(_cTipo) - 1 )
+EndIf
+_cFiltro:= "% AND ZZX.ZZX_CODPRD IN " +FormatIn(_cTipo, ';')+ " %"
+_cAlias	:= GetNextAlias()
+BeginSql alias _cAlias
+	SELECT ZZX.ZZX_CODIGO, ZZX.ZZX_DATA, ZZX.ZZX_HORA, ZZX.ZZX_FORNEC, ZZX.ZZX_LJFORN, A2F.A2_NREDUZ FORNECE,
+			ZZX.ZZX_PLACA, ZZX.ZZX_TRANSP, ZZX.ZZX_LJTRAN, A2T.A2_NREDUZ TRANSPO, ZZX.ZZX_DENSID, ZZX.R_E_C_N_O_ REGZZX
+		FROM %Table:ZZX% ZZX, %Table:SA2% A2F, %Table:SA2% A2T
+		WHERE ZZX.D_E_L_E_T_ = ' '
+		AND A2F.D_E_L_E_T_ = ' '
+		AND A2T.D_E_L_E_T_ = ' '
+		AND ZZX.ZZX_FILIAL = %xFilial:ZZX%
+		AND A2F.A2_COD = ZZX.ZZX_FORNEC
+		AND A2F.A2_LOJA = ZZX.ZZX_LJFORN
+		AND A2T.A2_COD = ZZX.ZZX_TRANSP
+		AND A2T.A2_LOJA = ZZX.ZZX_LJTRAN
+		AND ZZX.ZZX_FORNEC = %exp:_cFornec%
+		AND ZZX.ZZX_LJFORN = %exp:_cLjForn%
+		AND NOT EXISTS (SELECT ZLX.ZLX_CODIGO
+				FROM %Table:ZLX% ZLX
+				WHERE ZLX.D_E_L_E_T_ = ' '
+				AND ZZX.ZZX_FILIAL = ZLX.ZLX_FILIAL
+				AND ZLX.ZLX_CODANA = ZZX.ZZX_CODIGO)
+		%exp:_cFiltro%
+		ORDER BY ZZX_CODIGO
+EndSql
 
-End Sequence
+While (_cAlias)->( !Eof() )
+
+	aAdd( _aDados , {	(_cAlias)->ZZX_CODIGO	,;
+					DToC( SToD(	(_cAlias)->ZZX_DATA ) )	,;
+					(_cAlias)->ZZX_HORA		,;
+					(_cAlias)->ZZX_FORNEC	,;
+					(_cAlias)->ZZX_LJFORN	,;
+					(_cAlias)->FORNECE		,;
+					(_cAlias)->ZZX_PLACA	,;
+					(_cAlias)->ZZX_TRANSP	,;
+					(_cAlias)->ZZX_LJTRAN	,;
+					(_cAlias)->TRANSPO		,;
+					(_cAlias)->ZZX_DENSID	,;
+					(_cAlias)->REGZZX		})
+
+	(_cAlias)->( DBSkip() )
+EndDo
+
+(_cAlias)->( DBCloseArea() )
 
 If Empty(_aDados)
    _aDados   := {{"","","","","","","","","","","",1}}
 EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT035N()
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 20/02/2018
-===============================================================================================================================
 Descrição---------: Atualizar a tela da cosulta específica F3ZZXLT.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AGLT035N()
 
-Begin Sequence
-   _oLbx:SetArray( _aDados )
-   _oLbx:bLine := {|| { _aDados[_oLbx:nAt][01] ,;
-			            _aDados[_oLbx:nAt][02] ,;
-			            _aDados[_oLbx:nAt][03] ,;
-			            _aDados[_oLbx:nAt][04] ,;
-        	            _aDados[_oLbx:nAt][05] ,;
-			            _aDados[_oLbx:nAt][06] ,;
-			            _aDados[_oLbx:nAt][07] ,;
-			            _aDados[_oLbx:nAt][08] ,;
-	                    _aDados[_oLbx:nAt][09] ,;
-			            _aDados[_oLbx:nAt][10] ,;
-			            _aDados[_oLbx:nAt][11] ,;
-			            _aDados[_oLbx:nAt][12] }}
-   _oLbx:GoTop()			            
-   _oLbx:Refresh() 
-
-End Sequence
+_oLbx:SetArray( _aDados )
+_oLbx:bLine := {|| { _aDados[_oLbx:nAt][01] ,;
+					_aDados[_oLbx:nAt][02] ,;
+					_aDados[_oLbx:nAt][03] ,;
+					_aDados[_oLbx:nAt][04] ,;
+					_aDados[_oLbx:nAt][05] ,;
+					_aDados[_oLbx:nAt][06] ,;
+					_aDados[_oLbx:nAt][07] ,;
+					_aDados[_oLbx:nAt][08] ,;
+					_aDados[_oLbx:nAt][09] ,;
+					_aDados[_oLbx:nAt][10] ,;
+					_aDados[_oLbx:nAt][11] ,;
+					_aDados[_oLbx:nAt][12] }}
+_oLbx:GoTop()			            
+_oLbx:Refresh() 
 
 Return
 
@@ -1524,30 +1439,28 @@ Return
 Programa----------: AGLT35Tickets(oView)
 Autor-------------: Alex Wallauer
 Data da Criacao---: 15/02/2018
-===============================================================================================================================
 Descrição---------: Monta Tela para consulta dos Tickets
-===============================================================================================================================
 Parametros--------: oView
-===============================================================================================================================
 Retorno-----------: .T.
 ===============================================================================================================================
 /*/  
 
-Static Function AGLT35Tickets(oView)
+Static Function AGLT35Tickets(oView As Object) As Logical
 
-Local _nX			:= 0
-Local _cAlias		:= GetNextAlias()
-Local _oModel		:= FWModelActive()
-Local _nOper		:= _oModel:GetOperation()
-Local _cPit			:= PesqPict("ZLD","ZLD_TOTBOM")
-Local _cFiltro		:= "%"
-Local _cSetor		:= ""
-Private nTam      	:= LEN(ZLD->ZLD_TICKET+ZLD->ZLD_SETOR)
-Private nMaxSelect	:= 0
-Private aCat      	:= {}
-Private MvPar     	:= ""
-Private cTitulo   	:= ""
-Private MvParDef  	:= ""
+Local _nX			:= 0 As Numeric
+Local _cAlias		:= GetNextAlias() As Character
+Local _oModel		:= FWModelActive() As Object
+Local _nOper		:= _oModel:GetOperation() As Numeric
+Local _cPit			:= PesqPict("ZLD","ZLD_TOTBOM") As Character
+Local _cFiltro		:= "%" As Character
+Local _cSetor		:= "" As Character
+Private nTam      	:= Len(ZLD->ZLD_TICKET+ZLD->ZLD_SETOR) As Numeric
+Private nMaxSelect	:= 0 As Numeric
+Private aCat      	:= {} As Array
+Private MvPar     	:= "" As Character
+Private cTitulo   	:= "" As Character
+Private MvParDef  	:= "" As Character
+Private _cViagens 	:= "" As Character
 
 If M->ZLX_ORIGEM $ "2,3"
 	Help(NIL, NIL, "AGLT03531", NIL, "Essa Recepção de Leite NÃO tem origem na Recepcao Leite Terceiros MANUAL (1)", 1, 0, NIL, NIL, NIL, NIL, NIL, {""})
@@ -1559,13 +1472,13 @@ If Empty(M->ZLX_FORNEC)
 	Return(.F.)
 EndIf
 
-If !Empty(M->ZLX_LISTA) .AND. !Empty(_cSalvaForn) .AND. M->ZLX_FORNEC+M->ZLX_LJFORN # _cSalvaForn
+If !Empty(M->ZLX_LISTA) .And. !Empty(_cSalvaForn) .And. M->ZLX_FORNEC+M->ZLX_LJFORN # _cSalvaForn
 	Help(NIL, NIL, "AGLT03533", NIL, "O Fornecedor não pode ser modifiado.", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Retire os vinculos com os Tickets para modifica-lo"})
 EndIf
 
 BeginSql alias _cAlias
 	SELECT ZL2_COD , ZL2_CRIRT
-	FROM %table:ZL2%
+	FROM %Table:ZL2%
 	WHERE D_E_L_E_T_ =' '
 	AND ZL2_FILIAL = %xFilial:ZL2%
 	AND ZL2_CRIRT = '2' 
@@ -1573,7 +1486,7 @@ BeginSql alias _cAlias
 	AND ZL2_PLALOJ = %exp:M->ZLX_LJFORN%
 EndSql
 
-Do While (_cAlias)->(!EOF())
+While (_cAlias)->(!Eof())
    _cSetor+="'"+(_cAlias)->ZL2_COD+"',"
    (_cAlias)->(DBSkip())
 EndDo
@@ -1586,9 +1499,7 @@ If Empty( _cSetor )
    Return .F.
 EndIf
 
-PRIVATE _cViagens:= ""
-
-Do While  !_nOper  = MODEL_OPERATION_VIEW .AND. !_nOper = MODEL_OPERATION_DELETE
+While  !_nOper  = MODEL_OPERATION_VIEW .And. !_nOper = MODEL_OPERATION_DELETE
 
    _lOK     := .F.
    _nLinha  := 05
@@ -1598,7 +1509,7 @@ Do While  !_nOper  = MODEL_OPERATION_VIEW .AND. !_nOper = MODEL_OPERATION_DELETE
 
    DEFINE MSDIALOG _oDlg TITLE "Tickets / Viagens"  FROM 000,000 TO 170,330 PIXEL
    
-	@ _nLinha,_nCol1 SAY "    DIGITE OS TICKETS SEPERADOS POR VIRGULA:" PIXEL
+	@ _nLinha,_nCol1 Say "    DIGITE OS TICKETS SEPERADOS POR VIRGULA:" PIXEL
 	_nLinha+=_nPula
 
 	@ _nLinha,_nCol1 GET _cViagens MEMO SIZE 150,040 PIXEL OF _oDlg 
@@ -1615,7 +1526,7 @@ Do While  !_nOper  = MODEL_OPERATION_VIEW .AND. !_nOper = MODEL_OPERATION_DELETE
       Return .F.
    EndIf
 
-   _cViagens:= ALLTRIM(_cViagens)
+   _cViagens:= AllTrim(_cViagens)
    If Len(_cViagens) >= Len(ZLD->ZLD_TICKET)
       _cViagens:= StrTran(_cViagens,Chr(10),"")
       _cViagens:= StrTran(_cViagens,Chr(13),"")
@@ -1644,15 +1555,15 @@ Else
    _cFiltro += "AND ZLD_SETOR = "+_cSetor
 EndIf
 
-If _nOper  = MODEL_OPERATION_VIEW .OR. _nOper = MODEL_OPERATION_DELETE
+If _nOper  = MODEL_OPERATION_VIEW .Or. _nOper = MODEL_OPERATION_DELETE
    _cQuery += "  AND ZLD_CODZLX = '"+M->ZLX_CODIGO+"'  "
 ElseIf Empty(_cViagens)
-   _cFiltro += "  AND ((ZLD_CODZLX = ' ' AND ZLD_DTCOLE > '"+DTOS((DDataBase-40))+"') OR ZLD_CODZLX = '"+M->ZLX_CODIGO+"')  "
+   _cFiltro += "  AND ((ZLD_CODZLX = ' ' AND ZLD_DTCOLE > '"+DToS((DDataBase-40))+"') OR ZLD_CODZLX = '"+M->ZLX_CODIGO+"')  "
 Else
    _cFiltro += "  AND ZLD_TICKET IN "+FormatIn(_cViagens,",")
 EndIf
 
-If _nOper  = MODEL_OPERATION_VIEW .OR. _nOper = MODEL_OPERATION_DELETE
+If _nOper  = MODEL_OPERATION_VIEW .Or. _nOper = MODEL_OPERATION_DELETE
    _cFiltro += "  ORDER BY  ZLD_TICKET , ZLD_SETOR "
 Else
    _cFiltro += "  ORDER BY  ZLD_DTCOLE DESC, ZLD_DTLANC DESC , ZLD_SETOR , ZLD_TICKET "
@@ -1670,7 +1581,7 @@ EndSql
 
 nTamPict := 6
 
-Do While (_cAlias)->(!Eof())
+While (_cAlias)->(!Eof())
 
 	MvParDef += (_cAlias)->ZLD_TICKET+(_cAlias)->ZLD_SETOR
 
@@ -1678,26 +1589,26 @@ Do While (_cAlias)->(!Eof())
        nTamPict:=Len(AllTrim( Trans((_cAlias)->ZLD_TOTBOM,_cPit)))
     EndIf
 
-	AADD(aCat, PadL(AllTrim((_cAlias)->ZLD_TICKET),Len(ZLD->ZLD_TICKET),"0")+" - "+DToC(SToD((_cAlias)->ZLD_DTCOLE))+" - "+;
+	aAdd(aCat, PadL(AllTrim((_cAlias)->ZLD_TICKET),Len(ZLD->ZLD_TICKET),"0")+" - "+DToC(SToD((_cAlias)->ZLD_DTCOLE))+" - "+;
 	           DToC(SToD((_cAlias)->ZLD_DTLANC))+" - "+(_cAlias)->ZLD_SETOR+": "+Right( Trans((_cAlias)->ZLD_TOTBOM,_cPit),nTamPict) )
 	           
-    If (!Empty(M->ZLX_LISTA) .AND. (_cAlias)->ZLD_TICKET $ M->ZLX_LISTA) .OR. !Empty(_cViagens) .OR. _nOper = MODEL_OPERATION_VIEW .OR. _nOper = MODEL_OPERATION_DELETE
+    If (!Empty(M->ZLX_LISTA) .And. (_cAlias)->ZLD_TICKET $ M->ZLX_LISTA) .Or. !Empty(_cViagens) .Or. _nOper = MODEL_OPERATION_VIEW .Or. _nOper = MODEL_OPERATION_DELETE
         MvPar+= (_cAlias)->ZLD_TICKET+(_cAlias)->ZLD_SETOR
     EndIf
    
    nMaxSelect++
-   (_cAlias)->(dbSkip())
+   (_cAlias)->(DBSkip())
    
 EndDo
 (_cAlias)->( DBCloseArea() )
 
 If nMaxSelect = 0
-	If _nOper = MODEL_OPERATION_VIEW .OR. _nOper = MODEL_OPERATION_DELETE
+	If _nOper = MODEL_OPERATION_VIEW .Or. _nOper = MODEL_OPERATION_DELETE
 	   Help(NIL, NIL, "AGLT03535", NIL, "Não achou tickets anexo para essa recepção: "+M->ZLX_CODIGO, 1, 0, NIL, NIL, NIL, NIL, NIL, {""})
 	Else
 	   Help(NIL, NIL, "AGLT03536", NIL, "Não achou tickets em aberto para esse Setor(es): "+_cSetor, 1, 0, NIL, NIL, NIL, NIL, NIL, {""})
 	EndIf
-	DbSelectArea("ZLX")
+	DBSelectArea("ZLX")
 	Return .F.
 EndIf
 
@@ -1730,31 +1641,31 @@ If F_Opcoes(@MvPar		,; //01 -> Variavel de Retorno
             .F.         ,; //Nao Permite a Pesquisa    
             .F.         ,; //Forca o Retorno Como Array
             NIL         ); //Consulta F3    
-            .AND. !_nOper  = MODEL_OPERATION_VIEW .AND. !_nOper = MODEL_OPERATION_DELETE
+            .And. !_nOper  = MODEL_OPERATION_VIEW .And. !_nOper = MODEL_OPERATION_DELETE
 
 
-	ZLJ->( DbSetorder(3) )//ZLJ_FILIAL+ZLJ_VIAGEM+ZLJ_SETOR+ZLJ_TIPPRO+ZLJ_LINROT
-	ZLD->( DbSetorder(5) )//ZLD_FILIAL+ZLD_TICKET+ZLD_SETOR
+	ZLJ->( DBSetOrder(3) )//ZLJ_FILIAL+ZLJ_VIAGEM+ZLJ_SETOR+ZLJ_TIPPRO+ZLJ_LINROT
+	ZLD->( DBSetOrder(5) )//ZLD_FILIAL+ZLD_TICKET+ZLD_SETOR
 
 	M->ZLX_LISTA:= ""
 	_nTotVolume := 0
 	_aRecnosZLD := {}
 	For _nX:= 1 To Len(MvPar) Step nTam
 		If !(SubStr(MvPar,_nX,1) $ " |*")
-		    _cChave:=Substr(MvPar,_nX,nTam)
+		    _cChave:=SubStr(MvPar,_nX,nTam)
 		    _cData:=""
-		    If ZLJ->( DbSeek( xFilial() + _cChave ) )
+		    If ZLJ->( DBSeek( xFilial() + _cChave ) )
 		       _cData:=DToC(ZLJ->ZLJ_DTCRIA)
 		    EndIf
-		    If ZLD->( DbSeek( xFilial("ZLD")+_cChave ) )
-		       Do While ZLD->(!Eof()) .AND. xFilial("ZLD")+_cChave == ZLD->ZLD_FILIAL+ZLD->ZLD_TICKET+ZLD->ZLD_SETOR .AND. ZLD->ZLD_TOTBOM = 0
+		    If ZLD->( DBSeek( xFilial("ZLD")+_cChave ) )
+		       While ZLD->(!Eof()) .And. xFilial("ZLD")+_cChave == ZLD->ZLD_FILIAL+ZLD->ZLD_TICKET+ZLD->ZLD_SETOR .And. ZLD->ZLD_TOTBOM = 0
 		          ZLD->(DBSkip())
 		       EndDo
 		       If ZLD->ZLD_TOTBOM <> 0
-		          _cData:=If(Empty(_cData),DTOC(ZLD->ZLD_DTCOLE),_cData)
+		          _cData:=If(Empty(_cData),DToC(ZLD->ZLD_DTCOLE),_cData)
 		          _cTexto:=ZLD->ZLD_TICKET+" - "+ZLD->ZLD_SETOR+" - "+_cData+ " - Vol.: "+ Right(Trans(ZLD->ZLD_TOTBOM,_cPit),nTamPict)
 		          _nTotVolume+=ZLD->ZLD_TOTBOM
-		          AADD(_aRecnosZLD, { ZLD->ZLD_TICKET , ZLD->ZLD_SETOR , ZLD->(RECNO()) } )
+		          aAdd(_aRecnosZLD, { ZLD->ZLD_TICKET , ZLD->ZLD_SETOR , ZLD->(RECNO()) } )
 		       Else
 		          _cTexto:="Sem Volume "+_cChave
 		       EndIf
@@ -1764,12 +1675,12 @@ If F_Opcoes(@MvPar		,; //01 -> Variavel de Retorno
 			M->ZLX_LISTA  += _cTexto + CHR(13)+CHR(10)
 		EndIf
 	Next _nX
-	ZLJ->( DbSetorder(1) )
-	ZLD->( DbSetorder(1) )
+	ZLJ->( DBSetOrder(1) )
+	ZLD->( DBSetOrder(1) )
     _oModel:LoadValue( 'ZLXMASTER' , 'ZLX_VOLNF' , _nTotVolume)
     _oModel:LoadValue( 'ZLXMASTER' , 'ZLX_LISTA' , M->ZLX_LISTA )
     _oModel:LoadValue( 'ZLXMASTER' , 'ZLX_DIFVOL', M->ZLX_VOLREC - _nTotVolume)
-    _oModel:LoadValue( 'ZLXMASTER' , 'ZLX_BALCAP', M->ZLX_VOLREC - VAL(Posicione("ZZV",2,xFilial("ZZV")+M->(ZLX_TRANSP+ZLX_LJTRAN+ZLX_PLACA),"ZZV_CAPACI"))	)
+    _oModel:LoadValue( 'ZLXMASTER' , 'ZLX_BALCAP', M->ZLX_VOLREC - Val(Posicione("ZZV",2,xFilial("ZZV")+M->(ZLX_TRANSP+ZLX_LJTRAN+ZLX_PLACA),"ZZV_CAPACI"))	)
     _cSalvaForn := M->ZLX_FORNEC+M->ZLX_LJFORN
     _oModel:LMODIFY:=.T.
     _oModel:Activate()
@@ -1790,21 +1701,17 @@ Return(.T.)
 Programa----------: AGLT035Z()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 15/02/2018
-===============================================================================================================================
 Descrição---------: Monta Tela para consulta dos Tickets
-===============================================================================================================================
 Parametros--------: oView
-===============================================================================================================================
 Retorno-----------: .T.
 ===============================================================================================================================
 */
-User Function AGLT035Z()
+User Function AGLT035Z() As Logical
 
-Local _aParam	:= PARAMIXB
-Local _xRet		:= .T.
-Local _oObj		:= ''
-Local _oModel	:= Nil
-Local _cIdPonto	:= ''
+Local _aParam	:= ParamIXB As Array
+Local _oObj		:= '' As Object
+Local _oModel	:= Nil As Object
+Local _cIdPonto	:= '' As Character
 
 If _aParam <> NIL
 
@@ -1813,56 +1720,53 @@ If _aParam <> NIL
 	_oModel   := FWModelActive()
 	_nOper	  := _oObj:GetOperation()
 
-	If _cIdPonto == 'MODELPOS'	.And. ( _nOper == MODEL_OPERATION_INSERT .Or. _nOper == MODEL_OPERATION_UPDATE .OR. _nOper == MODEL_OPERATION_DELETE )
+	If _cIdPonto == 'MODELPOS'	.And. ( _nOper == MODEL_OPERATION_INSERT .Or. _nOper == MODEL_OPERATION_UPDATE .Or. _nOper == MODEL_OPERATION_DELETE )
 
 	   Private _cCodigo  := _oModel:GetValue( 'ZLXMASTER' , 'ZLX_CODIGO'	)
 	   
-       FWMSGRUN(,{|oProc| AGLT35Grv(oProc,_nOper) },"Aguarde! Aguarde! Aguarde! Aguarde! ","Processando Tickets vinculados..." )
+       FWMsgRun(,{|oProc| AGLT35Grv(oProc,_nOper) },"Aguarde! Aguarde! Aguarde! Aguarde! ","Processando Tickets vinculados..." )
 	
 	ElseIf _cIdPonto ==  'MODELVLDACTIVE'
        _aRecnosZLD := {}
 	EndIf
 EndIf
 
-Return( _xRet )
+Return .T.
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT035Z()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 15/02/2018
-===============================================================================================================================
 Descrição---------: Monta Tela para consulta dos Tickets
-===============================================================================================================================
 Parametros--------: oView
-===============================================================================================================================
 Retorno-----------: .T.
 ===============================================================================================================================
 */  
-Static Function AGLT35Grv(oProc,_nOper)
+Static Function AGLT35Grv(oProc As Object,_nOper As Numeric)
 
-Local _nX		:= 0
-Local _nRecno	:= 0
-Local _aOrd		:= SaveOrd({"ZLD"})
-Local _cFilZLD	:= xFilial("ZLD")
+Local _nX		:= 0 As Numeric
+Local _nRecno	:= 0 As Numeric
+Local _aOrd		:= SaveOrd({"ZLD"}) As Array
+Local _cFilZLD	:= xFilial("ZLD") As Character
 
 Begin Transaction
 
-If (_nOper = MODEL_OPERATION_UPDATE .AND. Len(_aRecnosZLD) > 0) .OR. _nOper == MODEL_OPERATION_DELETE//Se clicou no botao e salvou vai ter recnos
+If (_nOper = MODEL_OPERATION_UPDATE .And. Len(_aRecnosZLD) > 0) .Or. _nOper == MODEL_OPERATION_DELETE//Se clicou no botao e salvou vai ter recnos
 	oproc:cCaption := ("Limpando Tickets vinculados...")
 	ProcessMessages()
-	ZLD->( DbSetorder(8) )// ZLD_FILIAL+ZLD_CODZLX
-	If ZLD->(DbSeek( _cFilZLD + _cCodigo) )
-		Do While ZLD->(!Eof()) .AND. ZLD->ZLD_FILIAL+ZLD->ZLD_CODZLX == _cFilZLD+_cCodigo
+	ZLD->( DBSetOrder(8) )// ZLD_FILIAL+ZLD_CODZLX
+	If ZLD->(DBSeek( _cFilZLD + _cCodigo) )
+		While ZLD->(!Eof()) .And. ZLD->ZLD_FILIAL+ZLD->ZLD_CODZLX == _cFilZLD+_cCodigo
 			If !Empty(ZLD->ZLD_CODZLX)
 				oproc:cCaption := ("Limpando Ticket / Setor: "+ZLD->ZLD_TICKET+" / "+ZLD->ZLD_SETOR)
 				ProcessMessages()
 				ZLD->(DBSkip())
 				_nRecno:=ZLD->(RECNO())
 				ZLD->(DBSkip(-1))
-				ZLD->(RECLOCK("ZLD",.F.))
+				ZLD->(RecLock("ZLD",.F.))
 				ZLD->ZLD_CODZLX = ""
-				ZLD->(MSUNLOCK())
+				ZLD->(MSUnLock())
 				ZLD->(DBGoTo(_nRecno))
 			Else
 				ZLD->(DBSkip())
@@ -1871,8 +1775,8 @@ If (_nOper = MODEL_OPERATION_UPDATE .AND. Len(_aRecnosZLD) > 0) .OR. _nOper == M
 	EndIf
 EndIf
 
-If _nOper <> MODEL_OPERATION_DELETE .AND. Len(_aRecnosZLD) > 0//Se clicou no botao e salvou vai ter recnos
-    ZLD->( DbSetOrder(5) )// ZLD_FILIAL+ZLD_TICKET+ZLD_SETOR
+If _nOper <> MODEL_OPERATION_DELETE .And. Len(_aRecnosZLD) > 0//Se clicou no botao e salvou vai ter recnos
+    ZLD->( DBSetOrder(5) )// ZLD_FILIAL+ZLD_TICKET+ZLD_SETOR
     _cMostraViagem:=""
 	For _nX := 1 To Len(_aRecnosZLD)
 		
@@ -1880,22 +1784,22 @@ If _nOper <> MODEL_OPERATION_DELETE .AND. Len(_aRecnosZLD) > 0//Se clicou no bot
         oproc:cCaption := ("Vinculando Ticket / Setor: "+_aRecnosZLD[_nX,1]+" / "+_aRecnosZLD[_nX,2])
         ProcessMessages()
 		
-		If ZLD->( Dbseek( _cFilZLD+_cChave ) )//ZLD_TICKET + ZLD_SETOR
+		If ZLD->( DBSeek( _cFilZLD+_cChave ) )//ZLD_TICKET + ZLD_SETOR
 			_cMostraViagem+="["+ZLD->ZLD_TICKET+"-"+ZLD->ZLD_SETOR+"], "
-			Do While ZLD->(!Eof()) .AND. _cFilZLD+_cChave == ZLD->ZLD_FILIAL+ZLD->ZLD_TICKET+ZLD->ZLD_SETOR
+			While ZLD->(!Eof()) .And. _cFilZLD+_cChave == ZLD->ZLD_FILIAL+ZLD->ZLD_TICKET+ZLD->ZLD_SETOR
 			   If ZLD->ZLD_TOTBOM # 0
-				  ZLD->(RECLOCK("ZLD",.F.))
+				  ZLD->(RecLock("ZLD",.F.))
 				  ZLD->ZLD_CODZLX = _cCodigo
-				  ZLD->(MSUNLOCK())
+				  ZLD->(MSUnLock())
 			   EndIf
 				ZLD->(DBSkip())
 			EndDo
 		EndIf
 	Next _nX
 
-	If _nOper = MODEL_OPERATION_INSERT .OR. _cCodigo # ZLX->ZLX_CODIGO
+	If _nOper = MODEL_OPERATION_INSERT .Or. _cCodigo # ZLX->ZLX_CODIGO
 	    Help(NIL, NIL, "AGLT03538", NIL, "Recepção Gravada ["+_cCodigo+"] nos Tickets anexados: "+_cMostraViagem+;
-	    "Recepção Posicionada: "+ZLX->ZLX_CODIGO+" / Tipo Manutenção: "+ALLTRIM(STR(_nOper)), 1, 0, NIL, NIL, NIL, NIL, NIL, {"Caso não seja o numero da Recepção que voce entrou para Atualizar entre em contado com a area de TI"})
+	    "Recepção Posicionada: "+ZLX->ZLX_CODIGO+" / Tipo Manutenção: "+AllTrim(Str(_nOper)), 1, 0, NIL, NIL, NIL, NIL, NIL, {"Caso não seja o numero da Recepção que voce entrou para Atualizar entre em contado com a area de TI"})
 	EndIf
 	
 EndIf

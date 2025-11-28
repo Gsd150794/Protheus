@@ -8,11 +8,11 @@
 ===============================================================================================================================
 */
 
-#INCLUDE "FWMBROWSE.CH"
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "TOPCONN.CH"
-#INCLUDE "RWMAKE.CH"
+#Include "FWMBROWSE.CH"
+#Include "FWMVCDEF.CH"
+#Include "TOTVS.ch"
+#Include "TOPCONN.CH"
+#Include "RWMAKE.CH"
 
 /*
 ===============================================================================================================================
@@ -36,7 +36,7 @@ _oBrowse:SetMenuDef( 'AOMS139' )
 _oBrowse:SetDescription("Bloqueio de Produtos por Filial")
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================

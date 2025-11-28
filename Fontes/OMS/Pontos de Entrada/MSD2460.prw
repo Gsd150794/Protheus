@@ -13,7 +13,7 @@
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -32,85 +32,85 @@ Retorno-----------: Nenhum
 User Function MSD2460()
 
 Local _cAlias  := Alias()
-Local _aAmb    := GetArea()
+Local _aAmb    := FWGetArea()
 
 //Salvando Integridade do Sistema.
-dbSelectArea("SF2")
+DBSelectArea("SF2")
 _nOrdSF2 := IndexOrd()
 _nRecSF2 := Recno()
 
-dbSelectArea("SD2")
+DBSelectArea("SD2")
 _nOrdSD2 := IndexOrd()
 _nRecSD2 := Recno()
 
-dbSelectArea("SB1")
+DBSelectArea("SB1")
 _nOrdSB1 := IndexOrd()
 _nRecSB1 := Recno()
 
-dbSelectArea("SF4")
+DBSelectArea("SF4")
 _nOrdSF4 := IndexOrd()
 _nRecSF4 := Recno()
 
-dbSelectArea("SC5")
+DBSelectArea("SC5")
 _nOrdSC5 := IndexOrd()
 _nRecSC5 := Recno()
 
-dbSelectArea("SC6")
+DBSelectArea("SC6")
 _nOrdSC6 := IndexOrd()
 _nRecSC6 := Recno()                    
 
-dbSelectArea("SBZ")
+DBSelectArea("SBZ")
 _nOrdSBZ := IndexOrd()
 _nRecSBZ := Recno()                    
 
 //Gravacao de campo de usuario do SC6 no SD2
-DbselectArea("SC6")
-DbsetOrder(1)//C6_FILIAL+C6_NUM+C6_ITEM+C6_PRODUTO
-If DbSeek(xFilial("SC6")+SD2->D2_PEDIDO+SD2->D2_ITEMPV+SD2->D2_COD)
-	Reclock("SD2",.F.)
+DBSelectArea("SC6")
+DBSetOrder(1)//C6_FILIAL+C6_NUM+C6_ITEM+C6_PRODUTO
+If DBSeek(xFilial("SC6")+SD2->D2_PEDIDO+SD2->D2_ITEMPV+SD2->D2_COD)
+	RecLock("SD2",.F.)
 	SD2->D2_I_DQESP := SC6->C6_I_DQESP
-	SD2->(MsUnlock())
+	SD2->(MSUnLock())
 EndIf
 
-DbSelectArea("SBZ")
-SBZ->( DbSetOrder(1) )    //BZ_FILIAL+BZ_COD
-If SBZ->( DbSeek(xFilial("SBZ") + SD2->D2_COD) )
-	If !Empty(Alltrim(SBZ->BZ_I_FCICO ))
-		Reclock("SD2",.F.)
+DBSelectArea("SBZ")
+SBZ->( DBSetOrder(1) )    //BZ_FILIAL+BZ_COD
+If SBZ->( DBSeek(xFilial("SBZ") + SD2->D2_COD) )
+	If !Empty(AllTrim(SBZ->BZ_I_FCICO ))
+		RecLock("SD2",.F.)
 		SD2->D2_FCICOD := SBZ->BZ_I_FCICO 
-		SD2->(MsUnlock())
+		SD2->(MSUnLock())
 	EndIf
 EndIf
                            
-dbSelectArea("SD2")
-dbSetOrder(_nOrdSD2)
-dbGoto(_nRecSD2)
+DBSelectArea("SD2")
+DBSetOrder(_nOrdSD2)
+DBGoTo(_nRecSD2)
 
-dbSelectArea("SF2")
-dbSetOrder(_nOrdSF2)
-dbGoto(_nRecSF2)
+DBSelectArea("SF2")
+DBSetOrder(_nOrdSF2)
+DBGoTo(_nRecSF2)
 
-dbSelectArea("SB1")
-dbSetOrder(_nOrdSB1)
-dbGoto(_nRecSB1)
+DBSelectArea("SB1")
+DBSetOrder(_nOrdSB1)
+DBGoTo(_nRecSB1)
 
-dbSelectArea("SF4")
-dbSetOrder(_nOrdSF4)
-dbGoto(_nRecSF4)
+DBSelectArea("SF4")
+DBSetOrder(_nOrdSF4)
+DBGoTo(_nRecSF4)
 
-dbSelectArea("SC5")
-dbSetOrder(_nOrdSC5)
-dbGoto(_nRecSC5)
+DBSelectArea("SC5")
+DBSetOrder(_nOrdSC5)
+DBGoTo(_nRecSC5)
 
-dbSelectArea("SC6")
-dbSetOrder(_nOrdSC6)
-dbGoto(_nRecSC6)
+DBSelectArea("SC6")
+DBSetOrder(_nOrdSC6)
+DBGoTo(_nRecSC6)
 
-dbSelectArea("SBZ")
-dbSetOrder(_nOrdSBZ)
-dbGoto(_nRecSBZ)
+DBSelectArea("SBZ")
+DBSetOrder(_nOrdSBZ)
+DBGoTo(_nRecSBZ)
 
-dbSelectArea(_cAlias)
-RestArea(_aAmb)
+DBSelectArea(_cAlias)
+FWRestArea(_aAmb)
 
 Return

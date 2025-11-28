@@ -12,8 +12,8 @@ Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1
 // Definicoes de Includes da Rotina.
 //====================================================================================================
 #Include 'FWMVCDEF.CH'
-#include "protheus.ch"
-#include "topconn.ch"
+#Include "TOTVS.ch"
+#Include "topconn.ch"
 
 /*
 ===============================================================================================================================
@@ -46,14 +46,14 @@ Begin Sequence
    EndIf
    
    If MV_PAR05 <> 1 .And. MV_PAR06 <> 1 .And. MV_PAR07 <> 1 .And. MV_PAR08 <> 1
-      U_Itmsg("Para rodar esta rotina é obrigatório selecionar como 'SIM',"+ ;
+      U_ITMsg("Para rodar esta rotina é obrigatório selecionar como 'SIM',"+ ;
               " pelo menos um dos campos : 'Ajusta PR Carga Fech', 'Ajusta PR Min Carga Fech'," + ; 
               " 'Ajusta PR Carga Fra', 'Ajusta PR Min Carga Frac.'","Atenção",,1)
       Break
    EndIf
 
    If MV_PAR09 == 0
-      U_itmsg("O preenchimento do percentual de reajuste é obrigatório.","Atenção",,1)
+      U_ITMsg("O preenchimento do percentual de reajuste é obrigatório.","Atenção",,1)
       Break
    EndIf
 
@@ -61,17 +61,17 @@ Begin Sequence
    // Roda a query de dados e Cria a Tabela Temporária.
    //======================================================
    
-   fwmsgrun( ,{|_oProc| _lRet := U_AOMS122Q(_oProc) } , 'Aguarde...' , 'Efetuando Leitura dos dados...' )
+   FWMsgRun( ,{|_oProc| _lRet := U_AOMS122Q(_oProc) } , 'Aguarde...' , 'Efetuando Leitura dos dados...' )
     
    If ! _lRet 
-      U_Itmsg("Não foram encontrados dados que satisfazem as condições de filtros.","Atenção",,1)
+      U_ITMsg("Não foram encontrados dados que satisfazem as condições de filtros.","Atenção",,1)
       Break 
    EndIf 
 
    If MV_PAR10 == 1 
-     _cTipoReajuste := "Adicionando: " + Alltrim(Str(MV_PAR09,8,4))
+     _cTipoReajuste := "Adicionando: " + AllTrim(Str(MV_PAR09,8,4))
    Else
-     _cTipoReajuste := "Subtraindo: " + Alltrim(Str(MV_PAR09,8,4))
+     _cTipoReajuste := "Subtraindo: " + AllTrim(Str(MV_PAR09,8,4))
    EndIf
    
    _cTipoReajuste := _cTipoReajuste + "%"
@@ -90,10 +90,10 @@ Begin Sequence
 End Sequence
 
 If Select("TRBDA1") <> 0
-	TRBDA1->(DbCloseArea())
+	TRBDA1->(DBCloseArea())
 EndIf
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -162,15 +162,15 @@ Begin Sequence
    EndIf
 
    If Select("QRYDA1") <> 0
-	  QRYDA1->(DbCloseArea())
+	  QRYDA1->(DBCloseArea())
    EndIf
 	
    TCQUERY _cQry NEW ALIAS "QRYDA1"	
    	
-   DbSelectArea("QRYDA1")
+   DBSelectArea("QRYDA1")
    Count To _nTotRegs
 
-   QRYDA1->(dbGoTop())
+   QRYDA1->(DBGoTop())
 
    If _nTotRegs == 0 // QRYDA1->(Eof()) .Or. QRYDA1->(Bof())
       Break 
@@ -181,52 +181,52 @@ Begin Sequence
    //=================================================================
    // Cria a tabela temporária
    //=================================================================
-   Aadd(_aStruct,{"DA1_FILIAL", "C",  2, 0})
-   Aadd(_aStruct,{"DA1_CODTAB", "C",  3, 0})
-   Aadd(_aStruct,{"DA1_DESTAB", "C", 30, 0})
-   Aadd(_aStruct,{"DA1_I_MIX ", "C",  2, 0})
-   Aadd(_aStruct,{"DA1_GRUPO ", "C",  4, 0})
-   Aadd(_aStruct,{"DA1_CODPRO", "C", 15, 0})
-   Aadd(_aStruct,{"DA1_DESCRI", "C", 80, 0})
-   Aadd(_aStruct,{"DA1_PRCVEN", "N",  9, 2})  //  "PR Carga Fech"
-   Aadd(_aStruct,{"WK_PRCVEN" , "N",  9, 2})  //  "Reaj.PR Carga Fech"
-   Aadd(_aStruct,{"DA1_I_PMFE", "N",  9, 2})  //  "PR Min Carga Fech"
-   Aadd(_aStruct,{"WK_I_PMFE" , "N",  9, 2})  //  "Reaj.PR Min Carga Fech"
-   Aadd(_aStruct,{"DA1_I_PRFE", "N",  9, 2})  //  "PR Carga Frac"
-   Aadd(_aStruct,{"WK_I_PRFE" , "N",  9, 2})  //  "Reaj.PR Carga Frac"
-   Aadd(_aStruct,{"DA1_I_PMFR", "N",  9, 2})  //  "PR Min Carga Frac"
-   Aadd(_aStruct,{"WK_I_PMFR" , "N",  9, 2})  //  "Reaj.PR Min Carga Frac"
-   Aadd(_aStruct,{"DA1_I_PRCA", "N",  9, 2})  //  "Preco Maximo"
-   Aadd(_aStruct,{"WK_I_PRCA", "N",  9, 2})   //  "Reaj.Preco Maximo"
-   Aadd(_aStruct,{"DA1_PRCMAX", "N", 14, 2})  //  "Preco Maximo"
-   Aadd(_aStruct,{"WK_PRCMAX", "N", 14, 2})   //  "Reaj.Preco Maximo"
-   Aadd(_aStruct,{"DA1_RECNO" , "N", 10,0 })
+   aAdd(_aStruct,{"DA1_FILIAL", "C",  2, 0})
+   aAdd(_aStruct,{"DA1_CODTAB", "C",  3, 0})
+   aAdd(_aStruct,{"DA1_DESTAB", "C", 30, 0})
+   aAdd(_aStruct,{"DA1_I_MIX ", "C",  2, 0})
+   aAdd(_aStruct,{"DA1_GRUPO ", "C",  4, 0})
+   aAdd(_aStruct,{"DA1_CODPRO", "C", 15, 0})
+   aAdd(_aStruct,{"DA1_DESCRI", "C", 80, 0})
+   aAdd(_aStruct,{"DA1_PRCVEN", "N",  9, 2})  //  "PR Carga Fech"
+   aAdd(_aStruct,{"WK_PRCVEN" , "N",  9, 2})  //  "Reaj.PR Carga Fech"
+   aAdd(_aStruct,{"DA1_I_PMFE", "N",  9, 2})  //  "PR Min Carga Fech"
+   aAdd(_aStruct,{"WK_I_PMFE" , "N",  9, 2})  //  "Reaj.PR Min Carga Fech"
+   aAdd(_aStruct,{"DA1_I_PRFE", "N",  9, 2})  //  "PR Carga Frac"
+   aAdd(_aStruct,{"WK_I_PRFE" , "N",  9, 2})  //  "Reaj.PR Carga Frac"
+   aAdd(_aStruct,{"DA1_I_PMFR", "N",  9, 2})  //  "PR Min Carga Frac"
+   aAdd(_aStruct,{"WK_I_PMFR" , "N",  9, 2})  //  "Reaj.PR Min Carga Frac"
+   aAdd(_aStruct,{"DA1_I_PRCA", "N",  9, 2})  //  "Preco Maximo"
+   aAdd(_aStruct,{"WK_I_PRCA", "N",  9, 2})   //  "Reaj.Preco Maximo"
+   aAdd(_aStruct,{"DA1_PRCMAX", "N", 14, 2})  //  "Preco Maximo"
+   aAdd(_aStruct,{"WK_PRCMAX", "N", 14, 2})   //  "Reaj.Preco Maximo"
+   aAdd(_aStruct,{"DA1_RECNO" , "N", 10,0 })
 
    //=============================================================================
    // Montando o _aFields do FWMarkBrowse.
    //=============================================================================
    //                         Titulo     Code-Block   Tipo          Picture  Alinhamento  Tamanho  Decimal
-   AAdd(_aFields, {RetTitle("DA1_CODTAB"),{|| TRBDA1->DA1_CODTAB}, "C", "@!", 1,TamSX3("DA1_CODTAB")[1],TamSX3("DA1_CODTAB")[2]}) 
-   AAdd(_aFields, {RetTitle("DA1_DESTAB"),{|| TRBDA1->DA1_DESTAB}, "C", "@!", 1,TamSX3("DA1_DESTAB")[1],TamSX3("DA1_DESTAB")[2]}) 
-   AAdd(_aFields, {RetTitle("DA1_I_MIX"),{|| TRBDA1->DA1_I_MIX}, "C", "@!", 1,TamSX3("DA1_I_MIX")[1],TamSX3("DA1_I_MIX")[2]}) 
-   AAdd(_aFields, {RetTitle("DA1_GRUPO"),{|| TRBDA1->DA1_GRUPO}, "C", "@!", 1,TamSX3("DA1_GRUPO")[1],TamSX3("DA1_GRUPO")[2]}) 
-   AAdd(_aFields, {RetTitle("DA1_CODPRO"),{|| TRBDA1->DA1_CODPRO}, "C", "@!", 1,TamSX3("DA1_CODPRO")[1],TamSX3("DA1_CODPRO")[2]}) 
-   AAdd(_aFields, {RetTitle("DA1_DESCRI"),{|| TRBDA1->DA1_DESCRI}, "C", "@!", 1,TamSX3("DA1_DESCRI")[1],TamSX3("DA1_DESCRI")[2]}) 
-   AAdd(_aFields, {RetTitle("DA1_PRCVEN"),{|| TRBDA1->DA1_PRCVEN}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_PRCVEN")[1],TamSX3("DA1_PRCVEN")[2]}) 
-   AAdd(_aFields, {"Reajuste: PR Carga Fech",{|| TRBDA1->WK_PRCVEN}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_PRCVEN")[1],TamSX3("DA1_PRCVEN")[2]}) 
-   AAdd(_aFields, {RetTitle("DA1_I_PMFE"),{|| TRBDA1->DA1_I_PMFE}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_I_PMFE")[1],TamSX3("DA1_I_PMFE")[2]}) 
-   AAdd(_aFields, {"Reajuste: PR Min Carga Fech",{|| TRBDA1->WK_I_PMFE}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_I_PMFE")[1],TamSX3("DA1_I_PMFE")[2]}) 
-   AAdd(_aFields, {RetTitle("DA1_I_PRFE"),{|| TRBDA1->DA1_I_PRFE}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_I_PRFE")[1],TamSX3("DA1_I_PRFE")[2]}) 
-   AAdd(_aFields, {"Reajuste: PR Carga Frac",{|| TRBDA1->WK_I_PRFE}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_I_PRFE")[1],TamSX3("DA1_I_PRFE")[2]}) 
-   AAdd(_aFields, {RetTitle("DA1_I_PMFR"),{|| TRBDA1->DA1_I_PMFR}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_I_PMFR")[1],TamSX3("DA1_I_PMFR")[2]}) 
-   AAdd(_aFields, {"Reajuste: PR Min Carga Frac",{|| TRBDA1->WK_I_PMFR}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_I_PMFR")[1],TamSX3("DA1_I_PMFR")[2]}) 
-   AAdd(_aFields, {RetTitle("DA1_I_PRCA"),{|| TRBDA1->DA1_I_PRCA}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_I_PRCA")[1],TamSX3("DA1_I_PRCA")[2]}) 
-   AAdd(_aFields, {"Reajuste: Preco Maximo 1",{|| TRBDA1->WK_I_PRCA}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_I_PRCA")[1],TamSX3("DA1_I_PRCA")[2]}) 
-   AAdd(_aFields, {RetTitle("DA1_PRCMAX"),{|| TRBDA1->DA1_PRCMAX}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_PRCMAX")[1],TamSX3("DA1_PRCMAX")[2]}) 
-   AAdd(_aFields, {"Reajuste: Preco Maximo 2",{|| TRBDA1->WK_PRCMAX}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_PRCMAX")[1],TamSX3("DA1_PRCMAX")[2]}) 
+   aAdd(_aFields, {RetTitle("DA1_CODTAB"),{|| TRBDA1->DA1_CODTAB}, "C", "@!", 1,TamSX3("DA1_CODTAB")[1],TamSX3("DA1_CODTAB")[2]}) 
+   aAdd(_aFields, {RetTitle("DA1_DESTAB"),{|| TRBDA1->DA1_DESTAB}, "C", "@!", 1,TamSX3("DA1_DESTAB")[1],TamSX3("DA1_DESTAB")[2]}) 
+   aAdd(_aFields, {RetTitle("DA1_I_MIX"),{|| TRBDA1->DA1_I_MIX}, "C", "@!", 1,TamSX3("DA1_I_MIX")[1],TamSX3("DA1_I_MIX")[2]}) 
+   aAdd(_aFields, {RetTitle("DA1_GRUPO"),{|| TRBDA1->DA1_GRUPO}, "C", "@!", 1,TamSX3("DA1_GRUPO")[1],TamSX3("DA1_GRUPO")[2]}) 
+   aAdd(_aFields, {RetTitle("DA1_CODPRO"),{|| TRBDA1->DA1_CODPRO}, "C", "@!", 1,TamSX3("DA1_CODPRO")[1],TamSX3("DA1_CODPRO")[2]}) 
+   aAdd(_aFields, {RetTitle("DA1_DESCRI"),{|| TRBDA1->DA1_DESCRI}, "C", "@!", 1,TamSX3("DA1_DESCRI")[1],TamSX3("DA1_DESCRI")[2]}) 
+   aAdd(_aFields, {RetTitle("DA1_PRCVEN"),{|| TRBDA1->DA1_PRCVEN}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_PRCVEN")[1],TamSX3("DA1_PRCVEN")[2]}) 
+   aAdd(_aFields, {"Reajuste: PR Carga Fech",{|| TRBDA1->WK_PRCVEN}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_PRCVEN")[1],TamSX3("DA1_PRCVEN")[2]}) 
+   aAdd(_aFields, {RetTitle("DA1_I_PMFE"),{|| TRBDA1->DA1_I_PMFE}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_I_PMFE")[1],TamSX3("DA1_I_PMFE")[2]}) 
+   aAdd(_aFields, {"Reajuste: PR Min Carga Fech",{|| TRBDA1->WK_I_PMFE}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_I_PMFE")[1],TamSX3("DA1_I_PMFE")[2]}) 
+   aAdd(_aFields, {RetTitle("DA1_I_PRFE"),{|| TRBDA1->DA1_I_PRFE}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_I_PRFE")[1],TamSX3("DA1_I_PRFE")[2]}) 
+   aAdd(_aFields, {"Reajuste: PR Carga Frac",{|| TRBDA1->WK_I_PRFE}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_I_PRFE")[1],TamSX3("DA1_I_PRFE")[2]}) 
+   aAdd(_aFields, {RetTitle("DA1_I_PMFR"),{|| TRBDA1->DA1_I_PMFR}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_I_PMFR")[1],TamSX3("DA1_I_PMFR")[2]}) 
+   aAdd(_aFields, {"Reajuste: PR Min Carga Frac",{|| TRBDA1->WK_I_PMFR}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_I_PMFR")[1],TamSX3("DA1_I_PMFR")[2]}) 
+   aAdd(_aFields, {RetTitle("DA1_I_PRCA"),{|| TRBDA1->DA1_I_PRCA}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_I_PRCA")[1],TamSX3("DA1_I_PRCA")[2]}) 
+   aAdd(_aFields, {"Reajuste: Preco Maximo 1",{|| TRBDA1->WK_I_PRCA}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_I_PRCA")[1],TamSX3("DA1_I_PRCA")[2]}) 
+   aAdd(_aFields, {RetTitle("DA1_PRCMAX"),{|| TRBDA1->DA1_PRCMAX}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_PRCMAX")[1],TamSX3("DA1_PRCMAX")[2]}) 
+   aAdd(_aFields, {"Reajuste: Preco Maximo 2",{|| TRBDA1->WK_PRCMAX}, "N", "@E 999,999,999.99", 2,TamSX3("DA1_PRCMAX")[1],TamSX3("DA1_PRCMAX")[2]}) 
 
    If Select("TRBDA1") <> 0
-	   TRBDA1->(DbCloseArea())
+	   TRBDA1->(DBCloseArea())
    EndIf
    
    //======================================================================
@@ -241,19 +241,19 @@ Begin Sequence
    //==========================================================================
    _nI := 1
 
-   Do While ! QRYDA1->(Eof())
+   While ! QRYDA1->(Eof())
       _oProc:cCaption := ("Atualizando valores..." + AllTrim(Str(_nI,10)) + "/" + AllTrim(Str(_nTotRegs,10)))
       ProcessMessages()
 
-      DA1->(DbGoto(QRYDA1->NRRECNO))
+      DA1->(DBGoTo(QRYDA1->NRRECNO))
       
       _nValor1 := DA1->DA1_PRCVEN * (MV_PAR09 / 100) // "PR Carga Fech"
       _nValor2 := DA1->DA1_I_PMFE * (MV_PAR09 / 100) // "PR Min Carga Fech"
       _nValor3 := DA1->DA1_I_PRFE * (MV_PAR09 / 100) // "PR Carga Frac"
       _nValor4 := DA1->DA1_I_PMFR * (MV_PAR09 / 100) // "PR Min Carga Frac"
 
-      _cDescTab  := POSICIONE("DA0",1,xFilial("DA0")+DA1->DA1_CODTAB,"DA0_DESCRI")
-      _cDescProd := POSICIONE("SB1",1,xFilial("SB1")+DA1->DA1_CODPRO,"B1_DESC")
+      _cDescTab  := Posicione("DA0",1,xFilial("DA0")+DA1->DA1_CODTAB,"DA0_DESCRI")
+      _cDescProd := Posicione("SB1",1,xFilial("SB1")+DA1->DA1_CODPRO,"B1_DESC")
 
       TRBDA1->(RecLock("TRBDA1",.T.))
       TRBDA1->DA1_FILIAL := DA1->DA1_FILIAL 
@@ -327,9 +327,9 @@ Begin Sequence
 
       EndIf
       
-      TRBDA1->(MsUnLock())        
+      TRBDA1->(MSUnLock())        
 
-      QRYDA1->(DbSkip())
+      QRYDA1->(DBSkip())
       
       _nI += 1
 
@@ -338,7 +338,7 @@ Begin Sequence
 End Sequence
 
 If Select("QRYDA1") <> 0
-   QRYDA1->(DbCloseArea())
+   QRYDA1->(DBCloseArea())
 EndIf
 
 Return _lRet 
@@ -360,27 +360,27 @@ Local _nI := 1
 
 Begin Sequence 
 
-   If ! U_ITMSG("Confirma a gravação dos dados?","Atenção" , , ,2, 2) 
+   If ! U_ITMsg("Confirma a gravação dos dados?","Atenção" , , ,2, 2) 
       Break 
    EndIf
    
-   DA0->(DbSetOrder(1)) // DA0_FILIAL+DA0_CODTAB 
+   DA0->(DBSetOrder(1)) // DA0_FILIAL+DA0_CODTAB 
 
-   TRBDA1->(DbGotop())
-   Do While ! TRBDA1->(Eof())
+   TRBDA1->(DBGoTop())
+   While ! TRBDA1->(Eof())
       
-      DA1->(DbGoto(TRBDA1->DA1_RECNO))
-      DA0->(DbSeek(xFilial("DA0")+DA1->DA1_CODTAB))
+      DA1->(DBGoTo(TRBDA1->DA1_RECNO))
+      DA0->(DBSeek(xFilial("DA0")+DA1->DA1_CODTAB))
 
       //===================================================================
       // Grava log de alteração.
       //===================================================================
-      ZGS->(Reclock("ZGS",.T.))
-		ZGS->ZGS_FILIAL := xfilial("ZGS")
+      ZGS->(RecLock("ZGS",.T.))
+		ZGS->ZGS_FILIAL := xFilial("ZGS")
 		ZGS->ZGS_ITEM   := DA1->DA1_ITEM
-		ZGS->ZGS_DATA   := date()
-		ZGS->ZGS_HORA   := time()
-		ZGS->ZGS_USER   := cusername
+		ZGS->ZGS_DATA   := Date()
+		ZGS->ZGS_HORA   := Time()
+		ZGS->ZGS_USER   := cUserName
 		ZGS->ZGS_MODULO := funname()	
 		ZGS->ZGS_CODTAB := DA0->DA0_CODTAB
 		ZGS->ZGS_DATDE 	:= DA0->DA0_DATDE
@@ -416,28 +416,28 @@ Begin Sequence
 		ZGS->ZGS_I_OVII   := DA1->DA1_I_VIGI
 		ZGS->ZGS_I_OVIF   := DA1->DA1_I_VIGF
 		ZGS->ZGS_STATUS   := "A"
-		ZGS->(Msunlock())
+		ZGS->(MSUnLock())
 
-      DA1->(Reclock("DA1",.F.))
+      DA1->(RecLock("DA1",.F.))
       DA1->DA1_PRCVEN := TRBDA1->WK_PRCVEN // "PR Carga Fech"
       DA1->DA1_I_PMFE := TRBDA1->WK_I_PMFE // "PR Min Carga Fech"
       DA1->DA1_I_PRFE := TRBDA1->WK_I_PRFE // "PR Carga Frac"
       DA1->DA1_I_PMFR := TRBDA1->WK_I_PMFR // "PR Min Carga Frac"
       DA1->DA1_I_PRCA := TRBDA1->WK_I_PRCA // "Preço Máximo" 
       DA1->DA1_PRCMAX := TRBDA1->WK_PRCMAX // "Preço Máximo" 
-      DA1->(MsUnLock())        
+      DA1->(MSUnLock())        
       
-      TRBDA1->(DbSkip())
+      TRBDA1->(DBSkip())
       
       _nI += 1
 
    EndDo
    
-   U_Itmsg("Dados gravados com sucesso!.","Atenção",,2)
+   U_ITMsg("Dados gravados com sucesso!.","Atenção",,2)
 
 End Sequence
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -475,10 +475,10 @@ Begin Sequence
                  "Preco Maximo",;
                  "Reaj.Preco Maximo"}
    
-   TRBDA1->(DbGotop())
-   Do While ! TRBDA1->(Eof())
+   TRBDA1->(DBGoTop())
+   While ! TRBDA1->(Eof())
       If TRBDA1->DA1_FILIAL == '01' // Exibir os dados de apenas uma filial para o usuário.
-         Aadd(_aDados,{ TRBDA1->DA1_CODTAB,;  // Código Tab.Preço
+         aAdd(_aDados,{ TRBDA1->DA1_CODTAB,;  // Código Tab.Preço
                         TRBDA1->DA1_DESTAB,;  // Descr.Tab.Preço
                         TRBDA1->DA1_I_MIX,;   // Mix
                         TRBDA1->DA1_GRUPO,;   // Grupo de Produto
@@ -498,11 +498,11 @@ Begin Sequence
                         TRBDA1->WK_PRCMAX })  //  "Reaj.Preco Maximo"   
       EndIf
    
-      TRBDA1->(DbSkip())
+      TRBDA1->(DBSkip())
    EndDo 
 
    U_ITListBox( 'Exportação de dados - Ajustes de tabelas de preços - [' + _cTipoReajuste + "]" , _aTitulos , _aDados)
 
 End Sequece
 
-Return Nil
+Return

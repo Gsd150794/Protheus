@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 22/02/2019 | Migração para tReport e incluída seleção de vários setores. Chamado 26404
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 21/03/2019 | Correção na passagem de parâmetro. Chamado 28556
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 26/07/2019 | Corrigida a barra de progresso. Help 28346
+Lucas Borges  |22/02/2019| Chamado 26404. Migração para tReport e incluída seleção de vários setores.
+Lucas Borges  |21/03/2019| Chamado 28556. Correção na passagem de parâmetro.
+Lucas Borges  |26/07/2019| Chamado 28346. Corrigida a barra de progresso.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT025
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 10/03/2009
-===============================================================================================================================
 Descrição---------: Relação de produtores por setor
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 10/03/2009
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -92,11 +81,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Erich Buttner
 Data da Criacao---: 27/03/2013
-===============================================================================================================================
 Descrição---------: Relacao Rota/Linha
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -115,10 +101,10 @@ Local _nCountRec	:= 0
 If MV_PAR03 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZL3")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -180,7 +166,7 @@ oReport:SetMeter(0)
 
 BeginSql alias _cAlias
 	SELECT ZL3.ZL3_FILIAL, SA2.A2_COD, SA2.A2_LOJA, SA2.A2_NOME, ZL2.ZL2_COD, ZL2.ZL2_DESCRI, ZL3.ZL3_COD, ZL3.ZL3_DESCRI, SA2.A2_MSBLQL, SA2.A2_L_ATIVO
-		FROM %table:SA2% SA2, %table:ZL3% ZL3, %table:ZL2% ZL2
+		FROM %Table:SA2% SA2, %Table:ZL3% ZL3, %Table:ZL2% ZL2
 		WHERE SA2.D_E_L_E_T_ = ' '
 		AND ZL3.D_E_L_E_T_ = ' '
 		AND ZL2.D_E_L_E_T_ = ' '
@@ -206,20 +192,20 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->ZL3_FILIAL
 	_cLinha	:= (_cAlias)->ZL3_COD + ' - ' + (_cAlias)->ZL3_DESCRI
 	_cSetor	:= (_cAlias)->ZL2_COD + ' - ' + (_cAlias)->ZL2_DESCRI
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

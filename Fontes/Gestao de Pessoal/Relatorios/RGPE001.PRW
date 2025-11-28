@@ -10,29 +10,22 @@ Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "REPORT.CH"
-#INCLUDE "TopConn.ch"
+#Include "TOTVS.ch"
+#Include "TopConn.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGPE001
 Autor-------------: Igor Melgaço
 Data da Criacao---: 28/04/2023
-===============================================================================================================================
 Descrição---------: Relatório Folha de Recisões dos funcionários Chamado 43217
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function RGPE001()
 	Local oReport := nil
-	Local cPerg:= Padr("RGPE001",10)
+	Local cPerg:= PadR("RGPE001",10)
 	Private _cAlias   := "TRBSRA"
 	Private _aOrd:= {"Matricula",;               //ORDEM 01 Analitivo e Sintetico   
 					"Nome"}     //ORDEM 13 Sintetico   
@@ -52,11 +45,8 @@ Return
 Programa----------: RGPE001
 Autor-------------: Igor Melgaço
 Data da Criacao---: 28/04/2023
-===============================================================================================================================
 Descrição---------: Definições do relatorio
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -180,11 +170,8 @@ Return(oReport)
 Programa----------: RGPE001
 Autor-------------: Igor Melgaço
 Data da Criacao---: 28/04/2023
-===============================================================================================================================
 Descrição---------: Impressao do relatorio
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -255,49 +242,49 @@ Static Function ReportPrint(oReport)
 	SET DATE FORMAT TO "DD/MM/YYYY"
 	
 	//Filtros da Query
-	If !Empty(Alltrim(MV_PAR01))
-		cFiltro += "		AND RA_FILIAL IN " + FormatIn(ALLTRIM(MV_PAR01),";")
+	If !Empty(AllTrim(MV_PAR01))
+		cFiltro += "		AND RA_FILIAL IN " + FormatIn(AllTrim(MV_PAR01),";")
 	EndIf
 
-	If !Empty(Alltrim(MV_PAR02))
-		cFiltro += "		AND RA_CC IN " + FormatIn(ALLTRIM(MV_PAR02),";")
+	If !Empty(AllTrim(MV_PAR02))
+		cFiltro += "		AND RA_CC IN " + FormatIn(AllTrim(MV_PAR02),";")
 	EndIf
 	
-	If !Empty(Alltrim(MV_PAR03))
-		cFiltro += "		AND RA_TNOTRAB IN " + FormatIn(ALLTRIM(MV_PAR03),";")
+	If !Empty(AllTrim(MV_PAR03))
+		cFiltro += "		AND RA_TNOTRAB IN " + FormatIn(AllTrim(MV_PAR03),";")
 	EndIf
 
-	If !Empty(Alltrim(MV_PAR04))
-		cFiltro += "		AND RA_MAT  IN " + FormatIn(ALLTRIM(MV_PAR04),";")
+	If !Empty(AllTrim(MV_PAR04))
+		cFiltro += "		AND RA_MAT  IN " + FormatIn(AllTrim(MV_PAR04),";")
 	EndIf
 
-	If !Empty(Alltrim(MV_PAR05))
-		cFiltro += "		AND RA_NOME  IN " + FormatIn(ALLTRIM(MV_PAR05),";")
+	If !Empty(AllTrim(MV_PAR05))
+		cFiltro += "		AND RA_NOME  IN " + FormatIn(AllTrim(MV_PAR05),";")
 	EndIf
 
-	If !Empty(Alltrim(MV_PAR06)) .And. Alltrim(MV_PAR06) <> "*****"
-		cFiltro += "		AND SRA.RA_SITFOLH IN " + FormatIn(ALLTRIM(STRTRAN(MV_PAR06,"*","")),";")
+	If !Empty(AllTrim(MV_PAR06)) .And. AllTrim(MV_PAR06) <> "*****"
+		cFiltro += "		AND SRA.RA_SITFOLH IN " + FormatIn(AllTrim(StrTran(MV_PAR06,"*","")),";")
 	EndIf
 
-	If !Empty(Alltrim(MV_PAR07)) .And. Alltrim(MV_PAR07) <> "***************"
-		cFiltro += "		AND SRA.RA_CATFUNC IN " + FormatIn(ALLTRIM(STRTRAN(MV_PAR07,"*","")),";") 
+	If !Empty(AllTrim(MV_PAR07)) .And. AllTrim(MV_PAR07) <> "***************"
+		cFiltro += "		AND SRA.RA_CATFUNC IN " + FormatIn(AllTrim(StrTran(MV_PAR07,"*","")),";") 
 	EndIf 
 
-	If !Empty(Alltrim(MV_PAR08))
-		cFiltro += "  		AND	SRG.RG_EFETIVA IN " + FormatIn(ALLTRIM(MV_PAR08),";")
+	If !Empty(AllTrim(MV_PAR08))
+		cFiltro += "  		AND	SRG.RG_EFETIVA IN " + FormatIn(AllTrim(MV_PAR08),";")
 	EndIf
 
-	If !Empty(Alltrim(DTOS(MV_PAR09)))
-		cFiltro += "		AND (RG_DATADEM BETWEEN '"+DTOS(MV_PAR09)+"' AND '"+DTOS(MV_PAR10)+"')" //Data de Demissao
-	Endif
+	If !Empty(AllTrim(DToS(MV_PAR09)))
+		cFiltro += "		AND (RG_DATADEM BETWEEN '"+DToS(MV_PAR09)+"' AND '"+DToS(MV_PAR10)+"')" //Data de Demissao
+	EndIf
 
-	If !Empty(Alltrim(DTOS(MV_PAR11)))
-		cFiltro += "		AND (RG_DATAHOM BETWEEN '"+DTOS(MV_PAR11)+"' AND '"+DTOS(MV_PAR12)+"')" //Data Homologacao
-	Endif
+	If !Empty(AllTrim(DToS(MV_PAR11)))
+		cFiltro += "		AND (RG_DATAHOM BETWEEN '"+DToS(MV_PAR11)+"' AND '"+DToS(MV_PAR12)+"')" //Data Homologacao
+	EndIf
 	
-	If !Empty(Alltrim(DTOS(MV_PAR13)))
-		cFiltro += "		AND (RG_DTGERAR BETWEEN '"+DTOS(MV_PAR13)+"' AND '"+DTOS(MV_PAR14)+"')" //Data geração
-	Endif
+	If !Empty(AllTrim(DToS(MV_PAR13)))
+		cFiltro += "		AND (RG_DTGERAR BETWEEN '"+DToS(MV_PAR13)+"' AND '"+DToS(MV_PAR14)+"')" //Data geração
+	EndIf
 
 	If MV_PAR15 = 1 //Normal
 		cFiltro += "		AND SRG.RG_RESCDIS = '0'"
@@ -305,10 +292,10 @@ Static Function ReportPrint(oReport)
 		cFiltro += "		AND SRG.RG_RESCDIS = '1'"	
 	ElseIf MV_PAR15 = 3 //Por dissídio
 		cFiltro += "		AND SRG.RG_RESCDIS = '2'"	
-	Endif
+	EndIf
 
-	If !Empty(Alltrim(MV_PAR17))
-		cFiltro += "		AND SRR.RR_PD IN " + FormatIn(ALLTRIM(MV_PAR17),";")
+	If !Empty(AllTrim(MV_PAR17))
+		cFiltro += "		AND SRR.RR_PD IN " + FormatIn(AllTrim(MV_PAR17),";")
 	EndIf
 
 	//Monto minha consulta conforme parametros passado
@@ -316,9 +303,9 @@ Static Function ReportPrint(oReport)
 	cFilSR6 :=  FWJoinFilial("SR6", "SRA") 
 	cFilCTT :=  FWJoinFilial("CTT", "SRA") 
 
-	cFilSRV := StrTran(cFilSRV, "SUBSTRING", "SUBSTR")
-	cFilSR6 := StrTran(cFilSR6, "SUBSTRING", "SUBSTR")
-	cFilCTT := StrTran(cFilCTT, "SUBSTRING", "SUBSTR")
+	cFilSRV := StrTran(cFilSRV, "SUBSTRING", "SubStr")
+	cFilSR6 := StrTran(cFilSR6, "SUBSTRING", "SubStr")
+	cFilCTT := StrTran(cFilCTT, "SUBSTRING", "SubStr")
 
 	cQuery := "	SELECT RA_FILIAL,M0_FILIAL , RA_CC, RA_TNOTRAB,RA_ADMISSA, RA_MAT, RA_NOME, RA_DEPIR, RA_DEPSF, "
 	cQuery += "		RG_FILIAL, RG_MAT, RG_DATADEM, RG_DATAHOM, RG_DTAVISO, RG_DTGERAR, RG_DAVISO, RG_TIPORES, RG_MEDATU, "
@@ -347,7 +334,7 @@ Static Function ReportPrint(oReport)
 	cQuery += "		AND SRV.D_E_L_E_T_ = ' ' "
 	cQuery += "		AND CTT.D_E_L_E_T_ = ' ' "
 	cQuery += cFiltro
-	If MV_PAR16 = 2 .AND. Empty(Alltrim(MV_PAR17))
+	If MV_PAR16 = 2 .And. Empty(AllTrim(MV_PAR17))
 		cQuery += "		AND	(SRR.RR_PD = '428' OR SRR.RR_PD = '727')"
 	EndIf
 	If nOrdem = 1
@@ -359,16 +346,16 @@ Static Function ReportPrint(oReport)
 	cQuery := ChangeQuery(cQuery)
 
 	//Se o alias estiver aberto, irei fechar, isso ajuda a evitar erros
-	IF Select(_cAlias) > 0
-		DbSelectArea(_cAlias)
-		DbCloseArea()
-	ENDIF
+	If Select(_cAlias) > 0
+		DBSelectArea(_cAlias)
+		DBCloseArea()
+	EndIf
 	
 	//crio o novo alias
 	TCQUERY cQuery New Alias (_cAlias)
 
-	dbSelectArea(_cAlias)
-	(_cAlias)->(dbGoTop())
+	DBSelectArea(_cAlias)
+	(_cAlias)->(DBGoTop())
 	
 	oReport:SetMeter((_cAlias)->(LastRec()))	
 
@@ -382,7 +369,7 @@ If MV_PAR16 = 1
 		
 		If _cFilial <> (_cAlias)->RA_FILIAL
 			nTotalFil := 0
-			If !Empty(Alltrim(_cFilial))
+			If !Empty(AllTrim(_cFilial))
 				oSection1:Finish()
 			EndIf
 
@@ -396,12 +383,12 @@ If MV_PAR16 = 1
 			//imprimo a primeira seção				
 			oSection1:Cell("RA_FILIAL"):SetValue((_cAlias)->RA_FILIAL)
 			//oSection1:Cell("DESCRICAO"):SetValue((_cAlias)->DESCRICAO)				
-			oSection1:Printline()
+			oSection1:PrintLine()
 		EndIf
 
 		If _cMatric <> (_cAlias)->RA_MAT
 
-			If !Empty(Alltrim(_cMatric))
+			If !Empty(AllTrim(_cMatric))
 				oSection2:Finish()
 				oSection3:Finish()
 				oSection4:Finish()
@@ -417,26 +404,26 @@ If MV_PAR16 = 1
 			oSection2:Cell("RA_NOME"):SetValue((_cAlias)->RA_NOME)	
 			oSection2:Cell("RA_DEPIR"):SetValue((_cAlias)->RA_DEPIR)	
 			oSection2:Cell("RA_DEPSF"):SetValue((_cAlias)->RA_DEPSF)		
-			oSection2:Printline()
+			oSection2:PrintLine()
 
 			//inicializo a segunda seção
 			oSection3:init()
 
-			oSection3:Cell("RA_ADMISSA"):SetValue(DTOC(STOD((_cAlias)->RA_ADMISSA)))
-			oSection3:Cell("RG_DATADEM"):SetValue(DTOC(STOD((_cAlias)->RG_DATADEM)))
-			oSection3:Cell("RG_DATAHOM"):SetValue(DTOC(STOD((_cAlias)->RG_DATAHOM)))			
-			oSection3:Cell("RG_DTAVISO"):SetValue(DTOC(STOD((_cAlias)->RG_DTAVISO)))	
-			oSection3:Cell("RG_DTGERAR"):SetValue(DTOC(STOD((_cAlias)->RG_DTGERAR)))	
+			oSection3:Cell("RA_ADMISSA"):SetValue(DToC(SToD((_cAlias)->RA_ADMISSA)))
+			oSection3:Cell("RG_DATADEM"):SetValue(DToC(SToD((_cAlias)->RG_DATADEM)))
+			oSection3:Cell("RG_DATAHOM"):SetValue(DToC(SToD((_cAlias)->RG_DATAHOM)))			
+			oSection3:Cell("RG_DTAVISO"):SetValue(DToC(SToD((_cAlias)->RG_DTAVISO)))	
+			oSection3:Cell("RG_DTGERAR"):SetValue(DToC(SToD((_cAlias)->RG_DTGERAR)))	
 			oSection3:Cell("RG_DAVISO"):SetValue((_cAlias)->RG_DAVISO)	
 			oSection3:Cell("RG_TIPORES"):SetValue((_cAlias)->RG_TIPORES)
 			oSection3:Cell("RG_DESCTPR"):SetValue(fDescRCC("S043",(_cAlias)->RG_TIPORES,1,2,3,30) )
-			oSection3:Cell("RG_MEDATU"):SetValue(IF( (_cAlias)->RG_MEDATU == "S", "Sim" , "Não"))
+			oSection3:Cell("RG_MEDATU"):SetValue(If( (_cAlias)->RG_MEDATU == "S", "Sim" , "Não"))
 			oSection3:Cell("RG_DFERVEN"):SetValue((_cAlias)->RG_DFERVEN)
 			oSection3:Cell("RG_SALMES"):SetValue((_cAlias)->RG_SALMES)
 			oSection3:Cell("RG_SALDIA"):SetValue((_cAlias)->RG_SALDIA)
 			oSection3:Cell("RG_SALHORA"):SetValue((_cAlias)->RG_SALHORA)
 			oSection3:Cell("RG_EFETIVA"):SetValue((_cAlias)->RG_EFETIVA)
-			oSection3:Printline()
+			oSection3:PrintLine()
 
 			oSection5:init()
 		EndIf
@@ -450,7 +437,7 @@ If MV_PAR16 = 1
 				aTSectionR[nPos,3] += (_cAlias)->RR_HORAS
 				aTSectionR[nPos,4] += (_cAlias)->RR_VALOR
 			EndIf
-		Elseif (_cAlias)->RV_TIPOCOD = "2"
+		ElseIf (_cAlias)->RV_TIPOCOD = "2"
 			aAdd(aSectionD,{(_cAlias)->RR_PD,(_cAlias)->RV_DESC,(_cAlias)->RR_HORAS,(_cAlias)->RR_VALOR})
 			//Alimenta o Array totalizador
 			If (nPos := aScan(aTSectionD,{|x| x[1] ==(_cAlias)->RR_PD})) = 0
@@ -474,16 +461,16 @@ If MV_PAR16 = 1
 		_cMatric := (_cAlias)->RA_MAT
 		_cTipo   := (_cAlias)->RV_TIPOCOD
 
-		(_cAlias)->(dbSkip())
+		(_cAlias)->(DBSkip())
 
-		If _cMatric <> (_cAlias)->RA_MAT .OR. (_cAlias)->(Eof())
+		If _cMatric <> (_cAlias)->RA_MAT .Or. (_cAlias)->(Eof())
 
 			oSection4:init()
 			
 			oSection4:Cell("NOME1"):SetValue("RECEITAS")
 			oSection4:Cell("NOME2"):SetValue("DESPESAS")
 			oSection4:Cell("NOME3"):SetValue("BASES")
-			oSection4:Printline()
+			oSection4:PrintLine()
 
 			nTamR := Len(aSectionR)
 			nTamD := Len(aSectionD)
@@ -512,7 +499,7 @@ If MV_PAR16 = 1
 					oSection5:Cell("RRR_VALOR"):SetValue(Transform(aSectionR[i][4],"@E 999,999,999.99"))	
 					nTotalRec += aSectionR[i][4]
 					nTotalHRec += aSectionR[i][3]
-				else
+				Else
 					oSection5:Cell("RRR_PD"):SetValue("")
 					oSection5:Cell("RRV_DESC"):SetValue("")		
 					oSection5:Cell("RRR_HORAS"):SetValue("")	
@@ -537,7 +524,7 @@ If MV_PAR16 = 1
 					oSection5:Cell("BRV_DESC"):SetValue(aSectionB[i][2])			
 					oSection5:Cell("BRR_HORAS"):SetValue(aSectionB[i][3])	
 					oSection5:Cell("BRR_VALOR"):SetValue(Transform(aSectionB[i][4],"@E 999,999,999.99"))		
-				else
+				Else
 					oSection5:Cell("BRR_PD"):SetValue("")
 					oSection5:Cell("BRV_DESC"):SetValue("")		
 					oSection5:Cell("BRR_HORAS"):SetValue("")	
@@ -545,7 +532,7 @@ If MV_PAR16 = 1
 				EndIf
 				oSection5:Cell("ESPACO1"):SetValue("|")	
 				oSection5:Cell("ESPACO2"):SetValue("|")	
-				oSection5:Printline()
+				oSection5:PrintLine()
 
 			Next
 			oReport:ThinLine()
@@ -565,7 +552,7 @@ If MV_PAR16 = 1
 			oSection5:Cell("BRR_HORAS"):SetValue("")	
 			oSection5:Cell("BRR_VALOR"):SetValue(Transform(nTotalRec - nTotalDesp,"@E 999,999,999.99") )	
 
-			oSection5:Printline()
+			oSection5:PrintLine()
 			oReport:ThinLine()
 
 			nTotalFil += (nTotalRec - nTotalDesp)
@@ -576,7 +563,7 @@ If MV_PAR16 = 1
 			
 		EndIf
 
-		If _cFilial <> (_cAlias)->RA_FILIAL .OR. (_cAlias)->(Eof())
+		If _cFilial <> (_cAlias)->RA_FILIAL .Or. (_cAlias)->(Eof())
 
 			oReport:SkipLine(3)
 			oReport:ThinLine()
@@ -599,9 +586,9 @@ If MV_PAR16 = 1
 			oSection5:Cell("ESPACO1"):SetValue("")	
 			oSection5:Cell("ESPACO2"):SetValue("")	
 
-			oSection5:Printline()
+			oSection5:PrintLine()
 		EndIf
-	Enddo
+	EndDo
 
 	oSection1:Finish()
 	oSection2:Finish()
@@ -622,14 +609,14 @@ If MV_PAR16 = 1
 	oSection4:Cell("NOME1"):SetValue("Totalizador")
 	oSection4:Cell("NOME2"):SetValue("")
 	oSection4:Cell("NOME3"):SetValue("")
-	oSection4:Printline()
+	oSection4:PrintLine()
 
 	oReport:SkipLine(1)
 
 	oSection4:Cell("NOME1"):SetValue("RECEITAS")
 	oSection4:Cell("NOME2"):SetValue("DESPESAS")
 	oSection4:Cell("NOME3"):SetValue("BASES")
-	oSection4:Printline()
+	oSection4:PrintLine()
 
 
 
@@ -644,9 +631,9 @@ If MV_PAR16 = 1
 	nTamD := Len(aTSectionD)
 	nTamB := Len(aTSectionB)
 
-    ASORT(aTSectionR ,,, {|x,y| x[1] < y[1] } )
-    ASORT(aTSectionD ,,, {|x,y| x[1] < y[1] } )
-    ASORT(aTSectionB ,,, {|x,y| x[1] < y[1] } )
+    aSort(aTSectionR ,,, {|x,y| x[1] < y[1] } )
+    aSort(aTSectionD ,,, {|x,y| x[1] < y[1] } )
+    aSort(aTSectionB ,,, {|x,y| x[1] < y[1] } )
 	
 	nTam := nTamR
 
@@ -666,7 +653,7 @@ If MV_PAR16 = 1
 			oSection5:Cell("RRR_VALOR"):SetValue(Transform(aTSectionR[i][4],"@E 999,999,999.99"))	
 			nTotalRec += aTSectionR[i][4]
 			nTotalHRec += aTSectionR[i][3]
-		else
+		Else
 			oSection5:Cell("RRR_PD"):SetValue("")
 			oSection5:Cell("RRV_DESC"):SetValue("")		
 			oSection5:Cell("RRR_HORAS"):SetValue("")	
@@ -691,7 +678,7 @@ If MV_PAR16 = 1
 			oSection5:Cell("BRV_DESC"):SetValue(aTSectionB[i][2])			
 			oSection5:Cell("BRR_HORAS"):SetValue(aTSectionB[i][3])	
 			oSection5:Cell("BRR_VALOR"):SetValue(Transform(aTSectionB[i][4],"@E 999,999,999.99"))		
-		else
+		Else
 			oSection5:Cell("BRR_PD"):SetValue("")
 			oSection5:Cell("BRV_DESC"):SetValue("")		
 			oSection5:Cell("BRR_HORAS"):SetValue("")	
@@ -699,7 +686,7 @@ If MV_PAR16 = 1
 		EndIf
 		oSection5:Cell("ESPACO1"):SetValue("|")	
 		oSection5:Cell("ESPACO2"):SetValue("|")	
-		oSection5:Printline()
+		oSection5:PrintLine()
 
 	Next
 
@@ -720,15 +707,12 @@ If MV_PAR16 = 1
 	oSection5:Cell("BRR_HORAS"):SetValue("")	
 	oSection5:Cell("BRR_VALOR"):SetValue(Transform(nTotalRec - nTotalDesp,"@E 999,999,999.99") )	
 
-	oSection5:Printline()
+	oSection5:PrintLine()
 	oReport:ThinLine()
 
 	oSection4:Finish()
 	oSection5:Finish()
 	oReport:ThinLine()
-
-
-
 
 Else
 	//Irei percorrer todos os meus registros
@@ -748,31 +732,31 @@ Else
 		_cRA_CC      := (_cAlias)->RA_CC
 		_cRA_MAT     := (_cAlias)->RA_MAT
 		_cRA_NOME    := (_cAlias)->RA_NOME
-		_cRA_ADMISSA := DTOC(STOD((_cAlias)->RA_ADMISSA))
-		_cRG_DATAHOM := DTOC(STOD((_cAlias)->RG_DATAHOM))
-		_cRG_DATADEM := DTOC(STOD((_cAlias)->RG_DATADEM))
-		_cRG_DTAVISO := DTOC(STOD((_cAlias)->RG_DTAVISO))
+		_cRA_ADMISSA := DToC(SToD((_cAlias)->RA_ADMISSA))
+		_cRG_DATAHOM := DToC(SToD((_cAlias)->RG_DATAHOM))
+		_cRG_DATADEM := DToC(SToD((_cAlias)->RG_DATADEM))
+		_cRG_DTAVISO := DToC(SToD((_cAlias)->RG_DTAVISO))
 		_cRG_TIPORES := (_cAlias)->RG_TIPORES
 		_cRG_DRES    := fDescRCC("S043",(_cAlias)->RG_TIPORES,1,2,3,30)
 		_cRG_SALMES  := (_cAlias)->RG_SALMES
 		
-		If Empty(Alltrim(_c1RR_PD))
+		If Empty(AllTrim(_c1RR_PD))
 			_c1RR_PD := (_cAlias)->RR_PD
 			_c1RV_DESC := (_cAlias)->RV_DESC
 			_c1RR_VALOR := Transform((_cAlias)->RR_VALOR,"@E 999,999,999.99")
-		ElseIf Empty(Alltrim(_c2RR_PD))
+		ElseIf Empty(AllTrim(_c2RR_PD))
 			_c2RR_PD := (_cAlias)->RR_PD
 			_c2RV_DESC := (_cAlias)->RV_DESC
 			_c2RR_VALOR := Transform((_cAlias)->RR_VALOR,"@E 999,999,999.99")
-		ElseIf Empty(Alltrim(_c3RR_PD))
+		ElseIf Empty(AllTrim(_c3RR_PD))
 			_c3RR_PD := (_cAlias)->RR_PD
 			_c3RV_DESC := (_cAlias)->RV_DESC
 			_c3RR_VALOR := Transform((_cAlias)->RR_VALOR,"@E 999,999,999.99")
-		ElseIf Empty(Alltrim(_c4RR_PD))
+		ElseIf Empty(AllTrim(_c4RR_PD))
 			_c4RR_PD := (_cAlias)->RR_PD
 			_c4RV_DESC := (_cAlias)->RV_DESC
 			_c4RR_VALOR := Transform((_cAlias)->RR_VALOR,"@E 999,999,999.99")
-		ElseIf Empty(Alltrim(_c5RR_PD))
+		ElseIf Empty(AllTrim(_c5RR_PD))
 			_c5RR_PD := (_cAlias)->RR_PD
 			_c5RV_DESC := (_cAlias)->RV_DESC
 			_c5RR_VALOR := Transform((_cAlias)->RR_VALOR,"@E 999,999,999.99")
@@ -780,9 +764,9 @@ Else
 		
 		_cMatric := (_cAlias)->RA_MAT
 
-		(_cAlias)->(dbSkip())
+		(_cAlias)->(DBSkip())
 
-		If _cMatric <> (_cAlias)->RA_MAT .OR. (_cAlias)->(EOF())
+		If _cMatric <> (_cAlias)->RA_MAT .Or. (_cAlias)->(Eof())
 			//inicializo a segunda seção
 			oSection6:init()
 
@@ -819,7 +803,7 @@ Else
 			oSection6:Cell("RRV_5DESC"):SetValue(_c5RV_DESC)			
 			oSection6:Cell("RRR_5VALOR"):SetValue(_c5RR_VALOR)	
 
-			oSection6:Printline()
+			oSection6:PrintLine()
 
 			_c1RR_PD := Space(4)
 			_c1RV_DESC := Space(5)
@@ -848,7 +832,7 @@ Else
 
 		EndIf
 
-	Enddo	
+	EndDo	
 	oSection6:Finish()
 	oReport:ThinLine()
 EndIf

@@ -28,9 +28,9 @@ Antonio Ramos    -  Igor Melgaço     - 21/10/2024 - 24/10/2024 - 47892   - Inclu
 // Definicoes de Includes da Rotina.
 //====================================================================================================
 
-#INCLUDE "Protheus.ch"
-#INCLUDE "RwMake.ch"
-#INCLUDE "TopConn.ch"
+#Include "TOTVS.ch"
+#Include "RwMake.ch"
+#Include "TopConn.ch"
 
 /*
 ===============================================================================================================================
@@ -124,9 +124,9 @@ Begin Sequence
    SetKey(VK_F5,Nil)
    SetKey(VK_F6,Nil)
 
-   RestArea(aAreaSB1)
-   RestArea(aAreaZAZ)
-   RestArea(aAreaZB0)
+   FWRestArea(aAreaSB1)
+   FWRestArea(aAreaZAZ)
+   FWRestArea(aAreaZB0)
 
    If nOpc <> 1
 	  //======================================================================================
@@ -189,17 +189,17 @@ For nI := 1 To Len(aGrd)
 		//========================================================
 		// Identifica se pelo menos um produto foi selecionado. 
 		//========================================================
-		If !Empty(Alltrim(aGrd[nI,3]))
+		If !Empty(AllTrim(aGrd[nI,3]))
 		    lMark := .T.
 		EndIf
 		
 		If ! _lInicAdd 
-		   If !Empty(Alltrim(aCols[Len(aCols)][2]))
+		   If !Empty(AllTrim(aCols[Len(aCols)][2]))
 			
 			  //===============================================
 			  // Inicializa o Acols com uma linha em Branco. 
 			  //===============================================
-			  AADD(aCols,Array(Len(aHeader)+1))
+			  aAdd(aCols,Array(Len(aHeader)+1))
 			
 			  //=========================
 			  // Incrementa os Itens.  
@@ -278,7 +278,7 @@ EndIf
 //=========================================================
 _aBkpACols := AClone(aCols) 
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -334,8 +334,8 @@ If _lNMostSel
          _nColExc := Len(aCols[1])
       
          For _nI := 1 To Len(aCols)
-            If !aCols[_nI,_nColExc] .AND. !(aCols[_nI,4] $ _cProduto)
-               _cProduto += Iif(Empty(_cProduto),"",";") + aCols[_nI,4]
+            If !aCols[_nI,_nColExc] .And. !(aCols[_nI,4] $ _cProduto)
+               _cProduto += IIf(Empty(_cProduto),"",";") + aCols[_nI,4]
             EndIf
          Next
       EndIf
@@ -347,10 +347,10 @@ EndIf
 cQuery := "SELECT B1_COD, B1_I_DESCD"
 cQuery += " FROM " + RetSqlName("SB1")
 cQuery += " WHERE D_E_L_E_T_ <> '*'"
-cQuery += " AND B1_FILIAL  = '" + xFILIAL("SB1") + "'"
+cQuery += " AND B1_FILIAL  = '" + xFilial("SB1") + "'"
 cQuery += " AND B1_MSBLQL <> '1'"
 cQuery += " AND B1_TIPO = 'PA'"
-If _lNMostSel .AND. !Empty(_cProduto)
+If _lNMostSel .And. !Empty(_cProduto)
    cQuery += "  AND B1_COD NOT IN " + FormatIn(_cProduto,";") 
 EndIf
 If !Empty(cGrupo) //Se o grupo nao esta vazio
@@ -371,16 +371,16 @@ aGrd := {}
 //=============================================================
 // Processa o arquivo do select preenchendo o array do Grid. 
 //=============================================================
-dbSelectArea("TRB1")
-dbGoTop()
-Do While TRB1->(!EoF())
+DBSelectArea("TRB1")
+DBGoTop()
+While TRB1->(!Eof())
 	
 	aAdd(aGrd, {LoadBitmap(GetResources(),"BR_VERDE"),;
 	bNbMarked 		,;
 	TRB1->B1_COD	,;
 	TRB1->B1_I_DESCD})
 	
-	TRB1->(dbSkip())
+	TRB1->(DBSkip())
 EndDo
 
 If Len(aGrd) <= 0
@@ -390,8 +390,8 @@ If Len(aGrd) <= 0
 	""}}
 EndIf
 
-dbSelectArea("TRB1")
-dbCloseArea()
+DBSelectArea("TRB1")
+DBCloseArea()
 
 oBoxLib:SetArray(aGrd)
 oBoxLib:bLine := {|| {aGrd[oBoxLib:nAt,1],;
@@ -400,7 +400,7 @@ aGrd[oBoxLib:nAt,3],;
 aGrd[oBoxLib:nAt,4]}}
 oBoxLib:Refresh()
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -430,7 +430,7 @@ Next
 
 oBoxLib:Refresh()
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -461,18 +461,18 @@ Begin Sequence
          Break
 	  EndIf 
 
-      SA1->(DbSetOrder(1))
+      SA1->(DBSetOrder(1))
       If ! Empty(_cLoja)
-         If ! SA1->(DbSeek(xFilial("SA1")+_cCli+_cLoja)) 
+         If ! SA1->(DBSeek(xFilial("SA1")+_cCli+_cLoja)) 
             _lRet := .F.
-            U_ItMsg("Código de Cliente e Loja não cadastrado no cadastro de clientes.","Atenção","",1) 
+            U_ITMsg("Código de Cliente e Loja não cadastrado no cadastro de clientes.","Atenção","",1) 
 		 Else
             _cNomeCli := SA1->A1_NOME
 		 EndIf
 	  Else
-         If ! SA1->(DbSeek(xFilial("SA1")+_cCli)) 
+         If ! SA1->(DBSeek(xFilial("SA1")+_cCli)) 
             _lRet := .F.
-            U_ItMsg("Código de Cliente não cadastrado no cadastro de clientes.","Atenção","",1) 
+            U_ITMsg("Código de Cliente não cadastrado no cadastro de clientes.","Atenção","",1) 
 		 Else
             _cNomeCli := SA1->A1_NOME
 		 EndIf
@@ -485,10 +485,10 @@ Begin Sequence
          Break
 	  EndIf 
 
-      SA1->(DbSetOrder(1))
-      If ! SA1->(DbSeek(xFilial("SA1")+_cCli+_cLoja)) 
+      SA1->(DBSetOrder(1))
+      If ! SA1->(DBSeek(xFilial("SA1")+_cCli+_cLoja)) 
          _lRet := .F.
-         U_ItMsg("Código de Cliente e Loja não cadastrado no cadastro de clientes.","Atenção","",1) 
+         U_ITMsg("Código de Cliente e Loja não cadastrado no cadastro de clientes.","Atenção","",1) 
       Else
          _cNomeCli := SA1->A1_NOME
 	  EndIf
@@ -497,7 +497,7 @@ Begin Sequence
 End Sequence
 
 RestOrd(_aOrd)
-SA1->(DbGoTo(_nRegAtu))
+SA1->(DBGoTo(_nRegAtu))
 
 Return _lRet
 

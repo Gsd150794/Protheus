@@ -8,11 +8,11 @@
 ===============================================================================================================================
 */
 
-#INCLUDE "FWMBROWSE.CH"
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "TOPCONN.CH"
-#INCLUDE "RWMAKE.CH"
+#Include "FWMBROWSE.CH"
+#Include "FWMVCDEF.CH"
+#Include "TOTVS.ch"
+#Include "TOPCONN.CH"
+#Include "RWMAKE.CH"
  
 /*
 ===============================================================================================================================
@@ -36,7 +36,7 @@ _oBrowse:SetMenuDef( 'AOMS126' )
 _oBrowse:SetDescription("Cadastro de Capacidade de Carregamento")
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -136,10 +136,10 @@ Local _cOper        := _oModelMaster:GetValue('Z24_OPER' )
 Local _nOperation   := _oModel:GetOperation() 
 Local _lValida      := .F.
 
-If Empty(Alltrim(_cFilOri)) .And. Empty(Alltrim(_cOper))
+If Empty(AllTrim(_cFilOri)) .And. Empty(AllTrim(_cOper))
     _lReturn := .F.
     
-	U_ITMSG("Filial e Operação não prenchida.",;
+	U_ITMsg("Filial e Operação não prenchida.",;
             "Atenção",;
             "Preencha o campo Filial ou Operação para conclusão do cadastro.  ",3 , , , .T.)
 Else
@@ -152,11 +152,11 @@ Else
     EndIf
 
     If _lValida
-        Z24->(DbSetOrder(1))
-        If Z24->( Dbseek(xFilial("Z24")+_cFilOri+_cOper) )
+        Z24->(DBSetOrder(1))
+        If Z24->( DBSeek(xFilial("Z24")+_cFilOri+_cOper) )
             _lReturn := .F.
 
-    		U_ITMSG("Chave ( Filial + Operação ) informada já consta no cadastro. ",;
+    		U_ITMsg("Chave ( Filial + Operação ) informada já consta no cadastro. ",;
                     "Atenção",;
                     "Verifique e modifique o chave digitada.  ",3 , , , .T.)	
               

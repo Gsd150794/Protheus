@@ -2,18 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 30/03/2025 | Chamado 50280. Modificado cálculo para Extrato Seco Total (EST)
-Lucas Borges  | 10/04/2025 | Chamado 50420. Incluída a coluna de estado
-Lucas Borges  | 25/04/2025 | Chamado 50532. Incluído filtro de CFOP
+Lucas Borges  |10/04/2025| Chamado 50420. Incluída a coluna de estado
+Lucas Borges  |25/04/2025| Chamado 50532. Incluído filtro de CFOP
+Lucas Borges  |01/10/2025| Chamado 52143. Incluido filtro para fornecedore Centro Leite
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -25,9 +22,10 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function RGLT033()
+User Function RGLT033
 
-Local oReport
+Local oReport := Nil As Object
+
 Pergunte("RGLT033",.F.)
 //Inferface de Impressão
 oReport := ReportDef()
@@ -45,13 +43,13 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function ReportDef()
+Static Function ReportDef() As Object
 
-Local oReport
-Local oSection1
-Local oSection2
-Local _nEspaco	:= 5
-Local _aOrdem   := {"Filial+Produto"}
+Local oReport   := Nil As Object
+Local oSection1 := Nil As Object
+Local oSection2 := Nil As Object
+Local _nEspaco	:= 5 As Numeric
+Local _aOrdem   := {"Filial+Produto"} As Array
 
 //Criacao do componente de impressao
 //TReport():New
@@ -119,31 +117,32 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function ReportPrint(oReport,_aOrdem)
+Static Function ReportPrint(oReport As Object,_aOrdem As Array)
 
-Local _cFiltro	:= "%"
-Local _cFilDeb  := "% %"
-Local _cFilSD1  := "% %"
-Local _cAlias	  := ""
-Local _aSelFil	:= {}
-Local _nOrdem	  := oReport:Section(1):GetOrder() 
-Local _lPlanilha:= oReport:nDevice == 4
-Local _cFilial	:= ""
-Local _cProduto := ""
-Local _cProceden := ""
-Local _cCampos  := ""
-Local _aQuebras := {'oQbrProc','oQbrProd'}
-Local _cOrder   := ""
-Local _nX       := 0
+Local _cFiltro	:= "%" As Character
+Local _cFilDeb  := "% %" As Character
+Local _cFilSD1  := "% %" As Character
+Local _cFilSA2  := "% %" As Character
+Local _cAlias	  := "" As Character
+Local _aSelFil	:= {} As Array
+Local _nOrdem	  := oReport:Section(1):GetOrder() As Numeric
+Local _lPlanilha:= oReport:nDevice == 4 As Logical
+Local _cFilial	:= "" As Character
+Local _cProduto := "" As Character
+Local _cProceden := "" As Character
+Local _cCampos  := "" As Character
+Local _aQuebras := {'oQbrProc','oQbrProd'} As Array
+Local _cOrder   := "" As Character
+Local _nX       := 0 As Numeric
 
 //Chama função que permitirá a seleção das filiais
 If MV_PAR10 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZZX")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -221,13 +220,20 @@ EndIf
 _cCampos := "%, ZLX.ZLX_FORNEC, ZLX.ZLX_LJFORN, SA2.A2_NREDUZ, SA2.A2_EST %"
 _cOrder :=  "% ZZX.ZZX_CODPRD, ORD_PRC, ZZX.ZZX_FILIAL, ZLX.ZLX_FORNEC, ZLX.ZLX_LJFORN, SA2.A2_NREDUZ %"
 
+//Centro Leite
+If MV_PAR14 == 1
+	_cFilSA2 := "% AND A2_L_CENTR = '1' %"
+ElseIf MV_PAR14 == 2
+	_cFilSA2 := "% AND A2_L_CENTR = '2' %"
+EndIf
+
 //==========================================================================
 // Query do relatório da secao 1                                            
 //==========================================================================
 oReport:Section(1):BeginQuery()
 _cAlias := GetNextAlias()
 
-RGLT033Q(_cAlias, _cFiltro, _cFilDeb, _cCampos, _cOrder, _cFilSD1)
+RGLT033Q(_cAlias, _cFiltro, _cFilDeb, _cCampos, _cOrder, _cFilSD1, _cFilSA2)
 
 oReport:SetMsgPrint("Consultando registros no Banco de Dados")
 oReport:SetMeter(0)
@@ -253,17 +259,17 @@ oReport:SetMeter(0)
 oReport:SetPageFooter(3, {|| oReport:PrintText(Replicate(" ",35)+Replicate("_",30)+Replicate(" ",30)+Replicate("_",30)+Replicate(" ",30)+Replicate("_",30)),;
 oReport:PrintText(Replicate(" ",50)+"Depto. Leite"+Replicate(" ",60)+"Depto. Suprimento"+Replicate(" ",60)+"Depto. Financeiro" ) },.F.)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->ZZX_FILIAL
 	_cProduto := (_cAlias)->ZZX_CODPRD+' - '+AllTrim((_cAlias)->DESCRI)
   _cProceden := AllTrim(_cProduto)+' - '+oReport:Section(1):Cell("ZLX_TIPOLT"):GetCBox()
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 //==========================================================================
 // Query do relatório da secao 2
@@ -273,7 +279,7 @@ _cAlias := GetNextAlias()
 _cCampos := "% %"
 _cOrder :=  "% ZZX.ZZX_FILIAL, ZZX.ZZX_CODPRD, ORD_PRC %"
 
-RGLT033Q(_cAlias, _cFiltro, _cFilDeb, _cCampos, _cOrder, _cFilSD1)
+RGLT033Q(_cAlias, _cFiltro, _cFilDeb, _cCampos, _cOrder, _cFilSD1, _cFilSA2)
 
 oReport:SetMsgPrint("Consultando registros no Banco de Dados")
 oReport:SetMeter(0)
@@ -298,10 +304,10 @@ oReport:SetStartPage(.T.)
 oReport:Section(2):Init()
 oReport:SetMsgPrint("Imprimindo")
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(2):PrintLine()
 	oReport:IncMeter()
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(2):Finish()
@@ -319,41 +325,41 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function RGLT033Q (_cAlias, _cFiltro, _cFilDeb, _cCampos, _cOrder, _cFilSD1)
+Static Function RGLT033Q (_cAlias As Character,_cFiltro As Character,_cFilDeb As Character,_cCampos As Character,_cOrder As Character,_cFilSD1 As Character,_cFilSA2 As Character)
 
 BeginSql alias _cAlias
 SELECT ZZX.ZZX_FILIAL, ZZX.ZZX_CODPRD, SX5.X5_DESCRI DESCRI, ZLX.ZLX_TIPOLT,
-       CASE
+       Case
          WHEN ZLX.ZLX_TIPOLT = 'P' THEN '1'
          WHEN ZLX.ZLX_TIPOLT = 'F' THEN '2'
          WHEN ZLX.ZLX_TIPOLT = 'T' THEN '3'
        END ORD_PRC
        %exp:_cCampos%, SUM(ZLX.ZLX_VOLREC) ZLX_VOLREC,
-       NVL(ROUND(
-       CASE
+       NVL(Round(
+       Case
             WHEN ZZX.ZZX_CODPRD = '004' THEN 0
-            WHEN C7_L_EXEST > 0 THEN ROUND(SUM((ZLX.ZLX_VOLREC * COALESCE(ROUND(ZAP.ZAP_EST, 2), 0) / 100)) * C7_L_EXEST,2) /*QTD_EST_KG*/
-            ELSE SUM(ZLX.ZLX_VOLREC * ENT.C7_PRECO)
+            WHEN C7_L_EXEST > 0 THEN Round(SUM((ZLX.ZLX_VOLREC * COALESCE(Round(ZAP.ZAP_EST, 2), 0) / 100)) * C7_L_EXEST,2) /*QTD_EST_KG*/
+            Else SUM(ZLX.ZLX_VOLREC * ENT.C7_PRECO)
         END  +     
-       SUM((((NVL(ROUND(ZAP_GORD,2),0) - ENT.C7_L_PMGB) * ZLX.ZLX_VOLREC) / 100) *
-       CASE
-            WHEN NVL(ROUND(ZAP_GORD, 2),0) > ENT.C7_L_PMGB AND
-                  NVL(ROUND(ZAP_GORD, 2),0) <= ENT.C7_L_PMGB2 THEN
+       SUM((((NVL(Round(ZAP_GORD,2),0) - ENT.C7_L_PMGB) * ZLX.ZLX_VOLREC) / 100) *
+       Case
+            WHEN NVL(Round(ZAP_GORD, 2),0) > ENT.C7_L_PMGB AND
+                  NVL(Round(ZAP_GORD, 2),0) <= ENT.C7_L_PMGB2 THEN
               ENT.C7_L_EXEMG
-            WHEN NVL(ROUND(ZAP_GORD, 2),0) > ENT.C7_L_PMGB2 THEN
+            WHEN NVL(Round(ZAP_GORD, 2),0) > ENT.C7_L_PMGB2 THEN
               ENT.C7_L_EXEM2
-            ELSE
+            Else
               0
           END),2),0) + NVL(AVG(FIN.E2_VALOR),0) - NVL(FUNRURAL,0) 
-          - (CASE WHEN SUM(F2D_VALOR) > 0 OR SUM(D1_VALFUND) > 0 THEN ROUND(SUM(ZLX.ZLX_VOLREC)*0.000841,2) ELSE 0 END) 
+          - (Case WHEN SUM(F2D_VALOR) > 0 OR SUM(D1_VALFUND) > 0 THEN Round(SUM(ZLX.ZLX_VOLREC)*0.000841,2) Else 0 END) 
           VL_A_PAGAR,
        SUM(ZLX.ZLX_VOLNF) ZLX_VOLNF,
        SUM(ZLX.ZLX_VLRNF) ZLX_VLRNF,
        SUM(ZLX.ZLX_DIFVOL) ZLX_DIFVOL,
-       ROUND(AVG(NVL(ROUND(ZAP.ZAP_GORD,2),0)),2) ZAP_GORD,
-       ROUND(AVG(NVL(ROUND(ZAP.ZAP_EST,2),0)),2) ZAP_EST,
-       ROUND(SUM((ZLX.ZLX_VOLREC * NVL(ROUND(ZAP.ZAP_GORD,2),0) / 100)),2) QTD_MG_KG,
-       ROUND(SUM((ZLX.ZLX_VOLREC * NVL(ROUND(ZAP.ZAP_EST,2),0) / 100)),2) QTD_EST_KG
+       Round(AVG(NVL(Round(ZAP.ZAP_GORD,2),0)),2) ZAP_GORD,
+       Round(AVG(NVL(Round(ZAP.ZAP_EST,2),0)),2) ZAP_EST,
+       Round(SUM((ZLX.ZLX_VOLREC * NVL(Round(ZAP.ZAP_GORD,2),0) / 100)),2) QTD_MG_KG,
+       Round(SUM((ZLX.ZLX_VOLREC * NVL(Round(ZAP.ZAP_EST,2),0) / 100)),2) QTD_EST_KG
   FROM %Table:ZLX% ZLX, %Table:ZZX% ZZX, %Table:SA2% SA2, %Table:SX5% SX5,
   (SELECT ZAP.ZAP_FILIAL, ZAP.ZAP_CODIGO, AVG(ZAP.ZAP_GORD) ZAP_GORD, AVG(ZAP.ZAP_EST) ZAP_EST FROM %Table:ZAP% ZAP WHERE ZAP.D_E_L_E_T_ = ' '
           GROUP BY ZAP.ZAP_FILIAL, ZAP.ZAP_CODIGO) ZAP,
@@ -428,7 +434,7 @@ SELECT ZZX.ZZX_FILIAL, ZZX.ZZX_CODPRD, SX5.X5_DESCRI DESCRI, ZLX.ZLX_TIPOLT,
        %exp:_cFilSD1%
        GROUP BY SD1.D1_FILIAL, SD1.D1_DOC, SD1.D1_SERIE, SD1.D1_FORNECE, SD1.D1_LOJA, SD1.D1_COD, C7_PRECO, C7_L_PMGB, C7_L_PMGB2, C7_L_EXEST, C7_L_PMEST, C7_L_EXEMG, C7_L_EXEM2, D1_VALFUND, F2D_VALOR) ENT,
   (SELECT SE2.E2_FILIAL, SE2.E2_FORNECE, SE2.E2_LOJA, 
-       SUM(CASE WHEN SE2.E2_ORIGEM = 'AGLT022' THEN SE2.E2_VALOR+SE2.E2_ACRESC-SE2.E2_DECRESC ELSE (SE2.E2_VALOR+SE2.E2_ACRESC-SE2.E2_DECRESC)*-1 END) E2_VALOR FROM %Table:SE2% SE2
+       SUM(Case WHEN SE2.E2_ORIGEM = 'AGLT022' THEN SE2.E2_VALOR+SE2.E2_ACRESC-SE2.E2_DECRESC Else (SE2.E2_VALOR+SE2.E2_ACRESC-SE2.E2_DECRESC)*-1 END) E2_VALOR FROM %Table:SE2% SE2
        WHERE SE2.D_E_L_E_T_ = ' '
        AND SE2.E2_VENCTO BETWEEN %exp:MV_PAR11% AND %exp:MV_PAR12%
        AND (%exp:_cFilDeb%
@@ -456,6 +462,7 @@ SELECT ZZX.ZZX_FILIAL, ZZX.ZZX_CODPRD, SX5.X5_DESCRI DESCRI, ZLX.ZLX_TIPOLT,
    AND ZLX.ZLX_FORNEC = SA2.A2_COD
    AND ZLX.ZLX_LJFORN = SA2.A2_LOJA
    AND ZZX.ZZX_CODIGO = ZLX.ZLX_CODANA
+   %exp:_cFilSA2%
    AND ZLX.ZLX_DTENTR BETWEEN %exp:MV_PAR01% AND %exp:MV_PAR02%
    AND ZZX.ZZX_FORNEC BETWEEN %exp:MV_PAR05% AND %exp:MV_PAR07%
    AND ZZX.ZZX_LJFORN BETWEEN %exp:MV_PAR06% AND %exp:MV_PAR08%

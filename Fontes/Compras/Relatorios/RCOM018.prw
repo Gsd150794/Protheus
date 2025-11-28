@@ -9,11 +9,11 @@ Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para cont
 ===============================================================================================================================
 */
 
-#include "rwmake.ch"
-#include "ap5mail.ch"
-#include "tbiconn.ch"
-#include "protheus.ch"
-#INCLUDE "MATR110.CH"
+#Include "rwmake.ch"
+#Include "ap5mail.ch"
+#Include "tbiconn.ch"
+#Include "TOTVS.ch"
+#Include "MATR110.CH"
 
 /*
 ===============================================================================================================================
@@ -32,7 +32,7 @@ User Function RCOM018()
 
     U_ITLOGACS()
 
-    fwMsgRun(,{|| RCOM018M()},"Processando relatorio...","Aguarde")
+    FWMsgRun(,{|| RCOM018M()},"Processando relatorio...","Aguarde")
 Return
 
 
@@ -72,7 +72,7 @@ Private _cEmailXML  := SuperGetMv("IT_ENDXML" , .F. , "")
 
 If Type("lPedido") != "L"
 	lPedido := .F.
-Endif
+EndIf
 
 
 Define Font oFont10    Name "Helvetica"       Size 0,-08       // Tamanho 10 		                                                                              
@@ -88,20 +88,20 @@ Define Font oFontValor Name "Arial"           Size 0,-16 Bold  // Tamanho 18 Neg
 
 //================================================================
 // Variaveis utilizadas para parametros                         
-// mv_par01               Do Pedido                             
-// mv_par02               Ate o Pedido                          
-// mv_par03               A partir da data de emissao           
-// mv_par04               Ate a data de emissao                 
-// mv_par05               Somente os Novos                      
-// mv_par06               Campo Descricao do Produto    	     
-// mv_par07               Unidade de Medida:Primaria ou Secund. 
-// mv_par08               Imprime ? Pedido Compra ou Aut. Entreg
-// mv_par09               Numero de vias                        
-// mv_par10               Pedidos ? Liberados Bloqueados Ambos  
-// mv_par11               Impr. SC's Firmes, Previstas ou Ambas 
-// mv_par12               Qual a Moeda ?                        
-// mv_par13               Endereco de Entrega                   
-// mv_par14               todas ou em aberto ou atendidos       
+// MV_PAR01               Do Pedido                             
+// MV_PAR02               Ate o Pedido                          
+// MV_PAR03               A partir da data de emissao           
+// MV_PAR04               Ate a data de emissao                 
+// MV_PAR05               Somente os Novos                      
+// MV_PAR06               Campo Descricao do Produto    	     
+// MV_PAR07               Unidade de Medida:Primaria ou Secund. 
+// MV_PAR08               Imprime ? Pedido Compra ou Aut. Entreg
+// MV_PAR09               Numero de vias                        
+// MV_PAR10               Pedidos ? Liberados Bloqueados Ambos  
+// MV_PAR11               Impr. SC's Firmes, Previstas ou Ambas 
+// MV_PAR12               Qual a Moeda ?                        
+// MV_PAR13               Endereco de Entrega                   
+// MV_PAR14               todas ou em aberto ou atendidos       
 //================================================================
 
 	nMoeda := MAX(SC7->C7_MOEDA,1)
@@ -146,8 +146,8 @@ nLinha :=0100
 oPrint:SayBitmap(nlinha + (nSaltoLinha * 2),nColInic + 460,cRaizServer + "system/lgrl01.bmp",200,080) 
 nlinha+=nSaltoLinha * 4                      
                                              
-SM0->(dbSetOrder(1))   // forca o indice na ordem certa
-SM0->(dbSeek(SUBS(cNumEmp,1,2) + cFilAnt))   
+SM0->(DBSetOrder(1))   // forca o indice na ordem certa
+SM0->(DBSeek(SUBS(cNumEmp,1,2) + cFilAnt))   
 
 //1 QUADRANTE          
 //DADOS DA EMPRESA ITALAC                    
@@ -247,9 +247,9 @@ cEmisaoVia:= IIf(SC7->C7_QTDREEM > 0,AllTrim(Str((SC7->C7_QTDREEM+1),2)) + "a.EM
 oPrint:Say (nLinha + nSaltoLinha,2180,cEmisaoVia,oFont11bAr,nColFinal,,,2)
 
 //DADOS DO FORNECEDOR
-DbSelectArea("SA2")
-SA2->(DbSetOrder(1))
-SA2->(DbSeek(xFilial("SA2") + cCodFornec + cCodLjForn))
+DBSelectArea("SA2")
+SA2->(DBSetOrder(1))
+SA2->(DBSeek(xFilial("SA2") + cCodFornec + cCodLjForn))
 
 nlinha+=nSaltoLinha * 2                                               
 
@@ -295,7 +295,7 @@ oPrint:Say (nlinha,2100,"Conferido por",oFont10)
 nlinha+=nSaltoLinha                                              
 
 //RESTAURA A AREA DA SC7
-restArea(cAreaSC7)     
+FWRestArea(cAreaSC7)     
 
 Return                                                                                                                                    
 
@@ -372,7 +372,7 @@ Local cCampFormat:=""//Armazena o CPF ou CNPJ formatado
 		
 	Else//CNPJ       
 		
-		cCampFormat:=Substr(cCPFCNPJ,1,2)+"."+Substr(cCPFCNPJ,3,3)+"."+Substr(cCPFCNPJ,6,3)+"/"+Substr(cCPFCNPJ,9,4)+"-"+ Substr(cCPFCNPJ,13,2)
+		cCampFormat:=SubStr(cCPFCNPJ,1,2)+"."+SubStr(cCPFCNPJ,3,3)+"."+SubStr(cCPFCNPJ,6,3)+"/"+SubStr(cCPFCNPJ,9,4)+"-"+ SubStr(cCPFCNPJ,13,2)
 			
 	EndIf
 	
@@ -447,11 +447,11 @@ cCondBus := cNumPedf
 nOrder	 :=	1 
                                                  
                                     
-SB1->(dbSetOrder(1))
+SB1->(DBSetOrder(1))
 
-dbSelectArea("SC7") 
-SC7->(dbSetOrder(nOrder))
-SC7->(dbSeek(xFilial("SC7")+cCondBus,.T.))
+DBSelectArea("SC7") 
+SC7->(DBSetOrder(nOrder))
+SC7->(DBSeek(xFilial("SC7")+cCondBus,.T.))
 
 
 While SC7->(!Eof()) .And. C7_FILIAL = xFilial("SC7") .And. C7_NUM == cNumPedf
@@ -468,7 +468,7 @@ While SC7->(!Eof()) .And. C7_FILIAL = xFilial("SC7") .And. C7_NUM == cNumPedf
 	cObs05   := " "
 	
 	If	C7_TIPO == 2
-		dbSkip()
+		DBSkip()
 		Loop
 	EndIf
 
@@ -477,7 +477,7 @@ While SC7->(!Eof()) .And. C7_FILIAL = xFilial("SC7") .And. C7_NUM == cNumPedf
 	// Filtra Tipo de SCs Firmes ou Previstas                       
 	//================================================================
 	If !MtrAValOP(3, 'SC7')
-		dbSkip()
+		DBSkip()
 		Loop
 	EndIf
 
@@ -506,21 +506,21 @@ While SC7->(!Eof()) .And. C7_FILIAL = xFilial("SC7") .And. C7_NUM == cNumPedf
 
 		nConta++       
 
-		If Ascan(aSavRec,Recno()) == 0		// Guardo recno p/gravacao
-			AADD(aSavRec,Recno())
-		Endif
+		If aScan(aSavRec,Recno()) == 0		// Guardo recno p/gravacao
+			aAdd(aSavRec,Recno())
+		EndIf
 
 		//================================================================
 		// Verifica se havera salto de formulario                       
 		//================================================================
 		
-		if nLinha >= 3300   
+		If nLinha >= 3300   
 			oPrint:Box(nLinhaInic,0030,nLinha,nColFinal)    				    
 			oPrint:EndPage()	// Finaliza a Pagina.
 			oPrint:StartPage()	// Inicia uma nova pagina  
 			nPagina++
 			RCOM018C(ncw)  
-		EndIF
+		EndIf
 
 		//================================================================
 		// Pesquisa Descricao do Produto                                
@@ -529,28 +529,28 @@ While SC7->(!Eof()) .And. C7_FILIAL = xFilial("SC7") .And. C7_NUM == cNumPedf
 
 		_nVALORIPI := MaFisRet(nConta,"IT_VALIPI")
 		_nVALORICMS:= MaFisRet(nConta,"IT_VALICM")
-		IF SB1->(dbSeek( xFilial("SB1")+SC7->C7_PRODUTO)) 
-			IF SB1->B1_TIPO = "SV"
+		If SB1->(DBSeek( xFilial("SB1")+SC7->C7_PRODUTO)) 
+			If SB1->B1_TIPO = "SV"
 				nTotIpi += 0
 				nTotIcms+= 0
 
 				MaFisLoad("IT_VALIPI",0,nConta)
 				MaFisLoad("IT_VALICM",0,nConta)
-			ELSEIF !SB1->B1_TIPO $ "IN/EM/PA" .AND. _nVALORIPI <> 0
+			ElseIf !SB1->B1_TIPO $ "IN/EM/PA" .And. _nVALORIPI <> 0
 				_nBASEICM  := MaFisRet(nConta,"IT_BASEICM")
 				_nALIQICM  := MaFisRet(nConta,"IT_ALIQICM")
-				_nVALORICMS:= ROUND((_nVALORIPI+_nBASEICM)*(_nALIQICM/100),2)
+				_nVALORICMS:= Round((_nVALORIPI+_nBASEICM)*(_nALIQICM/100),2)
 
 				nTotIpi    += _nVALORIPI 
 				nTotIcms   += _nVALORICMS
 
 				MaFisLoad("IT_BASEICM",(_nVALORIPI+_nBASEICM),nConta)
 				MaFisLoad("IT_VALICM" ,_nVALORICMS,nConta)
-			ELSE
+			Else
 				nTotIpi    += _nVALORIPI
 				nTotIcms   += _nVALORICMS
-			ENDIF
-		ENDIF
+			EndIf
+		EndIf
 		
 		
 		//================================================================
@@ -573,23 +573,23 @@ While SC7->(!Eof()) .And. C7_FILIAL = xFilial("SC7") .And. C7_NUM == cNumPedf
 		
 		lImpri  := .T.
 		
-		dbSkip()
+		DBSkip()
 	EndDo
 
-	dbGoto(nSavRec)
+	DBGoTo(nSavRec)
 													
 	//quando acaba de imprimir os produtos e se chega no final da pagina
-	if nLinha >= 3300                           
+	If nLinha >= 3300                           
 			oPrint:Box(nLinhaInic,0030,nLinha,nColFinal)
 			oPrint:EndPage()	// Finaliza a Pagina.
 			oPrint:StartPage()	// Inicia uma nova pagina                  
 			nLinha:=0100                              
 			nPagina++
 			RCOM018S(ncw)
-	EndIF
+	EndIf
 
 	//Espaco em branco entre os produtos e a parte resumida do relatorio
-	nLinha:=IIF(nLinha < 2300,2300,nLinha)
+	nLinha:=IIf(nLinha < 2300,2300,nLinha)
 	oPrint:Line(nlinha,0030,nlinha,2360) 
 	RCOM018R(nDescProd)		// Imprime os dados complementares do PC passando o desconto dos produtos como parametro
 
@@ -600,30 +600,30 @@ While SC7->(!Eof()) .And. C7_FILIAL = xFilial("SC7") .And. C7_NUM == cNumPedf
 	
 	If Len(aSavRec)>0
 		For i:=1 to Len(aSavRec)
-			dbGoto(aSavRec[i])
+			DBGoTo(aSavRec[i])
 			RecLock("SC7",.F.)  //Atualizacao do flag de Impressao
 			Replace C7_QTDREEM With (C7_QTDREEM+1)
 			Replace C7_EMITIDO With "S"
-			MsUnLock()
+			MSUnLock()
 		Next
-		dbGoto(aSavRec[Len(aSavRec)])		// Posiciona no ultimo elemento e limpa array
-	Endif
+		DBGoTo(aSavRec[Len(aSavRec)])		// Posiciona no ultimo elemento e limpa array
+	EndIf
       
 
-	Aadd(aPedMail,aPedido)
+	aAdd(aPedMail,aPedido)
     
 	aSavRec := {}
  
-	dbSkip()
+	DBSkip()
 EndDo
 
  
-dbSelectArea("SC7")
+DBSelectArea("SC7")
 dbClearFilter()
-dbSetOrder(1)
+DBSetOrder(1)
 
-dbSelectArea("SX3")
-dbSetOrder(1)
+DBSelectArea("SX3")
+DBSetOrder(1)
 
 MS_FLUSH()
 
@@ -670,49 +670,49 @@ Local nLinFinal
 				@ 050,0015	To 095,135 Title OemToAnsi("Selecione qual descrição será utilizada:")
 				@ 060,0017	Radio oRadio Var nOpcoes ITEMS OemToAnsi("Descrição Simples"),OemToAnsi("Descrição Detalhada"),OemToAnsi("Descr. Detalhada + Simples") 3D SIZE 100,10 OF oDlg PIXEL
 				@ 100,0015	CHECKBOX oShowDlg VAR lShowDlg PROMPT "Repetir Opção" SIZE 60,11 OF oDlg PIXEL
-				@ 100,0110	BMPBUTTON TYPE 01 ACTION Close(oDlg)
+				@ 100,0110	BMPBUTTON Type 01 ACTION Close(oDlg)
 				
 				Activate MSDialog oDlg Centered
 			EndIf
 			
-			if nOpcoes == 1
+			If nOpcoes == 1
 				cDescPro := AllTrim(SC7->C7_DESCRI)
-			elseif nOpcoes == 2
-				SB1->(dbSetOrder(1))
-				SB1->(dbSeek( xFilial("SB1") + SC7->C7_PRODUTO ))
+			ElseIf nOpcoes == 2
+				SB1->(DBSetOrder(1))
+				SB1->(DBSeek( xFilial("SB1") + SC7->C7_PRODUTO ))
 				cDescPro := AllTrim(SB1->B1_I_DESCD)
-			elseif nOpcoes == 3
-				SB1->(dbSetOrder(1))
-				SB1->(dbSeek( xFilial("SB1") + SC7->C7_PRODUTO ))
+			ElseIf nOpcoes == 3
+				SB1->(DBSetOrder(1))
+				SB1->(DBSeek( xFilial("SB1") + SC7->C7_PRODUTO ))
 				cDescPro := AllTrim(SB1->B1_I_DESCD) + " - "
 				cDescPro += AllTrim(SC7->C7_DESCRI)
-			endif
+			EndIf
 			
 			
 			If Empty(cDescPro)
-				SB1->(dbSetOrder(1))
-				SB1->(dbSeek( xFilial("SB1") + SC7->C7_PRODUTO ))
+				SB1->(DBSetOrder(1))
+				SB1->(DBSeek( xFilial("SB1") + SC7->C7_PRODUTO ))
 				cDescPro := AllTrim(SB1->B1_DESC)
 			EndIf
 			
-			SA5->(dbSetOrder(1))
-			If SA5->(dbSeek(xFilial("SA5")+SC7->C7_FORNECE+SC7->C7_LOJA+SC7->C7_PRODUTO)) .And. !Empty(SA5->A5_CODPRF)
-				cDescPro := cDescPro + " ("+Alltrim(SA5->A5_CODPRF)+")"
+			SA5->(DBSetOrder(1))
+			If SA5->(DBSeek(xFilial("SA5")+SC7->C7_FORNECE+SC7->C7_LOJA+SC7->C7_PRODUTO)) .And. !Empty(SA5->A5_CODPRF)
+				cDescPro := cDescPro + " ("+AllTrim(SA5->A5_CODPRF)+")"
 			EndIf
 			
 			If SC7->C7_DESC1 != 0 .Or. SC7->C7_DESC2 != 0 .Or. SC7->C7_DESC3 != 0
 				nDescProd+= CalcDesc(SC7->C7_TOTAL,SC7->C7_DESC1,SC7->C7_DESC2,SC7->C7_DESC3)
 			Else
 				nDescProd+=SC7->C7_VLDESC
-			Endif
+			EndIf
 						
 			If !Empty(SC7->C7_OBS) .And. nLinObs < 1
 				nLinObs++
 				cVar:="cObs"+StrZero(nLinObs,2)
 				Eval(MemVarBlock(cVar),SC7->C7_OBS)
-			Endif
+			EndIf
 			
-			nTxMoeda   := IIF(SC7->C7_TXMOEDA > 0,SC7->C7_TXMOEDA,Nil)
+			nTxMoeda   := IIf(SC7->C7_TXMOEDA > 0,SC7->C7_TXMOEDA,Nil)
 			nValTotSC7 := xMoeda(SC7->C7_TOTAL,SC7->C7_MOEDA,nMoeda,SC7->C7_DATPRF,MsDecimais(SC7->C7_MOEDA),nTxMoeda)
 			
 			nTotal     := nTotal + SC7->C7_TOTAL
@@ -740,7 +740,7 @@ oPrint:Say (nlinha,1425,transform(cQuantidade,PesqPict("SC7","C7_QUANT")),oFont1
 			
 RCOM018D(cDescPro)//Descricao do produto
 
-restArea(aAreaSC7)      
+FWRestArea(aAreaSC7)      
 
 Return
 
@@ -852,26 +852,26 @@ Else
 EndIf
 
 
-oPrint:Say (nLinha,nColInic,"URGENTE: " + IF(SC7->C7_I_URGEN="S","SIM",IF(SC7->C7_I_URGEN="F","NF","NÃO")) + "            COMPRA DIRETA: " + cUrgen ,oFont14bAr)
+oPrint:Say (nLinha,nColInic,"URGENTE: " + If(SC7->C7_I_URGEN="S","SIM",If(SC7->C7_I_URGEN="F","NF","NÃO")) + "            COMPRA DIRETA: " + cUrgen ,oFont14bAr)
 nlinha+=nSaltoLinha
 oPrint:Line(nlinha,0030,nlinha,2360) 
 
-//LOCAL DE ENTREGA E COBRANCA
+//Local DE ENTREGA E COBRANCA
 //================================================================
 // Posiciona o Arquivo de Empresa SM0.                          
 //================================================================
 cAlias := Alias()
 
-SM0->(dbSetOrder(1))   // forca o indice na ordem certa
+SM0->(DBSetOrder(1))   // forca o indice na ordem certa
 nRecnoSM0 := SM0->(Recno())
-dbSeek(SUBS(cNumEmp,1,2) + SC7->C7_FILENT)         
+DBSeek(SUBS(cNumEmp,1,2) + SC7->C7_FILENT)         
 
-restArea(aAreaSC7)
+FWRestArea(aAreaSC7)
 
 //Condicao de pagamento + data de emissao + total das mercadorias + total das mercadorias com impostos
-dbSelectArea("SE4")
-dbSetOrder(1)
-dbSeek(xFilial("SE4") + SC7->C7_COND)          
+DBSelectArea("SE4")
+DBSetOrder(1)
+DBSeek(xFilial("SE4") + SC7->C7_COND)          
 
 PswOrder(1) //Pesquisa pelo id do usuario
 If PswSeek(_cUserDig, .T. )
@@ -881,7 +881,7 @@ If PswSeek(_cUserDig, .T. )
 
 EndIf
 
-dbSelectArea("SC7")                 
+DBSelectArea("SC7")                 
 
 nLiPosIni:=nlinha
                                                         
@@ -899,7 +899,7 @@ oPrint:Line(nlinInTran,1200,nlinha,1200)    //Coluna divisoria Transportadora
 			                                                                  
 //Colore a obs no final do relatorio
 //oPrint:FillRect({(nlinha+3),0030,nlinha+nSaltoLinha,2360},oBrush)
-If SC7->C7_TIPO == 1 .OR. SC7->C7_TIPO == 3
+If SC7->C7_TIPO == 1 .Or. SC7->C7_TIPO == 3
 	oPrint:Say (nlinha,0030,STR0081,oFont11b)//"NOTA: So aceitaremos a mercadoria se na sua Nota Fiscal constar o numero do nosso Pedido de Compras."            
 Else
 	oPrint:Say (nlinha,0030,STR0083,oFont11b)//"NOTA: So aceitaremos a mercadoria se na sua Nota Fiscal constar o numero da Autorizacao de Entrega."
@@ -910,7 +910,7 @@ nlinha+=nSaltoLinha
 //Imprime box 
 oPrint:Box(nLinhaInic,0030,nLinha,nColFinal)
 
-restArea(aAreaSC7)
+FWRestArea(aAreaSC7)
 
 Return
 
@@ -962,7 +962,7 @@ Retorno-----------: Nenhum
 */
 Static Function RCOM0181(cPedido,cItem,cSequen,cFiltro)
 
-Local aArea		:= GetArea()
+Local aArea		:= FWGetArea()
 Local aAreaSC7	:= SC7->(GetArea())
 Local cValid	:= ""
 Local nPosRef	:= 0
@@ -970,21 +970,21 @@ Local nItem		:= 0
 Local cItemDe	:= IIf(cItem==Nil,'',cItem)
 Local cItemAte	:= IIf(cItem==Nil,Repl('Z',Len(SC7->C7_ITEM)),cItem)
 Local cRefCols	:= '' , D
-DEFAULT cSequen	:= ""
-DEFAULT cFiltro	:= ""
+Default cSequen	:= ""
+Default cFiltro	:= ""
 
-dbSelectArea("SC7")
-dbSetOrder(1)
-If dbSeek(xFilial("SC7")+cPedido+cItemDe+Alltrim(cSequen))
+DBSelectArea("SC7")
+DBSetOrder(1)
+If DBSeek(xFilial("SC7")+cPedido+cItemDe+AllTrim(cSequen))
 	MaFisEnd()
 	MaFisIni(SC7->C7_FORNECE,SC7->C7_LOJA,"F","N","R",{})
-	While !Eof() .AND. SC7->C7_FILIAL+SC7->C7_NUM == xFilial("SC7")+cPedido .AND. ;
-			SC7->C7_ITEM <= cItemAte .AND. (Empty(cSequen) .OR. cSequen == SC7->C7_SEQUEN)
+	While !Eof() .And. SC7->C7_FILIAL+SC7->C7_NUM == xFilial("SC7")+cPedido .And. ;
+			SC7->C7_ITEM <= cItemAte .And. (Empty(cSequen) .Or. cSequen == SC7->C7_SEQUEN)
 
 		// Nao processar os Impostos se o item possuir residuo eliminado  
 		If &cFiltro
-			dbSelectArea('SC7')
-			dbSkip()
+			DBSelectArea('SC7')
+			DBSkip()
 			Loop
 		EndIf
             
@@ -993,26 +993,26 @@ If dbSeek(xFilial("SC7")+cPedido+cItemDe+Alltrim(cSequen))
 		MaFisIniLoad(nItem)
 
 		_aSC7 := SC7->(DBSTRUCT())
-		FOR D := 1 TO LEN(_aSC7)
+		For D := 1 TO Len(_aSC7)
 		    _cCampo := _aSC7[D][1]
-			cValid	:= StrTran(UPPER(Getsx3cache(_cCampo,"X3_VALID") )," ","")
+			cValid	:= StrTran(Upper(Getsx3cache(_cCampo,"X3_VALID") )," ","")
 			cValid	:= StrTran(cValid,"'",'"')
 			If "MAFISREF" $ cValid
 				nPosRef  := AT('MAFISREF("',cValid) + 10
-				cRefCols := Substr(cValid,nPosRef,AT('","MT120",',cValid)-nPosRef )
+				cRefCols := SubStr(cValid,nPosRef,AT('","MT120",',cValid)-nPosRef )
 				// Carrega os valores direto do SC7.           
 				MaFisLoad(cRefCols,&("SC7->"+_cCampo),nItem)
 			EndIf
-		NEXT
+		Next
 
 		MaFisEndLoad(nItem,2)
-		dbSelectArea('SC7')
-		dbSkip()
+		DBSelectArea('SC7')
+		DBSkip()
 	End
 EndIf
 
-RestArea(aAreaSC7)
-RestArea(aArea)
+FWRestArea(aAreaSC7)
+FWRestArea(aArea)
 
 Return .T.
 

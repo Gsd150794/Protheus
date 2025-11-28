@@ -2,26 +2,22 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 11/07/2023 | Chamado 44446. Corrigida gravação do campo ZLF_L_SEEK e retirada pergunta sobre geração de nova 
-			  |			   | parcela. Por padrão sempre será gerada. Não identificamos motivos para perguntar. 
-Lucas Borges  | 11/02/2025 | Chamado 49877. Removido tratamento sobre a versão do Mix
-Lucas Borges  | 12/02/2025 | Chamado 49885. Corrigido nome da variável
+Lucas Borges  |12/02/2025| Chamado 49885. Corrigido nome da variável
+Lucas Borges  |05/10/2025| Chamado 52148. Permitido executar a previsão para Mix Aprovado além do Efetivado
+Lucas Borges  |07/10/2025| Chamado 52411. Incluída permissão para encerrar rotina após exclusão da previsão
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa--------: MGLT011
 Autor-----------: Alexandre Villar
 Data da Criacao-: 14/04/2015
-Descrição-------: Rotina que processa o fechamento dos Fretistas. Rotina reestruturada para melhoria de performance e solução 
+Descrição-------: Rotina que Processa o fechamento dos Fretistas. Rotina reestruturada para melhoria de performance e solução 
 					de inconsistências nas amarrações. Chamados: 8071/8622
 Parametros------: Nenhum
 Retorno---------: Nenhum
@@ -71,7 +67,7 @@ Local _cSetores		:= ''
 Local _lFilCTe		:= .F.
 Local _lErro		:= .F.
 Local _nSldFrt		:= 0
-Local _cNroTit		:= StrZero( Day( dDataBase ) , 2 ) + StrZero( Month( dDataBase ) , 2 ) + Substr( Dtos( dDataBase ) , 3 , 2 ) + SubStr( _cMix , 4 , 3 )
+Local _cNroTit		:= StrZero( Day( dDataBase ) , 2 ) + StrZero( Month( dDataBase ) , 2 ) + SubStr( DToS( dDataBase ) , 3 , 2 ) + SubStr( _cMix , 4 , 3 )
 Local _cParcel		:= ''
 Local _cPrefixo		:= ''
 Local _cTipo		:= "NF "							// Tipo do Titulo do CTe
@@ -84,7 +80,7 @@ Local _dPgto		:= MV_PAR08
 Local _dVencto		:= MV_PAR09
 Local _cThread		:= CValToChar(ThreadID())
 Local _cHist		:= ''
-Private _nValISS	:= 0 //Variável private para poder ser executada no ZL8_FORMUL - evento 000147 - ISS
+Private _nValISS	:= 0 //Variável Private para poder ser executada no ZL8_FORMUL - evento 000147 - ISS
 
 _oProces:SaveLog("Thread:"+_cThread+" Iniciando a rotina. Parâmetros: "+CValToChar(MV_PAR01)+"-"+MV_PAR02+"-"+AllTrim(MV_PAR03)+"-"+MV_PAR04+"-"+MV_PAR05+"-"+MV_PAR06+"-"+MV_PAR07+"-"+DToC(MV_PAR08)+"-"+DToC(MV_PAR09))
 
@@ -94,6 +90,7 @@ If !Empty(MV_PAR03) .Or. Empty(MV_PAR03) .And. Posicione("ZLU",1,xFilial("ZLU")+
 Else
 	_oProces:SaveLog("Thread:"+_cThread+" MGLT01101 - Fim do processamento. Não foram informados setores válidos para o usuário.")
 	MsgStop("Não foram informados setores válidos para o usuário.","MGLT01101")
+	_lErro := .T.
 	Return
 EndIf
 
@@ -105,7 +102,7 @@ _oProces:IncRegua1( "Aguarde - Iniciando a rotina de processamento..." )
 //====================================================================================================
 DBSelectArea("ZLE")
 ZLE->( DBSetOrder(1) )
-ZLE->( DBSeek( xFILIAL("ZLE") + _cMix ) )
+ZLE->( DBSeek( xFilial("ZLE") + _cMix ) )
 _cHist	:= "GLF"+ StrZero(Month(ZLE->ZLE_DTINI),2) +"/"+ StrZero(Year(ZLE->ZLE_DTINI),4) +'-'+ _cMix
 
 // Validações para DataBbase
@@ -117,7 +114,7 @@ EndIf
 
 If (Date() <> dDataBase)
 	_oProces:SaveLog("Thread:"+_cThread+" MGLT01103 - Fim do processamento. DataBase Inválida.")
-	MsgStop("A Data-base atual não é válida! A Data-base deve ser igual à data atual do Servidor ["+ DtoC(Date()) +"].","MGLT01103")
+	MsgStop("A Data-base atual não é válida! A Data-base deve ser igual à data atual do Servidor ["+ DToC(Date()) +"].","MGLT01103")
 	Return
 EndIf
 
@@ -150,6 +147,9 @@ If TCSqlExec( _cQuery ) < 0
 	_oProces:SaveLog("Thread:"+_cThread+" MGLT01105 - Erro - Deleção de eventos")
 	MsgStop("Falha ao processar a exclusão de registros da ZLF referente à fechamentos anteriores. Favor acionar o Suporte."+AllTrim(TCSQLError()),"MGLT01105")
 	Return
+ElseIf !MsgYesNo("Previsão excluída com sucesso. Deseja prosseguir com o fechamento?","MGLT01119")
+	_oProces:SaveLog("Thread:"+_cThread+" MGLT01119' - Fim do processamento. Fim do processamento com a exclusão da previsão.")
+	Return
 EndIf
 
 //====================================================================================================
@@ -159,11 +159,17 @@ _cQuery := "%"
 If !Empty( _cSetores )
 	_cQuery += "AND ZLF.ZLF_SETOR  IN "+ FormatIn( _cSetores , ';' )
 EndIf
+If _nTipExe == 1
+	_cQuery += " AND ZLF.ZLF_STATUS IN ('E','A','P') "
+Else
+	_cQuery += " AND ZLF.ZLF_STATUS = 'E' "
+EndIf
+
 _cQuery += "%"
 BeginSql alias _cAliasP
 	SELECT SA2.A2_COD CODFRT, SA2.A2_LOJA LOJFRT, SA2.R_E_C_N_O_ REGSA2, ZLF_SETOR SETOR,
-		   SUM(CASE WHEN ZL8_DEBCRE = 'C' THEN ZLF_TOTAL ELSE 0 END) CREDITO,
-		   SUM(CASE WHEN ZL8_DEBCRE = 'D' THEN ZLF_TOTAL ELSE 0 END) DEBITO
+		   SUM(Case WHEN ZL8_DEBCRE = 'C' THEN ZLF_TOTAL Else 0 END) CREDITO,
+		   SUM(Case WHEN ZL8_DEBCRE = 'D' THEN ZLF_TOTAL Else 0 END) DEBITO
 	  FROM %Table:ZLF% ZLF, %Table:ZL8% ZL8, %Table:SA2% SA2
 	 WHERE ZLF.D_E_L_E_T_ = ' '
 	   AND ZL8.D_E_L_E_T_ = ' '
@@ -177,18 +183,17 @@ BeginSql alias _cAliasP
 	   %exp:_cQuery%
 	   AND ZLF.ZLF_A2COD BETWEEN %exp:MV_PAR04% AND %exp:MV_PAR05%
 	   AND ZLF.ZLF_A2LOJA BETWEEN %exp:MV_PAR06% AND %exp:MV_PAR07%
-	   AND SUBSTR(ZLF.ZLF_A2COD, 1, 1) = 'G'
+	   AND SubStr(ZLF.ZLF_A2COD, 1, 1) = 'G'
 	   AND ZLF.ZLF_CODZLE = %exp:_cMix%
 	   AND ZLF.ZLF_ORIGEM <> 'F' /*Origem Fechamento*/
 	   AND ZLF.ZLF_ACERTO NOT IN ('S', 'B') /*Nao foi feito acerto*/
-	   AND ZLF.ZLF_STATUS = 'E' /*Efetivado*/
 	   AND ZLF.ZLF_TP_MIX = 'F' /*Tipo do Mix para Frete*/
 	 GROUP BY SA2.A2_COD, SA2.A2_LOJA, SA2.R_E_C_N_O_, ZLF_SETOR
 	 ORDER BY ZLF_SETOR, SA2.A2_COD, SA2.A2_LOJA
 EndSql
 	
 Count To _nReg
-(_cAliasP)->( DbGoTop() )
+(_cAliasP)->( DBGoTop() )
 _oProces:SetRegua1( _nReg )
 	
 If _nReg <= 0
@@ -199,9 +204,9 @@ If _nReg <= 0
 EndIf
 DBSelectArea("SA2")
 DBSelectArea("ZL2")
-DbselectArea("ZLF")
+DBSelectArea("ZLF")
 DBSelectArea("SE2")
-DbSelectArea("ZL8")
+DBSelectArea("ZL8")
 While (_cAliasP)->( !Eof() )
 	
 	BEGIN TRANSACTION
@@ -235,7 +240,7 @@ While (_cAliasP)->( !Eof() )
 		//====================================================================================================
 		_nSldFrt	:= (_cAliasP)->CREDITO
 		_cIndZLF	:= xFilial("ZLF") + _cMix + "001" + "1" + _cFornece + _cLoja
-		_cParcel	:= StrZero( 1 , TamSx3("E2_PARCELA")[1] )	// Parcela do titulo do Fretista( NF )
+		_cParcel	:= StrZero( 1 , TamSX3("E2_PARCELA")[1] )	// Parcela do titulo do Fretista( NF )
 		
 		If _nTipExe == 2
 			//====================================================================================================
@@ -284,7 +289,7 @@ While (_cAliasP)->( !Eof() )
 	//====================================================================================================
 	If !_lErro .And. _nTipExe == 2
 		_cQuery := " UPDATE "+RetSqlName("ZLF")
-		_cQuery += " SET ZLF_ACERTO = 'S', ZLF_STATUS = 'F' , ZLF_DTFECH = '"+ DtoS( dDataBase ) +"' "
+		_cQuery += " SET ZLF_ACERTO = 'S', ZLF_STATUS = 'F' , ZLF_DTFECH = '"+ DToS( dDataBase ) +"' "
 		_cQuery += " WHERE D_E_L_E_T_ = ' ' "
 		_cQuery += " AND ZLF_FILIAL = '"+xFilial("ZLF")+"' "
 		_cQuery += " AND ZLF_A2COD  = '"+_cFornece+"' "
@@ -302,7 +307,7 @@ While (_cAliasP)->( !Eof() )
 	EndIf
 	
 	//====================================================================================================
-	// Desfaz o processamento se for encontrado algum erro
+	// Desfaz o processamento se For encontrado algum erro
 	//====================================================================================================
 	If _lErro
 		_lErro := .F.
@@ -313,7 +318,7 @@ While (_cAliasP)->( !Eof() )
 	// Confirma o processamento ao fim do processo sem erros
 	//====================================================================================================			
 	END TRANSACTION
-	MsUnLockAll()
+	MSUnLockAll()
 	
 (_cAliasP)->( DBSkip() )
 EndDo
@@ -330,7 +335,7 @@ If _nTipExe == 2 // Ajusta o Status caso o Acerto seja Definitivo
 	If ZLE->( DBSeek( xFilial('ZLE') + _cMix) )
 		ZLE->(RecLock( "ZLE" , .F. ))
 		ZLE->ZLE_STATUS := 'P'
-		ZLE->( MsUnLock() )
+		ZLE->( MSUnLock() )
 	EndIf
 EndIf
 _oProces:SaveLog("Thread:"+_cThread+" Processamento concluído com sucesso")
@@ -347,20 +352,20 @@ Return
 Programa----------: MGLT011PFM
 Autor-------------: Alexandre Villar
 Data da Criacao---: 14/04/2015
-Descrição---------: Rotina que processa o fechamento dos eventos manuais dos Fretistas
+Descrição---------: Rotina que Processa o fechamento dos eventos manuais dos Fretistas
 Parametros--------: _oProces - Objeto de controle do processamento
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function MGLT011PFM(_oProces,_cThread,_nTipExe,_cPrefixo,_cNum,_cXParc,_cTipo,_dPgto,_cMix,_cFornece,_cLoja,_cSetor,_cParcel,_nSldFrt,_cHist,_lErro)
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cAliasPFM:= GetNextAlias()
 Local _nTotReg	:= 0
 Local _nCont	:= 0
 Local _nVlrEve	:= 0
-Local _cNumTit	:= StrZero( Day(dDataBase) , 2 ) + StrZero( Month( dDataBase ) , 2 ) + Substr( DtoS(dDataBase) , 3 , 2 ) + SubStr( _cMix , 4 , 3 )
-Local _cParc	:= StrZero( 1 , TamSx3("E2_PARCELA")[1] ) //Parcela do titulo do evento
+Local _cNumTit	:= StrZero( Day(dDataBase) , 2 ) + StrZero( Month( dDataBase ) , 2 ) + SubStr( DToS(dDataBase) , 3 , 2 ) + SubStr( _cMix , 4 , 3 )
+Local _cParc	:= StrZero( 1 , TamSX3("E2_PARCELA")[1] ) //Parcela do titulo do evento
 Local _cSeekZLF	:= ''
 
 //====================================================================================================
@@ -379,7 +384,7 @@ BeginSql alias _cAliasPFM
 	   AND ZLF.ZLF_A2COD = %exp:_cFornece%
 	   AND ZLF.ZLF_A2LOJA = %exp:_cLoja%
 	   AND ZLF.ZLF_SETOR = %exp:_cSetor%
-	   AND SUBSTR(ZLF.ZLF_A2COD, 1, 1) = 'G'
+	   AND SubStr(ZLF.ZLF_A2COD, 1, 1) = 'G'
 	   AND ZLF.ZLF_ORIGEM = 'M'
 	   AND ZLF.ZLF_DEBCRE = 'D'
 	   AND ZLF.ZLF_ACERTO NOT IN ('S', 'B')
@@ -431,7 +436,7 @@ While !_lErro .And. (_cAliasPFM)->( !Eof() )
 						If !_lErro
 							MGLT011AVL(_cSeekZLF,_nVlrEve)
 						EndIf
-						_cParc		:= SOMA1( _cParc )
+						_cParc		:= Soma1( _cParc )
 						_nSldFrt	-= _nVlrEve
 					ElseIf !_lErro .And. _nSldFrt > 0
 						MGLT011BE2(_oProces,_cThread,{_nSldFrt,ZL8->ZL8_PREFIX,_cNumTit,_cParc ,"NDF" ,ZL8->ZL8_PREFIX,_cSeekZLF},_cMix,_cFornece,_cLoja,_cHist,@_lErro)
@@ -441,7 +446,7 @@ While !_lErro .And. (_cAliasPFM)->( !Eof() )
 						If !_lErro
 							MGLT011AVL(_cSeekZLF,_nSldFrt )
 						EndIf
-						_cParc		:= SOMA1( _cParc )
+						_cParc		:= Soma1( _cParc )
 						_nSldFrt	:= 0
 					EndIf
 				EndIf
@@ -449,11 +454,11 @@ While !_lErro .And. (_cAliasPFM)->( !Eof() )
 		EndIf
 	EndIf
 	
-	(_cAliasPFM)->( DbSkip() )
+	(_cAliasPFM)->( DBSkip() )
 EndDo
 
 (_cAliasPFM)->( DBCloseArea() )
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return
 
@@ -462,14 +467,14 @@ Return
 Programa----------: MGLT011PFE
 Autor-------------: Alexandre Villar
 Data da Criacao---: 14/04/2015
-Descrição---------: Rotina que processa o fechamento dos eventos avulsos dos Fretistas
+Descrição---------: Rotina que Processa o fechamento dos eventos avulsos dos Fretistas
 Parametros--------: _oProces - Objeto de controle do processamento
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function MGLT011PFE(_oProces,_cThread,_nTipExe,_cNroTit,_cXParc,_cTipo,_dPgto,_cMix,_cSetor,_cFornece,_cLoja,_cPrefixo,_cNum,_cParcel,_nSldFrt,_cHist,_lErro)
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _nTotReg	:= 0
 Local _cAliasPFE:= GetNextAlias()
 Local _nCont	:= 0
@@ -530,7 +535,7 @@ While !_lErro .And. (_cAliasPFE)->( !Eof() )
 						//====================================================================================================
 						// Grava um registro na ZLF de Debito referente ao valor do evento lido
 						//====================================================================================================
-						_cSeekZLF := MGLT011ZLF(_oProces,_cThread,ZL8->ZL8_COD,_nVlrEve,xFILIAL("SE2")+ZL8->ZL8_PREFIX+_cNroTit+_cParcel+"NDF"+_cFornece+_cLoja,.F.,.F.,,_cMix,_cSetor,_cFornece,_cLoja,_cMyLinha,@_lErro)
+						_cSeekZLF := MGLT011ZLF(_oProces,_cThread,ZL8->ZL8_COD,_nVlrEve,xFilial("SE2")+ZL8->ZL8_PREFIX+_cNroTit+_cParcel+"NDF"+_cFornece+_cLoja,.F.,.F.,,_cMix,_cSetor,_cFornece,_cLoja,_cMyLinha,@_lErro)
 						//====================================================================================================
 						// Inclui o titulo relacionado ao evento lido
 						//====================================================================================================
@@ -550,7 +555,7 @@ While !_lErro .And. (_cAliasPFE)->( !Eof() )
 							If !_lErro
 								MGLT011AVL( _cSeekZLF , _nVlrEve )
 							EndIf
-							_cParcel := SOMA1( _cParcel )
+							_cParcel := Soma1( _cParcel )
 							_nSldFrt -= _nVlrEve
 							
 						ElseIf !_lErro .And. _nSldFrt > 0
@@ -565,7 +570,7 @@ While !_lErro .And. (_cAliasPFE)->( !Eof() )
 								MGLT011AVL( _cSeekZLF , _nSldFrt )
 		                	EndIf
 
-							_cParcTit	:= SOMA1( _cParcTit )
+							_cParcTit	:= Soma1( _cParcTit )
 							_nSldFrt	:= 0
 						EndIf
 					EndIf
@@ -579,11 +584,11 @@ While !_lErro .And. (_cAliasPFE)->( !Eof() )
 		EndIf
 	EndIf
 	
-	(_cAliasPFE)->( DbSkip() )
+	(_cAliasPFE)->( DBSkip() )
 EndDo
 
 (_cAliasPFE)->( DBCloseArea() )
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return
 
@@ -592,7 +597,7 @@ Return
 Programa----------: MGLT011PFF
 Autor-------------: Alexandre Villar
 Data da Criacao---: 14/04/2015\
-Descrição---------: Rotina que processa o fechamento dos eventos Financeiros dos Fretistas
+Descrição---------: Rotina que Processa o fechamento dos eventos Financeiros dos Fretistas
 Parametros--------: _oProces - Objeto de controle do processamento
 Retorno-----------: Nenhum
 ===============================================================================================================================
@@ -601,7 +606,7 @@ Static Function MGLT011PFF(_oProces,_cThread,_nTipExe,_cTipo,_dVencto,_cMix,_cSe
 
 Local _cAliasPFF:= GetNextAlias()
 Local _cAliasPFT:= ""
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _nTotReg	:= 0
 Local _nCont    := 0
 Local _nSldTit  := 0
@@ -662,7 +667,7 @@ While (_cAliasPFF)->( !Eof() )
 		SE2->( DBGoTo( (_cAliasPFT)->REGSE2 ) )
 		
 		_nSldTit := SE2->(E2_SALDO+E2_SDACRES-E2_SDDECRE)
-		_nJurTit := FaJuros((_cAliasPFT)->E2_VALOR,(_cAliasPFT)->E2_SALDO,STOD((_cAliasPFT)->E2_VENCTO),(_cAliasPFT)->E2_VALJUR,(_cAliasPFT)->E2_PORCJUR,(_cAliasPFT)->E2_MOEDA,STOD((_cAliasPFT)->E2_EMISSAO),dDataBase,(_cAliasPFT)->E2_TXMOEDA,STOD((_cAliasPFT)->E2_BAIXA))
+		_nJurTit := FaJuros((_cAliasPFT)->E2_VALOR,(_cAliasPFT)->E2_SALDO,SToD((_cAliasPFT)->E2_VENCTO),(_cAliasPFT)->E2_VALJUR,(_cAliasPFT)->E2_PORCJUR,(_cAliasPFT)->E2_MOEDA,SToD((_cAliasPFT)->E2_EMISSAO),dDataBase,(_cAliasPFT)->E2_TXMOEDA,SToD((_cAliasPFT)->E2_BAIXA))
 		
 		//====================================================================================================
 		// Valor a ser baixado no titulo
@@ -670,7 +675,7 @@ While (_cAliasPFF)->( !Eof() )
 		_nSldTit := _nSldTit + _nJurTit
 		
 		//====================================================================================================
-		// Se o saldo do Fretista for maior que zero, baixa os titulos no SE2
+		// Se o saldo do Fretista For maior que zero, baixa os titulos no SE2
 		//====================================================================================================
 		If _nSldFrt > 0
 		    
@@ -766,7 +771,7 @@ While (_cAliasPFF)->( !Eof() )
 EndDo
 
 (_cAliasPFF)->( DBCloseArea() )
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return
 
@@ -792,8 +797,8 @@ Local _nModAnt	:= nModulo
 Local _cModAnt	:= cModulo
 Local _nValor	:= 0
 Local _cPrfCon	:= AllTrim(SuperGetMV("LT_CONVPRE",.F.,"GLC")) // Prefixo do titulo NF gerado pela rotina de convenio
-Local _cChave	:= xFILIAL("SE2") + _cPrxAux + _cNroAux + _cParAux + _cTipAux + _cFornece + _cLoja
-Local _cChvCon	:= xFILIAL("SE2") + _cPrfCon + SubStr( _cNroAux , 1 , 6 ) + "000" + "1" +"NF "+ _cFornece + _cLoja
+Local _cChave	:= xFilial("SE2") + _cPrxAux + _cNroAux + _cParAux + _cTipAux + _cFornece + _cLoja
+Local _cChvCon	:= xFilial("SE2") + _cPrfCon + SubStr( _cNroAux , 1 , 6 ) + "000" + "1" +"NF "+ _cFornece + _cLoja
 
 Private lMsErroAuto := .F.
 Private lMsHelpAuto := .T.
@@ -867,7 +872,7 @@ Else
 			SE2->E2_VALOR  := _nValor
 			SE2->E2_SALDO  := _nValor
 			SE2->E2_VLCRUZ := _nValor
-			SE2->( MsUnlock() )
+			SE2->( MSUnLock() )
 		Else
 			_lErro := .T.
 			_oProces:SaveLog("Thread:"+_cThread+" MGLT01112 - Erro - Título do Convênio já possui baixas - "+ _cChvCon)
@@ -913,18 +918,18 @@ If SE2->( DBSeek( _cChave ) )
 	_lVer		:= .T.
 	
 	While _lVer
-		If SE2->( DBSeek( xFILIAL("SE2") + _aDados[02] + _aDados[03] + _aDados[04] + _aDados[05] + _cFornece + _cLoja ) )
+		If SE2->( DBSeek( xFilial("SE2") + _aDados[02] + _aDados[03] + _aDados[04] + _aDados[05] + _cFornece + _cLoja ) )
 			_aDados[04] := Soma1( _aDados[04] )
 		Else
 			_lVer := .F.
-			//Se a parcela for atualizada, tenho que ajustar informação já gravada na ZLF, buscando pela parcela antiga
+			//Se a parcela For atualizada, tenho que ajustar informação já gravada na ZLF, buscando pela parcela antiga
 			//O registro já está posicionado pois a última operação foi sua inclusão.
 			//Para situações onde não gero a ZLF, não preciso atualizar
 			If _lAtuZLF
-				If AllTrim(ZLF->ZLF_L_SEEK) ==xFILIAL("SE2") + _aDados[02] + _aDados[03] + _cParcel + _aDados[05] + _cFornece + _cLoja
+				If AllTrim(ZLF->ZLF_L_SEEK) ==xFilial("SE2") + _aDados[02] + _aDados[03] + _cParcel + _aDados[05] + _cFornece + _cLoja
 					RecLock( "ZLF" , .F. )
-					ZLF->ZLF_L_SEEK := xFILIAL("SE2") + _aDados[02] + _aDados[03] + _aDados[04] + _aDados[05] + _cFornece + _cLoja
-					ZLF->( MsUnlock() )
+					ZLF->ZLF_L_SEEK := xFilial("SE2") + _aDados[02] + _aDados[03] + _aDados[04] + _aDados[05] + _cFornece + _cLoja
+					ZLF->( MSUnLock() )
 					_lErro		:= .F.
 					_lNExist	:= .T.
 				Else
@@ -1014,7 +1019,7 @@ Return( _aDados[04] )
 Programa--------: MGLT011BE2
 Autor-----------: Alexandre Villar
 Data da Criacao-: 14/04/2015
-Descrição-------: Rotina que processa a baixa dos títulos financeiros via ExecAuto
+Descrição-------: Rotina que Processa a baixa dos títulos financeiros via ExecAuto
 Parametros------: _oProces    - Objeto de controle do processamento
 ----------------: _aDados  - Dados do título a ser incluído
 Retorno---------: Nenhum
@@ -1028,7 +1033,7 @@ Local _cMotBxa	:= AllTrim(SuperGetMV("LT_MOTBX",.F.,"GLT"))
 Local _cModAnt	:= cModulo
 Local _cOrigem	:= ""
 Local _aTitSE2	:= {}
-Local _cChave	:= xFILIAL("SE2") + _aDados[02] + _aDados[03] + _aDados[04] + _aDados[05] + _cFornece + _cLoja
+Local _cChave	:= xFilial("SE2") + _aDados[02] + _aDados[03] + _aDados[04] + _aDados[05] + _cFornece + _cLoja
 
 Private lMsErroAuto:= .F.
 Private lMsHelpAuto:= .T.
@@ -1046,7 +1051,7 @@ If SE2->( DBSeek( _cChave ) )
 		SE2->(RecLock( "SE2" , .F. ))
 		SE2->E2_DATALIB := dDataBase
 		SE2->E2_USUALIB := cUserName
-		SE2->( MsUnLock() )
+		SE2->( MSUnLock() )
 	EndIf
 	
 	//====================================================================================================
@@ -1065,7 +1070,7 @@ If SE2->( DBSeek( _cChave ) )
 					{ "AUTMOTBX"		, _cMotBxa								, Nil },;
 					{ "AUTDTBAIXA"		, dDataBase								, Nil },;
 					{ "AUTDTCREDITO"	, dDataBase								, Nil },;
-					{ "AUTBENEF"		, _cFornece +" - "+ ALLTRIM(SA2->A2_NOME), Nil },;
+					{ "AUTBENEF"		, _cFornece +" - "+ AllTrim(SA2->A2_NOME), Nil },;
 					{ "AUTHIST"			, _cHist								, Nil },;
 					{ "AUTVLRPG"		, _aDados[01]							, Nil } }
 	
@@ -1159,7 +1164,7 @@ Default _cSeek	:= ''
 Default _lAltZLF	:= .F.
 
 ZL8->( DBSetOrder(1) ) // ZL8_FILIAL + ZL8_COD
-ZL8->( DBSeek( xFILIAL("ZL8") + _cEvento ) )
+ZL8->( DBSeek( xFilial("ZL8") + _cEvento ) )
 
 //====================================================================================================
 // Se altera a ZLF. Usado quando o Evento foi lancado na ZLF.
@@ -1189,13 +1194,13 @@ Else
 	//====================================================================================================
 	DBSelectArea("ZLF")
 	ZLF->( DBSetOrder(3) )
-	_lAchou := ZLF->( DBSeek( xFILIAL("ZLF") + _cMix + "1" + _cSetor + _cLinha + _cEvento + _cFornece + _cLoja ) )
+	_lAchou := ZLF->( DBSeek( xFilial("ZLF") + _cMix + "1" + _cSetor + _cLinha + _cEvento + _cFornece + _cLoja ) )
 	If _lAchou .And. !_lGrvZLF
 		_lNovo := .F.//Não grava ZLF. Apenas usa o que está posicionado. Válido apenas para o índice 3
 	EndIf
 	If !_lAchou
-		ZLF->( DbSetOrder(8) )
-		_lAchou := ZLF->( DBSeek( xFILIAL("ZLF") + _cMix + "1" + _cSetor + _cLinha + _cFornece + _cLoja ) )	
+		ZLF->( DBSetOrder(8) )
+		_lAchou := ZLF->( DBSeek( xFilial("ZLF") + _cMix + "1" + _cSetor + _cLinha + _cFornece + _cLoja ) )	
 	EndIf
 	//Se posicionou pelo índice 3 e era para gravar (_lGrvZLF=.T.), grava. Se posicinou mas não é para gravar, não faz nada.
 	//O posicionamento será usado apenas para montar a chave a ser referenciada no futuro
@@ -1205,8 +1210,8 @@ Else
 						{ 'ZLF_VERSAO'	, ZLF->ZLF_VERSAO										} ,;
 						{ 'ZLF_DTINI'	, ZLF->ZLF_DTINI										} ,;
 						{ 'ZLF_DTFIM'	, ZLF->ZLF_DTFIM										} ,;
-						{ 'ZLF_SETOR'	, IIF( Empty(_cSetor) , ZLF->ZLF_SETOR  , _cSetor  )	} ,;
-						{ 'ZLF_LINROT'	, IIF( Empty(_cLinha) , ZLF->ZLF_LINROT , _cLinha  )	} ,;
+						{ 'ZLF_SETOR'	, IIf( Empty(_cSetor) , ZLF->ZLF_SETOR  , _cSetor  )	} ,;
+						{ 'ZLF_LINROT'	, IIf( Empty(_cLinha) , ZLF->ZLF_LINROT , _cLinha  )	} ,;
 						{ 'ZLF_A2COD'	, ZLF->ZLF_A2COD										} ,;
 						{ 'ZLF_A2LOJA'	, ZLF->ZLF_A2LOJA										} ,;
 						{ 'ZLF_EVENTO'	, _cEvento												} ,;
@@ -1244,8 +1249,8 @@ Else
 				ZLF->ZLF_VERSAO := _aDadZLF[03][02] // ZLF->ZLF_VERSAO
 				ZLF->ZLF_DTINI  := _aDadZLF[04][02] // ZLF->ZLF_DTINI
 				ZLF->ZLF_DTFIM  := _aDadZLF[05][02] // ZLF->ZLF_DTFIM
-				ZLF->ZLF_SETOR  := _aDadZLF[06][02] // IIF( Empty(_cSetor) , ZLF->ZLF_SETOR  , _cSetor  )
-				ZLF->ZLF_LINROT := _aDadZLF[07][02] // IIF( Empty(_cLinha) , ZLF->ZLF_LINROT , _cLinha  )
+				ZLF->ZLF_SETOR  := _aDadZLF[06][02] // IIf( Empty(_cSetor) , ZLF->ZLF_SETOR  , _cSetor  )
+				ZLF->ZLF_LINROT := _aDadZLF[07][02] // IIf( Empty(_cLinha) , ZLF->ZLF_LINROT , _cLinha  )
 				ZLF->ZLF_A2COD  := _aDadZLF[08][02] // ZLF->ZLF_A2COD
 				ZLF->ZLF_A2LOJA := _aDadZLF[09][02] // ZLF->ZLF_A2LOJA
 				ZLF->ZLF_EVENTO := _aDadZLF[10][02] // ZL8->ZL8_COD
@@ -1267,7 +1272,7 @@ Else
 				ZLF->ZLF_F1SEEK := _aDadZLF[26][02] // ZLF->ZLF_F1SEEK
 				ZLF->ZLF_DTCALC	:= _aDadZLF[27][02] //ZLF->ZLF_DTCALC
 				ZLF->ZLF_DTFECH := _aDadZLF[28][02] // ZLF->ZLF_DTFECH
-			ZLF->( MsUnlock() )
+			ZLF->( MSUnLock() )
 		EndIf
 		_cRet := ZLF->(ZLF_FILIAL+ZLF_CODZLE+ZLF_VERSAO+ZLF_A2COD+ZLF_A2LOJA+ZLF_EVENTO+ZLF_SEQ)
 	EndIf
@@ -1290,7 +1295,7 @@ Static Function MGLT011ULT(_cMix,_cFornece,_cLoja,_cSetor)
 Local _cSeq		:= ''
 Local _cAlias	:= GetNextAlias()
 
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT MAX(ZLF_SEQ) COD
 	FROM %Table:ZLF%
 	WHERE D_E_L_E_T_ =' '
@@ -1299,10 +1304,10 @@ BeginSQL Alias _cAlias
 	AND ZLF_A2COD = %exp:_cFornece%
 	AND ZLF_A2LOJA = %exp:_cLoja%
 	AND ZLF_SETOR = %exp:_cSetor%
-EndSQL
+EndSql
 
 If (_cAlias)->(!Eof()) .And. !Empty( (_cAlias)->COD )
-	_cSeq := SOMA1( (_cAlias)->COD )
+	_cSeq := Soma1( (_cAlias)->COD )
 EndIf
 
 (_cAlias)->(DBCloseArea())
@@ -1349,9 +1354,9 @@ If !_lFilCTe
 	
 	DEFINE MSDIALOG _oDlgCTE TITLE "Filiais - Títulos CTe" FROM 000, 000  TO 220, 400 COLORS 0, 16777215 PIXEL
 		@010,008 GROUP	_oGroup1 TO 061, 190 PROMPT	"Informação CTe" 					OF _oDlgCTE PIXEL COLOR  0, 16777215
-		@020,019 SAY	_oSay1				PROMPT	_cTxtAux			SIZE 160,037	OF _oDlgCTE PIXEL COLORS 0, 16777215
+		@020,019 Say	_oSay1				PROMPT	_cTxtAux			SIZE 160,037	OF _oDlgCTE PIXEL COLORS 0, 16777215
 		@072,046 MSGET	_oGetFil VAR _cGetFil							SIZE 146,008	OF _oDlgCTE PIXEL F3 "SM0001"
-		@072,014 SAY	_oSay2				PROMPT	"Filial(is):"		SIZE 025,007	OF _oDlgCTE PIXEL COLORS 0, 16777215
+		@072,014 Say	_oSay2				PROMPT	"Filial(is):"		SIZE 025,007	OF _oDlgCTE PIXEL COLORS 0, 16777215
 		@090,085 BUTTON	_oButton2			PROMPT	"Fechar"			SIZE 045,016	OF _oDlgCTE PIXEL ACTION _oDlgCTE:End()
 	ACTIVATE MSDIALOG _oDlgCTE CENTERED
 	
@@ -1375,7 +1380,7 @@ EndIf
 //====================================================================================================
 // Consulta os títulos de CTe na base
 //====================================================================================================
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT E2_FILIAL, E2_PREFIXO, E2_NUM, E2_PARCELA, E2_TIPO, E2_LOJA, E2_VALOR, E2_ISS, E2_FORNECE, E2_LOJA, E2_EMISSAO
 	FROM %Table:SE2%
 	WHERE D_E_L_E_T_ =' '
@@ -1388,11 +1393,11 @@ BeginSQL Alias _cAlias
 	AND E2_VALOR > 0
 	AND E2_SALDO > 0
 	ORDER BY E2_FILIAL,E2_EMISSAO DESC 
-EndSQL
+EndSql
 
 _nItem := 0
 
-While (_cAlias)->( !EoF() )
+While (_cAlias)->( !Eof() )
 	_nItem++
 	aAdd( _aDados , {	.F.							,;
 						(_cAlias)->E2_FILIAL		,;
@@ -1401,7 +1406,7 @@ While (_cAlias)->( !EoF() )
 						(_cAlias)->E2_NUM			,;
 						(_cAlias)->E2_PARCELA		,;
 						(_cAlias)->E2_TIPO			,;
-						StoD((_cAlias)->E2_EMISSAO)	,;
+						SToD((_cAlias)->E2_EMISSAO)	,;
 						Transform( (_cAlias)->E2_VALOR , PesqPict("SE2","E2_VALOR") ),;
 						Transform( (_cAlias)->E2_ISS , PesqPict("SE2","E2_ISS") )})
 	(_cAlias)->( DBSkip() )
@@ -1445,7 +1450,7 @@ If Len(_aDados) > 0
 						SE2->E2_L_CONTA := SA2->A2_NUMCON
 						SE2->E2_DATALIB := dDataBase
 						SE2->E2_USUALIB := cUserName
-						SE2->( MsUnlock() )
+						SE2->( MSUnLock() )
 						Exit
 					EndIf
 				EndIf
@@ -1474,7 +1479,7 @@ Static Function MGLT011PLF(_cMix,_cSetor,_cFornece,_cLoja)
 Local _cAlias	:= GetNextAlias()
 Local _cRet		:= ''
 
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT ZLF_LINROT LINHA
 	FROM %Table:ZLF%
 	WHERE D_E_L_E_T_ =' '
@@ -1485,7 +1490,7 @@ BeginSQL Alias _cAlias
 	AND ZLF_SETOR = %exp:_cSetor%
 	AND ZLF_DEBCRE = 'C'
 	GROUP BY ZLF_LINROT
-EndSQL
+EndSql
 
 If (_cAlias)->( !Eof() )
 	_cRet := (_cAlias)->LINHA
@@ -1516,7 +1521,7 @@ If !Empty( _cSeek )
 		ZLF->(RecLock("ZLF",.F.))
 		ZLF->ZLF_TOTAL	:= _nValor
 		ZLF->ZLF_VLRLTR	:= Round( ZLF->ZLF_TOTAL / ZLF->ZLF_QTDBOM , 4 )
-		ZLF->(MsUnlock())
+		ZLF->(MSUnLock())
 	EndIf
 EndIf
 

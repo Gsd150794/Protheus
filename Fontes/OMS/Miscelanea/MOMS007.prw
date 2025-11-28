@@ -10,12 +10,12 @@ Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para cont
 ====================================================================================================================================================================================================================
 Analista - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
 ====================================================================================================================================================================================================================
-Jerry    - Alex Wallauer - 19/05/25 - 19/05/225-  50743  - Correção de error.log: InterFunctionCall: cannot find function CLOSE in AppMap on IMPORTAPED(MOMS007.PRW) 23/04/2025 11:35:13 line : 76
+Jerry    - Alex Wallauer - 19/05/25 - 19/05/225-  50743  - Correção de error.log: InterFunctionCall: cannot find function CLOSE in AppMap on IMPORTAPED(MOMS007.PRW) 23/04/2025 11:35:13 Line : 76
 ====================================================================================================================================================================================================================
 */
 
-#include "TopConn.ch"
-#INCLUDE "PROTHEUS.CH"
+#Include "TopConn.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -70,11 +70,11 @@ Retorno-----------: Nenhum
 */
 Static Function ImportaPed()                                                   
 
-if cPath == ""
+If cPath == ""
 	xMagHelpFis("INFORMAÇÃO",;
 	"Favor informar o caminho onde se encontram os arquivo de pedido de compra de EDI.",;
 	"A persistir o problema favor comunicar ao departamente de informática da ITALAC.")
-	Return()          
+	Return          
 EndIf
 
 oDlg:End()
@@ -88,7 +88,7 @@ If Len(aArqs) == 0
 	xMagHelpFis("INFORMAÇÃO",;
 	"Não existe nenhum arquivo .EDI no diretório informado.",;
 	"Favor verificar a localização dos arquivos .EDI de pedido de compra, ao persistir o problema favor contactar o administrador do sistema.")
-	Return()                        
+	Return                        
 	
 EndIf
 
@@ -114,17 +114,17 @@ Local aArqOri   := {}
 Local nXi		:= 0
 
 aArqOri := directory(cPath + "*.EDI")
-for nXi := 1 to Len(aArqOri)         
+For nXi := 1 to Len(aArqOri)         
     //1 - Nome do arquivo,.F. nao foi lancado o pedido de compra anteriormente, 
     //2 - .T. ja havia sido lancado anteriormente o pedido,
     //3 - numero do pedido de venda,
     //4 - mensagem de erro,numero do pediddo de compra 	
     //5 - Numero do pedido de compra do cliente CARREFOUR
     //6 - Problema encontrado para realizar a geracao do pedido de venda
-     aadd(aArqs, {aArqOri[nXi, 1],.F.,"","","",.F.,.F.})
-next nXi
+     aAdd(aArqs, {aArqOri[nXi, 1],.F.,"","","",.F.,.F.})
+Next nXi
 
-aArqs := asort(aArqs) //Ordena Arquivos !!!
+aArqs := aSort(aArqs) //Ordena Arquivos !!!
 
 Return
 
@@ -188,7 +188,7 @@ ProcRegua(Len(aArqs)) // Numero de registros a processar
 //Percorre todos os arquivos de texto encontrados no diretorio especificado pelo usuario
 For nCont:=1 to Len(aArqs)     
 
-	incProc("Processando o " + AllTrim(Str(nCont)) + "o. do " + AllTrim(Str(Len(aArqs))) + " pedido(s) de compra(s)." )
+	IncProc("Processando o " + AllTrim(Str(nCont)) + "o. do " + AllTrim(Str(Len(aArqs))) + " pedido(s) de compra(s)." )
                                    
 	FT_FUse(cPath + aArqs[nCont,1]) // Abre o arquivo
    
@@ -201,7 +201,7 @@ For nCont:=1 to Len(aArqs)
 	Else
        //Caso contratio percorre o arquivo para gerar o pedido de venda
        FT_FGOTOP()
-	   Do While !FT_FEOF()                         
+	   While !FT_FEOF()                         
           //Pega o conteudo da linha atual do arquivo corrente
 		  cLinhaAtual:= FT_FREADLN() 
           Do Case 			
@@ -210,9 +210,9 @@ For nCont:=1 to Len(aArqs)
 			 
 				  nNumItem := 0
                   //Busca dados do Comprador
-				  dbSelectArea("SA1")
+				  DBSelectArea("SA1")
 				  SA1->(dbOrderNickName("CODEAN")) //Filial + CNPJ
-				  If SA1->(DbSeek(xFilial("SA1") + SubStr(cLinhaAtual,154,13)))
+				  If SA1->(DBSeek(xFilial("SA1") + SubStr(cLinhaAtual,154,13)))
                      cCodCliCom:= SA1->A1_COD  			//Codigo do Cliente comprador
 				 	 cCodLojaCl:= SA1->A1_LOJA 			//Loja do Cliente 
 				 	 cDescClien:= AllTrim(SA1->A1_NOME)	//Descricao do Cliente
@@ -248,9 +248,9 @@ For nCont:=1 to Len(aArqs)
 					 cCnpjCliente:= SubStr(cLinhaAtual,195,14)	 
 				
 					 				
-					 DbSelectArea("SA1")
-					 DbSetOrder(3)
-					 DbSeek(xFilial("SA1")+cCnpjCliente)
+					 DBSelectArea("SA1")
+					 DBSetOrder(3)
+					 DBSeek(xFilial("SA1")+cCnpjCliente)
 							
 				     cCodCliente:= SA1->A1_COD 
 				     cLojCliente:= SA1->A1_LOJA
@@ -267,7 +267,7 @@ For nCont:=1 to Len(aArqs)
 				 	 cDtEntrega:= SubStr(cLinhaAtual,61 ,12)//Data e Hora da Emissao do Pedido de compra 
 				 	 cNroDoca  := SubStr(cLinhaAtual,273,02)//Numero da Doca   
 				 				  
-				 	 SA1->(DbCloseArea()) 					 		
+				 	 SA1->(DBCloseArea()) 					 		
 				  EndIf
 				 	
 				  //Pagamento(De zero a N ocorrencias)
@@ -301,12 +301,12 @@ For nCont:=1 to Len(aArqs)
 				cQuery +=  RetSqlName("SB1") + " B1 "          
 				cQuery += "WHERE"               
 				cQuery += " D_E_L_E_T_ = ' ' "
-				cQuery += " AND B1_FILIAL = '"  + xfilial("SB1") + "' AND B1_TIPO = 'PA' " 
+				cQuery += " AND B1_FILIAL = '"  + xFilial("SB1") + "' AND B1_TIPO = 'PA' " 
   				//cQuery += " AND B1_I_CDEAN = '" + AllTrim(SubStr(cLinhaAtual,18,14)) + "'"
   				If _lDun14
   				   cQuery += " AND B1_I_DUN14 = '"+AllTrim(SubStr(cLinhaAtual,18,14))+"'"
   				Else
-  				   cQuery += " AND (B1_CODBAR = '"+AllTrim(SubStr(cLinhaAtual,18,13))+"' OR B1_I_DUN14 = '"+AllTrim(SubStr(cLinhaAtual,18,13))+"') "       // + IIF(AllTrim(SubStr(cLinhaAtual,18,1))="0",AllTrim(SubStr(cLinhaAtual,19,13)),AllTrim(SubStr(cLinhaAtual,18,13))) + "'" //HEDER - 22/06/2011 - Modificado caso o preenchimento dos 14 digitos seja feito com um Zero '0' a esquerda//21/05/13 - Talita - Alterado o campo B1_I_CDEAN pelo B1_CODBAR. Conforme chamado 3361
+  				   cQuery += " AND (B1_CODBAR = '"+AllTrim(SubStr(cLinhaAtual,18,13))+"' OR B1_I_DUN14 = '"+AllTrim(SubStr(cLinhaAtual,18,13))+"') "       // + IIf(AllTrim(SubStr(cLinhaAtual,18,1))="0",AllTrim(SubStr(cLinhaAtual,19,13)),AllTrim(SubStr(cLinhaAtual,18,13))) + "'" //HEDER - 22/06/2011 - Modificado caso o preenchimento dos 14 digitos seja feito com um Zero '0' a esquerda//21/05/13 - Talita - Alterado o campo B1_I_CDEAN pelo B1_CODBAR. Conforme chamado 3361
   				EndIf
   						
   				cQuery += " AND B1_MSBLQL <> '1' " //Talita Teixeira - 21/08/14 - Incluido na query para que não traga os produtos bloqueados. Chamado: 7172						
@@ -314,11 +314,11 @@ For nCont:=1 to Len(aArqs)
   				cQuery += " ORDER BY B1.B1_COD "
   				//Para que nao ocorra erro, quando duas pessoas acessarem o relatorio simultaneamente
     			If Select("TMPPROD") > 0 
-    			   dbSelectArea("TMPPROD")
+    			   DBSelectArea("TMPPROD")
     		       TMPPROD->(DBCloseArea())
     			EndIf                   
     
-				dbUseArea(.T.,"TOPCONN",TCGenQry(,,ALLTRIM(Upper(cQuery))),'TMPPROD',.F.,.T.) 
+				dbUseArea(.T.,"TOPCONN",TCGenQry(,,AllTrim(Upper(cQuery))),'TMPPROD',.F.,.T.) 
 				//Inicio da Alteração - Talita Teixeira - 21/08/14 - Incluida a validação para que só tiver produtos bloqueados apresente uma mensagem de erro informando que o produto está bloqueado. Chamado: 7172
 				Count to  nCountReg     
 						
@@ -329,26 +329,26 @@ For nCont:=1 to Len(aArqs)
 				   cQuery +=  RetSqlName("SB1") + " B1 "          
 				   cQuery += "WHERE"               
 				   cQuery += " D_E_L_E_T_ = ' ' "
-				   cQuery += " AND B1_FILIAL = '"  + xfilial("SB1") + "' AND B1_TIPO = 'PA'" 
-	  			   //cQuery += " AND B1_CODBAR = '" + IIF(AllTrim(SubStr(cLinhaAtual,18,1))="0",AllTrim(SubStr(cLinhaAtual,19,13)),AllTrim(SubStr(cLinhaAtual,18,13))) + "'" 
+				   cQuery += " AND B1_FILIAL = '"  + xFilial("SB1") + "' AND B1_TIPO = 'PA'" 
+	  			   //cQuery += " AND B1_CODBAR = '" + IIf(AllTrim(SubStr(cLinhaAtual,18,1))="0",AllTrim(SubStr(cLinhaAtual,19,13)),AllTrim(SubStr(cLinhaAtual,18,13))) + "'" 
 	  			   If _lDun14
   				      cQuery += " AND B1_I_DUN14 = '"+AllTrim(SubStr(cLinhaAtual,18,14))+"'"
   				   Else
-  				      cQuery += " AND (B1_CODBAR = '"+AllTrim(SubStr(cLinhaAtual,18,13))+"' OR B1_I_DUN14 = '"+AllTrim(SubStr(cLinhaAtual,18,13))+"') " // + IIF(AllTrim(SubStr(cLinhaAtual,18,1))="0",AllTrim(SubStr(cLinhaAtual,19,13)),AllTrim(SubStr(cLinhaAtual,18,13))) + "'" //HEDER - 22/06/2011 - Modificado caso o preenchimento dos 14 digitos seja feito com um Zero '0' a esquerda//21/05/13 - Talita - Alterado o campo B1_I_CDEAN pelo B1_CODBAR. Conforme chamado 3361
+  				      cQuery += " AND (B1_CODBAR = '"+AllTrim(SubStr(cLinhaAtual,18,13))+"' OR B1_I_DUN14 = '"+AllTrim(SubStr(cLinhaAtual,18,13))+"') " // + IIf(AllTrim(SubStr(cLinhaAtual,18,1))="0",AllTrim(SubStr(cLinhaAtual,19,13)),AllTrim(SubStr(cLinhaAtual,18,13))) + "'" //HEDER - 22/06/2011 - Modificado caso o preenchimento dos 14 digitos seja feito com um Zero '0' a esquerda//21/05/13 - Talita - Alterado o campo B1_I_CDEAN pelo B1_CODBAR. Conforme chamado 3361
   				   EndIf
   					         
         	       cQuery += " ORDER BY B1.B1_COD "  					         
         	       
 	  			   If Select("TMPPROD") > 0 
-	    		      dbSelectArea("TMPPROD")
+	    		      DBSelectArea("TMPPROD")
 	    			  TMPPROD->(DBCloseArea())
 	    		   EndIf                   
 	    
-				   dbUseArea(.T.,"TOPCONN",TCGenQry(,,ALLTRIM(Upper(cQuery))),'TMPPROD',.F.,.T.) 
+				   dbUseArea(.T.,"TOPCONN",TCGenQry(,,AllTrim(Upper(cQuery))),'TMPPROD',.F.,.T.) 
   			    EndIf 
 						
-				DbSelectArea("TMPPROD")
-				TMPPROD->(DbGotop())   
+				DBSelectArea("TMPPROD")
+				TMPPROD->(DBGoTop())   
 						
 
 				//Verifica se o produto possui amarracao com o cadastro de produtos
@@ -368,7 +368,7 @@ For nCont:=1 to Len(aArqs)
                       cCodProdut:= TMPPROD->B1_COD            //Codigo do Produto
 					  cDesProdut:= AllTrim(TMPPROD->B1_DESC) //Descricao do Produto    
 				   Else 
-                      //cCodProdut:= IIF(AllTrim(SubStr(cLinhaAtual,18,1))="0",AllTrim(SubStr(cLinhaAtual,19,13)),AllTrim(SubStr(cLinhaAtual,18,13)))     //Codigo do Produto //HEDER - 22/06/2011 - Modificado caso o preenchimento dos 14 digitos seja feito com um Zero '0' a esquerda
+                      //cCodProdut:= IIf(AllTrim(SubStr(cLinhaAtual,18,1))="0",AllTrim(SubStr(cLinhaAtual,19,13)),AllTrim(SubStr(cLinhaAtual,18,13)))     //Codigo do Produto //HEDER - 22/06/2011 - Modificado caso o preenchimento dos 14 digitos seja feito com um Zero '0' a esquerda
                       If _lDun14  				      
   				         cCodProdut := AllTrim(SubStr(cLinhaAtual,18,14))                        
   				      Else
@@ -382,22 +382,22 @@ For nCont:=1 to Len(aArqs)
 				   EndIf	
 				   
 				   _aProdSimilar := {}
-				   Do While !TMPPROD->(Eof()) 
+				   While !TMPPROD->(Eof()) 
 				      If TMPPROD->B1_MSBLQL <> '1'
-					     Aadd(_aProdSimilar,{TMPPROD->B1_COD,AllTrim(TMPPROD->B1_DESC)})
+					     aAdd(_aProdSimilar,{TMPPROD->B1_COD,AllTrim(TMPPROD->B1_DESC)})
 					  EndIf 
 					  
 					  If !Empty(TMPPROD->B1_I_DUN14)
 					     _lDun14 := .T.                            
 					  EndIf
 					  
-					  TMPPROD->(DbSkip())
+					  TMPPROD->(DBSkip())
 				   EndDo
 				EndIf 	   			
 				//Fim da alteração. Chamado: 7172
 					
 				//Finaliza o arquivo temporario
-				dbSelectArea("TMPPROD")
+				DBSelectArea("TMPPROD")
     			TMPPROD->(DBCloseArea())
     					            
     			//Unidade Medida Cliente
@@ -432,9 +432,9 @@ For nCont:=1 to Len(aArqs)
     			_nQtdCli := Val(SubStr(cLinhaAtual,100,13) + '.' + SubStr(cLinhaAtual,113,02))//Quantidade do item da linha do pedido de venda
     			
     			// Quantidades e unidades de medidas com conversão.		                                           					
-    			dbSelectArea("SB1")	
-    			SB1->(dbSetOrder(1))
-    			SB1->(DbSeek(xFilial("SB1") + cCodProdut)) 
+    			DBSelectArea("SB1")	
+    			SB1->(DBSetOrder(1))
+    			SB1->(DBSeek(xFilial("SB1") + cCodProdut)) 
     			
     			// Um codigo DUN 14 é o código que representa a embalagem de embarque e por isso possui um digito a mais no código de barras.
     			// Exemplificando, um item unitário possui um código de barras de 13 digitos chamado EAN 13, a embalagem que agrupa mais de um item, a embalagem de embarque,
@@ -446,12 +446,12 @@ For nCont:=1 to Len(aArqs)
     				
     			If AllTrim(cUnMedidad) == AllTrim(SB1->B1_SEGUM)                          	
                    cqtdeUM2:= Val(SubStr(cLinhaAtual,100,13) + '.' + SubStr(cLinhaAtual,113,02))//Quantidade do item da linha do pedido de venda   	     
-    			   cqtdeUM := IIF(SB1->B1_TIPCONV == 'D',cqtdeUM2 * SB1->B1_CONV,cqtdeUM2 / SB1->B1_CONV)
+    			   cqtdeUM := IIf(SB1->B1_TIPCONV == 'D',cqtdeUM2 * SB1->B1_CONV,cqtdeUM2 / SB1->B1_CONV)
     			   cUM	  := SB1->B1_UM  	
     			   cUM2	  := cUnMedidad                 
    			  	Else    
                    cqtdeUM := Val(SubStr(cLinhaAtual,100,13) + '.' + SubStr(cLinhaAtual,113,02))//Quantidade do item da linha do pedido de venda    				
-                   cqtdeUM2:= IIF(SB1->B1_TIPCONV == 'D',cqtdeUM / SB1->B1_CONV,cqtdeUM * SB1->B1_CONV) 
+                   cqtdeUM2:= IIf(SB1->B1_TIPCONV == 'D',cqtdeUM / SB1->B1_CONV,cqtdeUM * SB1->B1_CONV) 
                    cUM2	:= SB1->B1_SEGUM 	
                    cUM     := cUnMedidad
     			EndIf 
@@ -466,7 +466,7 @@ For nCont:=1 to Len(aArqs)
                    	   If SB1->B1_I_QT3UM > 0
                            _nPrecoItalac :=  (nPrecoVend / SB1->B1_I_QT3UM) // Preço Italac calc pela 3a UM
                    	   Else
-                           _nPrecoItalac := IIF(SB1->B1_TIPCONV == 'D',nPrecoVend / SB1->B1_CONV, nPrecoVend * SB1->B1_CONV) // Preço Italac
+                           _nPrecoItalac := IIf(SB1->B1_TIPCONV == 'D',nPrecoVend / SB1->B1_CONV, nPrecoVend * SB1->B1_CONV) // Preço Italac
                       EndIf
                    Else
                       _nPrecoItalac := nPrecoVend
@@ -474,10 +474,10 @@ For nCont:=1 to Len(aArqs)
                 Else
                    _nQtdUnitItalac := _nQtdCli * _nQtdNaEmb    // Quantidade unitaria - Italac
                    _nPrecoItalac   := nPrecoVend / _nQtdNaEmb  // Preço Italac
-                   cqtdeUM2        := IIF(SB1->B1_TIPCONV == 'D',_nQtdUnitItalac / SB1->B1_CONV, _nQtdUnitItalac * SB1->B1_CONV) // Preço Italac
+                   cqtdeUM2        := IIf(SB1->B1_TIPCONV == 'D',_nQtdUnitItalac / SB1->B1_CONV, _nQtdUnitItalac * SB1->B1_CONV) // Preço Italac
 				EndIf
 				 	
-				aadd(aItensPC,  { ;        
+				aAdd(aItensPC,  { ;        
 								cNumPedCom,;			//Numero do Pedido de compra do Cliente CARREFOUR    1
 								StrZero(nNumItem,2),;   //Numero do Item da linha do produto                 2
 								cCodProdut,;			//Codigo do Produto Microsiga                        3
@@ -499,7 +499,7 @@ For nCont:=1 to Len(aArqs)
 				If Len(_aProdSimilar) > 1
 				   For _nI := 1 To Len(_aProdSimilar)
 				       If AllTrim(cCodProdut) <> AllTrim(_aProdSimilar[_nI,1])
-				          aadd(aItensPC,  { ;        
+				          aAdd(aItensPC,  { ;        
 								       cNumPedCom,;			  //Numero do Pedido de compra do Cliente CARREFOUR   1
 								       StrZero(nNumItem,2),;  //Numero do Item da linha do produto                2
 								       _aProdSimilar[_nI,1],; //Codigo do Produto Microsiga                       3
@@ -690,7 +690,7 @@ For nCont1:=1 to Len(aCabecPC)
 			nlinha+=nSaltoLinha   
 		    //oPrint:Say (nlinha,nColInic,'DIAS DE PRAZO: ' + aCondPgto[nCont2,3],oFont12b)
 			//nlinha+=nSaltoLinha         
-			oPrint:Say (nlinha,nColInic,'DATA DE VENCIMENTO: ' + DtoC(StoD(aCondPgto[nCont2,4])),oFont12b)
+			oPrint:Say (nlinha,nColInic,'DATA DE VENCIMENTO: ' + DToC(SToD(aCondPgto[nCont2,4])),oFont12b)
 			nlinha+=nSaltoLinha   
 			oPrint:Say (nlinha,nColInic,'VALOR A PAGAR:  ' + AllTrim(Transform(aCondPgto[nCont2,5],"999,999,999,999.99")),oFont12b)
 			nlinha+=nSaltoLinha     
@@ -816,7 +816,7 @@ For nCont1:=1 to Len(aCabecPC)
 		    	
 		    	EndIf
 	    	
-		EndIF
+		EndIf
 	Next nCont3            
 	
 	//Imprime Totalizadores  
@@ -884,12 +884,12 @@ Local cRaizServer := If(issrvunix(), "/", "\")
     //Endereco do cliente                                                                                                                  
  	oPrint:Say (nlinha,nColInic,aCabecPC[nCont1,5],oFont12b)      
  	//DATA E HORA DE EMISSOAO DO PEDIDO DE COMRA PELO CARREFOUR
-	oPrint:Say (nlinha,nColInic + 2000,'EMISSÃO : ' + DtoC(StoD(SubStr(aCabecPC[nCont1,11],1,8))) + '   ' + SubStr(aCabecPC[nCont1,11],9,2) + ':' + SubStr(aCabecPC[nCont1,11],11,2) + IIF(Len(AllTrim(aCabecPC[nCont1,13])) > 0,"   Nro.Doca: " + aCabecPC[nCont1,13],""  + '      Arq:' + aCabecPC[nCont1,18]),oFont12b)
+	oPrint:Say (nlinha,nColInic + 2000,'EMISSÃO : ' + DtoC(StoD(SubStr(aCabecPC[nCont1,11],1,8))) + '   ' + SubStr(aCabecPC[nCont1,11],9,2) + ':' + SubStr(aCabecPC[nCont1,11],11,2) + IIf(Len(AllTrim(aCabecPC[nCont1,13])) > 0,"   Nro.Doca: " + aCabecPC[nCont1,13],""  + '      Arq:' + aCabecPC[nCont1,18]),oFont12b)
 	nlinha+=nSaltoLinha 
 	//CEP + MUNICIPIO + ESTADO
 	oPrint:Say (nlinha,nColInic,transform(aCabecPC[nCont1,8],"@R 99.999-999") + ' - ' + aCabecPC[nCont1,6] + '/' + aCabecPC[nCont1,7],oFont12b)
 	//DATA E HORA DE EMISSOAO DO PEDIDO DE COMRA PELO CARREFOUR
-	oPrint:Say (nlinha,nColInic + 2000,'DATA DE ENTREGA : ' + DtoC(StoD(SubStr(aCabecPC[nCont1,12],1,8))) + '   ' + SubStr(aCabecPC[nCont1,12],9,2) + ':' + SubStr(aCabecPC[nCont1,11],11,2),oFont12b)
+	oPrint:Say (nlinha,nColInic + 2000,'DATA DE ENTREGA : ' + DToC(SToD(SubStr(aCabecPC[nCont1,12],1,8))) + '   ' + SubStr(aCabecPC[nCont1,12],9,2) + ':' + SubStr(aCabecPC[nCont1,11],11,2),oFont12b)
 	oPrint:SayBitmap(nLinha,nColInic + 3000,cRaizServer + "system/lgrl01.bmp",250,100)  
 	nlinha+=nSaltoLinha    
 	//CNPJ + I.E.
@@ -965,20 +965,20 @@ For nCont:=1 to Len(aArqs)
 						cQuery +=  RetSqlName("SC6") + " C6 "          
 						cQuery += "WHERE"               
 						cQuery += " D_E_L_E_T_ = ' ' "
-						cQuery += " AND C6_FILIAL = '"  + xfilial("SC6") + "'" 
+						cQuery += " AND C6_FILIAL = '"  + xFilial("SC6") + "'" 
   						cQuery += " AND C6_PEDCLI = '"  + SubStr(cLinhaAtual,09,20) + "'"
   						
   						//Para que nao ocorra erro, quando duas pessoas acessarem o relatorio simultaneamente
-    					if Select("TMPPED") > 0 
-    						dbSelectArea("TMPPED")
+    					If Select("TMPPED") > 0 
+    						DBSelectArea("TMPPED")
     						TMPPED->(DBCloseArea())
-    					endIf         
+    					EndIf         
     					
-    					dbUseArea(.T.,"TOPCONN",TCGenQry(,,ALLTRIM(Upper(cQuery))),'TMPPED',.F.,.T.)   
+    					dbUseArea(.T.,"TOPCONN",TCGenQry(,,AllTrim(Upper(cQuery))),'TMPPED',.F.,.T.)   
 						COUNT TO nCountRec	
 
-						dbSelectArea("TMPPED")   
-						TMPPED->(dbGotop())          
+						DBSelectArea("TMPPED")   
+						TMPPED->(DBGoTop())          
 						
 						//Ja existia um pedido de venda lancado anteriormente
 						If nCountRec > 0
@@ -990,7 +990,7 @@ For nCont:=1 to Len(aArqs)
 						
 						EndIf      
 						
-						dbSelectArea("TMPPED")
+						DBSelectArea("TMPPED")
     					TMPPED->(DBCloseArea())
 				
 				EndIf                           
@@ -1094,7 +1094,7 @@ For nCont:=1 to Len(aArqs)
 				nLinha:=0100   
 				nPagina++     
 				Cabecalho()
-		EndIF 
+		EndIf 
 	
 		//Imprime os pedidos de compra processados com sucesso              
 		oPrint:Say (nLinha,nColInic,StrZero(cNumItem,4),oFont11b)
@@ -1142,7 +1142,7 @@ For nCont:=1 to Len(aArqs)
 				nLinha:=0100   
 				nPagina++     
 				Cabecalho()
-		EndIF
+		EndIf
 	
 		oPrint:Say (nLinha,nColInic,StrZero(cNumItem,4),oFont11b)
 		oPrint:Say (nLinha,nColInic + 150 ,aArqs[nCont,5],oFont11b)
@@ -1201,7 +1201,7 @@ Local cRaizServer := If(issrvunix(), "/", "\")
 
 	oPrint:Say (nlinha,0100,AllTrim(SM0->M0_CIDCOB) + " - " + AllTrim(SM0->M0_ESTCOB),oFont11b)
 	oPrint:Say (nlinha,1250,"CEP: " + SubStr(AllTrim(SM0->M0_CEPCOB),1,2) + "." + SubStr(AllTrim(SM0->M0_CEPCOB),3,3) + "-" + SubStr(AllTrim(SM0->M0_CEPCOB),6,3),oFont11b)
-	oPrint:Say (nlinha,2000,"Emissão: " + DtoC(date()),oFont11b)
+	oPrint:Say (nlinha,2000,"Emissão: " + DToC(date()),oFont11b)
 	nlinha+=nSaltoLinha
 	//FIM DADOS DA EMPRESA
 	oPrint:Line(nLinha,nColInic,nLinha,nColFinal) 
@@ -1235,7 +1235,7 @@ Local cCampFormat:=""//Armazena o CPF ou CNPJ formatado
 		
 		Else//CNPJ       
 		
-			cCampFormat:=Substr(cCPFCNPJ,1,2)+"."+Substr(cCPFCNPJ,3,3)+"."+Substr(cCPFCNPJ,6,3)+"/"+Substr(cCPFCNPJ,9,4)+"-"+ Substr(cCPFCNPJ,13,2)
+			cCampFormat:=SubStr(cCPFCNPJ,1,2)+"."+SubStr(cCPFCNPJ,3,3)+"."+SubStr(cCPFCNPJ,6,3)+"/"+SubStr(cCPFCNPJ,9,4)+"-"+ SubStr(cCPFCNPJ,13,2)
 			
 	EndIf
 	
@@ -1264,7 +1264,7 @@ Local nHRes	:=	oMainWnd:nClientWidth	// Resolucao horizontal do monitor
                                                                                 
 	//Tratamento para tema Flat
 	If "MP8" $ oApp:cVersion                                                      
-		If (Alltrim(GetTheme()) == "FLAT") .Or. SetMdiChild()                      
+		If (AllTrim(GetTheme()) == "FLAT") .Or. SetMdiChild()                      
 			nTam *= 0.90                                                            
 		EndIf                                                                      
 	EndIf                                                                         
@@ -1292,10 +1292,10 @@ For i:=1 to Len(aArqs)
  
 	If !aArqs[i,6]
 
-		nStatus := frename(cPath + aArqs[i,1],cPath + SUBSTR(aArqs[i,1],1,AT('EDI',aArqs[i,1] )-1) + 'BKP')  
+		nStatus := frename(cPath + aArqs[i,1],cPath + SubStr(aArqs[i,1],1,AT('EDI',aArqs[i,1] )-1) + 'BKP')  
 	
 		If nStatus == - 1
-			MsgStop('Falha para renomear o arquivo ' + aArqs[i,1] + ' - ' + str(ferror(),4))
+			MsgStop('Falha para renomear o arquivo ' + aArqs[i,1] + ' - ' + Str(ferror(),4))
 		EndIf
 	
 	EndIf 

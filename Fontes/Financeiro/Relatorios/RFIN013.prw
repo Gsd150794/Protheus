@@ -2,33 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Talita       | 08/01/2014 | Corrigido o erro que estava ocorrendo com relação ao parâmetro maior. Chamaro 5122
--------------------------------------------------------------------------------------------------------------------------------
- Alexandre V. | 22/12/2015 | Tratativa na cláusula "ORDER BY" para remover a referência numérica. Chamado 13062
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 11/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Talita        |08/01/2014| Chamaro 5122. Corrigido o erro que estava ocorrendo com relação ao parâmetro maior.
+Alexandre V.  |22/12/2015| Chamado 13062. Tratativa na cláusula "ORDER BY" para remover a referência numérica.
+Lucas Borges  |11/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
-
-#DEFINE CRLF Chr(13)+Chr(10)
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa--------: RFIN013
 Autor-----------: Talita Teixeira
 Data da Criacao-: 08/04/2013
-===============================================================================================================================
 Descrição-------: Relatório para verificar as comissões pagas indevidamente à vendedores e coordenadores
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -49,11 +39,8 @@ Return
 Programa--------: Report
 Autor-----------: Talita Teixeira
 Data da Criacao-: 08/04/2013
-===============================================================================================================================
 Descrição-------: Relatório para verificar as comissões pagas indevidamente à vendedores e coordenadores
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -98,11 +85,8 @@ Return( oReport )
 Programa--------: PrintDifComi
 Autor-----------: Talita Teixeira
 Data da Criacao-: 30/09/2013
-===============================================================================================================================
 Descrição-------: Relatório para verificar as comissões pagas indevidamente à vendedores e coordenadores
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -137,7 +121,7 @@ SELECT EFET.E3_FILIAL,
                E3_LOJA,
                SUM(E3_BASE) BASE_E3,
                SUM(E3_COMIS) COMIS_PG
-          FROM %TABLE:SE3%, %TABLE:SE5%
+          FROM %Table:SE3%, %Table:SE5%
          WHERE SE3010.D_E_L_E_T_ = ' '
            AND SE5010.D_E_L_E_T_ = ' '
            AND E5_FILIAL = E3_FILIAL
@@ -169,10 +153,10 @@ SELECT EFET.E3_FILIAL,
                SUM(QRY2.BASE),
                SUM(QRY2.RETIDO),
                SUM(QRY2.VALOR_BAIXA) VL_BAIXA,
-               ROUND(SUM(QRY2.VALOR_BAIXA) * (SUM(QRY2.COMISSAO) / SUM(QRY2.BASE)),
+               Round(SUM(QRY2.VALOR_BAIXA) * (SUM(QRY2.COMISSAO) / SUM(QRY2.BASE)),
                      2) COMIS_BAIXA,
-               ROUND(SUM(QRY2.BASE) / (SUM(QRY2.BASE) + SUM(QRY2.RETIDO)), 6) RAZAO_CORRETA,
-               ROUND(SUM(QRY2.VALOR_BAIXA) * (SUM(QRY2.COMISSAO) / SUM(QRY2.BASE)) * (ROUND(SUM(QRY2.BASE) / (SUM(QRY2.BASE) + SUM(QRY2.RETIDO)),
+               Round(SUM(QRY2.BASE) / (SUM(QRY2.BASE) + SUM(QRY2.RETIDO)), 6) RAZAO_CORRETA,
+               Round(SUM(QRY2.VALOR_BAIXA) * (SUM(QRY2.COMISSAO) / SUM(QRY2.BASE)) * (Round(SUM(QRY2.BASE) / (SUM(QRY2.BASE) + SUM(QRY2.RETIDO)),
                             6)),
                      2) VALOR_A_PAGAR
           FROM (SELECT QRY1.D2_FILIAL,
@@ -183,11 +167,11 @@ SELECT EFET.E3_FILIAL,
                        QRY1.D2_CLIENTE,
                        QRY1.D2_LOJA,
                        SUM(TOTAL_D2) BASE,
-                       ROUND((SUM(COMIS) / SUM(TOTAL_D2)) * 100, 2) PERC_MED,
+                       Round((SUM(COMIS) / SUM(TOTAL_D2)) * 100, 2) PERC_MED,
                        SUM(COMIS) COMISSAO,
                        SUM(ICMSRET_D2) RETIDO,
                        NVL((SELECT SUM(E5_VALOR) - SUM(E5_VLJUROS) - SUM(E5_VLMULTA)
-                          FROM %TABLE:SE5%
+                          FROM %Table:SE5%
                          WHERE SE5010.D_E_L_E_T_ = ' '
                            AND D2_FILIAL = E5_FILIAL
                            AND D2_DOC = E5_NUMERO
@@ -197,7 +181,7 @@ SELECT EFET.E3_FILIAL,
                            AND E5_TIPO = 'NF'
                            AND E5_TIPODOC = 'VL'
                            AND E5_MOTBX = 'NOR'),0) - NVL((SELECT SUM(E5_VALOR) - SUM(E5_VLJUROS) - SUM(E5_VLMULTA)
-                          FROM %TABLE:SE5%
+                          FROM %Table:SE5%
                          WHERE SE5010.D_E_L_E_T_ = ' '
                            AND D2_FILIAL = E5_FILIAL
                            AND D2_DOC = E5_NUMERO
@@ -218,11 +202,11 @@ SELECT EFET.E3_FILIAL,
                                SUM(D2_TOTAL) TOTAL_D2,
                                SUM(D2_ICMSRET) ICMSRET_D2,
                                D2_COMIS1,
-                               ROUND(SUM(D2_TOTAL) * D2_COMIS1 / 100, 2) COMIS
-                          FROM %TABLE:SD2%, %TABLE:SF2%
+                               Round(SUM(D2_TOTAL) * D2_COMIS1 / 100, 2) COMIS
+                          FROM %Table:SD2%, %Table:SF2%
                          WHERE SD2010.D_E_L_E_T_ = ' '
                            AND SF2010.D_E_L_E_T_ = ' '
-                           AND D2_EMISSAO BETWEEN %exp:DTOS(MV_PAR01)% AND %exp:DTOS(MV_PAR02)%
+                           AND D2_EMISSAO BETWEEN %exp:DToS(MV_PAR01)% AND %exp:DToS(MV_PAR02)%
                            AND F2_FILIAL = D2_FILIAL
                            AND F2_DOC = D2_DOC
                            AND F2_SERIE = D2_SERIE
@@ -286,7 +270,7 @@ SELECT EFET.E3_FILIAL,
                E3_LOJA,
                SUM(E3_BASE) BASE_E3,
                SUM(E3_COMIS) COMIS_PG
-          FROM %TABLE:SE3%, %TABLE:SE5%
+          FROM %Table:SE3%, %Table:SE5%
          WHERE SE3010.D_E_L_E_T_ = ' '
            AND SE5010.D_E_L_E_T_ = ' '
            AND E5_FILIAL = E3_FILIAL
@@ -318,10 +302,10 @@ SELECT EFET.E3_FILIAL,
                SUM(QRY2.BASE),
                SUM(QRY2.RETIDO),
                SUM(QRY2.VALOR_BAIXA) VL_BAIXA,
-               ROUND(SUM(QRY2.VALOR_BAIXA) * (SUM(QRY2.COMISSAO) / SUM(QRY2.BASE)),
+               Round(SUM(QRY2.VALOR_BAIXA) * (SUM(QRY2.COMISSAO) / SUM(QRY2.BASE)),
                      2) COMIS_BAIXA,
-               ROUND(SUM(QRY2.BASE) / (SUM(QRY2.BASE) + SUM(QRY2.RETIDO)), 6) RAZAO_CORRETA,
-               ROUND(SUM(QRY2.VALOR_BAIXA) * (SUM(QRY2.COMISSAO) / SUM(QRY2.BASE)) * (ROUND(SUM(QRY2.BASE) / (SUM(QRY2.BASE) + SUM(QRY2.RETIDO)),
+               Round(SUM(QRY2.BASE) / (SUM(QRY2.BASE) + SUM(QRY2.RETIDO)), 6) RAZAO_CORRETA,
+               Round(SUM(QRY2.VALOR_BAIXA) * (SUM(QRY2.COMISSAO) / SUM(QRY2.BASE)) * (Round(SUM(QRY2.BASE) / (SUM(QRY2.BASE) + SUM(QRY2.RETIDO)),
                             6)),
                      2) VALOR_A_PAGAR
           FROM (SELECT QRY1.D2_FILIAL,
@@ -332,11 +316,11 @@ SELECT EFET.E3_FILIAL,
                        QRY1.D2_CLIENTE,
                        QRY1.D2_LOJA,
                        SUM(TOTAL_D2) BASE,
-                       ROUND((SUM(COMIS) / SUM(TOTAL_D2)) * 100, 2) PERC_MED,
+                       Round((SUM(COMIS) / SUM(TOTAL_D2)) * 100, 2) PERC_MED,
                        SUM(COMIS) COMISSAO,
                        SUM(ICMSRET_D2) RETIDO,
 		               NVL((SELECT SUM(E5_VALOR) - SUM(E5_VLJUROS) - SUM(E5_VLMULTA)
-                          FROM %TABLE:SE5%
+                          FROM %Table:SE5%
                          WHERE SE5010.D_E_L_E_T_ = ' '
                            AND D2_FILIAL = E5_FILIAL
                            AND D2_DOC = E5_NUMERO
@@ -346,7 +330,7 @@ SELECT EFET.E3_FILIAL,
                            AND E5_TIPO = 'NF'
                            AND E5_TIPODOC = 'VL'
                            AND E5_MOTBX = 'NOR'),0)- NVL((SELECT SUM(E5_VALOR) - SUM(E5_VLJUROS) - SUM(E5_VLMULTA)
-                          FROM %TABLE:SE5%
+                          FROM %Table:SE5%
                          WHERE SE5010.D_E_L_E_T_ = ' '
                            AND D2_FILIAL = E5_FILIAL
                            AND D2_DOC = E5_NUMERO
@@ -366,8 +350,8 @@ SELECT EFET.E3_FILIAL,
                                SUM(D2_TOTAL) TOTAL_D2,
                                SUM(D2_ICMSRET) ICMSRET_D2,
                                D2_COMIS2,
-                               ROUND(SUM(D2_TOTAL) * D2_COMIS2 / 100, 2) COMIS
-                          FROM %TABLE:SD2%, %TABLE:SF2%
+                               Round(SUM(D2_TOTAL) * D2_COMIS2 / 100, 2) COMIS
+                          FROM %Table:SD2%, %Table:SF2%
                          WHERE SD2010.D_E_L_E_T_ = ' '
                            AND SF2010.D_E_L_E_T_ = ' '
                            AND F2_FILIAL = D2_FILIAL
@@ -378,7 +362,7 @@ SELECT EFET.E3_FILIAL,
                            AND F2_LOJA = D2_LOJA
                            AND D2_COMIS2 > 0
                            AND D2_TOTAL > 0
-                           AND D2_EMISSAO BETWEEN %exp:DTOS(MV_PAR01)% AND %exp:DTOS(MV_PAR02)%
+                           AND D2_EMISSAO BETWEEN %exp:DToS(MV_PAR01)% AND %exp:DToS(MV_PAR02)%
                          GROUP BY D2_FILIAL,
                                   F2_VEND2,
                                   D2_EMISSAO,
@@ -417,27 +401,27 @@ oSection1:EndQuery()
 _cVend 	  := (cAliasQRY)->E3_VEND
 _NomeVend := _cVend + '-' + U_getNomVend(_cVend) 
 //Inicio da alteração	
-If MV_PAR05 == 1 .AND. (cAliasQRY)->DIF_COMIS > 0	//Alteração - 17/12/13 - Talita - Alterado a query para que traga os números absolutos e incluido o parametro para que separe o relatorio o tipo de pagamento maior ou menor conforme o chamado: 5000
+If MV_PAR05 == 1 .And. (cAliasQRY)->DIF_COMIS > 0	//Alteração - 17/12/13 - Talita - Alterado a query para que traga os números absolutos e incluido o parametro para que separe o relatorio o tipo de pagamento maior ou menor conforme o chamado: 5000
 	oReport:Section(1):Init()
 	oReport:Section(1):PrintLine() 
 	oReport:Section(1):Section(1):Init()  
 	nCont++  
 EndIf      
 
-If MV_PAR05 == 2 .AND. (cAliasQRY)->DIF_COMIS < 0	
+If MV_PAR05 == 2 .And. (cAliasQRY)->DIF_COMIS < 0	
 	oReport:Section(1):Init()
 	oReport:Section(1):PrintLine() 
 	oReport:Section(1):Section(1):Init()
 	nCont++    
 EndIf  
 
-If MV_PAR05 == 1 .AND. (cAliasQRY)->DIF_COMIS < 0  //Alteração - 07/01/13 - Talita - Corrigido o erro que estava ocorrendo com relação as informações do parametro maior conforme chamado 5122.
+If MV_PAR05 == 1 .And. (cAliasQRY)->DIF_COMIS < 0  //Alteração - 07/01/13 - Talita - Corrigido o erro que estava ocorrendo com relação as informações do parametro maior conforme chamado 5122.
 	nCont++
 EndIf
 
-While (cAliasQRY)->(!EoF()) 
+While (cAliasQRY)->(!Eof()) 
 
-	If MV_PAR05 == 1 .AND. (cAliasQRY)->DIF_COMIS > 0
+	If MV_PAR05 == 1 .And. (cAliasQRY)->DIF_COMIS > 0
 		If nCont > 0  
 			oReport:Section(1):Init()
 			oReport:Section(1):PrintLine() 
@@ -459,7 +443,7 @@ While (cAliasQRY)->(!EoF())
 		oReport:Section(1):Section(1):PrintLine()  
 	EndIf
  
-	If MV_PAR05 == 2 .AND. (cAliasQRY)->DIF_COMIS < 0 
+	If MV_PAR05 == 2 .And. (cAliasQRY)->DIF_COMIS < 0 
  		If nCont > 0  
     		oReport:Section(1):Init()
 			oReport:Section(1):PrintLine() 
@@ -481,7 +465,7 @@ While (cAliasQRY)->(!EoF())
 		oReport:Section(1):Section(1):PrintLine()  
 	EndIf
    		
-	dbSkip()
+	DBSkip()
 EndDo
 
 oReport:Section(1):SetPageBreak(.T.)
@@ -495,11 +479,8 @@ Return
 Programa--------: getNomVend
 Autor-----------: Talita Teixeira
 Data da Criacao-: 29/07/2013
-===============================================================================================================================
 Descrição-------: Busca nome do vendedor
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -508,13 +489,13 @@ User Function getNomVend(_cVend)
 Local aAreaSA3 := SA3->(getArea())
 Local cRet := " "
 
-SA3->(dbSelectArea("SA3"))
-SA3->(dbSetOrder(1))
-SA3->(dbSeek(xFilial("SA3")+ _cVend))
+SA3->(DBSelectArea("SA3"))
+SA3->(DBSetOrder(1))
+SA3->(DBSeek(xFilial("SA3")+ _cVend))
 cRet := SA3->A3_NOME
 
 //Restaura integridade da SM0
-SA3->(dbSetOrder(aAreaSA3[2]))
-SA3->(dbGoTo(aAreaSA3[3]))
+SA3->(DBSetOrder(aAreaSA3[2]))
+SA3->(DBGoTo(aAreaSA3[3]))
 
 Return cRet

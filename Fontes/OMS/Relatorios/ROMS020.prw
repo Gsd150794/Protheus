@@ -15,7 +15,7 @@ Lucas Borges  	  | 17/10/2019 | Removidos os Warning na compilação da release 12
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
 #Include "Report.ch"
-#Include "Protheus.ch"      
+#Include "TOTVS.ch"      
 #Include "RWMake.ch"
 
 /*
@@ -64,8 +64,8 @@ oPrint:SetPaperSize(9)	// Seta para papel A4
 oPrint:StartPage()
 
 If !Pergunte( cPerg )
-	U_ITMSG(  'Processamento cancelado pelo usuário!' , 'Atenção!' ,,1 )
-	Return()
+	U_ITMsg(  'Processamento cancelado pelo usuário!' , 'Atenção!' ,,1 )
+	Return
 EndIf
 
 //================================================================================
@@ -78,7 +78,7 @@ Processa( {|| ROMS020REL() } )
 oPrint:EndPage() //Finaliza a Pagina.
 oPrint:Preview() //Visualiza antes de Imprimir.
 
-Return()
+Return
            
 /*
 ===============================================================================================================================
@@ -97,7 +97,7 @@ Retorno-----------: Nenhum
 Static Function ROMS020CAB(impNrPag)
 
 Local cRaizServer	:= IIf( issrvunix() , "/" , "\" )
-Local cTitulo		:= "Relatório de movimentacao de Entradas e Saidas - Período de "+ DtoC( MV_PAR01 ) +" até "+ DtoC( MV_PAR02 )
+Local cTitulo		:= "Relatório de movimentacao de Entradas e Saidas - Período de "+ DToC( MV_PAR01 ) +" até "+ DToC( MV_PAR02 )
 
 nLinha := 0100
 
@@ -110,7 +110,7 @@ Else
 	oPrint:Say( nlinha + 100	, ( nColInic + 2750 )	, "EMPRESA: "+ AllTrim(SM0->M0_NOME) +'/'+ AllTrim(SM0->M0_FILIAL)	, oFont12b )
 EndIf
 
-oPrint:Say( nlinha + 50			, ( nColInic + 2750 )	, "DATA DE EMISSÃO: "+ DtoC( DATE() )								, oFont12b )
+oPrint:Say( nlinha + 50			, ( nColInic + 2750 )	, "DATA DE EMISSÃO: "+ DToC( Date() )								, oFont12b )
 
 nlinha += ( nSaltoLinha * 3 )
 
@@ -120,7 +120,7 @@ nlinha += ( nSaltoLinha * 2 )
 
 oPrint:Line( nLinha , nColInic , nLinha , nColFinal )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -204,7 +204,7 @@ nlinha += nSaltoLinha
 
 nLinInBox := nlinha + nSaltoLinha
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -246,7 +246,7 @@ oPrint:Box( nLinInBox , nColInic + 1430 , nLinha , nColInic + 2080 ) //Entradas
 oPrint:Box( nLinInBox , nColInic + 2090 , nLinha , nColInic + 2740 ) //Saidas
 oPrint:Box( nLinInBox , nColInic + 2750 , nLinha , nColFinal       ) //Saldo
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -289,7 +289,7 @@ oPrint:Say( nlinha + nAjuAltLi1 , nColInic + 3025 , um1												, oFont09 )
 oPrint:Say( nlinha + nAjuAltLi1 , nColInic + 3025 , Transform( nSaldo2 , "@E 99,999,999,999.99" )	, oFont09 )
 oPrint:Say( nlinha + nAjuAltLi1 , nColInic + 3315 , um2												, oFont09 )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -317,7 +317,7 @@ oPrint:Say( nlinha + nAjuAltLi1 , nColInic + 2410 , Transform( nqtdeSai2 , "@E 9
 oPrint:Say( nlinha + nAjuAltLi1 , nColInic + 2740 , Transform( nqtdeSal1 , "@E 99,999,999,999.99" )	, oFont09b )
 oPrint:Say( nlinha + nAjuAltLi1 , nColInic + 3025 , Transform( nqtdeSal2 , "@E 99,999,999,999.99" )	, oFont09b )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -361,7 +361,7 @@ If nLinha > nqbrPagina
 	
 EndIf  
 	
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -422,9 +422,9 @@ Local cProdMovi		:= ""
 //================================================================================
 If !Empty(MV_PAR01) .And. !Empty(MV_PAR02)
 
-	cFiltroSai += " AND D2.D2_EMISSAO BETWEEN '"+ DtoS( MV_PAR01 ) +"' AND '"+ DtoS( MV_PAR02 ) +"' "
-	cFiltroEnt += " AND D1.D1_DTDIGIT BETWEEN '"+ DtoS( MV_PAR01 ) +"' AND '"+ DtoS( MV_PAR02 ) +"' "
-	cFiltroInt += " AND D3.D3_EMISSAO BETWEEN '"+ DtoS( MV_PAR01 ) +"' AND '"+ DtoS( MV_PAR02 ) +"' "
+	cFiltroSai += " AND D2.D2_EMISSAO BETWEEN '"+ DToS( MV_PAR01 ) +"' AND '"+ DToS( MV_PAR02 ) +"' "
+	cFiltroEnt += " AND D1.D1_DTDIGIT BETWEEN '"+ DToS( MV_PAR01 ) +"' AND '"+ DToS( MV_PAR02 ) +"' "
+	cFiltroInt += " AND D3.D3_EMISSAO BETWEEN '"+ DToS( MV_PAR01 ) +"' AND '"+ DToS( MV_PAR02 ) +"' "
 
 EndIf
 
@@ -433,9 +433,9 @@ EndIf
 //================================================================================
 If !Empty(MV_PAR03)
 
-	cFiltroSai += " AND D2.d2_local IN "+ FormatIn( MV_PAR03 , ";" )
-	cFiltroEnt += " AND D1.d1_local IN "+ FormatIn( MV_PAR03 , ";" )
-	cFiltroInt += " AND D3.d3_local IN "+ FormatIn( MV_PAR03 , ";" )
+	cFiltroSai += " AND D2.d2_LOCAL IN "+ FormatIn( MV_PAR03 , ";" )
+	cFiltroEnt += " AND D1.d1_LOCAL IN "+ FormatIn( MV_PAR03 , ";" )
+	cFiltroInt += " AND D3.d3_LOCAL IN "+ FormatIn( MV_PAR03 , ";" )
 	
 EndIf
 
@@ -578,12 +578,12 @@ COUNT TO nCountRec //Contabiliza o numero de registros encontrados pela query
 ProcRegua(nCountRec)     
 
 DBSelectArea(cAliasEntr)
-(cAliasEntr)->( DBGotop() )
+(cAliasEntr)->( DBGoTop() )
 While (cAliasEntr)->( !Eof() )
 
 	IncProc( "Processando a entrada do produto: " + AllTrim( (cAliasEntr)->PRODUTO ) )
 	
-	nPosProEnt := aScan( aEntrada , {|x| Alltrim(x[3]) == AllTrim( (cAliasEntr)->PRODUTO ) } )
+	nPosProEnt := aScan( aEntrada , {|x| AllTrim(x[3]) == AllTrim( (cAliasEntr)->PRODUTO ) } )
 	
 	If nPosProEnt > 0
 	    
@@ -706,12 +706,12 @@ COUNT TO nCountRec //Contabiliza o numero de registros encontrados pela query
 ProcRegua(nCountRec)                                    
 
 DBSelectArea(cAliasSaid)
-(cAliasSaid)->( DBGotop() )
+(cAliasSaid)->( DBGoTop() )
 While (cAliasSaid)->(!Eof())
 
 	IncProc( "Processando a saida do produto: "+ AllTrim( (cAliasSaid)->PRODUTO ) )
     
-	nPosProSai := aScan( aSaida , {|x| Alltrim(x[3]) == AllTrim( (cAliasSaid)->PRODUTO ) } )
+	nPosProSai := aScan( aSaida , {|x| AllTrim(x[3]) == AllTrim( (cAliasSaid)->PRODUTO ) } )
 	
 	If nPosProSai > 0
         
@@ -771,7 +771,7 @@ nPosProEnt := 0
 //================================================================================
 For _nI := 1 To Len(aEntrada)
 
-	nPosProEnt := aScan( aSaida , {|x| Alltrim(x[3]) == AllTrim( aEntrada[_nI][03] ) } )
+	nPosProEnt := aScan( aSaida , {|x| AllTrim(x[3]) == AllTrim( aEntrada[_nI][03] ) } )
 	
 	If nPosProEnt > 0
 		
@@ -860,7 +860,7 @@ nPosProEnt := 0
 
 For _nI := 1 to Len(aSaida)
 
-	nPosProEnt := aScan( aDados , {|x| Alltrim(x[3]) == AllTrim( aSaida[_nI][03] ) } )
+	nPosProEnt := aScan( aDados , {|x| AllTrim(x[3]) == AllTrim( aSaida[_nI][03] ) } )
 	
 	If nPosProEnt == 0
 	
@@ -935,7 +935,7 @@ If MV_PAR12 == 1
 	
 	If !Empty(cProdMovi)
 	cQuery += " AND B1.B1_COD     NOT IN "+ FormatIn( cProdMovi , ";" )
-	EndIF
+	EndIf
 	
 	cQuery += cFiltProd
 	
@@ -949,7 +949,7 @@ If MV_PAR12 == 1
 	ProcRegua(nCountRec)
 	
 	DBSelectArea(cAliasProd)
-	(cAliasProd)->( DBGotop() )
+	(cAliasProd)->( DBGoTop() )
 	While (cAliasProd)->( !Eof() )
 	
 		IncProc("Selecionando Produtos sem movmentacao de estoque")
@@ -1068,7 +1068,7 @@ If Len(aDados) > 0
 		//================================================================================
 		// Verfica quebra por Grupo de Produto
 		//================================================================================
-		If aScan( aGrupoProd , {|z| Alltrim(z[01]) == AllTrim(aDados[_nI][01]) } ) == 0
+		If aScan( aGrupoProd , {|z| AllTrim(z[01]) == AllTrim(aDados[_nI][01]) } ) == 0
 			
 			//================================================================================
 			// Verifica se Imprime Totalizador
@@ -1205,4 +1205,4 @@ If Len(aDados) > 0
 
 EndIf
 
-Return()
+Return

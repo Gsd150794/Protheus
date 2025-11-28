@@ -17,9 +17,9 @@
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "RwMake.ch"
-STATIC aLog:={}
+#Include "TOTVS.ch"
+#Include "RwMake.ch"
+Static aLog:={}
 
 /*
 =========================================================================================================================================================
@@ -36,19 +36,19 @@ Parametros--------: Nenhum
 Observação--------: 
 =========================================================================================================================================================
 */
-USER FUNCTION MT440FIL()
+User Function MT440FIL()
 
 Local _cBlqCred:=""
 Local _lvalida := .T.
 Local _nTotal := 0
 Local _cFiltro:=""
 Local _cFiltroF:="(.F.)"
-Local _cChep   := Alltrim(GetMV("IT_CCHEP"))
+Local _cChep   := AllTrim(GetMV("IT_CCHEP"))
 
 _aSC5:= GetArea("SC5") 
 
-SC5->( Dbsetorder(1))
-SC5->( Dbseek(SC6->C6_FILIAL+SC6->C6_NUM) )//Posiciona na capa
+SC5->( DBSetOrder(1))
+SC5->( DBSeek(SC6->C6_FILIAL+SC6->C6_NUM) )//Posiciona na capa
 
 IncProc("Lendo PV: "+SC6->C6_FILIAL+" - "+SC6->C6_NUM)
 
@@ -57,85 +57,85 @@ IncProc("Lendo PV: "+SC6->C6_FILIAL+" - "+SC6->C6_NUM)
 //====================================================================================================
 If MV_PAR11 == 1
 
-   IF SC5->C5_I_OPER == "02" .And. SC5->C5_TIPO == "N" //.And. Upper(AllTrim(SC5->C5_I_OBPED)) == "PEDIDO AUTOMÁTICO - AOMS070"
+   If SC5->C5_I_OPER == "02" .And. SC5->C5_TIPO == "N" //.And. Upper(AllTrim(SC5->C5_I_OBPED)) == "PEDIDO AUTOMÁTICO - AOMS070"
       _cFiltro := ""
-   ELSE
-      Restarea(_aSC5)	
-      RETURN _cFiltroF
-   ENDIF
+   Else
+      FWRestArea(_aSC5)	
+      Return _cFiltroF
+   EndIf
 
 EndIf
 
-IF (_nPos:= ASCAN(aLog , {|L| L[3] == SC6->C6_NUM })) # 0
-   IF aLog[_nPos,1]//.T.
-      RETURN _cFiltro
-   ELSE//.F.
-      RETURN _cFiltroF
-   ENDIF
-ENDIF
+If (_nPos:= aScan(aLog , {|L| L[3] == SC6->C6_NUM })) # 0
+   If aLog[_nPos,1]//.T.
+      Return _cFiltro
+   Else//.F.
+      Return _cFiltroF
+   EndIf
+EndIf
 
 _nREC_SC6:= SC6->(RecNo()) 
 _aSC6    := GetArea("SC6") 
 _aSC9    := GetArea("SC9") 
 _aSF4    := GetArea("SF4") 
 
-SC6->( Dbsetorder(1))
-SC6->( Dbseek(SC5->C5_FILIAL+SC5->C5_NUM) )//Reposiciona o SC6 no primeiro item do PV
+SC6->( DBSetOrder(1))
+SC6->( DBSeek(SC5->C5_FILIAL+SC5->C5_NUM) )//Reposiciona o SC6 no primeiro item do PV
 
-Do while SC6->(!EOF()) .and. SC6->C6_FILIAL == SC5->C5_FILIAL .and. SC6->C6_NUM == SC5->C5_NUM
+While SC6->(!Eof()) .And. SC6->C6_FILIAL == SC5->C5_FILIAL .And. SC6->C6_NUM == SC5->C5_NUM
 
-   If alltrim(SC6->C6_PRODUTO) == _cChep .OR. AllTrim(SC6->C6_CF) $ '5910/6910/5911/6911'
+   If AllTrim(SC6->C6_PRODUTO) == _cChep .Or. AllTrim(SC6->C6_CF) $ '5910/6910/5911/6911'
    
       //NÃO VALIDA CRÉDITO PARA PALLET CHEP E PARA BONIFICAÇÃO
       _lvalida := .F.
       
-    Endif
+    EndIf
     
-    If SC5->C5_TIPO != 'N' .OR. posicione("SF4",1,xFilial("SF4")+SC6->C6_TES,"F4_DUPLIC") != 'S' 
+    If SC5->C5_TIPO != 'N' .Or. Posicione("SF4",1,xFilial("SF4")+SC6->C6_TES,"F4_DUPLIC") != 'S' 
    
       //NÃO VALIDA CRÉDITO PARA PEDIDO SEM DUPLICATA OU PARA PEDIDO QUE NÃO SEJA PEDIDO NORMAL
       _lvalida := .F.
       
-    Endif
+    EndIf
     
-    If posicione("ZAY",1,xfilial("ZAY")+SC6->C6_CF,"ZAY_TPOPER") != 'V' 
+    If Posicione("ZAY",1,xFilial("ZAY")+SC6->C6_CF,"ZAY_TPOPER") != 'V' 
    
       //NÃO VALIDA CRÉDITO PARA PEDIDO COM CFOP QUE NÃO SEJA DE VENDA
       _lvalida := .F.
       
-    Endif
+    EndIf
 
-    IF !_lvalida
-       EXIT
-    ENDIF   
+    If !_lvalida
+       Exit
+    EndIf   
 
    _nTotal += SC6->C6_VALOR
    
-   SC6->( Dbskip() )
+   SC6->( DBSkip() )
 	
-Enddo
+EndDo
 
 //AWF-30/11/2016 - Reavaliação de Credito
-IF _lvalida .AND. SC5->C5_I_BLCRE = "B" 
+If _lvalida .And. SC5->C5_I_BLCRE = "B" 
    cMensagem:="O pedido não pode ser liberado pois esta bloqueado para avaliação"
-   AADD(aLog,{ .F. , SC5->C5_FILIAL , SC5->C5_NUM , "Não" , cMensagem })
+   aAdd(aLog,{ .F. , SC5->C5_FILIAL , SC5->C5_NUM , "Não" , cMensagem })
    _cFiltro := _cFiltroF
-ENDIF   
+EndIf   
 
-IF _lvalida .AND. EMPTY(_cFiltro)
+If _lvalida .And. Empty(_cFiltro)
 
 //********************** VALIDACAO NOVA DE CREDITO UNIFICADA ***************************************************//		
    _aRetCre := U_ValidaCredito( _nTotal )//AWF-11/01/2017
    _cBlqCred:=_aRetCre[1]
 //********************** VALIDACAO NOVA DE CREDITO UNIFICADA ***************************************************//		
 
-   If _cBlqCred != "Liberação completa de crédito" .and. _cBlqCred != "Liberado por risco A" .and. _cBlqCred != "Aprovado em análise de crédito"
+   If _cBlqCred != "Liberação completa de crédito" .And. _cBlqCred != "Liberado por risco A" .And. _cBlqCred != "Aprovado em análise de crédito"
 
       SC5->(RecLock("SC5",.F.))
 	  SC5->C5_I_BLCRE := "B"
-	  SC5->C5_I_DTAVA := DATE()
-	  SC5->C5_I_HRAVA := TIME()
-	  SC5->C5_I_USRAV := cUsername
+	  SC5->C5_I_DTAVA := Date()
+	  SC5->C5_I_HRAVA := Time()
+	  SC5->C5_I_USRAV := cUserName
 	  SC5->C5_I_MOTBL := _cBlqCred
 
 	  SC5->C5_I_LIBCA := ""
@@ -146,49 +146,49 @@ IF _lvalida .AND. EMPTY(_cFiltro)
 	  SC5->C5_I_LIBCD := CTOD("")
 	  SC5->C5_I_DTLIC := CTOD("")
 
-   	  SC5->(MsUnlock())
+   	  SC5->(MSUnLock())
   
       cMensagem:="O pedido não pode ser liberado e será bloqueado para posterior avaliação [ "+_cBlqCred+" ]"
       
-      AADD(aLog,{ .F.  , SC5->C5_FILIAL , SC5->C5_NUM , "Não" , cMensagem })
+      aAdd(aLog,{ .F.  , SC5->C5_FILIAL , SC5->C5_NUM , "Não" , cMensagem })
 
       _cFiltro := _cFiltroF
    
-   Elseif SC5->C5_I_BLCRE != "L"
+   ElseIf SC5->C5_I_BLCRE != "L"
    
       SC5->(RecLock("SC5",.F.))
 	  SC5->C5_I_BLCRE := " "
-	  SC5->C5_I_DTAVA := DATE()
-	  SC5->C5_I_HRAVA := TIME()
-	  SC5->C5_I_USRAV := cUsername
+	  SC5->C5_I_DTAVA := Date()
+	  SC5->C5_I_HRAVA := Time()
+	  SC5->C5_I_USRAV := cUserName
 	  SC5->C5_I_MOTBL := _cBlqCred
-   	  SC5->(MsUnlock())
+   	  SC5->(MSUnLock())
    
-   ENDIF
+   EndIf
 
 EndIf
 //AWF-30/11/2016 - Reavaliação de Credito
 
-IF EMPTY(_cFiltro)
+If Empty(_cFiltro)
 
-   AADD(aLog,{ .T. , SC5->C5_FILIAL , SC5->C5_NUM ," ", "Pedido Liberado" })
+   aAdd(aLog,{ .T. , SC5->C5_FILIAL , SC5->C5_NUM ," ", "Pedido Liberado" })
 
-ENDIF 
+EndIf 
 
-Restarea(_aSC5)	
-Restarea(_aSC6)	
-Restarea(_aSC9)	
-Restarea(_aSF4)	
+FWRestArea(_aSC5)	
+FWRestArea(_aSC6)	
+FWRestArea(_aSC9)	
+FWRestArea(_aSF4)	
 
-SC6->(DBGOTO(_nREC_SC6)) 
+SC6->(DBGoTo(_nREC_SC6)) 
 
-RETURN _cFiltro
+Return _cFiltro
 
 *====================================================*
-USER FUNCTION MT440LOG(lLimpa)
+User Function MT440LOG(lLimpa)
 *====================================================*
-IF lLimpa
+If lLimpa
    aLog:={}
-ENDIF
+EndIf
 
-RETURN aLog
+Return aLog

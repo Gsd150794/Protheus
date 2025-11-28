@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 04/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 10/01/2019 | Incluído tratamento para CTeOS. Chamado 23984
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 22/05/2024 | Melhoria no tratatamento da emissão na CKO. Chamado 47282
+Lucas Borges  |04/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
+Lucas Borges  |10/01/2019| Chamado 23984. Incluído tratamento para CTeOS.
+Lucas Borges  |22/05/2024| Chamado 47282. Melhoria no tratatamento da emissão na CKO.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
+#Include "TOTVS.ch"
 
-#Include "Protheus.ch"
 /*
 ===============================================================================================================================
 Programa----------: RCOM004
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 01/05/2018
-===============================================================================================================================
 Descrição---------: Fila processamento XMLs. Chamado 24695
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -43,18 +35,15 @@ oReport := RCOM004RUN(_cAlias, _aSelFil)
 
 oReport:PrintDialog()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: RCOM004RUN
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 01/05/2018
-===============================================================================================================================
 Descrição---------: Processa a montagem do relatório
-===============================================================================================================================
 Parametros--------: _cAlias, _aSelFil
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -83,10 +72,10 @@ TRCell():New( oSection1 , "_cRaz"		,, "Nome "		,, 60 ,, {|| _cRaz		})
 oSection2 := TRSection():New( oSection , "Documentos")
 oSection2:SetTotalInLine(.F.)
 
-//TRFUNCTION():New(oCell,cName,cFunction,oBreak,cTitle,cPicture,uFormula,lEndSection,lEndReport,lEndPage,oParent,bCondition,lDisable,bCanPrint) 
+//TRFunction():New(oCell,cName,cFunction,oBreak,cTitle,cPicture,uFormula,lEndSection,lEndReport,lEndPage,oParent,bCondition,lDisable,bCanPrint) 
 //TRCell():New(oParent,cName,cAlias,cTitle,cPicture,nSize,lPixel,bBlock,cAlign,lLineBreak,cHeaderAlign,lCellBreak,nColSpace,lAutoSize,nClrBack,nClrFore,lBold)
 TRCell():New( oSection2 , "DS_FILIAL"	,_cAlias,/*X3Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,{|| (_cAlias)->FILIAL	})
-TRCell():New( oSection2 , "DS_EMISSAO",_cAlias,/*X3Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,{|| StoD((_cAlias)->EMISSAO)	})
+TRCell():New( oSection2 , "DS_EMISSAO",_cAlias,/*X3Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,{|| SToD((_cAlias)->EMISSAO)	})
 TRCell():New( oSection2 , "DS_CHAVENF"	,_cAlias,/*X3Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,{|| (_cAlias)->CHAVE	})
 TRCell():New( oSection2 , "DS_DOC"		,_cAlias,/*X3Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,{|| (_cAlias)->NUMERO	})
 TRCell():New( oSection2 , "DS_SERIE"	,_cAlias,/*X3Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,{|| (_cAlias)->SERIE	})
@@ -107,11 +96,8 @@ Return( oReport )
 Programa----------: RCOM004PRT
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 01/05/2018
-===============================================================================================================================
 Descrição---------: Processa a impressão do relatório
-===============================================================================================================================
 Parametros--------: oReport , _cAlias, _aSelFil
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -128,10 +114,10 @@ Local _nCountRec:= 0
 If MV_PAR01 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"SDS")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //====================================================================================================
 // Monta filtro de acordo com a tabela de origem
@@ -141,10 +127,10 @@ If !Empty(MV_PAR03) //Emissao
 	_cQuery += " AND CKO.CKO_I_EMIS BETWEEN '"+ DToS(MV_PAR02) + "' AND '" + DToS(MV_PAR03) + "'"
 EndIf
 If !Empty(MV_PAR07) //Numero
-   _cQuery += " AND SUBSTR(CKO.CKO_ARQUIV, 29, 9) BETWEEN '"+ MV_PAR06 + "' AND '" + MV_PAR07 + "'"
+   _cQuery += " AND SubStr(CKO.CKO_ARQUIV, 29, 9) BETWEEN '"+ MV_PAR06 + "' AND '" + MV_PAR07 + "'"
 EndIf
 If !Empty(MV_PAR09) //Serie
-   _cQuery += " AND SUBSTR(CKO.CKO_ARQUIV, 26, 3) BETWEEN '"+ MV_PAR08 + "' AND '" + MV_PAR09 + "'"
+   _cQuery += " AND SubStr(CKO.CKO_ARQUIV, 26, 3) BETWEEN '"+ MV_PAR08 + "' AND '" + MV_PAR09 + "'"
 EndIf
 If !Empty(MV_PAR05) //CNPJ
    _cQuery += " AND CKO.CKO_I_EMIT BETWEEN '"+ MV_PAR04 + "' AND '" + MV_PAR05 + "'"
@@ -164,24 +150,24 @@ BeginSql Alias _cAlias
 
 SELECT RTRIM(CKO.CKO_FILPRO) FILIAL,
        CKO.CKO_I_EMIS EMISSAO,
-       SUBSTR(CKO.CKO_ARQUIV, 4, 44) CHAVE,
-       SUBSTR(CKO.CKO_ARQUIV, 29, 9) NUMERO,
-       SUBSTR(CKO.CKO_ARQUIV, 26, 3) SERIE,
+       SubStr(CKO.CKO_ARQUIV, 4, 44) CHAVE,
+       SubStr(CKO.CKO_ARQUIV, 29, 9) NUMERO,
+       SubStr(CKO.CKO_ARQUIV, 26, 3) SERIE,
        CKO.CKO_I_EMIT CNPJ,
        (SELECT NOME
           FROM ((SELECT A2_CGC CGC, A2_NOME NOME
-                   FROM %table:SA2%
+                   FROM %Table:SA2%
                   WHERE D_E_L_E_T_ = ' '
                     AND CKO.CKO_I_EMIT = A2_CGC
                   GROUP BY A2_CGC, A2_NOME
                  UNION
                  SELECT A1_CGC CGC, A1_NOME NOME
-                   FROM %table:SA1%
+                   FROM %Table:SA1%
                   WHERE D_E_L_E_T_ = ' '
                     AND CKO.CKO_I_EMIT = A1_CGC
                   GROUP BY A1_CGC, A1_NOME))
          WHERE ROWNUM = 1) NOME,
-       CASE
+       Case
          WHEN CKO_FLAG = '2' THEN
           'Inconsistencia'
          WHEN CKO_FLAG = '9' THEN
@@ -190,17 +176,17 @@ SELECT RTRIM(CKO.CKO_FILPRO) FILIAL,
           'Pendente'
          WHEN CKO_FLAG = '1' AND EXISTS
           (SELECT 1
-                 FROM %table:SDS% SDS
+                 FROM %Table:SDS% SDS
                 WHERE SDS.D_E_L_E_T_ = ' '
                   AND RTRIM(CKO.CKO_FILPRO) = SDS.DS_FILIAL
-                  AND SDS.DS_CHAVENF = SUBSTR(CKO.CKO_ARQUIV, 4, 44)) THEN
+                  AND SDS.DS_CHAVENF = SubStr(CKO.CKO_ARQUIV, 4, 44)) THEN
           'Excluido'
-         ELSE
+         Else
           'Acionar TI'
        END STATUS_REPROCESSAMENTO,
        CKO_CODERR ERRO_REPROCESSAMENTO,
        DECODE(CKO_CODEDI, '109', 'NFE', '214', 'CTE', '273', 'CTEOS') ESPECIE
-  FROM %table:CKO% CKO
+  FROM %Table:CKO% CKO
  WHERE CKO.D_E_L_E_T_ = ' '
    AND CKO.CKO_FLAG <> '1'
    %exp:_cQuery%
@@ -226,7 +212,7 @@ Count To _nCountRec
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-IF !_lPlanilha
+If !_lPlanilha
    	oSection2:Cell("DS_FILIAL"):Disable()
 EndIf
 

@@ -1,29 +1,24 @@
 /*
 ===============================================================================================================================
-                          ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                          
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Josué Prestes    | 16/07/2015 | Mudança de função de ROMS011 para RFIN012 para concentrar no módulo financeiro                                             
-------------------------------------------------------------------------------------------------------------------------------- 
- Josué Danich     | 27/07/2018 | Inclusão de cálculo por supervisor - Chamado 25555
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges      | 11/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
+Josué Prestes |16/07/2015| Mudança de função de ROMS011 para RFIN012 para concentrar no módulo financeiro
+Josué Danich  |27/07/2018| Chamado 25555. Inclusão de cálculo por supervisor
+Lucas Borges  |11/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
+===============================================================================================================================
 */ 
 
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RFIN012
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 12/01/2010
-===============================================================================================================================
 Descrição---------: Imprime a relação de regra de comissão por vendedor.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -52,9 +47,9 @@ Define Font oFont14    Name "Courier New"       Size 0,-12       // Tamanho 14
 Define Font oFont14b   Name "Courier New"       Size 0,-12 Bold  // Tamanho 14 Negrito  
 Define Font oFont16b   Name "Courier New"       Size 0,-14 Bold  // Tamanho 16 Negrito  
 
-if !Pergunte(cPerg,.t.)
-  return
-endif
+If !Pergunte(cPerg,.T.)
+  Return
+EndIf
 
 oPrint:= TMSPrinter():New("REGRAS DE COMISSAO")
 oPrint:Setup()
@@ -78,16 +73,13 @@ Return
 Programa----------: RFIN012CAB
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 01/08/2018
-===============================================================================================================================
 Descrição---------: Prepara o cabeçalho do relatório para cada divisão vendedorxsupervisorxcoordenador
-===============================================================================================================================
 Parametros--------: codVendedo - código do vendedor
 					descVende - nome do vendedor
 					codCoord - código do coordenador
 					descCoord - nome do coordenador
 					codsui - código do supervisor
 					descsui - nome do supervisor
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -102,7 +94,7 @@ nLinha:=0100
 
 oPrint:SayBitmap(nLinha,nColInic,cRaizServer + "system/lgrl01.bmp",250,100)   
 oPrint:Say (nlinha,nColInic + 2500,"PÁGINA: " + Str(nPagina,2),oFont12)
-oPrint:Say (nlinha + 50,nColInic + 2500,"DATA DE EMISSÃO: " + DtoC(DATE()),oFont12)      
+oPrint:Say (nlinha + 50,nColInic + 2500,"DATA DE EMISSÃO: " + DToC(DATE()),oFont12)      
 
 If nPagina == 1                                                         
   oPrint:Say (nlinha - 50 ,nColInic + 2500,"FONTE: RFIN012",oFont12)
@@ -163,11 +155,8 @@ Return
 Programa----------: RFIN012DAD
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 01/08/2018
-===============================================================================================================================
 Descrição---------: Prepara e imprime corpo do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */ 
@@ -187,23 +176,23 @@ Local cCodCli     := ""
 
 //Vendedor
 If !Empty(MV_PAR01)
-	cFiltro += " AND zae_vend IN " + FormatIn(AllTrim(mv_par01),";")
-EndIF
+	cFiltro += " AND zae_vend IN " + FormatIn(AllTrim(MV_PAR01),";")
+EndIf
 
 //Supervisor
 If !Empty(MV_PAR02)
-	cFiltro += " AND zae_codsui IN " + FormatIn(AllTrim(mv_par02),";")
-EndIF
+	cFiltro += " AND zae_codsui IN " + FormatIn(AllTrim(MV_PAR02),";")
+EndIf
                    
 //Coordenador                             
 If !Empty(MV_PAR03)
-	cFiltro += " AND zae_codsup IN " + FormatIn(AllTrim(mv_par03),";")
-EndIF
+	cFiltro += " AND zae_codsup IN " + FormatIn(AllTrim(MV_PAR03),";")
+EndIf
 
 //Gerente                             
 If !Empty(MV_PAR04)
-	cFiltro += " AND zae_codger IN " + FormatIn(AllTrim(mv_par04),";")
-EndIF
+	cFiltro += " AND zae_codger IN " + FormatIn(AllTrim(MV_PAR04),";")
+EndIf
                                                      
 cQuery := "SELECT"
 cQuery += " zae_vend,zae_item,zae_prod,zae_comis1,zae_grpven,zae_cli,zae_loja,"                                                  
@@ -212,20 +201,20 @@ cQuery += "FROM "
 cQuery += RetSqlName("ZAE") + " "         
 cQuery += "WHERE"               
 cQuery += " D_E_L_E_T_ = ' ' "
-cQuery += " AND ZAE_FILIAL = '" + xfilial("ZAE") + "'" 
+cQuery += " AND ZAE_FILIAL = '" + xFilial("ZAE") + "'" 
 cQuery += cFiltro
 cQuery += " ORDER BY zae_vend,zae_item"
 		
-if Select("TMPCOMI") > 0 
-  dbSelectArea("TMPCOMI")
-  dbCloseArea()
-endif                   
+If Select("TMPCOMI") > 0 
+  DBSelectArea("TMPCOMI")
+  DBCloseArea()
+EndIf                   
     
-dbUseArea(.T.,"TOPCONN",TCGenQry(,,ALLTRIM(Upper(cQuery))),'TMPCOMI',.F.,.T.)   
+dbUseArea(.T.,"TOPCONN",TCGenQry(,,AllTrim(Upper(cQuery))),'TMPCOMI',.F.,.T.)   
 COUNT TO nCountRec
 	
-DbSelectArea("TMPCOMI")  
-TMPCOMI->(DbGotop())     
+DBSelectArea("TMPCOMI")  
+TMPCOMI->(DBGoTop())     
 	
 ProcRegua(nCountRec)
 	
@@ -234,8 +223,8 @@ If nCountRec > 0
   While TMPCOMI->(!Eof()) 
 	                            
     IncProc("Processando Vendedor: " + TMPCOMI->zae_vend)   
-	nPos := Ascan(aVendedor, { |x| x[1] == TMPCOMI->zae_vend })
-	if nPos == 0    
+	nPos := aScan(aVendedor, { |x| x[1] == TMPCOMI->zae_vend })
+	If nPos == 0    
 		
 	  If Len(aVendedor) > 0
 					           
@@ -250,7 +239,7 @@ If nCountRec > 0
 		  nLinha:=0100 
 		  oPrint:SayBitmap(nLinha,nColInic,cRaizServer + "system/lgrl01.bmp",250,100)   
 		  oPrint:Say (nlinha,nColInic + 2700,"PÁGINA: " + Str(nPagina,2),oFont12)
-		  oPrint:Say (nlinha + 50,nColInic + 2700,"DATA DE EMISSÃO: " + DtoC(DATE()),oFont12)
+		  oPrint:Say (nlinha + 50,nColInic + 2700,"DATA DE EMISSÃO: " + DToC(DATE()),oFont12)
 		  nlinha+=(nSaltoLinha * 3) 
 		  oPrint:Line(nLinha,nColInic,nLinha,nColFinal)    
 		  nLinha+= (nSaltoLinha * 5)
@@ -301,7 +290,7 @@ If nCountRec > 0
 	nLinInici:=nLinha
 	nLinFinal:=RFIN012CAL(SubStr(AllTrim(TMPCOMI->zae_prod) + '-' + Posicione("SB1",1,xFilial("SB1") + TMPCOMI->zae_prod,"SB1->B1_I_DESCD"),1,64))                  
 	nLinFinRz:=RFIN012CAL(SubStr(cCodCli,1,64))                  
-	nLinFinal:=IIF(nLinFinal >= nLinFinRz,nLinFinal,nLinFinRz)
+	nLinFinal:=IIf(nLinFinal >= nLinFinRz,nLinFinal,nLinFinRz)
 			
 	//Zebra o relatorio
 	contrCor++ 
@@ -311,13 +300,13 @@ If nCountRec > 0
 	
 	_crazao := " "
 	If Len(AllTrim(TMPCOMI->zae_cli + '/' + TMPCOMI->zae_loja)) > 1
-		_crazao := posicione("SA1",1,xfilial("SA1")+TMPCOMI->zae_cli+TMPCOMI->zae_loja,"A1_NOME") 
-	Endif
+		_crazao := Posicione("SA1",1,xFilial("SA1")+TMPCOMI->zae_cli+TMPCOMI->zae_loja,"A1_NOME") 
+	EndIf
 			
 	oPrint:Say (nlinha,nColInic + 25,TMPCOMI->zae_item,oFont12b)
 	oPrint:Say (nlinha,nColInic + 0758,Transform(TMPCOMI->zae_comis1,"@R 99.99") + "%",oFont12b)
 	oPrint:Say (nlinha,nColInic + 0930,SubStr(Posicione("ACY",1,xFilial("ACY") + TMPCOMI->zae_grpven,"ACY->ACY_DESCRI"),1,19),oFont12b)
-	oPrint:Say (nlinha,nColInic + 1340,IIF(Len(AllTrim(TMPCOMI->zae_cli + '/' + TMPCOMI->zae_loja)) > 1,TMPCOMI->zae_cli + '/' + TMPCOMI->zae_loja,""),oFont12b)
+	oPrint:Say (nlinha,nColInic + 1340,IIf(Len(AllTrim(TMPCOMI->zae_cli + '/' + TMPCOMI->zae_loja)) > 1,TMPCOMI->zae_cli + '/' + TMPCOMI->zae_loja,""),oFont12b)
 	oPrint:Say (nlinha,nColInic + 1620,_crazao,oFont12b)
 	oPrint:Say (nlinha,nColInic + 2430,Transform(TMPCOMI->zae_comis4,"@R 99.99") + "%",oFont12b)
 	oPrint:Say (nlinha,nColInic + 2590,Transform(TMPCOMI->zae_comis2,"@R 99.99") + "%",oFont12b)
@@ -332,7 +321,7 @@ If nCountRec > 0
 	RFIN012QUE(SubStr(AllTrim(TMPCOMI->zae_prod) + '-' + Posicione("SB1",1,xFilial("SB1") + TMPCOMI->zae_prod,"SB1->B1_I_DESCD"),1,50))
 	oPrint:Line(nLinha,nColInic,nLinha,nColFinal)
 		     
-	TMPCOMI->( DbSkip() )
+	TMPCOMI->( DBSkip() )
 		
   EndDo       
 							
@@ -349,7 +338,7 @@ If nCountRec > 0
 						
 	oPrint:SayBitmap(nLinha,nColInic,cRaizServer + "system/lgrl01.bmp",250,100)   
 	oPrint:Say (nlinha,nColInic + 2700,"PÁGINA: " + Str(nPagina,2),oFont12)
-	oPrint:Say (nlinha + 50,nColInic + 2700,"DATA DE EMISSÃO: " + DtoC(DATE()),oFont12)
+	oPrint:Say (nlinha + 50,nColInic + 2700,"DATA DE EMISSÃO: " + DToC(DATE()),oFont12)
 	nlinha+=(nSaltoLinha * 3) 
 	oPrint:Line(nLinha,nColInic,nLinha,nColFinal)    
 						
@@ -362,7 +351,7 @@ If nCountRec > 0
 		
 EndIf
 	
-TMPCOMI-> ( dbCloseArea( ) )			
+TMPCOMI-> ( DBCloseArea( ) )			
 
 Return
 
@@ -371,11 +360,8 @@ Return
 Programa----------: RFIN012BOX
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 01/08/2018
-===============================================================================================================================
 Descrição---------: Imprime box e divisorias para a ultima pagina do relatorio
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -402,11 +388,8 @@ Return
 Programa----------: RFIN012ASI
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 01/08/2018
-===============================================================================================================================
-Descrição---------: Desenha assinatura do Diretor Comercial e do Analista Comercial
-===============================================================================================================================
+escrição---------: Desenha assinatura do Diretor Comercial e do Analista Comercial
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -437,11 +420,8 @@ Return
 Programa----------: RFIN012QUE
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 01/08/2018
-===============================================================================================================================
 Descrição---------: Quebra descrição do produto em várias linhas
-===============================================================================================================================
 Parametros--------: ctexto - Descrição do produto a ser trabalhada
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -466,11 +446,8 @@ Return
 Programa----------: RFIN012CAL
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 01/08/2018
-===============================================================================================================================
 Descrição---------: Retorna linha que estará disponível após impressão de um string em linhas de 32 caracteres
-===============================================================================================================================
 Parametros--------: ctexto - texto a ser trabalhado
-===============================================================================================================================
 Retorno-----------: nlinhafin - linha após o texto
 ===============================================================================================================================
 */

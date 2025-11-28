@@ -4,21 +4,15 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |07/05/2025| Chamado 50617. Corrigir chamada estática no nome das tabelas do sistema
 Lucas Borges  |23/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
 Lucas Borges  |01/08/2025| Chamado 51453. Substituir função U_ITEncode por FWHttpEncode
+Lucas Borges  |14/09/2025| Chamado 51799. Implementada função para validar ambiente de teste totvs.framework.environment.Type.get()
+Jose Gavetti  |26/11/2025  Chamado 51341. cEmpAnt não devem ter seus conteúdos alterados orientação TOTVS.
 ===============================================================================================================================
-Analista       - Programador     - Inicio   - Envio    - Chamado - Motivo da Alteração
-==============================================================================================================================================================
-Andre          - Alex Wallauer   - 24/10/24 - 24/10/24 - 48947   - Correção do error.log variable does not exist CEMAIL
-Lucas          - Alex Wallauer   - 02/05/25 - 06/05/25 - 50525   - Ajuste para remoção de diretório local C:\SMARTCLIENT\.
-==============================================================================================================================================================
 */ 
 
-#INCLUDE "AP5MAIL.CH"
-#INCLUDE "TBICONN.CH"
-#INCLUDE "PROTHEUS.CH"  
-#INCLUDE "FWMVCDEF.CH"
+#Include "TOTVS.ch"
+#Include "FWMVCDef.ch"
 
 /*
 ===============================================================================================================================
@@ -32,9 +26,9 @@ Retorno-----------: Nenhum
 */
 User Function MEST19WS()//PARA CHAMAR DO MENU FORMULA
 
-FWMSGRUN(,{|oProc|  U_MEST019(oProc) },'Aguarde processamento...','Lendo dados...')
+FWMsgRun(,{|oProc|  U_MEST019(oProc) },'Aguarde processamento...','Lendo dados...')
    
-RETURN .T.
+Return .T.
 
 /*
 ===============================================================================================================================
@@ -53,16 +47,13 @@ Local lWFHTML	 := .T. , R , _aRegs
 Private _cHostWF := ""
 Private _lCriaAmb:= .F.
 
-//===============================================================
 //Verifica a necessidade de criar um ambiente, caso nao esteja 
 //criado anteriormente um ambiente, pois ocorrera erro.        
-//===============================================================
 If Select("SX3") <= 0
 	_lCriaAmb:= .T.
 EndIf                           
              
 If _lCriaAmb              
-
 	//Nao consome licensas
 	RPCSetType(3)
 
@@ -70,62 +61,57 @@ If _lCriaAmb
 	RpcSetEnv("01","01",,,,"SCHEDULE_WF_ARMAZEM",_aTables)
 
 	//Mensagem que ficara armazenada no arquivo totvsconsole.log para posterior monitoramento 
-   FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01901"/*cMsgId*/, "MEST01901 - Gerando envio do workflow das solicitações de armazem aos aprovadores na data: " + Dtoc(DATE()) + " - " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+   FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01901"/*cMsgId*/, "MEST01901 - Gerando envio do workflow das solicitações de armazem aos aprovadores na data: " + DToC(DATE()) + " - " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
 EndIf 
-cEmpAnt:="01"
-private oModel094 := FWLoadModel('MATA094')
 
-_cHostWF:=U_ItGetMv("IT_WFHOSTS","http://wfteste.italac.com.br:4003/")
-lWFHTML :=SuperGetMv("MV_WFHTML")
+Private oModel094 := FWLoadModel('MATA094')
+
+_cHostWF:=SuperGetMV("IT_WFHOSTS",.T.,"http://wfteste.italac.com.br:4003/")
+lWFHTML :=SuperGetMv("MV_WFHTML",.T.,.T.)
 
 PutMV("MV_WFHTML",.T.)
 
 U_ITWF1WF2Put("APRVSA","Workflow de Solicitação de armazem" )//Grava WF1 a primeira vez se não existir 
-//*********************************************************************//
 _aRegs := LerNEnviados(.F.)//NÃO ENVIADADOS
-//*********************************************************************//
 
-_cTot:=ALLTRIM(STR(LEN(_aRegs)))
+_cTot:=AllTrim(Str(Len(_aRegs)))
 
 aLog:={}
 _aControleEnv:={}
 
-FOR R := 1 TO LEN(_aRegs)
-
-    IF VALTYPE(oProc) = "O"
-	    oProc:cCaption := "Lendo dados: "+STRZERO(R,5) +" de "+ _cTot 
+For R := 1 TO Len(_aRegs)
+    If ValType(oProc) = "O"
+	    oProc:cCaption := "Lendo dados: "+StrZero(R,5) +" de "+ _cTot 
 	    ProcessMessages()    
-    ENDIF
+    EndIf
 
     MEST019S(_aRegs[R,1]) //Rotina responsável por montar o formulário de aprovação e o envio do link gerado.
-NEXT        
+Next        
 
 PutMV("MV_WFHTML",lWFHTML)
 
 If _lCriaAmb
 	RpcClearEnv()  
    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01902"/*cMsgId*/, "MEST01902 - Termino do envio do workflow das solicitações de armazem"/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
-ELSE
-	IF LEN(aLog) > 0
+Else
+	If Len(aLog) > 0
        aCab:={}
-       AADD(aCab,"Filial")
-       AADD(aCab,"Numero SA")
-       AADD(aCab,"Solicitante")
-       AADD(aCab,"Centro Custo")
-       AADD(aCab,"Aprovador")
-       AADD(aCab,"E-Mail")
-       AADD(aCab,"Status")
-       AADD(aCab,"Produtos...")
-       AADD(aCab,"E-Mail original")
-       //AADD(aLog,{SCP->CP_FILIAL,cNUMSA,cSolic,cCcust,cAprov,cEmail,"Enviado [ "+SCP->CP_STATSA+" ]",_cItens,cEmailOri}) 
+       aAdd(aCab,"Filial")
+       aAdd(aCab,"Numero SA")
+       aAdd(aCab,"Solicitante")
+       aAdd(aCab,"Centro Custo")
+       aAdd(aCab,"Aprovador")
+       aAdd(aCab,"E-Mail")
+       aAdd(aCab,"Status")
+       aAdd(aCab,"Produtos...")
+       aAdd(aCab,"E-Mail original")
 	   _cTitulo:='Lista de Aprovações Enviadas'
    //                           , _aCols,_lMaxSiz,_nTipo,_cMsgTop, _lSelUnc ,_aSizes , _nCampo , bOk , bCancel, _abuttons )
        U_ITListBox(_cTitulo,aCab,aLog   , .T.    , 1    ,       ,          ,        ,         ,     ,        , )
-	ELSE
-	   U_ITMSG("Não tem Aprovações para enviar",'Atenção!',,1)
-	ENDIF
-
+	Else
+	   U_ITMsg("Não tem Aprovações para enviar",'Atenção!',,1)
+	EndIf
 EndIf
 
 Return        
@@ -141,26 +127,27 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function MEST019S(nRegSCR)
-LOCAL cEmail      := ""
-LOCAL cFilAntSalva:= cFilAnt
-PRIVATE _cAmbiente:=UPPER(GETENVSERVER())
 
-SCR->(DBGOTO(nRegSCR))
-SCP->(DBSETORDER(1))
-SCP->(DBSEEK(SCR->CR_FILIAL+ALLTRIM(SCR->CR_NUM)))
+Local cEmail      := ""
+Local cFilAntSalva:= cFilAnt
+Private _cAmbiente:=Upper(GETENVSERVER())
+
+SCR->(DBGoTo(nRegSCR))
+SCP->(DBSetOrder(1))
+SCP->(DBSeek(SCR->CR_FILIAL+AllTrim(SCR->CR_NUM)))
 
 _cCC_SCP   :=""
 _cCC_Fil   :=""
 _cMVMEST19E:=""
 _cMVM19EOri:=""
 
-IF SCP->CP_I_INVES = "S"
+If SCP->CP_I_INVES = "S"
    cFilAnt :=SCP->CP_FILIAL//atualiza cFilAnt por causa das funções de pegar U_VLDCC() e SuperGetMv("MV_MEST19E")
-   _cCC_SCP:=SUBSTR(SCP->CP_CC,1,5)
+   _cCC_SCP:=SubStr(SCP->CP_CC,1,5)
    _cCC_Fil:=U_VLDCC()//Busca os CCs da filial corrente
    _cMVMEST19E:=SuperGetMv("MV_MEST19E",.F.,_cMVMEST19E)
    _cMVM19EOri:=LOWER(_cMVMEST19E)
-ENDIF
+EndIf
 
 //Codigo do processo cadastrado no CFG
 _cCodProce := "APRVSA"
@@ -169,18 +156,18 @@ _cHtmlMode := "\workflow\htm\sa_aprovador.htm"
 // Assunto da mensagem
 _cAssunto := "Aprovação da Solicitação de Armazem Filial " + SCP->CP_FILIAL + " - " + AllTrim(FWFilialName(cEmpAnt,SCP->CP_FILIAL,1)) + " / SA Número: " + SCP->CP_NUM
 
-//********************** Inicialize a classe TWFProcess e objeto oProcess: ******************************
+//Inicialize a classe TWFProcess e objeto oProcess:
 _oProcess := TWFProcess():New(_cCodProce,"Aprovação da Solicitação de armazem") //PARA O HTML
 
 cFilSA	:= SCP->CP_FILIAL + " - " + AllTrim(FWFilialName(cEmpAnt, SCP->CP_FILIAL, 1 ))
 cNUMSA	:= SCP->CP_NUM
 cSolic	:= Posicione("ZZL",4,xFilial("ZZL")+Trim(SCP->CP_SOLICIT),"ZZL_NOME")
-dDtEmi	:= DTOC(SCP->CP_EMISSAO)
+dDtEmi	:= DToC(SCP->CP_EMISSAO)
 cAprNom	:= Posicione("ZZL",3,xFilial("ZZL")+Trim(SCR->CR_USER),"ZZL_NOME")//nome completo
 cAprov	:= SCR->CR_APROV+" - "+cAprNom//Pega na avaliacao
 cEmail	:= UsrRetMail(SCR->CR_USER) //SCR->CR_USER//vai pegar o e-mail
-cObsGen	:= ALLTRIM(SCP->CP_OBS)
-cCcust	:= SCP->CP_CC +" - "+ ALLTRIM(Posicione("CTT",1,xFilial("CTT") + SCP->CP_CC,"CTT_DESC01"))
+cObsGen	:= AllTrim(SCP->CP_OBS)
+cCcust	:= SCP->CP_CC +" - "+ AllTrim(Posicione("CTT",1,xFilial("CTT") + SCP->CP_CC,"CTT_DESC01"))
 
 _oProcess:NewTask("Aprovacao_SA", _cHtmlMode)  
 _oProcess:oHtml:ValByName("Filial"			, cFilSA)
@@ -202,10 +189,9 @@ FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()
 FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01910"/*cMsgId*/, "MEST01910 - S-CCusto...........: " + cCcust/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01911"/*cMsgId*/, "MEST01911 - S-Observacao.......: " + cObsGen/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
-SB2->(DbSetorder(1))
+SB2->(DBSetOrder(1))
 nVlrTotOrc:=0
-DO While !SCP->(Eof()) .AND. SCR->CR_FILIAL == SCP->CP_FILIAL .And. cNUMSA == SCP->CP_NUM
-
+While !SCP->(Eof()) .And. SCR->CR_FILIAL == SCP->CP_FILIAL .And. cNUMSA == SCP->CP_NUM
    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01912"/*cMsgId*/, "MEST01912 - S-Produto..........: " + SCP->CP_PRODUTO/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
 	aAdd( _oProcess:oHtml:ValByName("Itens.Item" 		), SCP->CP_ITEM												)
@@ -213,29 +199,27 @@ DO While !SCP->(Eof()) .AND. SCR->CR_FILIAL == SCP->CP_FILIAL .And. cNUMSA == SC
 	aAdd( _oProcess:oHtml:ValByName("Itens.UM"			), SCP->CP_UM													)
 	aAdd( _oProcess:oHtml:ValByName("Itens.Qtde"		), Transform(SCP->CP_QUANT, PesqPict("SC1","C1_QUANT")) 		)
 
-	SB2->(DBSEEK(SCP->CP_FILIAL + SCP->CP_PRODUTO + SCP->CP_LOCAL))
+	SB2->(DBSeek(SCP->CP_FILIAL + SCP->CP_PRODUTO + SCP->CP_LOCAL))
 	nValor:=(SB2->B2_CM1 * SCP->CP_QUANT)
 	nVlrTotOrc+=nValor
-    aAdd( _oProcess:oHtml:ValByName("Itens.Valor") ,"R$ "+ALLTRIM(Transform( nValor ,"@E 999,999,999,999,999.99"))	)
+    aAdd( _oProcess:oHtml:ValByName("Itens.Valor") ,"R$ "+AllTrim(Transform( nValor ,"@E 999,999,999,999,999.99"))	)
 
-	SBZ->(DBSEEK(SCP->CP_FILIAL + SCP->CP_PRODUTO + SCP->CP_LOCAL))
+	SBZ->(DBSeek(SCP->CP_FILIAL + SCP->CP_PRODUTO + SCP->CP_LOCAL))
 	aAdd( _oProcess:oHtml:ValByName("Itens.EstMin") , Transform(SBZ->BZ_ESTSEG,PesqPict("SBZ","BZ_ESTSEG")) )
 	aAdd( _oProcess:oHtml:ValByName("Itens.EstMax") , Transform(SBZ->BZ_EMAX  ,PesqPict("SBZ","BZ_EMAX"  )) )
     
-	nSldAtual:=CalcEst( SCP->CP_PRODUTO, SCP->CP_LOCAL , (DATE() + 1) )[1]
+	nSldAtual:=CalcEst( SCP->CP_PRODUTO, SCP->CP_LOCAL , (Date() + 1) )[1]
 	aAdd( _oProcess:oHtml:ValByName("Itens.SldAtFil"	), Transform(nSldAtual, PesqPict("SB2","B2_QATU"))	)
 	
 	nMedia:=MEST19Media(SCP->CP_FILIAL,SCP->CP_PRODUTO,SCP->CP_LOCAL)
 	aAdd( _oProcess:oHtml:ValByName("Itens.SldAtEmp"	), Transform(nMedia   , PesqPict("SB2","B2_QATU"))	)
 	
-	SCP->(dbSkip())
-ENDDO
+	SCP->(DBSkip())
+EndDo
 
 _oProcess:oHtml:ValByName("VlrTot","R$ "+Transform(nVlrTotOrc,"@E 999,999,999,999,999.99"))
 
-//================================
 // respostas retornar ao Workflow:
-//================================
 _oProcess:bReturn := "U_MEST019R"
 	
 _cMailID := _oProcess:Start("\workflow\emp01")//GRAVA O HTML
@@ -246,34 +230,24 @@ EndIf
 	
 FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01914"/*cMsgId*/, "MEST01914 - Email enviado para: [" + (cEmail) + "]"/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
-//====================================
 //Codigo do processo cadastrado no CFG
-//====================================
 _cCodProce := "APRVSA"
 
-//===========================================================
 // Arquivo html template utilizado para montagem da aprovação
-//===========================================================
 _cHtmlMode := "\workflow\htm\sa_aprovador.htm"
 
-//====================
 // Assunto da mensagem
-//====================
 _cAssunto := "Aprovação da Solicitação de Armazem Filial " + cFilSA + " / SA Número: " + cNUMSA
 
-//======================================================================
 // Inicialize a classe TWFProcess e assinale a variável objeto oProcess:
-//======================================================================
 _oProcess  := TWFProcess():New(_cCodProce,"Aprovação da Solicitação de armazem")//CRIA PARA O ENVIO DO E-MAIL
 chtmlfile  := _cMailID + ".htm"
-cMailTo	  := "mailto:" + Alltrim(Posicione("WF7", 1, XFilial("WF7") + AllTrim(SuperGetMv('MV_WFMLBOX')), "WF7_ENDERE"))
+cMailTo	  := "mailto:" + AllTrim(Posicione("WF7", 1, xFilial("WF7") + AllTrim(SuperGetMv('MV_WFMLBOX')), "WF7_ENDERE"))
 chtmltexto := wfloadfile("\workflow\emp01\" + chtmlfile )
-chtmltexto := strtran( chtmltexto, cmailto, "WFHTTPRET.APL" )
+chtmltexto := StrTran( chtmltexto, cmailto, "WFHTTPRET.APL" )
 wfsavefile("\workflow\emp"+cEmpAnt+"\" + chtmlfile, chtmltexto) // grava novamente com as alteracoes necessarias.
 
-//=================================================================
 // Criamos o link para o arquivo que foi gerado na tarefa anterior.  
-//=================================================================
 _oProcess:NewTask("LINK", "\workflow\htm\sa_link.htm")
 	
 cLink := _cHostWF + "emp01/" + _cMailID + ".htm"
@@ -290,64 +264,56 @@ _oProcess:oHtml:ValByName("A_SOLIC"	, cSolic	)
 _oProcess:oHtml:ValByName("A_CUSTO"	, cCcust	)
 _oProcess:oHtml:ValByName("A_OBSSA"	, cObsGen	)
 
-//================================================================
 // Informamos o destinatário (Aprovador) do email contendo o link.  
-//================================================================
 cEmailOri:=LOWER(cEmail)
-IF SuperGetMV("IT_AMBTEST",.F.,.T.)
-   cEmail:= ALLTRIM(UsrRetMail(__cUserId))
-ENDIF
+If !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
+   cEmail:= AllTrim(UsrRetMail(__cUserId))
+EndIf
 _oProcess:cTo := (cEmail)
 
-//===============================
 // Informamos o assunto do email.  
-//===============================
 _oProcess:cSubject	:= FWHttpEncode(_cAssunto)
 
 _cMailID	:= _oProcess:fProcessId
 _cTaskID	:= _oProcess:fTaskID
-//RastreiaWF(_cMailID + '.' + _cTaskID , _oProcess:fProcCode, "1001", "Recebimento da Aprovacao da SC", "")
 U_ITWF1WF2Put("APRVSA",,"WFTP01","ENVIADO/AGUARDANDO APROVACAO" )//Grava WF2 a primeira vez se não existir
  //          cStatusCode, cDescription, cUserName, uShape
 _oProcess:Track("WFTP01",_cAssunto    ,cSolic)
 
-//=======================================================
 // Iniciamos a tarefa e enviamos o email ao destinatário.
-//=======================================================
 _oProcess:Start() //ENVIA O E-MAIL
 	
 U_ITCONOUT("MEST019 - Email enviado para: [" + (cEmail) + "]")
 
-//=============================================================
 //Atualiza o sistema com as informações do SITWF e IDHTML
 _cItens:=""
-SCP->(DBSETORDER(1))
-SCP->(DBSEEK(SCR->CR_FILIAL+cNUMSA))        
-DO WHILE (!SCP->(eof()) .and. ( SCR->CR_FILIAL+cNUMSA == SCP->CP_FILIAL+SCP->CP_NUM )) 
+SCP->(DBSetOrder(1))
+SCP->(DBSeek(SCR->CR_FILIAL+cNUMSA))        
+While (!SCP->(Eof()) .And. ( SCR->CR_FILIAL+cNUMSA == SCP->CP_FILIAL+SCP->CP_NUM )) 
 	SCP->(RecLock("SCP",.F.))
 	SCP->CP_I_SITWF:= "2"//Enviado
    SCP->CP_I_HTMWF:=cLink//GRAVA O ARQUIVO PARA USAR NA LISTAGEM DEPOIS
-	SCP->(MSUNLOCK())    		
-   _cItens+=ALLTRIM(SCP->CP_PRODUTO)+" / "
-   SCP->(DBSKIP())
-ENDDO
-_cItens:=LEFT(_cItens, LEN(_cItens)-3 )
-SCP->(DBSEEK(SCR->CR_FILIAL+cNUMSA))        
-AADD(aLog,{SCR->CR_FILIAL,cNUMSA,cSolic,cCcust,cAprov,LOWER(cEmail),"Enviado [ "+SCP->CP_STATSA+" ]",_cItens,cEmailOri}) 
+	SCP->(MSUnLock())    		
+   _cItens+=AllTrim(SCP->CP_PRODUTO)+" / "
+   SCP->(DBSkip())
+EndDo
+_cItens:=LEFT(_cItens, Len(_cItens)-3 )
+SCP->(DBSeek(SCR->CR_FILIAL+cNUMSA))        
+aAdd(aLog,{SCR->CR_FILIAL,cNUMSA,cSolic,cCcust,cAprov,LOWER(cEmail),"Enviado [ "+SCP->CP_STATSA+" ]",_cItens,cEmailOri}) 
 
-//=============================================================
 //GRAVAO LOG NA TABELA ZGT010
-_cTipv := POSICIONE("SA3",1, xFilial("SA3")+LEFT(cAprov,LEN(SCR->CR_APROV)), "A3_I_TIPV")
-U_GrVLZGT(cFilSA, LEFT(cAprov,LEN(SCR->CR_APROV)) , "MESO19-WF-SA", "E", _cTipv , cLink , cNUMSA )
+_cTipv := Posicione("SA3",1, xFilial("SA3")+LEFT(cAprov,Len(SCR->CR_APROV)), "A3_I_TIPV")
+U_GrVLZGT(cFilSA, LEFT(cAprov,Len(SCR->CR_APROV)) , "MESO19-WF-SA", "E", _cTipv , cLink , cNUMSA )
 
-//=========================== ENVIA A COPIA DO E-MAIL DE APROVACAO PARA O GESTOR DA FILIAL ===========================
-IF !EMPTY(_cMVMEST19E) .AND. ALLTRIM(_cCC_SCP) $ _cCC_Fil  
+// ENVIA A COPIA DO E-MAIL DE APROVACAO PARA O GESTOR DA FILIAL
+If !Empty(_cMVMEST19E) .And. AllTrim(_cCC_SCP) $ _cCC_Fil  
    MEST19CCopia( _oProcess , nRegSCR )
-ENDIF
+EndIf
 
 cFilAnt:=cFilAntSalva
 
 Return .T.
+
 /*
 ===============================================================================================================================
 Programa----------: MEST19CCopia
@@ -358,39 +324,39 @@ Parametros--------: _oProcess - Processo inicializado do workflow / , nRegSCR - 
 Retorno-----------: .T.
 ===============================================================================================================================
 */
-STATIC Function MEST19CCopia( _oProcess, nRegSCR  )
+Static Function MEST19CCopia( _oProcess, nRegSCR  )
 
-SCR->(DBGOTO(nRegSCR))
-SCP->(DBSETORDER(1))
-SCP->(DBSEEK(SCR->CR_FILIAL+ALLTRIM(SCR->CR_NUM)))
+SCR->(DBGoTo(nRegSCR))
+SCP->(DBSetOrder(1))
+SCP->(DBSeek(SCR->CR_FILIAL+AllTrim(SCR->CR_NUM)))
 
-IF ASCAN(_aControleEnv,SCP->CP_FILIAL+SCP->CP_NUM) = 0
-   AADD(_aControleEnv,SCP->CP_FILIAL+SCP->CP_NUM)
-ELSE
-   RETURN .F.//ENVIA UMA COPIA POR FILIAL + Solicitação
-ENDIF
+If aScan(_aControleEnv,SCP->CP_FILIAL+SCP->CP_NUM) = 0
+   aAdd(_aControleEnv,SCP->CP_FILIAL+SCP->CP_NUM)
+Else
+   Return .F.//ENVIA UMA COPIA POR FILIAL + Solicitação
+EndIf
 
 // Arquivo html template utilizado para montagem da aprovação
 _cHtmlMode := "\workflow\htm\SA_APROV_COM_COPIA.htm"
 // Assunto da mensagem
 _cAssunto := "Validação da Solicitação de Armazem Filial " + SCP->CP_FILIAL + " - " + AllTrim(FWFilialName(cEmpAnt,SCP->CP_FILIAL,1)) + " / SA Número: " + SCP->CP_NUM
 
-//********************** Inicialize a classe TWFProcess e objeto oProcess: ******************************
+//Inicialize a classe TWFProcess e objeto oProcess:
 _oProcess := TWFProcess():New(_cCodProce,"Validação da Solicitação de armazem") //PARA O HTML
 
 cFilSA	:= SCP->CP_FILIAL + " - " + AllTrim(FWFilialName(cEmpAnt, SCP->CP_FILIAL, 1 ))
 cNUMSA	:= SCP->CP_NUM
 cSolic	:= Posicione("ZZL",4,xFilial("ZZL")+Trim(SCP->CP_SOLICIT),"ZZL_NOME")
-dDtEmi	:= DTOC(SCP->CP_EMISSAO)
+dDtEmi	:= DToC(SCP->CP_EMISSAO)
 cEmail	:= UsrRetMail(SCR->CR_USER) //SCR->CR_USER//vai pegar o e-mail
-cObsGen	:= ALLTRIM(SCP->CP_OBS)
-cCcust	:= SCP->CP_CC +" - "+ ALLTRIM(Posicione("CTT",1,xFilial("CTT") + SCP->CP_CC,"CTT_DESC01"))
-cLocInves:= ALLTRIM(SCP->CP_I_LOCIN)
-IF EMPTY(SCP->CP_I_DESIN) .AND. !EMPTY(cLocInves)
-   cDescInve:= ALLTRIM(POSICIONE("ZZI",1,xfilial("ZZI")+cLocInves,"ZZI_DESINV"))
-ELSE
-   cDescInve:= ALLTRIM(SCP->CP_I_DESIN)
-ENDIF
+cObsGen	:= AllTrim(SCP->CP_OBS)
+cCcust	:= SCP->CP_CC +" - "+ AllTrim(Posicione("CTT",1,xFilial("CTT") + SCP->CP_CC,"CTT_DESC01"))
+cLocInves:= AllTrim(SCP->CP_I_LOCIN)
+If Empty(SCP->CP_I_DESIN) .And. !Empty(cLocInves)
+   cDescInve:= AllTrim(Posicione("ZZI",1,xFilial("ZZI")+cLocInves,"ZZI_DESINV"))
+Else
+   cDescInve:= AllTrim(SCP->CP_I_DESIN)
+EndIf
 
 _oProcess:NewTask("Aprovacao_SA"          , _cHtmlMode)  
 _oProcess:oHtml:ValByName("Filial"			, cFilSA)
@@ -403,73 +369,59 @@ _oProcess:oHtml:ValByName("DescInvest"    , cDescInve)
 _oProcess:oHtml:ValByName("Obs"			   , cObsGen)   
 _oProcess:oHtml:ValByName("A_RODAP"	      , _cAmbiente)
 
-SB2->(DbSetorder(1))
+SB2->(DBSetOrder(1))
 nVlrTotOrc:=0
-DO While !SCP->(Eof()) .AND. SCR->CR_FILIAL == SCP->CP_FILIAL .And. cNUMSA == SCP->CP_NUM
-
+While !SCP->(Eof()) .And. SCR->CR_FILIAL == SCP->CP_FILIAL .And. cNUMSA == SCP->CP_NUM
 	aAdd( _oProcess:oHtml:ValByName("Itens.Item" 	), SCP->CP_ITEM												    )
 	aAdd( _oProcess:oHtml:ValByName("Itens.Produto"	), SCP->CP_PRODUTO + " - " + SCP->CP_DESCRI			    )
 	aAdd( _oProcess:oHtml:ValByName("Itens.UM"		), SCP->CP_UM													    )
 	aAdd( _oProcess:oHtml:ValByName("Itens.Qtde"		), Transform(SCP->CP_QUANT, PesqPict("SC1","C1_QUANT")))
 
-	SB2->(DBSEEK(SCP->CP_FILIAL + SCP->CP_PRODUTO + SCP->CP_LOCAL))
+	SB2->(DBSeek(SCP->CP_FILIAL + SCP->CP_PRODUTO + SCP->CP_LOCAL))
 	nValor:=(SB2->B2_CM1 * SCP->CP_QUANT)
 	nVlrTotOrc+=nValor
-    aAdd( _oProcess:oHtml:ValByName("Itens.Valor") ,"R$ "+ALLTRIM(Transform( nValor ,"@E 999,999,999,999,999.99"))	)
+    aAdd( _oProcess:oHtml:ValByName("Itens.Valor") ,"R$ "+AllTrim(Transform( nValor ,"@E 999,999,999,999,999.99"))	)
 
-	SBZ->(DBSEEK(SCP->CP_FILIAL + SCP->CP_PRODUTO + SCP->CP_LOCAL))
+	SBZ->(DBSeek(SCP->CP_FILIAL + SCP->CP_PRODUTO + SCP->CP_LOCAL))
 	aAdd( _oProcess:oHtml:ValByName("Itens.EstMin") , Transform(SBZ->BZ_ESTSEG,PesqPict("SBZ","BZ_ESTSEG")) )
 	aAdd( _oProcess:oHtml:ValByName("Itens.EstMax") , Transform(SBZ->BZ_EMAX  ,PesqPict("SBZ","BZ_EMAX"  )) )
     
-	nSldAtual:=CalcEst( SCP->CP_PRODUTO, SCP->CP_LOCAL , (DATE() + 1) )[1]
+	nSldAtual:=CalcEst( SCP->CP_PRODUTO, SCP->CP_LOCAL , (Date() + 1) )[1]
 	aAdd( _oProcess:oHtml:ValByName("Itens.SldAtFil"	), Transform(nSldAtual, PesqPict("SB2","B2_QATU"))	)
 	
 	nMedia:=MEST19Media(SCP->CP_FILIAL,SCP->CP_PRODUTO,SCP->CP_LOCAL)
 	aAdd( _oProcess:oHtml:ValByName("Itens.SldAtEmp"	), Transform(nMedia   , PesqPict("SB2","B2_QATU"))	)
 	
-	SCP->(dbSkip())
-ENDDO
+	SCP->(DBSkip())
+EndDo
 
 _oProcess:oHtml:ValByName("VlrTot","R$ "+Transform(nVlrTotOrc,"@E 999,999,999,999,999.99"))
 
-//================================
 // respostas retornar ao Workflow:
-//================================
-	
 _cMailID := _oProcess:Start("\workflow\emp01")//GRAVA O HTML
 	
 If File("\workflow\emp01\" + _cMailID + ".htm")
    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01913"/*cMsgId*/, "MEST01913 - Arquivo " + "\workflow\emp01\" + _cMailID + ".htm" + " criado com sucesso."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 EndIf 
 
-//====================================
 //Codigo do processo cadastrado no CFG
-//====================================
 _cCodProce := "APRVSA"
 
-//===========================================================
 // Arquivo html template utilizado para montagem da aprovação
-//===========================================================
 _cHtmlMode := "\workflow\htm\sa_aprovador.htm"
 
-//====================
 // Assunto da mensagem
-//====================
 _cAssunto := "Validação da Solicitação de Armazem Filial " + cFilSA + " / SA Número: " + cNUMSA
 
-//======================================================================
 // Inicialize a classe TWFProcess e assinale a variável objeto oProcess:
-//======================================================================
 _oProcess  := TWFProcess():New(_cCodProce,"Validação da Solicitação de armazem")//CRIA PARA O ENVIO DO E-MAIL
 chtmlfile  := _cMailID + ".htm"
-cMailTo	  := "mailto:" + Alltrim(Posicione("WF7", 1, XFilial("WF7") + AllTrim(SuperGetMv('MV_WFMLBOX')), "WF7_ENDERE"))
+cMailTo	  := "mailto:" + AllTrim(Posicione("WF7", 1, xFilial("WF7") + AllTrim(SuperGetMv('MV_WFMLBOX')), "WF7_ENDERE"))
 chtmltexto := wfloadfile("\workflow\emp01\" + chtmlfile )
-chtmltexto := strtran( chtmltexto, cmailto, "WFHTTPRET.APL" )
+chtmltexto := StrTran( chtmltexto, cmailto, "WFHTTPRET.APL" )
 wfsavefile("\workflow\emp"+cEmpAnt+"\" + chtmlfile, chtmltexto) // grava novamente com as alteracoes necessarias.
 
-//=================================================================
 // Criamos o link para o arquivo que foi gerado na tarefa anterior.  
-//=================================================================
 _oProcess:NewTask("LINK", "\workflow\htm\sa_link.htm")
 	
 cLink := _cHostWF + "emp01/" + _cMailID + ".htm"
@@ -485,28 +437,23 @@ _oProcess:oHtml:ValByName("A_CUSTO"	, cCcust	)
 _oProcess:oHtml:ValByName("A_OBSSA"	, cObsGen	)
 _oProcess:oHtml:ValByName("A_RODAP"	, _cAmbiente)
 
-//================================================================
 // Informamos o destinatário (Aprovador) do email contendo o link.  
-//================================================================
 _oProcess:cTo := _cMVMEST19E
 
-//===============================
 // Informamos o assunto do email.  
-//===============================
 _oProcess:cSubject	:= FWHttpEncode(_cAssunto)
 
-//=======================================================
 // Iniciamos a tarefa e enviamos o email ao destinatário.
-//=======================================================
 _oProcess:Start() //ENVIA O E-MAIL
 
-SCR->(DBGOTO(nRegSCR))
-SCP->(DBSEEK(SCR->CR_FILIAL+ALLTRIM(SCR->CR_NUM)))
-AADD(aLog,{SCR->CR_FILIAL,cNUMSA,cSolic,cCcust,"E-mail dos Gestor(es):",LOWER(_cMVMEST19E),"Enviado [ "+SCP->CP_STATSA+" ]",_cItens,_cMVM19EOri}) 
+SCR->(DBGoTo(nRegSCR))
+SCP->(DBSeek(SCR->CR_FILIAL+AllTrim(SCR->CR_NUM)))
+aAdd(aLog,{SCR->CR_FILIAL,cNUMSA,cSolic,cCcust,"E-mail dos Gestor(es):",LOWER(_cMVMEST19E),"Enviado [ "+SCP->CP_STATSA+" ]",_cItens,_cMVM19EOri}) 
 
 U_ITCONOUT("MEST019 - Email COPIA enviado para: [" + (_cMVMEST19E) + "]")
 
-RETURN .T.
+Return .T.
+
 /*
 ===============================================================================================================================
 Programa----------: MEST019R
@@ -518,51 +465,51 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function MEST019R( _oProcess )
-Local _cFilial	 := SUBSTR(_oProcess:oHtml:RetByName("Filial"),1,2)
+
+Local _cFilial	 := SubStr(_oProcess:oHtml:RetByName("Filial"),1,2)
 Local _cNumSA	 := _oProcess:oHtml:RetByName("NumSA")    
-Local _cAprova	 := UPPER(_oProcess:oHtml:RetByName("APROVACAO"))
-Local _cAvaliou := UPPER(_oProcess:oHtml:RetByName("Aprovador"))//SCR->CR_APROV+" - "+cAprNom
-Local _cObs		 := ALLTRIM( _oProcess:oHtml:RetByName("CP_OBS") )
-Local _cArqHtm	 := SUBSTR(_oProcess:oHtml:RetByName("WFMAILID"),3,Len(_oProcess:oHtml:RetByName("WFMAILID")))
-Local cAprNom   := ALLTRIM(SUBSTR(_cAvaliou, At(" ", _cAvaliou)+3 ))//PEGA SÓ O NOME
-Local _sDtLiber := DTOC(DATE())
-Local _cHrLiber := SUBSTR(TIME(),1,5)
+Local _cAprova	 := Upper(_oProcess:oHtml:RetByName("APROVACAO"))
+Local _cAvaliou := Upper(_oProcess:oHtml:RetByName("Aprovador"))//SCR->CR_APROV+" - "+cAprNom
+Local _cObs		 := AllTrim( _oProcess:oHtml:RetByName("CP_OBS") )
+Local _cArqHtm	 := SubStr(_oProcess:oHtml:RetByName("WFMAILID"),3,Len(_oProcess:oHtml:RetByName("WFMAILID")))
+Local cAprNom   := AllTrim(SubStr(_cAvaliou, At(" ", _cAvaliou)+3 ))//PEGA SÓ O NOME
+Local _sDtLiber := DToC(DATE())
+Local _cHrLiber := SubStr(TIME(),1,5)
 Local _cVlrCampo:= ""
 Local _cHtmlMode:= "\Workflow\htm\sa_concluida.htm"
-Local _cAmbiente:= UPPER(GETENVSERVER())
+Local _cAmbiente:= Upper(GETENVSERVER())
 Local _bType    := {|x| Type(x)}
-PRIVATE nRegSCR := 0
+Private nRegSCR := 0
 
 FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01917"/*cMsgId*/, "MEST01917 - INICIO DO MEST019R"/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 nConta:=0
 cPilha:=""
 cProcName:="XX"
-DO WHILE !EMPTY(cProcName) .AND. nConta < 25
+While !Empty(cProcName) .And. nConta < 25
    cProcName:=PROCNAME(nConta)
    cPilha:=""
-   IF !EMPTY(cProcName)
+   If !Empty(cProcName)
       aTipo:={};   aArquivo:={};   aLinha:={};   aData:={};   aHora:={}
 	  aRet :=GetFuncArray( PROCNAME(nConta),aTipo,aArquivo,aLinha,aData,aHora)
 
-      cPilha+=STRTRAN(PROCNAME(nConta),"  ","")
-      IF Eval(_bType,"aArquivo[1]") = "C" 
+      cPilha+=StrTran(PROCNAME(nConta),"  ","")
+      If Eval(_bType,"aArquivo[1]") = "C" 
          cPilha+=" Fonte: ("+aArquivo[1]+")"
-      ENDIF
-      IF Eval(_bType,"aData[1]") = "D" 
-         cPilha+=" "+DTOC(aData[1])
-      ENDIF
-      IF Eval(_bType,"aHora[1]") = "C" 
+      EndIf
+      If Eval(_bType,"aData[1]") = "D" 
+         cPilha+=" "+DToC(aData[1])
+      EndIf
+      If Eval(_bType,"aHora[1]") = "C" 
          cPilha+=" "+aHora[1]
-      ENDIF
-      IF Eval(_bType,"aLinha[1]") = "C"
+      EndIf
+      If Eval(_bType,"aLinha[1]") = "C"
          cPilha+=" linha " +aLinha[1]
-      ENDIF
+      EndIf
 
       FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01918"/*cMsgId*/, "MEST01918 - Pilha de chamada...: "+cPilha/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
-
-   ENDIF
+   EndIf
    nConta++   
-ENDDO
+EndDo
 //Grava log no server
 FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01919"/*cMsgId*/, "MEST01919 - E-Filial...........: " + _cFilial/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01920"/*cMsgId*/, "MEST01920 - E-Solicitacao......: " + _cNumSA/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
@@ -579,7 +526,6 @@ If "APROVAR" $ _cAprova //== "S"
 
    U_ITWF1WF2Put("APRVSA",,"WFTP02","APROVADO" )//Grava WF2 a primeira vez se não existir  'N=Não Enviado;E=Enviado/Aguardando Aprovação;Q=Questionado;A=Aprovado;R-Rejeitado'
    _oProcess:Track("WFTP02",_cObsConc,cAprNom)
-
 Else             
    _cAprova:="N"
 	_cVlrCampo:= "REJEICAO"		
@@ -588,21 +534,17 @@ Else
   
    U_ITWF1WF2Put("APRVSA",,"WFTP03","REJEITADO" )//Grava WF2 a primeira vez se não existir  'N=Não Enviado;E=Enviado/Aguardando Aprovação;Q=Questionado;A=Aprovado;R-Rejeitado'
    _oProcess:Track("WFTP03",_cObsConc,cAprNom)
-
 EndIf
 
 If Empty(_cObs)
 	_cObs := _cVlrCampo+" EXECUTADA VIA WORKFLOW"
 EndIf
 
-//===================================================================================================
 //Chama para atualização do registro da solicitação de armazem, com as informações da aprovação/rejeicao
-//===================================================================================================
 _cErro:=""
-lOk:=MyExec094(_cFilial,_cNumSA,_cAprova,@_cErro,LEFT(_cAvaliou,LEN(SCR->CR_APROV)),_cArqHtm,_cObs)
+lOk:=MyExec094(_cFilial,_cNumSA,_cAprova,@_cErro,LEFT(_cAvaliou,Len(SCR->CR_APROV)),_cArqHtm,_cObs)
 
 If !lOk 
-
    _cObsConc:= "Houve um problema na hora da "+_cVlrCampo+":<br>"+_cErro
    chtmlfile  := "\workflow\emp01\" + _cArqHtm + ".Erro"
    MemoWrite(chtmlfile,_cObsConc)
@@ -613,15 +555,12 @@ If !lOk
 
    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01928"/*cMsgId*/, "MEST01928 - FINAL DO MEST019R  1"/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
-   RETURN .F.
-
-ELSE
-
+   Return .F.
+Else
    chtmlfile  := "\workflow\emp01\" + _cArqHtm + ".Erro"
    MemoWrite(chtmlfile,_cObsConc)
    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01929"/*cMsgId*/, "MEST01929 - Arq do OK......: " + chtmlfile/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01930"/*cMsgId*/, "MEST01930 - Obs do OK......: " + _cObsConc/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
-
 EndIf
 
 //Finalize a tarefa anterior para não ficar pendente
@@ -634,28 +573,28 @@ MEST19Copy(_cHtmlMode,_cArqHtm)
 //Alterando o conteudo do \Workflow\htm\sa_concluida.htm 
 chtmlfile  := "\workflow\emp01\" + _cArqHtm + ".htm"
 chtmltexto := wfloadfile( chtmlfile )
-chtmltexto := strtran( chtmltexto, "!A_MSG!"  , _cObsConc)
-chtmltexto := strtran( chtmltexto, "!A_RODAP!", _cAmbiente)
+chtmltexto := StrTran( chtmltexto, "!A_MSG!"  , _cObsConc)
+chtmltexto := StrTran( chtmltexto, "!A_RODAP!", _cAmbiente)
 WFSAVEFILE( chtmlfile , chtmltexto)
 
 FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01931"/*cMsgId*/, "MEST01931 - chtmlfile........: " + chtmlfile/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
 //Faz a cópia dos arquivos arquivos de aprovação para .old, e cria o arquivo de processo já concluído
-DBSELECTAREA("ZGT")
-ZGT->(DBSETORDER(2)) //ZGT_FILIAL+ZGT_IDPED                                                                                                                                            
-IF ZGT->(DBSEEK(_cFilial+_cNumSA))
-   DO WHILE ZGT->(!EOF()) .AND. ZGT->ZGT_FILIAL+ALLTRIM(ZGT->ZGT_IDPED) == _cFilial+_cNumSA
-      IF ALLTRIM(ZGT->ZGT_ROTINA) = "MESO19-WF-SA"
-         _cArqHtm:=UPPER(ALLTRIM(ZGT->ZGT_HTML))
-         _cArqHtm:=SUBSTR(_cArqHtm,AT("EMP01/",_cArqHtm)+6)
-         _cArqHtm:=STRTRAN(_cArqHtm,".HTM","")
+DBSelectArea("ZGT")
+ZGT->(DBSetOrder(2)) //ZGT_FILIAL+ZGT_IDPED                                                                                                                                            
+If ZGT->(DBSeek(_cFilial+_cNumSA))
+   While ZGT->(!Eof()) .And. ZGT->ZGT_FILIAL+AllTrim(ZGT->ZGT_IDPED) == _cFilial+_cNumSA
+      If AllTrim(ZGT->ZGT_ROTINA) = "MESO19-WF-SA"
+         _cArqHtm:=Upper(AllTrim(ZGT->ZGT_HTML))
+         _cArqHtm:=SubStr(_cArqHtm,AT("EMP01/",_cArqHtm)+6)
+         _cArqHtm:=StrTran(_cArqHtm,".HTM","")
          FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01932"/*cMsgId*/, "MEST01932 - _cArqHtm.........: " + _cArqHtm/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 	   //         Origem    ,Destino
          MEST19Copy(chtmlfile,_cArqHtm)
-      ENDIF 
-	   ZGT->(DBSKIP())
-   ENDDO
-ENDIF
+      EndIf 
+	   ZGT->(DBSkip())
+   EndDo
+EndIf
 
 //Grava log no server
 FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01933"/*cMsgId*/, "MEST01933 - Filial...........: " + _cFilial/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
@@ -691,14 +630,14 @@ Static Function MEST019A(_oProcess,_cObsConc,nRegSCR,_lErro)
 Local _cFilName := _oProcess:oHtml:RetByName("Filial")
 Local _cFilSA	 := SubStr(_cFilName,1,2)
 Local _cNumSA	 := _oProcess:oHtml:RetByName("NumSA")    
-Local _cAprova	 := UPPER(_oProcess:oHtml:RetByName("APROVACAO"))
-Local _cAvaliou := UPPER(_oProcess:oHtml:RetByName("Aprovador"))//SCR->CR_APROV+" - "+cAprNom
-Local _cObs		 := ALLTRIM( _oProcess:oHtml:RetByName("CP_OBS"))
+Local _cAprova	 := Upper(_oProcess:oHtml:RetByName("APROVACAO"))
+Local _cAvaliou := Upper(_oProcess:oHtml:RetByName("Aprovador"))//SCR->CR_APROV+" - "+cAprNom
+Local _cObs		 := AllTrim( _oProcess:oHtml:RetByName("CP_OBS"))
 Local _cArqHtm	 := _oProcess:oHtml:RetByName("WFMAILID")
-Local _cAprNom  := ALLTRIM(SUBSTR(_cAvaliou, At(" ", _cAvaliou)+3 ))//PEGA SÓ O NOME
-Local _sDtLiber := DTOS(DATE())
-Local _cHrLiber := TIME()
-Local _cAmbiente:= UPPER(GETENVSERVER())
+Local _cAprNom  := AllTrim(SubStr(_cAvaliou, At(" ", _cAvaliou)+3 ))//PEGA SÓ O NOME
+Local _sDtLiber := DToS(DATE())
+Local _cHrLiber := Time()
+Local _cAmbiente:= Upper(GETENVSERVER())
 Local _cSolic   := ""
 Local _cCcust   := ""
 Local _cEmail	 := ""
@@ -706,49 +645,45 @@ Local _cAssunto := ""
 
 FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01942"/*cMsgId*/, "MEST01942 - INCIO DA MEST019A"/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
-//======================================================================
 // Inicialize a classe TWFProcess e assinale a variável objeto oProcess:
-//======================================================================
 _oProcess := TWFProcess():New("APRVSA","Aprovação da Solicitação de armazem")//CRIA PARA O ENVIO DO E-MAIL
 
-SCP->(DBSETORDER(1))
-IF nRegSCR <> 0
-   SCR->(DBGOTO(nRegSCR))
-   SCP->(DBSEEK(SCR->CR_FILIAL+ALLTRIM(SCR->CR_NUM)))
-ELSE
+SCP->(DBSetOrder(1))
+If nRegSCR <> 0
+   SCR->(DBGoTo(nRegSCR))
+   SCP->(DBSeek(SCR->CR_FILIAL+AllTrim(SCR->CR_NUM)))
+Else
    SCR->(DBGOBOTTOM())
-   SCR->(DBSKIP())//DEIXA EM REGISTRO EM BRANCO
-   SCP->(DBSEEK(_cFilSA+ALLTRIM(_cNumSA)))
-ENDIF
+   SCR->(DBSkip())//DEIXA EM REGISTRO EM BRANCO
+   SCP->(DBSeek(_cFilSA+AllTrim(_cNumSA)))
+EndIf
 
 _cSolic := Posicione("ZZL",4,xFilial("ZZL")+Trim(SCP->CP_SOLICIT),"ZZL_NOME")
 _cEmail := UsrRetMail(ZZL->ZZL_CODUSU)
-_cCcust := SCP->CP_CC +" - "+ ALLTRIM(Posicione("CTT",1,xFilial("CTT") + SCP->CP_CC,"CTT_DESC01"))
+_cCcust := SCP->CP_CC +" - "+ AllTrim(Posicione("CTT",1,xFilial("CTT") + SCP->CP_CC,"CTT_DESC01"))
 
-//=================================================================
 // Criamos o link para o arquivo que foi gerado na tarefa anterior.  
-//=================================================================
-IF _lErro
+If _lErro
    _oProcess:NewTask("LINK", "\workflow\htm\SA_RET_APROVADOR.htm")
    _cObs:=_cObsConc
    _cEmail := UsrRetMail(SCR->CR_USER)
-ELSE
+Else
    _oProcess:NewTask("LINK", "\workflow\htm\sa_solicitante.htm")
-ENDIF
+EndIf
 
 If "APROVAR" $ _cAprova //== "S" 
-   IF _lErro
+   If _lErro
       _cAviso:= "APROVACAO"
-   ELSE
+   Else
       _cAviso:= "APROVADA"
-   ENDIF
+   EndIf
    _cAvisoC:= "<font color= #0101DF  style='font-size: 12px; font-weight: bold;'>"+_cAviso+"</font>"//AZUL
 Else             
-   IF _lErro
+   If _lErro
       _cAviso:= "REJEICAO"		
-   ELSE
+   Else
       _cAviso:= "REJEITADA"
-   ENDIF
+   EndIf
    _cAvisoC:= "<font color= #FF0000  style='font-size: 12px; font-weight: bold;'>"+_cAviso+"</font>"//VERMELHO
 EndIf
 If Empty(_cObs)
@@ -770,39 +705,31 @@ _oProcess:oHtml:ValByName("A_SOLIC"	  , _cSolic	)
 _oProcess:oHtml:ValByName("Num_SA"	  , _cNumSA	)
 _oProcess:oHtml:ValByName("Aprovacao" , _cAvisoC)
 _oProcess:oHtml:ValByName("AprNom"	  , _cAprNom)
-_oProcess:oHtml:ValByName("A_Data"	  , DTOC(STOD(_sDtLiber)))
+_oProcess:oHtml:ValByName("A_Data"	  , DToC(SToD(_sDtLiber)))
 _oProcess:oHtml:ValByName("A_Hora"	  , _cHrLiber)
 _oProcess:oHtml:ValByName("A_CUSTO"	  , _cCcust	)
 _oProcess:oHtml:ValByName("A_OBSSA"	  , _cObs   )
 _oProcess:oHtml:ValByName("A_RODAP"	, 	_cAmbiente	)
 
-//================================================================
 // Informamos o destinatário (Aprovador) do email contendo o link.  
-//================================================================
 cEmailOri:=LOWER(_cEmail)
-IF SuperGetMV("IT_AMBTEST",.F.,.T.)
+If !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
    _cEmail:= UsrRetMail(__cUserId)
-ENDIF
+EndIf
 _oProcess:cTo := _cEmail
 
-//===============================
 // Informamos o assunto do email.  
-//===============================
-_cAssunto := "Retorno WF da Solicitação de armazem Filial " + _cFilName + " / SA Número: " + ALLTRIM(_cNUMSA) + " - " + _cAviso
+_cAssunto := "Retorno WF da Solicitação de armazem Filial " + _cFilName + " / SA Número: " + AllTrim(_cNUMSA) + " - " + _cAviso
 _oProcess:cSubject	:= FWHttpEncode(_cAssunto)
 
-//=======================================================
 // Iniciamos a tarefa e enviamos o email ao destinatário.
-//=======================================================
 _oProcess:Start() //ENVIA O E-MAIL
 	
 FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01952"/*cMsgId*/, "MEST01952 - Email enviado para: " + _cEmail + " com sucesso!"/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
-//=============================================================
 //GRAVAO LOG NA TABELA ZGT010
-_cTipv := POSICIONE("SA3",1, xFilial("SA3")+LEFT(_cAvaliou,LEN(SCR->CR_APROV)), "A3_I_TIPV")
-U_GrVLZGT(_cFilSA, LEFT(_cAvaliou,LEN(SCR->CR_APROV)) , "MESO19-WF-SA", "R", _cTipv , _cArqHtm , _cNumSA )
-//=============================================================
+_cTipv := Posicione("SA3",1, xFilial("SA3")+LEFT(_cAvaliou,Len(SCR->CR_APROV)), "A3_I_TIPV")
+U_GrVLZGT(_cFilSA, LEFT(_cAvaliou,Len(SCR->CR_APROV)) , "MESO19-WF-SA", "R", _cTipv , _cArqHtm , _cNumSA )
 
 FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01953"/*cMsgId*/, "MEST01953 - FIM DA MEST019A"/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
@@ -819,16 +746,16 @@ Retorno-----------: .T.
 */
 User Function MEST19Lista()
 
-FWMSGRUN(,{|oproc|  U_MEST019L(oproc) },'Aguarde processamento...','Lendo dados...')
+FWMsgRun(,{|oproc|  U_MEST019L(oproc) },'Aguarde processamento...','Lendo dados...')
    
-RETURN .T.
+Return .T.
 
 User Function MEST019L(oproc)//Vai ser agendada, chamar via Schedule
 Local _lCriaAmb := .F.
 Local lWFHTML	 := .T.
 Local _aTables	 := {"SC1","SC7","ZZ7","ZZ8","ZZI","CTT","ZZL","ZP1"}
 Local _cCodProce:= ""
-Local _cAmbiente:= UPPER(GETENVSERVER())
+Local _cAmbiente:= Upper(GETENVSERVER())
 Local _cAssunto := ""
 Local _cMailId	 := ""
 Local _cTaskID	 := ""
@@ -842,26 +769,17 @@ If Select("SX3") <= 0
 EndIf                           
              
 If _lCriaAmb              
-
-	//====================
 	//Nao consome licensas
-	//====================
 	RPCSetType(3)
 
-	//==========================================
 	//seta o ambiente com a empresa 01 filial 01
-	//==========================================   	 
 	RpcSetEnv("01","01",,,,"SCHEDULE_WF_SOLICITACAO",_aTables)
 
-	//=======================================================================================
 	//Mensagem que ficara armazenada no arquivo totvsconsole.log para posterior monitoramento
-	//======================================================================================= 
-    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01954"/*cMsgId*/, "MEST01954 - Gerando envio do workflow das solicitações de armazem aos aprovadores na data: " + Dtoc(DATE()) + " - " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01954"/*cMsgId*/, "MEST01954 - Gerando envio do workflow das solicitações de armazem aos aprovadores na data: " + DToC(DATE()) + " - " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
 	_nRet:=1//TODOS
-
-ELSE
-
+Else
    aBotoes   :={"TODOS","ATUAL","SAIR"}
    cSubTitulo:="Solicitações de Armazem"
    cMensagem :="TODOS - Lista o WF de todos SEM link para aprovar"+CRLF
@@ -870,124 +788,117 @@ ELSE
    //Aviso( <cTitulo>                       , <cMensagem>, aBotoes>, <nTamTela>, <cSubTitulo>, <nRotAut>, <cBitMap>   , <lEditMemo>, <nTimer> )
    _nRet:=Aviso( "GERAR LISTA DO WORKFLOW ?", cMensagem  , aBotoes , 3         ,  cSubTitulo ,          , "ENGRENAGEM",    .F.     ,          )
 
-   IF _nRet = 3//SAIR
-      RETURN .F.
-   ENDIF
+   If _nRet = 3//SAIR
+      Return .F.
+   EndIf
 EndIf 
 
-_cHostWF  := U_ItGetMv("IT_WFHOSTS","http://protheusteste.italac.com.br:11786/workflow/")//http://protheusteste.italac.com.br:11786/workflow/
-lWFHTML	 := SuperGetMv("MV_WFHTML")
+_cHostWF  := SuperGetMV("IT_WFHOSTS",.T.,"http://protheusteste.italac.com.br:11786/workflow/")//http://protheusteste.italac.com.br:11786/workflow/
+lWFHTML	 := SuperGetMv("MV_WFHTML",.T.,.T.)
 _cCodProce:= "APRVSA"//Codigo do processo cadastrado no CFG
 PutMV("MV_WFHTML",.T.)
 
 If !_lCriaAmb              
    oproc:cCaption := ("Lendo dados dos SOLICITAÇÕES DE ARMAZEM...")
    ProcessMessages()
-ENDIF
+EndIf
 
 _aRegs:=LerNEnviados(.T.)//PEGA TODOS//OS ENVIADOS E NÃO AVALIADOS
 
 _cGet :=SuperGetMv('MV_WFMLBOX')
-SCP->(DBSETORDER(1))
+SCP->(DBSetOrder(1))
 aLog:={}
 _aLista:={}
-FOR _nAprv := 1 TO LEN(_aRegs)
+For _nAprv := 1 TO Len(_aRegs)
+   // Inicialize a classe TWFProcess e assinale a variável objeto oProcess:
+   _oProcess := TWFProcess():New(_cCodProce,"Aprovação da Solicitação de armazem")
+   _oProcess:NewTask("LINK", "\workflow\htm\sa_lista.htm")
 
-	// Inicialize a classe TWFProcess e assinale a variável objeto oProcess:
-	_oProcess := TWFProcess():New(_cCodProce,"Aprovação da Solicitação de armazem")
-	_oProcess:NewTask("LINK", "\workflow\htm\sa_lista.htm")
+   _cMailId	   := _oProcess:fProcessId
+   _cTaskID	   := _oProcess:fTaskID
+   chtmlfile	:= _cMailID + ".htm"
+   cMailTo		:= "mailto:" + AllTrim(Posicione("WF7", 1, xFilial("WF7") + AllTrim(_cGet), "WF7_ENDERE"))
+   chtmltexto	:= wfloadfile("\workflow\emp01\" + chtmlfile )
+   chtmltexto	:= StrTran( chtmltexto, cmailto, "WFHTTPRET.APL" )
+   wfsavefile("\workflow\emp"+cEmpAnt+"\" + chtmlfile, chtmltexto)
 
-	_cMailId	   := _oProcess:fProcessId
-	_cTaskID	   := _oProcess:fTaskID
-	chtmlfile	:= _cMailID + ".htm"
-	cMailTo		:= "mailto:" + Alltrim(Posicione("WF7", 1, XFilial("WF7") + AllTrim(_cGet), "WF7_ENDERE"))
-	chtmltexto	:= wfloadfile("\workflow\emp01\" + chtmlfile )
-	chtmltexto	:= strtran( chtmltexto, cmailto, "WFHTTPRET.APL" )
-	wfsavefile("\workflow\emp"+cEmpAnt+"\" + chtmlfile, chtmltexto)
+   // Assunto da mensagem
+   _cAprovador:= _aRegs[_nAprv,2] 
+   While _aRegs[_nAprv,2] == _cAprovador
+      SCR->(DBGoTo(_aRegs[_nAprv,1]))        
+      SCP->(DBSeek(SCR->CR_FILIAL+AllTrim(SCR->CR_NUM)))
 
-	// Assunto da mensagem
-    _cAprovador:= _aRegs[_nAprv,2] 
-    DO WHILE _aRegs[_nAprv,2] == _cAprovador
+      cFilSA	 := SCP->CP_FILIAL + " - " + AllTrim(FWFilialName(cEmpAnt, SCP->CP_FILIAL, 1 ))
+      cNUMSA	 := SCP->CP_NUM
+      cSolic	 := Posicione("ZZL",4,xFilial("ZZL")+Trim(SCP->CP_SOLICIT),"ZZL_NOME")//Login
+      cAprNom	 := Posicione("ZZL",3,xFilial("ZZL")+Trim(SCR->CR_USER   ),"ZZL_NOME")//Codigo
+      cAprov	 := SCR->CR_APROV+" - "+cAprNom
+      cCcust	 := SCP->CP_CC + " - " + AllTrim(Posicione("CTT",1,xFilial("CTT") + SCP->CP_CC,"CTT_DESC01"))
+      _cAssunto := "Aprovação da Solicitação de Armazem Filial "+cFilSA
 
-       SCR->(DBGOTO(_aRegs[_nAprv,1]))        
-	    SCP->(DBSEEK(SCR->CR_FILIAL+ALLTRIM(SCR->CR_NUM)))
+      If !_lCriaAmb              
+         oproc:cCaption := ("Lendo SA: "+cNUMSA+" / Aprovador: "+cAprNom)
+         ProcessMessages()
+      EndIf
 
-       cFilSA	 := SCP->CP_FILIAL + " - " + AllTrim(FWFilialName(cEmpAnt, SCP->CP_FILIAL, 1 ))
-       cNUMSA	 := SCP->CP_NUM
-       cSolic	 := Posicione("ZZL",4,xFilial("ZZL")+Trim(SCP->CP_SOLICIT),"ZZL_NOME")//Login
-       cAprNom	 := Posicione("ZZL",3,xFilial("ZZL")+Trim(SCR->CR_USER   ),"ZZL_NOME")//Codigo
-       cAprov	 := SCR->CR_APROV+" - "+cAprNom
-       cCcust	 := SCP->CP_CC + " - " + ALLTRIM(Posicione("CTT",1,xFilial("CTT") + SCP->CP_CC,"CTT_DESC01"))
-	   _cAssunto := "Aprovação da Solicitação de Armazem Filial "+cFilSA
-
-       IF !_lCriaAmb              
-          oproc:cCaption := ("Lendo SA: "+cNUMSA+" / Aprovador: "+cAprNom)
-          ProcessMessages()
-       ENDIF
-
-       If _lCriaAmb //SCHEDULE
-       
-          cEmail:= UsrRetMail(SCR->CR_USER)
-	    
-       ELSE // MENU / TELA
-
+      If _lCriaAmb //SCHEDULE
+         cEmail:= UsrRetMail(SCR->CR_USER)
+      Else // MENU / TELA
          cEmail:= UsrRetMail(__cUserId)
 
-         IF _nRet = 2 .AND. SCR->CR_USER <> __cUserId//só mostra o aprovador logado
-	         _nAprv++
-	         IF _nAprv > LEN(_aRegs) 
-	             EXIT
-	         ENDIF
-	         LOOP
-	      ENDIF
-	       
-	      _cItens:="" 
-         DO WHILE (!SCP->(eof()) .and. ( SCR->CR_FILIAL+ALLTRIM(SCR->CR_NUM) == SCP->CP_FILIAL+SCP->CP_NUM ))
-	   	   _cItens+=ALLTRIM(SCP->CP_PRODUTO)+" / "
-            SCP->(DBSKIP())
-         ENDDO
-	   	_cItens:=LEFT(_cItens, LEN(_cItens)-3 )
-	      SCP->(DBSEEK(SCR->CR_FILIAL+ALLTRIM(SCR->CR_NUM)))
-         IF SCP->CP_I_SITWF = "2"//Enviados
-             AADD(_aLista,{SCP->CP_FILIAL,cNUMSA,cSolic,cCcust,cAprov,"Enviado [ "+SCP->CP_STATSA+" ]",_cItens}) 
-	      ELSEIF SCP->CP_I_SITWF = "1"//Não Enviados
-             AADD(_aLista,{SCP->CP_FILIAL,cNUMSA,cSolic,cCcust,cAprov,"Não Enviado [ "+SCP->CP_STATSA+" ]",_cItens})
-	          _nAprv++
-	          IF _nAprv > LEN(_aRegs) 
-	             EXIT
-	         ENDIF
-	         LOOP//SÓ LISTA/ENVIA EMAIL DOS ENVIADOS QUE NÃO FORAM APROVADOS
-         ENDIF
-       
-	   ENDIF
+         If _nRet = 2 .And. SCR->CR_USER <> __cUserId//só mostra o aprovador logado
+            _nAprv++
+            If _nAprv > Len(_aRegs) 
+               Exit
+            EndIf
+            Loop
+         EndIf
+         
+         _cItens:="" 
+         While (!SCP->(Eof()) .And. ( SCR->CR_FILIAL+AllTrim(SCR->CR_NUM) == SCP->CP_FILIAL+SCP->CP_NUM ))
+            _cItens+=AllTrim(SCP->CP_PRODUTO)+" / "
+            SCP->(DBSkip())
+         EndDo
+         _cItens:=LEFT(_cItens, Len(_cItens)-3 )
+         SCP->(DBSeek(SCR->CR_FILIAL+AllTrim(SCR->CR_NUM)))
+         If SCP->CP_I_SITWF = "2"//Enviados
+            aAdd(_aLista,{SCP->CP_FILIAL,cNUMSA,cSolic,cCcust,cAprov,"Enviado [ "+SCP->CP_STATSA+" ]",_cItens}) 
+         ElseIf SCP->CP_I_SITWF = "1"//Não Enviados
+            aAdd(_aLista,{SCP->CP_FILIAL,cNUMSA,cSolic,cCcust,cAprov,"Não Enviado [ "+SCP->CP_STATSA+" ]",_cItens})
+            _nAprv++
+            If _nAprv > Len(_aRegs) 
+               Exit
+            EndIf
+            Loop//SÓ LISTA/ENVIA EMAIL DOS ENVIADOS QUE NÃO FORAM APROVADOS
+         EndIf
+      EndIf
 
-	   aAdd( _oProcess:oHtml:ValByName("itens.FILIAL")	, cFilSA)
-	   aAdd( _oProcess:oHtml:ValByName("itens.NUMSA")	, cNUMSA)
-	   aAdd( _oProcess:oHtml:ValByName("itens.SOLIC")	, cSolic)
-	   aAdd( _oProcess:oHtml:ValByName("itens.CUSTO")	, cCcust)
-      IF SCR->CR_USER = __cUserId .AND. SCP->CP_STATSA = "B" //SÓ MOSTRA O LINK PARA O APROVADOR LOGADO
-          AADD( _oProcess:oHtml:ValByName("itens.LINK")	, AllTrim(SCP->CP_I_HTMWF) )
-		    AADD( _oProcess:oHtml:ValByName("itens.Click"), "Clique Aqui" )
-	   ELSE//SENÃO NÃO MOSTRA O LINK
-          AADD( _oProcess:oHtml:ValByName("itens.LINK") , " " )
-		    AADD( _oProcess:oHtml:ValByName("itens.Click"), " " )
-      ENDIF
-       
-	   _nAprv++
-	   IF _nAprv > LEN(_aRegs) 
-	      EXIT
-	   ENDIF
-	
-	ENDDO
+      aAdd( _oProcess:oHtml:ValByName("itens.FILIAL")	, cFilSA)
+      aAdd( _oProcess:oHtml:ValByName("itens.NUMSA")	, cNUMSA)
+      aAdd( _oProcess:oHtml:ValByName("itens.SOLIC")	, cSolic)
+      aAdd( _oProcess:oHtml:ValByName("itens.CUSTO")	, cCcust)
+      If SCR->CR_USER = __cUserId .And. SCP->CP_STATSA = "B" //SÓ MOSTRA O LINK PARA O APROVADOR LOGADO
+         aAdd( _oProcess:oHtml:ValByName("itens.LINK")	, AllTrim(SCP->CP_I_HTMWF) )
+         aAdd( _oProcess:oHtml:ValByName("itens.Click"), "Clique Aqui" )
+      Else//SENÃO NÃO MOSTRA O LINK
+         aAdd( _oProcess:oHtml:ValByName("itens.LINK") , " " )
+         aAdd( _oProcess:oHtml:ValByName("itens.Click"), " " )
+      EndIf
+
+      _nAprv++
+      If _nAprv > Len(_aRegs) 
+         Exit
+      EndIf
+   EndDo
 
 	_oProcess:oHtml:ValByName("AprNom"	, cAprNom	)
    _oProcess:oHtml:ValByName("A_RODAP"	, _cAmbiente)
 	   		
 	// Informamos o destinatário do email contendo o link.  
    cEmailOri:=LOWER(cEmail)
-   IF SuperGetMV("IT_AMBTEST",.F.,.T.)
+   If !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
       cEmail:= UsrRetMail(__cUserId)
-   ENDIF
+   EndIf
 	_oProcess:cTo := (cEmail)
 
 	// Informamos o assunto do email.  
@@ -995,31 +906,30 @@ FOR _nAprv := 1 TO LEN(_aRegs)
 
 	// Iniciamos a tarefa e enviamos o email ao destinatário.
 	_oProcess:Start()
-
-NEXT
+Next
 
 PutMV("MV_WFHTML",lWFHTML)
 
 If _lCriaAmb
-	//Limpa o ambiente, liberando a licença e fechando as conexoes
-	RpcClearEnv()  
-	FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01955"/*cMsgId*/, "MEST01955 - Termino do envio do workflow das solicitações de armazem na data: " + Dtoc(DATE()) + " - " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
-ELSE
-	IF LEN(_aLista) > 0
-       aCab:={}
-       AADD(aCab,"Filial")
-       AADD(aCab,"Numero SA")
-       AADD(aCab,"Solicitante")
-       AADD(aCab,"Centro Custo")
-       AADD(aCab,"Aprovador")
-       AADD(aCab,"Status")
-       AADD(aCab,"Produtos...")
-	   _cTitulo:='Lista de Aprovações Pendentes - '+IF(_nRet = 2,"ATUAL","TODOS")
-   //                           , _aCols,_lMaxSiz,_nTipo,_cMsgTop, _lSelUnc ,_aSizes , _nCampo , bOk , bCancel, _abuttons )
-       U_ITListBox(_cTitulo,aCab,_aLista   , .T.    , 1    ,       ,          ,        ,         ,     ,        , )
-	ELSE
-	   U_ITMSG("Não tem Aprovações Pendentes",'Atenção!',,1)
-	ENDIF
+   //Limpa o ambiente, liberando a licença e fechando as conexoes
+   RpcClearEnv()  
+   FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01955"/*cMsgId*/, "MEST01955 - Termino do envio do workflow das solicitações de armazem na data: " + DToC(DATE()) + " - " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+Else
+   If Len(_aLista) > 0
+      aCab:={}
+      aAdd(aCab,"Filial")
+      aAdd(aCab,"Numero SA")
+      aAdd(aCab,"Solicitante")
+      aAdd(aCab,"Centro Custo")
+      aAdd(aCab,"Aprovador")
+      aAdd(aCab,"Status")
+      aAdd(aCab,"Produtos...")
+      _cTitulo:='Lista de Aprovações Pendentes - '+If(_nRet = 2,"ATUAL","TODOS")
+      //                           , _aCols,_lMaxSiz,_nTipo,_cMsgTop, _lSelUnc ,_aSizes , _nCampo , bOk , bCancel, _abuttons )
+      U_ITListBox(_cTitulo,aCab,_aLista   , .T.    , 1    ,       ,          ,        ,         ,     ,        , )
+   Else
+      U_ITMsg("Não tem Aprovações Pendentes",'Atenção!',,1)
+   EndIf
 EndIf
 
 Return
@@ -1035,10 +945,11 @@ Retorno-----------: _aRegistros
 ===============================================================================================================================
 */
 Static Function LerNEnviados(_lTodos)
+
 Local _aRegistros:= {}
 Local _cQuery    := ""
 Local cAlias     := GetNextAlias()
-Local cFils      := ALLTRIM(U_ItGetMv("IT_FILIWFSA","01;40;10;20;23"))
+Local cFils      := AllTrim(SuperGetMV("IT_FILIWFS",.T.,"01;40;10;20;23"))
 
 _cQuery := " SELECT DISTINCT SCR.R_E_C_N_O_ REC , SCR.CR_APROV "
 _cQuery += "                   FROM " + RetSqlName("SCR") + " SCR "
@@ -1049,38 +960,34 @@ _cQuery += "       AND SCR.CR_FILIAL IN " + FormatIn(cFils,";")
 _cQuery += "       AND SCR.CR_TIPO    = 'SA' "
 _cQuery += "       AND SCP.CP_EMISSAO >= '20200727' "
 
-IF _lTodos .OR. SuperGetMV("IT_AMBTEST",.F.,.T.)//PARA TELA VIA TELA
-
-   IF SuperGetMV("IT_AMBTEST",.F.,.T.)//PODE SER QQ FILTRO PARA TESTES NA HOMOLOGACAO E DESENV
+If _lTodos .Or. !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento//PARA TELA VIA TELA
+   If !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento//PODE SER QQ FILTRO PARA TESTES NA HOMOLOGACAO E DESENV
       _cQuery += " AND SCP.CP_I_SITWF <> ' ' "
       _cQuery += " AND SCP.CP_STATSA  =  'B'"
       _cQuery += " AND SCP.CP_I_INVES <> 'S' "
       _cQuery += " AND SCP.CP_EMISSAO >= '20240801' "
-
-   ELSE//*********** PRODUCAO - LISTA DE APROVAÇÕES ENVIADAS E NÃO AVALIADOS *************
+   Else// PRODUCAO - LISTA DE APROVAÇÕES ENVIADAS E NÃO AVALIADOS
       _cQuery += " AND SCP.CP_I_SITWF = '2' "//ENVIADOS
       _cQuery += " AND SCP.CP_STATSA  = 'B' "//BLOQUEADOS
-   ENDIF
-
-ELSE// ************* PRODUCAO - SCHEDULE - NÃO ENVIADOS *************
+   EndIf
+Else// PRODUCAO - SCHEDULE - NÃO ENVIADOS
    _cQuery += "    AND SCP.CP_I_SITWF = '1' "//NÃO ENVIADOS
    _cQuery += "    AND SCP.CP_STATSA  = 'B' "//BLOQUEADOS
-ENDIF
+EndIf
 
-//_cQuery+="     AND ZZL.ZZL_GRPAPR = SCP.CP_I_GRAPR "
 _cQuery += "       AND ZZL.ZZL_LIBSAS = 'S' "
 _cQuery += "       ORDER BY 2 "
 
 _cQuery := ChangeQuery(_cQuery)
 MPSysOpenQuery( _cQuery , cAlias )
 
-DO WHILE (cAlias)->(!EOF())
-    AADD( _aRegistros , { (cAlias)->REC , (cAlias)->CR_APROV }  )
+While (cAlias)->(!Eof())
+   aAdd( _aRegistros , { (cAlias)->REC , (cAlias)->CR_APROV }  )
+   (cAlias)->(DBSkip())
+EndDo
 
-    (cAlias)->(DBSKIP())
-ENDDO
-(cAlias)->(DBCLOSEAREA())
-DBSELECTAREA("SCR")
+(cAlias)->(DBCloseArea())
+DBSelectArea("SCR")
 
 Return _aRegistros
 
@@ -1100,106 +1007,95 @@ Parametros--------: cFil.......: Recebe a Filial do documento a ser avaliado
 Retorno-----------: .T. ou .F.
 ===============================================================================================================================*/
 Static Function MyExec094(cFil,_cNum,cAprov,_cErro,_cAprovador,_cArqHtm,_cObs)
+
 Local oModel094 := Nil      //-- Objeto que receberá o modelo da MATA094
-Local nLenSCR   := LEN(SCR->CR_NUM)//-- Controle de tamanho de campo do documento
+Local nLenSCR   := Len(SCR->CR_NUM)//-- Controle de tamanho de campo do documento
 Local lOk       := .T.      //-- Controle de validação e commit
 Local aErro     := {}       //-- Recebe msg de erro de processamento
 Local cTipo     := "SA"     //-- Recebe o tipo do documento a ser avaliado
 
-FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01956"/*cMsgId*/, "MEST01956 - MYEXEC094 - SCR DBSEEK...: [" + cFil + cTipo + Padr(_cNum, nLenSCR) + _cAprovador+"] "/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01956"/*cMsgId*/, "MEST01956 - MYEXEC094 - SCR DBSeek...: [" + cFil + cTipo + PadR(_cNum, nLenSCR) + _cAprovador+"] "/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 cFilAnt:=cFil
-SCR->(DBSETORDER(3)) //CR_FILIAL+CR_TIPO+CR_NUM+CR_APROV
-If SCR->(DBSEEK(cFil + cTipo + Padr(_cNum, nLenSCR) + _cAprovador))
+SCR->(DBSetOrder(3)) //CR_FILIAL+CR_TIPO+CR_NUM+CR_APROV
+If SCR->(DBSeek(cFil + cTipo + PadR(_cNum, nLenSCR) + _cAprovador))
    nRegSCR:=SCR->(RECNO())
 
    //INICA A VARIAVEL cUserName para usar dentro da função RetCodUsr() usada dentro do programa MATA094
-   cUserName:=Posicione("ZZL",3,xFilial("ZZL")+ALLTRIM(SCR->CR_USER),"ZZL_USER")
+   cUserName:=Posicione("ZZL",3,xFilial("ZZL")+AllTrim(SCR->CR_USER),"ZZL_USER")
    //GRAVA LOG NO SERVER
    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01957"/*cMsgId*/, "MEST01957 - MYEXEC094 - cFilAnt .....: " + cFilAnt/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01958"/*cMsgId*/, "MEST01958 - MYEXEC094 - RECNO SCR ...: " + AlltoChar(nRegSCR)/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01959"/*cMsgId*/, "MEST01959 - MYEXEC094 - SCR->CR_USER.: " + SCR->CR_USER/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01960"/*cMsgId*/, "MEST01960 - MYEXEC094 - cUserName....: " + cUserName/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
-   FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01961"/*cMsgId*/, "MEST01961 - MYEXEC094 - RETCODUSR()..: " + RETCODUSR()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+   FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01961"/*cMsgId*/, "MEST01961 - MYEXEC094 - RetCodUsr()..: " + RetCodUsr()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01962"/*cMsgId*/, "MEST01962 - MYEXEC094 - _cObs........: " + _cObs/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
-   
-    //-- Códigos de operações possíveis:
-    //--"001" // Liberado *
-    //--"002" // Estornar
-    //--"003" // Superior
-    //--"004" // Transferir Superior
-    //--"005" // Rejeitado *
-    //--"006" // Bloqueio
-    //--"007" // Visualizacao
-    //-- Seleciona a operação de aprovação de documentos
-	IF cAprov = "S"
-       A094SetOp('001')// Liberado
-	ELSE
-       A094SetOp('005')// Rejeitado
-	ENDIF
-    //-- Carrega o modelo de dados e seleciona a operação de aprovação (UPDATE)
-    oModel094 := FWLoadModel('MATA094')
-    oModel094:SetOperation( MODEL_OPERATION_UPDATE )
-    oFieldSCR:= oModel094:GetModel("FieldSCR")
-    oFieldSCR:Activate()
-    oFieldSCR:LoadValue("CR_OBS" , _cObs ) 
-    oModel094:Activate()
-    //-- Valida o formulário
-    lOk := oModel094:VldData()
-    If lOk
-        //-- Se validou, grava o formulário
-        lOk := oModel094:CommitData()//oFieldSCR:CommitData() .AND.
-	 ENDIF
 
-    IF !lOk//-- Avalia erros
-        //-- Busca o Erro do Modelo de Dados
-        aErro := oModel094:GetErrorMessage()
-        //-- Monta o Texto que será mostrado na tela
-        _cErro+='Mensagem do erro: [' + AllToChar(aErro[06]) + ']<br>'
-        IF !EMPTY(aErro[07])
-           _cErro+='Mensagem da solução: [' + AllToChar(aErro[07]) + ']<br>'
-        ENDIF
-        _cErro+='cFilAnt: ' + cFilAnt+'<br>'
-        _cErro+='RECNO SCR: ' + AlltoChar(nRegSCR)+'<br>'
-        _cErro+='SCR->CR_USER: ' + SCR->CR_USER+'<br>'
-        _cErro+='cUserName: ' + cUserName+'<br>'
-        _cErro+='RETCODUSR(): ' + RETCODUSR()+'<br>'
-        
-/*      _cErro+='Id do formulário de origem: [' + AllToChar(aErro[01]) + ']'
-        _cErro+='Id do campo de origem:      [' + AllToChar(aErro[02]) + ']'
-        _cErro+='Id do formulário de erro:   [' + AllToChar(aErro[03]) + ']'
-        _cErro+='Id do campo de erro:        [' + AllToChar(aErro[04]) + ']'
-        _cErro+='Id do erro:                 [' + AllToChar(aErro[05]) + ']'
-        _cErro+='Valor atribuído:            [' + AllToChar(aErro[08]) + ']'
-        _cErro+='Valor anterior:             [' + AllToChar(aErro[09]) + ']'*/
-    EndIf
+   //-- Códigos de operações possíveis:
+   //--"001" // Liberado *
+   //--"002" // Estornar
+   //--"003" // Superior
+   //--"004" // Transferir Superior
+   //--"005" // Rejeitado *
+   //--"006" // Bloqueio
+   //--"007" // Visualizacao
+   //-- Seleciona a operação de aprovação de documentos
+   If cAprov = "S"
+      A094SetOp('001')// Liberado
+   Else
+      A094SetOp('005')// Rejeitado
+   EndIf
+   //-- Carrega o modelo de dados e seleciona a operação de aprovação (UPDATE)
+   oModel094 := FWLoadModel('MATA094')
+   oModel094:SetOperation( MODEL_OPERATION_UPDATE )
+   oFieldSCR:= oModel094:GetModel("FieldSCR")
+   oFieldSCR:Activate()
+   oFieldSCR:LoadValue("CR_OBS" , _cObs ) 
+   oModel094:Activate()
+   //-- Valida o formulário
+   lOk := oModel094:VldData()
+   If lOk
+      //-- Se validou, grava o formulário
+      lOk := oModel094:CommitData()//oFieldSCR:CommitData() .And.
+   EndIf
 
-	 SCP->(DBSETORDER(1))
-    SCP->(DBSEEK(xFilial("SCP")+_cNum))        
-    DO WHILE (!SCP->(eof()) .and. ( xFilial("SCP")+_cNum == SCP->CP_FILIAL+SCP->CP_NUM )) 
-    
-       SCP->(RecLock("SCP",.F.))
-       IF !lOk//-- Avalia erros
-        //SCP->CP_I_SITWF:= "1"//Enviar de novo se dar erro 
-       ELSE      
-      	 SCP->CP_I_SITWF:= "2"//Enviado, marca de novo por garantia
-       ENDIF
-       SCP->CP_I_OBSAP:=_cObs
-       SCP->(MSUNLOCK())    		
-       SCP->(DBSKIP())        	
-    
-    ENDDO
+   If !lOk//-- Avalia erros
+      //-- Busca o Erro do Modelo de Dados
+      aErro := oModel094:GetErrorMessage()
+      //-- Monta o Texto que será mostrado na tela
+      _cErro+='Mensagem do erro: [' + AllToChar(aErro[06]) + ']<br>'
+      If !Empty(aErro[07])
+         _cErro+='Mensagem da solução: [' + AllToChar(aErro[07]) + ']<br>'
+      EndIf
+      _cErro+='cFilAnt: ' + cFilAnt+'<br>'
+      _cErro+='RECNO SCR: ' + AlltoChar(nRegSCR)+'<br>'
+      _cErro+='SCR->CR_USER: ' + SCR->CR_USER+'<br>'
+      _cErro+='cUserName: ' + cUserName+'<br>'
+      _cErro+='RetCodUsr(): ' + RetCodUsr()+'<br>'
+   EndIf
 
-    //-- Desativa o modelo de dados
-    oModel094:DeActivate()
+   SCP->(DBSetOrder(1))
+   SCP->(DBSeek(xFilial("SCP")+_cNum))        
+   While (!SCP->(Eof()) .And. ( xFilial("SCP")+_cNum == SCP->CP_FILIAL+SCP->CP_NUM )) 
+      SCP->(RecLock("SCP",.F.))
+      If lOk    
+         SCP->CP_I_SITWF:= "2"//Enviado, marca de novo por garantia
+      EndIf
+      SCP->CP_I_OBSAP:=_cObs
+      SCP->(MSUnLock())    		
+      SCP->(DBSkip())        	
+   EndDo
+
+   //-- Desativa o modelo de dados
+   oModel094:DeActivate()
 Else
-    _cErro+="Documento não encontrado, Chave: "+cFil + cTipo + ALLTRIM(_cNum) + _cAprovador+" [ MyExec094 ] "
+    _cErro+="Documento não encontrado, Chave: "+cFil + cTipo + AllTrim(_cNum) + _cAprovador+" [ MyExec094 ] "
 EndIf 
 
-IF lOk
-   FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01963"/*cMsgId*/, "MEST01963 - MYEXEC094 - OK...........: " + IF(cAprov="S","APROVADO: ","REJEITADO: ")+_cObs/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
-ELSE
+If lOk
+   FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01963"/*cMsgId*/, "MEST01963 - MYEXEC094 - OK...........: " + If(cAprov="S","APROVADO: ","REJEITADO: ")+_cObs/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+Else
    FWLogMsg("ERROR"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01964"/*cMsgId*/, "MEST01964 - MYEXEC094 - ERRO.........: " + _cErro/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
-ENDIF
+EndIf
 
 Return lOk
 
@@ -1212,10 +1108,11 @@ Descrição---------: Media dos ultimos 3 meses
 Parametros--------: cFil, cItem, cLocal
 Retorno-----------: nMedia
 ===============================================================================================================================*/
-STATIC FUNCTION MEST19Media(cFil,cItem,cLocal)
-LOCAL cQry:=""
-LOCAL _dDAtaIncio:= DATE() - 90
-LOCAL nMedia     := 0
+Static Function MEST19Media(cFil,cItem,cLocal)
+
+Local cQry:=""
+Local _dDAtaIncio:= Date() - 90
+Local nMedia     := 0
 
 cQry += " SELECT D3_EMISSAO, D3_QUANT  "
 cQry += " FROM " + RetSqlName("SD3") + " D3 "
@@ -1223,27 +1120,27 @@ cQry += " WHERE D3.D_E_L_E_T_ = ' ' "
 cQry += "   AND D3_ESTORNO  <> 'S'   "
 cQry += "   AND D3.D3_TM     = '560' "
 cQry += "   AND D3.D3_FILIAL = '" + cFil   + "' "
-cQry += "   AND D3_COD       = '" + ALLTRIM(cItem)  + "' "
+cQry += "   AND D3_COD       = '" + AllTrim(cItem)  + "' "
 cQry += "   AND D3.D3_LOCAL  = '" + cLocal + "' "
-cQry += "   AND D3.D3_EMISSAO BETWEEN '" + DtoS(_dDAtaIncio) + "' AND '" + DtoS(DATE()) + "' "//MEDIA
+cQry += "   AND D3.D3_EMISSAO BETWEEN '" + DToS(_dDAtaIncio) + "' AND '" + DToS(DATE()) + "' "//MEDIA
 
 If Select("TRB") <> 0
-   TRB->(DbCloseArea())
+   TRB->(DBCloseArea())
 EndIf
 cQry := ChangeQuery(cQry)
 MPSysOpenQuery(cQry,"TRB")
 
-TRB->(DBGOTOP())
-IF !TRB->(EOF())
+TRB->(DBGoTop())
+If !TRB->(Eof())
    nMedia+=TRB->D3_QUANT
-ENDIF
+EndIf
 nMedia:=(nMedia/3)
 
 If Select("TRB") <> 0
-   TRB->(DbCloseArea())
+   TRB->(DBCloseArea())
 EndIf
 
-RETURN nMedia
+Return nMedia
 
 /*
 ===============================================================================================================================
@@ -1254,12 +1151,12 @@ Descrição---------: Faz a cópia do arquivo de aprovação para .old, e cria o arqu
 Parametros--------: _cHtmlMode,_cArqHtm
 Retorno-----------: nMedia
 ===============================================================================================================================*/
-STATIC FUNCTION MEST19Copy(_cHtmlMode,_cArqHtm)
+Static Function MEST19Copy(_cHtmlMode,_cArqHtm)
 
-IF UPPER("\workflow\emp01\" + _cArqHtm + ".htm") == UPPER(_cHtmlMode)
+If Upper("\workflow\emp01\" + _cArqHtm + ".htm") == Upper(_cHtmlMode)
    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01965"/*cMsgId*/, "MEST01965 - Origem e destino iguais: DE "+_cHtmlMode+" PARA \workflow\emp01\" + _cArqHtm + ".htm."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
-   RETURN .T.
-ENDIF
+   Return .T.
+EndIf
 
 If File("\workflow\emp01\" + _cArqHtm + ".htm")
 	If __CopyFile("\workflow\emp01\" + _cArqHtm + ".htm", "\workflow\emp01\" + _cArqHtm + ".old")
@@ -1271,11 +1168,11 @@ If File("\workflow\emp01\" + _cArqHtm + ".htm")
 	Else
       FWLogMsg("ERROR"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01968"/*cMsgId*/, "MEST01968 - Não foi possível renomear o arquivo " + _cArqHtm + ".htm."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 	EndIf
-else
+Else
    FWLogMsg("ERROR"/*cSeverity*/, /*cTransactionId*/, "MEST019"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MEST01969"/*cMsgId*/, "MEST01969 - Arquivo não encontrado \workflow\emp01\" + _cArqHtm + ".htm"/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 EndIf
 
-RETURN .T.
+Return .T.
 
 /*
 ===============================================================================================================================
@@ -1285,28 +1182,28 @@ Data da Criacao---: 25/06/2020
 Descrição---------: Recria arquivo com conteúdo de outro arquivo
 Parametros--------: _cArqDest - Arquivo onde vai gravar o conteudo
 					     _cArqOri - Arquivo com conteúdo a ser utilizado
-Retorno-----------: _lret - lógico indicando se completou o processo
+Retorno-----------: _lRet - lógico indicando se completou o processo
 ===============================================================================================================================
 */
 Static Function MEST019CP(_cArqDest,_cArqOri)
 
-Local _lret := .T.
+Local _lRet := .T.
 Local _cconteudo := MemoRead( _cArqOri)
 
-If empty(_cconteudo)
-	_lret := .F.
-Endif
-If _lret .and. FERASE(_cArqDest)==0 
+If Empty(_cconteudo)
+	_lRet := .F.
+EndIf
+If _lRet .And. FERASE(_cArqDest)==0 
 
-	_nHandle := FCREATE(_cArqDest) 
+	_nHandle := FCreate(_cArqDest) 
 	If _nHandle > 0
-		FCLOSE(_nHandle)
-		_lret := memowrite(_cArqDest,_cconteudo)
+		FClose(_nHandle)
+		_lRet := memowrite(_cArqDest,_cconteudo)
 	Else
-		_lret := .F.
-	Endif
+		_lRet := .F.
+	EndIf
 Else
-	_lret := .F.
-Endif 
+	_lRet := .F.
+EndIf 
 	
-Return _lret
+Return _lRet

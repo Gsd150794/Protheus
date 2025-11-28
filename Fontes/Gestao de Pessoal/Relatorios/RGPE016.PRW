@@ -9,11 +9,8 @@ Alex Wallauer |03/02/2022| Chamado 38743. Ajuste no filtro dos 2 paramentros nov
 Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
-#Define ENTER Chr(13)+Chr(10)
+
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -29,7 +26,7 @@ User Function RGPE016()
 
 Local _alog := {}  , _nzi
 
-If !(isincallstack("MDIEXECUTE") .or. isincallstack("SIGAADV"))
+If !(isincallstack("MDIEXECUTE") .Or. isincallstack("SIGAADV"))
 
 	//===========================================================================
 	//| Prepara o ambiente pra processamento do JOB                             |
@@ -39,7 +36,7 @@ If !(isincallstack("MDIEXECUTE") .or. isincallstack("SIGAADV"))
 	RpcSetType(2)
 		
 	If !RPCSETENV( '01' , '01' )
-		Return()
+		Return
 	EndIf
 	
 	Pergunte('RGPE016',.F.)
@@ -47,15 +44,15 @@ If !(isincallstack("MDIEXECUTE") .or. isincallstack("SIGAADV"))
 Else
 
 	//Faz pergunte
-	IF !Pergunte('RGPE016',.T.)
+	If !Pergunte('RGPE016',.T.)
    
-  		U_ITMSG("Relatório cancelado!","Atenção",,1)
-		RETURN .F.
+  		U_ITMsg("Relatório cancelado!","Atenção",,1)
+		Return .F.
 		
-	ENDIF
+	EndIf
 
 
-Endif
+EndIf
 
 _aheader := ;
 {"Filial",;				//01
@@ -95,34 +92,34 @@ _aheader := ;
 //Log de utilização
 U_ITLOGACS()
 
-PRIVATE _cTitulo:='Programação de Férias Filtros: Data: ' + DTOC(MV_PAR01)+" - Dias: "+STR(MV_PAR02,3)
+Private _cTitulo:='Programação de Férias Filtros: Data: ' + DToC(MV_PAR01)+" - Dias: "+Str(MV_PAR02,3)
 
-IF !EMPTY(MV_PAR12) .OR. !EMPTY(MV_PAR13)
-   _cTitulo+=" - Inicio Ferias de "+DTOC(MV_PAR12)+" ate "+DTOC(MV_PAR13)
-ENDIF
+If !Empty(MV_PAR12) .Or. !Empty(MV_PAR13)
+   _cTitulo+=" - Inicio Ferias de "+DToC(MV_PAR12)+" ate "+DToC(MV_PAR13)
+EndIf
 
-If (isincallstack("MDIEXECUTE") .or. isincallstack("SIGAADV"))
+If (isincallstack("MDIEXECUTE") .Or. isincallstack("SIGAADV"))
 
 
-	fwmsgrun(,{ |_oProc| _alog := RGPE016D(_oProc) },"Processando relatório...","Aguarde...")
+	FWMsgRun(,{ |_oProc| _alog := RGPE016D(_oProc) },"Processando relatório...","Aguarde...")
 
-	If len(_alog) > 0
+	If Len(_alog) > 0
 	
 		U_ITListBox( _cTitulo ,_aheader , _alog , .T. , 1 , _cTitulo )
 		 			
 	Else
 	
-		u_itmsg("Não foram localizados registros para esse filtro","Atenção",,2)
+		U_ITMsg("Não foram localizados registros para esse filtro","Atenção",,2)
 		_lenvia := .F.
 		
-	Endif
+	EndIf
 	
 Else
 
 	_cfiliais := u_itgetmv("ITFERFIL","92")
-	_afils := strtokarr(_cfiliais,",")
+	_afils := StrTokArr(_cfiliais,",")
 
-	For _nzi := 1 to len(_afils)
+	For _nzi := 1 to Len(_afils)
 
 		MV_PAR01 := DATE()+45
 		MV_PAR02 := 31
@@ -137,18 +134,14 @@ Else
 
 		_alog := RGPE016D()
 		
-		If len(_alog) > 0
+		If Len(_alog) > 0
 			_cfil := cfilant
 			cfilant := _afils[_nzi]
 			RGPE016E(_alog,_aheader)
 			cfilant := _cfil					
-		Endif
-				
+		EndIf
 	Next
-
-
-Endif
-
+EndIf
 
 Return 
 
@@ -157,30 +150,27 @@ Return
 Programa----------: RGPE016E
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 25/06/2018
-===============================================================================================================================
 Descrição---------: Envia email do relatório
-===============================================================================================================================
 Parametros--------: _alog - Dados do relatório
 					_aheader - cabeçalho do relatório
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static function RGPE016E(_alog,_aheader)
+Static Function RGPE016E(_alog,_aheader)
 
 Local _aConfig	:= U_ITCFGEML('')
 Local _cEmail	:= U_ITGETMV( 'IT_WFPRFR' , 'sistema@italac.com.br' )
-Local _carquivo := "\temp\RGPE016.csv"  , _ni , _nc
+Local _carquivo := "\temp\RGPE016.csv"  , _nI , _nc
 
 erase(_carquivo)
 
-U_RGPE016G( 'Relatório de programação de férias - ' + dtoc(date())  , _aHeader , _alog, 'RGPE016')
+U_RGPE016G( 'Relatório de programação de férias - ' + DToC(date())  , _aHeader , _alog, 'RGPE016')
 	
 
 	_cMsgEml := '<html>'
-	_cMsgEml += '<head><title></title>Relatório de programação de férias - ' + dtoc(date()) + '</head>'
+	_cMsgEml += '<head><title></title>Relatório de programação de férias - ' + DToC(date()) + '</head>'
 	_cMsgEml += '<body>'
-	_cMsgEml += '<style type="text/css"><!--'
+	_cMsgEml += '<style Type="text/css"><!--'
 	_cMsgEml += 'table.bordasimples { border-collapse: collapse; }'
 	_cMsgEml += 'table.bordasimples tr td { border:1px solid #777777; }'
 	_cMsgEml += 'td.titulos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #C6E2FF; }'
@@ -193,7 +183,7 @@ U_RGPE016G( 'Relatório de programação de férias - ' + dtoc(date())  , _aHeader ,
 	_cMsgEml += '<img src="http://www.italac.com.br/wf/italac-wf.jpg" width="700" height="50"><br>'
 	_cMsgEml += '<table class="bordasimples" width="700">'
 	_cMsgEml += '    <tr>'
-	_cMsgEml += '	<td class="titulos"><center>Relatório de programação de férias - ' + dtoc(date()) + '</center></td>'
+	_cMsgEml += '	<td class="titulos"><center>Relatório de programação de férias - ' + DToC(date()) + '</center></td>'
 	_cMsgEml += '	</tr>'
 	_cMsgEml += '</table>'
 	_cMsgEml += '<br>'
@@ -203,11 +193,11 @@ U_RGPE016G( 'Relatório de programação de férias - ' + dtoc(date())  , _aHeader ,
 	_cMsgEml += '    </tr>'
 	_cMsgEml += '    <tr>'
 	_cMsgEml += '      <td class="itens" align="center" width="20%"><b>Data:</b></td>'
-	_cMsgEml += '      <td class="itens" align="left" >'+ dtoc(date()) +'</td>'
+	_cMsgEml += '      <td class="itens" align="left" >'+ DToC(date()) +'</td>'
 	_cMsgEml += '    </tr>'
 	_cMsgEml += '    <tr>'
 	_cMsgEml += '      <td class="itens" align="center" width="20%"><b>Hora:</b></td>'
-	_cMsgEml += '      <td class="itens" align="left" >'+ time() +'</td>'
+	_cMsgEml += '      <td class="itens" align="left" >'+ Time() +'</td>'
 	_cMsgEml += '    </tr>'
 	
 	_cMsgEml += '	<tr>'
@@ -225,23 +215,23 @@ U_RGPE016G( 'Relatório de programação de férias - ' + dtoc(date())  , _aHeader ,
 	
 	_cMsgEml += '      <td class="itens" align="center" width="10%"><b>Filial</b></td>'
 
-	For _ni := 2 to len(_aheader)
-	    _cMsgEml += '      <td class="itens" align="left" width="10%"><b>' + ( _aheader[_ni] ) + '</b></td>'
+	For _nI := 2 to Len(_aheader)
+	    _cMsgEml += '      <td class="itens" align="left" width="10%"><b>' + ( _aheader[_nI] ) + '</b></td>'
     Next
 
 	_cMsgEml += '    </tr>'
 	_cMsgEml += '</center>'
 	
-	For _ni := 1 to len(_alog)
+	For _nI := 1 to Len(_alog)
 
 		_cMsgEml += '    <tr>'
 
-	    For _nc := 1 to LEN( _alog[_ni] )
-	        IF _alog[_ni][_nc] <> "___  / ___ / ___"
-		        _cMsgEml += '   <td class="itens" align="left" >' + ( _alog[_ni][_nc] ) + '</td>'        
-		    ELSE
+	    For _nc := 1 to Len( _alog[_nI] )
+	        If _alog[_nI][_nc] <> "___  / ___ / ___"
+		        _cMsgEml += '   <td class="itens" align="left" >' + ( _alog[_nI][_nc] ) + '</td>'        
+		    Else
 		        _cMsgEml += '   <td class="itens" align="left" ></td>'        
-		    ENDIF		        
+		    EndIf		        
 	    Next
 
 		_cMsgEml += '    </tr>'
@@ -263,23 +253,23 @@ U_RGPE016G( 'Relatório de programação de férias - ' + dtoc(date())  , _aHeader ,
 
 _cEmlLog := ''
 
-_cAssunto := "Programação de férias - Filial " + cfilant + " - " + dtoc(date())
+_cAssunto := "Programação de férias - Filial " + cfilant + " - " + DToC(date())
 _cEmlLog := ""
 
-If !(isincallstack("MDIEXECUTE") .or. isincallstack("SIGAADV"))
+If !(isincallstack("MDIEXECUTE") .Or. isincallstack("SIGAADV"))
 	
 		U_ITENVMAIL( _aConfig[01] , _cEmail ,        ,         ,_cAssunto, _cMsgEml ,_carquivo;
 			,_aConfig[01],_aConfig[02], _aConfig[03],_aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog )
 	
 Else
 
-		fwmsgrun(,{ || U_ITENVMAIL( _aConfig[01] , _cEmail ,        ,         ,_cAssunto, _cMsgEml ,_carquivo;
+		FWMsgRun(,{ || U_ITENVMAIL( _aConfig[01] , _cEmail ,        ,         ,_cAssunto, _cMsgEml ,_carquivo;
 	         ,_aConfig[01],_aConfig[02], _aConfig[03],_aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog )},"Aguarde...","Enviando email...")
 
 
-		U_ITMSG("Enviado arquivo "+_carquivo+" para "+_cEmail+CHR(13)+CHR(10)+_cEmlLog,"Atenção",,1)
+		U_ITMsg("Enviado arquivo "+_carquivo+" para "+_cEmail+CHR(13)+CHR(10)+_cEmlLog,"Atenção",,1)
 	         
-Endif
+EndIf
 
 Return
 
@@ -300,10 +290,10 @@ Local _cAliasSRA
 Local _cQuery := ""
 Local _ntot := 0
 
-IF VALTYPE(_oProc) = "O"
+If ValType(_oProc) = "O"
    _oProc:cCaption := ("Lendo dados dos funcionarios ")
    ProcessMessages()
-ENDIF   
+EndIf   
  
 //Faz query filtrando o SRA
 _cQuery := " SELECT" 
@@ -313,13 +303,13 @@ _cQuery += " WHERE "
 _cQuery += "     SRA.D_E_L_E_T_  = ' ' "        
 
 
-If !Empty(MV_PAR03) .AND. !Empty(MV_PAR04)
+If !Empty(MV_PAR03) .And. !Empty(MV_PAR04)
 
-	_cQuery += " AND SRA.RA_MAT >= '" + ALLTRIM(MV_PAR03) + "' AND SRA.RA_MAT <= '" + ALLTRIM(MV_PAR04) + "' "
+	_cQuery += " AND SRA.RA_MAT >= '" + AllTrim(MV_PAR03) + "' AND SRA.RA_MAT <= '" + AllTrim(MV_PAR04) + "' "
 
-   _cTitulo+=' - Matriculas de ' + ALLTRIM(MV_PAR03)+" ate "+ALLTRIM(MV_PAR04)
+   _cTitulo+=' - Matriculas de ' + AllTrim(MV_PAR03)+" ate "+AllTrim(MV_PAR04)
 
-Endif
+EndIf
 
 _csitfol := RGPE016F(MV_PAR05)
 
@@ -327,9 +317,9 @@ If !Empty(_csitfol)
 
 	_cQuery += " AND SRA.RA_SITFOLH IN " + _csitfol
 
-   _cTitulo+=' - Situacoes: ' + ALLTRIM(_csitfol)
+   _cTitulo+=' - Situacoes: ' + AllTrim(_csitfol)
 	
-Endif 
+EndIf 
 
 _ccatfunc := RGPE016F( AllTrim(MV_PAR06)  )
 
@@ -337,33 +327,33 @@ If !Empty(_ccatfunc)
 
 	_cQuery += " AND SRA.RA_CATFUNC IN " + _ccatfunc
 
-   _cTitulo+=' - Categorias: ' + ALLTRIM(_ccatfunc)
+   _cTitulo+=' - Categorias: ' + AllTrim(_ccatfunc)
 	
-Endif 
+EndIf 
 
 If !Empty(MV_PAR07)
 
 	_cQuery += " AND SRA.RA_FILIAL IN " + FormatIn( AllTrim(MV_PAR07) , ';' )
 
-   _cTitulo+=' - Filiais: ' + ALLTRIM(MV_PAR07)
+   _cTitulo+=' - Filiais: ' + AllTrim(MV_PAR07)
 	
-Endif 
+EndIf 
 
 If !Empty(MV_PAR09)
 
 	_cQuery += " AND SRA.RA_I_SETOR IN " + FormatIn( AllTrim(MV_PAR09) , ';' )
 
-   _cTitulo+=' - Setores: ' + ALLTRIM(MV_PAR09)
+   _cTitulo+=' - Setores: ' + AllTrim(MV_PAR09)
 	
-Endif 
+EndIf 
 
 If !Empty(MV_PAR11) 
 
 	_cQuery += " AND SRA.RA_CC >= '" + MV_PAR10 + "' AND SRA.RA_CC <= '" + MV_PAR11 + "'"
 
-   _cTitulo+=' - Centros de custos de: ' + ALLTRIM(MV_PAR10)+' ate ' + ALLTRIM(MV_PAR11)
+   _cTitulo+=' - Centros de custos de: ' + AllTrim(MV_PAR10)+' ate ' + AllTrim(MV_PAR11)
 	
-Endif 
+EndIf 
 
 _cQuery += " ORDER BY RA_FILIAL,RA_MAT"
 
@@ -375,22 +365,22 @@ EndIf
 DBUseArea( .T. , "TOPCONN" , TcGenQry(,,_cQuery) , _cAliasSRA , .T. , .F. )
 
 COUNT TO _ntot  
-_cTot:=ALLTRIM(STR(_ntot))
-_nTam:=LEN(_cTot)+1
+_cTot:=AllTrim(Str(_ntot))
+_nTam:=Len(_cTot)+1
 
 _nConta := 0
-(_cAliasSRA)->(DBGOTOP())
+(_cAliasSRA)->(DBGoTop())
 _cAliasSRF	:= GetNextAlias()   	
 
-Do while !(_cAliasSRA)->(Eof())
+While !(_cAliasSRA)->(Eof())
 
-	SRA->(Dbgoto((_cAliasSRA)->REC))
+	SRA->(DBGoTo((_cAliasSRA)->REC))
 	
-    IF VALTYPE(_oProc) = "O"
+    If ValType(_oProc) = "O"
        _nConta++
-       _oProc:cCaption := ("Lendo funcionario " + SRA->RA_FILIAL + '/' + SRA->RA_MAT+" : "+STR(_nConta,_nTam)+" de "+_cTot )
+       _oProc:cCaption := ("Lendo funcionario " + SRA->RA_FILIAL + '/' + SRA->RA_MAT+" : "+Str(_nConta,_nTam)+" de "+_cTot )
        ProcessMessages()
-    ENDIF   
+    EndIf   
 
 	//Faz query filtrando o SRF
 	_cQuery := " SELECT" 
@@ -398,13 +388,13 @@ Do while !(_cAliasSRA)->(Eof())
 	_cQuery += " FROM "+ RetSqlName("SRF") +" SRF "
 	_cQuery += " WHERE "
 	_cQuery += "     SRF.D_E_L_E_T_  = ' ' "
-	_cQuery += " AND SRF.RF_FILIAL = '" + ALLTRIM(SRA->RA_FILIAL) + "' "
-	_cQuery += " AND SRF.RF_MAT = '" + ALLTRIM(SRA->RA_MAT) + "' " 
-    if !EMPTY(MV_PAR01)
-	   _cQuery += " AND SRF.RF_DATAFIM <= '" + DTOS(MV_PAR01) + "' "
-	ENDIF   
+	_cQuery += " AND SRF.RF_FILIAL = '" + AllTrim(SRA->RA_FILIAL) + "' "
+	_cQuery += " AND SRF.RF_MAT = '" + AllTrim(SRA->RA_MAT) + "' " 
+    If !Empty(MV_PAR01)
+	   _cQuery += " AND SRF.RF_DATAFIM <= '" + DToS(MV_PAR01) + "' "
+	EndIf   
 	_cQuery += " AND SRF.RF_STATUS = '1' "//só os ativos 
-	_cQuery += " AND SRF.RF_DATABAS <= " + DTOS(DATE())
+	_cQuery += " AND SRF.RF_DATABAS <= " + DToS(DATE())
 	_cQuery += " ORDER BY SRF.RF_DATABAS "
 	      
 	If Select(_cAliasSRF) > 0
@@ -413,31 +403,31 @@ Do while !(_cAliasSRA)->(Eof())
  
 	DBUseArea( .T. , "TOPCONN" , TcGenQry(,,_cQuery) , _cAliasSRF , .T. , .F. )
 	
-	Do while !(_cAliasSRF)->(Eof())
+	While !(_cAliasSRF)->(Eof())
 	
-		SRF->(Dbgoto((_cAliasSRF)->REC))
+		SRF->(DBGoTo((_cAliasSRF)->REC))
 
-		_ddtbase 	:= iif(SRF->RF_DATABAS>SRA->RA_ADMISSA,SRF->RF_DATABAS,SRA->RA_ADMISSA)
+		_ddtbase 	:= IIf(SRF->RF_DATABAS>SRA->RA_ADMISSA,SRF->RF_DATABAS,SRA->RA_ADMISSA)
 	
-        _cDtFimGozo := STOD("")
-		_ddtiniciof := STOD("")
-		_ddtfinalf  := STOD("")
+        _cDtFimGozo := SToD("")
+		_ddtiniciof := SToD("")
+		_ddtfinalf  := SToD("")
 		_ndiasFer   := 0 
 		_ndiasAbon  := 0
 
-		_d2dtiniciof:= STOD("")
-		_d2dtfinalf := STOD("")
+		_d2dtiniciof:= SToD("")
+		_d2dtfinalf := SToD("")
 		_n2diasFer  := 0
 		_n2diasAbon := 0
 
-		_d3dtiniciof:= STOD("")
-		_d3dtfinalf := STOD("")
+		_d3dtiniciof:= SToD("")
+		_d3dtfinalf := SToD("")
 		_n3diasFer  := 0
 		_n3diasAbon := 0
 
 		_ndiasprog := 0
 
-		If  !EMPTY(SRF->RF_DFEPRO1) .OR. !EMPTY(SRF->RF_DATINI2) .OR. !EMPTY(SRF->RF_DATINI3)
+		If  !Empty(SRF->RF_DFEPRO1) .Or. !Empty(SRF->RF_DATINI2) .Or. !Empty(SRF->RF_DATINI3)
 	
 			_ddtiniciof := SRF->RF_DATAINI
 			_ddtfinalf 	:= SRF->RF_DATAINI+(SRF->RF_DFEPRO1-1)
@@ -447,33 +437,33 @@ Do while !(_cAliasSRA)->(Eof())
 			_ndiasprog  += SRF->RF_DFEPRO1 + SRF->RF_DABPRO1
 
 			_d2dtiniciof := SRF->RF_DATINI2
-			IF !EMPTY(SRF->RF_DATINI2)
+			If !Empty(SRF->RF_DATINI2)
 			   _d2dtfinalf  := SRF->RF_DATINI2+(SRF->RF_DFEPRO2-1)
-			ENDIF   
+			EndIf   
 			_n2diasFer   := SRF->RF_DFEPRO2
 			_n2diasAbon  := SRF->RF_DABPRO2
 
 			_ndiasprog   += SRF->RF_DFEPRO2 + SRF->RF_DABPRO2
 
 			_d3dtiniciof:= SRF->RF_DATINI3
-			IF !EMPTY(SRF->RF_DATINI3)
+			If !Empty(SRF->RF_DATINI3)
 			   _d3dtfinalf := SRF->RF_DATINI3+(SRF->RF_DFEPRO3-1)
-			ENDIF   
+			EndIf   
 			_n3diasFer  := SRF->RF_DFEPRO3
 			_n3diasAbon := SRF->RF_DABPRO3
 
 			_ndiasprog  += SRF->RF_DFEPRO3 + SRF->RF_DABPRO3
 
-		Elseif !EMPTY(SRF->RF_DFERANT) 
+		ElseIf !Empty(SRF->RF_DFERANT) 
 
 			_ndiasprog  += SRF->RF_DFERANT
 		
-		Endif
+		EndIf
 	
-        _nLimite   := 730-(IF(MV_PAR02<31,31,MV_PAR02)) //699
-		_cperINI   := DTOC(SRF->RF_DATABAS) 
-		_cperFIM   := DTOC(SRF->RF_DATAFIM)
-		_cDtLimMax := DTOC(SRF->RF_DATABAS+_nLimite) 
+        _nLimite   := 730-(If(MV_PAR02<31,31,MV_PAR02)) //699
+		_cperINI   := DToC(SRF->RF_DATABAS) 
+		_cperFIM   := DToC(SRF->RF_DATAFIM)
+		_cDtLimMax := DToC(SRF->RF_DATABAS+_nLimite) 
 		_ndiasvenc := SRF->RF_DFERVAT
 		
 		//Montagem de campo proporcional/Saldo conforme tipo de registro
@@ -481,100 +471,100 @@ Do while !(_cAliasSRA)->(Eof())
 			_ndiasprop  := SRF->RF_DFERVAT - _ndiasprog
 		Else
 			_ndiasprop  := SRF->RF_DFERAAT - _ndiasprog
-		Endif
+		EndIf
 	
-		_ctipo := IF(SRF->RF_DFERVAT>0,"Vencida","Proporcional")
+		_ctipo := If(SRF->RF_DFERVAT>0,"Vencida","Proporcional")
 		_cSitu := "Ativo"// (A =Afastado, Vazio = Ativo, D = Demitido, T = Transferido)
-		IF SRA->RA_SITFOLH="A"
+		If SRA->RA_SITFOLH="A"
 		   _cSitu := "Afastado
-		ELSEIF SRA->RA_SITFOLH="D"
+		ElseIf SRA->RA_SITFOLH="D"
 		   _cSitu := "Demitido"
-		ELSEIF SRA->RA_SITFOLH="T"
+		ElseIf SRA->RA_SITFOLH="T"
 		   _cSitu := "Transferido"
-		ENDIF
+		EndIf
         
 		_lLoop:=.F.
-        IF !EMPTY(MV_PAR12) .OR. !EMPTY(MV_PAR13)
+        If !Empty(MV_PAR12) .Or. !Empty(MV_PAR13)
 		   
 		    _lLoop:=.T.
-            IF !EMPTY(MV_PAR12) 
-               IF     !EMPTY(_ddtiniciof ) .AND. _ddtiniciof  >= MV_PAR12  .AND. (EMPTY(MV_PAR13) .OR.  _ddtiniciof  <= MV_PAR13 )
+            If !Empty(MV_PAR12) 
+               If     !Empty(_ddtiniciof ) .And. _ddtiniciof  >= MV_PAR12  .And. (Empty(MV_PAR13) .Or.  _ddtiniciof  <= MV_PAR13 )
 			      _lLoop:=.F.
-			   ELSEIF !EMPTY(_d2dtiniciof) .AND. _d2dtiniciof >= MV_PAR12  .AND. (EMPTY(MV_PAR13) .OR.  _d2dtiniciof <= MV_PAR13 )
+			   ElseIf !Empty(_d2dtiniciof) .And. _d2dtiniciof >= MV_PAR12  .And. (Empty(MV_PAR13) .Or.  _d2dtiniciof <= MV_PAR13 )
 			      _lLoop:=.F.
-			   ELSEIF !EMPTY(_d3dtiniciof) .AND. _d3dtiniciof >= MV_PAR12  .AND. (EMPTY(MV_PAR13) .OR.  _d3dtiniciof <= MV_PAR13 )
+			   ElseIf !Empty(_d3dtiniciof) .And. _d3dtiniciof >= MV_PAR12  .And. (Empty(MV_PAR13) .Or.  _d3dtiniciof <= MV_PAR13 )
 			      _lLoop:=.F.
-			   ENDIF
-			ELSEIF !EMPTY(MV_PAR13)
-               IF     !EMPTY(_ddtiniciof ) .AND. _ddtiniciof  <= MV_PAR13 
+			   EndIf
+			ElseIf !Empty(MV_PAR13)
+               If     !Empty(_ddtiniciof ) .And. _ddtiniciof  <= MV_PAR13 
 			      _lLoop:=.F.
-			   ELSEIF !EMPTY(_d2dtiniciof) .AND. _d2dtiniciof <= MV_PAR13 
+			   ElseIf !Empty(_d2dtiniciof) .And. _d2dtiniciof <= MV_PAR13 
 			      _lLoop:=.F.
-			   ELSEIF !EMPTY(_d3dtiniciof) .AND. _d3dtiniciof <= MV_PAR13 
+			   ElseIf !Empty(_d3dtiniciof) .And. _d3dtiniciof <= MV_PAR13 
 			      _lLoop:=.F.
-			   ENDIF
-			ENDIF
+			   EndIf
+			EndIf
            
-        ENDIF
+        EndIf
 
-        IF _lLoop
-		   (_cAliasSRF)->(Dbskip())
-		   LOOP
-        ENDIF
+        If _lLoop
+		   (_cAliasSRF)->(DBSkip())
+		   Loop
+        EndIf
 
-		If MV_PAR08 == 3 .or. (MV_PAR08 == 1 .AND. _ctipo == "Vencida") .or. (MV_PAR08 == 2 .AND. _ctipo == "Proporcional");
-			.OR. (!(isincallstack("MDIEXECUTE") .or. isincallstack("SIGAADV")) .AND.  _ndiasprop > 22) //Alerta prestes a vencer no schedule
+		If MV_PAR08 == 3 .Or. (MV_PAR08 == 1 .And. _ctipo == "Vencida") .Or. (MV_PAR08 == 2 .And. _ctipo == "Proporcional");
+			.Or. (!(isincallstack("MDIEXECUTE") .Or. isincallstack("SIGAADV")) .And.  _ndiasprop > 22) //Alerta prestes a vencer no schedule
 
             _cDtFimGozo    := BuscaGozo(SRA->RA_FILIAL+SRA->RA_MAT)
 			_cDtAfastamento:= BuscaDtAfas(SRA->RA_FILIAL,SRA->RA_MAT)
 		
-			aadd(_alog,{SRA->RA_FILIAL,;   													//01 *
+			aAdd(_alog,{SRA->RA_FILIAL,;   													//01 *
 				fDesc("CTT",SRA->RA_CC,"CTT_DESC01",,SRA->RA_FILIAL) ,;						//02
-				POSICIONE("ZAK",1,xfilial("ZAK")+SRA->RA_I_SETOR,"ZAK_DESCRI"),;			//03
+				Posicione("ZAK",1,xFilial("ZAK")+SRA->RA_I_SETOR,"ZAK_DESCRI"),;			//03
 				SRA->RA_MAT,;																//04
-				IF(!EMPTY(SRA->RA_NSOCIAL),SRA->RA_NSOCIAL,SRA->RA_NOME) ,;																//05 *
+				If(!Empty(SRA->RA_NSOCIAL),SRA->RA_NSOCIAL,SRA->RA_NOME) ,;																//05 *
 				FDESC("SQ3",SRA->RA_CARGO,"Q3_DESCSUM",,SRA->RA_FILIAL),;					//06
-				alltrim(SRA->RA_MUNICIP),;													//07			
+				AllTrim(SRA->RA_MUNICIP),;													//07			
 				SRA->RA_ESTADO,;															//08
 				_cperINI,;																	//09 *
 				_cperFIM,;																	//10
 				_cDtLimMax,;															    //11
                 ;
-				DTOC(_ddtiniciof),;	        												//12
-				DTOC(_ddtfinalf ),;		    												//13
-                STRZERO(_ndiasFer ,4,1),;											        //14 
-                STRZERO(_ndiasAbon,4,1),;													//15 
+				DToC(_ddtiniciof),;	        												//12
+				DToC(_ddtfinalf ),;		    												//13
+                StrZero(_ndiasFer ,4,1),;											        //14 
+                StrZero(_ndiasAbon,4,1),;													//15 
 				;
-				DTOC(_d2dtiniciof),;	    												//16
-				DTOC(_d2dtfinalf ),;														//17
-                STRZERO(_n2diasFer ,4,1),;											        //18 
-                STRZERO(_n2diasAbon,4,1),;													//19 
+				DToC(_d2dtiniciof),;	    												//16
+				DToC(_d2dtfinalf ),;														//17
+                StrZero(_n2diasFer ,4,1),;											        //18 
+                StrZero(_n2diasAbon,4,1),;													//19 
 				;
-				DTOC(_d3dtiniciof),;	    												//20
-				DTOC(_d3dtfinalf ),;														//21
-                STRZERO(_n3diasFer ,4,1),;											        //22 
-                STRZERO(_n3diasAbon,4,1),;													//23 
+				DToC(_d3dtiniciof),;	    												//20
+				DToC(_d3dtfinalf ),;														//21
+                StrZero(_n3diasFer ,4,1),;											        //22 
+                StrZero(_n3diasAbon,4,1),;													//23 
 				;
-				Strzero(_ndiasvenc,4,1),;													//24
-				Strzero(_ndiasprop,4,1),;													//25
+				StrZero(_ndiasvenc,4,1),;													//24
+				StrZero(_ndiasprop,4,1),;													//25
 				_ctipo,;																	//26
 				_cDtFimGozo,;																//27 
 				_cSitu,;																	//29
 				_cDtAfastamento})															//30  
 
-		Endif
+		EndIf
 
-		(_cAliasSRF)->(Dbskip())
+		(_cAliasSRF)->(DBSkip())
 	
-	Enddo
+	EndDo
 
-	(_cAliasSRA)->(Dbskip())
+	(_cAliasSRA)->(DBSkip())
 	
-Enddo
+EndDo
 
-ASORT(_aLog,,,{|X,Y| ( X[1]+X[5]+DTOS(CTOD(X[9])) ) < ( Y[1]+Y[5]+DTOS(CTOD(Y[9])) ) })//ORDEM DE FILIAL + NOME + Dt. Ini. Per. Aquis
+aSort(_aLog,,,{|X,Y| ( X[1]+X[5]+DToS(CTOD(X[9])) ) < ( Y[1]+Y[5]+DToS(CTOD(Y[9])) ) })//ORDEM DE FILIAL + NOME + Dt. Ini. Per. Aquis
 
-_cTot:=ALLTRIM(STR(LEN(_alog)))
+_cTot:=AllTrim(Str(Len(_alog)))
 
 Return _alog
 
@@ -596,21 +586,21 @@ For x:=1 To Len(_cDados)
 	
 	If SubStr(_cDados,x,1) != "*" 
 	
-		If empty(_cStrFormt)
+		If Empty(_cStrFormt)
 		
 			_cStrFormt+= "("
 			
-		Endif
+		EndIf
 		
 		_cStrFormt+= "'" + SubStr(_cDados,x,1) + "',"
 		
-	Endif
+	EndIf
 	
 Next x
 
-If !empty(_cStrFormt)
+If !Empty(_cStrFormt)
 	_cStrFormt:= SubStr(_cStrFormt,1,Len(_cStrFormt) - 1) + ")"
-Endif
+EndIf
 
 Return _cStrFormt
 
@@ -633,7 +623,7 @@ Local _nI		:= 0
 Local _nX		:= 0
 Local _cPthArq	:= '\temp'
 Local _cPthDes	:= ''
-Local _cNomArq	:= IF(_cNameFile = NIL,'PROTHEUS_'+ StrTran( Time() , ':' , '' ) + DtoS( Date() ) + RetCodUsr() +'.csv', _cNameFile +'.csv' )
+Local _cNomArq	:= If(_cNameFile = NIL,'PROTHEUS_'+ StrTran( Time() , ':' , '' ) + DToS( Date() ) + RetCodUsr() +'.csv', _cNameFile +'.csv' )
 Local _cArqTmp	:= _cPthArq +'\'+ _cNomArq
 Local _cBuffer	:= ''
 
@@ -647,7 +637,7 @@ If !Empty( _aHeader ) .And. !Empty( _aCols )
 
 	If !ExistDir( _cPthArq )
 		If MakeDir( _cPthArq ) <> 0
-			u_itmsg( 'Não foi possível criar o diretório temporário para o arquivo, informe a área de TI/ERP!', "Alerta",,1  )
+			U_ITMsg( 'Não foi possível criar o diretório temporário para o arquivo, informe a área de TI/ERP!', "Alerta",,1  )
 			Return .F.
 		EndIf
 	EndIf
@@ -655,12 +645,12 @@ If !Empty( _aHeader ) .And. !Empty( _aCols )
 	_nHdlArq := FCreate( _cArqTmp ,,, .F. )
 	
 	If _nHdlArq < 0
-		u_itmsg(  'Não foi possível criar o arquivo no diretório temporário, informe a área de TI/ERP!' , "Alerta",,1 )
+		U_ITMsg(  'Não foi possível criar o arquivo no diretório temporário, informe a área de TI/ERP!' , "Alerta",,1 )
 		Return .F.
 	EndIf
 	
 	If !Empty( _cTitAux )
-		FWrite( _nHdlArq , AllTrim( _cTitAux ) + ENTER )
+		FWrite( _nHdlArq , AllTrim( _cTitAux ) + CRLF )
 	EndIf
 	
 	_cBuffer := ''
@@ -669,7 +659,7 @@ If !Empty( _aHeader ) .And. !Empty( _aCols )
 		_cBuffer += _aHeader[_nI] + ';'
 	Next _nI
 	
-	FWrite( _nHdlArq , AllTrim( _cBuffer ) + ENTER )
+	FWrite( _nHdlArq , AllTrim( _cBuffer ) + CRLF )
 	
 	For _nI := 1 To Len( _aCols )
 		
@@ -681,23 +671,23 @@ If !Empty( _aHeader ) .And. !Empty( _aCols )
 				
 				Case ValType( _aCols[_nI][_nX] ) == 'C'	; _cBuffer += _aCols[_nI][_nX]							+ ';'
 				Case ValType( _aCols[_nI][_nX] ) == 'N'	; _cBuffer += cValToChar( _aCols[_nI][_nX] )			+ ';'
-				Case ValType( _aCols[_nI][_nX] ) == 'L'	; _cBuffer += IIF( _aCols[_nI][_nX] , '.T.' , '.F.' )	+ ';'
-				Case ValType( _aCols[_nI][_nX] ) == 'D'	; _cBuffer += DtoC( _aCols[_nI][_nX] )					+ ';'
+				Case ValType( _aCols[_nI][_nX] ) == 'L'	; _cBuffer += IIf( _aCols[_nI][_nX] , '.T.' , '.F.' )	+ ';'
+				Case ValType( _aCols[_nI][_nX] ) == 'D'	; _cBuffer += DToC( _aCols[_nI][_nX] )					+ ';'
 				OtherWise								; _cBuffer += ';'
 				
 			EndCase
 					
 		Next _nX
 		
-		FWrite( _nHdlArq , AllTrim( _cBuffer ) + ENTER )
+		FWrite( _nHdlArq , AllTrim( _cBuffer ) + CRLF )
 		
 	Next _nI
 	
 	FClose( _nHdlArq )
 
-    IF _cNameFile # NIL
-       RETURN .T.
-    ENDIF
+    If _cNameFile # NIL
+       Return .T.
+    EndIf
 	
 	If File( _cArqTmp )
 		
@@ -706,13 +696,13 @@ If !Empty( _aHeader ) .And. !Empty( _aCols )
 		FErase( _cArqTmp )
 		
 	Else
-		u_itmsg(  'Falha no processamento do arquivo, informe a área de TI/ERP!' , "Atenção",,1 )
+		U_ITMsg(  'Falha no processamento do arquivo, informe a área de TI/ERP!' , "Atenção",,1 )
         Return .F.
 	EndIf
 	
 Else
 
-	u_itmsg(  'Não foi possível verificar os dados para a geração do arquivo, não é possível criar um arquivo em branco!' ,  "Atenção",,1 )
+	U_ITMsg(  'Não foi possível verificar os dados para a geração do arquivo, não é possível criar um arquivo em branco!' ,  "Atenção",,1 )
     Return .F.
 	
 EndIf
@@ -730,23 +720,23 @@ Retorno-----------: data da ultima ferias gozada
 ===============================================================================================================================
 */
 Static Function BuscaGozo(cMat) 
-LOCAL _cDtFimGozo:=""
+Local _cDtFimGozo:=""
 
-SR8->(DbSetOrder(2))  // R8_FILIAL+R8_MAT+R8_SEQ
-SR8->(DbSeek(cMat))
-Do While ! SR8->(Eof()) .And. SR8->R8_FILIAL+SR8->R8_MAT == cMat
+SR8->(DBSetOrder(2))  // R8_FILIAL+R8_MAT+R8_SEQ
+SR8->(DBSeek(cMat))
+While ! SR8->(Eof()) .And. SR8->R8_FILIAL+SR8->R8_MAT == cMat
 
 	If SR8->R8_TIPOAFA = "001"
-       _cDtFimGozo:=DTOC(SR8->R8_DATAFIM)
-	Endif
+       _cDtFimGozo:=DToC(SR8->R8_DATAFIM)
+	EndIf
 	
-	SR8->(DbSkip())
+	SR8->(DBSkip())
 EndDo
 //Não mostra as data menores que 60 dias 
-IF CTOD(_cDtFimGozo) <= (DATE()-60) 
+If CTOD(_cDtFimGozo) <= (DATE()-60) 
    _cDtFimGozo:=""
-ENDIF
-RETURN _cDtFimGozo
+EndIf
+Return _cDtFimGozo
 
 /*
 ===============================================================================================================================
@@ -759,18 +749,18 @@ Parametros--------: _cFilial    = Filial do funcionário
 Retorno-----------: _DataAfast  = Data de afastamento do funcionário.
 ===============================================================================================================================
 */
-Static function BuscaDtAfas(_cFilial, _cMatricula)
+Static Function BuscaDtAfas(_cFilial, _cMatricula)
 Local _dRet := Ctod("  /  /  ")
 Local _cQry, _cAlias
-Local _aSaveArea := GetArea()
+Local _aSaveArea := FWGetArea()
 
 Begin Sequence
    _cQry := " SELECT R8_DATAINI FROM "+RetSqlName("SR8")+ " SR8 "
    _cQry += " WHERE SR8.R8_FILIAL = '" + _cFilial + "' AND SR8.D_E_L_E_T_ = ' ' "
    _cQry += " AND SR8.R8_MAT = '" + _cMatricula + "' "
    _cQry += " AND SR8.R8_TIPOAFA <> '001' "
-   _cQry += " AND SR8.R8_DATAINI <= '"+Dtos(Date())+"' "
-   _cQry += " AND (SR8.R8_DATAFIM = '        ' OR SR8.R8_DATAFIM >= '"+Dtos(Date())+"' ) "
+   _cQry += " AND SR8.R8_DATAINI <= '"+DToS(Date())+"' "
+   _cQry += " AND (SR8.R8_DATAFIM = '        ' OR SR8.R8_DATAFIM >= '"+DToS(Date())+"' ) "
    
    _cAlias := GetNextAlias()
 		
@@ -779,13 +769,13 @@ Begin Sequence
    EndIf
 		
    DBUseArea( .T. , "TOPCONN" , TCGenQry(,,_cQry) , _cAlias , .F. , .T. )
-   TcSetField(_cAlias,"R8_DATAINI","D",8,0)
+   TCSetField(_cAlias,"R8_DATAINI","D",8,0)
 		
    (_cAlias)->( DBGoTop() )
    
-   Do While (_cAlias)->( !Eof() )
+   While (_cAlias)->( !Eof() )
 	  If ! Empty((_cAlias)->R8_DATAINI)
-	     If Dtos(_dRet) < Dtos((_cAlias)->R8_DATAINI)
+	     If DToS(_dRet) < DToS((_cAlias)->R8_DATAINI)
 	        _dRet := (_cAlias)->R8_DATAINI
 	     EndIf
 	  EndIf
@@ -797,6 +787,6 @@ Begin Sequence
 
 End Sequence
 
-RestArea(_aSaveArea)
+FWRestArea(_aSaveArea)
 
 Return _dRet

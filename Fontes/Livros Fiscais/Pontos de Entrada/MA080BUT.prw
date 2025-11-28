@@ -1,30 +1,27 @@
 /*
 ===============================================================================================================================
-                                    ATUALIZACOES SOFRIDAS DESDE A CONSTRUÇAO INICIAL
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                           |
-------------------:------------:----------------------------------------------------------------------------------------------:
- Julio Paz        | 21/03/2019 | Padronização de fontes para funcionar com o novo servidor Totvs Loboguará. Chamado 28557.    |
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+Julio Paz     |21/03/2019| Chamado 28557. Padronização de fontes para funcionar com o novo servidor Totvs Loboguará.
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa--------: MA080BUT
 Autor-----------: Alexandre Villar
 Data da Criacao-: 02/10/2015
-===============================================================================================================================
 Descrição-------: P.E. na abertura da tela de manutenção do cadastro de TES
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-
 User Function MA080BUT()
+
 Local _nI
 
 Private aHeader, aCols
@@ -43,7 +40,7 @@ If Altera
    aCols   := {}
    FillGetDados(1,"SF4",1,,,{||.T.},,,,,,.T.)
    //                          1                    2               3              4               5                6             7        8              9                 10 
-   // AADD(aHeader, {Alltrim(SX3->X3_TITULO), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL,"AllwaysTrue()", USADO, SX3->X3_TIPO, SX3->X3_ARQUIVO, SX3->X3_CONTEXT})
+   // aAdd(aHeader, {AllTrim(SX3->X3_TITULO), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL,"AllwaysTrue()", USADO, SX3->X3_TIPO, SX3->X3_ARQUIVO, SX3->X3_CONTEXT})
 
    _aDadSF4 := {}
    _aDadCC7 := {}
@@ -62,7 +59,7 @@ If Altera
    aCols   := {}
    FillGetDados(1,"CC7",1,,,{||.T.},,,,,,.T.)
    //                          1                    2               3              4               5                6             7        8              9                 10 
-   // AADD(aHeader, {Alltrim(SX3->X3_TITULO), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL,"AllwaysTrue()", USADO, SX3->X3_TIPO, SX3->X3_ARQUIVO, SX3->X3_CONTEXT})
+   // aAdd(aHeader, {AllTrim(SX3->X3_TITULO), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL,"AllwaysTrue()", USADO, SX3->X3_TIPO, SX3->X3_ARQUIVO, SX3->X3_CONTEXT})
 	
    DBSelectArea('CC7')
    CC7->( DBSetOrder(1) )
@@ -82,4 +79,4 @@ If Altera
 
 EndIf
 
-Return()
+Return

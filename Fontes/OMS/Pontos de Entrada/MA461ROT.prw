@@ -24,19 +24,19 @@ Descrição---------: Ponto de Entrada antes dos mBrowse's de geração dos document
 ============================================================================================================================================
 Parametros--------: Nenhum
 ============================================================================================================================================
-Observação--------: Esse PE deve retornar um arotina custumizado para ser adicionado no arotina padrão caso for preciso senão retornar 
+Observação--------: Esse PE deve retornar um aRotina custumizado para ser adicionado no aRotina padrão caso For preciso senão retornar 
                     qq coisa diferente de array
 ============================================================================================================================================
 */
-USER FUNCTION MA461ROT()
+User Function MA461ROT()
 
-LOCAL _nPos:=ASCAN(aRotina, {|R| UPPER(R[2]) == UPPER("Ma460Nota") } )
+Local _nPos:=aScan(aRotina, {|R| Upper(R[2]) == Upper("Ma460Nota") } )
 
-IF _nPos # 0
+If _nPos # 0
 
    aRotina[_nPos][2] := "U_I_Ma460Nota"
 
-ENDIF
+EndIf
 
 aAdd( aRotina,{'Marcar Todos'		      , 'U_MA461M(.T.)', 0 , 2 , 0 , NIL } )
 aAdd( aRotina,{'Desmarcar Todos'		   , 'U_MA461M(.F.)', 0 , 2 , 0 , NIL } )
@@ -45,20 +45,20 @@ aAdd( aRotina,{'Solic.Ret.Pedido <== TMS RDC/Multi', 'U_MA461RP()', 0 , 2 , 0 , 
 Return ""
 
 ********************************************************
-USER FUNCTION I_Ma460Nota(cAlias, nRecno, nOpcx)
+User Function I_Ma460Nota(cAlias, nRecno, nOpcx)
 ********************************************************
 If ThisInv()
 
-   u_itmsg( 'Não é permitido selecionar todos os pedidos ou trazer pedidos selecionados. ','Validação de Processo',;
+   U_ITMsg( 'Não é permitido selecionar todos os pedidos ou trazer pedidos selecionados. ','Validação de Processo',;
 			   'Utilize a seleção manual de pedidos',1)
 
-    RETURN .F.
+    Return .F.
     
-ENDIF
+EndIf
 
 Ma460Nota(cAlias, nRecno, nOpcx)
 
-RETURN .T.
+Return .T.
 
 
 /*
@@ -75,30 +75,30 @@ Retorno-----------:
 ===============================================================================================================================
 */
 User Function MA461M(_lMark)
-Local aArea		:= GetArea()         //Salva a area atual
+Local aArea		:= FWGetArea()         //Salva a area atual
 Local oMark		:= GetMarkBrow()     //Objeto do Browser Markbrow()
 Local nQtdAtu	:= 0 //Quantidade de Registros Atualizados
 Local cOk      := ""
 
    If _lMark
-      If MV_PAR03 = 1 .AND. MV_PAR04 = 1 // Considera Parametros abaixo = Sim / Trazer Pedidos Marcados = Sim
+      If MV_PAR03 = 1 .And. MV_PAR04 = 1 // Considera Parametros abaixo = Sim / Trazer Pedidos Marcados = Sim
          cOk := " "
       Else
          cOk := oMark:cMark
       EndIf
    Else
-      If MV_PAR03 = 1 .AND. MV_PAR04 = 1 // Considera Parametros abaixo = Sim / Trazer Pedidos Marcados = Sim
+      If MV_PAR03 = 1 .And. MV_PAR04 = 1 // Considera Parametros abaixo = Sim / Trazer Pedidos Marcados = Sim
          cOk := oMark:cMark
       Else
          cOk := " "
       EndIf
    EndIf
 
-   FWMSGRUN( ,{|oProc| nQtdAtu := MA461MARK(oProc,cOk) } , "Processando..." , "Marcação de registros..." )
+   FWMsgRun( ,{|oProc| nQtdAtu := MA461MARK(oProc,cOk) } , "Processando..." , "Marcação de registros..." )
 
-   RestArea(aArea)
+   FWRestArea(aArea)
 
-   //Somente atualiza o browse se a quantidade de registros atualizados for maiou que 1, ou seja, atualizaou um registro além do corrente
+   //Somente atualiza o browse se a quantidade de registros atualizados For maiou que 1, ou seja, atualizaou um registro além do corrente
    If nQtdAtu > 1
    	oMark:Refresh()
    	Eval(bFiltraBrw)
@@ -129,10 +129,10 @@ Local aAreaSL1 := {} //WorkArea SL1
 Local nRecnoSC9 := 0
 Local lECCia	:= SuperGetMV("MV_LJECOMO",,.F.)// EC CiaShop
 
-   Dbselectarea("SC9")
-   SC9->(DbGoTop())
+   DBSelectArea("SC9")
+   SC9->(DBGoTop())
    Eval(bFiltraBrw)
-   Do While SC9->(!EOF()) .AND. SC9->C9_FILIAL == cFilAnt
+   While SC9->(!Eof()) .And. SC9->C9_FILIAL == cFilAnt
       nRecnoSC9 := SC9->(Recno())
 
    	If  A460CKPRES(@cPedido)
@@ -145,42 +145,42 @@ Local lECCia	:= SuperGetMV("MV_LJECOMO",,.F.)// EC CiaShop
          ProcessMessages()
       Else
 
-         oProc:cCaption := (Iif(Empty(cOK),"Desmarcando","Marcando") + " pedido "+SC9->C9_PEDIDO+" ...")
+         oProc:cCaption := (IIf(Empty(cOK),"Desmarcando","Marcando") + " pedido "+SC9->C9_PEDIDO+" ...")
          ProcessMessages()
 
-   		Reclock("SC9",.F.)
+   		RecLock("SC9",.F.)
    		SC9->C9_OK := cOK
-   		SC9->( MsUnlock() )
+   		SC9->( MSUnLock() )
    		nQtdAtu++ //Atualiza a quantidade de Registros atualizados
 
-   		If lECCia .AND. SC5->(FieldPos("C5_PEDECOM")) > 0 .AND. Val(SC5->C5_PEDECOM) > 0 //E-Commerce CiaShop
+   		If lECCia .And. SC5->(FieldPos("C5_PEDECOM")) > 0 .And. Val(SC5->C5_PEDECOM) > 0 //E-Commerce CiaShop
    			lSelPedEC := .T.
    		ElseIf !Empty(SC5->C5_ORCRES)
    			aAreaSL1 := SL1->(GetArea())
    			cOrcamto := Posicione("SL1",1,xFilial("SL1")+SC5->C5_ORCRES,"L1_ORCRES")
-   			lSelPedEC := SL1->(FieldPos("L1_ECFLAG")) > 0 .AND. !Empty(cOrcamto) .AND. !Empty(SL1->L1_ECFLAG)//E-commerce Rakuten
-   			RestArea(aAreaSL1)
+   			lSelPedEC := SL1->(FieldPos("L1_ECFLAG")) > 0 .And. !Empty(cOrcamto) .And. !Empty(SL1->L1_ECFLAG)//E-commerce Rakuten
+   			FWRestArea(aAreaSL1)
    		EndIf
 
-   		If lSelPedEC .AND. !( Empty(cPedido) ) .And. SC9->( dbSeek(cIndPed) )
+   		If lSelPedEC .And. !( Empty(cPedido) ) .And. SC9->( DBSeek(cIndPed) )
    			nQtdAtu-- //subtrai a quantidade atualizada anteriormente, porque o registro vai ser atualizado novamente
    			While !( Eof() ) .And. ((C9_FILIAL+C9_PEDIDO == cPedido) .Or. (C9_FILIAL+C9_PEDIDO == cIndPed))
 
-   				Reclock("SC9",.F.)
+   				RecLock("SC9",.F.)
    				SC9->C9_OK := cOK
-   				SC9->( MsUnlock() )
+   				SC9->( MSUnLock() )
 
                nRecnoSC9 := SC9->(Recno())
 
-   				SC9->( dbSkip() )
+   				SC9->( DBSkip() )
    				nQtdAtu++
    			End
    		EndIf
    	EndIf
       
-      SC9->(DbGoTo(nRecnoSC9))
+      SC9->(DBGoTo(nRecnoSC9))
 
-      SC9->(DbSkip())
+      SC9->(DBSkip())
    EndDo   	
 
 Return nQtdAtu
@@ -200,12 +200,12 @@ Retorno-----------:
 */
 User Function MA461RP()
 
-Dbselectarea("SC5")
+DBSelectArea("SC5")
 DBSetOrder(1)
-If Dbseek(SC9->C9_FILIAL+SC9->C9_PEDIDO)
+If DBSeek(SC9->C9_FILIAL+SC9->C9_PEDIDO)
    U_AOMS084B()
 Else
-   U_ItMsg( 'Não encontrado o pedido '+SC9->C9_PEDIDO+' para execução da rotina!','Validação de Processo',;
+   U_ITMsg( 'Não encontrado o pedido '+SC9->C9_PEDIDO+' para execução da rotina!','Validação de Processo',;
 			   'Comunique o administrador do sistema.',1)
 EndIf
 

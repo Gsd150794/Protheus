@@ -2,43 +2,27 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor     |    Data    |                                             Motivo                                           
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Julio Paz       | 19/09/2018 | Chamado 26330 - Inclusão de campos para gravar data e hora de envio dos dados para o RDC. 
- Julio Paz       | 22/01/2019 | Chamado 27795 - Realização de Ajustes no fonte para funcionar com o novo servidor Totvs Loboguará.
- Lucas Borges    | 16/10/2019 | Chamado 28346 - Removidos os Warning na compilação da release 12.1.25. 
- Julio Paz       | 11/09/2020 | Chamado 34126 - Correções conversão Saldos p/outra unidade,quando fator conv B1_CONV estiver zero.
- Julio Paz       | 09/09/2022 | Chamado 41046 - Alterar função utilizada para chamada via Scheduller para não consumir liçenças. 
- Igor Melgaco    | 12/01/2024 | Chamado 46028 - Integração via TMS metodo rest SalvarEstoqueProdutoArmazem
- Lucas Borges    | 01/08/2025 | Chamado 51453. Substituir função EncodeUtf8 por FWHttpEncode
-============================================================================================================================================================
-Analista         - Programador     - Inicio     - Envio    - Chamado - Motivo da Alteração
-------------------------------------------------------------------------------------------------------------------------------------------------------------
-Vanderlei Alves  - Igor Melgaço    - 06/06/25   - 10/06/25 - 45229   - Ajuste do parâmetro p/determinar se a integração WebS.será TMS Multiembarcador ou RDC
-Jerry            - Alex Wallauer   - 11/06/25   - 11/06/25 - 45229   - Correcao de error.log: variable does not exist _LSTATUS U_AOMS083W() line : 481.
-Jerry            - Alex Wallauer   - 12/06/25   - 12/06/25 - 45229   - Correcao de error.log: variable does not exist _lWs Tms U_AOMS083g() line : 1028.
-Jerry            - Alex Wallauer   - 12/06/25   - 13/06/25 - 45229   - Correcao de error.log: variable does not exist _lWs Tms AOMS083T()   line : 1396.
-Vanderlei        - Igor Melgaco    - 26/06/25   - 26/06/25 - 45229   - Correcao de url.
-============================================================================================================================================================
+Lucas Borges  |01/08/2025| Chamado 51453. Substituir função EncodeUtf8 por FWHttpEncode
+Igor Melgaco  |26/06/2025| Chamado 45229. Correcao de url.
+Lucas Borges  |17/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
+===========================================================================================================================================================================================================================================================
+ Analista       - Programador  - Inicio   - Envio    - Chamado - Motivo da Alteração
+============================================================================================================================================================================================================================================================
+Vanderlei Alves - Alex Wallauer- 21/11/25 -          - 53091   - Ajsute para ler os parametros IT_EST3FIL / IT_EST3LOC na filial correta quando rodar via scheduller.
+===========================================================================================================================================================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes e Defines da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
-#INCLUDE "APWEBSRV.CH"   
-#INCLUDE "TBICONN.CH" 
+
+#Include "TOTVS.ch"
+#Include "APWEBSRV.CH"   
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS083
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 13/09/2016
-===============================================================================================================================
-Descrição---------: Rotina de integração e envio de dados dos estoques via webservice para empresa RDC.
-===============================================================================================================================
-Parametros--------: Nenhum
-===============================================================================================================================
-Retorno-----------: Nenhum
+Descrição---------: Rotina de integração e envio de dados dos estoques via webservice para empresa  / Multi.
 ===============================================================================================================================
 */  
 User Function AOMS083()
@@ -52,66 +36,62 @@ Begin Sequence
 	U_ITLOGACS()
 
    cCadastro := "Integração dos Dados dos Estoques Via Webservice: Italac <---> RDC ou TMS"
-   Aadd(aRotina,{"Pesquisar" ,"AxPesqui" ,0,1})
-   Aadd(aRotina,{"Visualizar","AxVisual" ,0,2})
-   Aadd(aRotina,{"Gera Dados Integr.WS"  ,"U_AOMS083R",0,3})
-   Aadd(aRotina,{"Integracao Webservice" ,"U_AOMS083I",0,4})
-   Aadd(aRotina,{"Legenda"   ,"U_AOMS083L" ,0,6})
+   aAdd(aRotina,{"Pesquisar" ,"AxPesqui" ,0,1})
+   aAdd(aRotina,{"Visualizar","AxVisual" ,0,2})
+   aAdd(aRotina,{"Gera Dados Integr.WS"  ,"U_AOMS083R",0,3})
+   aAdd(aRotina,{"Integracao Webservice" ,"U_AOMS083I",0,4})
+   aAdd(aRotina,{"Legenda"   ,"U_AOMS083L" ,0,6})
    
-   Aadd(_aCores,{"ZFJ_SITUAC == 'N'" ,"BR_VERDE" })
-   Aadd(_aCores,{"ZFJ_SITUAC == 'P'" ,"BR_VERMELHO" })
-   Aadd(_aCores,{"ZFJ_SITUAC == 'R'" ,"BR_AMARELO" })
+   aAdd(_aCores,{"ZFJ_SITUAC == 'N'" ,"BR_VERDE" })
+   aAdd(_aCores,{"ZFJ_SITUAC == 'P'" ,"BR_VERMELHO" })
+   aAdd(_aCores,{"ZFJ_SITUAC == 'R'" ,"BR_AMARELO" })
 
-   DbSelectArea("ZFJ")
-   ZFJ->(DbSetOrder(1)) 
-   ZFJ->(DbGoTop())
+   DBSelectArea("ZFJ")
+   ZFJ->(DBSetOrder(1)) 
+   ZFJ->(DBGoTop())
    MBrowse(6,1,22,75,"ZFJ", , , , , , _aCores)
    
 End Sequence
 
-Return Nil    
+Return    
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS083L
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 13/09/2016
-===============================================================================================================================
 Descrição---------: Rotina de Exibição da Legenda do MBrowse.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
-User Function AOMS083L       
+User Function AOMS083L()
+
 Local _aLegenda := {}
 
 Begin Sequence
-   Aadd(_aLegenda,{"BR_VERDE"    ,"Não Processado" })
-   Aadd(_aLegenda,{"BR_AMARELO"  ,"Rejeitada" })
-   Aadd(_aLegenda,{"BR_VERMELHO" ,"Processado" })
+   aAdd(_aLegenda,{"BR_VERDE"    ,"Não Processado" })
+   aAdd(_aLegenda,{"BR_AMARELO"  ,"Rejeitada" })
+   aAdd(_aLegenda,{"BR_VERMELHO" ,"Processado" })
 
    BrwLegenda(cCadastro, "Legenda", _aLegenda)
 
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS083I
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 13/09/2016
-===============================================================================================================================
 Descrição---------: Rotina de integração e envio de dados dos estoques via webservice para empresa RDC.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS083I()
+
 Local _lRet := .F.
 Local _aStrucZFJ
 Local _aOrd := SaveOrd({"ZFJ"})
@@ -121,7 +101,7 @@ Local _aSizeAut  := MsAdvSize(.T.)
 Local _bOk, _bCancel , _cTitulo
 Local _lInverte := .F.
 Local _oDlgInt, _nI
-Private _lWsTms := IF(cFilAnt $ SuperGetMV( 'IT_WEBETMS',.F.,"90") .And. !EMPTY(SuperGetMV( 'IT_LOEMTMS',.F.,"")) ,.T.,.F.) //U_ITGETMV( 'IT_WEBSTMS' , .F.) 
+Private _lWsTms := If(cFilAnt $ SuperGetMV( 'IT_WEBETMS',.F.,"90") .And. !Empty(SuperGetMV( 'IT_LOEMTMS',.F.,"")) ,.T.,.F.)
 Private _oMarkZFJ, _cMarcaZFJ := GetMark() 
 Private aHeader, aCols
 
@@ -133,30 +113,25 @@ Begin Sequence
    aCols   := {}
    FillGetDados(1,"ZFJ",1,,,{||.T.},,,,,,.T.)
    
-   //                          1                    2               3              4               5                6             7        8              9                 10 
-   // AADD(aHeader, {Alltrim(SX3->X3_TITULO), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL,"AllwaysTrue()", USADO, SX3->X3_TIPO, SX3->X3_ARQUIVO, SX3->X3_CONTEXT})
-   
-   //================================================================================
    // Monta as colunas do MSSELECT para a tabela temporária TRBZFQ 
-   //================================================================================
-   Aadd( _aCmpZFJ , { "WK_OK"		,    , "Marca"    ,"@!"})
+   aAdd( _aCmpZFJ , { "WK_OK"		,    , "Marca"    ,"@!"})
    
    For _nI := 1 To Len(aHeader)
        If AllTrim(aHeader[_nI,2])=="ZFJ_FILIAL" 
           Loop
        EndIf
        
-       Aadd( _aCmpZFJ , { aHeader[_nI,2], "" , aHeader[_nI,1]  , aHeader[_nI,3] } )
+       aAdd( _aCmpZFJ , { aHeader[_nI,2], "" , aHeader[_nI,1]  , aHeader[_nI,3] } )
    Next
 
    //================================================================================
    // Cria as estruturas das tabelas temporárias
    //================================================================================
    _aStrucZFJ := {}
-   Aadd(_aStrucZFJ,{"WK_OK"  , "C", 2 ,0})
-   Aadd(_aStrucZFJ,{"WKRECNO", "N", 10,0})
+   aAdd(_aStrucZFJ,{"WK_OK"  , "C", 2 ,0})
+   aAdd(_aStrucZFJ,{"WKRECNO", "N", 10,0})
    For _nI := 1 To Len(aHeader)
-       Aadd(_aStrucZFJ,{aHeader[_nI,2], aHeader[_nI,8], aHeader[_nI,4] ,aHeader[_nI,5]})
+       aAdd(_aStrucZFJ,{aHeader[_nI,2], aHeader[_nI,8], aHeader[_nI,4] ,aHeader[_nI,5]})
    Next   
 
    //================================================================================
@@ -186,7 +161,7 @@ Begin Sequence
 
    _bOk := {|| _lRet := .T., _oDlgInt:End()}
    _bCancel := {|| _lRet := .F., _oDlgInt:End()}
-   AADD(_aButtons,{"",{|| U_AOMS083M("T") },"Marc/Des","Marca/Desmarca Todos"})
+   aAdd(_aButtons,{"",{|| U_AOMS083M("T") },"Marc/Des","Marca/Desmarca Todos"})
   
    //================================================================================
    // Monta a tela de dados com MSSELECT.
@@ -200,11 +175,11 @@ Begin Sequence
    Activate MsDialog _oDlgInt On Init (EnchoiceBar(_oDlgInt,_bOk,_bCancel,,_aButtons), _oMarkZFJ:oBrowse:Align:=CONTROL_ALIGN_ALLCLIENT , _oMarkZFJ:oBrowse:Refresh() )
    
    If _lRet
-      IF _lWsTms
+      If _lWsTms
          Processa( {|| U_AOMS083Y( .F. ) , U_AOMS083W( .F. ) } , 'Aguarde!' , 'Integrando Dados do Estoque...' )
       Else
          Processa( {|| U_AOMS083W( .F. ) } , 'Aguarde!' , 'Integrando Dados do Estoque...' )
-      Endif
+      EndIf
    EndIf
 
 End Sequence
@@ -213,28 +188,26 @@ End Sequence
 // Fecha e exclui as tabelas temporárias
 //================================================================================                    
 If Select("TRBZFJ") > 0
-   TRBZFJ->(DbCloseArea())
+   TRBZFJ->(DBCloseArea())
 EndIf
 
 RestOrd(_aOrd)
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: AOMS083M
 Autor-----------: Julio de Paula Paz
 Data da Criacao-: 13/09/2016
-===============================================================================================================================
 Descrição-------: Função para marcar e desmarcar todos estoques que serão integrados via Webservice.
-===============================================================================================================================
 Parametros------: _cTipoMarca = "T" = Marca e desmarca todos os registros.
                   _cTipoMarca = "P" = Marca e desmarca apena o registro posisionado.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS083M(_cTipoMarca)
+
 Local _cSimboloMarca := Space(2)
 Local _nRegAtu := TRBZFJ->(Recno()) 
 
@@ -248,40 +221,38 @@ Begin Sequence
    If _cTipoMarca == "P"
       TRBZFJ->(RecLock("TRBZFJ",.F.))
       TRBZFJ->WK_OK := _cSimboloMarca 
-      TRBZFJ->(MsUnlock())
+      TRBZFJ->(MSUnLock())
    Else
-      TRBZFJ->(DbGoTop())
-      Do While ! TRBZFJ->(Eof())
+      TRBZFJ->(DBGoTop())
+      While ! TRBZFJ->(Eof())
          TRBZFJ->(RecLock("TRBZFJ",.F.))
          TRBZFJ->WK_OK := _cSimboloMarca 
-         TRBZFJ->(MsUnlock()) 
+         TRBZFJ->(MSUnLock()) 
          
-         TRBZFJ->(DbSkip())
+         TRBZFJ->(DBSkip())
       EndDo
    
    EndIf
            
 End Sequence
 
-TRBZFJ->(DbGoTo(_nRegAtu)) 
+TRBZFJ->(DBGoTo(_nRegAtu)) 
 _oMarkZFJ:oBrowse:Refresh()
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS083W
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 13/09/2016
-===============================================================================================================================
 Descrição---------: Gera os dados XML com base nos estoques selecionados e integra via webservice.
-===============================================================================================================================
 Parametros--------: _lScheduller = .T. = Modo agendado (Scheduller) / .F. = Modo manual
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS083W(_lScheduller)             
+
 Local _cDirXML := ""
 Local _cLink   := ""
 Local _cCabXML := ""
@@ -302,28 +273,28 @@ Begin Sequence
    // Verifica se há itens selecionados e lê o código da empresa de WebService.
    //================================================================================                    
    If _lScheduller
-      u_itconout("[AOMS083] - Verificando itens selecionados. Data: "+Dtoc(Date())+". Hora: "+Time())
+      u_itconout("[AOMS083] - Verificando itens selecionados. Data: "+DToC(Date())+". Hora: "+Time())
    Else
       ProcRegua(8)     
       IncProc("Verificando itens selecionados...")      
    EndIf
    
-   TRBZFJ->(DbGoTop())                                                                   
-   Do While ! TRBZFJ->(Eof())
+   TRBZFJ->(DBGoTop())                                                                   
+   While ! TRBZFJ->(Eof())
       If ! Empty(TRBZFJ->WK_OK)   
          _cEmpWebService := TRBZFJ->ZFJ_CODEMP                         
          _lItemSelect := .T. 
          Exit
       EndIf                 
       
-      TRBZFJ->(DbSkip())
+      TRBZFJ->(DBSkip())
    EndDo 
    
    If ! _lItemSelect
       If _lScheduller
-         u_itconout("[AOMS083] - Nenhum item foi selecionado para integração Webservice. Não será possível realizar a integração Italac <---> RDC. Data: "+Dtoc(Date())+". Hora: "+Time())
+         Break//u_itconout("[AOMS083] - Nenhum item foi selecionado para integração Webservice. Não será possível realizar a integração Italac <---> RDC. Data: "+DToC(Date())+". Hora: "+Time())
       Else
-         u_itmsg("Nenhum item foi selecionado para integração Webservice. Não será possível realizar a integração Italac <---> RDC.","Atenção",,1)
+         U_ITMsg("Nenhum item foi selecionado para integração Webservice. Não será possível realizar a integração Italac <---> RDC.","Atenção",,1)
          Break   
       EndIf
    EndIf              
@@ -332,20 +303,20 @@ Begin Sequence
    // Lê o diretório dos arquivos XML modelos e o link de envio dos dados.
    //================================================================================
    If _lScheduller
-      u_itconout("[AOMS083] - Identificando diretório dos XML. Data: "+Dtoc(Date())+". Hora: "+Time())
+      u_itconout("[AOMS083] - Identificando diretório dos XML. Data: "+DToC(Date())+". Hora: "+Time())
    Else
       IncProc("Identificando diretório dos XML...")                    
    EndIf
 
-   ZFM->(DbSetOrder(1))
-   If ZFM->(DbSeek(xFilial("ZFM")+_cEmpWebService))
+   ZFM->(DBSetOrder(1))
+   If ZFM->(DBSeek(xFilial("ZFM")+_cEmpWebService))
       _cDirXML := ZFM->ZFM_LOCXML 
       _cLink   := AllTrim(ZFM->ZFM_LINK01)
    Else
       If _lScheduller
-         u_itconout("[AOMS083] - Empresa WebService para envio dos dados não localizada. Data: "+Dtoc(Date())+". Hora: "+Time())
+         u_itconout("[AOMS083] - Empresa WebService para envio dos dados não localizada. Data: "+DToC(Date())+". Hora: "+Time())
       Else
-         u_itmsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
+         U_ITMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
       EndIf                                                              
       
       Break   
@@ -353,15 +324,15 @@ Begin Sequence
    
    If Empty(_cDirXML) .Or. Empty(_cLink)
       If _lScheduller
-         u_itconout("[AOMS083] - Diretório dos arquivos XML modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+". Data: "+Dtoc(Date())+". Hora: "+Time())
+         u_itconout("[AOMS083] - Diretório dos arquivos XML modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+". Data: "+DToC(Date())+". Hora: "+Time())
       Else
-         u_itmsg("Diretório dos arquivos XML modelos ou o Link de envio de dados não informado para a empresa: ";
+         U_ITMsg("Diretório dos arquivos XML modelos ou o Link de envio de dados não informado para a empresa: ";
                +AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)
       EndIf
       Break                                     
    EndIf
       
-   _cDirXML := Alltrim(_cDirXML)
+   _cDirXML := AllTrim(_cDirXML)
    If Right(_cDirXML,1) <> "\"
       _cDirXML := _cDirXML + "\"
    EndIf
@@ -370,7 +341,7 @@ Begin Sequence
    // Lê os arquivos modelo XML e os transforma em String.
    //================================================================================
    If _lScheduller
-      u_itconout("[AOMS083] - Lendo arquivo XML Modelo de Cabeçalho. Data: "+Dtoc(Date())+". Hora: "+Time())
+      u_itconout("[AOMS083] - Lendo arquivo XML Modelo de Cabeçalho. Data: "+DToC(Date())+". Hora: "+Time())
    Else
       IncProc("Lendo arquivo XML Modelo de Cabeçalho...")                      
    EndIf
@@ -378,16 +349,16 @@ Begin Sequence
    _cCabXML := U_AOMS083X(_cDirXML+"Cab_EntradaEstoque.txt") 
    If Empty(_cCabXML)
       If _lScheduller
-         u_itconout("[AOMS083] - Erro na leitura do arquivo XML modelo do cabeçalho de entrada estoque. Data: "+Dtoc(Date())+". Hora: "+Time())
+         u_itconout("[AOMS083] - Erro na leitura do arquivo XML modelo do cabeçalho de entrada estoque. Data: "+DToC(Date())+". Hora: "+Time())
       Else
-         u_itmsg("Erro na leitura do arquivo XML modelo do cabeçalho de entrada estoque. ","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo XML modelo do cabeçalho de entrada estoque. ","Atenção",,1)
       EndIf
       
       Break
    EndIf
    
    If _lScheduller
-      u_itconout("[AOMS083] - Lendo arquivo XML Modelo de Detalhe. Data: "+Dtoc(Date())+". Hora: "+Time())
+      u_itconout("[AOMS083] - Lendo arquivo XML Modelo de Detalhe. Data: "+DToC(Date())+". Hora: "+Time())
    Else
       IncProc("Lendo arquivo XML Modelo de Detalhe...")
    EndIf
@@ -395,16 +366,16 @@ Begin Sequence
    _cDetXML := U_AOMS083X(_cDirXML+"Det_EntradaEstoque.txt")
    If Empty(_cDetXML)
       If _lScheduller
-         u_itconout("[AOMS083] - Erro na leitura do arquivo XML modelo do detalhe de entrada estoque.Data: "+Dtoc(Date())+". Hora: "+Time())
+         u_itconout("[AOMS083] - Erro na leitura do arquivo XML modelo do detalhe de entrada estoque.Data: "+DToC(Date())+". Hora: "+Time())
       Else
-         u_itmsg("Erro na leitura do arquivo XML modelo do detalhe de entrada estoque.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo XML modelo do detalhe de entrada estoque.","Atenção",,1)
       EndIf
       
       Break
    EndIf            
    
    If _lScheduller
-      u_itconout("[AOMS083] - Lendo arquivo XML Modelo de Rodapé. Data: "+Dtoc(Date())+". Hora: "+Time())
+      u_itconout("[AOMS083] - Lendo arquivo XML Modelo de Rodapé. Data: "+DToC(Date())+". Hora: "+Time())
    Else
       IncProc("Lendo arquivo XML Modelo de Rodapé...")
    EndIf
@@ -412,9 +383,9 @@ Begin Sequence
    _cRodXML := U_AOMS083X(_cDirXML+"Rodape_EntradaEstoque.txt")
    If Empty(_cRodXML)
       If _lScheduller
-         u_itconout("[AOMS083] - Erro na leitura do arquivo XML modelo do rodapé de entrada estoque. Data: "+Dtoc(Date())+". Hora: "+Time())
+         u_itconout("[AOMS083] - Erro na leitura do arquivo XML modelo do rodapé de entrada estoque. Data: "+DToC(Date())+". Hora: "+Time())
       Else
-         u_itmsg("Erro na leitura do arquivo XML modelo do rodapé de entrada estoque.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo XML modelo do rodapé de entrada estoque.","Atenção",,1)
       EndIf
       
       Break
@@ -424,7 +395,7 @@ Begin Sequence
    // Concatena os estoques selecionados e monta array de XML com os dados.
    //================================================================================                       
    If _lScheduller
-      u_itconout("[AOMS083] - Montando dados de envio. Data: "+Dtoc(Date())+". Hora: "+Time())
+      u_itconout("[AOMS083] - Montando dados de envio. Data: "+DToC(Date())+". Hora: "+Time())
    Else
       IncProc("Montando dados de envio...")
    EndIf
@@ -437,15 +408,15 @@ Begin Sequence
    oWsdl:SetOperation( "EnviaEstoque") // Define qual operação será realizada.
 
    If _lScheduller
-      u_itconout("[AOMS083] - Enviando Dados. Data: "+Dtoc(Date())+". Hora: "+Time())
+      u_itconout("[AOMS083] - Enviando Dados. Data: "+DToC(Date())+". Hora: "+Time())
    EndIf
    
    _aresult := {}
    
-   TRBZFJ->(DbGoTop())                                                                   
-   Do While ! TRBZFJ->(Eof())    
+   TRBZFJ->(DBGoTop())                                                                   
+   While ! TRBZFJ->(Eof())    
       If ! Empty(TRBZFJ->WK_OK)   
-         ZFJ->(DbGoto(TRBZFJ->WKRECNO))
+         ZFJ->(DBGoTo(TRBZFJ->WKRECNO))
         
          Begin Transaction
  		    // Monta XML
@@ -477,62 +448,58 @@ Begin Sequence
 
  		    //grava resultado // sempre como processado
             ZFJ->(RecLock("ZFJ",.F.))
-            ZFJ->ZFJ_SITUAC  := _cSituacao // iif(_cok, "P", "N")
-            ZFJ->ZFJ_USUARI  := __CUSERID
+            ZFJ->ZFJ_SITUAC  := _cSituacao // IIf(_cok, "P", "N")
+            ZFJ->ZFJ_USUARI  := __cUserId
             ZFJ->ZFJ_DATAAL  := Date() // Grava data de alteração da tabela de muro.
             ZFJ->ZFJ_DTENV   := Date() // Grava data de envio para o RDC.
             ZFJ->ZFJ_HRENV   := Time() // Grava hora de envio para o RDC.
-            ZFJ->ZFJ_RETORN  := _cResposta // AllTrim(Strtran(_cResult,Chr(10)," ")) // grava o resultado da integração na tabela ZFJ,dizendo que deu certo ou não.
+            ZFJ->ZFJ_RETORN  := _cResposta // AllTrim(StrTran(_cResult,Chr(10)," ")) // grava o resultado da integração na tabela ZFJ,dizendo que deu certo ou não.
             ZFJ->ZFJ_XML     := _cXML
-            ZFJ->(MsUnlock())
+            ZFJ->(MSUnLock())
         
-            Aadd(_aresult,{_lStatus,ZFJ->ZFJ_CGC,ZFJ->ZFJ_NOME,ZFJ->ZFJ_FILTMS,AllTrim(Subs(ZFJ->ZFJ_COD,1,11)),ZFJ->ZFJ_RETORN}) // adicona em um array para fazer um item list, exibir os resultados.
+            aAdd(_aresult,{_lStatus,ZFJ->ZFJ_CGC,ZFJ->ZFJ_NOME,ZFJ->ZFJ_FILTMS,AllTrim(Subs(ZFJ->ZFJ_COD,1,11)),ZFJ->ZFJ_RETORN}) // adicona em um array para fazer um item list, exibir os resultados.
             Sleep(500) //Espera para não travar a comunicação com o webservice da RDC
             IncProc(ZFJ->ZFJ_CGC + " - "  + ZFJ->ZFJ_RETORN)
          End Transaction
       EndIf                 
       
-      TRBZFJ->(DbSkip())      
+      TRBZFJ->(DBSkip())      
    
    EndDo 
    
    If ! _lScheduller
       _aCabecalho := {}
-      Aadd(_aCabecalho,"Processado?" ) 
-      Aadd(_aCabecalho,"CGC" ) 
-      Aadd(_aCabecalho,"NOME") 
-      Aadd(_aCabecalho,"FILIAL") 
-      Aadd(_aCabecalho,"PRODUTO") 
-      Aadd(_aCabecalho,"RETORNO") 
+      aAdd(_aCabecalho,"Processado?" ) 
+      aAdd(_aCabecalho,"CGC" ) 
+      aAdd(_aCabecalho,"NOME") 
+      aAdd(_aCabecalho,"FILIAL") 
+      aAdd(_aCabecalho,"PRODUTO") 
+      aAdd(_aCabecalho,"RETORNO") 
              
       _cTitulo := "Resultados da integração"
       
-      If len(_aresult) > 0
+      If Len(_aresult) > 0
       	//ITListBox( _cTitAux , _aHeader    , _aCols     , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab , bDblClk , _aColXML , bCondMarca,_bLegenda                      ,_lHasOk,_bHeadClk,_aSX1)
 			U_ITListBox( _cTitulo , _aCabecalho , _aresult   , .F.      , 4      ,          ,          ,         ,         ,     ,        ,          ,       ,         ,          ,           , {|C,L|U_AOMS083U(C,L)}        , .F.   ,         ,     )
 
-      Endif  
+      EndIf  
    Else
-      u_itconout("[AOMS083] - Integração de envio de dados finalizada. Data: "+Dtoc(Date())+". Hora: "+Time())
+      u_itconout("[AOMS083] - Integração de envio de dados finalizada. Data: "+DToC(Date())+". Hora: "+Time())
    EndIf 
   
 End Sequence
 
 RestOrd(_aOrd)
 
-Return Nil   
-
+Return   
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS083Y
 Autor-------------: Igor Melgaco
 Data da Criacao---: 24/01/2024
-===============================================================================================================================
 Descrição---------: Com base nos estoques selecionados e integra via REST ao TMS.
-===============================================================================================================================
 Parametros--------: _lScheduller = .T. = Modo agendado (Scheduller) / .F. = Modo manual
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
@@ -551,7 +518,7 @@ Local cResult   := ""
 Local cRegistro := ""
 Local _aHeader  := {}
 Local _cUrl     := ""
-Local _cToken   := U_ITGETMV( 'IT_TOKMUTE' , "a78e0523d3794843855e8d95c2bff8d4")
+Local _cToken   := SuperGetMV('IT_TOKMUTE',.F.,"a78e0523d3794843855e8d95c2bff8d4")
 Local _cParms   := "/Filial/SalvarEstoqueProdutoArmazem"
 Local _aResult  := {}
 Local _cCodEmpWS := ""
@@ -561,14 +528,14 @@ Default _lScheduller := .F.
 Begin Sequence
 
    
-   _cCodEmpWS := U_ITGETMV( 'IT_EMPTMSM' , "000005")
+   _cCodEmpWS := SuperGetMV('IT_EMPTMSM',.F.,"000005")
 
-   ZFM->(DbSetOrder(1))
-   If ZFM->(DbSeek(xFilial("ZFM")+_cCodEmpWS))
+   ZFM->(DBSetOrder(1))
+   If ZFM->(DBSeek(xFilial("ZFM")+_cCodEmpWS))
       _cUrl := AllTrim(ZFM->ZFM_LINK07)
-   Else         
+   Else
       If _lExibeTela
-         u_itmsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
+         U_ITMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
       EndIf
       
       Break   
@@ -582,20 +549,20 @@ Begin Sequence
       IncProc("Verificando itens selecionados...")      
    EndIf
    
-   TRBZFJ->(DbGoTop())                                                                   
-   Do While ! TRBZFJ->(Eof())
+   TRBZFJ->(DBGoTop())                                                                   
+   While ! TRBZFJ->(Eof())
       If ! Empty(TRBZFJ->WK_OK)   
          _cEmpWebService := TRBZFJ->ZFJ_CODEMP                         
          _lItemSelect := .T. 
          Exit
       EndIf                 
       
-      TRBZFJ->(DbSkip())
+      TRBZFJ->(DBSkip())
    EndDo 
    
    If ! _lItemSelect
       If !_lScheduller
-         u_itmsg("Nenhum item foi selecionado para integração Webservice. Não será possível realizar a integração Italac <---> TMS.","Atenção",,1)
+         U_ITMsg("Nenhum item foi selecionado para integração Webservice. Não será possível realizar a integração Italac <---> TMS.","Atenção",,1)
          Break   
       EndIf
    EndIf
@@ -607,20 +574,20 @@ Begin Sequence
       IncProc("Montando dados de envio...")
    EndIf  
 
-   TRBZFJ->(DbGoTop())                                                                   
-   Do While ! TRBZFJ->(Eof())    
+   TRBZFJ->(DBGoTop())                                                                   
+   While ! TRBZFJ->(Eof())    
       If ! Empty(TRBZFJ->WK_OK)   
-         ZFJ->(DbGoto(TRBZFJ->WKRECNO))
+         ZFJ->(DBGoTo(TRBZFJ->WKRECNO))
         
          Begin Transaction
 
-            If !Empty(Alltrim(ZFJ->ZFJ_FILTMS))
+            If !Empty(AllTrim(ZFJ->ZFJ_FILTMS))
                
                _cBodyJson := '{'
                _cBodyJson += '"codigoFilial": "'+FWHttpEncode(AllTrim(ZFJ->ZFJ_FILTMS))+'",'
                _cBodyJson += '"codigoProduto": "'+FWHttpEncode(AllTrim(Subs(ZFJ->ZFJ_COD,1,11)))+'",'
-               _cBodyJson += '"codigoFilialArmazem": "'+FWHttpEncode(Alltrim(ZFJ->ZFJ_CODARM))+'",'
-               _cBodyJson += '"quantidadeProduto": '+FWHttpEncode(Alltrim(Str(ZFJ->ZFJ_QATU,13)))
+               _cBodyJson += '"codigoFilialArmazem": "'+FWHttpEncode(AllTrim(ZFJ->ZFJ_CODARM))+'",'
+               _cBodyJson += '"quantidadeProduto": '+FWHttpEncode(AllTrim(Str(ZFJ->ZFJ_QATU,13)))
                _cBodyJson += '}'
 
                _aHeader :={}
@@ -629,9 +596,9 @@ Begin Sequence
                oRest:SetPath(_cParms)
 
                //Cabeçalho de requisição
-               Aadd(_aHeader , "Content-Type: application/json")
+               aAdd(_aHeader , "Content-Type: application/json")
                aAdd(_aHeader , "Authorization: Bearer Token" ) 
-               Aadd(_aHeader , "Token: "+_cToken)
+               aAdd(_aHeader , "Token: "+_cToken)
 
                oRest:SetPostParams(_cBodyJson)
                oRest:SetChkStatus(.F.)
@@ -642,10 +609,10 @@ Begin Sequence
 
                   If nStatus >= 200 .And. nStatus <= 299
                      If Empty(oRest:getResult())
-                        cResult := "Falha de comunicação no retorno da requisição com o com o sistema TMS Emabarcador!" + CRLF + "Status " + Alltrim(Str(nStatus))
+                        cResult := "Falha de comunicação no retorno da requisição com o com o sistema TMS Emabarcador!" + CRLF + "Status " + AllTrim(Str(nStatus))
                         _lStatus := .F.
                         If !_lScheduller
-                           U_ItMsg(cResult,"Atenção",,1)
+                           U_ITMsg(cResult,"Atenção",,1)
                         Else
                            U_ItConout(cResult)
                         EndIf
@@ -663,9 +630,9 @@ Begin Sequence
                         EndIf
 
                         _cResposta := '"status":'+oJson:GetJsonText("status")+ ', "mensagem":' + oJson:GetJsonText("mensagem") + ', "codigoMensagem":' + oJson:GetJsonText("codigoMensagem")  
-                        _lStatus   := Iif(oJson:GetJsonText("status") == "false",.F.,.T.)
+                        _lStatus   := IIf(oJson:GetJsonText("status") == "false",.F.,.T.)
 
-                        If !_lStatus .AND. oJson:GetJsonText("mensagem") == "Produto não encontrado." //Trecho solicitado pelo Vanderlei
+                        If !_lStatus .And. oJson:GetJsonText("mensagem") == "Produto não encontrado." //Trecho solicitado pelo Vanderlei
                            _lStatus := .T.
                         EndIf
 
@@ -734,20 +701,20 @@ Begin Sequence
 
                //grava resultado // sempre como processado
                ZFJ->(RecLock("ZFJ",.F.))
-               ZFJ->ZFJ_SITUAC  := _cSituacao // iif(_cok, "P", "N")
-               ZFJ->ZFJ_USUARI  := __CUSERID
+               ZFJ->ZFJ_SITUAC  := _cSituacao // IIf(_cok, "P", "N")
+               ZFJ->ZFJ_USUARI  := __cUserId
                ZFJ->ZFJ_DATAAL  := Date() // Grava data de alteração da tabela de muro.
                ZFJ->ZFJ_DTENV   := Date() // Grava data de envio para o RDC.
                ZFJ->ZFJ_HRENV   := Time() // Grava hora de envio para o RDC.
-               ZFJ->ZFJ_RETORN  := _cResposta // AllTrim(Strtran(_cResult,Chr(10)," ")) // grava o resultado da integração na tabela ZFJ,dizendo que deu certo ou não.
+               ZFJ->ZFJ_RETORN  := _cResposta // AllTrim(StrTran(_cResult,Chr(10)," ")) // grava o resultado da integração na tabela ZFJ,dizendo que deu certo ou não.
                ZFJ->ZFJ_XML     := _cBodyJson
-               ZFJ->(MsUnlock())
+               ZFJ->(MSUnLock())
             Else
                _cResposta := " Não há filial para transmissão. Campo ZFJ->ZFJ_FILTMS com conteudo vazio."
                _lStatus := .F.
             EndIf
 
-            Aadd(_aResult,{_lStatus,ZFJ->ZFJ_CGC,ZFJ->ZFJ_NOME,ZFJ->ZFJ_FILTMS,AllTrim(Subs(ZFJ->ZFJ_COD,1,11)), _cResposta}) // adicona em um array para fazer um item list, exibir os resultados.
+            aAdd(_aResult,{_lStatus,ZFJ->ZFJ_CGC,ZFJ->ZFJ_NOME,ZFJ->ZFJ_FILTMS,AllTrim(Subs(ZFJ->ZFJ_COD,1,11)), _cResposta}) // adicona em um array para fazer um item list, exibir os resultados.
             Sleep(500) //Espera para não travar a comunicação com o webservice da RDC
             IncProc(ZFJ->ZFJ_CGC + " - "  + ZFJ->ZFJ_RETORN)
 
@@ -755,48 +722,46 @@ Begin Sequence
 
       EndIf                 
       
-      TRBZFJ->(DbSkip())      
+      TRBZFJ->(DBSkip())      
    
    EndDo 
    
    If ! _lScheduller
       _aCabecalho := {}
-      Aadd(_aCabecalho,"Processado?" ) 
-      Aadd(_aCabecalho,"CGC" ) 
-      Aadd(_aCabecalho,"NOME") 
-      Aadd(_aCabecalho,"FILIAL") 
-      Aadd(_aCabecalho,"PRODUTO") 
-      Aadd(_aCabecalho,"RETORNO") 
+      aAdd(_aCabecalho,"Processado?" ) 
+      aAdd(_aCabecalho,"CGC" ) 
+      aAdd(_aCabecalho,"NOME") 
+      aAdd(_aCabecalho,"FILIAL") 
+      aAdd(_aCabecalho,"PRODUTO") 
+      aAdd(_aCabecalho,"RETORNO") 
              
       _cTitulo := "Resultados da integração"
       
       If Len(_aresult) > 0
 			U_ITListBox( _cTitulo , _aCabecalho , _aresult   , .F.      , 4      ,  ,          ,         ,         ,     ,        ,          ,       ,         ,          ,           , {|C,L|U_AOMS083U(C,L)}        , .F.   ,         ,     )
-      Endif  
+      EndIf  
    Else
-      u_itconout("[AOMS083] - Integração de envio de dados finalizada. Data: "+Dtoc(Date())+". Hora: "+Time())
+      u_itconout("[AOMS083] - Integração de envio de dados finalizada. Data: "+DToC(Date())+". Hora: "+Time())
    EndIf 
   
 End Sequence
 
 RestOrd(_aOrd)
 
-Return Nil   
+Return   
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS083X
 Aut2or-------------: Julio de Paula Paz
 Data da Criacao---: 13/09/2016
-===============================================================================================================================
 Descrição---------: Lê o arquivo XML modelo no diretório informado e retorna os dados no formato de String.
-===============================================================================================================================
 Parametros--------: _cArq
-===============================================================================================================================
 Retorno-----------: _cRet
 ===============================================================================================================================
 */  
 User Function AOMS083X(_cArq)
+
 Local _cRet := ""
 Local _nStatusArq 
 Local _cLine 
@@ -807,13 +772,11 @@ Begin Sequence
    // Se houver erro de abertura abandona processamento
    If _nStatusArq = -1  
       Break
-   Endif
+   EndIf
    
    // Posiciona na primeria linha
-   FT_FGoTop()
-
-  
-   While !FT_FEOF()   
+   FT_FGoTop()  
+   While !FT_FEof()   
       _cLine  := FT_FReadLn() 
       
       _cRet +=  _cLine
@@ -833,15 +796,13 @@ Return _cRet
 Programa----------: AOMS083D
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 13/09/2016
-===============================================================================================================================
 Descrição---------: Grava em tabela temporária os dados a serem integrados via webservice.
-===============================================================================================================================
 Parametros--------: _lScheduller = .T. = Modo agendado (Scheduller) / .F. = Modo manual
-===============================================================================================================================
 Retorno-----------: _lRet
 ===============================================================================================================================
 */  
 User Function AOMS083D(_lScheduller)
+
 Local _lRet := .F.,_nI
 Local _cMarkZFJ := GetMark() 
                     
@@ -852,18 +813,18 @@ Begin Sequence
       ProcRegua(0)
    EndIf
    
-   ZFJ->(DbSetOrder(2))  // ZFF_FILIAL+ZFF_SITUAC
-   ZFJ->(DbSeek(xFilial("ZFJ")+"N"))
-   Do While ! ZFJ->(Eof()) .And. ZFJ->(ZFJ_FILIAL+ZFJ_SITUAC) == xFilial("ZFJ")+"N"
+   ZFJ->(DBSetOrder(2))  // ZFF_FILIAL+ZFF_SITUAC
+   ZFJ->(DBSeek(xFilial("ZFJ")+"N"))
+   While ! ZFJ->(Eof()) .And. ZFJ->(ZFJ_FILIAL+ZFJ_SITUAC) == xFilial("ZFJ")+"N"
       If ! _lScheduller
          IncProc("Lendo Prod.: "+ZFJ->ZFJ_COD)
       EndIf    
       TRBZFJ->(DBAPPEND())
       For _nI := 1 To ZFJ->(FCount())                  
           nPos:=TRBZFJ->(FieldPos(  ZFJ->( FieldName(_nI)) ))
-          IF nPos # 0
+          If nPos # 0
              TRBZFJ->(FieldPut(nPos,ZFJ->( FieldGet(_nI) ) )) 
-          ENDIF
+          EndIf
       Next
       If _lScheduller         
          TRBZFJ->WK_OK := _cMarkZFJ
@@ -872,9 +833,9 @@ Begin Sequence
       
       _lRet := .T.
       
-      ZFJ->(DbSkip())
+      ZFJ->(DBSkip())
    EndDo
-   TRBZFJ->(DbGoTop())
+   TRBZFJ->(DBGoTop())
 
 End Sequence
 
@@ -885,19 +846,16 @@ Return _lRet
 Programa----------: AOMS083R
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 15/09/2016
-===============================================================================================================================
 Descrição---------: Rotina de exibição da régua de processo e chamada da rotina de gravação dos dados de estoque para 
                     integração via webservice.                                     
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS083R()
 
 Begin Sequence              
-   If ! u_itmsg("Confirma a geração de dados dos estoques para integração via WebService?","Atenção",,2,2,2)
+   If ! U_ITMsg("Confirma a geração de dados dos estoques para integração via WebService?","Atenção",,2,2,2)
       Break
    EndIf
    
@@ -905,34 +863,32 @@ Begin Sequence
 
 End Sequence          
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS083G
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 15/09/2016
-===============================================================================================================================
 Descrição---------: Rotina de leitura dos saldos em estoques (Tabela SB2) e gravação na tabela de integração webservice (ZFJ).   
-===============================================================================================================================
 Parametros--------: _lScheduller = .T. = Modo agendado (Scheduller) / .F. = Modo manual
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS083G(_lScheduller)
-Local _cCodEmpWS := U_ITGETMV( 'IT_EMPWEBSE' , '000001' )
+
+Local _cCodEmpWS := SuperGetMV('IT_EMPWEBS',.F.,'000001')
 Local _aOrd := SaveOrd({"ZFJ","SA2","SB1"})
 Local _cQry
 Local _cCod          
 Local _nTamCod := TamSX3('ZFJ_COD')[1]
 Local _nI
 Local _nQtd
-Local _cFilTer	:= AllTrim( U_ITGetMV( 'IT_EST3FIL' ,, '' ) ) // Verifica parâmetro de configurações das Filiais que usam estoque em poder de terceiros
-Local _cLocTer	:= AllTrim( U_ITGetMV( 'IT_EST3LOC' ,, '' ) ) // Verifica parâmetro de configurações dos Armazéns que usam estoque em poder de terceiros
+Local _cFilTer	:= AllTrim(SuperGetMV('IT_EST3FIL',.F.,'')) // Verifica parâmetro de configurações das Filiais que usam estoque em poder de terceiros
+Local _cLocTer	:= AllTrim(SuperGetMV('IT_EST3LOC',.F.,'')) // Verifica parâmetro de configurações dos Armazéns que usam estoque em poder de terceiros
 Local _nQtdSaldo   
-Local _cTipoProduto := U_ITGETMV( 'IT_TIPPRDSL' , 'PA;UN;' )
-Local _cFilHabilit  := U_ITGETMV( 'IT_FILINTWS' , '' ) // Filiais habilitadas na integracao Webservice Italac x RDC.
+Local _cTipoProduto := SuperGetMV('IT_TIPPRDS',.F.,'PA;UN;')
+Local _cFilHabilit  := SuperGetMV('IT_FILINTW',.F.,'') // Filiais habilitadas na integracao Webservice Italac x RDC.
 Local _cFilial := ""
 Private aHeader, aCols
 
@@ -947,7 +903,7 @@ Begin Sequence
    FillGetDados(1,"ZFJ",1,,,{||.T.},,,,,,.T.)
    
    //                          1                    2               3              4               5                6             7        8              9                 10 
-   // AADD(aHeader, {Alltrim(SX3->X3_TITULO), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL,"AllwaysTrue()", USADO, SX3->X3_TIPO, SX3->X3_ARQUIVO, SX3->X3_CONTEXT})
+   // aAdd(aHeader, {AllTrim(SX3->X3_TITULO), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL,"AllwaysTrue()", USADO, SX3->X3_TIPO, SX3->X3_ARQUIVO, SX3->X3_CONTEXT})
 
    If ! _lScheduller 
       ProcRegua(0)
@@ -966,10 +922,10 @@ Begin Sequence
    _cQry += "      B2_QNPT,"
    _cQry += "      (B2_QATU - B2_QEMP - B2_QEMPN - B2_RESERVA - B2_QACLASS) AS NQATU "
    _cQry += " FROM "+RetSqlName("SB2")+" SB2, "+ RetSqlName("ZZM")+" ZZM, " + RetSqlName("NNR")+" NNR, " + RetSqlName("SB1")+" SB1 " 
-   _cQry += " WHERE SB2.D_E_L_E_T_ <> '*' "
+   _cQry += " WHERE SB2.D_E_L_E_T_ = ' ' "
    _cQry += "       AND ZZM.D_E_L_E_T_ <> '*'"
-   _cQry += "       AND NNR.D_E_L_E_T_ <> '*' "
-   _cQry += "       AND SB1.D_E_L_E_T_ <> '*' "
+   _cQry += "       AND NNR.D_E_L_E_T_ = ' ' "
+   _cQry += "       AND SB1.D_E_L_E_T_ = ' ' "
    _cQry += "       AND B2_FILIAL = ZZM_CODIGO "
    _cQry += "       AND B2_LOCAL = NNR_CODIGO "
    _cQry += "       AND NNR_I_ERDC = 'S' "
@@ -982,12 +938,14 @@ Begin Sequence
    If Select("TRBSB2") > 0
       TRBSB2->( DBCloseArea() )
    EndIf
-    
-   dbUseArea( .T., "TOPCONN", TcGenQry(,,_cQry), "TRBSB2", .T., .F. )
-   DbSelectArea("TRBSB2")
+
+   _cQry := ChangeQuery(_cQry)
+   MPSysOpenQuery(_cQry,"TRBSB2")
+
+   DBSelectArea("TRBSB2")
 
    nConta:=0
-   COUNT TO nConta
+   COUNT To nConta
    If !_lScheduller 
       ProcRegua(nConta)
       IncProc("Gerando dados...")      
@@ -1006,81 +964,54 @@ Begin Sequence
    //===============================================================================
    // Leitura e gravação dos saldos dos Estoques na tabela de integração Webservice.
    //===============================================================================
-   ZFJ->(DbSetOrder(5)) // ZFJ_FILIAL+ZFJ_COD+ZFJ_CODARM+ZFJ_CGC+ZFJ_SITUAC
-   SB1->(DbSetOrder(1)) // B1_FILIAL  + B1_COD
-   SA2->(DbSetOrder(3)) // A2_FILIAL  + A2_CGC
+   ZFJ->(DBSetOrder(5)) // ZFJ_FILIAL+ZFJ_COD+ZFJ_CODARM+ZFJ_CGC+ZFJ_SITUAC
+   SB1->(DBSetOrder(1)) // B1_FILIAL  + B1_COD
+   SA2->(DBSetOrder(3)) // A2_FILIAL  + A2_CGC
    
-   TRBSB2->(DbGoTop())
+   TRBSB2->(DBGoTop())
    ZEL->(DBSetOrder(3))
    
-   Do While ! TRBSB2->(Eof())   
+   While ! TRBSB2->(Eof())   
 
       IncProc("Lendo Produto: "+TRBSB2->B2_COD)      
 
-      If ZEL->(Dbseek(xFilial("ZEL")+TRBSB2->B2_FILIAL+TRBSB2->B2_LOCAL+Space(Len(ZEL->ZEL_OPERAD))+Space(Len(ZEL->ZEL_LOJAOP)) ))
-         _cFilial := Alltrim(ZEL->ZEL_FILTMS)
-      ElseIf ZEL->(Dbseek(xFilial("ZEL")+TRBSB2->B2_FILIAL+Space(Len(ZEL->ZEL_LOCAL))+Space(Len(ZEL->ZEL_OPERAD))+Space(Len(ZEL->ZEL_LOJAOP)) ))
-         _cFilial := Alltrim(ZEL->ZEL_FILTMS)
+      If ZEL->(DBSeek(xFilial("ZEL")+TRBSB2->B2_FILIAL+TRBSB2->B2_LOCAL+Space(Len(ZEL->ZEL_OPERAD))+Space(Len(ZEL->ZEL_LOJAOP)) ))
+         _cFilial := AllTrim(ZEL->ZEL_FILTMS)
+      ElseIf ZEL->(DBSeek(xFilial("ZEL")+TRBSB2->B2_FILIAL+Space(Len(ZEL->ZEL_LOCAL))+Space(Len(ZEL->ZEL_OPERAD))+Space(Len(ZEL->ZEL_LOJAOP)) ))
+         _cFilial := AllTrim(ZEL->ZEL_FILTMS)
       Else
          _cFilial := ""
       EndIf
 
-      SB1->(DbSeek(xFilial("SB1")+TRBSB2->B2_COD))
-      SA2->(DbSeek(xFilial("SA2")+TRBSB2->ZZM_CGC))
-      _cCod := AllTrim(TRBSB2->B2_COD) + IF(u_IT_TMS(ZEL->ZEL_CODIGO),"", Right(AllTrim(TRBSB2->ZZM_CGC),6))
+      SB1->(DBSeek(xFilial("SB1")+TRBSB2->B2_COD))
+      SA2->(DBSeek(xFilial("SA2")+TRBSB2->ZZM_CGC))
+      _cCod := AllTrim(TRBSB2->B2_COD) + If(u_IT_TMS(ZEL->ZEL_CODIGO),"", Right(AllTrim(TRBSB2->ZZM_CGC),6))
       _cCod := PadR(_cCod,_nTamCod," ")   
       
       //===========================================================================================
       // Verifica se o saldo em poder de terceiros deve ser adicionado as quantidades.
       //===========================================================================================      
       _nQtdSaldo := TRBSB2->NQATU
+
+      If _lScheduller
+         cFilAnt := TRBSB2->B2_FILIAL //Considerar essa filial para buscar os parâmetros
+         _cFilTer:= AllTrim(GetMV('IT_EST3FIL',.F.,'')) // Verifica parâmetro de configurações das Filiais que usam estoque em poder de terceiros
+         _cLocTer:= AllTrim(GetMV('IT_EST3LOC',.F.,'')) // Verifica parâmetro de configurações dos Armazéns que usam estoque em poder de terceiros
+      EndIf
+
       If TRBSB2->B2_FILIAL $ _cFilTer .And. TRBSB2->B2_LOCAL $ _cLocTer
          _nQtdSaldo := _nQtdSaldo + TRBSB2->B2_QNPT
       EndIf                                                                                                   
 
-      //===========================================================================================
-      // Realiza as conversões das Quantidades.
-      //===========================================================================================   
-      /*      
-         Multiplica ou Divide o Fator de
-         Conversao para se calcular a 1a Unidade
-         de Medida.
-
-         1o Exemplo - MULTIPLICACAO:
-         ===========================
-         1UM = CX (Caixa)
-         2UM = PC (Peca)
-         FC (Fator de Conversao) = 16
-         O sistema irá calcular:
-         2UM * FC = 1UM, onde:
-         (1 Peca)*16 = 1 Caixa, ou seja, 1 Caixa
-         possui 16 Pecas.
-
-         2o Exemplo - DIVISAO: 
-         =====================
-         1UM = PC (Peca)
-         2UM = CX (Caixa)
-         FC (Fator de Conversao) = 16
-         O sistema irá calcular:
-         2UM / FC = 1UM, onde:
-         (1 Caixa)/16 = 1 Peca, ou seja, 16
-         pecasjuntas formam 1 Caixa.      
-
-         ========================================
-         B1_UM      = 1 Unidade de medida
-         B1_SEGUM   = 2 Unidade de medida
-         B1_TIPCONV = Tipo de Conversão
-         B1_CONV    = Fator de Conversão
-      */                            
       _nQtd := _nQtdSaldo // TRBSB2->NQATU
       If Empty(SB1->B1_SEGUM) // Não há segunda unidade de medida
          _nQtd := _nQtdSaldo // TRBSB2->NQATU
-      Else                   
+      Else          
          If SB1->B1_TIPCONV == "D" // TIPO DE CONVERSAO DIVISÃO
             
             If ! Empty(SB1->B1_CONV)
 		         _nQtd := _nQtdSaldo / SB1->B1_CONV // TRBSB2->NQATU / SB1->B1_CONV
-            Else 
+            Else
                _nQtd := _nQtdSaldo / SB1->B1_I_FATCO // TRBSB2->NQATU / SB1->B1_CONV               
             EndIf   
          Else
@@ -1090,7 +1021,7 @@ Begin Sequence
       //==========================================================
 
       If U_AOMS083S(TRBSB2->B2_FILIAL,_cCod,TRBSB2->B2_LOCAL,TRBSB2->ZZM_CGC,Int(_nQtd))   //_nQtdSaldo) //TRBSB2->NQATU)
-         TRBSB2->(DbSkip())
+         TRBSB2->(DBSkip())
          Loop
       EndIf
 
@@ -1098,12 +1029,12 @@ Begin Sequence
       // Grava em um array as filiais que serão integradas para o sistema RDC.
       //===========================================================================================
       If _lScheduller
-         If Ascan(_aFilProcess,TRBSB2->B2_FILIAL) == 0
-            Aadd(_aFilProcess,TRBSB2->B2_FILIAL)
+         If aScan(_aFilProcess,TRBSB2->B2_FILIAL) == 0
+            aAdd(_aFilProcess,TRBSB2->B2_FILIAL)
          EndIf
       EndIf
       
-      If ZFJ->(DbSeek(TRBSB2->B2_FILIAL + _cCod + TRBSB2->B2_LOCAL + TRBSB2->ZZM_CGC + "N")) // ZFJ_FILIAL+ZFJ_COD+ZFJ_CODARM+ZFJ_CGC+ZFJ_SITUAC         
+      If ZFJ->(DBSeek(TRBSB2->B2_FILIAL + _cCod + TRBSB2->B2_LOCAL + TRBSB2->ZZM_CGC + "N")) // ZFJ_FILIAL+ZFJ_COD+ZFJ_CODARM+ZFJ_CGC+ZFJ_SITUAC         
          //================================================================================
          // Se já existir um registro do estoque na tabela ZFJ que ainda não foi processado
          // apenas altera.
@@ -1134,12 +1065,12 @@ Begin Sequence
       ZFJ->ZFJ_SITUAC  := "N"              // Situação
       ZFJ->ZFJ_CODARM  := TRBSB2->B2_LOCAL // Codigo do Armazem
       ZFJ->ZFJ_CODEMP  := _cCodEmpWS  
-      ZFJ->ZFJ_USUARI  := __CUSERID
+      ZFJ->ZFJ_USUARI  := __cUserId
       ZFJ->ZFJ_DATAAL  := Date()
       ZFJ->ZFJ_FILTMS  := _cFilial
-      ZFJ->(MsUnlock()) 
+      ZFJ->(MSUnLock()) 
       
-      TRBSB2->(DbSkip())
+      TRBSB2->(DBSkip())
             
    EndDo
 End Sequence  
@@ -1149,26 +1080,24 @@ If Select("TRBSB2") > 0
    TRBSB2->( DBCloseArea() )
 EndIf
 
-ZFJ->(DbGoTop())
+ZFJ->(DBGoTop())
 
 RestOrd(_aOrd)
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS083N
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 19/09/2016
-===============================================================================================================================
 Descrição---------: Com base em um endereço passado como parâmetro, retorna o numero deste endereço.
-===============================================================================================================================
 Parametros--------: _cEndereco = Endereço a ser lido e retornado o número.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS083N(_cEndereco)
+
 Local _cRet := "000000"
 Local _nPos
 Local _nI
@@ -1209,7 +1138,7 @@ Begin Sequence
    
 End Sequence
 
-If Empty(alltrim(_cret))
+If Empty(AllTrim(_cret))
 
    _cRet := "00000"
   
@@ -1222,15 +1151,13 @@ Return _cRet
 Programa----------: AOMS083S
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 25/05/2017
-===============================================================================================================================
 Descrição---------: Verifica se houve alterações nos saldos dos estoques antes de enviar para o sistema RDC.
-===============================================================================================================================
 Parametros--------: _cFilial,_cCodProduto,_cArmazem,_cCnpj,_nQtdAtu
-===============================================================================================================================
 Retorno-----------: .T. = Quantidades iguais, .F. = Quantidades diferentes.
 ===============================================================================================================================
 */  
 User Function AOMS083S(_cFilial,_cCodProduto,_cArmazem,_cCnpj,_nQtdAtu)
+
 Local _lRet := .T.
 Local _cQry 
 Local _nRegAtu := ZFJ->(Recno())
@@ -1238,7 +1165,7 @@ Local _nRegAtu := ZFJ->(Recno())
 Begin Sequence
    _cQry := " SELECT MAX(ZFJ.R_E_C_N_O_) AS NRECNO "
    _cQry += " FROM "+RetSqlName("ZFJ")+" ZFJ "
-   _cQry += " WHERE ZFJ.D_E_L_E_T_ <> '*' AND ZFJ_FILIAL = '"+_cFilial+"' AND ZFJ_COD = '"+_cCodProduto+"' "
+   _cQry += " WHERE ZFJ.D_E_L_E_T_ = ' ' AND ZFJ_FILIAL = '"+_cFilial+"' AND ZFJ_COD = '"+_cCodProduto+"' "
    _cQry += " AND ZFJ_CODARM = '"+_cArmazem+"' AND ZFJ_CGC = '"+_cCnpj+"' AND (ZFJ_SITUAC = 'P' OR ZFJ_SITUAC = 'N') "
    
    _cQry := ChangeQuery(_cQry)
@@ -1259,7 +1186,7 @@ Begin Sequence
       Break
    EndIf
    
-   ZFJ->(DbGoTo(QRYZFJ->NRECNO))
+   ZFJ->(DBGoTo(QRYZFJ->NRECNO))
         
    If ZFJ->ZFJ_QATU <> _nQtdAtu
       _lRet := .F.
@@ -1271,7 +1198,7 @@ If Select("QRYZFJ") > 0
    QRYZFJ->( DBCloseArea() )
 EndIf
 
-ZFJ->(DbGoTo(_nRegAtu))
+ZFJ->(DBGoTo(_nRegAtu))
 
 Return _lRet
 
@@ -1280,11 +1207,8 @@ Return _lRet
 Programa----------: AOMS083T
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 26/05/2017
-===============================================================================================================================
 Descrição---------: Rotina para rodar a integração de saldos em estoques de forma agendada(Scheduller).
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
@@ -1307,9 +1231,6 @@ Begin Sequence
    //===========================================================================================
    // Preparando o ambiente com a filial da carga recebida
    //===========================================================================================
-   //PREPARE ENVIRONMENT EMPRESA '01' FILIAL '01'; //_cfilial; //USER 'Administrador' PASSWORD '' ;
-   //        TABLES "SA7","SB1","SB2","SB5","SB8","SBJ","SB9","SBE","SBF","SC0","SD5","SBK","SD7","SDC","SF4","SGA","SM2","SDA","SDB","SBM","ADA","SA2","DAK","DAI","DA4","ZFU","ZFV","SC9","SA1","SC5","SC6","ZP1";
-   //        MODULO 'OMS'
    RpcSetEnv("01", "01",,,,, {"SA7","SB1","SB2","SB5","SB8","SBJ","SB9","SBE","SBF","SC0","SD5","SBK","SD7","SDC","SF4","SGA","SM2","SDA","SDB","SBM","ADA","SA2","DAK","DAI","DA4","ZFU","ZFV","SC9","SA1","SC5","SC6","ZP1"})
 
    cFilAnt := _cfilial
@@ -1317,7 +1238,7 @@ Begin Sequence
 
    _cMarcaZFJ := GetMark()  
    
-      //============================================================================
+   //============================================================================
    //Montagem do aheader                                                        
    //=============================================================================
    aHeader := {}
@@ -1325,22 +1246,22 @@ Begin Sequence
    FillGetDados(1,"ZFJ",1,,,{||.T.},,,,,,.T.)
    
    //                          1                    2               3              4               5                6             7        8              9                 10 
-   // AADD(aHeader, {Alltrim(SX3->X3_TITULO), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL,"AllwaysTrue()", USADO, SX3->X3_TIPO, SX3->X3_ARQUIVO, SX3->X3_CONTEXT})
+   // aAdd(aHeader, {AllTrim(SX3->X3_TITULO), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL,"AllwaysTrue()", USADO, SX3->X3_TIPO, SX3->X3_ARQUIVO, SX3->X3_CONTEXT})
    
    //================================================================================
    // Cria as estruturas das tabelas temporárias
    //================================================================================
    _aStrucZFJ := {}
-   Aadd(_aStrucZFJ,{"WK_OK"  , "C", 2 ,0})
-   Aadd(_aStrucZFJ,{"WKRECNO", "N", 10,0})
+   aAdd(_aStrucZFJ,{"WK_OK"  , "C", 2 ,0})
+   aAdd(_aStrucZFJ,{"WKRECNO", "N", 10,0})
    For _nI := 1 To Len(aHeader)
-       Aadd(_aStrucZFJ,{aHeader[_nI,2], aHeader[_nI,8], aHeader[_nI,4] ,aHeader[_nI,5]})
+       aAdd(_aStrucZFJ,{aHeader[_nI,2], aHeader[_nI,8], aHeader[_nI,4] ,aHeader[_nI,5]})
    Next   
    
    //===========================================================================================
    // Lê os saldos dos estoques e grava na tabela de muro ZFJ.
    //===========================================================================================
-   U_AOMS083G(.T.) 
+ U_AOMS083G(.T.) 
     
    //===================================================================================
    // Processo os dados pelas filiais carregadas com base nas filiais dos armazens.
@@ -1359,13 +1280,10 @@ Begin Sequence
        //===========================================================================================
        // Preparando o ambiente com a filial da carga recebida
        //===========================================================================================
-       // PREPARE ENVIRONMENT EMPRESA '01' FILIAL _cfilial; //USER 'Administrador' PASSWORD '' ;
-       //         TABLES "SA7","SB1","SB2","SB5","SB8","SBJ","SB9","SBE","SBF","SC0","SD5","SBK","SD7","SDC","SF4","SGA","SM2","SDA","SDB","SBM","ADA","SA2","DAK","DAI","DA4","ZFU","ZFV","SC9","SA1","SC5","SC6","ZP1";
-       //         MODULO 'OMS'
        RpcSetEnv("01", _cfilial,,,,, {"SA7","SB1","SB2","SB5","SB8","SBJ","SB9","SBE","SBF","SC0","SD5","SBK","SD7","SDC","SF4","SGA","SM2","SDA","SDB","SBM","ADA","SA2","DAK","DAI","DA4","ZFU","ZFV","SC9","SA1","SC5","SC6","ZP1"})
 
        cFilAnt := _cfilial                                                                          
-       Private _lWsTms := IF(cFilAnt $ SuperGetMV( 'IT_WEBETMS',.F.,"90") .And. !EMPTY(SuperGetMV( 'IT_LOEMTMS',.F.,"")) ,.T.,.F.)
+       Private _lWsTms := If(cFilAnt $ SuperGetMV( 'IT_WEBETMS',.F.,"90") .And. !Empty(SuperGetMV( 'IT_LOEMTMS',.F.,"")) ,.T.,.F.)
 
        //================================================================================
        // Verifica se ja existe um arquivo com mesmo nome, se sim fecha.
@@ -1398,7 +1316,7 @@ Begin Sequence
        If _lWsTms
           U_AOMS083Y(.T.)
           U_AOMS083W(.T.)
-       else
+       Else
           U_AOMS083W(.T.)
        EndIf
        
@@ -1416,17 +1334,15 @@ End Sequence
 // Fecha e exclui as tabelas temporárias
 //================================================================================                    
 If Select("TRBZFJ") > 0
-   TRBZFJ->(DbCloseArea())
+   TRBZFJ->(DBCloseArea())
 EndIf
                  
 //=====================================================================
 // Limpa o ambiente, liberando a licença e fechando as conexões
 //=====================================================================
-//RESET ENVIRONMENT
-//RpcSetType(3)
 RpcClearEnv() 
 
-Return Nil
+Return
 
 
 /*
@@ -1434,22 +1350,20 @@ Return Nil
 Programa----------: AOMS083U
 Autor-------------: Igor Melgaco
 Data da Criacao---: 24/01/2024
-===============================================================================================================================
 Descrição---------: Monta Legenda
-===============================================================================================================================
 Parametros--------: _aCol,_nLinha
-===============================================================================================================================
 Retorno-----------: cRet
 ===============================================================================================================================
 */
-USER Function AOMS083U(_aCol,_nLinha)
-   Local oOk			:= LoadBitmap( GetResources() , "BR_VERMELHO" )
-   Local oNo			:= LoadBitmap( GetResources() , "BR_VERDE" )
+User Function AOMS083U(_aCol,_nLinha)
 
-	IF _aCol[_nLinha,1]
-		RETURN oOk
-	ELSE
-		RETURN oNo
-	ENDIF
+Local oOk := LoadBitmap( GetResources() , "BR_VERMELHO" )
+Local oNo := LoadBitmap( GetResources() , "BR_VERDE" )
 
-RETURN oNo
+If _aCol[_nLinha,1]
+   Return oOk
+Else
+   Return oNo
+EndIf
+
+Return oNo

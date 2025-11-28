@@ -2,48 +2,24 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 16/10/2019 | Chamado 28346. Removidos os Warning na compilação da release 12.1.25. 
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 26/10/2020 | Chamado 34262. Remoção de bugs apontados pelo Totvs CodeAnalysis. 
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 05/11/2020 | Chamado 34584. Correcao do LOOP infinito da procura da Loja do SA2. 
--------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 23/02/2021 | Chamado 35512. Ver existência taxa seguro tabela taxas p/transp/filial se não peger do parametro.
--------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 02/06/2021 | Chamado 30306. Inclusão de botão e rotina para o usuário selecionar quai notas irão gerar o titulo. 
--------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 14/09/2022 | Chamado 41335. Alterar a data de validação do vencimento por DDatabase e não a data do sistema. 
--------------------------------------------------------------------------------------------------------------------------------
-Igor Melgaço  | 24/01/2023 | Chamado 42611. Ajustes para tratamento da Loja da Transportadora e gravação do campo NDFSE. 
--------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 22/08/2023 | Chamado 44027. Coorigir a lentidão da rotina Central de Seguros de Frete,na visualização das Nfs.
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 23/07/2025 | Chamado 51340. Ajustar função para validação de ambiente de teste
+Lucas Borges  |23/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
+Lucas Borges  |14/09/2025| Chamado 51799. Implementada função para validar ambiente de teste totvs.framework.environment.Type.get()
+Lucas Borges  |17/09/2025| Chamado 52146. Corrigido erro na chamada do SuperGetMV
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes da Rotina
-//====================================================================================================
- 
-#Include "RWMAKE.CH"
-#Include "TopConn.ch"
-#Include "ap5mail.ch"
-#Include "Protheus.ch"
 
-#DEFINE CRLF	Chr(13)+Chr(10)
+#Include "ap5mail.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
-Programa----------: AOMS114  
+Programa----------: AOMS114
 Autor-------------: Alex Wallauer 
 Data da Criacao---: 12/03/2013
-===============================================================================================================================
 Descrição---------: Central de seguros de frete  - Chamado 29372
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -53,93 +29,89 @@ Private _oTRBF := nil
 Private _aTRBF := {}
 Private nQtdTit:= 0
 Private nValTit:= 0
-Private dDtVenc:= DATE()
-PRIVATE _aRecEsto:={}
+Private dDtVenc:= Date()
+Private _aRecEsto:={}
 
-IF DAY(DATE()) >  23
+If DAY(Date()) >  23
    dDtVenc:=CTOD("23/"+StrZero( Month(Date())+1 , 2 ) +'/'+ StrZero( Year(Date()) , 4 ))
-ELSE
+Else
    dDtVenc:=CTOD("23/"+StrZero( Month(Date())   , 2 ) +'/'+ StrZero( Year(Date()) , 4 ))
-ENDIF
+EndIf
 AOMS114INI()
 
 If Select("TRBF") > 0
 	If ValType(_oTRBF) == "O"
-	   TRBF->(DbCloseArea())
+	   TRBF->(DBCloseArea())
 	    _oTRBF:Delete()
 	Else
-	   TRBF->(DbCloseArea())
+	   TRBF->(DBCloseArea())
 	EndIf
 EndIf
 
 If Select("TRBSF2") > 0
-	TRBSF2->(DBCLOSEAREA())
+	TRBSF2->(DBCloseArea())
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS114INI
 Autor-------------: Alex Wallauer
 Data da Criacao---: 20/07/2018
-===============================================================================================================================
 Descrição---------: Funcao que controla o processamento 
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS114INI()
+
 Private _cPerg		  := 'AOMS114'
 Private _cMV_ZP1    := "ITAOMS114TR"
-Private _nPercSeguro:= U_ITGETMV("IT_PERCSEG",0.13)//Padrão é 0.13% criar o parametro tipo numerico
-Private _dDtCorte   := U_ITGETMV("ITNDFDTCOR", CTOD("01/07/2019") )//
+Private _nPercSeguro:= SuperGetMV("IT_PERCSEG",.F.,0.13)//Padrão é 0.13% criar o parametro tipo numerico
+Private _dDtCorte   := SuperGetMV("IT_NDFDTCO",.F.,CTOD("01/07/2019") )//
 Private _cMarca     := GetMark()
-PRIVATE _lTemPercDiferente:=.F.
+Private _lTemPercDiferente:=.F.
 Private _bPergunte := {|| Pergunte( _cPerg , .T. ) }
 
-IF VALTYPE(_nPercSeguro) <> "N"
+If ValType(_nPercSeguro) <> "N"
    _nPercSeguro:=0.13/100
-ELSE
+Else
    _nPercSeguro:=(_nPercSeguro/100)
-ENDIF
+EndIf
 
-DO WHILE .T.
+While .T.
    
    ZP1->(DBSetOrder(2))
    ZP1->(MsSeek( xFilial('ZP1') + cFilant + _cMV_ZP1 ))//TRAVA POR FILIAL
    ZP1->(MsRUnLock())
-   ZP1->(MSUNLOCKALL())
+   ZP1->(MSUnLockALL())
    nOpca:=0
    If EVAL(_bPergunte)
-      IF !AOM114Trava()
-         LOOP
-      ENDIF
+      If !AOM114Trava()
+         Loop
+      EndIf
       _lTemReg:=.F.
 	  // Cria o arquivo Temporario para insercao dos dados selecionados.	
-	  FWMSGRUN( , {|oProc| _lTemReg:=AOMS114ArQ(oProc) }, "Aguarde!" , 'Lendo Dados das Notas...' )
-	  IF _lTemReg 
-        //FWMSGRUN( , {|oProc| U_AOMS114 B(oProc) }, "Aguarde!" , 'Gravando Dados das Notas...' )
-        
+	  FWMsgRun( , {|oProc| _lTemReg:=AOMS114ArQ(oProc) }, "Aguarde!" , 'Lendo Dados das Notas...' )
+	  If _lTemReg 
 	     nOpca:=AOMS114TRS()
-	  ELSE
-         U_ITMSG("Não há registros, altere o filtro!","ATENCAO",,3)
-	     LOOP
-	  ENDIF   
+	  Else
+         U_ITMsg("Não há registros, altere o filtro!","ATENCAO",,3)
+	     Loop
+	  EndIf   
 	  
-	ENDIF
-	IF nOpca <> 3   
-	   EXIT
-	ENDIF   
-ENDDO
+	EndIf
+	If nOpca <> 3   
+	   Exit
+	EndIf   
+EndDo
 
-ZP1->(DBSETORDER(2))
+ZP1->(DBSetOrder(2))
 ZP1->(MSSEEK( xFilial('ZP1') + cFilant + _cMV_ZP1 ))//TRAVA POR FILIAL
 ZP1->(MSRUNLOCK())
-ZP1->(MSUNLOCKALL())
-ZP1->(DBSETORDER(1))
+ZP1->(MSUnLockALL())
+ZP1->(DBSetOrder(1))
 
 Return .T.
 
@@ -148,11 +120,8 @@ Return .T.
 Programa----------: AOMS114TRS
 Autor-------------: Alex Wallauer
 Data da Criacao---: 20/07/2018
-===============================================================================================================================
 Descrição---------: Função que monta a tela para processar
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -165,27 +134,26 @@ Local nWidth		:= 0
 Local aSize			:= {}
 Local aBotoes		:= {}
 Local aCoors		:= {}
-//LOCAL _bVal:={|| IF(dDtVenc >= DATE(),.T.,(U_ITMSG("Data INVALIDA",'Atenção!',"Tente novamente com a data maior ou igual que hoje",3),.F.) ) }
-LOCAL _bVal:={|| IF(dDtVenc >= DDATABASE,.T.,(U_ITMSG("Data INVALIDA",'Atenção!',"Tente novamente com a data maior ou igual que hoje",3),.F.) ) }
+Local _bVal:={|| If(dDtVenc >= dDataBase,.T.,(U_ITMsg("Data INVALIDA",'Atenção!',"Tente novamente com a data maior ou igual que hoje",3),.F.) ) }
 Private nOpca	 := 2
 Private cFiltro	 := "" 
 Private oMark	 := Nil
 Private oQtda	 := Nil
 Private oValor   := Nil
 // Botoes da tela.
-Aadd( aBotoes , { "" , {|| AOMS114LEG() }   , "" , "Legenda"          } )
-Aadd( aBotoes , { "" , {|| AOMS114ALL() }   , "" , "Marca/Desm.Todos"} )
-Aadd( aBotoes , { "" , {|| AOMS114C(9)	}	  , "" , "Selecionar Notas"    } )
-Aadd( aBotoes , { "" , {|| AOMS114C(4)	}	  , "" , "Visualiza NFs"    } )
-Aadd( aBotoes , { "" , {|| AOMS114C(2) 	} , "" , "Pesquisar"		  } )
-Aadd( aBotoes , { "" , {|| AOMS114C(5) 	} , "" , "Exporta Excel"    } )
+aAdd( aBotoes , { "" , {|| AOMS114LEG() }   , "" , "Legenda"          } )
+aAdd( aBotoes , { "" , {|| AOMS114ALL() }   , "" , "Marca/Desm.Todos"} )
+aAdd( aBotoes , { "" , {|| AOMS114C(9)	}	  , "" , "Selecionar Notas"    } )
+aAdd( aBotoes , { "" , {|| AOMS114C(4)	}	  , "" , "Visualiza NFs"    } )
+aAdd( aBotoes , { "" , {|| AOMS114C(2) 	} , "" , "Pesquisar"		  } )
+aAdd( aBotoes , { "" , {|| AOMS114C(5) 	} , "" , "Exporta Excel"    } )
 // Faz o calculo automatico de dimensoes de objetos
 aSize := MSADVSIZE() 
 
-DO WHILE .T.
+While .T.
  
    nOpca:= 2
-   DEFINE MSDIALOG oDlg1 TITLE "CENTRAL DE SEGUROS DE FRETE "+IF(MV_PAR06=1,"[ TITULOS GERADOS ]","[ TITULOS NAO GERADOS ]") From 0,0 To aSize[6],aSize[5] PIXEL
+   DEFINE MSDIALOG oDlg1 TITLE "CENTRAL DE SEGUROS DE FRETE "+If(MV_PAR06=1,"[ TITULOS GERADOS ]","[ TITULOS NAO GERADOS ]") From 0,0 To aSize[6],aSize[5] PIXEL
 
 	oPanel:= TPanel():New(30,0,'',oDlg1,, .T., .T.,, ,315,20,.T.,.T. )
 	oFont := TFont():New('Times New Roman',,-16,.T.)
@@ -193,14 +161,14 @@ DO WHILE .T.
 	_nCol:=005
 	_nSize:=60
 	_nPula:= 65
-	IF MV_PAR06 = 1//JÁ EMITIDOS                                                                                    //LOOP   ,SAI  
-	   @003,_nCol BUTTON "ESTORNA TITULO"   SIZE _nSize, 015 PIXEL OF oPanel ACTION (IF(AOMS114C(8),(IF(AOMS114C(1),nOpca:=1,nOpca:=3),oDlg1:End()),))//SEM PERGUNTE()
-	ELSE                                                                                                            //LOOP   ,SAI  
-	   @003,_nCol BUTTON "GERA TITULO"      SIZE _nSize, 015 PIXEL OF oPanel ACTION (IF(AOMS114C(6),(IF(AOMS114C(1),nOpca:=1,nOpca:=3),oDlg1:End()),))//SEM PERGUNTE()
-	ENDIF   
+	If MV_PAR06 = 1//JÁ EMITIDOS                                                                                    //Loop   ,SAI  
+	   @003,_nCol BUTTON "ESTORNA TITULO"   SIZE _nSize, 015 PIXEL OF oPanel ACTION (If(AOMS114C(8),(If(AOMS114C(1),nOpca:=1,nOpca:=3),oDlg1:End()),))//SEM PERGUNTE()
+	Else                                                                                                   //Loop   ,SAI  
+	   @003,_nCol BUTTON "GERA TITULO"      SIZE _nSize, 015 PIXEL OF oPanel ACTION (If(AOMS114C(6),(If(AOMS114C(1),nOpca:=1,nOpca:=3),oDlg1:End()),))//SEM PERGUNTE()
+	EndIf   
 	_nCol+=_nPula
 
-   IF MV_PAR06 == 2 //Não Emitidos
+   If MV_PAR06 == 2 //Não Emitidos
       @003,_nCol BUTTON "SELECIONAR NOTAS" SIZE _nSize, 015 PIXEL OF oPanel ACTION (AOMS114C(9)) 
       _nCol+=_nPula
    EndIf 
@@ -210,17 +178,14 @@ DO WHILE .T.
 
 	@003,_nCol BUTTON "PESQUISAR"     SIZE _nSize, 015 PIXEL OF oPanel ACTION (AOMS114C(2))
 	_nCol+=_nPula
-                                                                                              //LOOP   ,SAI  
-    @003,_nCol BUTTON "ATUALIZAR"     SIZE _nSize, 015 PIXEL OF oPanel ACTION ( IF(AOMS114C(3),nOpca:=1,nOpca:=3),oDlg1:End() )//COM PERGUNTE()
+                                                                                              //Loop   ,SAI  
+    @003,_nCol BUTTON "ATUALIZAR"     SIZE _nSize, 015 PIXEL OF oPanel ACTION ( If(AOMS114C(3),nOpca:=1,nOpca:=3),oDlg1:End() )//COM PERGUNTE()
 	_nCol+=_nPula
 
-	IF MV_PAR06 = 1//JÁ EMITIDOS 
+	If MV_PAR06 = 1//JÁ EMITIDOS 
 	   @003,_nCol BUTTON "RE-ENVIA E-MAIL" SIZE _nSize, 015 PIXEL OF oPanel ACTION (AOMS114C(7))
 	   _nCol+=_nPula
-	ELSE                                                                                      
-	   //@003,_nCol BUTTON "EXPORTA EXCEL"   SIZE _nSize, 015 PIXEL OF oPanel ACTION (AOMS114C(5))
-	   //_nCol+=_nPula
-	ENDIF   
+	EndIf   
 
 	@003,_nCol BUTTON "MARCA/DESM.TODOS" SIZE _nSize, 015 PIXEL OF oPanel ACTION AOMS114ALL()
 	_nCol+=_nPula
@@ -232,10 +197,10 @@ DO WHILE .T.
     @ 05,_nCol MSGET dDtVenc Size 050,10 COLORS CLR_RED,CLR_WHITE Picture "@D" PIXEL OF oPanel FONT oFont  VALID Eval(_bVal)
     _nCol+=(_nPula-9)
 
-	oQtda := TSay():New(05,_nCol,{||'Qtde transp: '+ALLTRIM(TRANSFORM(nQtdTit,"@E 99,999,999,999"))},oPanel,,oFont,,,,.T.,CLR_BLACK,CLR_WHITE,200,20)//450
+	oQtda := TSay():New(05,_nCol,{||'Qtde transp: '+AllTrim(TRANSFORM(nQtdTit,"@E 99,999,999,999"))},oPanel,,oFont,,,,.T.,CLR_BLACK,CLR_WHITE,200,20)//450
 	_nCol+=(_nPula)
 
-	oValor:= TSay():New(05,_nCol,{||'Valor seguro: '+ALLTRIM(TRANSFORM(nValTit,"@E 9999,999,999.99"))},oPanel,,oFont,,,,.T.,CLR_BLACK,CLR_WHITE,200,20)//550
+	oValor:= TSay():New(05,_nCol,{||'Valor seguro: '+AllTrim(TRANSFORM(nValTit,"@E 9999,999,999.99"))},oPanel,,oFont,,,,.T.,CLR_BLACK,CLR_WHITE,200,20)//550
 	
 	If FlatMode()
 		aCoors	:= GetScreenRes()
@@ -244,7 +209,7 @@ DO WHILE .T.
 	Else
 		nHeight	:= 143
 		nWidth	:= 315
-	Endif
+	EndIf
 
   //TCBrowse():New( [ nRow ], [ nCol ], [ nWidth ], [ nHeight ], [ bLine ], [ aHeaders ], [ aColSizes ], [ oWnd ], [ cField ], [ uValue1 ], [ uValue2 ], [ bChange ], [ bLDblClick ]  , [ bRClick ], [ oFont ], [ oCursor ], [ nClrFore ], [ nClrBack ], [ cMsg ], [ uParam20 ], [ cAlias ], [ lPixel ], [ bWhen ], [ uParam24 ], [ bValid ], [ lHScroll ], [ lVScroll ] )
 	oMark := TCBrowse():New(35,  01   , 35+nHeight, 01+nwidth  ,          ,             ,              , oDlg1   ,           ,            ,            ,            ,                 ,            ,          ,            ,             ,             ,         ,    .F.      ,           ,   .T.     ,          ,    .F.      ,           ,             ,              )
@@ -253,21 +218,21 @@ DO WHILE .T.
 	oMark:bHeaderClick := {|| AOMS114ALL()}
 	oMark:bLDblClick   := {|| AOMS114INV()}
 	
-	oMark:AddColumn(TCColumn():New(" "       			      ,{|| LoadBitmap(GetResources(), IF(LEN(_aTRBF)>0,IF(_aTRBF[oMark:nat,01]==_cMarca,"LBOK","LBNO"),"LBNO") ) },,,,,,.T.,.F.,,,,.F., ) )
-  	oMark:AddColumn(TCColumn():New(" "       			      ,{|| LoadBitmap(GetResources(), IF(LEN(_aTRBF)>0,U_AOMS1149(_aTRBF[oMark:nat,14]),' '))  },    ,,,,,.T.,.F.,,,,.F., ) )
-	oMark:AddColumn(TCColumn():New("Codigo"               ,{|| if(len(_aTRBF)>0,_aTRBF[oMark:nat,03], ' ') },"@!"       			  ,,,"LEFT" ,050,.F.,.F.,,,,,))
-	oMark:AddColumn(TCColumn():New("Lojas"                ,{|| if(len(_aTRBF)>0,_aTRBF[oMark:nat,04], ' ') },"@!"       			  ,,,"LEFT" ,050,.F.,.F.,,,,,))
+	oMark:AddColumn(TCColumn():New(" "       			      ,{|| LoadBitmap(GetResources(), If(Len(_aTRBF)>0,If(_aTRBF[oMark:nat,01]==_cMarca,"LBOK","LBNO"),"LBNO") ) },,,,,,.T.,.F.,,,,.F., ) )
+  	oMark:AddColumn(TCColumn():New(" "       			      ,{|| LoadBitmap(GetResources(), If(Len(_aTRBF)>0,U_AOMS1149(_aTRBF[oMark:nat,14]),' '))  },    ,,,,,.T.,.F.,,,,.F., ) )
+	oMark:AddColumn(TCColumn():New("Codigo"               ,{|| If(Len(_aTRBF)>0,_aTRBF[oMark:nat,03], ' ') },"@!"       			  ,,,"LEFT" ,050,.F.,.F.,,,,,))
+	oMark:AddColumn(TCColumn():New("Lojas"                ,{|| If(Len(_aTRBF)>0,_aTRBF[oMark:nat,04], ' ') },"@!"       			  ,,,"LEFT" ,050,.F.,.F.,,,,,))
 
-	oMark:AddColumn(TCColumn():New("Transportador"		   ,{|| if(len(_aTRBF)>0,_aTRBF[oMark:nat,05], ' ') },"@!"       			  ,,,"LEFT" ,250,.F.,.F.,,,,,))
-	oMark:AddColumn(TCColumn():New("Valor Mercadoria"	   ,{|| if(len(_aTRBF)>0,_aTRBF[oMark:nat,08], ' ') },"@E 999,999,999,999.99",,,"RIGHT",050,.F.,.F.,,,,,))
-   oMark:AddColumn(TCColumn():New("Frete" 				   ,{|| if(len(_aTRBF)>0,_aTRBF[oMark:nat,11], ' ') },"@E 999,999,999,999.99",,,"RIGHT",050,.F.,.F.,,,,,))
-	oMark:AddColumn(TCColumn():New("Valor Bruto" 		   ,{|| if(len(_aTRBF)>0,_aTRBF[oMark:nat,09], ' ') },"@E 999,999,999,999.99",,,"RIGHT",050,.F.,.F.,,,,,))
-   IF !_lTemPercDiferente
-      oMark:AddColumn(TCColumn():New("% Seguro" 			   ,{|| if(len(_aTRBF)>0,_aTRBF[oMark:nat,12], ' ') },"@E 99,999,999,999.999",,,"RIGHT",050,.F.,.F.,,,,,))
-   ENDIF
-	oMark:AddColumn(TCColumn():New("Seguro" 			      ,{|| if(len(_aTRBF)>0,_aTRBF[oMark:nat,13], ' ') },"@E 999,999,999,999.99",,,"RIGHT",050,.F.,.F.,,,,,))
-	oMark:AddColumn(TCColumn():New("Qtde NFs"    		   ,{|| if(len(_aTRBF)>0,_aTRBF[oMark:nat,10], ' ') },"@E 999,999,999,999"   ,,,"CENTER",050,.F.,.F.,,,,,))
-	oMark:AddColumn(TCColumn():New("Chave do Titulo"      ,{|| if(len(_aTRBF)>0,_aTRBF[oMark:nat,14], ' ') },"@!"       			  ,,,"LEFT" ,050,.F.,.F.,,,,,))
+	oMark:AddColumn(TCColumn():New("Transportador"		   ,{|| If(Len(_aTRBF)>0,_aTRBF[oMark:nat,05], ' ') },"@!"       			  ,,,"LEFT" ,250,.F.,.F.,,,,,))
+	oMark:AddColumn(TCColumn():New("Valor Mercadoria"	   ,{|| If(Len(_aTRBF)>0,_aTRBF[oMark:nat,08], ' ') },"@E 999,999,999,999.99",,,"RIGHT",050,.F.,.F.,,,,,))
+   oMark:AddColumn(TCColumn():New("Frete" 				   ,{|| If(Len(_aTRBF)>0,_aTRBF[oMark:nat,11], ' ') },"@E 999,999,999,999.99",,,"RIGHT",050,.F.,.F.,,,,,))
+	oMark:AddColumn(TCColumn():New("Valor Bruto" 		   ,{|| If(Len(_aTRBF)>0,_aTRBF[oMark:nat,09], ' ') },"@E 999,999,999,999.99",,,"RIGHT",050,.F.,.F.,,,,,))
+   If !_lTemPercDiferente
+      oMark:AddColumn(TCColumn():New("% Seguro" 			   ,{|| If(Len(_aTRBF)>0,_aTRBF[oMark:nat,12], ' ') },"@E 99,999,999,999.999",,,"RIGHT",050,.F.,.F.,,,,,))
+   EndIf
+	oMark:AddColumn(TCColumn():New("Seguro" 			      ,{|| If(Len(_aTRBF)>0,_aTRBF[oMark:nat,13], ' ') },"@E 999,999,999,999.99",,,"RIGHT",050,.F.,.F.,,,,,))
+	oMark:AddColumn(TCColumn():New("Qtde NFs"    		   ,{|| If(Len(_aTRBF)>0,_aTRBF[oMark:nat,10], ' ') },"@E 999,999,999,999"   ,,,"CENTER",050,.F.,.F.,,,,,))
+	oMark:AddColumn(TCColumn():New("Chave do Titulo"      ,{|| If(Len(_aTRBF)>0,_aTRBF[oMark:nat,14], ' ') },"@!"       			  ,,,"LEFT" ,050,.F.,.F.,,,,,))
 
 	oDlg1:lMaximized:=.T.
 
@@ -276,15 +241,15 @@ DO WHILE .T.
                                      oPanel:Align:=CONTROL_ALIGN_TOP ,;
                                      oMark:Align:=CONTROL_ALIGN_ALLCLIENT ,;
                                      oMark:Refresh())
-    IF nOpca = 1
-       LOOP
-    ELSEIF nOpca = 2  .AND. !U_ITMSG("Confirmar Sair ?",'Atenção!',,3,2,2)
-       LOOP
-    ENDIF
+    If nOpca = 1
+       Loop
+    ElseIf nOpca = 2  .And. !U_ITMsg("Confirmar Sair ?",'Atenção!',,3,2,2)
+       Loop
+    EndIf
 
-    EXIT
+    Exit
 
-ENDDO 
+EndDo 
 
 Return nOpca
 
@@ -293,11 +258,8 @@ Return nOpca
 Programa----------: AOMS114INV
 Autor-------------: Alex Wallauer
 Data da Criacao---: 20/07/2018
-===============================================================================================================================
 Descrição---------: Rotina de duplo clique na linha do browse
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -306,14 +268,14 @@ Static Function AOMS114INV()
 
 Local _nlinpos := oMark:nat
 
-TRBF->(Dbgoto(_aTRBF[_nlinpos,15]))
+TRBF->(DBGoTo(_aTRBF[_nlinpos,15]))
 
 //Duplo clique na marcação
-If ALLTRIM(_cMarca)==ALLTRIM(_aTRBF[_nlinpos,01])
+If AllTrim(_cMarca)==AllTrim(_aTRBF[_nlinpos,01])
    nQtdTit--
    nValTit-= TRBF->SEGURO
    _aTRBF[_nlinpos,01] := "  "
-ELSE//IF EMPTY(TRBF->F2_I_NDFSE) 
+Else
    nQtdTit++
    nValTit+= TRBF->SEGURO
    _aTRBF[_nlinpos,01] := _cMarca
@@ -327,40 +289,37 @@ TRBF->OK := _aTRBF[_nlinpos,01]
 oQtda:Refresh()
 oValor:Refresh()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS114ALL
 Autor-------------: Alex Wallauer
 Data da Criacao---: 20/07/2018
-===============================================================================================================================
 Descrição---------: Rotina para inverter a marcacao de todos os registros.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-
 Static Function AOMS114ALL()
+
 Local nReg     := _aTRBF[oMark:nAt,15]
 Local _nnp     := 1
-Local _cMarcALL:= IF(_aTRBF[nReg,1]==_cMarca,SPACE(2),_cMarca)//OU MARCA TODOS OU DESMARCA TODOS
+Local _cMarcALL:= If(_aTRBF[nReg,1]==_cMarca,Space(2),_cMarca)//OU MARCA TODOS OU DESMARCA TODOS
 
-For _nnp := 1 to len(_aTRBF)
+For _nnp := 1 To Len(_aTRBF)
 
-	TRBF->(DBGOTO(_aTRBF[_nnp,15]))
+	TRBF->(DBGoTo(_aTRBF[_nnp,15]))
 
-	If !EMPTY(_aTRBF[_nnp,1]) .AND.  EMPTY(_cMarcALL)
+	If !Empty(_aTRBF[_nnp,1]) .And.  Empty(_cMarcALL)
 	
-		TRBF->OK       := SPACE(2)                     
+		TRBF->OK       := Space(2)                     
 		
-		_aTRBF[_nnp,01]:= SPACE(2)
+		_aTRBF[_nnp,01]:= Space(2)
 		nQtdTit--
 		nValTit-= TRBF->SEGURO
 
-	ELSEIF EMPTY(_aTRBF[_nnp,1]) .AND. !EMPTY(_cMarcALL)
+	ElseIf Empty(_aTRBF[_nnp,1]) .And. !Empty(_cMarcALL)
 	
 		TRBF->OK       := _cMarca
 		_aTRBF[_nnp][1]:= _cMarca
@@ -374,28 +333,26 @@ For _nnp := 1 to len(_aTRBF)
 	
 Next
 
-TRBF->( DBGoto(nReg) )
+TRBF->( DBGoTo(nReg) )
 oQtda:Refresh()
 oValor:Refresh()
 oMark:Refresh()
-PROCESSMESSAGES()
+ProcessMessages()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS114Arq
 Autor-------------: Alex Wallauer
 Data da Criacao---: 20/07/2018
-===============================================================================================================================
 Descrição---------: Rotina para criação do arquivo temporário
-===============================================================================================================================
 Parametros--------: oProc - objeto da barra de processamento
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS114Arq(oProc)
+
 Local aEstru  := {}
 Local cFiltro := "" 
 Local _cQuery1:= ""
@@ -406,13 +363,11 @@ Local _nPerTransp, _nPSeguro
 //GARANTE QUE O PERGUNTE ESTA CORRETO
 Pergunte( _cPerg , .F. )
 
-//================================================================================
 // Armazena no array aEstru a estrutura dos campos da tabela.
-//================================================================================
 aEstru := {	{ "OK"			 , "C" , 002 , 0 } ,;
-            { "COD"	  		 , "C" , LEN(SA2->A2_COD)  , 0 } ,;
-            { "A2_LOJA"		 , "C" , LEN(SA2->A2_LOJA) , 0 } ,;
-            { "F2_I_NDFSE"  , "C" , LEN(SF2->F2_I_NDFSE),0} ,;                        
+            { "COD"	  		 , "C" , Len(SA2->A2_COD)  , 0 } ,;
+            { "A2_LOJA"		 , "C" , Len(SA2->A2_LOJA) , 0 } ,;
+            { "F2_I_NDFSE"  , "C" , Len(SF2->F2_I_NDFSE),0} ,;                        
 	   		{ "TRANSP"	    , "C" , 040 , 0 } ,;
             { "LOJATRANSP"	 , "C" , 100, 0 } ,;
 	   		{ "CNPJ"	  	    , "C" , 020 , 0 } ,;
@@ -424,15 +379,13 @@ aEstru := {	{ "OK"			 , "C" , 002 , 0 } ,;
             { "ALIQS"       , "N" , 018 , 6 } ,;
 		   	{ "SEGURO"      , "N" , 018 , 4 }  }
 
-//================================================================================
 // Verifica se ja existe um arquivo com mesmo nome, se sim deleta.
-//================================================================================
 If Select("TRBF") > 0
 	If ValType(_oTRBF) == "O"
-	   TRBF->(DbCloseArea())
+	   TRBF->(DBCloseArea())
 	    _oTRBF:Delete()
 	Else
-	   TRBF->(DbCloseArea())
+	   TRBF->(DBCloseArea())
 	EndIf
 EndIf
 
@@ -466,7 +419,7 @@ _cQuery1+= "         SF2.R_E_C_N_O_ SF2_REC "
 _cQuery1+= "		FROM " + RetSqlName("SF2")+" SF2         "
 _cQuery1+= "		JOIN " + RetSqlName("SA2")+" SA2 ON SA2.A2_COD	= SF2.F2_I_CTRA   AND SA2.A2_LOJA    = SF2.F2_I_LTRA "
 
-IF !EMPTY(MV_PAR04)  
+If !Empty(MV_PAR04)  
    _cQuery1+= "		JOIN " + RetSqlName("SD2")+" SD2 "
    _cQuery1+= "		    ON  SD2.D2_FILIAL  = SF2.F2_FILIAL  "
    _cQuery1+= "		    AND SD2.D2_DOC     = SF2.F2_DOC     " 
@@ -484,12 +437,6 @@ If MV_PAR06 = 1//JÁ EMITIDOS
 EndIf
 
 _cQuery1+= cFiltro
-//_cQuery1+= "        GROUP BY       "
-//_cQuery1+= "		SF2.F2_FILIAL, "
-//_cQuery1+= "		SF2.F2_I_CTRA,    "
-//_cQuery1+= "        SF2.F2_I_LTRA, "
-//_cQuery1+= "        SF2.F2_I_NDFSE "
-
 _cQuery1+= " ORDER BY SF2.F2_I_NDFSE, SF2.F2_I_CTRA , SF2.F2_I_LTRA"
 
 _cAlias:=GetNextAlias()
@@ -499,44 +446,43 @@ TCSetField( _cAlias, "F2_EMISSAO", "D", 8, 0)
 
 oProc:cCaption := ("Contando os dados lidos...")
 ProcessMessages()
-DBSELECTAREA(_cAlias)
-(_cAlias)->(Dbgotop())
+DBSelectArea(_cAlias)
+(_cAlias)->(DBGoTop())
 _cTot := 0
-COUNT TO _cTot
-_cTot:=ALLTRIM(STR(_cTot))
-_nTam:=LEN(_cTot)
-(_cAlias)->(Dbgotop())
+COUNT To _cTot
+_cTot:=AllTrim(Str(_cTot))
+_nTam:=Len(_cTot)
+(_cAlias)->(DBGoTop())
 
 _aTRBF := {}
 nQtdTit:= 0
 nValTit:= 0
-SA2->(DBSETORDER(1)) 
+SA2->(DBSetOrder(1)) 
 
 If Select("TRBSF2") > 0
-   TRBSF2->(DBCLOSEAREA())
+   TRBSF2->(DBCloseArea())
 EndIf
 
-TRBF->(DBSETORDER(2)) //"COD","F2_I_NDFSE"
+TRBF->(DBSetOrder(2)) //"COD","F2_I_NDFSE"
 
-DO While (_cAlias)->(!EOF())
+While (_cAlias)->(!Eof())
 
 	//Atualiza régua
 	_npv++
-	oProc:cCaption := ("Processando Dados: "+ STRZERO(_npv,_nTam) +" de "+ _cTot)
+	oProc:cCaption := ("Processando Dados: "+ StrZero(_npv,_nTam) +" de "+ _cTot)
 	ProcessMessages()
 
    _nPerTransp := Posicione('ZGX',1,xFilial("ZGX")+(_cAlias)->F2_FILIAL+(_cAlias)->TRANSP+(_cAlias)->A2_LOJA,'ZGX_PERSEG')
    If ! Empty(_nPerTransp)
-      IF !_lTemPercDiferente//Se mudou para .T. tem que ficar .T.
+      If !_lTemPercDiferente//Se mudou para .T. tem que ficar .T.
          _lTemPercDiferente:=(_nPerTransp<>_nPercSeguro)
-      ENDIF
+      EndIf
       _nPSeguro := (_nPerTransp/100)
    Else
       _nPSeguro := _nPercSeguro
    EndIf 
  
-   //SA2->(Dbseek(xfilial("SA2")+(_cAlias)->TRANSP+TRBF->LOJATRANSP))
-   IF !TRBF->(DBSEEK( (_cAlias)->TRANSP+(_cAlias)->F2_I_NDFSE ))//ORDEM 2
+   If !TRBF->(DBSeek( (_cAlias)->TRANSP+(_cAlias)->F2_I_NDFSE ))//ORDEM 2
        TRBF->(DBAPPEND())
        TRBF->COD		   := (_cAlias)->TRANSP
        TRBF->A2_LOJA    := (_cAlias)->LOJATRANSP//PEGO A PRIMEIRA LOJA QUE ACHAR
@@ -545,21 +491,21 @@ DO While (_cAlias)->(!EOF())
        TRBF->F2_I_NDFSE := (_cAlias)->F2_I_NDFSE
 	    TRBF->ALIQS 		:= _nPSeguro * 100              
 
-	    IF EMPTY(TRBF->F2_I_NDFSE) .OR. MV_PAR06 = 1//SIM: JÁ EMITIDOS
+	    If Empty(TRBF->F2_I_NDFSE) .Or. MV_PAR06 = 1//SIM: JÁ EMITIDOS
 	       _cOK:=_cMarca
-	    ELSE   
+	    Else
           _cOK:="  "
-	    ENDIF   
+	    EndIf   
   	    TRBF->OK:=_cOK
     
-       IF !EMPTY(TRBF->OK)//SÓ OS MARCADOS
+       If !Empty(TRBF->OK)//SÓ OS MARCADOS
 	       nQtdTit++
-	    ENDIF   
+	    EndIf   
         _lTemReg:=.T.
 
-   ELSEIF !(_cAlias)->LOJATRANSP $ TRBF->LOJATRANSP
-       TRBF->LOJATRANSP := ALLTRIM(TRBF->LOJATRANSP)+"-"+(_cAlias)->LOJATRANSP//SOMA AS LOJAS DIFERENTES
-   ENDIF
+   ElseIf !(_cAlias)->LOJATRANSP $ TRBF->LOJATRANSP
+       TRBF->LOJATRANSP := AllTrim(TRBF->LOJATRANSP)+"-"+(_cAlias)->LOJATRANSP//SOMA AS LOJAS DIFERENTES
+   EndIf
 
    TRBF->TOTAL       += (_cAlias)->F2_VALMERC
 	TRBF->FRETE   		+= (_cAlias)->F2_I_FRET
@@ -567,9 +513,9 @@ DO While (_cAlias)->(!EOF())
 	TRBF->SEGURO		+= _nPSeguro * (_cAlias)->F2_VALBRUT 
 	TRBF->QTDENF   	+= 1
 
-   IF !EMPTY(TRBF->OK)//SÓ OS MARCADOS
+   If !Empty(TRBF->OK)//SÓ OS MARCADOS
 	   nValTit+= _nPSeguro * (_cAlias)->F2_VALBRUT
-	ENDIF   
+	EndIf   
 	
    AOMS114B(oProc,_cAlias)
 
@@ -582,40 +528,40 @@ EndDo
 oProc:cCaption := ("Re-Ordenando Dados...")
 ProcessMessages()
 _aTRBF:={}
-TRBF->(DBSETORDER(1))//NOME da transportadora
-TRBF->(DbGotop())
-DO While TRBF->(!EOF())
+TRBF->(DBSetOrder(1))//NOME da transportadora
+TRBF->(DBGoTop())
+While TRBF->(!Eof())
     _aItens:={}
-	AADD(_aItens,TRBF->OK)                 //01                                    
-	AADD(_aItens,"")                       //02 //CAMPO FILLER
-	AADD(_aItens,TRBF->COD)                //03                   
-	AADD(_aItens,TRBF->LOJATRANSP)		   //04 //LOJAS
-	AADD(_aItens,TRBF->TRANSP)             //05 
-	AADD(_aItens,"")               		   //06 //CAMPO FILLER                
- 	AADD(_aItens,"") 		                  //07 //CAMPO FILLER  
- 	AADD(_aItens,TRBF->TOTAL)		         //08
- 	AADD(_aItens,TRBF->BRUTO)              //09
- 	AADD(_aItens,TRBF->QTDENF)		         //10
- 	AADD(_aItens,TRBF->FRETE)              //11    
- 	AADD(_aItens,TRBF->ALIQS)              //12  
- 	AADD(_aItens,TRBF->SEGURO)             //13     
- 	AADD(_aItens,TRBF->F2_I_NDFSE)         //14 //CAMPO FILLER
- 	AADD(_aItens,TRBF->(RECNO()) )         //15    
-	AADD(_aTRBF,_aItens)
+	aAdd(_aItens,TRBF->OK)                 //01                                    
+	aAdd(_aItens,"")                       //02 //CAMPO FILLER
+	aAdd(_aItens,TRBF->COD)                //03                   
+	aAdd(_aItens,TRBF->LOJATRANSP)		   //04 //LOJAS
+	aAdd(_aItens,TRBF->TRANSP)             //05 
+	aAdd(_aItens,"")               		   //06 //CAMPO FILLER                
+ 	aAdd(_aItens,"") 		                  //07 //CAMPO FILLER  
+ 	aAdd(_aItens,TRBF->TOTAL)		         //08
+ 	aAdd(_aItens,TRBF->BRUTO)              //09
+ 	aAdd(_aItens,TRBF->QTDENF)		         //10
+ 	aAdd(_aItens,TRBF->FRETE)              //11    
+ 	aAdd(_aItens,TRBF->ALIQS)              //12  
+ 	aAdd(_aItens,TRBF->SEGURO)             //13     
+ 	aAdd(_aItens,TRBF->F2_I_NDFSE)         //14 //CAMPO FILLER
+ 	aAdd(_aItens,TRBF->(RECNO()) )         //15    
+	aAdd(_aTRBF,_aItens)
    TRBF->( DBSkip() )
 EndDo
-TRBF->(DbGotop())
+TRBF->(DBGoTop())
 
 //Se browse já está montando garante que array está atualizado
-iF TYPE("oMark") == "O" .and. LEN(_aTRBF) > 0
+If Type("oMark") == "O" .And. Len(_aTRBF) > 0
 
    oQtda:Refresh()
    oValor:Refresh()
 	oMark:setarray(_aTRBF)
 	oMark:refresh()
-	TRBF->(Dbgoto(_aTRBF[oMark:NAT,15]))
+	TRBF->(DBGoTo(_aTRBF[oMark:NAT,15]))
 
-Endif
+EndIf
 
 Return _lTemReg
 
@@ -624,34 +570,31 @@ Return _lTemReg
 Programa----------: AOMS114C()
 Autor-------------: Alex Wallauer 
 Data da Criacao---: 02/10/2018
-===============================================================================================================================
 Descrição---------: Chamada de itens do menu
-===============================================================================================================================
 Parametros--------: _nOpcao - Opção do menu
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS114C(_nOpcao)
 
-If LEN(_aTRBF) > 0
-   TRBF->(Dbgoto(_aTRBF[oMark:NAT,15]))
-ELSEIF _nOpcao <> 3
-   U_ITMSG("Não há registros, altere o filtro!")
-   RETURN .F.
-Endif
+If Len(_aTRBF) > 0
+   TRBF->(DBGoTo(_aTRBF[oMark:NAT,15]))
+ElseIf _nOpcao <> 3
+   U_ITMsg("Não há registros, altere o filtro!")
+   Return .F.
+EndIf
 
 Do Case
 
 Case _nOpcao == 1 //Atualizar AÇÕES RELACIONADAS SEM PERGUNTE()
 
-	 RETURN .F. //01/002/2023 agora sai sempre (não recarrega e volta para tela)
+	 Return .F. //01/002/2023 agora sai sempre (não recarrega e volta para tela)
      _lTemReg:=.F.
-	 FWMSGRUN(,{ |oProc| _lTemReg:=AOMS114Arq(oProc) }, "Aguarde...","Carregando dados...")
-	 IF !_lTemReg
-	    U_ITMSG("Não há registros, altere o filtro!","ATENCAO",,3)
-	 ENDIF   
-	 RETURN _lTemReg
+	 FWMsgRun(,{ |oProc| _lTemReg:=AOMS114Arq(oProc) }, "Aguarde...","Carregando dados...")
+	 If !_lTemReg
+	    U_ITMsg("Não há registros, altere o filtro!","ATENCAO",,3)
+	 EndIf   
+	 Return _lTemReg
 	
 Case _nOpcao == 2 //Pesquisa
 
@@ -660,52 +603,52 @@ Case _nOpcao == 2 //Pesquisa
 Case _nOpcao == 3 //Atualizar BOTÃO COM PERGUNTE()
 
      _lRet:=.F.
-	 FWMSGRUN(,{ |oProc| _lRet:=AOMS114Atu(oProc) }, "Aguarde...","Carregando dados...")
-	 RETURN _lRet
+	 FWMsgRun(,{ |oProc| _lRet:=AOMS114Atu(oProc) }, "Aguarde...","Carregando dados...")
+	 Return _lRet
 
 Case _nOpcao == 4	//Visualiza NFs
      _aRecEsto:={}//ZERA POR SEGURANÇA 
                                  //oProc,_cChave,_nRecTRBF,_lGrava,_lSoma
-	 FWMSGRUN(,{ |oProc| AOMS114NF(oProc,""     ,         ,.F.    ,(MV_PAR06=1)) }, "Aguarde...","Carregando dados...")
+	 FWMsgRun(,{ |oProc| AOMS114NF(oProc,""     ,         ,.F.    ,(MV_PAR06=1)) }, "Aguarde...","Carregando dados...")
 	
 Case _nOpcao == 5	//Exporta Excel
 
-	 FWMSGRUN(,{ |oProc| AOMS114XC(oProc) }, "Aguarde...","Carregando dados...")
+	 FWMsgRun(,{ |oProc| AOMS114XC(oProc) }, "Aguarde...","Carregando dados...")
 
 Case _nOpcao == 6	//Gera NDF
      
-     IF U_ITMSG("Confirmar Geracao de Titulos ?",'Atenção!',,3,2,2)
+     If U_ITMsg("Confirmar Geracao de Titulos ?",'Atenção!',,3,2,2)
         _lRet:=.F.
-  	    FWMSGRUN(,{ |oProc| _lRet:=AOMS114GE(oProc,.F.,.T.) }, "Aguarde...","Gerando Titulo do Seguro...")//ENVIA E-MAIL SEM TELA
-	    RETURN _lRet
-     ELSE
-	    RETURN .F.
-     ENDIF
+  	    FWMsgRun(,{ |oProc| _lRet:=AOMS114GE(oProc,.F.,.T.) }, "Aguarde...","Gerando Titulo do Seguro...")//ENVIA E-MAIL SEM TELA
+	    Return _lRet
+     Else
+	    Return .F.
+     EndIf
 
 Case _nOpcao == 7	//ENVIA - EMAIL
 
-	FWMSGRUN(,{ |oProc| _lRet:=AOMS114GE(oProc,.T.,.T.) }, "Aguarde...","Lendo Titulo do Seguro...")//ENVIA E-MAIL COM TELA
+	FWMsgRun(,{ |oProc| _lRet:=AOMS114GE(oProc,.T.,.T.) }, "Aguarde...","Lendo Titulo do Seguro...")//ENVIA E-MAIL COM TELA
 
 Case _nOpcao == 8	//Estorna NDF
      
-     IF U_ITMSG("Confirmar Estorno de Titulos ?",'Atenção!',,3,2,2)
+     If U_ITMsg("Confirmar Estorno de Titulos ?",'Atenção!',,3,2,2)
         _lRet:=.F.
-  	    FWMSGRUN(,{ |oProc| _lRet:=AOMS114GE(oProc,.F.,.F.) }, "Aguarde...","Estorno Titulo do Seguro...")//ENVIA E-MAIL SEM TELA
-	    RETURN _lRet
-     ELSE
-	    RETURN .F.
-     ENDIF
+  	    FWMsgRun(,{ |oProc| _lRet:=AOMS114GE(oProc,.F.,.F.) }, "Aguarde...","Estorno Titulo do Seguro...")//ENVIA E-MAIL SEM TELA
+	    Return _lRet
+     Else
+	    Return .F.
+     EndIf
 
 Case _nOpcao == 9	// Permite selecionar Notas para geração dos titulos.  
                                  
-	 FWMSGRUN(,{ |oProc| U_AOMS114R() }, "Aguarde...","Carregando dados...")
+	 FWMsgRun(,{ |oProc| U_AOMS114R() }, "Aguarde...","Carregando dados...")
 
 
 EndCase
 
-If len(_aTRBF) > 0
-   TRBF->(Dbgoto(_aTRBF[oMark:NAT,15]))
-Endif
+If Len(_aTRBF) > 0
+   TRBF->(DBGoTo(_aTRBF[oMark:NAT,15]))
+EndIf
 
 
 Return .T.
@@ -715,21 +658,18 @@ Return .T.
 Programa--------: AOMS1149
 Autor-----------: Alex Wallauer 
 Data da Criacao-: 18/02/2014
-===============================================================================================================================
 Descrição-------: Retorna cor e legenda
-===============================================================================================================================
 Parametros------: _cMarca: Marcacao
-===============================================================================================================================
 Retorno---------: string com cor da legenda da linha posicionada no TRBF
 ===============================================================================================================================
 */
 User Function AOMS1149(_cMarca)
 
-IF EMPTY(_cMarca)
-   RETURN "BR_VERDE"
-ELSE
-   RETURN "BR_AZUL"
-ENDIF
+If Empty(_cMarca)
+   Return "BR_VERDE"
+Else
+   Return "BR_AZUL"
+EndIf
 
 Return "BR_VERMELHO"
 
@@ -739,30 +679,28 @@ Return "BR_VERMELHO"
 Programa----------: AOMS114Atu
 Autor-------------: Alex Wallauer
 Data da Criacao---: 20/07/2018
-===============================================================================================================================
 Descrição---------: Função que refaz filtro da tela
-===============================================================================================================================
 Parametros--------: oProc - objeto da barra de processamento
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS114Atu(oProc)
-LOCAL _lTemReg:=.T.//INICIA COM .T. PQ NA PRIMIERA FEZ QUE ENTRA ESTA COM REGISTROS, e o usuario pode cancelar o pergunte
-DO WHILE .T.
+
+Local _lTemReg:=.T.//INICIA COM .T. PQ NA PRIMIERA FEZ QUE ENTRA ESTA COM REGISTROS, e o usuario pode cancelar o pergunte
+While .T.
    If EVAL(_bPergunte)
       _lTemReg:=.F.
 	  // Cria o arquivo Temporario para insercao dos dados selecionados.	
-	  FWMSGRUN( , {|oProc| _lTemReg:=AOMS114ArQ(oProc) }, "Aguarde!" , 'Lendo Dados das Notas...' )
-	  IF _lTemReg 
+	  FWMsgRun( , {|oProc| _lTemReg:=AOMS114ArQ(oProc) }, "Aguarde!" , 'Lendo Dados das Notas...' )
+	  If _lTemReg 
 	     Return .T.
-	  ELSE
-         U_ITMSG("Não há registros, altere o filtro!","ATENCAO",,3)
-	     LOOP
-	  ENDIF	  
-	ENDIF  
-	EXIT
-ENDDO
+	  Else
+         U_ITMsg("Não há registros, altere o filtro!","ATENCAO",,3)
+	     Loop
+	  EndIf	  
+	EndIf  
+	Exit
+EndDo
 
 Return _lTemReg
 
@@ -771,11 +709,8 @@ Return _lTemReg
 Programa----------: AOMS114PSQ
 Autor-------------: Alex Wallauer
 Data da Criacao---: 20/07/2018
-===============================================================================================================================
 Descrição---------: Funcao para pesquisa no arquivo temporario.
-===============================================================================================================================
 Parametros--------: oProc - objeto da barra de processamento
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -789,13 +724,13 @@ Local cComboBx1	:= ""
 Local aComboBx1	:= { "Nome do Transportador","Codigo do Transportador" }
 Local nOpca		:= 0
 
-DEFINE MSDIALOG oDlg TITLE "Pesquisar" FROM 178,181 TO 259,697 PIXEL
+DEFINE MSDIALOG oDlg TITLE "Pesquisar" FROM 178,181 To 259,697 PIXEL
 
 	@004,003 ComboBox	cComboBx1	Items aComboBx1 Size 213,010 OF oDlg PIXEL
 	@020,003 MsGet		oGet1		Var cGet1		Size 212,009 OF oDlg PIXEL COLOR CLR_BLACK Picture "@!"
 	
-	DEFINE SBUTTON FROM 004,227 TYPE 1 ENABLE ACTION ( nOpca := 1 , oDlg:End() ) OF oDlg
-	DEFINE SBUTTON FROM 021,227 TYPE 2 ENABLE ACTION ( nOpca := 0 , oDlg:End() ) OF oDlg
+	DEFINE SBUTTON FROM 004,227 Type 1 ENABLE ACTION ( nOpca := 1 , oDlg:End() ) OF oDlg
+	DEFINE SBUTTON FROM 021,227 Type 2 ENABLE ACTION ( nOpca := 0 , oDlg:End() ) OF oDlg
 
 ACTIVATE MSDIALOG oDlg CENTERED
 
@@ -806,19 +741,19 @@ If nOpca == 1
 		If cComboBx1 == aComboBx1[nI]
 		
 			DBSelectArea("TRBF")
-			TRBF->( DBSETORDER(nI) )
+			TRBF->( DBSetOrder(nI) )
 			
-			If TRBF->(DbSeek( ALLTRIM(cGet1) ))
+			If TRBF->(DBSeek( AllTrim(cGet1) ))
 			
-				_nPos := ascan(_aTRBF,{|x| x[15] == TRBF->(Recno())})
+				_nPos := aScan(_aTRBF,{|x| x[15] == TRBF->(Recno())})
 				oMark:GOPOSITION(_nPos)
 				oMark:Refresh()
 
 			Else
 
-				U_ITMSG("Transportador não encontrado","Atenção",,1)
+				U_ITMsg("Transportador não encontrado","Atenção",,1)
 
-			Endif
+			EndIf
 
 			
 		EndIf
@@ -827,26 +762,24 @@ If nOpca == 1
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: AOMS114LEG
 Autor-----------: Erich Buttner
 Data da Criacao-: 09/09/2010
-===============================================================================================================================
 Descrição-------: Exibe a tela de detalhes da legenda
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS114LEG()
-LOCAL _aLegenda:={}
-AADD(_aLegenda, { "BR_VERDE"   ,"Transp. / NF sem NDF gerado"} )
-AADD(_aLegenda, { "BR_AZUL"    ,"Transp. com NDF gerado"     } )
-AADD(_aLegenda, { "BR_VERMELHO","Nota com NDF gerado"        } )
+
+Local _aLegenda:={}
+aAdd(_aLegenda, { "BR_VERDE"   ,"Transp. / NF sem NDF gerado"} )
+aAdd(_aLegenda, { "BR_AZUL"    ,"Transp. com NDF gerado"     } )
+aAdd(_aLegenda, { "BR_VERMELHO","Nota com NDF gerado"        } )
 
 BrwLegenda("Titulo de Seguros","Legenda" ,_aLegenda)										
 
@@ -857,11 +790,8 @@ Return(.T.)
 Programa----------: AOMS114XC()
 Autor-------------: Alex Wallauer 
 Data da Criacao---: 11/03/2019
-===============================================================================================================================
 Descrição---------: Exporta browse para o excel
-===============================================================================================================================
 Parametros--------: oProc - objeto de processamento
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -870,38 +800,38 @@ Static Function AOMS114XC(oProc)
 Local _aExcel := {}  , _nnh
 Local _aCabec := {}
 Local _aItens := {}
-Local _cTot:=ALLTRIM(STR(len(_aTRBF)))
-Local _nTam:=LEN(_cTot)
+Local _cTot:=AllTrim(Str(Len(_aTRBF)))
+Local _nTam:=Len(_cTot)
 Local _npv :=0
 
-aadd(_aCabec,"Codigo")         //03
-aadd(_aCabec,"Transportador" ) //05
-aadd(_aCabec,"Valor Total")    //08
-aadd(_aCabec,"Frete")          //11
-aadd(_aCabec,"% Seguro")       //12
-aadd(_aCabec,"Seguro")         //13
-aadd(_aCabec,"Chave do Titulo")//14
+aAdd(_aCabec,"Codigo")         //03
+aAdd(_aCabec,"Transportador" ) //05
+aAdd(_aCabec,"Valor Total")    //08
+aAdd(_aCabec,"Frete")          //11
+aAdd(_aCabec,"% Seguro")       //12
+aAdd(_aCabec,"Seguro")         //13
+aAdd(_aCabec,"Chave do Titulo")//14
 
-For _nnh := 1 to len(_aTRBF)
+For _nnh := 1 To Len(_aTRBF)
  	_npv++ 
-	 oProc:cCaption := ("Lendo dados: "+STRZERO(_npv,_nTam) +" de "+ _cTot)
+	 oProc:cCaption := ("Lendo dados: "+StrZero(_npv,_nTam) +" de "+ _cTot)
     ProcessMessages()
     _aItens:={}
-    AADD(_aItens,_aTRBF[_nnh,03])
-    AADD(_aItens,_aTRBF[_nnh,05])
-    AADD(_aItens,_aTRBF[_nnh,08])
-	AADD(_aItens,_aTRBF[_nnh,11])
-	AADD(_aItens,_aTRBF[_nnh,12])
-	AADD(_aItens,_aTRBF[_nnh,13])
-	AADD(_aItens,_aTRBF[_nnh,14])
-    AADD(_aExcel,_aItens)
+    aAdd(_aItens,_aTRBF[_nnh,03])
+    aAdd(_aItens,_aTRBF[_nnh,05])
+    aAdd(_aItens,_aTRBF[_nnh,08])
+	aAdd(_aItens,_aTRBF[_nnh,11])
+	aAdd(_aItens,_aTRBF[_nnh,12])
+	aAdd(_aItens,_aTRBF[_nnh,13])
+	aAdd(_aItens,_aTRBF[_nnh,14])
+    aAdd(_aExcel,_aItens)
 Next
 
-If len(_aExcel) > 0
+If Len(_aExcel) > 0
 	U_ITLISTBOX("Seguro por transportador" , _aCabec , _aExcel , .T. , 1 )
 Else
-	U_ITMSG("Nenhum registro selecionado!","Atenção",,1)
-Endif
+	U_ITMsg("Nenhum registro selecionado!","Atenção",,1)
+EndIf
 
 Return .T.
 
@@ -910,15 +840,13 @@ Return .T.
 Programa----------: AOMS114 NF()
 Autor-------------: Alex Wallauer 
 Data da Criacao---: 10/07/2019
-===============================================================================================================================
 Descrição---------: Visualiza Nfs do transportador. ATENCAO TEM 3 CHAMADAS DESSA FUNÇÃO COM 4 SITUACOES
-===============================================================================================================================
 Parametros--------: oProc,_cChave,_nRecTRBF,_lGrava,_lSoma,lGera
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS114NF(oProc,_cChave,_nRecTRBF,_lGrava,_lSoma,_lGera)
+
 Local _aLinhas := {}
 Local _aCab    := {}
 Local cFiltro  := ""
@@ -928,12 +856,12 @@ Local _cNfGerTit
 Local _nTotNfs
 Local _cNFTitSeg 
 
-DEFAULT _cChave:= ""
-DEFAULT _lGrava:= .F.
-DEFAULT _lSoma := .F.
-DEFAULT _lGera := .F.
-DEFAULT _nRecTRBF:=_aTRBF[oMark:NAT,15]
-TRBF->(DBGOTO(_nRecTRBF))
+Default _cChave:= ""
+Default _lGrava:= .F.
+Default _lSoma := .F.
+Default _lGera := .F.
+Default _nRecTRBF:=_aTRBF[oMark:NAT,15]
+TRBF->(DBGoTo(_nRecTRBF))
 
 oProc:cCaption:="Lendo Notas do Transportador: "+LEFT(TRBF->TRANSP,30)
 ProcessMessages()
@@ -958,15 +886,10 @@ _cQuery1+= " SF2.F2_I_CTRA AS TRANSPORT, "  // Transportadora
 _cQuery1+= " SF2.F2_I_LTRA AS LOJATRANSP, "  // Loja Transportadora 
 _cQuery1+= " SF2.F2_I_GERTS "
 
-//_cQuery1+= " MAX(SD2.D2_LOCAL) D2_LOCAL  "//PARA NÃO QUEBRAR AS NOTAS POR LOCAL
-//IF !_lGrava
-//   _cQuery1+= ",SUM(SD2.D2_TOTAL)	AS TOTAL, "
-//   _cQuery1+= " SUM(SD2.D2_I_FRET)	AS FRETE " 
-//ENDIF
 _cQuery1+= "		FROM " + RetSqlName("SF2")+" SF2 "
 _cQuery1+= "		JOIN " + RetSqlName("SA2")+" SA2 ON SA2.A2_COD = SF2.F2_I_CTRA	AND SA2.A2_LOJA	 = SF2.F2_I_LTRA "
 
-IF !EMPTY(MV_PAR04)  
+If !Empty(MV_PAR04)  
    _cQuery1+= "		JOIN " + RetSqlName("SD2")+" SD2 "
    _cQuery1+= "		    ON  SD2.D2_FILIAL  = SF2.F2_FILIAL  "
    _cQuery1+= "		    AND SD2.D2_DOC     = SF2.F2_DOC     " 
@@ -979,81 +902,80 @@ _cQuery1+= "		WHERE SF2.D_E_L_E_T_ = ' '	"
 _cQuery1+= "		  AND SA2.D_E_L_E_T_ = ' '	"
 _cQuery1+= "		  AND SF2.F2_CARGA  <> ' '  "
 _cQuery1+= cFiltro
-IF !_lGrava
+If !_lGrava
    _cQuery1+= "        ORDER BY F2_I_NDFSE,SF2.F2_FILIAL,SF2.F2_DOC, SF2.F2_SERIE, SF2.F2_EMISSAO "
-ENDIF
+EndIf
 
-IF SELECT("NFS") > 0
-	NFS->(DBCLOSEAREA())
-ENDIF
+If Select("NFS") > 0
+	NFS->(DBCloseArea())
+EndIf
 
 MPSysOpenQuery( _cQuery1 , "NFS" )  
 
 // 27 Caracteres // F2_I_NDFSE 
 
-DBSELECTAREA("NFS")
-//NFS->(DBGOTOP())
+DBSelectArea("NFS")
 _cTot := 0
 oProc:cCaption:="Contando Notas do Transportador: "+LEFT(TRBF->TRANSP,30)
 ProcessMessages()
-IF LEN(_aRecEsto) > 0
-   _cTot:=LEN(_aRecEsto)
-ELSE
-   COUNT TO _cTot
-ENDIF   
+If Len(_aRecEsto) > 0
+   _cTot:=Len(_aRecEsto)
+Else
+   COUNT To _cTot
+EndIf   
 
 If Select("TRBSF2") > 0 
-   TRBSF2->(DbSetOrder(2))
+   TRBSF2->(DBSetOrder(2))
 EndIf 
 
-_cTot:=ALLTRIM(STR(_cTot))
-_nTam:=LEN(_cTot)+1
-NFS->(DBGOTOP())
+_cTot:=AllTrim(Str(_cTot))
+_nTam:=Len(_cTot)+1
+NFS->(DBGoTop())
 
 _aTotais:={0,0,0,0,0,0,0,0,0,0}
 
 _nTotNfs := 0 
 
-DO WHILE NFS->(!EOF())
+While NFS->(!Eof())
 
 	_npv++
 
-   IF _lGrava
-  	  oProc:cCaption := ("Gravando Nota: "+NFS->F2_DOC+"/"+NFS->F2_SERIE+" - "+ STRZERO(_npv,_nTam) +" de "+ _cTot)
+   If _lGrava
+  	  oProc:cCaption := ("Gravando Nota: "+NFS->F2_DOC+"/"+NFS->F2_SERIE+" - "+ StrZero(_npv,_nTam) +" de "+ _cTot)
 	  ProcessMessages()
-      SF2->( DBGOTO(NFS->SF2_REC) )
-      IF _lGera .AND. EMPTY(SF2->F2_I_NDFSE)//QUANDO GERA
+      SF2->( DBGoTo(NFS->SF2_REC) )
+      If _lGera .And. Empty(SF2->F2_I_NDFSE)//QUANDO GERA
          _cNfGerTit := ""
          TRBSF2->(MsSeek(StrZero(NFS->SF2_REC,10))) 
          If Empty(TRBSF2->WK_OK) 
             _cNfGerTit := "N"
-         Else 
+         Else
             _cNfGerTit := "S"
             _nTotNfs += 1
          EndIf
-         SF2->(RECLOCK("SF2",.F.))
+         SF2->(RecLock("SF2",.F.))
          SF2->F2_I_NDFSE:=_cChave 
          SF2->F2_I_GERTS := _cNfGerTit 
-         SF2->(MSUNLOCK())
-      ELSEIF !_lGera .AND. !EMPTY(SF2->F2_I_NDFSE)//QUANDO ESTORNA
+         SF2->(MSUnLock())
+      ElseIf !_lGera .And. !Empty(SF2->F2_I_NDFSE)//QUANDO ESTORNA
          If SF2->F2_I_GERTS <> "N"            
             _nTotNfs += 1
          EndIf
-         SF2->(RECLOCK("SF2",.F.))
+         SF2->(RecLock("SF2",.F.))
          SF2->F2_I_NDFSE:=""
          SF2->F2_I_GERTS := "N"       
-         AADD(_aRecEsto,NFS->SF2_REC)
-         SF2->(MSUNLOCK())
-      ENDIF   
-      NFS->(Dbskip())
-      LOOP// SE _lGrava = .T. SÓ VAI ATE AQUI
-   ENDIF   
+         aAdd(_aRecEsto,NFS->SF2_REC)
+         SF2->(MSUnLock())
+      EndIf   
+      NFS->(DBSkip())
+      Loop// SE _lGrava = .T. SÓ VAI ATE AQUI
+   EndIf   
 
-    IF LEN(_aRecEsto) > 0 .AND. ASCAN(_aRecEsto,NFS->SF2_REC) = 0//DA TELA DO RESULTADO DO ESTORNO
-       NFS->(Dbskip())
-       LOOP
-    ENDIF
-	oProc:cCaption := ("Lendo Nota: "+NFS->F2_DOC+"/"+NFS->F2_SERIE+" - "+STRZERO(_npv,_nTam) +" de "+ _cTot)
+    If Len(_aRecEsto) > 0 .And. aScan(_aRecEsto,NFS->SF2_REC) = 0//DA TELA DO RESULTADO DO ESTORNO
+       NFS->(DBSkip())
+       Loop
+    EndIf
+	oProc:cCaption := ("Lendo Nota: "+NFS->F2_DOC+"/"+NFS->F2_SERIE+" - "+StrZero(_npv,_nTam) +" de "+ _cTot)
 	ProcessMessages()
 
    _nPerTransp := Posicione('ZGX',1,xFilial("ZGX")+NFS->F2_FILIAL+NFS->TRANSPORT+NFS->LOJATRANSP,'ZGX_PERSEG')
@@ -1064,38 +986,38 @@ DO WHILE NFS->(!EOF())
    EndIf
  
    _cNFTitSeg := ""
-   IF LEN(_aRecEsto) > 0 //DA TELA DO RESULTADO DO ESTORNO NÃO MOSTRA MENSAGEM Nenhuma
+   If Len(_aRecEsto) > 0 //DA TELA DO RESULTADO DO ESTORNO NÃO MOSTRA MENSAGEM Nenhuma
       _cNFTitSeg := ""
-   ELSEIF _lSoma .OR. MV_PAR06 = 1//JÁ EMITIDOS
+   ElseIf _lSoma .Or. MV_PAR06 = 1//JÁ EMITIDOS
       If NFS->F2_I_GERTS <> "N"
          _cNFTitSeg := "NF UTILIZADA CALCULO SEGURO"
-      Else 
+      Else
          _cNFTitSeg := "NF NÃO UTILIZADA CALCULO SEGURO"
       EndIf
    EndIf 
  
    _aItens:={}
-   IF _lSoma 
-      AADD(_aItens,(NFS->F2_I_GERTS <> "N"))//01
-   ELSE
-      AADD(_aItens,EMPTY(NFS->F2_I_NDFSE))//01
-   ENDIF
-	AADD(_aItens,NFS->F2_DOC+"/"+NFS->F2_SERIE)//02 
-	AADD(_aItens,DTOC(STOD(NFS->F2_EMISSAO)))//03
-	AADD(_aItens,TRANSFORM(NFS->TOTAL* _nPSeguro,"@E 999,999,999.9999") )// _nPercSeguro,"@E 999,999,999.9999") )//04
-  	AADD(_aItens,TRANSFORM(NFS->TOTAL             ,"@E 999,999,999.99") )//06
-	AADD(_aItens,TRANSFORM(NFS->F2_VALMERC        ,"@E 999,999,999.99") )//05
-	AADD(_aItens,TRANSFORM(NFS->F2_I_FRET         ,"@E 999,999,999.99") )//07
-	AADD(_aItens,NFS->A2_I_AVERB)
-	AADD(_aItens,NFS->A2_EST)
-	AADD(_aItens,NFS->A2_LOJA)
-	AADD(_aItens,NFS->A2_NREDUZ)
-	AADD(_aItens,_cNFTitSeg)
-   AADD(_aItens,NFS->F2_I_NDFSE)
-	AADD(_aLinhas,_aItens)
+   If _lSoma 
+      aAdd(_aItens,(NFS->F2_I_GERTS <> "N"))//01
+   Else
+      aAdd(_aItens,Empty(NFS->F2_I_NDFSE))//01
+   EndIf
+	aAdd(_aItens,NFS->F2_DOC+"/"+NFS->F2_SERIE)//02 
+	aAdd(_aItens,DToC(SToD(NFS->F2_EMISSAO)))//03
+	aAdd(_aItens,TRANSFORM(NFS->TOTAL* _nPSeguro,"@E 999,999,999.9999") )// _nPercSeguro,"@E 999,999,999.9999") )//04
+  	aAdd(_aItens,TRANSFORM(NFS->TOTAL             ,"@E 999,999,999.99") )//06
+	aAdd(_aItens,TRANSFORM(NFS->F2_VALMERC        ,"@E 999,999,999.99") )//05
+	aAdd(_aItens,TRANSFORM(NFS->F2_I_FRET         ,"@E 999,999,999.99") )//07
+	aAdd(_aItens,NFS->A2_I_AVERB)
+	aAdd(_aItens,NFS->A2_EST)
+	aAdd(_aItens,NFS->A2_LOJA)
+	aAdd(_aItens,NFS->A2_NREDUZ)
+	aAdd(_aItens,_cNFTitSeg)
+   aAdd(_aItens,NFS->F2_I_NDFSE)
+	aAdd(_aLinhas,_aItens)
 
     //CONTA NA OPCAO EMITIDOS OU SE NÃO EMITIDOS E ESTIVER EM BRANCO F2_I_NDFSE
-    IF _lSoma .OR. EMPTY(NFS->F2_I_NDFSE)
+    If _lSoma .Or. Empty(NFS->F2_I_NDFSE)
        If NFS->F2_I_GERTS <> "N"
           _aTotais[1]+=NFS->TOTAL * _nPSeguro // _nPercSeguro
           _aTotais[2]+=NFS->TOTAL
@@ -1103,73 +1025,73 @@ DO WHILE NFS->(!EOF())
           _aTotais[4]+=NFS->F2_I_FRET
           _aTotais[7]++
        EndIf 
-    ELSEIF !EMPTY(NFS->F2_I_NDFSE)//CONTA QUANDO NÃO EMITIDOS MAS TEM ALGUMAS NOTAS GERADAS
+    ElseIf !Empty(NFS->F2_I_NDFSE)//CONTA QUANDO NÃO EMITIDOS MAS TEM ALGUMAS NOTAS GERADAS
        If NFS->F2_I_GERTS <> "N"
           _aTotais[8]+=NFS->TOTAL * _nPSeguro // _nPercSeguro   
        EndIf 
-    ENDIF   
+    EndIf   
 
-	NFS->(Dbskip())
+	NFS->(DBSkip())
 
-ENDDO
+EndDo
 
-_cTot:=ALLTRIM(STR(_nTotNfs))
+_cTot:=AllTrim(Str(_nTotNfs))
  
-IF !EMPTY(_cChave)
-   RETURN _cTot
-ENDIF
+If !Empty(_cChave)
+   Return _cTot
+EndIf
 If Len(_aLinhas) = 0
-   U_ITMSG("Nenhum Nota localizada","Atenção",,1)
-   RETURN .F.
-ENDIF
+   U_ITMsg("Nenhum Nota localizada","Atenção",,1)
+   Return .F.
+EndIf
 
 _aItens:={}
-IF (_aTotais[7]) > 0
-   AADD(_aItens,.T.)//01
-   AADD(_aItens,"TOTAIS:")//02
-   AADD(_aItens,ALLTRIM(STR(_aTotais[7]))+" Notas")//03
-   AADD(_aItens,TRANSFORM(_aTotais[1],"@E 999,999,999,999.99") )//04
-   AADD(_aItens,TRANSFORM(_aTotais[2],"@E 999,999,999,999.99") )//05
-   AADD(_aItens,TRANSFORM(_aTotais[3],"@E 999,999,999,999.99") )//06
-   AADD(_aItens,TRANSFORM(_aTotais[4],"@E 999,999,999,999.99") )//07
-   AADD(_aItens,"")
-   AADD(_aItens,"")
-   AADD(_aItens,"")
-   AADD(_aItens,"")
-   AADD(_aItens,"")
-   AADD(_aItens,"")
-ENDIF
+If (_aTotais[7]) > 0
+   aAdd(_aItens,.T.)//01
+   aAdd(_aItens,"TOTAIS:")//02
+   aAdd(_aItens,AllTrim(Str(_aTotais[7]))+" Notas")//03
+   aAdd(_aItens,TRANSFORM(_aTotais[1],"@E 999,999,999,999.99") )//04
+   aAdd(_aItens,TRANSFORM(_aTotais[2],"@E 999,999,999,999.99") )//05
+   aAdd(_aItens,TRANSFORM(_aTotais[3],"@E 999,999,999,999.99") )//06
+   aAdd(_aItens,TRANSFORM(_aTotais[4],"@E 999,999,999,999.99") )//07
+   aAdd(_aItens,"")
+   aAdd(_aItens,"")
+   aAdd(_aItens,"")
+   aAdd(_aItens,"")
+   aAdd(_aItens,"")
+   aAdd(_aItens,"")
+EndIf
 
-AADD(_aLinhas,_aItens)
+aAdd(_aLinhas,_aItens)
 
 //Monta _aCab
-aadd(_aCab,"")
-aadd(_aCab,"Nota/Serie")   
-aadd(_aCab,"Emissao")      //07
-aadd(_aCab,"Seguro")       //01
-aadd(_aCab,"Valor Bruto")//02
-aadd(_aCab,"Valor Mercadoria") //03
-aadd(_aCab,"Frete") //04
-aadd(_aCab,"Averbacao")    
-aadd(_aCab,"Estado")       
-aadd(_aCab,"Loja")         
-aadd(_aCab,"Nome Transportador")
-aadd(_aCab,"Calculo Titulo Seguro")
-aadd(_aCab,"Chave Gerada")      
+aAdd(_aCab,"")
+aAdd(_aCab,"Nota/Serie")   
+aAdd(_aCab,"Emissao")      //07
+aAdd(_aCab,"Seguro")       //01
+aAdd(_aCab,"Valor Bruto")//02
+aAdd(_aCab,"Valor Mercadoria") //03
+aAdd(_aCab,"Frete") //04
+aAdd(_aCab,"Averbacao")    
+aAdd(_aCab,"Estado")       
+aAdd(_aCab,"Loja")         
+aAdd(_aCab,"Nome Transportador")
+aAdd(_aCab,"Calculo Titulo Seguro")
+aAdd(_aCab,"Chave Gerada")      
 
 If Len(_aLinhas) > 0
-   _cTitulo:="Nfs do transportador " + ALLTRIM(TRBF->COD)+" - "+TRBF->TRANSP
+   _cTitulo:="Nfs do transportador " + AllTrim(TRBF->COD)+" - "+TRBF->TRANSP
    _cMsgTop:=NIL
-   IF (_aTotais[7]) > 0
-      _cMsgTop:=ALLTRIM(STR(_aTotais[7]))+" Notas: Valor do Seguro das Nfs"+IF(_aTotais[8]<>0," NÃO Geradas","")+" R$ "+ALLTRIM(TRANSFORM(_aTotais[1],"@E 999,999,999.99"))+;
-      IF(_aTotais[8]<>0," / Valor do Seguro das Nfs Geradas R$ "+ALLTRIM(TRANSFORM(_aTotais[8],"@E 999,999,999.99")),"")
-   ENDIF
+   If (_aTotais[7]) > 0
+      _cMsgTop:=AllTrim(Str(_aTotais[7]))+" Notas: Valor do Seguro das Nfs"+If(_aTotais[8]<>0," NÃO Geradas","")+" R$ "+AllTrim(TRANSFORM(_aTotais[1],"@E 999,999,999.99"))+;
+      If(_aTotais[8]<>0," / Valor do Seguro das Nfs Geradas R$ "+AllTrim(TRANSFORM(_aTotais[8],"@E 999,999,999.99")),"")
+   EndIf
 // U_ITListBox(_cTitAux, _aHeader , _aCols    , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _abuttons )
    U_ITLISTBOX(_cTitulo, _aCab    , _aLinhas  , .T.      , 4      ,_cMsgTop)
-Endif
+EndIf
 
 If Select("TRBSF2") > 0 
-   TRBSF2->(DbSetOrder(1))
+   TRBSF2->(DBSetOrder(1))
 EndIf 
 
 Return (Len(_aLinhas) > 0)
@@ -1179,380 +1101,335 @@ Return (Len(_aLinhas) > 0)
 Programa----------: AOMS114 Filtro()
 Autor-------------: Alex Wallauer 
 Data da Criacao---: 22/07/2019
-===============================================================================================================================
 Descrição---------: Filtro Básico
-===============================================================================================================================
 Parametros--------: _lLerNotas,_lGera
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS114Filtro(_lLerNotas,_lGera)
-LOCAL cFiltro:=""
+
+Local cFiltro:=""
 
 // Filtra Filial das tabelas 
 If !Empty( xFilial("SF2") )
    cFiltro += " AND SF2.F2_FILIAL = '"+cFilant+"' "
 EndIf
 
-IF MV_PAR06 = 1//SIM: JÁ EMITIDOS ********************************************************************
+If MV_PAR06 = 1//SIM: JÁ EMITIDOS
 
-   IF _lLerNotas
+   If _lLerNotas
       //Filtra transportador posicionado
       cFiltro += " AND SF2.F2_I_CTRA  = '" + TRBF->COD + "' "
-      IF !EMPTY(TRBF->F2_I_NDFSE)//SE EM BRANCO É QUE ESTORNOU O FILTRO VAI SER pela tabela: _aRecEsto
+      If !Empty(TRBF->F2_I_NDFSE)//SE EM BRANCO É QUE ESTORNOU O FILTRO VAI SER pela tabela: _aRecEsto
           cFiltro += " AND SF2.F2_I_NDFSE = '" + TRBF->F2_I_NDFSE + "' "//CHAVE DOS TIUTLOS
-      ENDIF   
+      EndIf   
 
-   ELSE
+   Else
 
       cFiltro += " AND SF2.F2_I_NDFSE <>  ' ' "
-/*
-      // Filtra Emissao da SF2
-      IF !EMPTY(MV_PAR02)
-         cFiltro += " AND SF2.F2_EMISSAO BETWEEN '" + DTOS(MV_PAR01) + "' AND '" + DTOS(MV_PAR02) + "'"
-      ELSEIF !EMPTY(MV_PAR01) 
-         cFiltro += " AND SF2.F2_EMISSAO >= '" + DTOS(MV_PAR01) + "'"
-      ENDIF
-*/
-
       // Filtra Transportadores
-      IF !EMPTY(MV_PAR03)
-         IF LEN(ALLTRIM(MV_PAR03)) > 6
-            cFiltro += " AND SF2.F2_I_CTRA IN " + FormatIn(ALLTRIM(MV_PAR03),";")
-         ELSE
-            //cFiltro += " AND SA2.A2_COD    = '" + ALLTRIM(MV_PAR03) + "' "
-            cFiltro += " AND SF2.F2_I_CTRA = '" + ALLTRIM(MV_PAR03) + "' "
-         ENDIF   
-      ENDIF 
+      If !Empty(MV_PAR03)
+         If Len(AllTrim(MV_PAR03)) > 6
+            cFiltro += " AND SF2.F2_I_CTRA IN " + FormatIn(AllTrim(MV_PAR03),";")
+         Else
+            cFiltro += " AND SF2.F2_I_CTRA = '" + AllTrim(MV_PAR03) + "' "
+         EndIf   
+      EndIf 
 
-   ENDIF 
+   EndIf 
 
-ELSEIF MV_PAR06 = 2//NÃO: NAO EMITIDOS ********************************************************************
+ElseIf MV_PAR06 = 2//NÃO: NAO EMITIDOS
+   If _lLerNotas
 
-/*
-   // Filtra Emissao da SF2
-   IF !EMPTY(MV_PAR02)
-      cFiltro += " AND SF2.F2_EMISSAO BETWEEN '" + DTOS(MV_PAR01) + "' AND '" + DTOS(MV_PAR02) + "'"
-   ELSEIF !EMPTY(MV_PAR01) 
-      cFiltro += " AND SF2.F2_EMISSAO >= '" + DTOS(MV_PAR01) + "'"
-   ENDIF
-*/
-
-   IF _lLerNotas
-
-      IF !EMPTY(TRBF->F2_I_NDFSE)//DEPOIS QUE GEROU TÁ PREENCHIDO
+      If !Empty(TRBF->F2_I_NDFSE)//DEPOIS QUE GEROU TÁ PREENCHIDO
          cFiltro += " AND SF2.F2_I_NDFSE = '" + TRBF->F2_I_NDFSE + "' "//CHAVE DOS TIUTLOS
-      ELSEIF _lGera//NA HORA DE GERAR SÓ PEGA OS EM BRANCO
+      ElseIf _lGera//NA HORA DE GERAR SÓ PEGA OS EM BRANCO
          cFiltro += " AND SF2.F2_I_NDFSE = ' ' "         
-      ENDIF   
+      EndIf   
       //Filtra transportador posicionado
       cFiltro += " AND SF2.F2_I_CTRA  = '" + TRBF->COD + "' "
 
-   ELSE
+   Else
 
       cFiltro += " AND SF2.F2_I_NDFSE = ' ' "
 
       // Filtra Transportadores
-      IF !EMPTY(MV_PAR03)
-         IF LEN(ALLTRIM(MV_PAR03)) > 6
-            cFiltro += " AND SF2.F2_I_CTRA IN " + FormatIn(ALLTRIM(MV_PAR03),";")
-         ELSE
-            cFiltro += " AND SF2.F2_I_CTRA = '" + ALLTRIM(MV_PAR03) + "' "
-         ENDIF   
-      ENDIF 
+      If !Empty(MV_PAR03)
+         If Len(AllTrim(MV_PAR03)) > 6
+            cFiltro += " AND SF2.F2_I_CTRA IN " + FormatIn(AllTrim(MV_PAR03),";")
+         Else
+            cFiltro += " AND SF2.F2_I_CTRA = '" + AllTrim(MV_PAR03) + "' "
+         EndIf   
+      EndIf 
 
-   ENDIF
-
-   // Filtra Armazém
-/*   IF !EMPTY(MV_PAR04) 
-      cFiltro += " AND  EXISTS (SELECT 'Y' "
-      cFiltro += " 	              FROM " + RetSqlName("SD2")+" SD2 "
-      cFiltro += " 	               WHERE  SD2.D_E_L_E_T_ = ' ' "
-      cFiltro += " 	                  AND SD2.D2_FILIAL     = SF2.F2_FILIAL "
-      cFiltro += " 	                  AND SD2.D2_DOC        = SF2.F2_DOC    "
-      cFiltro += " 	                  AND SD2.D2_SERIE      = SF2.F2_SERIE  "
-      cFiltro += " 	                  AND SD2.D2_CLIENTE    = SF2.F2_CLIENTE"
-      cFiltro += " 	                  AND SD2.D2_LOJA       = SF2.F2_LOJA   "
-      IF LEN(ALLTRIM(MV_PAR04)) > 3
-         cFiltro += " 	              AND SD2.D2_LOCAL IN " + FormatIn(ALLTRIM(MV_PAR04),";")+" ) "
-      ELSE
-         cFiltro += " 	              AND SD2.D2_LOCAL = '"+ALLTRIM(MV_PAR04)+"' ) "
-      ENDIF   
-   ENDIF
-*/
+   EndIf
 
    // Filtra Transportadores por averbacao
-   IF MV_PAR05 == 1
+   If MV_PAR05 == 1
       cFiltro += " AND SA2.A2_I_AVERB = '1'"
-   ELSEIF MV_PAR05 == 2
+   ElseIf MV_PAR05 == 2
       cFiltro += " AND SA2.A2_I_AVERB = '2'"
-   ENDIF
+   EndIf
 
-   IF SuperGetMV("IT_AMBTEST",.F.,.T.)
+   If !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
       cFiltro+="	AND SA2.A2_I_CLASS IN ('T','A','G') "
-   ELSE
+   Else
       cFiltro+= "	AND SA2.A2_I_TPFRT = 'S' "//SÓ NA PRODUCAO TESTA
-   ENDIF   
+   EndIf   
 
-ENDIF
+EndIf
 
-If !EMPTY(MV_PAR01) 
-   cFiltro += " AND SF2.F2_EMISSAO >= '" + DTOS(MV_PAR01) + "'"
+If !Empty(MV_PAR01) 
+   cFiltro += " AND SF2.F2_EMISSAO >= '" + DToS(MV_PAR01) + "'"
 EndIf  
 
-If !EMPTY(MV_PAR02) 
-   cFiltro += " AND SF2.F2_EMISSAO <= '" + DTOS(MV_PAR02) + "'"
+If !Empty(MV_PAR02) 
+   cFiltro += " AND SF2.F2_EMISSAO <= '" + DToS(MV_PAR02) + "'"
 EndIf 
 
-IF !EMPTY(MV_PAR04)  
-   IF LEN(ALLTRIM(MV_PAR04)) > 3
-      cFiltro += " 	              AND SD2.D2_LOCAL IN " + FormatIn(ALLTRIM(MV_PAR04),";")
-   ELSE
-      cFiltro += " 	              AND SD2.D2_LOCAL = '"+ALLTRIM(MV_PAR04)+"' "
-   ENDIF   
-ENDIF
-//====================================================================================================
+If !Empty(MV_PAR04)  
+   If Len(AllTrim(MV_PAR04)) > 3
+      cFiltro += " 	              AND SD2.D2_LOCAL IN " + FormatIn(AllTrim(MV_PAR04),";")
+   Else
+      cFiltro += " 	              AND SD2.D2_LOCAL = '"+AllTrim(MV_PAR04)+"' "
+   EndIf   
+EndIf
 
-RETURN cFiltro
+Return cFiltro
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS114GE()
 Autor-------------: Alex Wallauer 
 Data da Criacao---: 22/07/2019
-===============================================================================================================================
 Descrição---------: Le Transportadores marcados para gera os titulos
-===============================================================================================================================
 Parametros--------: oProc,_lEMail,_lGera
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS114GE(oProc,_lEMail,_lGera)
-LOCAL _nConta:=0
-LOCAL _aCab :={} 
-LOCAL _aSize:={}
-LOCAL _cTot := TRBF->(LASTREC())
-DEFAULT _lEMail:=.F.
-PRIVATE _aTLinhas:={}
+
+Local _nConta:=0
+Local _aCab :={} 
+Local _aSize:={}
+Local _cTot := TRBF->(LASTREC())
+Default _lEMail:=.F.
+Private _aTLinhas:={}
 
 oProc:cCaption := ("Processando Titulos de Seguro...")
 ProcessMessages()
 
-TRBF->(DBGOTOP())
-DO WHILE TRBF->(!EOF())
-   IF _lEMail 
-      IF !EMPTY(TRBF->OK) .AND. !EMPTY(TRBF->F2_I_NDFSE)
+TRBF->(DBGoTop())
+While TRBF->(!Eof())
+   If _lEMail 
+      If !Empty(TRBF->OK) .And. !Empty(TRBF->F2_I_NDFSE)
          _nConta++
-      ENDIF   
-   ELSEIF _lGera .AND. !EMPTY(TRBF->OK).AND. EMPTY(TRBF->F2_I_NDFSE)//GERACAO
+      EndIf   
+   ElseIf _lGera .And. !Empty(TRBF->OK).AND. Empty(TRBF->F2_I_NDFSE)//GERACAO
       _nConta++
-   ELSEIF !_lGera .AND. !EMPTY(TRBF->OK) .AND. !EMPTY(TRBF->F2_I_NDFSE) .AND. SE2->(Dbseek(xfilial("SE2")+ALLTRIM(TRBF->F2_I_NDFSE)))//ESTORNO
+   ElseIf !_lGera .And. !Empty(TRBF->OK) .And. !Empty(TRBF->F2_I_NDFSE) .And. SE2->(DBSeek(xFilial("SE2")+AllTrim(TRBF->F2_I_NDFSE)))//ESTORNO
       _nConta++
-   ENDIF   
-   TRBF->(Dbskip())
-ENDDO 
+   EndIf   
+   TRBF->(DBSkip())
+EndDo 
 
-IF _nConta = 0
-   IF _lEMail
-      U_ITMSG("Nenhum Titulo de Seguro Gerado","Atenção",,1)
-   ELSE
-      U_ITMSG("Nenhum registro Marcado","Atenção",,1)
-   ENDIF   
-   RETURN .F.
-ENDIF
+If _nConta = 0
+   If _lEMail
+      U_ITMsg("Nenhum Titulo de Seguro Gerado","Atenção",,1)
+   Else
+      U_ITMsg("Nenhum registro Marcado","Atenção",,1)
+   EndIf   
+   Return .F.
+EndIf
 
-_cTot:=ALLTRIM(STR(_nConta))
-_nTam:=LEN(_cTot)+1
+_cTot:=AllTrim(Str(_nConta))
+_nTam:=Len(_cTot)+1
 _nConta:=0
 
 SE2->( DBSetOrder(1) ) //E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
 
 _aRecEsto:={}
-TRBF->(DBGOTOP())
-DO WHILE TRBF->(!EOF())
+TRBF->(DBGoTop())
+While TRBF->(!Eof())
 
-   IF _lEMail 
+   If _lEMail 
 
-      IF !EMPTY(TRBF->OK) .AND. !EMPTY(TRBF->F2_I_NDFSE) .AND. SE2->(Dbseek(xfilial("SE2")+ALLTRIM(TRBF->F2_I_NDFSE)))
+      If !Empty(TRBF->OK) .And. !Empty(TRBF->F2_I_NDFSE) .And. SE2->(DBSeek(xFilial("SE2")+AllTrim(TRBF->F2_I_NDFSE)))
          _nConta++
-          oProc:cCaption := ("Lendo Titulo: "+ALLTRIM(STR(_nConta,_nTam)) +" de "+ _cTot+" - Transp.: "+TRBF->COD)
+          oProc:cCaption := ("Lendo Titulo: "+AllTrim(Str(_nConta,_nTam)) +" de "+ _cTot+" - Transp.: "+TRBF->COD)
          ProcessMessages()
          _aItens:={}
-         AADD(_aItens,.T.             )     //01
-         AADD(_aItens,SE2->E2_PREFIXO )     //02
-         AADD(_aItens,SE2->E2_NUM     )     //03
-         AADD(_aItens,SE2->E2_PARCELA )     //04
-         AADD(_aItens,SE2->E2_TIPO    )     //05
-         AADD(_aItens,SE2->E2_NATUREZ )     //06
-         AADD(_aItens,SE2->E2_FORNECE )     //07
-         AADD(_aItens,SE2->E2_LOJA    )     //08
-         AADD(_aItens,DTOC(SE2->E2_EMISSAO))//09
-         AADD(_aItens,DTOC(SE2->E2_VENCTO)) //10
-         AADD(_aItens,ALLTRIM(TRANSFORM(SE2->E2_VALOR,"@E 999,999,999,999.99")))//11
-         AADD(_aItens,SE2->E2_HIST)         //12
-         AADD(_aItens,DTOC(SE2->E2_DATALIB))//13
-         AADD(_aItens,SE2->E2_USUALIB)      //14
-         AADD(_aItens,TRBF->QTDENF)         //15
-         AADD(_aItens,"Gerado com Sucesso") //16
-         AADD(_aItens, SE2->(RECNO()) )     //17
-         AADD(_aTLinhas,_aItens)
-      ENDIF
+         aAdd(_aItens,.T.             )     //01
+         aAdd(_aItens,SE2->E2_PREFIXO )     //02
+         aAdd(_aItens,SE2->E2_NUM     )     //03
+         aAdd(_aItens,SE2->E2_PARCELA )     //04
+         aAdd(_aItens,SE2->E2_TIPO    )     //05
+         aAdd(_aItens,SE2->E2_NATUREZ )     //06
+         aAdd(_aItens,SE2->E2_FORNECE )     //07
+         aAdd(_aItens,SE2->E2_LOJA    )     //08
+         aAdd(_aItens,DToC(SE2->E2_EMISSAO))//09
+         aAdd(_aItens,DToC(SE2->E2_VENCTO)) //10
+         aAdd(_aItens,AllTrim(TRANSFORM(SE2->E2_VALOR,"@E 999,999,999,999.99")))//11
+         aAdd(_aItens,SE2->E2_HIST)         //12
+         aAdd(_aItens,DToC(SE2->E2_DATALIB))//13
+         aAdd(_aItens,SE2->E2_USUALIB)      //14
+         aAdd(_aItens,TRBF->QTDENF)         //15
+         aAdd(_aItens,"Gerado com Sucesso") //16
+         aAdd(_aItens, SE2->(RECNO()) )     //17
+         aAdd(_aTLinhas,_aItens)
+      EndIf
 
-   ELSEIF _lGera .AND. !EMPTY(TRBF->OK) .AND. EMPTY(TRBF->F2_I_NDFSE)//GERACAO
+   ElseIf _lGera .And. !Empty(TRBF->OK) .And. Empty(TRBF->F2_I_NDFSE)//GERACAO
       _nConta++
-      oProc:cCaption := ("Gerando Titulo: "+ALLTRIM(STR(_nConta,_nTam))+" de "+ _cTot+" - Transp.: "+TRBF->COD)
+      oProc:cCaption := ("Gerando Titulo: "+AllTrim(Str(_nConta,_nTam))+" de "+ _cTot+" - Transp.: "+TRBF->COD)
       ProcessMessages()
 
-      AOMS114SE(oProc,ALLTRIM(STR(TRBF->QTDENF)))//GERACAO
+      AOMS114SE(oProc,AllTrim(Str(TRBF->QTDENF)))//GERACAO
 
-   ELSEIF !_lGera .AND. !EMPTY(TRBF->OK) .AND. !EMPTY(TRBF->F2_I_NDFSE) .AND. SE2->(Dbseek(xfilial("SE2")+ALLTRIM(TRBF->F2_I_NDFSE)))//ESTORNO
+   ElseIf !_lGera .And. !Empty(TRBF->OK) .And. !Empty(TRBF->F2_I_NDFSE) .And. SE2->(DBSeek(xFilial("SE2")+AllTrim(TRBF->F2_I_NDFSE)))//ESTORNO
       _nConta++
-      oProc:cCaption := ("Estornando Titulo: "+ALLTRIM(STR(_nConta,_nTam))+" de "+ _cTot+" - Transp.: "+TRBF->COD)
+      oProc:cCaption := ("Estornando Titulo: "+AllTrim(Str(_nConta,_nTam))+" de "+ _cTot+" - Transp.: "+TRBF->COD)
       ProcessMessages()
 
-      AOM114Estorno(oProc,ALLTRIM(STR(TRBF->QTDENF)))//ESTORNO
+      AOM114Estorno(oProc,AllTrim(Str(TRBF->QTDENF)))//ESTORNO
 
-   ENDIF   
+   EndIf   
     
-   TRBF->(Dbskip())
+   TRBF->(DBSkip())
 
-ENDDO
-TRBF->(DBGOTOP())
+EndDo
+TRBF->(DBGoTop())
 
 //Monta aheader
-aadd(_aCab,"")//01
-aadd(_aSize,5)
-AAdd(_aCab,Getsx3cache("E2_PREFIXO","X3_TITULO"))//02
-aadd(_aSize,5)
-AAdd(_aCab,Getsx3cache("E2_NUM"    ,"X3_TITULO"))//03
-aadd(_aSize,9)
-AAdd(_aCab,Getsx3cache("E2_PARCELA","X3_TITULO"))//04
-aadd(_aSize,5)
-AAdd(_aCab,Getsx3cache("E2_TIPO"   ,"X3_TITULO"))//05
-aadd(_aSize,5)
-AAdd(_aCab,Getsx3cache("E2_NATUREZ","X3_TITULO"))//06
-aadd(_aSize,8)
-AAdd(_aCab,Getsx3cache("E2_FORNECE","X3_TITULO"))//07
-aadd(_aSize,15)
-AAdd(_aCab,Getsx3cache("E2_LOJA"   ,"X3_TITULO"))//08	
-aadd(_aSize,5)
-AAdd(_aCab,Getsx3cache("E2_EMISSAO","X3_TITULO"))//09
-aadd(_aSize,15)
-AAdd(_aCab,Getsx3cache("E2_VENCTO" ,"X3_TITULO"))//10
-aadd(_aSize,15)
-AAdd(_aCab,Getsx3cache("E2_VALOR"  ,"X3_TITULO"))//11
-aadd(_aSize,15)
-AAdd(_aCab,Getsx3cache("E2_HIST"   ,"X3_TITULO"))//12
-aadd(_aSize,30)
-AAdd(_aCab,Getsx3cache("E2_DATALIB","X3_TITULO"))//13
-aadd(_aSize,15)
-AAdd(_aCab,Getsx3cache("E2_USUALIB","X3_TITULO"))//14
-aadd(_aSize,15)
-AAdd(_aCab,"Qtde NF")  //15
-aadd(_aSize,10)
-AAdd(_aCab,"Resultado")//16
-aadd(_aSize,15)
-AAdd(_aCab,"Registro") //17
-aadd(_aSize,10)
+aAdd(_aCab,"")//01
+aAdd(_aSize,5)
+aAdd(_aCab,Getsx3cache("E2_PREFIXO","X3_TITULO"))//02
+aAdd(_aSize,5)
+aAdd(_aCab,Getsx3cache("E2_NUM"    ,"X3_TITULO"))//03
+aAdd(_aSize,9)
+aAdd(_aCab,Getsx3cache("E2_PARCELA","X3_TITULO"))//04
+aAdd(_aSize,5)
+aAdd(_aCab,Getsx3cache("E2_TIPO"   ,"X3_TITULO"))//05
+aAdd(_aSize,5)
+aAdd(_aCab,Getsx3cache("E2_NATUREZ","X3_TITULO"))//06
+aAdd(_aSize,8)
+aAdd(_aCab,Getsx3cache("E2_FORNECE","X3_TITULO"))//07
+aAdd(_aSize,15)
+aAdd(_aCab,Getsx3cache("E2_LOJA"   ,"X3_TITULO"))//08	
+aAdd(_aSize,5)
+aAdd(_aCab,Getsx3cache("E2_EMISSAO","X3_TITULO"))//09
+aAdd(_aSize,15)
+aAdd(_aCab,Getsx3cache("E2_VENCTO" ,"X3_TITULO"))//10
+aAdd(_aSize,15)
+aAdd(_aCab,Getsx3cache("E2_VALOR"  ,"X3_TITULO"))//11
+aAdd(_aSize,15)
+aAdd(_aCab,Getsx3cache("E2_HIST"   ,"X3_TITULO"))//12
+aAdd(_aSize,30)
+aAdd(_aCab,Getsx3cache("E2_DATALIB","X3_TITULO"))//13
+aAdd(_aSize,15)
+aAdd(_aCab,Getsx3cache("E2_USUALIB","X3_TITULO"))//14
+aAdd(_aSize,15)
+aAdd(_aCab,"Qtde NF")  //15
+aAdd(_aSize,10)
+aAdd(_aCab,"Resultado")//16
+aAdd(_aSize,15)
+aAdd(_aCab,"Registro") //17
+aAdd(_aSize,10)
 
 If Len(_aTLinhas) > 0
 
    AOMS114Email(_aTLinhas,_lEMail,oProc,_lGera,_aCab)
 
-   IF _lEMail
-      RETURN  .T.
-   ENDIF   
-   nPosResu:=LEN(_aCab)//Posiçao do "Resultado"
-   nPosRecn:=LEN(_aTLinhas[1])//Posiçao do Recno do TRB
+   If _lEMail
+      Return  .T.
+   EndIf   
+   nPosResu:=Len(_aCab)//Posiçao do "Resultado"
+   nPosRecn:=Len(_aTLinhas[1])//Posiçao do Recno do TRB
    aBotoes:={}                                            //oProc,_cChave,_nRecTRBF                              ,_lGrava,_lSoma
-   AADD( aBotoes , { "" , {|| FWMSGRUN(,{ |oProc| AOMS114NF(oProc,""     ,oLbxAux:aArray[oLbxAux:nAt][ nPosRecn ],.F.    ,.T.   )}, "","") },"","Visualiza NFs"} )
-   AADD( aBotoes , { "" , {|| AVISO("ATENCAO",oLbxAux:aArray[oLbxAux:nAt][ nPosResu ],{"Fechar"},3) }	, "" , "Visualizar Erro"		  } )
+   aAdd( aBotoes , { "" , {|| FWMsgRun(,{ |oProc| AOMS114NF(oProc,""     ,oLbxAux:aArray[oLbxAux:nAt][ nPosRecn ],.F.    ,.T.   )}, "","") },"","Visualiza NFs"} )
+   aAdd( aBotoes , { "" , {|| AVISO("ATENCAO",oLbxAux:aArray[oLbxAux:nAt][ nPosResu ],{"Fechar"},3) }	, "" , "Visualizar Erro"		  } )
 //    ITListBox(_cTitAux               , _aHeader , _aCols    , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _abuttons )
 	U_ITLISTBOX("Titulos Processados: ", _aCab    , _aTLinhas , .T.      , 4      ,          ,          , _aSize  ,         ,     ,        , aBotoes)
 Else
-	U_ITMSG("Nenhum registro localizado","Atenção",,1)
-Endif
+	U_ITMsg("Nenhum registro localizado","Atenção",,1)
+EndIf
 
-RETURN  .T.
+Return  .T.
 /*
 ===============================================================================================================================
 Programa----------: AOMS114SE()
 Autor-------------: Alex Wallauer 
 Data da Criacao---: 23/07/2019
-===============================================================================================================================
 Descrição---------: Gera os titulos dos Transportadores marcados
-===============================================================================================================================
 Parametros--------: oProc,_cTot
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS114SE(oProc,_cTot) 
+
 Local _nModAux  := nModulo
 Local _cModAux  := cModulo
 Local _lRet     := .T.  
-LOCAL _cNatureza:= U_ITGETMV("IT_NDFNATU","112006    ")
-LOCAL _cCodigo  :="" , nSeq
-LOCAL _cFornece :=TRBF->COD
-LOCAL _cLoja    :=TRBF->A2_LOJA
-LOCAL _nValortit:=TRBF->SEGURO
-LOCAL _cHistoric:="SEGURO - "+TRBF->TRANSP
+Local _cNatureza:= SuperGetMV("IT_NDFNATU",.F.,"112006    ")
+Local _cCodigo  :="" , nSeq
+Local _cFornece :=TRBF->COD
+Local _cLoja    :=TRBF->A2_LOJA
+Local _nValortit:=TRBF->SEGURO
+Local _cHistoric:="SEGURO - "+TRBF->TRANSP
 cUserName:=cUserName
 
 SA2->( DBSetOrder(1) ) 
-If SA2->(Dbseek(xfilial("SA2")+TRBF->COD+TRBF->A2_LOJA))
-	IF SA2->A2_MSBLQL == '1'
-		SA2->(Dbseek(xfilial("SA2")+TRBF->COD))
-		DO WHILE TRBF->COD == SA2->A2_COD .AND. xfilial("SA2") = SA2->A2_FILIAL .AND. SA2->(!EOF())
-   			IF SA2->A2_MSBLQL <> '1'
+If SA2->(DBSeek(xFilial("SA2")+TRBF->COD+TRBF->A2_LOJA))
+	If SA2->A2_MSBLQL == '1'
+		SA2->(DBSeek(xFilial("SA2")+TRBF->COD))
+		While TRBF->COD == SA2->A2_COD .And. xFilial("SA2") = SA2->A2_FILIAL .And. SA2->(!Eof())
+   			If SA2->A2_MSBLQL <> '1'
       			_cLoja:=SA2->A2_LOJA//Pega a primeira loja não bloqueada
-      			EXIT
-   			ENDIF
-   			SA2->(DBSKIP())
-		ENDDO
+      			Exit
+   			EndIf
+   			SA2->(DBSkip())
+		EndDo
 	EndIf
 EndIf
 SE2->( DBSetOrder(1) ) //E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
-FOR nSeq := 0 TO 999
-   _cCodigo:=STRZERO(nSeq,3)+STRTRAN( DTOC(DATE()),"/","")
-   IF !SE2->(Dbseek(xfilial("SE2")+"MAN"+_cCodigo+"01"+"NDF"))//+_cFornece+_cLoja
-      EXIT
-   ENDIF   
-NEXT
+For nSeq := 0 To 999
+   _cCodigo:=StrZero(nSeq,3)+StrTran( DToC(Date()),"/","")
+   If !SE2->(DBSeek(xFilial("SE2")+"MAN"+_cCodigo+"01"+"NDF"))//+_cFornece+_cLoja
+      Exit
+   EndIf   
+Next
 
 _aAutoSE2 := {}
-AAdd( _aAutoSE2 , { "E2_PREFIXO"	, "MAN"			, NIL } )		
-AAdd( _aAutoSE2 , { "E2_NUM"		, _cCodigo		, NIL } )
-AAdd( _aAutoSE2 , { "E2_PARCELA"	, "01"			, NIL } )	
-AAdd( _aAutoSE2 , { "E2_TIPO"		, "NDF"			, NIL } )
-AAdd( _aAutoSE2 , { "E2_NATUREZ"	, _cNatureza	, NIL } ) 
-AAdd( _aAutoSE2 , { "E2_FORNECE"	, _cFornece 	, NIL } )	
-AAdd( _aAutoSE2 , { "E2_LOJA"		, _cLoja 		, NIL } )	
-AAdd( _aAutoSE2 , { "E2_EMISSAO"	, DDataBase	   , NIL } )   // AAdd( _aAutoSE2 , { "E2_EMISSAO"	, DATE()		, NIL } )
-AAdd( _aAutoSE2 , { "E2_VENCTO"	, dDtVenc	   , NIL } )
-AAdd( _aAutoSE2 , { "E2_VALOR"	, _nValortit   , NIL } )
-AAdd( _aAutoSE2 , { "E2_HIST"		, _cHistoric   , Nil } )
-AAdd( _aAutoSE2 , { "E2_DATALIB"	, DDataBase		, NIL } )     // AAdd( _aAutoSE2 , { "E2_DATALIB"	, DATE()		, NIL } )
-AAdd( _aAutoSE2 , { "E2_USUALIB"	, cUserName		, NIL } )
-AAdd( _aAutoSE2 , { "E2_ORIGEM"	, "AOMS114"    , NIL } )
+aAdd( _aAutoSE2 , { "E2_PREFIXO"	, "MAN"			, NIL } )		
+aAdd( _aAutoSE2 , { "E2_NUM"		, _cCodigo		, NIL } )
+aAdd( _aAutoSE2 , { "E2_PARCELA"	, "01"			, NIL } )	
+aAdd( _aAutoSE2 , { "E2_TIPO"		, "NDF"			, NIL } )
+aAdd( _aAutoSE2 , { "E2_NATUREZ"	, _cNatureza	, NIL } ) 
+aAdd( _aAutoSE2 , { "E2_FORNECE"	, _cFornece 	, NIL } )	
+aAdd( _aAutoSE2 , { "E2_LOJA"		, _cLoja 		, NIL } )	
+aAdd( _aAutoSE2 , { "E2_EMISSAO"	, dDataBase	   , NIL } )   // aAdd( _aAutoSE2 , { "E2_EMISSAO"	, Date()		, NIL } )
+aAdd( _aAutoSE2 , { "E2_VENCTO"	, dDtVenc	   , NIL } )
+aAdd( _aAutoSE2 , { "E2_VALOR"	, _nValortit   , NIL } )
+aAdd( _aAutoSE2 , { "E2_HIST"		, _cHistoric   , Nil } )
+aAdd( _aAutoSE2 , { "E2_DATALIB"	, dDataBase		, NIL } )     // aAdd( _aAutoSE2 , { "E2_DATALIB"	, Date()		, NIL } )
+aAdd( _aAutoSE2 , { "E2_USUALIB"	, cUserName		, NIL } )
+aAdd( _aAutoSE2 , { "E2_ORIGEM"	, "AOMS114"    , NIL } )
 
 _aItens:={}
-AADD(_aItens,.T.     )
-AADD(_aItens,"MAN"   )
-AADD(_aItens,_cCodigo)
-AADD(_aItens,"01"    )
-AAdd(_aItens,"NDF"   ) 
-AAdd(_aItens,_cNatureza) 
-AAdd(_aItens,_cFornece )	
-AAdd(_aItens,_cLoja    )		 	
-AAdd(_aItens,DTOC(DDataBase)) // AAdd(_aItens,DTOC(DATE()) )
-AAdd(_aItens,DTOC(dDtVenc) )
-AAdd(_aItens,ALLTRIM(TRANSFORM(_nValortit,"@E 999,999,999,999.99")))//11
-AAdd(_aItens,_cHistoric   )
-AAdd(_aItens,DTOC(DDataBase)) // AAdd(_aItens,DTOC(DATE()) )
-AAdd(_aItens,cUserName    )
+aAdd(_aItens,.T.     )
+aAdd(_aItens,"MAN"   )
+aAdd(_aItens,_cCodigo)
+aAdd(_aItens,"01"    )
+aAdd(_aItens,"NDF"   ) 
+aAdd(_aItens,_cNatureza) 
+aAdd(_aItens,_cFornece )	
+aAdd(_aItens,_cLoja    )		 	
+aAdd(_aItens,DToC(dDataBase)) // aAdd(_aItens,DToC(Date()) )
+aAdd(_aItens,DToC(dDtVenc) )
+aAdd(_aItens,AllTrim(TRANSFORM(_nValortit,"@E 999,999,999,999.99")))//11
+aAdd(_aItens,_cHistoric   )
+aAdd(_aItens,DToC(dDataBase)) // aAdd(_aItens,DToC(Date()) )
+aAdd(_aItens,cUserName    )
 
 nModulo	   := 6
 cModulo	   := "FIN"
@@ -1564,77 +1441,75 @@ _cErro:="Gerado com Sucesso"
 If lMsErroAuto
 
    _cErro:=(MOSTRAERRO(GETTEMPPATH()))
-   _cErro:="Não Gerou. Acesse Visualizar Erro: "+CHR(13)+CHR(10)+ALLTRIM(_cErro)
+   _cErro:="Não Gerou. Acesse Visualizar Erro: "+CHR(13)+CHR(10)+AllTrim(_cErro)
    _aItens[1]:=.F.
 	_lRet:= .F.  
 
-ELSE
+Else
   _cChave:="MAN"+_cCodigo+"01"+"NDF"+_cFornece+_cLoja
   
-  _aTRBF[ TRBF->(RECNO()),01]:=SPACE(2)
+  _aTRBF[ TRBF->(RECNO()),01]:=Space(2)
   _aTRBF[ TRBF->(RECNO()),14]:=_cChave
                  //oProc,_cChave,_nRecTRBF      ,_lGrava,_lSoma,lGera
   _cTot:=AOMS114NF(oProc,_cChave,TRBF->(RECNO()),.T.    ,.F.   ,.T.  )//GRAVA O CAMPO F2_I_NDFSE DAS NOTAS
   TRBF->OK        :=Space(2)
   TRBF->F2_I_NDFSE:=_cChave//Grava despois pq causa dos controles do filtro em cima desse campo na gravação
   
-Endif
-AAdd(_aItens,_cTot)//15
-AAdd(_aItens,_cErro)//16
-AAdd(_aItens,TRBF->(RECNO()))//17
+EndIf
+aAdd(_aItens,_cTot)//15
+aAdd(_aItens,_cErro)//16
+aAdd(_aItens,TRBF->(RECNO()))//17
 
-AADD(_aTLinhas,_aItens)
+aAdd(_aTLinhas,_aItens)
 
 nModulo:= _nModAux
 cModulo:= _cModAux
 
-RETURN _lRet
+Return _lRet
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS114Email()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 25/07/2019
-===============================================================================================================================
 Descrição---------: Monta e envia email 
-===============================================================================================================================
 Parametros--------: _aTLinhas,_lTela,oProc,_lGera,_aCab
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS114Email(_aTLinhas,_lTela,oProc,_lGera,_aCab)
+
 Local _aConfig	:= U_ITCFGEML('')
 Local _cEmlLog	:= ""
 Local _cMsgEml	:= ""
 Local nOpcA		:= 2   , _nI , oDlgMail , _aSizes:={}
 Local cGetAnx	:= ""
-Local cGetCc	:= SPACE(200)
-Local cGetMens	:= SPACE(999)//Esta é uma mensagem automática
-Local cGetPara	:= U_ITGETMV("IT_NDFEMAIL", " " ) + SPACE(150)
-Local _cTot     := ALLTRIM(STR(LEN(_aTLinhas)))
-Local _nTam     := LEN(_cTot)
+Local cGetCc	:= Space(200)
+Local cGetMens	:= Space(999)//Esta é uma mensagem automática
+Local cGetPara	:= SuperGetMV("IT_NDFEMAI",.F.,"") + Space(150)
+Local _cTot     := AllTrim(Str(Len(_aTLinhas)))
+Local _nTam     := Len(_cTot)
 Local _cNomeFil := cFilant+" - "+AllTrim( Posicione('SM0',1,"01"+cFilant,'M0_FILIAL') )
-Local cGetAssun	:= "Geração de Titulos de Seguro de Frete / "+_cNomeFil+" - ["+DTOC(DATE())+"]"
+Local cGetAssun	:= "Geração de Titulos de Seguro de Frete / "+_cNomeFil+" - ["+DToC(Date())+"]"
 
-If (LEN(PSWRET()) # 0) // Quando nao for rotina automatica do configurador
+If (Len(PSWRET()) # 0) // Quando nao For rotina automatica do configurador
    PswOrder(1)
-   PswSeek(__cUserID,.T.)
+   PswSeek(__cUserId,.T.)
    aUsuario:= PswRet()
-   cGetCc  := LOWER(Alltrim(aUsuario[1,14]))+SPACE(150)// Pega e-mail do usuario
-Endif
-IF EMPTY(cGetPara)
+   cGetCc  := LOWER(AllTrim(aUsuario[1,14]))+Space(150)// Pega e-mail do usuario
+EndIf
+If Empty(cGetPara)
    cGetPara:=cGetCc
-ENDIF   
+EndIf   
 _cMsgEml := '<html>'
-IF _lGera
+If _lGera
   _cMsgEml += '<head><title>Geração de Titulos de Seguro de Frete</title></head>'
-ELSE
-   cGetAssun:= "Estorno de Titulos de Seguro de Frete / "+_cNomeFil+" - ["+DTOC(DATE())+"]"
+Else
+   cGetAssun:= "Estorno de Titulos de Seguro de Frete / "+_cNomeFil+" - ["+DToC(Date())+"]"
   _cMsgEml += '<head><title>Estorno de Titulos de Seguro de Frete</title></head>'
-ENDIF
+EndIf
 _cMsgEml += '<body>'
-_cMsgEml += '<style type="text/css"><!--'
+_cMsgEml += '<style Type="text/css"><!--'
 _cMsgEml += 'table.bordasimples { border-collapse: collapse; }'
 _cMsgEml += 'table.bordasimples tr td { border:1px solid #777777; }'
 _cMsgEml += 'td.titulos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #C6E2FF; }'
@@ -1655,7 +1530,7 @@ _cMsgEml += '      <td align="center" colspan="2" class="grupos">Dados de envio<
 _cMsgEml += '    </tr>'
 _cMsgEml += '    <tr>'
 _cMsgEml += '      <td class="itens" align="center" width="30%"><b>Enviado por: </b></td>'
-_cMsgEml += '      <td class="itens" >'+ UsrFullName(__cUserID) +'</td>' 
+_cMsgEml += '      <td class="itens" >'+ UsrFullName(__cUserId) +'</td>' 
 _cMsgEml += '    </tr>'
 _cMsgEml += '    <tr>'
 _cMsgEml += '      <td class="itens" align="center" width="30%"><b>Filial:</b></td>'
@@ -1701,32 +1576,25 @@ _cMsgEml += '    </tr>'
 _cMsgEml += '</body>'
 _cMsgEml += '</html>'
 
-IF _lTela
+If _lTela
 
    oMainWnd:ReadClientCoords()//So precisa declarar uma fez para o Programa todo
 
-   DEFINE MSDIALOG oDlgMail TITLE "E-Mail de: "+Lower(AllTrim(UsrRetMail(RetCodUsr()))) FROM 000, 000  TO 415,999 COLORS 0, 16777215 PIXEL
+   DEFINE MSDIALOG oDlgMail TITLE "E-Mail de: "+Lower(AllTrim(UsrRetMail(RetCodUsr()))) FROM 000, 000  To 415,999 COLORS 0, 16777215 PIXEL
      _nLinha:=05
      _nPula :=16
      _nWidth:=((oDlgMail:nClientWidth-6)/2)-8
      _nSize :=_nWidth-24
-	// Para:
-	@ _nLinha+2, 005 SAY "Para:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+	@ _nLinha+2, 005 Say "Para:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
 	@ _nLinha  , 030 MSGET cGetPara SIZE _nSize, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 PIXEL
      _nLinha+=_nPula
-
-	// Com cópia:
-	@ _nLinha+2, 005 SAY "Cc:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+	@ _nLinha+2, 005 Say "Cc:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
 	@ _nLinha  , 030 MSGET cGetCc SIZE _nSize, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 PIXEL
      _nLinha+=_nPula
-
-	// Assunto:
-	@ _nLinha+2, 005 SAY "Assunto:" SIZE 022, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+	@ _nLinha+2, 005 Say "Assunto:" SIZE 022, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
 	@ _nLinha  , 030 MSGET cGetAssun SIZE _nSize, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 PIXEL
      _nLinha+=_nPula
-
-	// Mensagem:
-	@ _nLinha+2, 005 SAY "Observ.:" SIZE 030, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+	@ _nLinha+2, 005 Say "Observ.:" SIZE 030, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
 	@ _nLinha  , 030 MSGET cGetMens SIZE _nSize, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 PIXEL
      _nLinha+=_nPula
 
@@ -1734,41 +1602,41 @@ IF _lTela
   //TCBrowse():New( [ nRow ], [ nCol ], [ nWidth ], [ nHeight ], [ bLine ], [ aHeaders ], [ aColSizes ], [ oWnd ], [ cField ], [ uValue1 ], [ uValue2 ], [ bChange ], [ bLDblClick ]  , [ bRClick ], [ oFont ], [ oCursor ], [ nClrFore ], [ nClrBack ], [ cMsg ], [ uParam20 ], [ cAlias ], [ lPixel ], [ bWhen ], [ uParam24 ], [ bValid ], [ lHScroll ], [ lVScroll ] )
 	oMark2:= TCBrowse():New(070 , 006  ,_nWidth , 110  ,          ,             ,              , oDlgMail ,           ,            ,            ,            ,                 ,            ,          ,            ,             ,             ,         ,    .F.      ,           ,   .T.     ,          ,    .F.      ,           ,             ,              )
 	oMark2:SetArray(_aTLinhas)
-  	oMark2:AddColumn(TCColumn():New(_aCab[01],{|| LoadBitmap(GetResources(), IF(_aTLinhas[oMark2:nat,01],"BR_VERDE","BR_VERMELHO")) },,,,,,.T.,.F.,,,,.F., ) )
-	oMark2:AddColumn(TCColumn():New(_aCab[02],{|| iif(len(_aTLinhas)>0,_aTLinhas[oMark2:nat,02], ' ') },"@!"       	,,,"LEFT" ,020,.F.,.F.,,,,,))
-	oMark2:AddColumn(TCColumn():New(_aCab[03],{|| iif(len(_aTLinhas)>0,_aTLinhas[oMark2:nat,03], ' ') },"@!"       	,,,"LEFT" ,020,.F.,.F.,,,,,))
-	oMark2:AddColumn(TCColumn():New(_aCab[04],{|| iif(len(_aTLinhas)>0,_aTLinhas[oMark2:nat,04], ' ') },"@!"       	,,,"LEFT" ,050,.F.,.F.,,,,,))
-	oMark2:AddColumn(TCColumn():New(_aCab[05],{|| iif(len(_aTLinhas)>0,_aTLinhas[oMark2:nat,05], ' ') },"@!"       	,,,"LEFT" ,050,.F.,.F.,,,,,))
-	oMark2:AddColumn(TCColumn():New(_aCab[06],{|| iif(len(_aTLinhas)>0,_aTLinhas[oMark2:nat,06], ' ') },"@!"       	,,,"LEFT" ,050,.F.,.F.,,,,,))
-	oMark2:AddColumn(TCColumn():New(_aCab[07],{|| iif(len(_aTLinhas)>0,_aTLinhas[oMark2:nat,07], ' ') },"@!"       	,,,"LEFT" ,050,.F.,.F.,,,,,))
-	oMark2:AddColumn(TCColumn():New(_aCab[08],{|| iif(len(_aTLinhas)>0,_aTLinhas[oMark2:nat,08], ' ') },"@!"       	,,,"LEFT" ,050,.F.,.F.,,,,,))
-	oMark2:AddColumn(TCColumn():New(_aCab[09],{|| iif(len(_aTLinhas)>0,_aTLinhas[oMark2:nat,09], ' ') },"@!"       	,,,"LEFT" ,050,.F.,.F.,,,,,))
-	oMark2:AddColumn(TCColumn():New(_aCab[10],{|| iif(len(_aTLinhas)>0,_aTLinhas[oMark2:nat,10], ' ') },"@!"       	,,,"LEFT" ,050,.F.,.F.,,,,,))
-	oMark2:AddColumn(TCColumn():New(_aCab[11],{|| iif(len(_aTLinhas)>0,_aTLinhas[oMark2:nat,11], ' ') },"@!"        ,,,"RIGHT",050,.F.,.F.,,,,,))
-	oMark2:AddColumn(TCColumn():New(_aCab[12],{|| iif(len(_aTLinhas)>0,_aTLinhas[oMark2:nat,12], ' ') },"@!"       	,,,"LEFT" ,050,.F.,.F.,,,,,))
-	oMark2:AddColumn(TCColumn():New(_aCab[13],{|| iif(len(_aTLinhas)>0,_aTLinhas[oMark2:nat,13], ' ') },"@!"       	,,,"LEFT" ,050,.F.,.F.,,,,,))
-	oMark2:AddColumn(TCColumn():New(_aCab[14],{|| iif(len(_aTLinhas)>0,_aTLinhas[oMark2:nat,14], ' ') },"@!"       	,,,"LEFT" ,050,.F.,.F.,,,,,))
+  	oMark2:AddColumn(TCColumn():New(_aCab[01],{|| LoadBitmap(GetResources(), If(_aTLinhas[oMark2:nat,01],"BR_VERDE","BR_VERMELHO")) },,,,,,.T.,.F.,,,,.F., ) )
+	oMark2:AddColumn(TCColumn():New(_aCab[02],{|| IIf(Len(_aTLinhas)>0,_aTLinhas[oMark2:nat,02], ' ') },"@!"       	,,,"LEFT" ,020,.F.,.F.,,,,,))
+	oMark2:AddColumn(TCColumn():New(_aCab[03],{|| IIf(Len(_aTLinhas)>0,_aTLinhas[oMark2:nat,03], ' ') },"@!"       	,,,"LEFT" ,020,.F.,.F.,,,,,))
+	oMark2:AddColumn(TCColumn():New(_aCab[04],{|| IIf(Len(_aTLinhas)>0,_aTLinhas[oMark2:nat,04], ' ') },"@!"       	,,,"LEFT" ,050,.F.,.F.,,,,,))
+	oMark2:AddColumn(TCColumn():New(_aCab[05],{|| IIf(Len(_aTLinhas)>0,_aTLinhas[oMark2:nat,05], ' ') },"@!"       	,,,"LEFT" ,050,.F.,.F.,,,,,))
+	oMark2:AddColumn(TCColumn():New(_aCab[06],{|| IIf(Len(_aTLinhas)>0,_aTLinhas[oMark2:nat,06], ' ') },"@!"       	,,,"LEFT" ,050,.F.,.F.,,,,,))
+	oMark2:AddColumn(TCColumn():New(_aCab[07],{|| IIf(Len(_aTLinhas)>0,_aTLinhas[oMark2:nat,07], ' ') },"@!"       	,,,"LEFT" ,050,.F.,.F.,,,,,))
+	oMark2:AddColumn(TCColumn():New(_aCab[08],{|| IIf(Len(_aTLinhas)>0,_aTLinhas[oMark2:nat,08], ' ') },"@!"       	,,,"LEFT" ,050,.F.,.F.,,,,,))
+	oMark2:AddColumn(TCColumn():New(_aCab[09],{|| IIf(Len(_aTLinhas)>0,_aTLinhas[oMark2:nat,09], ' ') },"@!"       	,,,"LEFT" ,050,.F.,.F.,,,,,))
+	oMark2:AddColumn(TCColumn():New(_aCab[10],{|| IIf(Len(_aTLinhas)>0,_aTLinhas[oMark2:nat,10], ' ') },"@!"       	,,,"LEFT" ,050,.F.,.F.,,,,,))
+	oMark2:AddColumn(TCColumn():New(_aCab[11],{|| IIf(Len(_aTLinhas)>0,_aTLinhas[oMark2:nat,11], ' ') },"@!"        ,,,"RIGHT",050,.F.,.F.,,,,,))
+	oMark2:AddColumn(TCColumn():New(_aCab[12],{|| IIf(Len(_aTLinhas)>0,_aTLinhas[oMark2:nat,12], ' ') },"@!"       	,,,"LEFT" ,050,.F.,.F.,,,,,))
+	oMark2:AddColumn(TCColumn():New(_aCab[13],{|| IIf(Len(_aTLinhas)>0,_aTLinhas[oMark2:nat,13], ' ') },"@!"       	,,,"LEFT" ,050,.F.,.F.,,,,,))
+	oMark2:AddColumn(TCColumn():New(_aCab[14],{|| IIf(Len(_aTLinhas)>0,_aTLinhas[oMark2:nat,14], ' ') },"@!"       	,,,"LEFT" ,050,.F.,.F.,,,,,))
 	                                     
 	@ 189, 005 BUTTON "ENVIAR"		SIZE 037, 012 OF oDlgMail ACTION ( nOpcA := 1 , oDlgMail:End() ) PIXEL
 	@ 189, 050 BUTTON "CANCELAR"	SIZE 037, 012 OF oDlgMail ACTION ( nOpcA := 2 , oDlgMail:End() ) PIXEL
 
    ACTIVATE MSDIALOG oDlgMail CENTERED
 
-ELSE
+Else
    cGetMens:="Esta é uma mensagem automática"
-ENDIF   
+EndIf   
 
-If nOpcA == 1 .OR. !_lTela
+If nOpcA == 1 .Or. !_lTela
 
-   _cMsgEml:=STRTRAN(_cMsgEml,"#OBS#",cGetMens)
+   _cMsgEml:=StrTran(_cMsgEml,"#OBS#",cGetMens)
    _cGetLista:=""
    _lEnvia:=.F.
-   For _nI := 1 To LEN(_aTLinhas)
-	   oProc:cCaption := ("Lendo dados dos Titulo: "+ALLTRIM(STR(_nI,_nTam))+" de "+ _cTot)
+   For _nI := 1 To Len(_aTLinhas)
+	   oProc:cCaption := ("Lendo dados dos Titulo: "+AllTrim(Str(_nI,_nTam))+" de "+ _cTot)
        ProcessMessages()
-       IF !_aTLinhas[_nI,01]
-          LOOP
-       ENDIF
+       If !_aTLinhas[_nI,01]
+          Loop
+       EndIf
 	   _cGetLista += '    <tr>'
 	   _cGetLista += '      <td class="itens" align="center" width="'+_aSizes[01]+'%">'+ _aTLinhas[_nI][02]+'</td>'
 	   _cGetLista += '      <td class="itens" align="center" width="'+_aSizes[02]+'%">'+ _aTLinhas[_nI][03]+'</td>'
@@ -1783,18 +1651,18 @@ If nOpcA == 1 .OR. !_lTela
 	   _lEnvia:=.T.
    Next
    
-	IF _lEnvia
+	If _lEnvia
 		
-		_cMsgEml:=STRTRAN(_cMsgEml,"#LISTA#",_cGetLista)
+		_cMsgEml:=StrTran(_cMsgEml,"#LISTA#",_cGetLista)
 		
 		// Chama a função para envio do e-mail
 		U_ITENVMAIL( Lower(AllTrim(UsrRetMail(RetCodUsr()))), cGetPara, cGetCc, "", cGetAssun, _cMsgEml, cGetAnx, _aConfig[01], _aConfig[02], _aConfig[03], _aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog )
 		
-		U_ITMSG(UPPER(_cEmlLog)+CHR(13)+CHR(10)+;
+		U_ITMsg(Upper(_cEmlLog)+CHR(13)+CHR(10)+;
 		"E-mail para: "+cGetPara +CHR(13)+CHR(10)+;
 		"Com Copia: "+cGetCc+CHR(13)+CHR(10),"Envio do E-MAIL",,3)
 
-	ENDIF
+	EndIf
    
 EndIf
 
@@ -1805,21 +1673,19 @@ Return .T.
 Programa----------: AOM114Trava()
 Autor-------------: Alex Wallauer 
 Data da Criacao---: 31/07/2019
-===============================================================================================================================
 Descrição---------: Travaa tela para um usuario por filial
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================*/
 Static Function AOM114Trava()
+
 Local _nCnt01  	:= 0
 Local _lLockZP1	:= .F.
 
-DbSelectArea( "ZP1" )
+DBSelectArea( "ZP1" )
 ZP1->( DBSetOrder(2) )
 If ZP1->( MsSeek( xFilial('ZP1') + cFilant + _cMV_ZP1 ) )//TRAVA POR FILIAL
-   DO WHILE !_lLockZP1 .And. (++_nCnt01 < 03)
+   While !_lLockZP1 .And. (++_nCnt01 < 03)
 	  If InTransact()
 	  	_lLockZP1 := RecLock("ZP1")
 	  Else
@@ -1829,8 +1695,8 @@ If ZP1->( MsSeek( xFilial('ZP1') + cFilant + _cMV_ZP1 ) )//TRAVA POR FILIAL
 	     Inkey(1)
 	  EndIf
    EndDo
-ELSE
-   ZP1->(RECLOCK("ZP1",.T.))
+Else
+   ZP1->(RecLock("ZP1",.T.))
    ZP1->ZP1_FILIAL:=xFilial("ZP1")
    ZP1->ZP1_MODULO:="39"
    ZP1->ZP1_GRUPO :="P"
@@ -1844,66 +1710,64 @@ ELSE
 EndIf
 ZP1->( DBSetOrder(1) )
 If _lLockZP1
-   ZP1->ZP1_CONTEU:=UsrFullName(__cUserID)+" - "+DTOC(DATE())+" - "+TIME()
+   ZP1->ZP1_CONTEU:=UsrFullName(__cUserId)+" - "+DToC(Date())+" - "+Time()
 Else
-   U_ITMSG( "O Programa esta sendo utilizado pelo Usuario: "+ALLTRIM(ZP1->ZP1_CONTEU),"Parametro "+_cMV_ZP1+" na ZP1","Aguarde o usuario finalizar",1) 
-   RETURN .F.
+   U_ITMsg( "O Programa esta sendo utilizado pelo Usuario: "+AllTrim(ZP1->ZP1_CONTEU),"Parametro "+_cMV_ZP1+" na ZP1","Aguarde o usuario finalizar",1) 
+   Return .F.
 EndIf
 
-IF MV_PAR01 < _dDtCorte .OR. MV_PAR01 > MV_PAR02
-   U_ITMSG("Intervalo de datas invalido","Parametro ITNDFDTCOR na ZP1","Data inicial deve ser maior ou igual que data de Corte: "+DTOC(_dDtCorte),1) 
-   RETURN .F.
+If MV_PAR01 < _dDtCorte .Or. MV_PAR01 > MV_PAR02
+   U_ITMsg("Intervalo de datas invalido","Parametro ITNDFDTCOR na ZP1","Data inicial deve ser maior ou igual que data de Corte: "+DToC(_dDtCorte),1) 
+   Return .F.
 EndIf
 
-RETURN .T.
+Return .T.
 /*
 ===============================================================================================================================
 Programa----------: AOM114Estorno()
 Autor-------------: Alex Wallauer 
 Data da Criacao---: 31/07/2019
-===============================================================================================================================
 Descrição---------: Estorna Titulo do seguro
-===============================================================================================================================
 Parametros--------: oProc,_cTot
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================*/
 Static Function AOM114Estorno(oProc,_cTot)
+
 Local _aAutoSE2:= {}
 Local _nModAux  := nModulo
 Local _cModAux  := cModulo
 Local _lRet     := .T.  
 					
-AAdd( _aAutoSE2 , { "E2_FILIAL"		, SE2->E2_FILIAL		, nil } )	
-AAdd( _aAutoSE2 , { "E2_PREFIXO"	, SE2->E2_PREFIXO		, nil } )		
-AAdd( _aAutoSE2 , { "E2_NUM"		, SE2->E2_NUM			, nil } )
-AAdd( _aAutoSE2 , { "E2_PARCELA"	, SE2->E2_PARCELA		, nil } )	
-AAdd( _aAutoSE2 , { "E2_TIPO"		, SE2->E2_TIPO			, nil } )
-AAdd( _aAutoSE2 , { "E2_NATUREZ"	, SE2->E2_NATUREZ		, nil } ) 
-AAdd( _aAutoSE2 , { "E2_FORNECE"	, SE2->E2_FORNECE		, nil } )	
-AAdd( _aAutoSE2 , { "E2_LOJA"		, SE2->E2_LOJA			, nil } )	
-AAdd( _aAutoSE2 , { "E2_EMISSAO"	, SE2->E2_EMISSAO		, nil } )
-AAdd( _aAutoSE2 , { "E2_VENCTO"	, SE2->E2_VENCTO		, nil } )
-AAdd( _aAutoSE2 , { "E2_VALOR"	, SE2->E2_VALOR		, nil } )
-AAdd( _aAutoSE2 , { "E2_HIST"		, SE2->E2_HIST 		, Nil } )
-AAdd( _aAutoSE2 , { "E2_DATALIB"	, SE2->E2_DATALIB		, nil } )
-AAdd( _aAutoSE2 , { "E2_USUALIB"	, SE2->E2_USUALIB		, nil } )
+aAdd( _aAutoSE2 , { "E2_FILIAL"		, SE2->E2_FILIAL		, nil } )	
+aAdd( _aAutoSE2 , { "E2_PREFIXO"	, SE2->E2_PREFIXO		, nil } )		
+aAdd( _aAutoSE2 , { "E2_NUM"		, SE2->E2_NUM			, nil } )
+aAdd( _aAutoSE2 , { "E2_PARCELA"	, SE2->E2_PARCELA		, nil } )	
+aAdd( _aAutoSE2 , { "E2_TIPO"		, SE2->E2_TIPO			, nil } )
+aAdd( _aAutoSE2 , { "E2_NATUREZ"	, SE2->E2_NATUREZ		, nil } ) 
+aAdd( _aAutoSE2 , { "E2_FORNECE"	, SE2->E2_FORNECE		, nil } )	
+aAdd( _aAutoSE2 , { "E2_LOJA"		, SE2->E2_LOJA			, nil } )	
+aAdd( _aAutoSE2 , { "E2_EMISSAO"	, SE2->E2_EMISSAO		, nil } )
+aAdd( _aAutoSE2 , { "E2_VENCTO"	, SE2->E2_VENCTO		, nil } )
+aAdd( _aAutoSE2 , { "E2_VALOR"	, SE2->E2_VALOR		, nil } )
+aAdd( _aAutoSE2 , { "E2_HIST"		, SE2->E2_HIST 		, Nil } )
+aAdd( _aAutoSE2 , { "E2_DATALIB"	, SE2->E2_DATALIB		, nil } )
+aAdd( _aAutoSE2 , { "E2_USUALIB"	, SE2->E2_USUALIB		, nil } )
 
 _aItens:={}
-AADD(_aItens,.T.)
-AADD(_aItens,SE2->E2_PREFIXO)
-AADD(_aItens,SE2->E2_NUM)
-AADD(_aItens,SE2->E2_PARCELA)
-AAdd(_aItens,SE2->E2_TIPO) 
-AAdd(_aItens,SE2->E2_NATUREZ) 
-AAdd(_aItens,SE2->E2_FORNECE)	
-AAdd(_aItens,SE2->E2_LOJA   )		 	
-AAdd(_aItens,DTOC(SE2->E2_EMISSAO))
-AAdd(_aItens,DTOC(SE2->E2_VENCTO))
-AAdd(_aItens,ALLTRIM(TRANSFORM(SE2->E2_VALOR,"@E 999,999,999,999.99")))//11
-AAdd(_aItens,SE2->E2_HIST   )
-AAdd(_aItens,DTOC(SE2->E2_DATALIB))
-AAdd(_aItens,SE2->E2_USUALIB)
+aAdd(_aItens,.T.)
+aAdd(_aItens,SE2->E2_PREFIXO)
+aAdd(_aItens,SE2->E2_NUM)
+aAdd(_aItens,SE2->E2_PARCELA)
+aAdd(_aItens,SE2->E2_TIPO) 
+aAdd(_aItens,SE2->E2_NATUREZ) 
+aAdd(_aItens,SE2->E2_FORNECE)	
+aAdd(_aItens,SE2->E2_LOJA   )		 	
+aAdd(_aItens,DToC(SE2->E2_EMISSAO))
+aAdd(_aItens,DToC(SE2->E2_VENCTO))
+aAdd(_aItens,AllTrim(TRANSFORM(SE2->E2_VALOR,"@E 999,999,999,999.99")))//11
+aAdd(_aItens,SE2->E2_HIST   )
+aAdd(_aItens,DToC(SE2->E2_DATALIB))
+aAdd(_aItens,SE2->E2_USUALIB)
    
 nModulo	   := 6
 cModulo	   := "FIN"
@@ -1918,235 +1782,120 @@ If lMsErroAuto
    _cErro:="Não Estornou. Acesse Visualizar Erro: "+CHR(13)+CHR(10)+_cErro
    _aItens[1]:=.F.
 
-ELSE
+Else
 
-  _aTRBF[ TRBF->(RECNO()),01]:=SPACE(2)
+  _aTRBF[ TRBF->(RECNO()),01]:=Space(2)
   _aTRBF[ TRBF->(RECNO()),14]:=""
                  //oProc,_cChave         ,_nRecTRBF      ,_lGrava,_lSoma,lGera
   _cTot:=AOMS114NF(oProc,TRBF->F2_I_NDFSE,TRBF->(RECNO()),.T.    ,.F.   ,.F.  )//LIMPA O CAMPO F2_I_NDFSE DAS NOTAS
   TRBF->OK        :=Space(2)
   TRBF->F2_I_NDFSE:=""//Limpa despois pq causa dos controles do filtro em cima desse campo no estorno
   
-Endif
-AAdd(_aItens,_cTot)//15
-AAdd(_aItens,_cErro)//16
-AAdd(_aItens,TRBF->(RECNO()))//17
+EndIf
+aAdd(_aItens,_cTot)//15
+aAdd(_aItens,_cErro)//16
+aAdd(_aItens,TRBF->(RECNO()))//17
 
-AADD(_aTLinhas,_aItens)
+aAdd(_aTLinhas,_aItens)
 
 nModulo:= _nModAux
 cModulo:= _cModAux
 
-RETURN _lRet
+Return _lRet
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS11 4B()
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 01/06/2021
-===============================================================================================================================
 Descrição---------: Cria tabela temporária e carrega com os dados das notas fiscais selecionadas nos filtros.
-===============================================================================================================================
 Parametros--------: _oProc - objeto da regua de processamento.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC Function AOMS114B(_oProc,QRYNFS)
-Local _aStruct := {}
-//Local _oTRBSF2, _nI , _cQry
-//Local _aDadosPesq := {}, _nTotRegs
-Local _nPerTransp, _nPSeguro
-//Local _nPercSeguro := U_ITGETMV("IT_PERCSEG",0.13)//Padrão é 0.13% criar o parametro tipo numerico
-//Local _cFiltro := ""
-//Local _lGera := .T.  
-//Local _nQtdNfs, _nTotSeguro
+Static Function AOMS114B(_oProc,QRYNFS)
 
-Begin Sequence
+Local _aStruct := {}
+Local _nPerTransp, _nPSeguro
    
 If Select("TRBSF2") = 0
-	//   TRBSF2->(DBCLOSEAREA())
-   //EndIf
-
    _oProc:cCaption := ("Criando arquivo detalhes das notas...")
    ProcessMessages()
 
-   Aadd(_aStruct,{"WK_OK"     ,"C",2,0})
-   Aadd(_aStruct,{"F2_FILIAL" ,"C",2,0})
-   Aadd(_aStruct,{"F2_DOC"    ,"C",Getsx3cache("F2_DOC","X3_TAMANHO"),0})
-   Aadd(_aStruct,{"F2_SERIE"  ,"C",Getsx3cache("F2_DOC","X3_TAMANHO"),0})
-   Aadd(_aStruct,{"F2_EMISSAO","D",8,0})
-   Aadd(_aStruct,{"A2_I_AVERB",Getsx3cache("A2_I_AVERB","X3_TIPO"), Getsx3cache("A2_I_AVERB","X3_TAMANHO"),Getsx3cache("A2_I_AVERB","X3_DECIMAL")})
-   Aadd(_aStruct,{"A2_COD"    ,"C",Getsx3cache("A2_COD","X3_TAMANHO"),0})   
-   Aadd(_aStruct,{"A2_LOJA"   ,"C",Getsx3cache("A2_LOJA","X3_TAMANHO"),0}) 
-   Aadd(_aStruct,{"A2_EST"    ,"C",Getsx3cache("A2_EST","X3_TAMANHO"),0}) 
-   Aadd(_aStruct,{"A2_NREDUZ" ,"C",Getsx3cache("A2_NREDUZ","X3_TAMANHO"),0}) 
-   Aadd(_aStruct,{"F2_I_NDFSE","C", Getsx3cache("F2_I_NDFSE","X3_TAMANHO"),0}) // Nota Fiscal do Seguro
-   Aadd(_aStruct,{"F2_I_FRET" ,"N",Getsx3cache("F2_I_FRET","X3_TAMANHO"),Getsx3cache("F2_I_FRET","X3_DECIMAL")}) 
-   Aadd(_aStruct,{"F2_VALMERC","N",Getsx3cache("F2_VALMERC","X3_TAMANHO"),Getsx3cache("F2_VALMERC","X3_DECIMAL")}) 
-   Aadd(_aStruct,{"F2_VALBRUT","N",Getsx3cache("F2_VALBRUT","X3_TAMANHO"),Getsx3cache("F2_VALBRUT","X3_DECIMAL")}) 
-   Aadd(_aStruct,{"WK_PERSEGU","N",14,8}) 
-   Aadd(_aStruct,{"WK_SEGURO" ,"N",18,6}) 
-   Aadd(_aStruct,{"F2_I_CTRA" ,"C",Getsx3cache("F2_I_CTRA","X3_TAMANHO"),0})   // Transportadora
-   Aadd(_aStruct,{"F2_I_LTRA" ,"C",Getsx3cache("F2_I_LTRA","X3_TAMANHO"),0})   // Loja Transportadora
-   Aadd(_aStruct,{"WK_RECNO"  ,"C",10,0})
-   Aadd(_aStruct,{"WK_RECSF2" ,"C",10,0})
+   aAdd(_aStruct,{"WK_OK"     ,"C",2,0})
+   aAdd(_aStruct,{"F2_FILIAL" ,"C",2,0})
+   aAdd(_aStruct,{"F2_DOC"    ,"C",Getsx3cache("F2_DOC","X3_TAMANHO"),0})
+   aAdd(_aStruct,{"F2_SERIE"  ,"C",Getsx3cache("F2_DOC","X3_TAMANHO"),0})
+   aAdd(_aStruct,{"F2_EMISSAO","D",8,0})
+   aAdd(_aStruct,{"A2_I_AVERB",Getsx3cache("A2_I_AVERB","X3_TIPO"), Getsx3cache("A2_I_AVERB","X3_TAMANHO"),Getsx3cache("A2_I_AVERB","X3_DECIMAL")})
+   aAdd(_aStruct,{"A2_COD"    ,"C",Getsx3cache("A2_COD","X3_TAMANHO"),0})   
+   aAdd(_aStruct,{"A2_LOJA"   ,"C",Getsx3cache("A2_LOJA","X3_TAMANHO"),0}) 
+   aAdd(_aStruct,{"A2_EST"    ,"C",Getsx3cache("A2_EST","X3_TAMANHO"),0}) 
+   aAdd(_aStruct,{"A2_NREDUZ" ,"C",Getsx3cache("A2_NREDUZ","X3_TAMANHO"),0}) 
+   aAdd(_aStruct,{"F2_I_NDFSE","C", Getsx3cache("F2_I_NDFSE","X3_TAMANHO"),0}) // Nota Fiscal do Seguro
+   aAdd(_aStruct,{"F2_I_FRET" ,"N",Getsx3cache("F2_I_FRET","X3_TAMANHO"),Getsx3cache("F2_I_FRET","X3_DECIMAL")}) 
+   aAdd(_aStruct,{"F2_VALMERC","N",Getsx3cache("F2_VALMERC","X3_TAMANHO"),Getsx3cache("F2_VALMERC","X3_DECIMAL")}) 
+   aAdd(_aStruct,{"F2_VALBRUT","N",Getsx3cache("F2_VALBRUT","X3_TAMANHO"),Getsx3cache("F2_VALBRUT","X3_DECIMAL")}) 
+   aAdd(_aStruct,{"WK_PERSEGU","N",14,8}) 
+   aAdd(_aStruct,{"WK_SEGURO" ,"N",18,6}) 
+   aAdd(_aStruct,{"F2_I_CTRA" ,"C",Getsx3cache("F2_I_CTRA","X3_TAMANHO"),0})   // Transportadora
+   aAdd(_aStruct,{"F2_I_LTRA" ,"C",Getsx3cache("F2_I_LTRA","X3_TAMANHO"),0})   // Loja Transportadora
+   aAdd(_aStruct,{"WK_RECNO"  ,"C",10,0})
+   aAdd(_aStruct,{"WK_RECSF2" ,"C",10,0})
 
    _oTRBSF2 := FWTemporaryTable():New( "TRBSF2", _aStruct )
    _oTRBSF2:AddIndex( "1", {"WK_RECNO"} )
    _oTRBSF2:AddIndex( "2", {"WK_RECSF2"} )
 
    _oTRBSF2:Create()
-ENDIF
-   //_oProc:cCaption := ("Iniciando processo de gravação detalhes das notas...")
-   //ProcessMessages()
+EndIf
+_nPerTransp := Posicione('ZGX',1,xFilial("ZGX")+(QRYNFS)->F2_FILIAL+(QRYNFS)->TRANSPORT+(QRYNFS)->LOJATRANSP,'ZGX_PERSEG')
+If ! Empty(_nPerTransp)
+   _nPSeguro := (_nPerTransp/100)
+Else
+   _nPSeguro := _nPercSeguro
+EndIf 
 
-   //If ValType(_nPercSeguro) <> "N"
-   //   _nPercSeguro := 0.13/100
-   //Else
-   //   _nPercSeguro:=(_nPercSeguro/100)
-   //EndIf
+TRBSF2->(DBAPPEND())
+TRBSF2->WK_OK      := _cMarca
+TRBSF2->F2_FILIAL  := (QRYNFS)->F2_FILIAL
+TRBSF2->F2_DOC     := (QRYNFS)->F2_DOC
+TRBSF2->F2_SERIE   := (QRYNFS)->F2_SERIE
+TRBSF2->F2_EMISSAO := (QRYNFS)->F2_EMISSAO
+TRBSF2->A2_I_AVERB := (QRYNFS)->A2_I_AVERB
+TRBSF2->A2_COD     := (QRYNFS)->A2_COD
+TRBSF2->A2_LOJA    := (QRYNFS)->A2_LOJA
+TRBSF2->A2_EST     := (QRYNFS)->A2_EST
+TRBSF2->A2_NREDUZ  := (QRYNFS)->A2_NREDUZ
+TRBSF2->F2_I_NDFSE := (QRYNFS)->F2_I_NDFSE
+TRBSF2->F2_I_FRET  := (QRYNFS)->F2_I_FRET
+TRBSF2->F2_VALMERC := (QRYNFS)->F2_VALMERC
+TRBSF2->F2_VALBRUT := (QRYNFS)->F2_VALBRUT
+TRBSF2->F2_I_CTRA  := (QRYNFS)->TRANSP
+TRBSF2->F2_I_LTRA  := (QRYNFS)->LOJATRANSP
+TRBSF2->WK_SEGURO  := (QRYNFS)->F2_VALBRUT * _nPSeguro
+TRBSF2->WK_PERSEGU := _nPSeguro * 100
+TRBSF2->WK_RECNO   := StrZero( TRBF->(Recno()) ,10) // Grava o Recno da tabela TRBF
+TRBSF2->WK_RECSF2  := StrZero((QRYNFS)->SF2_REC,10) 
 
-   //TRBF->(DbGoTop())
-   //Do While ! TRBF->(Eof())
-   //   Aadd(_aDadosPesq, {TRBF->COD,TRBF->F2_I_NDFSE,TRBF->(Recno())})
-   //   
-   //   TRBF->(DbSkip())
-   //EndDo
-
-   //TRBF->(DbGoTop())
-   //_nTotRegs := Len(_aDadosPesq)
-   //For _nI := 1 To _nTotRegs
-   //    _oProc:cCaption := ("Gravando Detalhes das Notas "+AllTrim(Str(_nI,10)) + "/" + AllTrim(Str(_nTotRegs,10))+"...")
-   //    ProcessMessages()
-
-   //   TRBF->(DbGoTo(_aDadosPesq[_nI,3]))  
-       
-       //_cFiltro:=AOMS114Filtro(.T.,_lGera) 
-       //If Select("QRYNFS") > 0
-	    //   QRYNFS->(DBCLOSEAREA())
-       //EndIf       _cQry:= " SELECT "
-       //_cQry+= " SF2.F2_FILIAL , "
-       //_cQry+= " SF2.F2_DOC    , "
-       //_cQry+= " SF2.F2_SERIE  , "
-       //_cQry+= " SF2.F2_EMISSAO, "
-       //_cQry+= " SA2.A2_I_AVERB, " 
-       //_cQry+= " SA2.A2_COD    , "
-       //_cQry+= " SA2.A2_LOJA   , " 
-       //_cQry+= " SA2.A2_EST    , "
-       //_cQry+= " SA2.A2_NREDUZ , " 
-       //_cQry+= " SF2.F2_I_NDFSE, "
-       //_cQry+= " SF2.F2_I_FRET , "
-       //_cQry+= " SF2.F2_VALMERC, "
-       //_cQry+= " SF2.F2_VALBRUT, " 
-       //_cQry+= " SF2.R_E_C_N_O_ SF2_REC, "
-       //_cQry+= " SF2.F2_I_CTRA AS TRANSPORT, "  // Transportadora
-       //_cQry+= " SF2.F2_I_LTRA AS LOJATRANSP, "  // Loja Transportadora
-       //_cQry+= " SF2.F2_I_GERTS "   
-       //_cQry+= " FROM " + RetSqlName("SF2")+" SF2 "
-       //_cQry+= " JOIN " + RetSqlName("SA2")+" SA2 ON SA2.A2_COD = SF2.F2_I_CTRA	AND SA2.A2_LOJA	 = SF2.F2_I_LTRA "
-       //_cQry+= " WHERE SF2.D_E_L_E_T_ = ' '	"
-       //_cQry+= " AND SA2.D_E_L_E_T_ = ' '	"
-       //_cQry+= " AND SF2.F2_CARGA  <> ' '  "
-       //_cQry+= _cFiltro
-       //_cQry+= " ORDER BY F2_I_NDFSE,SF2.F2_FILIAL,SF2.F2_DOC, SF2.F2_SERIE, SF2.F2_EMISSAO "
-       //MPSysOpenQuery( _cQry , "QRYNFS" )  
-       //TCSetField( "QRYNFS", "F2_EMISSAO", "D", 8, 0)
-       
-       //_nQtdNfs    := 0
-       //_nTotSeguro := 0
-
-       //Do While ! QRYNFS->(Eof())
-          _nPerTransp := Posicione('ZGX',1,xFilial("ZGX")+(QRYNFS)->F2_FILIAL+(QRYNFS)->TRANSPORT+(QRYNFS)->LOJATRANSP,'ZGX_PERSEG')
-          If ! Empty(_nPerTransp)
-             _nPSeguro := (_nPerTransp/100)
-          Else
-             _nPSeguro := _nPercSeguro
-          EndIf 
-
-          TRBSF2->(DBAPPEND())
-          TRBSF2->WK_OK      := _cMarca
-          TRBSF2->F2_FILIAL  := (QRYNFS)->F2_FILIAL
-          TRBSF2->F2_DOC     := (QRYNFS)->F2_DOC
-          TRBSF2->F2_SERIE   := (QRYNFS)->F2_SERIE
-          TRBSF2->F2_EMISSAO := (QRYNFS)->F2_EMISSAO
-          TRBSF2->A2_I_AVERB := (QRYNFS)->A2_I_AVERB
-          TRBSF2->A2_COD     := (QRYNFS)->A2_COD
-          TRBSF2->A2_LOJA    := (QRYNFS)->A2_LOJA
-          TRBSF2->A2_EST     := (QRYNFS)->A2_EST
-          TRBSF2->A2_NREDUZ  := (QRYNFS)->A2_NREDUZ
-          TRBSF2->F2_I_NDFSE := (QRYNFS)->F2_I_NDFSE
-          TRBSF2->F2_I_FRET  := (QRYNFS)->F2_I_FRET
-          TRBSF2->F2_VALMERC := (QRYNFS)->F2_VALMERC
-          TRBSF2->F2_VALBRUT := (QRYNFS)->F2_VALBRUT
-          TRBSF2->F2_I_CTRA  := (QRYNFS)->TRANSP
-          TRBSF2->F2_I_LTRA  := (QRYNFS)->LOJATRANSP
-          TRBSF2->WK_SEGURO  := (QRYNFS)->F2_VALBRUT * _nPSeguro
-          TRBSF2->WK_PERSEGU := _nPSeguro * 100
-          TRBSF2->WK_RECNO   := StrZero( TRBF->(Recno()) ,10) // Grava o Recno da tabela TRBF
-          TRBSF2->WK_RECSF2  := StrZero((QRYNFS)->SF2_REC,10) 
-          //TRBSF2->(MsUnLock())
-   
-          //=========================================================================
-          //If MV_PAR06 == 1 // Emitidos  
-          //   If QRYNFS->F2_I_GERTS <> "N"
-          //      _nQtdNfs    += 1
-          //      _nTotSeguro += (QRYNFS->F2_VALBRUT * _nPSeguro)
-          //   EndIf
-          //EndIf
-          //=========================================================================
-          
-       //   QRYNFS->(DbSkip())
-       //EndDo
-       //If MV_PAR06 == 1 // Emitidos
-       //   TRBF->(RecLock("TRBF",.F.))
-       //   TRBF->QTDENF := _nQtdNfs
-       //   TRBF->SEGURO := _nTotSeguro 
-       //   TRBF->(MsUnLock())
-       //EndIf
-
-   //Next
-
-   //_nTotRegs := Len(_aTRBF)  
-   //For _nI := 1 To _nTotRegs
-   //    _oProc:cCaption := ("Atualizando Dados Tela Principal... "+AllTrim(Str(_nI,10)) + "/" + AllTrim(Str(_nTotRegs,10))+"...")
-   //    ProcessMessages()
-   //    TRBF->(DbGoTo(_aTRBF[_nI,15]))
-   //    If _aTRBF[_nI,10] <> TRBF->QTDENF 
-   //       _aTRBF[_nI,10] := TRBF->QTDENF 
-   //       _aTRBF[_nI,13] := TRBF->SEGURO
-   //    EndIf  
-   //Next  
-   
-End Sequence
-
-//If Select("QRYNFS") > 0
-//	QRYNFS->(DBCLOSEAREA())
-//EndIf
-
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS114R
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 02/06/2021
-===============================================================================================================================
 Descrição---------: Permite selecionar as notas fiscais que serão utilizadas na geração dos titulos de seguro.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS114R()
-//Local _oPanelSF2		:= Nil
-//Local _oDlgNfs			:= Nil
+
 Local _nHeight		:= 0
 Local _nWidth		:= 0
 Local _aSize			:= {}
 Local _aBotoes		:= {}
-
 Local _nOpca  := 0
 Local _cChavePesq 
 
@@ -2159,17 +1908,15 @@ Private _oPanelSF2
 Private _oDlgNfs
 
 Begin Sequence 
-   //=================================================================
    // Carrega os dados das notas fiscais no array _aNotas.
-   //=================================================================
    _nQtdNfs := 0
    _nValSegNf := 0
 
-   TRBSF2->(DbSetOrder(1))
+   TRBSF2->(DBSetOrder(1))
    _cChavePesq := StrZero(_aTRBF[oMark:NAT,15],10)
    TRBSF2->(MsSeek(_cChavePesq))
-   Do While ! TRBSF2->(Eof()) .And. _cChavePesq == TRBSF2->WK_RECNO
-      Aadd(_aNotas,{TRBSF2->WK_OK,;                                // 1
+   While ! TRBSF2->(Eof()) .And. _cChavePesq == TRBSF2->WK_RECNO
+      aAdd(_aNotas,{TRBSF2->WK_OK,;                                // 1
                     TRBSF2->F2_FILIAL,;                            // 2
                     TRBSF2->F2_DOC,;                               // 3
                     TRBSF2->F2_SERIE,;                             // 4
@@ -2194,19 +1941,15 @@ Begin Sequence
          _nQtdNfs += 1
          _nValSegNf += TRBSF2->WK_SEGURO
       EndIf 
-      TRBSF2->(DbSkip())
+      TRBSF2->(DBSkip())
    EndDo 
    
    _nValSegNf := Round(_nValSegNf,2)
 
-   //=================================================================
    // Botoes da tela.
-   //=================================================================
-   Aadd( _aBotoes , { "" , {|| U_AOMS114M("T") }   , "" , "Marca/Desmarca Todos"} )
+   aAdd( _aBotoes , { "" , {|| U_AOMS114M("T") }   , "" , "Marca/Desmarca Todos"} )
 
-   //=================================================================
    // Faz o calculo automatico de dimensoes da tela do computador
-   //=================================================================
    _aSize := MSADVSIZE() 
 
    _nOpca:= 2
@@ -2222,10 +1965,10 @@ Begin Sequence
    @ 003,_nCol BUTTON "Marca/Desmarca Todos" SIZE _nSize, 015 PIXEL OF _oPanelSF2 ACTION (U_AOMS114M("T"))
    _nCol+=_nPula
 
-   _oQtdNfs := TSay():New(05,_nCol,{||'Qtde Notas: '+ALLTRIM(TRANSFORM(_nQtdNfs,"@E 99,999,999,999"))},_oPanelSF2,,oFont,,,,.T.,CLR_BLACK,CLR_WHITE,200,20)//450
+   _oQtdNfs := TSay():New(05,_nCol,{||'Qtde Notas: '+AllTrim(TRANSFORM(_nQtdNfs,"@E 99,999,999,999"))},_oPanelSF2,,oFont,,,,.T.,CLR_BLACK,CLR_WHITE,200,20)//450
 	_nCol+=_nPula
 
-	_oValorSeg := TSay():New(05,_nCol,{||'Valor seguro: '+ALLTRIM(TRANSFORM(_nValSegNf,"@E 999,999,999.99"))},_oPanelSF2,,oFont,,,,.T.,CLR_BLACK,CLR_WHITE,200,20)//550
+	_oValorSeg := TSay():New(05,_nCol,{||'Valor seguro: '+AllTrim(TRANSFORM(_nValSegNf,"@E 999,999,999.99"))},_oPanelSF2,,oFont,,,,.T.,CLR_BLACK,CLR_WHITE,200,20)//550
 	
 	If FlatMode()
 		aCoors	:= GetScreenRes()
@@ -2234,7 +1977,7 @@ Begin Sequence
 	Else
 		_nHeight	:= 143
 		_nWidth	:= 315
-	Endif
+	EndIf
 
   //TCBrowse():New( [ nRow ], [ nCol ], [ _nWidth ], [ _nHeight ], [ bLine ], [ aHeaders ], [ aColSizes ], [ oWnd ], [ cField ], [ uValue1 ], [ uValue2 ], [ bChange ], [ bLDblClick ]  , [ bRClick ], [ oFont ], [ oCursor ], [ nClrFore ], [ nClrBack ], [ cMsg ], [ uParam20 ], [ cAlias ], [ lPixel ], [ bWhen ], [ uParam24 ], [ bValid ], [ lHScroll ], [ lVScroll ] )
 	_oMark := TCBrowse():New(35,  01   , 35+_nHeight, 01+_nWidth  ,          ,             ,              , _oDlgNfs   ,           ,            ,            ,            ,                 ,            ,          ,            ,             ,             ,         ,    .F.      ,           ,   .T.     ,          ,    .F.      ,           ,             ,              )
@@ -2242,24 +1985,23 @@ Begin Sequence
 	_oMark:SetArray(_aNotas)
 	_oMark:bLDblClick   := {|| U_AOMS114M("P")}
 	
-	_oMark:AddColumn(TCColumn():New(" "       	   	 ,{|| LoadBitmap(GetResources(), IF(LEN(_aNotas)>0,IF(_aNotas[_oMark:nat,01]==_cMarca,"LBOK","LBNO"),"LBNO") ) },,,,,,.T.,.F.,,,,.F., ) )
-  	_oMark:AddColumn(TCColumn():New("Filial"            ,{|| if(len(_aNotas)>0,_aNotas[_oMark:nat,02], ' ') },"@!"       			  ,,,"LEFT" ,010,.F.,.F.,,,,,))
-	_oMark:AddColumn(TCColumn():New("Nota Fiscal"		 ,{|| if(len(_aNotas)>0,_aNotas[_oMark:nat,03], ' ') },"@!"       			  ,,,"LEFT" ,20,.F.,.F.,,,,,))
-	_oMark:AddColumn(TCColumn():New("Serie"		       ,{|| if(len(_aNotas)>0,_aNotas[_oMark:nat,04], ' ') },"@!"       			  ,,,"LEFT" ,6,.F.,.F.,,,,,))
-	_oMark:AddColumn(TCColumn():New("Emissão"		       ,{|| if(len(_aNotas)>0,_aNotas[_oMark:nat,05], ' ') },"@D"       			  ,,,"CENTER" ,10,.F.,.F.,,,,,))
-   _oMark:AddColumn(TCColumn():New("Averbação"		    ,{|| if(len(_aNotas)>0,_aNotas[_oMark:nat,06], ' ') },"@!"       			  ,,,"LEFT" ,10,.F.,.F.,,,,,))
-   _oMark:AddColumn(TCColumn():New("Fornecedor"		    ,{|| if(len(_aNotas)>0,_aNotas[_oMark:nat,07], ' ') },"@!"       			  ,,,"LEFT" ,10,.F.,.F.,,,,,))
-   _oMark:AddColumn(TCColumn():New("Loja Forn."		    ,{|| if(len(_aNotas)>0,_aNotas[_oMark:nat,08], ' ') },"@!"       			  ,,,"LEFT" ,10,.F.,.F.,,,,,))
-	_oMark:AddColumn(TCColumn():New("Nome"		          ,{|| if(len(_aNotas)>0,_aNotas[_oMark:nat,09], ' ') },"@!"       			  ,,,"LEFT" ,20,.F.,.F.,,,,,))
-   _oMark:AddColumn(TCColumn():New("Estado"		       ,{|| if(len(_aNotas)>0,_aNotas[_oMark:nat,10], ' ') },"@!"       			  ,,,"LEFT" ,6,.F.,.F.,,,,,))
-   _oMark:AddColumn(TCColumn():New("Nota Fiscal Seguro",{|| if(len(_aNotas)>0,_aNotas[_oMark:nat,11], ' ') },"@!"       			  ,,,"LEFT" ,30,.F.,.F.,,,,,))
-   _oMark:AddColumn(TCColumn():New("Valor Mercadoria"	 ,{|| if(len(_aNotas)>0,_aNotas[_oMark:nat,12], ' ') },"@E 999,999,999,999.99",,,"RIGHT",050,.F.,.F.,,,,,))
-   _oMark:AddColumn(TCColumn():New("Frete" 				 ,{|| if(len(_aNotas)>0,_aNotas[_oMark:nat,13], ' ') },"@E 999,999,999,999.99",,,"RIGHT",050,.F.,.F.,,,,,))
-	_oMark:AddColumn(TCColumn():New("Valor Bruto" 		 ,{|| if(len(_aNotas)>0,_aNotas[_oMark:nat,14], ' ') },"@E 999,999,999,999.99",,,"RIGHT",050,.F.,.F.,,,,,))
-   _oMark:AddColumn(TCColumn():New("% Seguro" 			 ,{|| if(len(_aNotas)>0,_aNotas[_oMark:nat,17], ' ') },"@E 99,999,999,999.999",,,"RIGHT",050,.F.,.F.,,,,,))
-	_oMark:AddColumn(TCColumn():New("Seguro" 			    ,{|| if(len(_aNotas)>0,_aNotas[_oMark:nat,18], ' ') },"@E 999,999,999,999.99",,,"RIGHT",050,.F.,.F.,,,,,))
-	//_oMark:AddColumn(TCColumn():New("Recno"      		 ,{|| if(len(_aNotas)>0,_aNotas[_oMark:nat,19], ' ') },"@E 99999999999"       ,,,"CENTER",050,.F.,.F.,,,,,))
-	
+	_oMark:AddColumn(TCColumn():New(" "       	   	 ,{|| LoadBitmap(GetResources(), If(Len(_aNotas)>0,If(_aNotas[_oMark:nat,01]==_cMarca,"LBOK","LBNO"),"LBNO") ) },,,,,,.T.,.F.,,,,.F., ) )
+  	_oMark:AddColumn(TCColumn():New("Filial"            ,{|| If(Len(_aNotas)>0,_aNotas[_oMark:nat,02], ' ') },"@!"       			  ,,,"LEFT" ,010,.F.,.F.,,,,,))
+	_oMark:AddColumn(TCColumn():New("Nota Fiscal"		 ,{|| If(Len(_aNotas)>0,_aNotas[_oMark:nat,03], ' ') },"@!"       			  ,,,"LEFT" ,20,.F.,.F.,,,,,))
+	_oMark:AddColumn(TCColumn():New("Serie"		       ,{|| If(Len(_aNotas)>0,_aNotas[_oMark:nat,04], ' ') },"@!"       			  ,,,"LEFT" ,6,.F.,.F.,,,,,))
+	_oMark:AddColumn(TCColumn():New("Emissão"		       ,{|| If(Len(_aNotas)>0,_aNotas[_oMark:nat,05], ' ') },"@D"       			  ,,,"CENTER" ,10,.F.,.F.,,,,,))
+   _oMark:AddColumn(TCColumn():New("Averbação"		    ,{|| If(Len(_aNotas)>0,_aNotas[_oMark:nat,06], ' ') },"@!"       			  ,,,"LEFT" ,10,.F.,.F.,,,,,))
+   _oMark:AddColumn(TCColumn():New("Fornecedor"		    ,{|| If(Len(_aNotas)>0,_aNotas[_oMark:nat,07], ' ') },"@!"       			  ,,,"LEFT" ,10,.F.,.F.,,,,,))
+   _oMark:AddColumn(TCColumn():New("Loja Forn."		    ,{|| If(Len(_aNotas)>0,_aNotas[_oMark:nat,08], ' ') },"@!"       			  ,,,"LEFT" ,10,.F.,.F.,,,,,))
+	_oMark:AddColumn(TCColumn():New("Nome"		          ,{|| If(Len(_aNotas)>0,_aNotas[_oMark:nat,09], ' ') },"@!"       			  ,,,"LEFT" ,20,.F.,.F.,,,,,))
+   _oMark:AddColumn(TCColumn():New("Estado"		       ,{|| If(Len(_aNotas)>0,_aNotas[_oMark:nat,10], ' ') },"@!"       			  ,,,"LEFT" ,6,.F.,.F.,,,,,))
+   _oMark:AddColumn(TCColumn():New("Nota Fiscal Seguro",{|| If(Len(_aNotas)>0,_aNotas[_oMark:nat,11], ' ') },"@!"       			  ,,,"LEFT" ,30,.F.,.F.,,,,,))
+   _oMark:AddColumn(TCColumn():New("Valor Mercadoria"	 ,{|| If(Len(_aNotas)>0,_aNotas[_oMark:nat,12], ' ') },"@E 999,999,999,999.99",,,"RIGHT",050,.F.,.F.,,,,,))
+   _oMark:AddColumn(TCColumn():New("Frete" 				 ,{|| If(Len(_aNotas)>0,_aNotas[_oMark:nat,13], ' ') },"@E 999,999,999,999.99",,,"RIGHT",050,.F.,.F.,,,,,))
+	_oMark:AddColumn(TCColumn():New("Valor Bruto" 		 ,{|| If(Len(_aNotas)>0,_aNotas[_oMark:nat,14], ' ') },"@E 999,999,999,999.99",,,"RIGHT",050,.F.,.F.,,,,,))
+   _oMark:AddColumn(TCColumn():New("% Seguro" 			 ,{|| If(Len(_aNotas)>0,_aNotas[_oMark:nat,17], ' ') },"@E 99,999,999,999.999",,,"RIGHT",050,.F.,.F.,,,,,))
+	_oMark:AddColumn(TCColumn():New("Seguro" 			    ,{|| If(Len(_aNotas)>0,_aNotas[_oMark:nat,18], ' ') },"@E 999,999,999,999.99",,,"RIGHT",050,.F.,.F.,,,,,))
+		
 	_oDlgNfs:lMaximized:=.T.
 
    Activate MSDIALOG _oDlgNfs ON INIT ( EnchoiceBar(_oDlgNfs,{|| If(U_AOMS114V(),(_nOpca:= 1,_oDlgNfs:End()),_nOpca:= 2) },;
@@ -2270,11 +2012,11 @@ Begin Sequence
     If _nOpca = 1
        nValTit-=TRBF->SEGURO//Tira o valor ANTERIOR
        
-       TRBF->(DbGoTo(_aTRBF[oMark:NAT,15]))
+       TRBF->(DBGoTo(_aTRBF[oMark:NAT,15]))
        TRBF->(RecLock("TRBF",.F.))
        TRBF->QTDENF := _nQtdNfs
        TRBF->SEGURO := _nValSegNf
-       TRBF->(MsUnLock())
+       TRBF->(MSUnLock())
        
        nValTit+=TRBF->SEGURO//Coloca o valor ATUAL
 
@@ -2284,114 +2026,103 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS114R
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 02/06/2021
-===============================================================================================================================
 Descrição---------: Marca e desmar itens. Posicionado ou todos.
-===============================================================================================================================
 Parametros--------: _cTipoMarca = "P" = Marca e desmarca apenas o Item posicionado.
                                   "T" = Marca e desmarca todos os itens.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS114M(_cTipoMarca)
+
 Local _nI 
 Local _lMarcar := .T.
 Local _cMarkSF2 
 Local _nItens, _nTotSegur
 
-Begin Sequence 
-   //=================================================
-   // Marca/desmarca apenas o item posicionado.
-   //=================================================
-   If _cTipoMarca == "P"
-      If Empty(_aNotas[_oMark:nat,01])
-         TRBSF2->(DbGoTo(_aNotas[_oMark:nat,20]))
-         TRBSF2->(RecLock("TRBSF2",.F.))
-         TRBSF2->WK_OK :=_cMarca                     
-         TRBSF2->(MsUnLock())
-         _aNotas[_oMark:nat,01] := _cMarca
-		Else
-         TRBSF2->(DbGoTo(_aNotas[_oMark:nat,20]))
-         TRBSF2->(RecLock("TRBSF2",.F.))
-         TRBSF2->WK_OK := Space(2)                     
-         TRBSF2->(MsUnLock())
-         _aNotas[_oMark:nat,01] := Space(2)
-      EndIf 
+// Marca/desmarca apenas o item posicionado.
+If _cTipoMarca == "P"
+   If Empty(_aNotas[_oMark:nat,01])
+      TRBSF2->(DBGoTo(_aNotas[_oMark:nat,20]))
+      TRBSF2->(RecLock("TRBSF2",.F.))
+      TRBSF2->WK_OK :=_cMarca                     
+      TRBSF2->(MSUnLock())
+      _aNotas[_oMark:nat,01] := _cMarca
    Else
-      //=================================================
-      // Marca/desmarca todos os itens
-      //=================================================
-      For _nI := 1 To Len(_aNotas)
-          If ! Empty(_aNotas[_nI,01])  
-             _lMarcar := .F.
-          EndIf 
-      Next 
-      
-      If _lMarcar
-         _cMarkSF2 := _cMarca 
-      Else  
-         _cMarkSF2 := Space(2)
-      EndIf 
-
-      For _nI := 1 To Len(_aNotas)
-          TRBSF2->(DbGoTo(_aNotas[_nI,20]))
-          TRBSF2->(RecLock("TRBSF2",.F.))
-          TRBSF2->WK_OK := _cMarkSF2
-          TRBSF2->(MsUnLock())
-          _aNotas[_nI,01] := _cMarkSF2
-      Next 
-
+      TRBSF2->(DBGoTo(_aNotas[_oMark:nat,20]))
+      TRBSF2->(RecLock("TRBSF2",.F.))
+      TRBSF2->WK_OK := Space(2)                     
+      TRBSF2->(MSUnLock())
+      _aNotas[_oMark:nat,01] := Space(2)
    EndIf 
+Else
+   // Marca/desmarca todos os itens
+   For _nI := 1 To Len(_aNotas)
+         If ! Empty(_aNotas[_nI,01])  
+            _lMarcar := .F.
+         EndIf 
+   Next 
    
-   _nItens := 0
-   _nTotSegur := 0
+   If _lMarcar
+      _cMarkSF2 := _cMarca 
+   Else
+      _cMarkSF2 := Space(2)
+   EndIf 
 
    For _nI := 1 To Len(_aNotas)
-       If ! Empty(_aNotas[_nI,01])
-          _nItens += 1
-          _nTotSegur += _aNotas[_nI,18] 
-       EndIf 
+         TRBSF2->(DBGoTo(_aNotas[_nI,20]))
+         TRBSF2->(RecLock("TRBSF2",.F.))
+         TRBSF2->WK_OK := _cMarkSF2
+         TRBSF2->(MSUnLock())
+         _aNotas[_nI,01] := _cMarkSF2
    Next 
 
-   _nQtdNfs := _nItens 
-   _oQtdNfs:SetText('Qtde Notas: '+ALLTRIM(TRANSFORM(_nQtdNfs,"@E 99,999,999,999")))
-   _oQtdNfs:CtrlRefresh()
-   
-   _nValSegNf := _nTotSegur
-   _oValorSeg:SetText('Valor seguro: '+ALLTRIM(TRANSFORM(_nValSegNf,"@E 999,999,999.99")))
-   _oValorSeg:CtrlRefresh()
+EndIf 
 
-End Sequence 
+_nItens := 0
+_nTotSegur := 0
 
-Return Nil 
+For _nI := 1 To Len(_aNotas)
+      If ! Empty(_aNotas[_nI,01])
+         _nItens += 1
+         _nTotSegur += _aNotas[_nI,18] 
+      EndIf 
+Next 
+
+_nQtdNfs := _nItens 
+_oQtdNfs:SetText('Qtde Notas: '+AllTrim(TRANSFORM(_nQtdNfs,"@E 99,999,999,999")))
+_oQtdNfs:CtrlRefresh()
+
+_nValSegNf := _nTotSegur
+_oValorSeg:SetText('Valor seguro: '+AllTrim(TRANSFORM(_nValSegNf,"@E 999,999,999.99")))
+_oValorSeg:CtrlRefresh()
+
+Return 
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS114V
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 02/06/2021
-===============================================================================================================================
 Descrição---------: Valida a Gravação do valor das notas selecionadas para geração de titulos de seguros.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: _lRet = .T. validação correta.
                             .F. Problema encontrados na validação.
 ===============================================================================================================================
 */
 User Function AOMS114V()
+
 Local _lRet := .T.
 Local _nI, _lTemNf 
 
 Begin Sequence
-    If ! U_ITMSG("Confirma a atualização dos valores de titulos de seguros a serem gerados, com base no valor do seguro das notas fiscais selecionadas?",;
+    If ! U_ITMsg("Confirma a atualização dos valores de titulos de seguros a serem gerados, com base no valor do seguro das notas fiscais selecionadas?",;
                "Atenção", , ,2, 2)
        _lRet := .F.
        Break
@@ -2406,16 +2137,10 @@ Begin Sequence
     Next 
 
     If ! _lTemNf  
-       U_ITMSG("Nenhuma nota fiscal foi selecionada.","Atenção","Selecione pelo menos uma nota fiscal, ou desmarque a geração de tiluos para esta transportadora.",1) 
+       U_ITMsg("Nenhuma nota fiscal foi selecionada.","Atenção","Selecione pelo menos uma nota fiscal, ou desmarque a geração de tiluos para esta transportadora.",1) 
        _lRet := .F.
        Break
     EndIf
-
-    //If _aTRBF[oMark:NAT,10] == _nQtdNfs // Tirei pq pode ser desmacado um e marcado outro
-    //   U_ITMSG("Nenhuma alteração foi realizada. O numero de notas fiscais selecionadas continua o mesmo.","Atenção",,1) 
-    //   _lRet := .F.
-    //EndIf 
-
 End Sequence
 
 Return _lRet 

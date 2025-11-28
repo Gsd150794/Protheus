@@ -1,47 +1,27 @@
-/*  
+/*
 ===============================================================================================================================
-                          ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-     Autor    |   Data   |                                             Motivo                                          
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Alex Walaluer| 19/07/18 | Chamado 25558. Correção do ERROLOG (variable does not exist C5_I_FILFT U_AOMS015R() line: 1180.
- Josué Danich | 09/01/19 | Chamado 27607. Inclusão de legenda de simulador de preços. 
- Lucas Borges | 15/10/19 | Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
- Jerry        | 20/05/20 | Chamado 32883. Ajuste na validação Preço Máximo.
- Julio Paz    | 18/06/20 | Chamado 33284. Exibir novos dados e Remodelar tela de Avaliação Pedidos Bloqueados Preço Portal
- Jerry        | 03/08/20 | Chamado 33740. Novos campos na Tela e no formato de mostrar Preço.
- Jerry        | 04/11/20 | Chamado 34582. Validar novo campo de Tabela de Preço. 
- Igor Melgaço | 24/01/22 | Chamado 37416. Ajuste para compartilhamento das tabelas DA0 e DA1.
- Alex Wallauer| 03/02/22 | Chamado 39057. Correção/alteração do tratamento da função BLQPRC().
- Jerry        | 13/05/22 | Chamado 40105. Ajuste para demonstrar Preço por Faixa.
- Julio Paz    | 14/11/22 | Chamado 41481. Ajustar a exibição de dados da rotina. Exibir Razão social e Nome reduzido. 
- Alex Wallauer| 04/01/24 | Chamado 45999. Vanderlei. variable does not exist _NPRCMIN on U_AOMS015R(AOMS015.PRW).
-==============================================================================================================================================================
-Analista - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
-==============================================================================================================================================================
-Alex     - Alex Wallauer - 20/02/25 - 25/02/25 - 49966   - CORREÇÃO DE ERROR.LOG: variable does not exist _NPESOFAIXA on U_AOMS015R(AOMS015.PRW) 04/01/2024 17:41:14 line : 1398
-Alex     - Julio Paz     - 25/02/25 - 25/02/25 - 49966   - Disponibilizar o botão Visualizar apenas para Pedidos de Vendas/Portal com status bloqueados.
-==============================================================================================================================================================
+Alex Wallauer |25/02/2025| Chamado 49966. CORREÇÃO DE ERROR.LOG: variable does not exist _NPESOFAIXA on U_AOMS015R(AOMS015.PRW) 04/01/2024 17:41:14 Line : 1398
+Julio Paz     |25/02/2025| Chamado 49966. Disponibilizar o botão Visualizar apenas para Pedidos de Vendas/Portal com status bloqueados.
+Lucas Borges  |02/10/2025| Chamado 51526. Modificada forma para recuperar a matrícula do usuário.
+===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "Protheus.ch"
-#INCLUDE "RWMAKE.CH"
-#INCLUDE "TopConn.ch"
-#INCLUDE "vKey.ch"
+#Include "TOTVS.ch"
+#Include "RWMAKE.CH"
+#Include "TopConn.ch"
+#Include "vKey.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS015
 Autor-------------: Erich Buttner
 Data da Criacao---: 18/03/2013
-===============================================================================================================================
 Descrição---------: Liberação de Pedidos de Venda e Pedido Portal Bloqueados por preço de venda - Chamado 2721 
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -50,13 +30,13 @@ User Function AOMS015()
 Private _cPerg    := "AOMS015"
 Private aSize     := {}
 Private _lVersao12:=(AllTrim( cVersao ) = "12")
-Private _nAltCombo:=IF(_lVersao12,10,20)
-Private _nLB      :=IF(_lVersao12,20,05)
-Private _nMSS     :=IF(_lVersao12,24,10)
+Private _nAltCombo:=If(_lVersao12,10,20)
+Private _nLB      :=If(_lVersao12,20,05)
+Private _nMSS     :=If(_lVersao12,24,10)
 
 AOMS015TT() //Função utilizada para mostrar as configurações de tela do usuário
 
-If pergunte(_cPerg,.T.)
+If Pergunte(_cPerg,.T.)
 
 	If MV_PAR01 == 1
 	
@@ -77,11 +57,8 @@ Return
 Programa----------: AOMS015ZW
 Autor-------------: Erich Buttner
 Data da Criacao---: 18/03/2013
-===============================================================================================================================
 Descrição---------: Tela Liberação de Preço Pedido Portal	
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -97,19 +74,19 @@ Private lInverte 		:= .T.
 Private cmarca   		:= GetMark()
 Private oMark
 Private cPesq   		:= Space(50)
-Private lCheck1 		:= .t.
-Private lCheck2 		:= .t.
-Private lCheck3 		:= .t.
+Private lCheck1 		:= .T.
+Private lCheck2 		:= .T.
+Private lCheck3 		:= .T.
 Private cCombo		:= " "
 Private cOrdem		:= " "
 Private aOrdem		:= {"GERENTE","COORDENADOR","REPRESENTANTE","PEDIDO","CLIENTE"}
-Private cPESQUISA		:= SPACE(200), oPesquisa
+Private cPESQUISA		:= Space(200), oPesquisa
 Private _aMarcados	:={}
 Private TRB 			:= CriaTrab(Nil,.F.)
 Public lClos 			:= .F.
 Public cChama := "1"
 
-Do while cChama == "1"
+While cChama == "1"
 
 	Processa( {|| AOMS015PP() } , 'Aguarde...' , "Recarregando Tabela..." ) //Prepara dados para a tela
 	cChama := "2"//Para sair no X
@@ -136,28 +113,28 @@ Do while cChama == "1"
 	@ aSize[4]-_nLB,385 - _nPosCol Button "Avaliar"	Size 40,13	Action AOMS0159(1)								Object oBtnRet  //Função que chama autorização ou bloqueio do pedido
 	@ aSize[4]-_nLB,430 - _nPosCol Button "Sair"		Size 40,13	Action AOMS0158()								Object oBtnInv  //Funcao que fecha a rotina
 
-	dbSelectArea("TMP")
-	dbGoTop()
+	DBSelectArea("TMP")
+	DBGoTop()
 
-	While !TMP->(EOF())
+	While !TMP->(Eof())
 
-		RecLock("TMP",.f.)
+		RecLock("TMP",.F.)
 		TMP->OK    := ThisMark()
-		TMP->(MsUnlock())
-		TMP->(dbSkip())
+		TMP->(MSUnLock())
+		TMP->(DBSkip())
 
 	End
 
-	dbGoTop()
+	DBGoTop()
 
 	oMark:oBrowse:Refresh(.T.)
 
 	ACTIVATE DIALOG oDlgLib CENTERED
 
-	DBSELECTAREA("TMP")
-	TMP->(Dbclosearea())
+	DBSelectArea("TMP")
+	TMP->(DBCloseArea())
 
-Enddo
+EndDo
 
 Return
 
@@ -167,31 +144,28 @@ Return
 Programa----------: AOMS015O
 Autor-------------: Erich Buttner
 Data da Criacao---: 18/03/2013
-===============================================================================================================================
 Descrição---------: Funcao que avalia os Pedido de Venda para classifica-lo corretamente na legenda.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS015O()
 
 Local _cRet
-Local _aArea  := GetArea()
+Local _aArea  := FWGetArea()
 Local _cBloq	 := 0
 
-If TMP->( EOF() )
+If TMP->( Eof() )
 
 	Return("")
 
-Endif
+EndIf
 
-DbSelectArea("SZW")
-SZW->( DbSetorder(1) )
-szw->( DbSeek(TMP->FILIAL+TMP->NUMPED) )
+DBSelectArea("SZW")
+SZW->( DBSetOrder(1) )
+szw->( DBSeek(TMP->FILIAL+TMP->NUMPED) )
 
-While SZW->(!EOF()) .And. SZW->ZW_IDPED == TMP->NUMPED
+While SZW->(!Eof()) .And. SZW->ZW_IDPED == TMP->NUMPED
 
 	If SZW->ZW_BLOPRC == 'B'
 
@@ -199,7 +173,7 @@ While SZW->(!EOF()) .And. SZW->ZW_IDPED == TMP->NUMPED
 
 			_cBloq:= 4
 
-		ElseIF SZW->ZW_ENVWF == 'C'
+		ElseIf SZW->ZW_ENVWF == 'C'
 
 			_cBloq:= 5
 
@@ -219,7 +193,7 @@ While SZW->(!EOF()) .And. SZW->ZW_IDPED == TMP->NUMPED
 		Exit
 	EndIf
 
-	SZW->( DbSkip() )
+	SZW->( DBSkip() )
 
 EndDo
 
@@ -245,7 +219,7 @@ ElseIf _cBloq == 5
 
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return(_cRet)
 
@@ -254,17 +228,14 @@ Return(_cRet)
 Programa----------: AOMS015H
 Autor-------------: Erich Buttner
 Data da Criacao---: 18/03/2013
-===============================================================================================================================
 Descrição---------: Funcao que Visualiza Itens do(s) Pedido(s) de Venda 	
-===============================================================================================================================
 Parametros--------: cFilAux , cPedAux
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS015H( cFilAux , cPedAux )
 
-Local _aArea		:= GetArea()									// Salva a area atual
+Local _aArea		:= FWGetArea()									// Salva a area atual
 Local _oDlgHist													// Tela do Historico
 
 Local S
@@ -283,14 +254,14 @@ aLigacoes	:= {}
 aCC			:= {}
 LCOORD		:= .F.
 
-DbSelectArea("SZW")
-SZW->( DBSETORDER(1) )
-SZW->( DBSEEK( cFilAux + cPedAux ) )
+DBSelectArea("SZW")
+SZW->( DBSetOrder(1) )
+SZW->( DBSeek( cFilAux + cPedAux ) )
 
-While SZW->( !Eof() ) .AND. SZW->(ZW_FILIAL+ZW_IDPED) == cFilAux + cPedAux
+While SZW->( !Eof() ) .And. SZW->(ZW_FILIAL+ZW_IDPED) == cFilAux + cPedAux
 	
-	AAdd(aCC, {	SZW->ZW_BLOPRC,;
-					IF(EMPTY(SZW->ZW_FILPRO),SZW->ZW_FILIAL,SZW->ZW_FILPRO),;
+	aAdd(aCC, {	SZW->ZW_BLOPRC,;
+					If(Empty(SZW->ZW_FILPRO),SZW->ZW_FILIAL,SZW->ZW_FILPRO),;
 					SZW->ZW_FILIAL,;
 					SZW->ZW_IDPED,;
 					SZW->ZW_ITEM,;
@@ -308,11 +279,11 @@ While SZW->( !Eof() ) .AND. SZW->(ZW_FILIAL+ZW_IDPED) == cFilAux + cPedAux
 					SZW->ZW_TES,;
 					SZW->ZW_CF})
 	
-	SZW->(DbSkip())
+	SZW->(DBSkip())
 	
 End
 
-aLigacoes := ASort(aCC,,,{|x,y|x[2]<y[2]})
+aLigacoes := aSort(aCC,,,{|x,y|x[2]<y[2]})
 
 If Len(aLigacoes) <= 0
 
@@ -320,15 +291,15 @@ If Len(aLigacoes) <= 0
 	CursorArrow()
 	Return(.F.)
 	
-Endif
+EndIf
 
-SZW->( DBSEEK( cFilAux + cPedAux ) )
-DbSelectArea("SZW")
-FOR S := 1 TO FCount()
+SZW->( DBSeek( cFilAux + cPedAux ) )
+DBSelectArea("SZW")
+For S := 1 TO FCount()
     M->&(FIELDNAME(S)) := FieldGet(S)
-NEXT
+Next
 aRotina:={}
-aADD(aRotina,{ "Visualizar","Auxiliar",0,2})
+aAdd(aRotina,{ "Visualizar","Auxiliar",0,2})
 
 DEFINE MSDIALOG _oDlgHist FROM aSize[7],000 TO aSize[6],aSize[5] TITLE "Itens do Pedido: " + cPedAux  PIXEL  
 
@@ -379,29 +350,26 @@ oLbx:SetFocus(.T.)
 
 ACTIVATE MSDIALOG _oDlgHist CENTER ON INIT EnchoiceBar(_oDlgHist,{|| _oDlgHist:End()},{|| _oDlgHist:End()})
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS015P
 Autor-------------: Erich Buttner
 Data da Criacao---: 18/03/2013
-===============================================================================================================================
 Descrição---------: Pesquisa Informações no Browse de acordo com a Ordem selecionada.
-===============================================================================================================================
 Parametros--------: cOrdem
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS015P(cOrdem)
 
-DbSelectArea("TMP")
-TMP->( DbSetOrder(Ascan(aOrdem,cOrdem)) )
-TMP->( DbGoTop() )
-TMP->( DbSeek(Alltrim(cPesquisa),.T.) )
+DBSelectArea("TMP")
+TMP->( DBSetOrder(aScan(aOrdem,cOrdem)) )
+TMP->( DBGoTop() )
+TMP->( DBSeek(AllTrim(cPesquisa),.T.) )
 oMark:oBrowse:Refresh(.T.)
 
 Return
@@ -411,11 +379,8 @@ Return
 Programa----------: AOMS015FO
 Autor-------------: Erich Buttner
 Data da Criacao---: 18/03/2013
-===============================================================================================================================
 Descrição---------: Funcao executada na saida do campo Ordem, para ordenar o browse
-===============================================================================================================================
 Parametros--------: cORDEM
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -427,61 +392,61 @@ oPesquisa:Refresh()
 
 _aMarcados:={}
 
-DbSelectArea("TMP")
-TMP->(DbGoTop())
+DBSelectArea("TMP")
+TMP->(DBGoTop())
 
-IF CORDEM == 'PEDIDO'
+If CORDEM == 'PEDIDO'
 
-	While TMP->(!EOF())
+	While TMP->(!Eof())
 	
-		AADD(_aMarcados,{TMP->NUMPED,TMP->OK})
-		TMP->(DbSkip())
+		aAdd(_aMarcados,{TMP->NUMPED,TMP->OK})
+		TMP->(DBSkip())
 		
 	End
 	
-ELSEIF CORDEM == 'CLIENTE'
+ElseIf CORDEM == 'CLIENTE'
 
-	While TMP->(!EOF())
+	While TMP->(!Eof())
 	
-		AADD(_aMarcados,{TMP->CODCLI,TMP->OK})
-		TMP->(DbSkip())
+		aAdd(_aMarcados,{TMP->CODCLI,TMP->OK})
+		TMP->(DBSkip())
 		
 	End
 
-ELSEIF CORDEM == "GERENTE"
+ElseIf CORDEM == "GERENTE"
 
-	While TMP->(!EOF())
+	While TMP->(!Eof())
 	
-		AADD(_aMarcados,{TMP->VEND3,TMP->OK})
-		TMP->(DbSkip())
-		
-	End
-	
-
-ELSEIF CORDEM == "COORDENADOR"
-
-	While TMP->(!EOF())
-	
-		AADD(_aMarcados,{TMP->VEND2,TMP->OK})
-		TMP->(DbSkip())
+		aAdd(_aMarcados,{TMP->VEND3,TMP->OK})
+		TMP->(DBSkip())
 		
 	End
 	
 
-ELSEIF CORDEM == "REPRESENTANTE"
+ElseIf CORDEM == "COORDENADOR"
 
-	While TMP->(!EOF())
+	While TMP->(!Eof())
 	
-		AADD(_aMarcados,{TMP->VEND1,TMP->OK})
-		TMP->(DbSkip())
+		aAdd(_aMarcados,{TMP->VEND2,TMP->OK})
+		TMP->(DBSkip())
 		
 	End
 	
-ENDIF
 
-DbSelectArea("TMP")
-TMP->( DbSetOrder(Ascan(aOrdem,cOrdem)) )
-TMP->( DbGoTo(_nReg) )    //Mantendo no mesmo registro que estava posicionado anteriormente
+ElseIf CORDEM == "REPRESENTANTE"
+
+	While TMP->(!Eof())
+	
+		aAdd(_aMarcados,{TMP->VEND1,TMP->OK})
+		TMP->(DBSkip())
+		
+	End
+	
+EndIf
+
+DBSelectArea("TMP")
+TMP->( DBSetOrder(aScan(aOrdem,cOrdem)) )
+TMP->( DBGoTo(_nReg) )    //Mantendo no mesmo registro que estava posicionado anteriormente
 oMark:oBrowse:Refresh(.T.)
 
 Return
@@ -491,11 +456,8 @@ Return
 Programa----------: AOMS015J
 Autor-------------: Erich Buttner
 Data da Criacao---: 18/03/2013
-===============================================================================================================================
 Descrição---------: Função utilizada no botão de legenda mostrar o significado de cada cor
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -514,19 +476,16 @@ Return(.T.)
 Programa----------: AOMS015TT
 Autor-------------: Erich Buttner
 Data da Criacao---: 18/03/2013
-===============================================================================================================================
 Descrição---------: Função utilizada para mostrar as configurações de tela do usuário	
-===============================================================================================================================
 Parametros--------: _nPosEnch,_nPosGetDados,_lDimensao
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS015TT(_nPosEnch,_nPosGetDados,_lDimensao)
 
-LOCAL aObjects:= {}
-LOCAL aInfo   := {}
-LOCAL aPosObj := {}
+Local aObjects:= {}
+Local aInfo   := {}
+Local aPosObj := {}
 aSize   := {}
 
 DEFAULT _nPosEnch    := 0
@@ -536,8 +495,8 @@ DEFAULT _lDimensao   :=.F.
 // Obtém a a área de trabalho e tamanho da dialog
 aSize := MsAdvSize()
 
-AAdd( aObjects, { _nPosEnch    , _nPosEnch    , .T., .T.             } ) // Dados da Enchoice
-AAdd( aObjects, { _nPosGetDados, _nPosGetDados, .T., .T. ,_lDimensao } ) // Dados da getdados
+aAdd( aObjects, { _nPosEnch    , _nPosEnch    , .T., .T.             } ) // Dados da Enchoice
+aAdd( aObjects, { _nPosGetDados, _nPosGetDados, .T., .T. ,_lDimensao } ) // Dados da getdados
 
 // Dados da área de trabalho e separação
 aInfo 	:= { aSize[ 1 ], aSize[ 2 ], aSize[ 3 ], aSize[ 4 ], 3, 3, 3, 3 } // Chama MsObjSize e recebe array e tamanhos
@@ -551,11 +510,8 @@ Return aPosObj
 Programa----------: AOMS015W
 Autor-------------: Erich Buttner
 Data da Criacao---: 18/03/2013
-===============================================================================================================================
 Descrição---------: Tela do pedido do portal chamada a partir do botão Avalia na tela principal
-===============================================================================================================================
 Parametros--------: cFilAux , cPedAux
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -578,20 +534,20 @@ Private oVermelho	 := LoadBitmap( GetResources(), "BR_VERMELHO" )
 Private oVerde   	 := LoadBitmap( GetResources(), "BR_VERDE" )
 
 //Muda para filial do pedido para garantir o processamento correto
-cfilant := IIF(empty(TMP->FILPRO),TMP->FILIAL,TMP->FILPRO)
+cfilant := IIf(Empty(TMP->FILPRO),TMP->FILIAL,TMP->FILPRO)
 
 aLigacoes := {}
 aCC       := {}
 LCOORD := .F.
 
-DbSelectArea("SZW")
-SZW->( DBSETORDER(1) )
-SZW->( DBSEEK( cFilAux + cPedAux ) ) 
+DBSelectArea("SZW")
+SZW->( DBSetOrder(1) )
+SZW->( DBSeek( cFilAux + cPedAux ) ) 
 
 _cvend2 := Posicione("SA3",1,xFilial("SA3")+SZW->ZW_VEND1,"A3_SUPER")  
 _cvend3 := SA3->A3_GEREN
 _cvend4 := SA3->A3_I_SUPE
-_cRede  := Posicione("SA1",1,xfilial("SA1")+SZW->ZW_CLIENTE,"A1_GRPVEN")
+_cRede  := Posicione("SA1",1,xFilial("SA1")+SZW->ZW_CLIENTE,"A1_GRPVEN")
 If SA1->A1_SIMPNAC == "1"
 	_lSimplNac := .T. // O cliente é optante do Simples Nacional
 Else
@@ -599,17 +555,17 @@ Else
 EndIf
 
 _nPesoBrut := AOMS015PESO(SZW->ZW_FILIAL,SZW->ZW_IDPED)
-SZW->( DBSEEK( cFilAux + cPedAux ) ) 
+SZW->( DBSeek( cFilAux + cPedAux ) ) 
 
 //_atab := {}
-//_aTab	:= u_ittabprc( TMP->FILIAL, IIF(empty(TMP->FILPRO),TMP->FILIAL,TMP->FILPRO),_cvend3,_cvend2,SZW->ZW_VEND1,SZW->ZW_CLIENTE,SZW->ZW_LOJACLI,.T.,SZW->ZW_TABELA,_cVend4,_cRede)
+//_aTab	:= u_ittabprc( TMP->FILIAL, IIf(Empty(TMP->FILPRO),TMP->FILIAL,TMP->FILPRO),_cvend3,_cvend2,SZW->ZW_VEND1,SZW->ZW_CLIENTE,SZW->ZW_LOJACLI,.T.,SZW->ZW_TABELA,_cVend4,_cRede)
 _ctab := SZW->ZW_TABELA
  
 //_atabs := {}
-//_aTabs	:= u_ittabprc( TMP->FILIAL, IIF(empty(TMP->FILPRO),TMP->FILIAL,TMP->FILPRO),_cvend3,_cvend2,SZW->ZW_VEND1,SZW->ZW_CLIENTE,SZW->ZW_LOJACLI,.T.)
+//_aTabs	:= u_ittabprc( TMP->FILIAL, IIf(Empty(TMP->FILPRO),TMP->FILIAL,TMP->FILPRO),_cvend3,_cvend2,SZW->ZW_VEND1,SZW->ZW_CLIENTE,SZW->ZW_LOJACLI,.T.)
 _ctabs := SZW->ZW_TABELA   //Não validar tabela simular com o novo processo de preço
 
-While !Eof() .AND. SZW->ZW_IDPED == cPedAux
+While !Eof() .And. SZW->ZW_IDPED == cPedAux
 
 	nQtd2UM    := 0
 	nPrcMin    := 0
@@ -618,13 +574,13 @@ While !Eof() .AND. SZW->ZW_IDPED == cPedAux
 	_cPrTela1  := ""
 	_cPrTela2  := "" 
 /*
-	DA1->(Dbsetorder(1))
-	If DA1->(Dbseek(xFilial("DA1")+SZW->ZW_TABELA+SZW->ZW_PRODUTO))
+	DA1->(DBSetOrder(1))
+	If DA1->(DBSeek(xFilial("DA1")+SZW->ZW_TABELA+SZW->ZW_PRODUTO))
 	   	 nPrcMax   := DA1->DA1_PRCMAX
 		If SZW->ZW_TPVENDA = "F" 
 			nPrcMin := DA1->DA1_I_PMFE
 			_nPrecoTab := DA1->DA1_PRCVEN
-		else
+		Else
 			nPrcMin := DA1->DA1_I_PMFR
 		   _nPrecoTab := DA1->DA1_I_PRFE 
 		EndIf
@@ -662,9 +618,9 @@ While !Eof() .AND. SZW->ZW_IDPED == cPedAux
     	_cPrTela1 := "Sem Tabela de Preço"
     EndIf
 
-	AAdd(aCC, {		SZW->ZW_ITEM,;
+	aAdd(aCC, {		SZW->ZW_ITEM,;
 						SZW->ZW_PRODUTO,;
-						alltrim(GetAdvFVal("SB1","B1_DESC",xFilial("SB1")+SZW->ZW_PRODUTO,1,"")),;
+						AllTrim(GetAdvFVal("SB1","B1_DESC",xFilial("SB1")+SZW->ZW_PRODUTO,1,"")),;
 						Transform(SZW->ZW_QTDVEN,"@E 99,999") + " " + 						SZW->ZW_UM,;
 						Transform(nQtd2UM,"@E 99,999") + " " + GetAdvFVal("SB1","B1_SEGUM",xFilial("SB1")+SZW->ZW_PRODUTO,1,""),;
 						Transform(SZW->ZW_PRCVEN, "@E 99,999.99"),;
@@ -673,18 +629,18 @@ While !Eof() .AND. SZW->ZW_IDPED == cPedAux
     					_cPrTela1,;
     					_cPrTela2,;
  						Transform(SZW->ZW_QTDVEN*SZW->ZW_PRCVEN, "@E 999,999.99"),;
- 						IF(_lPrecErro,"B"," "),;
- 						IF(_lPrecErro,"B"," ")})
+ 						If(_lPrecErro,"B"," "),;
+ 						If(_lPrecErro,"B"," ")})
 												
-	SZW->(DbSkip())
+	SZW->(DBSkip())
 	
 End
 
-DbSelectArea("SZW")
-SZW->( DBSETORDER(1) ) 
-SZW->( DBSEEK( cFilAux + cPedAux ) )
+DBSelectArea("SZW")
+SZW->( DBSetOrder(1) ) 
+SZW->( DBSeek( cFilAux + cPedAux ) )
 
-aLigacoes := ASort(aCC,,,{|x,y|x[1]<y[1]})
+aLigacoes := aSort(aCC,,,{|x,y|x[1]<y[1]})
 
 If Len(aLigacoes) <= 0
 
@@ -693,78 +649,78 @@ If Len(aLigacoes) <= 0
 	cfilant := _cfilori
 	Return(.F.)
 	
-Endif
+EndIf
 lClos := .F.
 DEFINE MSDIALOG _oDlgHist FROM aSize[7],000 TO aSize[6],aSize[5] TITLE "Itens do Pedido do portal de Id " + cPedAux  PIXEL  
 
 
-_cnomefil := alltrim(TMP->FILIAL) + " / " + FWFilialName(cEmpAnt,TMP->FILIAL)
+_cnomefil := AllTrim(TMP->FILIAL) + " / " + FWFilialName(cEmpAnt,TMP->FILIAL)
 
-If empty(TMP->FILPRO)
+If Empty(TMP->FILPRO)
 
-	_cnomefat := alltrim(TMP->FILIAL) + " / " + FWFilialName(cEmpAnt,TMP->FILIAL)
+	_cnomefat := AllTrim(TMP->FILIAL) + " / " + FWFilialName(cEmpAnt,TMP->FILIAL)
 	
 Else
 
-	_cnomefat := alltrim(TMP->FILIAL) + " / " + FWFilialName(cEmpAnt,TMP->FILIAL)
-	_cnomefil := alltrim(TMP->FILPRO) + " / " + FWFilialName(cEmpAnt,TMP->FILPRO)
+	_cnomefat := AllTrim(TMP->FILIAL) + " / " + FWFilialName(cEmpAnt,TMP->FILIAL)
+	_cnomefil := AllTrim(TMP->FILPRO) + " / " + FWFilialName(cEmpAnt,TMP->FILPRO)
 
-Endif
+EndIf
 _cOper     := SZW->ZW_TIPO      // "Operação" 
 _dDtEmiss  := SZW->ZW_EMISSAO   // "Data de Emissão"  
 _dDtEntr   := SZW->ZW_FECENT    // "Data de Entrega" 
 _dDtLiber  := SZW->ZW_I_LIBCD   // "Data Liberação de Credito"
 _cCondPg   := SZW->ZW_CONDPAG   // "Condição de Pagamento"
-_cDescCond := AllTrim(posicione("SE4",1,xFilial("SE4")+SZW->ZW_CONDPAG,"E4_DESCRI")) // "Condição de Pagamento"     
+_cDescCond := AllTrim(Posicione("SE4",1,xFilial("SE4")+SZW->ZW_CONDPAG,"E4_DESCRI")) // "Condição de Pagamento"     
 _cTipCarg  := If(SZW->ZW_TPVENDA == "F","Fechada", "Fracionada") // "Tipo de Carga"
 
 _nLinha := 5
 @ _nLinha,005 Say "Pedido:" 
-@ _nLinha,055 Get TMP->NUMPED Picture "@!"  SIZE 050,10 when .f.   // 045
-@ _nLinha,105 Get _cnomefil   Picture "@!"  SIZE 200,10 when .f.   // 095
+@ _nLinha,055 Get TMP->NUMPED Picture "@!"  SIZE 050,10 when .F.   // 045
+@ _nLinha,105 Get _cnomefil   Picture "@!"  SIZE 200,10 when .F.   // 095
 
 @ _nLinha,330 Say "Operação:"                  
-@ _nLinha,405 Get _cOper      Picture "@!"  SIZE 050,10 when .f. // 375
+@ _nLinha,405 Get _cOper      Picture "@!"  SIZE 050,10 when .F. // 375
 
 _nLinha += 15
 
 @ _nLinha,005 Say "Filial Faturamento:" 
-@ _nLinha,055 Get _cnomefat   Picture "@!"  SIZE 250,10 when .f. 
+@ _nLinha,055 Get _cnomefat   Picture "@!"  SIZE 250,10 when .F. 
 
 @ _nLinha,330 Say "Data de Emissão:"           
-@ _nLinha,405 Get _dDtEmiss   Picture "@D"  SIZE 050,10 when .f. 
+@ _nLinha,405 Get _dDtEmiss   Picture "@D"  SIZE 050,10 when .F. 
 _nLinha += 15
 
 @ _nLinha,005 Say "Cliente:"
 
-SA1->(DBSETORDER(1))
-SA1->(Dbseek(xfilial("SA1")+SZW->ZW_CLIENTE+SZW->ZW_LOJACLI))
+SA1->(DBSetOrder(1))
+SA1->(DBSeek(xFilial("SA1")+SZW->ZW_CLIENTE+SZW->ZW_LOJACLI))
 
-_ccodcomp     := alltrim(SZW->ZW_CLIENTE) + " / " + alltrim(SZW->ZW_LOJACLI)
+_ccodcomp     := AllTrim(SZW->ZW_CLIENTE) + " / " + AllTrim(SZW->ZW_LOJACLI)
 _cRazaoSocial := SA1->A1_NOME + " / " + SA1->A1_EST 
 
-@ _nLinha,055 Get _ccodcomp      Picture "@!"  SIZE 050,10 when .f. 
-@ _nLinha,105 Get _cRazaoSocial  Picture "@!"  SIZE 200,10 when .f. 
+@ _nLinha,055 Get _ccodcomp      Picture "@!"  SIZE 050,10 when .F. 
+@ _nLinha,105 Get _cRazaoSocial  Picture "@!"  SIZE 200,10 when .F. 
 
 @ _nLinha,330 Say "Data de Entrega:"           
-@ _nLinha,405 Get _dDtEntr   Picture "@D"  SIZE 050,10 when .f. 
+@ _nLinha,405 Get _dDtEntr   Picture "@D"  SIZE 050,10 when .F. 
 
 _nLinha += 15
 
 @ _nLinha,005 Say "Loja do Cliente:"
-@ _nLinha,055 Get AllTrim(GetAdvFval("SA1","A1_NREDUZ",xFilial("SA1")+SZW->ZW_CLIENTE+SZW->ZW_LOJACLI,1,"")) Picture "@!"  SIZE 250,10 when .f.
+@ _nLinha,055 Get AllTrim(GetAdvFval("SA1","A1_NREDUZ",xFilial("SA1")+SZW->ZW_CLIENTE+SZW->ZW_LOJACLI,1,"")) Picture "@!"  SIZE 250,10 when .F.
 
 @ _nLinha,330 Say "Data Liberação de Credito:" 
-@ _nLinha,405 Get _dDtLiber    Picture "@D"  SIZE 050,10 when .f.
+@ _nLinha,405 Get _dDtLiber    Picture "@D"  SIZE 050,10 when .F.
 _nLinha += 15
 
 @ _nLinha,005 Say "Representante:"
-@ _nLinha,055 Get SZW->ZW_VEND1 Picture "@!"  SIZE 050,10 when .f. 
-@ _nLinha,105 Get AllTrim(posicione("SA3",1,xFilial("SA3")+SZW->ZW_VEND1,"A3_NOME")) Picture "@!"  SIZE 200,10 when .f.  
+@ _nLinha,055 Get SZW->ZW_VEND1 Picture "@!"  SIZE 050,10 when .F. 
+@ _nLinha,105 Get AllTrim(Posicione("SA3",1,xFilial("SA3")+SZW->ZW_VEND1,"A3_NOME")) Picture "@!"  SIZE 200,10 when .F.  
 
 @ _nLinha,330 Say "Condição de Pagamento:"     
-@ _nLinha,405 Get _cCondPg     Picture "@!"  SIZE 020,10 when .f.
-@ _nLinha,430 Get _cDescCond   Picture "@!"  SIZE 175,10 when .f.  
+@ _nLinha,405 Get _cCondPg     Picture "@!"  SIZE 020,10 when .F.
+@ _nLinha,430 Get _cDescCond   Picture "@!"  SIZE 175,10 when .F.  
 
 _nLinha += 15
 
@@ -773,32 +729,32 @@ _coord  := SA3->A3_SUPER
 _cgeren := SA3->A3_GEREN
 
 @ _nLinha,005 Say "Supervisor:"
-@ _nLinha,055 Get _csuper Picture "@!"  SIZE 050,10 when .f. 
-@ _nLinha,105 Get AllTrim(posicione("SA3",1,xFilial("SA3")+_csuper,"A3_NOME")) Picture "@!"  SIZE 200,10 when .f.  
+@ _nLinha,055 Get _csuper Picture "@!"  SIZE 050,10 when .F. 
+@ _nLinha,105 Get AllTrim(Posicione("SA3",1,xFilial("SA3")+_csuper,"A3_NOME")) Picture "@!"  SIZE 200,10 when .F.  
 
 @ _nLinha,330 Say "Tipo de Carga:"             
-@ _nLinha,405 Get _cTipCarg Picture "@!"  SIZE 200,10 when .f.
+@ _nLinha,405 Get _cTipCarg Picture "@!"  SIZE 200,10 when .F.
 
 _nLinha += 15
 
 @ _nLinha,005 Say "Coordenador:"
-@ _nLinha,055 Get _coord Picture "@!"  SIZE 050,10 when .f. 
-@ _nLinha,105 Get AllTrim(posicione("SA3",1,xFilial("SA3")+_coord,"A3_NOME")) Picture "@!"  SIZE 200,10 when .f.
+@ _nLinha,055 Get _coord Picture "@!"  SIZE 050,10 when .F. 
+@ _nLinha,105 Get AllTrim(Posicione("SA3",1,xFilial("SA3")+_coord,"A3_NOME")) Picture "@!"  SIZE 200,10 when .F.
 
-_ctabela := _ctab + " - " + ALLTRIM(POSICIONE("DA0",1,xFilial("DA0")+_ctab,'DA0_DESCRI'))
+_ctabela := _ctab + " - " + AllTrim(Posicione("DA0",1,xFilial("DA0")+_ctab,'DA0_DESCRI'))
 _ctabels := _ctabela
 
 @ _nLinha,330 Say "Tabela de preços Pedido:" 
-@ _nLinha,405 Get  _ctabela  Picture "@!"  SIZE 200,10 when .f.
+@ _nLinha,405 Get  _ctabela  Picture "@!"  SIZE 200,10 when .F.
 
 _nLinha += 15
 
 @ _nLinha,005 Say "Gerente:"
-@ _nLinha,055 Get _cgeren Picture "@!"  SIZE 050,10 when .f. 
-@ _nLinha,105 Get AllTrim(posicione("SA3",1,xFilial("SA3")+_cgeren,"A3_NOME")) Picture "@!"  SIZE 200,10 when .f.
+@ _nLinha,055 Get _cgeren Picture "@!"  SIZE 050,10 when .F. 
+@ _nLinha,105 Get AllTrim(Posicione("SA3",1,xFilial("SA3")+_cgeren,"A3_NOME")) Picture "@!"  SIZE 200,10 when .F.
 
 @ _nLinha,330 Say "Faixa de Preços Pedido:" 
-@ _nLinha,405 Get  SZW->ZW_I_FXPES  Picture "99"  SIZE 050,10 when .f.
+@ _nLinha,405 Get  SZW->ZW_I_FXPES  Picture "99"  SIZE 050,10 when .F.
 
 _nLinha += 15
 
@@ -833,17 +789,17 @@ oLbx:bLine:={||			{ aLigacoes[oLbx:nAt,1],;
 oLbx:Refresh()
 oLbx:SetFocus(.T.)
 
-@ aSize[4]-_nLB,aSize[3]-175	Button "Rejeitar"	Size 037,012 action (Iif(AOMS015B(2),(lClos := .T.,_oDlgHist:end()),.F.))  //Função chamada para a liberação ou rejeição de acordo com a chamada da mesma pelo seu respectivo botão
-@ aSize[4]-_nLB,aSize[3]-130	Button "Liberar"	Size 037,012 action (Iif(AOMS015B(1),(lClos := .T.,_oDlgHist:end()),.F.))	//Função chamada para a liberação ou rejeição de acordo com a chamada da mesma pelo seu respectivo botão
+@ aSize[4]-_nLB,aSize[3]-175	Button "Rejeitar"	Size 037,012 action (IIf(AOMS015B(2),(lClos := .T.,_oDlgHist:end()),.F.))  //Função chamada para a liberação ou rejeição de acordo com a chamada da mesma pelo seu respectivo botão
+@ aSize[4]-_nLB,aSize[3]-130	Button "Liberar"	Size 037,012 action (IIf(AOMS015B(1),(lClos := .T.,_oDlgHist:end()),.F.))	//Função chamada para a liberação ou rejeição de acordo com a chamada da mesma pelo seu respectivo botão
 @ aSize[4]-_nLB,aSize[3]-85 	Button "Sair"		Size 037,012 action (lClos := .F.,_oDlgHist:end())
 
 ACTIVATE MSDIALOG _oDlgHist CENTER ON INIT CursorArrow()
 
 oMark:oBrowse:Refresh(.T.)
 
-IF lClos 
+If lClos 
    Close(oDlgLIb)
-ENDIF
+EndIf
 
 cfilant := _cfilori
 
@@ -854,30 +810,27 @@ Return .T.
 Programa----------: AOMS015B
 Autor-------------: Erich Buttner
 Data da Criacao---: 18/03/2013
-===============================================================================================================================
 Descrição---------: Função chamada para a liberação ou rejeição de acordo com a chamada da mesma pelo seu respectivo botão
-===============================================================================================================================
 Parametros--------: _nAcao
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS015B( _nAcao )
 
-Local _cmotivo 	:= space(100)
+Local _cmotivo 	:= Space(100)
 Local _nopc 	:= 0
 Local _odlg		:= nil
 Public lRetLib
 
-Do while _nopc == 0 .or. ( empty(_cmotivo) .and. _nopc == 1) 
+While _nopc == 0 .Or. ( Empty(_cmotivo) .And. _nopc == 1) 
 
-    _cmotivo:=IF(_nacao = 1, "Autorizado"+SPACE(100-LEN("Autorizado")) , SPACE(100) )
+    _cmotivo:=If(_nacao = 1, "Autorizado"+Space(100-Len("Autorizado")) , Space(100) )
 
 	DEFINE MSDIALOG _oDlg;
-				 TITLE "Confirmar Motivo de " + iif(_nacao == 1, "liberação", "bloqueio") + " do pedido " + ALLTRIM(TMP->NUMPED);
+				 TITLE "Confirmar Motivo de " + IIf(_nacao == 1, "liberação", "bloqueio") + " do pedido " + AllTrim(TMP->NUMPED);
 				 FROM 000,000 TO 140,600 OF _oDlg PIXEL
 	
-	@ 006,008 SAY "Motivo de " + iif(_nacao == 1, "liberação", "bloqueio") + " do pedido " + ALLTRIM(TMP->NUMPED) + " - " + posicione("SA1",1,xfilial("SA1")+TMP->CODCLI,"A1_NOME")	
+	@ 006,008 Say "Motivo de " + IIf(_nacao == 1, "liberação", "bloqueio") + " do pedido " + AllTrim(TMP->NUMPED) + " - " + Posicione("SA1",1,xFilial("SA1")+TMP->CODCLI,"A1_NOME")	
 	
 	@ 020,008 GET _cmotivo PICTURE "@x"	SIZE 220,010 
 	
@@ -890,33 +843,33 @@ Do while _nopc == 0 .or. ( empty(_cmotivo) .and. _nopc == 1)
 
 		Return .F.
 	
-	Elseif empty(_cmotivo)
+	ElseIf Empty(_cmotivo)
 
-		u_itmsg("Obrigatório informar o motivo.","Atenção",,1)
+		U_ITMsg("Obrigatório informar o motivo.","Atenção",,1)
 
-	Endif
+	EndIf
 	
-Enddo
+EndDo
 
-DbSelectArea("SZW")
-SZW->( DBSETORDER(1) )
+DBSelectArea("SZW")
+SZW->( DBSetOrder(1) )
 
-If SZW->( DBSEEK(TMP->(FILIAL+NUMPED)) ) 
+If SZW->( DBSeek(TMP->(FILIAL+NUMPED)) ) 
 		
-	While SZW->(!EOF()) .And. SZW->(ZW_FILIAL+ZW_IDPED) == TMP->(FILIAL+NUMPED)
+	While SZW->(!Eof()) .And. SZW->(ZW_FILIAL+ZW_IDPED) == TMP->(FILIAL+NUMPED)
 	
- 		SZW->( Reclock("SZW",.F.) )
+ 		SZW->( RecLock("SZW",.F.) )
 			If SZW->ZW_BLOPRC == "B"
-	   		 	SZW->ZW_BLOPRC := IIF( _nAcao == 1 , "L" , "R" )
+	   		 	SZW->ZW_BLOPRC := IIf( _nAcao == 1 , "L" , "R" )
 			EndIf
-    		SZW->ZW_STATUS := IIF( _nAcao == 1 , "L" , "Q" )
+    		SZW->ZW_STATUS := IIf( _nAcao == 1 , "L" , "Q" )
 			SZW->ZW_MLIBPRC:= "AOMS015"
 			SZW->ZW_DTLIB := Date() 
-			SZW->ZW_MOTLP  := Alltrim(_cmotivo) + " Via AOMS015" 
-			SZW->ZW_DLIBP  := date()
-			SZW->ZW_HLIBP  := time()
-			SZW->ZW_MLIBP  := U_UCFG001(1) 
-			SZW->ZW_ULIBP  := cUsername  
+			SZW->ZW_MOTLP  := AllTrim(_cmotivo) + " Via AOMS015" 
+			SZW->ZW_DLIBP  := Date()
+			SZW->ZW_HLIBP  := Time()
+			SZW->ZW_MLIBP  := FWSFAllUsers({__cUserID},{"USR_FILIAL"})[1][3]+FWSFAllUsers({__cUserID},{"USR_CODFUNC"})[1][3]
+			SZW->ZW_ULIBP  := cUserName  
 
 			If _nacao == 1
 			
@@ -926,11 +879,11 @@ If SZW->( DBSEEK(TMP->(FILIAL+NUMPED)) )
 				SZW->ZW_CLILP  := SZW->ZW_CLIENTE
 				SZW->ZW_PLIBP  := DDATABASE + 30 
 							 
-			Endif
+			EndIf
 	
-	   	SZW->( MsUnLock() )
+	   	SZW->( MSUnLock() )
 	
-		SZW->( DbSkip() )
+		SZW->( DBSkip() )
 	
 	EndDo
 
@@ -943,11 +896,8 @@ Return(.T.)
 Programa----------: AOMS015Y
 Autor-------------: Erich Buttner
 Data da Criacao---: 18/03/2013
-===============================================================================================================================
 Descrição---------: Tela de Liberação de Preço de Venda Pedido de Venda - CHAMADO 2721
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -958,13 +908,13 @@ Private lInverte := .T.
 Private cmarca   := GetMark()
 Private oMark
 Private cPesq     := Space(50)
-Private lCheck1   := .t.
-Private lCheck2   := .t.
-Private lCheck3   := .t.
+Private lCheck1   := .T.
+Private lCheck2   := .T.
+Private lCheck3   := .T.
 Private cCombo, cOrdem	:= " "
 //Private aOrdem	:= {"PEDIDO","CLIENTE"}
 Private aOrdem		:= {"GERENTE","COORDENADOR","REPRESENTANTE","PEDIDO","CLIENTE"}
-Private cPESQUISA:= SPACE(200), oPesquisa
+Private cPESQUISA:= Space(200), oPesquisa
 Private _aMarcados:={}
 Private TRB := CriaTrab(Nil,.F.)
 Private _aCpoBrw
@@ -974,7 +924,7 @@ Private bped := nil
 Public cChama := "1"
 
 
-Do while cChama == "1"
+While cChama == "1"
 
 	
 	Processa( {|| AOMS015P2() } , 'Aguarde...' , "Recarregando Tabela..." ) //Prepara dados para a tela
@@ -1002,28 +952,28 @@ Do while cChama == "1"
 	@ aSize[4]-_nLB,385 - _nPosCol Button "Avaliar"	Size 40,13	Action AOMS0159(2)				Object oBtnRet
 	@ aSize[4]-_nLB,430 - _nPosCol Button "Sair"		Size 40,13	Action AOMS0158()				Object oBtnInv
 
-	dbSelectArea("TMP")
-	TMP->( dbGoTop() )
+	DBSelectArea("TMP")
+	TMP->( DBGoTop() )
 
-	While !TMP->(EOF())
+	While !TMP->(Eof())
 
-		RecLock("TMP",.f.)
+		RecLock("TMP",.F.)
 		TMP->OK    := ThisMark()
-		TMP->(MsUnlock())
-		TMP->(dbSkip())
+		TMP->(MSUnLock())
+		TMP->(DBSkip())
 
 	End
 
-	TMP->( dbGoTop() )
+	TMP->( DBGoTop() )
 
 	oMark:oBrowse:Refresh()
 
 	ACTIVATE DIALOG oDlgLib CENTERED
 
-	Dbselectarea("TMP")
-	TMP->(Dbclosearea())
+	DBSelectArea("TMP")
+	TMP->(DBCloseArea())
 
-Enddo
+EndDo
 
 
 Return
@@ -1033,24 +983,21 @@ Return
 Programa----------: AOMS015I
 Autor-------------: Erich Buttner
 Data da Criacao---: 18/03/2013
-===============================================================================================================================
 Descrição---------: Funcao que avalia os Pedido de Venda para classifica-lo corretamente na legenda.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS015I()
 
 Local _cRet
-Local _aArea  := GetArea()
+Local _aArea  := FWGetArea()
 
-If TMP->( EOF() )
+If TMP->( Eof() )
 
 	Return("")
 
-Endif
+EndIf
 
 If TMP->BLPRC == 'B'
 
@@ -1066,7 +1013,7 @@ ElseIf TMP->BLPRC == 'R'
 
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return(_cRet)
 
@@ -1075,17 +1022,14 @@ Return(_cRet)
 Programa----------: AOMS015X
 Autor-------------: Erich Buttner
 Data da Criacao---: 18/03/2013
-===============================================================================================================================
 Descrição---------: Funcao que Visualiza Itens do(s) Pedido(s) de Venda 
-===============================================================================================================================
 Parametros--------: _CPED - NUMERO DO PEDIDO DE VENDA
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS015X(CPED)
 
-Local _aArea		:= GetArea()									// Salva a area atual
+Local _aArea		:= FWGetArea()									// Salva a area atual
 Local _oDlgHist													// Tela do Historico
 
 Local aOldSize:= aSize,S
@@ -1103,13 +1047,13 @@ aLigacoes := {}
 aCC       := {}
 LCOORD := .F.
 
-DbSelectArea("SC6")
-SC6->( DBSETORDER(1) )
-SC6->( DBSEEK(xFilial("SC6")+ALLTRIM(CPED),.T.) )
+DBSelectArea("SC6")
+SC6->( DBSetOrder(1) )
+SC6->( DBSeek(xFilial("SC6")+AllTrim(CPED),.T.) )
 
-While SC6->( !Eof() ) .AND. SC6->C6_NUM == ALLTRIM(CPED)
+While SC6->( !Eof() ) .And. SC6->C6_NUM == AllTrim(CPED)
 	
-	AAdd(aCC, {	SC6->C6_FILIAL,;
+	aAdd(aCC, {	SC6->C6_FILIAL,;
 					SC6->C6_NUM,;
 					SC6->C6_ITEM,;
 					SC6->C6_PRODUTO,;
@@ -1126,11 +1070,11 @@ While SC6->( !Eof() ) .AND. SC6->C6_NUM == ALLTRIM(CPED)
 					SC6->C6_TES,;
 					SC6->C6_CF})
 	
-	SC6->(DbSkip())
+	SC6->(DBSkip())
 	
 End
 
-aLigacoes := ASort(aCC,,,{|x,y|x[2]<y[2]})
+aLigacoes := aSort(aCC,,,{|x,y|x[2]<y[2]})
 
 If Len(aLigacoes) <= 0
 
@@ -1138,16 +1082,16 @@ If Len(aLigacoes) <= 0
 	CursorArrow()
 	Return(.F.)
 
-Endif
+EndIf
 
-SC5->( DBSETORDER(1) )
-SC5->( DBSEEK(xFilial("SC5")+ALLTRIM(CPED),.T.) )
-DbSelectArea("SC5")
-FOR S := 1 TO FCount()
+SC5->( DBSetOrder(1) )
+SC5->( DBSeek(xFilial("SC5")+AllTrim(CPED),.T.) )
+DBSelectArea("SC5")
+For S := 1 TO FCount()
     M->&(FIELDNAME(S)) := FieldGet(S)
-NEXT
+Next
 aRotina:={}
-aADD(aRotina,{ "Visualizar","Auxiliar",0,2})
+aAdd(aRotina,{ "Visualizar","Auxiliar",0,2})
 
 DEFINE MSDIALOG _oDlgHist FROM aSize[7],000 TO aSize[6],aSize[5] TITLE "Itens do Pedido Protheus de número  " + CPED  PIXEL  //"Historico" //750SC5->C5_NUM
 
@@ -1185,11 +1129,11 @@ oLbx:bLine:={||{	aLigacoes[oLbx:nAt,1],;
 oLbx:Refresh()
 oLbx:SetFocus(.T.)
 
-//DEFINE SBUTTON FROM aSize[4]-02,aSize[3]-40 TYPE 02 ENABLE OF _oDlgHist PIXEL ACTION (_oDlgHist:End())
+//DEFINE SBUTTON FROM aSize[4]-02,aSize[3]-40 Type 02 ENABLE OF _oDlgHist PIXEL ACTION (_oDlgHist:End())
 
 ACTIVATE MSDIALOG _oDlgHist CENTER ON INIT EnchoiceBar(_oDlgHist,{|| _oDlgHist:End()},{|| _oDlgHist:End()})
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 aSize:=aOldSize
 
@@ -1200,11 +1144,8 @@ Return
 Programa----------: AOMS015C
 Autor-------------: Erich Buttner
 Data da Criacao---: 18/03/2013
-===============================================================================================================================
 Descrição---------: Função utilizada no botão de legenda mostrar o significado de cada cor	
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1222,11 +1163,8 @@ Return(.T.)
 Programa----------: AOMS015R
 Autor-------------: Erich Buttner
 Data da Criacao---: 18/03/2013
-===============================================================================================================================
 Descrição---------: Tela do pedido de Venda chamada a partir do botão Avalia na tela principal		
-===============================================================================================================================
 Parametros--------: _cped - Numero do pedido
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1246,27 +1184,27 @@ aLigacoes := {}
 aCC       := {}
 LCOORD := .F.
 
-DbSelectArea("SC6")
-SC6->( DBSETORDER(1) )
-SC6->( DBSEEK(xFilial("SC6")+ALLTRIM(CPED),.T.) )
+DBSelectArea("SC6")
+SC6->( DBSetOrder(1) )
+SC6->( DBSeek(xFilial("SC6")+AllTrim(CPED),.T.) )
 
-SC5->( DBSETORDER(1) )
-SC5->( DBSEEK(xFilial("SC5")+ALLTRIM(CPED)) )
+SC5->( DBSetOrder(1) )
+SC5->( DBSeek(xFilial("SC5")+AllTrim(CPED)) )
 
 nQtd2UM := 0
 nPrcMax := 0
 
-DA1->(Dbsetorder(1))
+DA1->(DBSetOrder(1))
 
-While !Eof() .AND. SC6->C6_NUM == ALLTRIM(CPED)
+While !Eof() .And. SC6->C6_NUM == AllTrim(CPED)
 
 /*
-	_aTab	:= u_ittabprc( IIF(EMPTY(SC5->C5_FILGCT),SC5->C5_FILIAL,C5_FILGCT), IIF(EMPTY(SC5->C5_I_FILFT),SC5->C5_FILIAL,SC5->C5_I_FILFT),;
+	_aTab	:= u_ittabprc( IIf(Empty(SC5->C5_FILGCT),SC5->C5_FILIAL,C5_FILGCT), IIf(Empty(SC5->C5_I_FILFT),SC5->C5_FILIAL,SC5->C5_I_FILFT),;
 									SC5->C5_VEND3,SC5->C5_VEND2,SC5->C5_VEND1,SC5->C5_CLIENTE,SC5->C5_LOJACLI,.T.,SC5->C5_I_TAB,SC5->C5_VEND4,SC5->C5_I_GRPVE)
 	_ctab := _atab[1]
 	
 
-	_atabs	:= u_ittabprc( IIF(EMPTY(SC5->C5_FILGCT),SC5->C5_FILIAL,C5_FILGCT), IIF(EMPTY(SC5->C5_I_FILFT),SC5->C5_FILIAL,SC5->C5_I_FILFT),;
+	_atabs	:= u_ittabprc( IIf(Empty(SC5->C5_FILGCT),SC5->C5_FILIAL,C5_FILGCT), IIf(Empty(SC5->C5_I_FILFT),SC5->C5_FILIAL,SC5->C5_I_FILFT),;
 									SC5->C5_VEND3,SC5->C5_VEND2,SC5->C5_VEND1,SC5->C5_CLIENTE,SC5->C5_LOJACLI,.T.,SC5->C5_I_TAB,SC5->C5_VEND4,SC5->C5_I_GRPVE)
 
 	_ctabs := _atabs[1]
@@ -1274,7 +1212,7 @@ While !Eof() .AND. SC6->C6_NUM == ALLTRIM(CPED)
     _nPrcMin:=9999
 	_nPrcTabela:=0
 	_nPesoFaixa:=0
-	If DA1->(Dbseek(xFilial("DA1")+SC5->C5_I_TAB+SC6->C6_PRODUTO))
+	If DA1->(DBSeek(xFilial("DA1")+SC5->C5_I_TAB+SC6->C6_PRODUTO))
 
 		_nPesoFaixa := SC6->C6_I_FXPES
 
@@ -1284,15 +1222,15 @@ While !Eof() .AND. SC6->C6_NUM == ALLTRIM(CPED)
 		ElseIf _nPesoFaixa == 2
 			_nPrcTabela := DA1->DA1_I_PRF2
 			_nPrcMin    := DA1->DA1_I_PMF2
-		else
+		Else
 			_nPrcTabela := DA1->DA1_I_PRF1						
 			_nPrcMin    := DA1->DA1_I_PMF1
-		ENDIF					
+		EndIf					
 
-	ENDIF
-	dbSelectArea("SB1")
-	dbSetOrder(1)
-	dbSeek(xFilial("SB1") + SC6->C6_PRODUTO)
+	EndIf
+	DBSelectArea("SB1")
+	DBSetOrder(1)
+	DBSeek(xFilial("SB1") + SC6->C6_PRODUTO)
 
  	nFator  := SB1->B1_CONV 
 	cTipConv:= SB1->B1_TIPCONV
@@ -1313,10 +1251,10 @@ While !Eof() .AND. SC6->C6_NUM == ALLTRIM(CPED)
 	//Puxa dados de desconto contratual
 	_aVlrDesc := U_veriContrato( SC6->C6_CLI , SC6->C6_LOJA , SC6->C6_PRODUTO ) 
 	 	
-	AAdd(aCC, {		SC6->C6_ITEM,;
-					alltrim(SC6->C6_PRODUTO),;
-					alltrim(substr(GetAdvFVal("SB1","B1_DESC",xFilial("SB1")+SC6->C6_PRODUTO,1,""),1,40)),;
-					Transform(SC6->C6_QTDVEN,"@E 999,999") + " " + alltrim(SC6->C6_UM),;
+	aAdd(aCC, {		SC6->C6_ITEM,;
+					AllTrim(SC6->C6_PRODUTO),;
+					AllTrim(SubStr(GetAdvFVal("SB1","B1_DESC",xFilial("SB1")+SC6->C6_PRODUTO,1,""),1,40)),;
+					Transform(SC6->C6_QTDVEN,"@E 999,999") + " " + AllTrim(SC6->C6_UM),;
 					Transform(nQtd2UM,"@E 99,999") + " " + 	GetAdvFVal("SB1","B1_SEGUM",xFilial("SB1")+SC6->C6_PRODUTO,1,""),;
 					Transform(SC6->C6_PRCVEN, "@E 9,999.99"),;
 					Transform(_aVlrDesc[1], "@E 99.99"),;
@@ -1324,18 +1262,18 @@ While !Eof() .AND. SC6->C6_NUM == ALLTRIM(CPED)
 					Transform(_nPrcMin, "@E 9,999.99") + "   --->" + Transform(_nPrcTabela, "@E 9,999.99"),;
 					Transform(_nPrcMin, "@E 9,999.99") + "   --->" + Transform(_nPrcTabela, "@E 9,999.99"),;
 					Transform(SC6->C6_QTDVEN*SC6->C6_PRCVEN, "@E 999,999.99"),;
-					IF(SC6->C6_PRCVEN < _nPrcMin .OR. SC6->C6_PRCVEN > _nPrcTabela,"B"," "),;
-					IF(SC6->C6_PRCVEN < _nPrcMin .OR. SC6->C6_PRCVEN > _nPrcTabela,"B"," ")})
+					If(SC6->C6_PRCVEN < _nPrcMin .Or. SC6->C6_PRCVEN > _nPrcTabela,"B"," "),;
+					If(SC6->C6_PRCVEN < _nPrcMin .Or. SC6->C6_PRCVEN > _nPrcTabela,"B"," ")})
 					
-	SC6->( DbSkip() )
+	SC6->( DBSkip() )
 	
 End
 
-DbSelectArea("SC5")
-SC5->( DBSETORDER(1) )
-SC5->( DBSEEK(xFilial("SC5")+ALLTRIM(CPED),.T.) )
+DBSelectArea("SC5")
+SC5->( DBSetOrder(1) )
+SC5->( DBSeek(xFilial("SC5")+AllTrim(CPED),.T.) )
 
-aLigacoes := ASort(aCC,,,{|x,y|x[1]<y[1]})
+aLigacoes := aSort(aCC,,,{|x,y|x[1]<y[1]})
 
 If Len(aLigacoes) <= 0
 
@@ -1343,21 +1281,21 @@ If Len(aLigacoes) <= 0
 	CursorArrow()
 	Return(.F.)
 	
-Endif
+EndIf
 lClos := .F.
 DEFINE MSDIALOG _oDlgHist FROM aSize[7],000 TO aSize[6],aSize[5] TITLE "Itens do Pedido " + CPED  PIXEL  //"Historico" //750SC5->C5_NUM
 
-_cnomefil := alltrim(TMP->FILIAL) + " / " + FWFilialName(cEmpAnt,TMP->FILIAL)
+_cnomefil := AllTrim(TMP->FILIAL) + " / " + FWFilialName(cEmpAnt,TMP->FILIAL)
 
-If empty(TMP->FILFAT)
+If Empty(TMP->FILFAT)
 
-	_cnomefat := alltrim(TMP->FILIAL) + " / " + FWFilialName(cEmpAnt,TMP->FILIAL)
+	_cnomefat := AllTrim(TMP->FILIAL) + " / " + FWFilialName(cEmpAnt,TMP->FILIAL)
 	
 Else
 
-	_cnomefat := alltrim(TMP->FILFAT) + " / " + FWFilialName(cEmpAnt,TMP->FILFAT)
+	_cnomefat := AllTrim(TMP->FILFAT) + " / " + FWFilialName(cEmpAnt,TMP->FILFAT)
 
-Endif
+EndIf
 
 If TMP->TROCANF = "S"
 
@@ -1367,48 +1305,48 @@ Else
 
 	_cnomefat := "Faturamento Direto - " + _cnomefat
 
-Endif
+EndIf
 
 @ 005,005 Say "Pedido:" 
-@ 005,045 Get TMP->NUMPED Picture "@!"  SIZE 050,10 when .f. 
-@ 005,095 Get _cnomefil   Picture "@!"  SIZE 200,10 when .f. 
+@ 005,045 Get TMP->NUMPED Picture "@!"  SIZE 050,10 when .F. 
+@ 005,095 Get _cnomefil   Picture "@!"  SIZE 200,10 when .F. 
 
 @ 005,330 Say "Filial Faturamento:" 
-@ 005,375 Get _cnomefat   Picture "@!"  SIZE 200,10 when .f. 
+@ 005,375 Get _cnomefat   Picture "@!"  SIZE 200,10 when .F. 
 
 @ 020,005 Say "Cliente:"
 
-_ccodcomp := alltrim(SC5->C5_CLIENTE) + " / " + alltrim(SC5->C5_LOJACLI)
+_ccodcomp := AllTrim(SC5->C5_CLIENTE) + " / " + AllTrim(SC5->C5_LOJACLI)
 
-@ 020,045 Get _ccodcomp  Picture "@!"  SIZE 050,10 when .f. 
-@ 020,095 Get AllTrim(GetAdvFval("SA1","A1_NOME",xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI,1,"")) Picture "@!"  SIZE 200,10 when .f. 
+@ 020,045 Get _ccodcomp  Picture "@!"  SIZE 050,10 when .F. 
+@ 020,095 Get AllTrim(GetAdvFval("SA1","A1_NOME",xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI,1,"")) Picture "@!"  SIZE 200,10 when .F. 
 
 @ 020,330 Say "Loja cliente: " 
-@ 020,375 Get AllTrim(GetAdvFval("SA1","A1_NREDUZ",xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI,1,"")) Picture "@!"  SIZE 200,10 when .f.
+@ 020,375 Get AllTrim(GetAdvFval("SA1","A1_NREDUZ",xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI,1,"")) Picture "@!"  SIZE 200,10 when .F.
 
 @ 035,005 Say "Representante:"
-@ 035,045 Get SC5->C5_VEND1 Picture "@!"  SIZE 050,10 when .f. 
-@ 035,095 Get AllTrim(GetAdvFval("SA3","A3_NOME",xFilial("SA3")+SC5->C5_VEND1,1,"")) Picture "@!"  SIZE 200,10 when .f.  
+@ 035,045 Get SC5->C5_VEND1 Picture "@!"  SIZE 050,10 when .F. 
+@ 035,095 Get AllTrim(GetAdvFval("SA3","A3_NOME",xFilial("SA3")+SC5->C5_VEND1,1,"")) Picture "@!"  SIZE 200,10 when .F.  
 
 @ 050,005 Say "Supervisor:"
-@ 050,045 Get SC5->C5_VEND4 Picture "@!"  SIZE 050,10 when .f. 
-@ 050,095 Get AllTrim(GetAdvFval("SA3","A3_NOME",xFilial("SA3")+SC5->C5_VEND4,1,"")) Picture "@!"  SIZE 200,10 when .f.  
+@ 050,045 Get SC5->C5_VEND4 Picture "@!"  SIZE 050,10 when .F. 
+@ 050,095 Get AllTrim(GetAdvFval("SA3","A3_NOME",xFilial("SA3")+SC5->C5_VEND4,1,"")) Picture "@!"  SIZE 200,10 when .F.  
 
 @ 065,005 Say "Coordenador:"
-@ 065,045 Get SC5->C5_VEND2 Picture "@!"  SIZE 050,10 when .f. 
-@ 065,095 Get AllTrim(GetAdvFval("SA3","A3_NOME",xFilial("SA3")+SC5->C5_VEND2,1,"")) Picture "@!"  SIZE 200,10 when .f.
+@ 065,045 Get SC5->C5_VEND2 Picture "@!"  SIZE 050,10 when .F. 
+@ 065,095 Get AllTrim(GetAdvFval("SA3","A3_NOME",xFilial("SA3")+SC5->C5_VEND2,1,"")) Picture "@!"  SIZE 200,10 when .F.
 
 @ 080,005 Say "Gerente:"
-@ 080,045 Get SC5->C5_VEND3 Picture "@!"  SIZE 050,10 when .f. 
-@ 080,095 Get AllTrim(GetAdvFval("SA3","A3_NOME",xFilial("SA3")+SC5->C5_VEND3,1,"")) Picture "@!"  SIZE 200,10 when .f.
+@ 080,045 Get SC5->C5_VEND3 Picture "@!"  SIZE 050,10 when .F. 
+@ 080,095 Get AllTrim(GetAdvFval("SA3","A3_NOME",xFilial("SA3")+SC5->C5_VEND3,1,"")) Picture "@!"  SIZE 200,10 when .F.
 
-_ctabela := SC5->C5_I_TAB + " - " + POSICIONE("DA0",1,xFilial("DA0")+SC5->C5_I_TAB ,'DA0_DESCRI') + " Faixa " + Str(_nPesoFaixa)
+_ctabela := SC5->C5_I_TAB + " - " + Posicione("DA0",1,xFilial("DA0")+SC5->C5_I_TAB ,'DA0_DESCRI') + " Faixa " + Str(_nPesoFaixa)
 @ 065,330 Say "Tabela de preços padrão:" 
-@ 065,400 Get  _ctabela  Picture "@!"  SIZE 200,10 when .f. 
+@ 065,400 Get  _ctabela  Picture "@!"  SIZE 200,10 when .F. 
 
-_ctabels := SC5->C5_I_TAB  + " - " + POSICIONE("DA0",1,xFilial("DA0")+SC5->C5_I_TAB ,'DA0_DESCRI') + " Faixa " + Str(_nPesoFaixa)
+_ctabels := SC5->C5_I_TAB  + " - " + Posicione("DA0",1,xFilial("DA0")+SC5->C5_I_TAB ,'DA0_DESCRI') + " Faixa " + Str(_nPesoFaixa)
 @ 080,330 Say "Tabela de preços simulador:" 
-@ 080,400 Get  _ctabels  Picture "@!"  SIZE 200,10 when .f. 
+@ 080,400 Get  _ctabels  Picture "@!"  SIZE 200,10 when .F. 
 
 
 
@@ -1446,17 +1384,17 @@ oLbx:Refresh()
 oLbx:SetFocus(.T.)
 
 @ aSize[4]-_nLB,aSize[3]-260	Button "Histórico"	Size 037,012 action ( AOMS015CP() )
-@ aSize[4]-_nLB,aSize[3]-195	Button "Rejeitar"	Size 037,012 action (Iif(AOMS015E(2),(lClos := .T.,_oDlgHist:end()),.F.) )
-@ aSize[4]-_nLB,aSize[3]-130	Button "Liberar"	Size 037,012 action (Iif(AOMS015E(1),(lClos := .T.,_oDlgHist:end()),.F.))
+@ aSize[4]-_nLB,aSize[3]-195	Button "Rejeitar"	Size 037,012 action (IIf(AOMS015E(2),(lClos := .T.,_oDlgHist:end()),.F.) )
+@ aSize[4]-_nLB,aSize[3]-130	Button "Liberar"	Size 037,012 action (IIf(AOMS015E(1),(lClos := .T.,_oDlgHist:end()),.F.))
 @ aSize[4]-_nLB,aSize[3]-65 	Button "&Sair" 		Size 037,012 action (lClos := .F.,_oDlgHist:end())
 
 ACTIVATE MSDIALOG _oDlgHist CENTER ON INIT CursorArrow()
 
 oMark:oBrowse:Refresh(.T.)
 
-IF lClos 
+If lClos 
    Close(oDlgLIb)
-ENDIF
+EndIf
 
 Return
 
@@ -1465,11 +1403,8 @@ Return
 Programa----------: AOMS015E
 Autor-------------: Erich Buttner
 Data da Criacao---: 18/03/2013
-===============================================================================================================================
 Descrição---------: Função chamada para a liberação ou rejeição de acordo com a chamada da mesma pelo seu respectivo botão	
-===============================================================================================================================
 Parametros--------: _ctipo - 1 Libera - 2 Bloqueia
-===============================================================================================================================
 Retorno-----------: .T.
 ===============================================================================================================================
 */
@@ -1477,21 +1412,21 @@ Static Function AOMS015E(cTipo)
 
 Local _ntotqtd 	:= 0
 Local _ntotprc 	:= 0
-Local _cmotivo 	:= space(100)
+Local _cmotivo 	:= Space(100)
 Local _nopc 		:= 0
 Local _odlg		:= nil
 Public lRetLib
 
 
-Do while _nopc == 0 .or. ( empty(_cmotivo) .and. _nopc == 1) 
+While _nopc == 0 .Or. ( Empty(_cmotivo) .And. _nopc == 1) 
 
-    _cmotivo:=IF(ctipo = 1, "Autorizado"+SPACE(100-LEN("Autorizado")) , SPACE(100) )
+    _cmotivo:=If(ctipo = 1, "Autorizado"+Space(100-Len("Autorizado")) , Space(100) )
 
 	DEFINE MSDIALOG _oDlg;
-				 TITLE "Confirmar Motivo de " + iif(ctipo == 1, "liberação", "rejeição") + " do pedido " + ALLTRIM(TMP->NUMPED) + " - " + posicione("SA1",1,xfilial("SA1")+TMP->CODCLI,"A1_NOME");
+				 TITLE "Confirmar Motivo de " + IIf(ctipo == 1, "liberação", "rejeição") + " do pedido " + AllTrim(TMP->NUMPED) + " - " + Posicione("SA1",1,xFilial("SA1")+TMP->CODCLI,"A1_NOME");
 				 FROM 000,000 TO 140,600 OF _oDlg PIXEL
 	
-	@ 006,008 SAY "Motivo de " + iif(ctipo == 1, "liberação", "rejeição") + " do pedido " + ALLTRIM(TMP->NUMPED) + " - " + posicione("SA1",1,xfilial("SA1")+TMP->CODCLI,"A1_NOME")	
+	@ 006,008 Say "Motivo de " + IIf(ctipo == 1, "liberação", "rejeição") + " do pedido " + AllTrim(TMP->NUMPED) + " - " + Posicione("SA1",1,xFilial("SA1")+TMP->CODCLI,"A1_NOME")	
 	
 	@ 020,008 GET _cmotivo PICTURE "@x"	SIZE 220,010 
 	
@@ -1504,28 +1439,28 @@ Do while _nopc == 0 .or. ( empty(_cmotivo) .and. _nopc == 1)
 
 		Return .F.
 	
-	Elseif empty(_cmotivo)
+	ElseIf Empty(_cmotivo)
 
-		u_itmsg("Obrigatório informar o motivo.","Atenção",,1)
+		U_ITMsg("Obrigatório informar o motivo.","Atenção",,1)
 
-	Endif
+	EndIf
 	
-Enddo
+EndDo
 
 
-IF cTipo == 1
+If cTipo == 1
 
-	DbSelectArea("SC6")
-	DBSETORDER(1)
-	SC6->( DBSEEK(xFilial("SC6")+ALLTRIM(TMP->NUMPED),.T.) )		
+	DBSelectArea("SC6")
+	DBSetOrder(1)
+	SC6->( DBSeek(xFilial("SC6")+AllTrim(TMP->NUMPED),.T.) )		
 	
-	While SC6->(!EOF()) .And. SC6->C6_NUM == ALLTRIM(TMP->NUMPED)
+	While SC6->(!Eof()) .And. SC6->C6_NUM == AllTrim(TMP->NUMPED)
 	
  		_ntotqtd += SC6->C6_QTDVEN
  		_ntotprc += SC6->C6_PRCVEN
  		
- 		Reclock("SC6",.F.)
-   	 	SC6->C6_I_LIBPE := U_UCFG001(1) 
+ 		RecLock("SC6",.F.)
+   	 	SC6->C6_I_LIBPE := FWSFAllUsers({__cUserID},{"USR_FILIAL"})[1][3]+FWSFAllUsers({__cUserID},{"USR_CODFUNC"})[1][3]
    	 	SC6->C6_I_BLPRC := "L" 
    	 	SC6->C6_I_LLIBP := SC6->C6_LOJA
    	 	SC6->C6_I_CLILP := SC6->C6_CLI
@@ -1534,33 +1469,33 @@ IF cTipo == 1
    	 	SC6->C6_I_MOTLP := _cmotivo
    	 	SC6->C6_I_PLIBP := DDATABASE + 30
    	 	SC6->C6_I_DLIBP := DDATABASE
-    	SC6->(MsUnLock())
-		SC6->(DbSkip())
+    	SC6->(MSUnLock())
+		SC6->(DBSkip())
 	
 	EndDo
 
 
-	DbSelectArea("SC5")
-	SC5->( DBSETORDER(1) )
-	SC5->( DBSEEK(xFilial("SC5")+ALLTRIM(TMP->NUMPED),.T.) )	
-	_cusernome := UsrFullName(__cUserID)	
+	DBSelectArea("SC5")
+	SC5->( DBSetOrder(1) )
+	SC5->( DBSeek(xFilial("SC5")+AllTrim(TMP->NUMPED),.T.) )	
+	_cusernome := UsrFullName(__cUserId)	
 	
-	While SC5->(!EOF()) .And. SC5->C5_NUM == ALLTRIM(TMP->NUMPED)
+	While SC5->(!Eof()) .And. SC5->C5_NUM == AllTrim(TMP->NUMPED)
 	
- 		Reclock("SC5",.F.)
+ 		RecLock("SC5",.F.)
    	 	SC5->C5_I_BLPRC := "L"
    	 	SC5->C5_I_DTLIP := dDataBase
-   	 	SC5->C5_I_HLIBP := TIME()
+   	 	SC5->C5_I_HLIBP := Time()
    	 	SC5->C5_I_VLIBP := _ntotprc
    	 	SC5->C5_I_QLIBP := _ntotqtd
    	 	SC5->C5_I_CLILP := SC5->C5_CLIENTE
    	 	SC5->C5_I_LLIBP := SC5->C5_LOJACLI
    	 	SC5->C5_I_MOTLP := _cmotivo
    	 	SC5->C5_I_ULIBP := _cusernome
-   	 	SC5->C5_I_MLIBP := U_UCFG001(1) 
+   	 	SC5->C5_I_MLIBP := FWSFAllUsers({__cUserID},{"USR_FILIAL"})[1][3]+FWSFAllUsers({__cUserID},{"USR_CODFUNC"})[1][3]
    	 	SC5->C5_I_PLIBP := ddatabase + 30
    	 	
-    	SC5->(MsUnLock())
+    	SC5->(MSUnLock())
     	
     	//==============================================================
 		//Envia interface para o rdc com status do pedido
@@ -1569,31 +1504,31 @@ IF cTipo == 1
 
 			U_ENVSITPV()   //Envia interface de alteração de situação do pedido atual
     
-		Endif
+		EndIf
     	
-		SC5->(DbSkip())
+		SC5->(DBSkip())
 		
 	EndDo
 	
 	
 Else
 
-	DbSelectArea("SC5")
-	SC5->( DBSETORDER(1) )
-	SC5->( DBSEEK(xFilial("SC5")+ALLTRIM(TMP->NUMPED),.T.) )		
-	_cusernome := UsrFullName(__cUserID)
+	DBSelectArea("SC5")
+	SC5->( DBSetOrder(1) )
+	SC5->( DBSeek(xFilial("SC5")+AllTrim(TMP->NUMPED),.T.) )		
+	_cusernome := UsrFullName(__cUserId)
 	 
-	While SZW->(!EOF()) .And. SC5->C5_NUM == ALLTRIM(TMP->NUMPED)
+	While SZW->(!Eof()) .And. SC5->C5_NUM == AllTrim(TMP->NUMPED)
 	
- 		Reclock("SC5",.F.)
+ 		RecLock("SC5",.F.)
    	 	SC5->C5_I_BLPRC := "R"
    	 	SC5->C5_I_DTLIB := dDataBase
    	 	SC5->C5_I_ULIBP := _cusernome
    	 	SC5->C5_I_MOTLP := _cmotivo
-   	 	SC5->C5_I_MLIBP := U_UCFG001(1)
+   	 	SC5->C5_I_MLIBP := FWSFAllUsers({__cUserID},{"USR_FILIAL"})[1][3]+FWSFAllUsers({__cUserID},{"USR_CODFUNC"})[1][3]
    	 	SC5->C5_I_DTLIP := dDataBase
-   	 	SC5->C5_I_HLIBP := TIME() 
-    	SC5->(MsUnLock())
+   	 	SC5->C5_I_HLIBP := Time() 
+    	SC5->(MSUnLock())
     	
     	//==============================================================
 		//Envia interface para o rdc com status do pedido
@@ -1602,23 +1537,23 @@ Else
 
 			U_ENVSITPV()   //Envia interface de alteração de situação do pedido atual
     
-		Endif
+		EndIf
     	
-		SC5->(DbSkip())
+		SC5->(DBSkip())
 		
 	EndDo	
 
-	DbSelectArea("SC6")
-	SC6->( DBSETORDER(1) )
-	SC6->( DBSEEK(xFilial("SC6")+ALLTRIM(TMP->NUMPED),.T.) )		
+	DBSelectArea("SC6")
+	SC6->( DBSetOrder(1) )
+	SC6->( DBSeek(xFilial("SC6")+AllTrim(TMP->NUMPED),.T.) )		
 	
-	While SC6->(!EOF()) .And. SC6->C6_NUM == ALLTRIM(TMP->NUMPED)
+	While SC6->(!Eof()) .And. SC6->C6_NUM == AllTrim(TMP->NUMPED)
 	
- 		Reclock("SC6",.F.)
-   	 	SC6->C6_I_LIBPE := U_UCFG001(1)
+ 		RecLock("SC6",.F.)
+   	 	SC6->C6_I_LIBPE := FWSFAllUsers({__cUserID},{"USR_FILIAL"})[1][3]+FWSFAllUsers({__cUserID},{"USR_CODFUNC"})[1][3]
    	 	SC6->C6_I_BLPRC := "R" 
-    	SC6->(MsUnLock())
-		SC6->(DbSkip())
+    	SC6->(MSUnLock())
+		SC6->(DBSkip())
 		
 	EndDo
 
@@ -1631,11 +1566,8 @@ Return .T.
 Programa----------: AOMS0158
 Autor-------------: Erich Buttner
 Data da Criacao---: 18/03/2013
-===============================================================================================================================
 Descrição---------: Funcao que fecha a tela
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1651,18 +1583,15 @@ Return
 Programa----------: AOMS0159
 Autor-------------: Erich Buttner
 Data da Criacao---: 18/03/2013
-===============================================================================================================================
 Descrição---------: Função que chama autorização ou bloqueio do pedido
-===============================================================================================================================
 Parametros--------: __cBotao - 1 - avalia pedido do portal
 							   2 - avalia pedido de vendas
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS0159(_cBotao)
 
-Local _cMatric  := U_UCFG001(1) 
+Local _cMatric  := FWSFAllUsers({__cUserID},{"USR_FILIAL"})[1][3]+FWSFAllUsers({__cUserID},{"USR_CODFUNC"})[1][3]
 Local _cAutoriz := GetAdvFVal("ZZL","ZZL_APRPRC",xFilial("ZZL")+_cMatric,1,"")
 
 //Mantém browse aberto
@@ -1682,7 +1611,7 @@ If _cAutoriz == "S"
 
 Else
 
-	u_itmsg("Você Não Tem Autorização Para Efetuar a Liberação/Rejeição do Preço","Atenção",,1)
+	U_ITMsg("Você Não Tem Autorização Para Efetuar a Liberação/Rejeição do Preço","Atenção",,1)
 
 EndIf
 
@@ -1693,21 +1622,18 @@ Return
 Programa----------: AOMS015PP
 Autor-------------: Josué Danich
 Data da Criacao---: 08/04/2016
-===============================================================================================================================
 Descrição---------: Prepara dados para tela para pedidos do portal
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS015PP()
 Local _cVend1, _cVend2, _cVend3, _cVend4
 
-Procregua(3)
+ProcRegua(3)
 
-Incproc("")
-Incproc("Carregando pedidos do portal...")
+IncProc("")
+IncProc("Carregando pedidos do portal...")
 
 //========================================
 // Monta Query 
@@ -1742,15 +1668,15 @@ cQuery += " 			ZW_SENHA SENHA,"
 cQuery += " 			ZW_FECENT DT_ENTREG,"
 cQuery += " 			ZW_EVENTO EVENTO,"
 cQuery += " 			ZW_STATUS STAT_ZW,"
-cQuery += "             CASE 
+cQuery += "             Case 
 cQuery += "					WHEN ZW_FILPRO = '0 '  THEN '  '
-cQuery += "					ELSE ZW_FILPRO
+cQuery += "					Else ZW_FILPRO
 cQuery += "				END AS FILPRO, 			
 cQuery += " 			ZW_IDPED NUMPED,"
 cQuery += " 			ZW_ENVWF BLOPRC"
 cQuery += " FROM SZW010 "
 cQuery += " WHERE ZW_STATUS IN ('L','P','Q') "
-cQuery += " 			AND "+Iif (MV_PAR02 == 1,"ZW_BLOPRC = 'R'", Iif(MV_PAR02 == 2,"ZW_BLOPRC = 'B'", "(ZW_BLOPRC = 'R' OR ZW_BLOPRC = 'B')"))
+cQuery += " 			AND "+IIf (MV_PAR02 == 1,"ZW_BLOPRC = 'R'", IIf(MV_PAR02 == 2,"ZW_BLOPRC = 'B'", "(ZW_BLOPRC = 'R' OR ZW_BLOPRC = 'B')"))
 cQuery += " 			AND D_E_L_E_T_ = ' ' "
 cQuery += " GROUP BY ZW_FILIAL,"
 cQuery += " 			ZW_TIPO,"
@@ -1786,26 +1712,26 @@ cQuery := ChangeQuery(cQuery)
 //========================================
 If Select("TRB") >0
 
-	dbSelectArea("TRB")
-	dbCloseArea()
-	Endif
+	DBSelectArea("TRB")
+	DBCloseArea()
+	EndIf
 	If Select("TMP") >0
-		dbSelectArea("TMP")
-	dbCloseArea()
+		DBSelectArea("TMP")
+	DBCloseArea()
 
-Endif
+EndIf
 
 //================================================
 // Monta Area de Trabalho executando a Query 
 //================================================
 TCQUERY cQuery New Alias "TRB"
-dbSelectArea("TRB")
-dbGoTop()
+DBSelectArea("TRB")
+DBGoTop()
 //================================================
 // Monta arquivo temporario 
 //================================================
 
-Incproc("Montando arquivo temporario...")
+IncProc("Montando arquivo temporario...")
 
 _aCpoTmp:={}
 
@@ -1867,9 +1793,9 @@ _otemp:Create()
 //================================================
 SA3->(DBSetOrder(1))
 
-dbSelectArea("TMP")
-While !TRB->(EOF())
-    SA3->(DbSeek(xFilial("SA3")+TRB->VEND1))
+DBSelectArea("TMP")
+While !TRB->(Eof())
+    SA3->(DBSeek(xFilial("SA3")+TRB->VEND1))
     _cVend1 := TRB->VEND1     // REPRESENTANTE
 	_cVend2 := SA3->A3_SUPER  // COORDENADOR
 	_cVend3 := SA3->A3_GEREN  // GERENTE
@@ -1887,8 +1813,8 @@ While !TRB->(EOF())
        _cVend4 := TRB->VEND4
     EndIf 
 
-	DbSelectArea("TMP")
-	RecLock("TMP",.t.)
+	DBSelectArea("TMP")
+	RecLock("TMP",.T.)
 	TMP->OK			    := ""
 	TMP->FILIAL 		:= TRB->FILIAL
 	TMP->FILPRO 		:= TRB->FILPRO
@@ -1913,7 +1839,7 @@ While !TRB->(EOF())
 	TMP->DESC3			:= TRB->DESC3
 	TMP->DESC4			:= TRB->DESC4
 	TMP->TAB_PREC		:= TRB->TAB_PREC
-	TMP->DTEMISS		:= SUBSTR(TRB->DTEMISS,7,2)+"/"+SUBSTR(TRB->DTEMISS,5,2)+"/"+SUBSTR(TRB->DTEMISS,1,4)
+	TMP->DTEMISS		:= SubStr(TRB->DTEMISS,7,2)+"/"+SubStr(TRB->DTEMISS,5,2)+"/"+SubStr(TRB->DTEMISS,1,4)
 	TMP->TPFRETE		:= TRB->TPFRETE
 	TMP->TRANSP		    := TRB->TRANSP
 	TMP->DESPESA		:= TRB->DESPESA
@@ -1922,7 +1848,7 @@ While !TRB->(EOF())
 	TMP->OBSCOMER		:= TRB->OBSCOMER
 	TMP->HORAENTR		:= TRB->HORAENTR
 	TMP->SENHA			:= TRB->SENHA
-	TMP->DT_ENTREG	    := SUBSTR(TRB->DT_ENTREG,7,2)+"/"+SUBSTR(TRB->DT_ENTREG,5,2)+"/"+SUBSTR(TRB->DT_ENTREG,1,4)
+	TMP->DT_ENTREG	    := SubStr(TRB->DT_ENTREG,7,2)+"/"+SubStr(TRB->DT_ENTREG,5,2)+"/"+SubStr(TRB->DT_ENTREG,1,4)
 	TMP->EVENTO		    := TRB->EVENTO
 	TMP->STAT_ZW		:= TRB->STAT_ZW
 	TMP->BLOPRC  		:= TRB->BLOPRC
@@ -1931,23 +1857,23 @@ While !TRB->(EOF())
 	TMP->NREDUZ         := Posicione("SA1",1,xFilial("SA1")+TRB->CODCLI+TRB->LOJA,"A1_NREDUZ") 
 
 
-	TMP->(MsUnlock())
-	DbSelectArea("TRB")
-	TRB->( dbSkip() )
+	TMP->(MSUnLock())
+	DBSelectArea("TRB")
+	TRB->( DBSkip() )
 
 End
 	
-TRB->(dbCloseArea())
+TRB->(DBCloseArea())
 
 _aCores:={}
 
 bped := {|| AOMS015O()} //monta váriavel de legenda
 
-AADD(_aCores,{'Eval(bped)==""' ,"BR_VERDE"})
-AADD(_aCores,{'Eval(bped)=="1"',"BR_VERMELHO"})
-AADD(_aCores,{'Eval(bped)=="2"',"BR_CINZA"})
-AADD(_aCores,{'Eval(bped)=="4"',"BR_VERDE_ESCURO"})
-AADD(_aCores,{'Eval(bped)=="5"',"BR_AMARELO"}) 
+aAdd(_aCores,{'Eval(bped)==""' ,"BR_VERDE"})
+aAdd(_aCores,{'Eval(bped)=="1"',"BR_VERMELHO"})
+aAdd(_aCores,{'Eval(bped)=="2"',"BR_CINZA"})
+aAdd(_aCores,{'Eval(bped)=="4"',"BR_VERDE_ESCURO"})
+aAdd(_aCores,{'Eval(bped)=="5"',"BR_AMARELO"}) 
 
 
 
@@ -2000,20 +1926,17 @@ Return
 Programa----------: AOMS015P2
 Autor-------------: Josué Danich
 Data da Criacao---: 08/04/2016
-===============================================================================================================================
 Descrição---------: Prepara dados para tela para pedido de vendas
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS015P2()
 
-Procregua(3)
+ProcRegua(3)
 
-Incproc("")
-Incproc("Carregando pedidos de venda")
+IncProc("")
+IncProc("Carregando pedidos de venda")
 
 //==========================================
 // Monta Query 
@@ -2050,7 +1973,7 @@ cQuery += " 			C5_I_TRCNF TROCANF,"
 cQuery += " 			C5_I_FILFT FILFAT," 
 cQuery += " 			C5_I_BLPRC BLPRC"
 cQuery += " FROM SC5010 
-cQuery += " WHERE " + Iif (MV_PAR02 == 1,"C5_I_BLPRC = 'R' ", Iif(MV_PAR02 == 2,"C5_I_BLPRC = 'B'", "(C5_I_BLPRC = 'R' OR C5_I_BLPRC = 'B')"))
+cQuery += " WHERE " + IIf (MV_PAR02 == 1,"C5_I_BLPRC = 'R' ", IIf(MV_PAR02 == 2,"C5_I_BLPRC = 'B'", "(C5_I_BLPRC = 'R' OR C5_I_BLPRC = 'B')"))
 cQuery += " 			AND D_E_L_E_T_ = ' ' 
 cQuery += " 			AND C5_FILIAL = '"+xFilial("SC5")+"' 
 cQuery += " GROUP BY C5_FILIAL,"
@@ -2087,26 +2010,26 @@ cQuery := ChangeQuery(cQuery)
 //==========================================
 If Select("TRB") >0
 
-	dbSelectArea("TRB")
-	TRB->( dbCloseArea() )
+	DBSelectArea("TRB")
+	TRB->( DBCloseArea() )
 
-Endif
+EndIf
 
 If Select("TMP") >0
 
-	dbSelectArea("TMP")
-	TMP->( dbCloseArea() )
+	DBSelectArea("TMP")
+	TMP->( DBCloseArea() )
 
-Endif
+EndIf
 
 
 //==========================================
 // Monta Area de Trabalho executando a Query 
 //==========================================
 TCQUERY cQuery New Alias "TRB"
-dbSelectArea("TRB")
+DBSelectArea("TRB")
 
-TRB->( dbGoTop() )
+TRB->( DBGoTop() )
 
 //==========================================
 // Monta arquivo temporario 
@@ -2163,21 +2086,21 @@ _otemp:AddIndex( "05", {"CODCLI"} ) // CODIGO DO CLIENTE
 
 _otemp:Create()
 
-incproc("Carregando arquivo temporario...")
+IncProc("Carregando arquivo temporario...")
 
 //==========================================
 // Alimenta arquivo temporario 
 //==========================================
-dbSelectArea("TMP")
+DBSelectArea("TMP")
 
-While !TRB->(EOF())
+While !TRB->(Eof())
 	
-	DbSelectArea("TMP")
-	RecLock("TMP",.t.)
+	DBSelectArea("TMP")
+	RecLock("TMP",.T.)
 	TMP->OK			:= ""
 	TMP->FILIAL 		:= TRB->FILIAL
-	TMP->FILFAT 		:= IIF(EMPTY(TRB->FILFAT),TRB->FILIAL,TRB->FILFAT)
-	TMP->TROCANF 		:= IIF(TRB->TROCANF="S","S","N")
+	TMP->FILFAT 		:= IIf(Empty(TRB->FILFAT),TRB->FILIAL,TRB->FILFAT)
+	TMP->TROCANF 		:= IIf(TRB->TROCANF="S","S","N")
 	TMP->NUMPED 		:= TRB->NUMPED
 	TMP->TIPO   		:= TRB->TIPO
 	TMP->CODCLI 		:= TRB->CODCLI
@@ -2199,7 +2122,7 @@ While !TRB->(EOF())
 	TMP->DESC3			:= TRB->DESC3
 	TMP->DESC4			:= TRB->DESC4
 	TMP->TAB_PREC		:= TRB->TAB_PREC
-	TMP->DTEMISS		:= SUBSTR(TRB->DTEMISS,7,2)+"/"+SUBSTR(TRB->DTEMISS,5,2)+"/"+SUBSTR(TRB->DTEMISS,1,4)
+	TMP->DTEMISS		:= SubStr(TRB->DTEMISS,7,2)+"/"+SubStr(TRB->DTEMISS,5,2)+"/"+SubStr(TRB->DTEMISS,1,4)
 	TMP->TPFRETE		:= TRB->TPFRETE
 	TMP->TRANSP		    := TRB->TRANSP
 	TMP->DESPESA		:= TRB->DESPESA
@@ -2208,25 +2131,25 @@ While !TRB->(EOF())
 	TMP->OBSCOMER		:= TRB->OBSCOMER
 	TMP->HORAENTR		:= TRB->HORAENTR
 	TMP->SENHA			:= TRB->SENHA
-	TMP->DT_ENTREG	    := SUBSTR(TRB->DT_ENTREG,7,2)+"/"+SUBSTR(TRB->DT_ENTREG,5,2)+"/"+SUBSTR(TRB->DT_ENTREG,1,4)
+	TMP->DT_ENTREG	    := SubStr(TRB->DT_ENTREG,7,2)+"/"+SubStr(TRB->DT_ENTREG,5,2)+"/"+SubStr(TRB->DT_ENTREG,1,4)
 	TMP->BLPRC			:= TRB->BLPRC
 
 	TMP->RAZAOSOC       := Posicione("SA1",1,xFilial("SA1")+TRB->CODCLI+TRB->LOJA,"A1_NOME")   
 	TMP->NREDUZ         := Posicione("SA1",1,xFilial("SA1")+TRB->CODCLI+TRB->LOJA,"A1_NREDUZ") 
 
-	TMP->(MsUnlock())
-	DbSelectArea("TRB")
-	TRB->( dbSkip() )
+	TMP->(MSUnLock())
+	DBSelectArea("TRB")
+	TRB->( DBSkip() )
 	
 End
 
-TRB->(dbCloseArea())
+TRB->(DBCloseArea())
 
 _aCores:={}
 bped := {|| AOMS015I()} //Função que carrega váriavel com cores da legenda
-AADD(_aCores,{'Eval(bped)==""' ,"BR_VERDE"})
-AADD(_aCores,{'Eval(bped)=="1"',"BR_VERMELHO"})
-AADD(_aCores,{'Eval(bped)=="2"',"BR_CINZA"})
+aAdd(_aCores,{'Eval(bped)==""' ,"BR_VERDE"})
+aAdd(_aCores,{'Eval(bped)=="1"',"BR_VERMELHO"})
+aAdd(_aCores,{'Eval(bped)=="2"',"BR_CINZA"})
 
 //==========================================
 // Array com definicoes dos campos do browse 
@@ -2278,27 +2201,24 @@ Return
 Programa----------: AOMS015CP(
 Autor-------------: Josué Danich
 Data da Criacao---: 08/04/2016
-===============================================================================================================================
 Descrição---------: Chama tela de consulta de histórico e refaz posicionamento de tabelas
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-static function AOMS015CP()
+Static Function AOMS015CP()
 
-Local _asc5 := SC5->( Getarea() )
-Local _asa1 := SA1->( Getarea() )
+Local _asc5 := SC5->( FWGetArea() )
+Local _asa1 := SA1->( FWGetArea() )
 
 U_COMS001( 'SC5' , TMP->( TMP->FILIAL + TMP->NUMPED ) )
 
-SC5->( Restarea(_asc5) )
-SA1->( Restarea(_asa1) )
+SC5->( FWRestArea(_asc5) )
+SA1->( FWRestArea(_asa1) )
 
-DbSelectArea("SC5")
-SC5->( DBSETORDER(1) )
-SC5->( DBSEEK(TMP->FILIAL+TMP->NUMPED,.T.) )
+DBSelectArea("SC5")
+SC5->( DBSetOrder(1) )
+SC5->( DBSeek(TMP->FILIAL+TMP->NUMPED,.T.) )
 
 Return
 
@@ -2307,24 +2227,21 @@ Return
 Programa----------: AOMS015PESO
 Autor-------------: Alex Wallauer
 Data da Criacao---: 31/01/2022
-===============================================================================================================================
 Descrição---------: Rotina para calcular o Peso Bruto para validar Preço por Faixa de Peso
-===============================================================================================================================
 Parametros--------: _cFilped,_cIdPed
-===============================================================================================================================
 Retorno-----------: _nPesBruTot
 ===============================================================================================================================
 */
 Static Function AOMS015PESO(_cFilped,_cIdPed)
 Local _nPesBruTot:= 0
 Local _aAreaSZW	 := SZW->(GetArea())
-SB1->(DbSetOrder(1))
-IF SZW->(dbSeek(_cFilped+_cIdPed))
-	DO WHILE SZW->(!EOF()  .AND. SZW->ZW_FILIAL == _cFilped .AND. SZW->ZW_IDPED == _cIdPed )
-		SB1->(DbSeek(xfilial("SB1")+ SZW->ZW_PRODUTO))
+SB1->(DBSetOrder(1))
+If SZW->(DBSeek(_cFilped+_cIdPed))
+	While SZW->(!Eof()  .And. SZW->ZW_FILIAL == _cFilped .And. SZW->ZW_IDPED == _cIdPed )
+		SB1->(DBSeek(xFilial("SB1")+ SZW->ZW_PRODUTO))
 		_nPesBruTot:=(SB1->B1_PESBRU * SZW->ZW_QTDVEN)
-		SZW->(DBSKIP())
-	ENDDO
-ENDIF
-RestArea(_aAreaSZW)
-RETURN _nPesBruTot
+		SZW->(DBSkip())
+	EndDo
+EndIf
+FWRestArea(_aAreaSZW)
+Return _nPesBruTot

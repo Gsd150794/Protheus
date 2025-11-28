@@ -10,8 +10,8 @@ Lucas Borges  	  | 17/10/2019 | Removidos os Warning na compilação da release 12
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#include "report.ch"
-#include "protheus.ch"      
+#Include "report.ch"
+#Include "TOTVS.ch"      
 
 /*
 ===============================================================================================================================
@@ -55,7 +55,7 @@ Private _nVlrDePGr := 0
 Private _nVlrTotGr := 0
 Private _nVlrQtdGr := 0 
 
-pergunte(cPerg,.F.)
+Pergunte(cPerg,.F.)
 
 DEFINE REPORT oReport NAME cPerg TITLE "Descontos Contratuais Anal.Financeira" PARAMETER cPerg ACTION {|oReport| PrintReport(oReport)} Description "Este relatório emitirá os descontos contratuais gerados de acordo com os parâmetros fornecdidos pelo usuário, esta é uma nnálise financeira."
 
@@ -78,7 +78,7 @@ oReport:SetMsgPrint('AGUARDE OS DADOS DO RELATORIO ESTAO SENDO PROCESSADOS')//me
 //======================================================
 
 //Secao dados da Rede
-DEFINE SECTION oSecRede_2 OF oReport TITLE "Rede_ordem_1" TABLES "SA1","ACY" ORDERS aOrd
+DEFINE Section oSecRede_2 OF oReport TITLE "Rede_ordem_1" TABLES "SA1","ACY" ORDERS aOrd
 
 DEFINE CELL NAME "a1_grpven"	OF oSecRede_2 ALIAS "SA1"  TITLE "Rede"      SIZE 12
 DEFINE CELL NAME "acy_descri"   OF oSecRede_2 ALIAS "ACY"  TITLE "Descrição" SIZE 40
@@ -86,7 +86,7 @@ oSecRede_2:Disable()
 oSecRede_2:SetLineStyle(.T.)  
 oSecRede_2:SetLinesBefore(2) 
 
-DEFINE SECTION oSecDado_2 OF oSecRede_2 TITLE "Dados_ordem_1" TABLES "SE1","SF2"
+DEFINE Section oSecDado_2 OF oSecRede_2 TITLE "Dados_ordem_1" TABLES "SE1","SF2"
 
 DEFINE CELL NAME "MESANO"	   	OF oSecDado_2 ALIAS ""    TITLE "Mês/Ano - Vencimento" SIZE 40 BLOCK{|| aMes[Val(QRY2->MES)] + '/' + QRY2->ANO}    
 DEFINE CELL NAME "e1_valor"     OF oSecDado_2 ALIAS "SE1" TITLE "Valor a Vencer"       SIZE 25 PICTURE "@E 9,999,999,999.99"
@@ -117,14 +117,14 @@ oSecDado_2:OnPrintLine({|| cNomeRede := QRY2->a1_grpven  + " - " + SubStr(QRY2->
 //======================================================
 
 //Secao dados da Rede
-DEFINE SECTION oSecRede_3 OF oReport TITLE "Rede_ordem_2" TABLES "SE1" ORDERS aOrd
+DEFINE Section oSecRede_3 OF oReport TITLE "Rede_ordem_2" TABLES "SE1" ORDERS aOrd
 
 DEFINE CELL NAME "MESANO"	   	OF oSecRede_3 ALIAS ""    TITLE "Mês/Ano - Vencimento" SIZE 40 BLOCK{|| aMes[Val(QRY3->MES)] + '/' + QRY3->ANO}    
 
 oSecRede_3:Disable()       
 oSecRede_3:SetLineStyle(.T.) 
 
-DEFINE SECTION oSecDado_3 OF oSecRede_3 TITLE "Dados_ordem_2" TABLES "SE1","SF2","ACY"
+DEFINE Section oSecDado_3 OF oSecRede_3 TITLE "Dados_ordem_2" TABLES "SE1","SF2","ACY"
 
 DEFINE CELL NAME "a1_grpven"	OF oSecDado_3 ALIAS "SA1" TITLE "Rede"      		   SIZE 12
 DEFINE CELL NAME "acy_descri"   OF oSecDado_3 ALIAS "ACY" TITLE "Descrição" 		   SIZE 40   
@@ -171,81 +171,81 @@ Static Function PrintReport(oReport)
 Local cFiltro   := "%"    
 Private nOrdem  := oSecRede_2:GetOrder() //Busca ordem selecionada pelo usuario   
 
-oReport:SetTitle("Relação de Descontos Contratuais Orderm  " + aOrd[nOrdem] + " - Emissao de " + dtoc(mv_par02) + " até "  + dtoc(mv_par03))
+oReport:SetTitle("Relação de Descontos Contratuais Orderm  " + aOrd[nOrdem] + " - Emissao de " + DToC(MV_PAR02) + " até "  + DToC(MV_PAR03))
 
 //Define o filtro de acordo com os parametros digitados
 //Filtra Filial da SF2,SE1,SA1,ZAZ,SA3,ACY
-if !empty(alltrim(mv_par01))	
+If !Empty(AllTrim(MV_PAR01))	
 	
-	if !empty(xFilial("SF2"))
-		cFiltro   += " AND F2.F2_FILIAL IN " + FormatIn(mv_par01,";")
-	endif	                         
-	if !empty(xFilial("SE1"))
-		cFiltro   += " AND E1.E1_FILIAL IN " + FormatIn(mv_par01,";")
-	endif         
-	/*if !empty(xFilial("ZAZ"))
-		cFiltro   += " AND ZAZ.ZAZ_FILIAL IN " + FormatIn(mv_par01,";")
-	endif*/                	
-	if !empty(xFilial("SA1"))
-		cFiltro   += " AND A1.A1_FILIAL IN " + FormatIn(mv_par01,";")
-	endif
-	if !empty(xFilial("SA3"))
-		cFiltro  += " AND SA3.A3_FILIAL IN " + FormatIn(mv_par01,";")
-	endif
-	if !empty(xFilial("ACY"))
-		cFiltro  += " AND ACY.ACY_FILIAL IN " + FormatIn(mv_par01,";")
-	endif
-endif 
+	If !Empty(xFilial("SF2"))
+		cFiltro   += " AND F2.F2_FILIAL IN " + FormatIn(MV_PAR01,";")
+	EndIf	                         
+	If !Empty(xFilial("SE1"))
+		cFiltro   += " AND E1.E1_FILIAL IN " + FormatIn(MV_PAR01,";")
+	EndIf         
+	/*If !Empty(xFilial("ZAZ"))
+		cFiltro   += " AND ZAZ.ZAZ_FILIAL IN " + FormatIn(MV_PAR01,";")
+	EndIf*/                	
+	If !Empty(xFilial("SA1"))
+		cFiltro   += " AND A1.A1_FILIAL IN " + FormatIn(MV_PAR01,";")
+	EndIf
+	If !Empty(xFilial("SA3"))
+		cFiltro  += " AND SA3.A3_FILIAL IN " + FormatIn(MV_PAR01,";")
+	EndIf
+	If !Empty(xFilial("ACY"))
+		cFiltro  += " AND ACY.ACY_FILIAL IN " + FormatIn(MV_PAR01,";")
+	EndIf
+EndIf 
 
 //Filtra Emissao da SF2
-if !empty(mv_par02) .and. !empty(mv_par03)
-	cFiltro  += " AND F2.F2_EMISSAO BETWEEN '" + dtos(mv_par02) + "' AND '" + dtos(mv_par03) + "'"
-endif
+If !Empty(MV_PAR02) .And. !Empty(MV_PAR03)
+	cFiltro  += " AND F2.F2_EMISSAO BETWEEN '" + DToS(MV_PAR02) + "' AND '" + DToS(MV_PAR03) + "'"
+EndIf
 
 //Filtra a data de vencimento real do titulo
-if !empty(mv_par04) .and. !empty(mv_par05)
-	cFiltro += " AND E1.E1_VENCREA BETWEEN '" + dtos(mv_par04) + "' AND '" + dtos(mv_par05) + "'"
-endif      
+If !Empty(MV_PAR04) .And. !Empty(MV_PAR05)
+	cFiltro += " AND E1.E1_VENCREA BETWEEN '" + DToS(MV_PAR04) + "' AND '" + DToS(MV_PAR05) + "'"
+EndIf      
 
 //Filtra Cliente
-if !empty(mv_par06) .and. !empty(mv_par08)
-	cFiltro   += " AND F2.F2_CLIENTE BETWEEN '" + mv_par06 + "' AND '" + mv_par08 + "'"
-endif
+If !Empty(MV_PAR06) .And. !Empty(MV_PAR08)
+	cFiltro   += " AND F2.F2_CLIENTE BETWEEN '" + MV_PAR06 + "' AND '" + MV_PAR08 + "'"
+EndIf
 
 //Filtra Loja Cliente
-if !empty(mv_par07) .and. !empty(mv_par09)  
-	cFiltro += " AND F2.F2_LOJA BETWEEN '" + mv_par07 + "' AND '" + mv_par09 + "'"  
-endif
+If !Empty(MV_PAR07) .And. !Empty(MV_PAR09)  
+	cFiltro += " AND F2.F2_LOJA BETWEEN '" + MV_PAR07 + "' AND '" + MV_PAR09 + "'"  
+EndIf
 
 //Filtra Rede Cliente
-if !empty(mv_par10)
-	cFiltro    += " AND A1.A1_GRPVEN IN " + FormatIn(mv_par10,";")
-endif
+If !Empty(MV_PAR10)
+	cFiltro    += " AND A1.A1_GRPVEN IN " + FormatIn(MV_PAR10,";")
+EndIf
      
 //Filtra Estado Cliente
-if !empty(mv_par11) 
-	cFiltro   += " AND A1.A1_EST IN " + FormatIn(mv_par11,";")   
-endif
+If !Empty(MV_PAR11) 
+	cFiltro   += " AND A1.A1_EST IN " + FormatIn(MV_PAR11,";")   
+EndIf
 
 //Filtra Cod Municipio Cliente
-if !empty(mv_par12) 
-	cFiltro   += " AND A1.A1_COD_MUN IN " + FormatIn(mv_par12,";")
-endif
+If !Empty(MV_PAR12) 
+	cFiltro   += " AND A1.A1_COD_MUN IN " + FormatIn(MV_PAR12,";")
+EndIf
 
 //Filtra Vendedor
-if !empty(mv_par13) 
-	cFiltro   += " AND SA3.A3_COD IN " + FormatIn(mv_par13,";")     
-endif
+If !Empty(MV_PAR13) 
+	cFiltro   += " AND SA3.A3_COD IN " + FormatIn(MV_PAR13,";")     
+EndIf
 
 //Filtra Supervisor
-if !empty(mv_par14)
-	cFiltro   += " AND SA3.A3_SUPER IN " + FormatIn(mv_par14,";")
-endif
+If !Empty(MV_PAR14)
+	cFiltro   += " AND SA3.A3_SUPER IN " + FormatIn(MV_PAR14,";")
+EndIf
               
 cFiltro   += "%"
                
 //Primeira Ordem - Rede_Vencimento
-if nOrdem == 1    
+If nOrdem == 1    
              
 			oSecRede_2:Enable()
 			oSecDado_2:Enable()      
@@ -273,13 +273,13 @@ if nOrdem == 1
 					SUM(E1.e1_i_desco) e1_i_desco,
 					((SUM(E1.e1_i_desco) / SUM(E1.e1_valor)) * 100) PORCDESC    				
 				FROM 
-					%table:SE1% E1
-					JOIN %table:SF2% F2  ON F2.f2_filial = E1.e1_filial AND F2.f2_doc = E1.e1_num AND F2.f2_serie = E1.e1_prefixo AND F2.F2_CLIENTE = E1.e1_cliente AND F2.f2_loja = E1.e1_loja
-					//JOIN %table:ZAZ% ZAZ ON F2.f2_i_nrzaz = zaz.zaz_cod  
-					//JOIN %table:ZB0% ZB0 ON zaz.zaz_cod = zb0.zb0_cod
-					JOIN %table:SA1% A1  ON F2.f2_cliente = A1.a1_cod AND F2.f2_loja = A1.a1_loja
-					JOIN %table:SA3% SA3 ON F2.F2_VEND1 = SA3.A3_COD
-					JOIN %table:ACY% ACY ON A1.a1_grpven = ACY.acy_grpven
+					%Table:SE1% E1
+					JOIN %Table:SF2% F2  ON F2.f2_filial = E1.e1_filial AND F2.f2_doc = E1.e1_num AND F2.f2_serie = E1.e1_prefixo AND F2.F2_CLIENTE = E1.e1_cliente AND F2.f2_loja = E1.e1_loja
+					//JOIN %Table:ZAZ% ZAZ ON F2.f2_i_nrzaz = zaz.zaz_cod  
+					//JOIN %Table:ZB0% ZB0 ON zaz.zaz_cod = zb0.zb0_cod
+					JOIN %Table:SA1% A1  ON F2.f2_cliente = A1.a1_cod AND F2.f2_loja = A1.a1_loja
+					JOIN %Table:SA3% SA3 ON F2.F2_VEND1 = SA3.A3_COD
+					JOIN %Table:ACY% ACY ON A1.a1_grpven = ACY.acy_grpven
 				WHERE 
 					F2.%notDel%    
 					AND E1.%notDel%  
@@ -305,7 +305,7 @@ if nOrdem == 1
 			
 		
 		//Segunda Ordem - Vencimento Rede
-		Elseif nOrdem == 2   
+		ElseIf nOrdem == 2   
          	
 			oSecRede_3:Enable()
 			oSecDado_3:Enable()      
@@ -332,11 +332,11 @@ if nOrdem == 1
 					SUM(E1.e1_i_desco) e1_i_desco,
 					((SUM(E1.e1_i_desco) / SUM(E1.e1_valor)) * 100) PORCDESC    				
 				FROM 
-					%table:SE1% E1
-					JOIN %table:SF2% F2  ON F2.f2_filial = E1.e1_filial AND F2.f2_doc = E1.e1_num AND F2.f2_serie = E1.e1_prefixo AND F2.F2_CLIENTE = E1.e1_cliente AND F2.f2_loja = E1.e1_loja
-					JOIN %table:SA1% A1  ON F2.f2_cliente = A1.a1_cod AND F2.f2_loja = A1.a1_loja
-					JOIN %table:SA3% SA3 ON F2.F2_VEND1 = SA3.A3_COD
-					JOIN %table:ACY% ACY ON A1.a1_grpven = ACY.acy_grpven
+					%Table:SE1% E1
+					JOIN %Table:SF2% F2  ON F2.f2_filial = E1.e1_filial AND F2.f2_doc = E1.e1_num AND F2.f2_serie = E1.e1_prefixo AND F2.F2_CLIENTE = E1.e1_cliente AND F2.f2_loja = E1.e1_loja
+					JOIN %Table:SA1% A1  ON F2.f2_cliente = A1.a1_cod AND F2.f2_loja = A1.a1_loja
+					JOIN %Table:SA3% SA3 ON F2.F2_VEND1 = SA3.A3_COD
+					JOIN %Table:ACY% ACY ON A1.a1_grpven = ACY.acy_grpven
 				WHERE 
 					F2.%notDel%    
 					AND E1.%notDel%  

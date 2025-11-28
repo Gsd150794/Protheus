@@ -1,34 +1,17 @@
 /*
-=====================================================================================================================================
-        ------------------:		 ULTIMAS ATUALIZAÃ‡Ã•ES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-=====================================================================================================================================
-   Autor     |	Data	     | ------------------:	------------------:	Motivo ---------------:	------------------: ------------------:		
--------------------------------------------------------------------------------------------------------------------------------------
-Igor Melgaco | 14/09/2023 | Chamado 44750 - Mudança na regra de marcação automatica qdo NCC e vis. de Campos.
-Igor Melgaco | 14/09/2023 | Chamado 44750 - Inclusão de filtro por prefixo.
-Igor Melgaco | 28/09/2023 | Chamado 44750 - Implementação de compensação pela chamapda padrão MaIntBxCR.
-Igor Melgaco | 03/11/2023 | Chamado 45433 - Inclusão de parametro de filtro de exclusão de Clientes.
-Igor Melgaco | 17/11/2023 | Chamado 45466 - Adaptação para qdo rotina for chamada pelo MOMS068.
-Igor Melgaco | 01/12/2023 | Chamado 45692 - Ajustes para filtro na lista de títulos a compensar.
-Igor Melgaco | 09/01/2024 | Chamado 45466 - Ajustes para novo status de contrato compensado.
-Igor Melgaco | 04/04/2024 | Chamado 45466 - Ajustes para compensação qdo executado na Filial 01 e titulo referente ao arcordo em outra filial.
-Igor Melgaco | 04/04/2024 | Chamado 45466 - Ajustes para compensação qdo executado na Filial 01 e titulo referente ao arcordo em outra filial.
-=====================================================================================================================================
-
-=========================================================================================================================================================
-Analista         - Programador       - Inicio     - Envio      - Chamado - Motivo da Alteração
----------------------------------------------------------------------------------------------------------------------------------------------------------
-Antonio Ramos    -  Igor Melgaço     - 16/12/2024 -            - 49255   - Ajustes para mudança na exibição de campos dos registros a compensar.
-=========================================================================================================================================================
+===============================================================================================================================
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+===============================================================================================================================
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+Igor Melgaco  |04/04/2024| Chamado 45466. Ajustes para compensação qdo executado na Filial 01 e titulo referente ao arcordo em outra filial.
+Igor Melgaco  |04/04/2024| Chamado 45466. Ajustes para compensação qdo executado na Filial 01 e titulo referente ao arcordo em outra filial.
+Igor Melgaço  |16/12/2024| Chamado 49255. Ajustes para mudança na exibição de campos dos registros a compensar.
+===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-
-#INCLUDE "MFIN023.CH"
-#INCLUDE "PROTHEUS.CH"
-#Include "FWMVCDEF.CH"
+#Include "MFIN023.CH"
+#Include "TOTVS.ch"
 
 Static __PesqList
 Static aRLocks
@@ -109,15 +92,12 @@ Static _lMOMS68 := IsInCallStack("U_MOMS068")
 Programa----------: MFIN023
 Autor-------------: Igor Melgaço
 Data da Criacao---: 28/08/2023
-===============================================================================================================================
 Descrição---------: Compensação de titulos a Receber. Chamado: 44750  
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------:  
 ===============================================================================================================================
 */ 
-USER Function MFIN023(nPosArotina,lExecAuto)
+User Function MFIN023(nPosaRotina,lExecAuto)
 	Local nSavRec	:= Recno()
 	Local cMoedaTx  := ""
 	Local nA        := 0
@@ -146,7 +126,7 @@ USER Function MFIN023(nPosArotina,lExecAuto)
 	Private _dDtCompAte := CTOD("")
 	Private _nLayout    := ""
 
-	Default nPosArotina := 0
+	Default nPosaRotina := 0
 	Default lExecAuto	:= .F.
 	Default lRatFields 	:= cPaisLoc == "BRA"
 
@@ -159,7 +139,7 @@ USER Function MFIN023(nPosArotina,lExecAuto)
 	__lMotRet	:= ExistFunc("FTemMotor") .And. FTemMotor()
 	__l330Va	:= ExistFunc("F23VACAL") .And. TableInDic("FKD") .And. TableInDic("FKC") 
 	//Estrutura aTxMoedas [1] = Nome Moeda, [2] = Taxa a Ser Utilizada, [3] = Picture, [4] = Taxa do dia atual
-	Aadd(aTxMoedas, {"", 1, PesqPict("SM2","M2_MOEDA1"), 1})
+	aAdd(aTxMoedas, {"", 1, PesqPict("SM2","M2_MOEDA1"), 1})
 	
 	For nA := 2	To MoedFin()
 		cMoedaTx  :=	Str(nA, IIf(nA <= 9, 1, 2))
@@ -169,17 +149,17 @@ USER Function MFIN023(nPosArotina,lExecAuto)
 			Exit
 		Else
 			nVlMoeda := RecMoeda(dDataBase, nA)
-			Aadd(aTxMoedas, {cDescMoed, nVlMoeda, PesqPict("SM2","M2_MOEDA" + cMoedaTx), nVlMoeda} )
-		Endif
+			aAdd(aTxMoedas, {cDescMoed, nVlMoeda, PesqPict("SM2","M2_MOEDA" + cMoedaTx), nVlMoeda} )
+		EndIf
 	Next nA
 	
 	__lTxMoed := Len(aTxMoedas) > 0
-	dbSelectArea('SFQ')
-	dbSelectArea('SE1')
+	DBSelectArea('SFQ')
+	DBSelectArea('SE1')
 	
-	If nPosArotina > 0
-		bBlock := &( "{ |a,b,c,d,e,f,g,h| " + aRotina[ nPosArotina,2 ] + "(a,b,c,d,e,f,g,h) }" )
-		Eval( bBlock, Alias(), (Alias())->(Recno()),nPosArotina,/*oDlgPae*/,/*cLoteFat*/,/*cOrigem*/,/*aNumLay*/,l330Auto)
+	If nPosaRotina > 0
+		bBlock := &( "{ |a,b,c,d,e,f,g,h| " + aRotina[ nPosaRotina,2 ] + "(a,b,c,d,e,f,g,h) }" )
+		Eval( bBlock, Alias(), (Alias())->(Recno()),nPosaRotina,/*oDlgPae*/,/*cLoteFat*/,/*cOrigem*/,/*aNumLay*/,l330Auto)
 	Else
 		_aParAux    := {}
 		_aItalac_F3 := {}
@@ -202,42 +182,42 @@ USER Function MFIN023(nPosArotina,lExecAuto)
 		If _lMOMS68
 
 			//_cFiltro := " SE1->E1_FILIAL = '92' "
-			//_cFiltro += " .AND. SE1->E1_PREFIXO = 'VRB' "
-			//_cFiltro += " .AND. (SE1->E1_NUM + SE1->E1_PARCELA + SE1->E1_CLIENTE + SE1->E1_LOJA) $ '" + __cNumTit + "' "		
+			//_cFiltro += " .And. SE1->E1_PREFIXO = 'VRB' "
+			//_cFiltro += " .And. (SE1->E1_NUM + SE1->E1_PARCELA + SE1->E1_CLIENTE + SE1->E1_LOJA) $ '" + __cNumTit + "' "		
 			
 			_cFiltro := " SE1->E1_HIST = 'Ref. Acordo: " + __cNumCont +"' " 
 			
 			_lContinua := .T.
 			
 		Else
-			_bSelectSX5:={|| "SELECT DISTINCT X5_CHAVE, X5_DESCRI FROM "+RETSQLNAME("SX5")+" SX5 WHERE D_E_L_E_T_ <> '*' AND X5_TABELA = '05' ORDER BY X5_CHAVE "  }
-			AADD(_aItalac_F3,{"MV_PAR07",_bSelectSX5,{|Tab| (Tab)->X5_CHAVE }, {|Tab|(Tab)->X5_DESCRI } ,/*_bCondSA1*/ ,"Tipos de Título",,,,.F.        ,       , } )
+			_bSelectSX5:={|| "SELECT DISTINCT X5_CHAVE, X5_DESCRI FROM "+RETSQLNAME("SX5")+" SX5 WHERE D_E_L_E_T_ = ' ' AND X5_TABELA = '05' ORDER BY X5_CHAVE "  }
+			aAdd(_aItalac_F3,{"MV_PAR07",_bSelectSX5,{|Tab| (Tab)->X5_CHAVE }, {|Tab|(Tab)->X5_DESCRI } ,/*_bCondSA1*/ ,"Tipos de Título",,,,.F.        ,       , } )
 
-			_bSelectZAB:={|| "SELECT DISTINCT ZAB_PREFIX, ZAB_DESCRI FROM "+RETSQLNAME("ZAB")+" ZAB WHERE D_E_L_E_T_ <> '*' ORDER BY ZAB_PREFIX "  }
-			AADD(_aItalac_F3,{"MV_PAR08",_bSelectZAB,{|Tab| (Tab)->ZAB_PREFIX },{|Tab| (Tab)->ZAB_DESCRI }  ,/*_bCondSA1*/ ,"Prefixos",,,,.F.        ,       , } )
+			_bSelectZAB:={|| "SELECT DISTINCT ZAB_PREFIX, ZAB_DESCRI FROM "+RETSQLNAME("ZAB")+" ZAB WHERE D_E_L_E_T_ = ' ' ORDER BY ZAB_PREFIX "  }
+			aAdd(_aItalac_F3,{"MV_PAR08",_bSelectZAB,{|Tab| (Tab)->ZAB_PREFIX },{|Tab| (Tab)->ZAB_DESCRI }  ,/*_bCondSA1*/ ,"Prefixos",,,,.F.        ,       , } )
 
-			_bSelectSA1:={|| "SELECT A1_COD, A1_LOJA, A1_NREDUZ FROM SA1010 WHERE D_E_L_E_T_ <> '*' "}
-			AADD(_aItalac_F3,{"MV_PAR09",_bSelectSA1,{|Tab|(Tab)->A1_COD},{|Tab| (Tab)->A1_NREDUZ}, ,"Clientes" ,          ,          ,100        ,.F.        ,       , } )
+			_bSelectSA1:={|| "SELECT A1_COD, A1_LOJA, A1_NREDUZ FROM SA1010 WHERE D_E_L_E_T_ = ' ' "}
+			aAdd(_aItalac_F3,{"MV_PAR09",_bSelectSA1,{|Tab|(Tab)->A1_COD},{|Tab| (Tab)->A1_NREDUZ}, ,"Clientes" ,          ,          ,100        ,.F.        ,       , } )
 
-			AADD( _aParAux , { 1 , "Emissão de"	 		, MV_PAR01, "@D"	  , ""  , ""	     , "" , 50  , .T. } )
-			AADD( _aParAux , { 1 , "Emissão ate" 		, MV_PAR02, "@D"	  , ""  , ""	     , "" , 50  , .T. } )
-			AADD( _aParAux , { 1 , "Cliente de"  		, MV_PAR03, "@!"    , ""  , "SA1"     , "" , 06 , .F. } )
-			AADD( _aParAux , { 1 , "Loja de"     		, MV_PAR04, "@!"    , ""  , ""        , "" , 04  , .F. } )
-			AADD( _aParAux , { 1 , "Cliente até" 		, MV_PAR05, "@!"    , ""  , "SA1"     , "" , 06 , .F. } )
-			AADD( _aParAux , { 1 , "Loja até"    		, MV_PAR06, "@!"    , ""  , ""        , "" , 04  , .F. } )
-			AADD( _aParAux , { 1 , "Tipos"       		, MV_PAR07, "@!"    , ""  , "F3ITLC"  , "" , 100 , .F. } )
-			AADD( _aParAux , { 1 , "Prefixos"    		, MV_PAR08, "@!"    , ""  , "F3ITLC"  , "" , 100 , .F. } )
-			AADD( _aParAux , { 1 , "Excluir Clientes" , MV_PAR09, "@!"    , ""  , "F3ITLC"  , "" , 999 , .F. } )
-			AADD( _aParAux , { 1 , "A Compensar de"	, MV_PAR10, "@D"	  , ""  , ""	     , "" , 50  , .T. } )
-			AADD( _aParAux , { 1 , "A Compensar ate" 	, MV_PAR11, "@D"	  , ""  , ""	     , "" , 50  , .T. } )
+			aAdd( _aParAux , { 1 , "Emissão de"	 		, MV_PAR01, "@D"	  , ""  , ""	     , "" , 50  , .T. } )
+			aAdd( _aParAux , { 1 , "Emissão ate" 		, MV_PAR02, "@D"	  , ""  , ""	     , "" , 50  , .T. } )
+			aAdd( _aParAux , { 1 , "Cliente de"  		, MV_PAR03, "@!"    , ""  , "SA1"     , "" , 06 , .F. } )
+			aAdd( _aParAux , { 1 , "Loja de"     		, MV_PAR04, "@!"    , ""  , ""        , "" , 04  , .F. } )
+			aAdd( _aParAux , { 1 , "Cliente até" 		, MV_PAR05, "@!"    , ""  , "SA1"     , "" , 06 , .F. } )
+			aAdd( _aParAux , { 1 , "Loja até"    		, MV_PAR06, "@!"    , ""  , ""        , "" , 04  , .F. } )
+			aAdd( _aParAux , { 1 , "Tipos"       		, MV_PAR07, "@!"    , ""  , "F3ITLC"  , "" , 100 , .F. } )
+			aAdd( _aParAux , { 1 , "Prefixos"    		, MV_PAR08, "@!"    , ""  , "F3ITLC"  , "" , 100 , .F. } )
+			aAdd( _aParAux , { 1 , "Excluir Clientes" , MV_PAR09, "@!"    , ""  , "F3ITLC"  , "" , 999 , .F. } )
+			aAdd( _aParAux , { 1 , "A Compensar de"	, MV_PAR10, "@D"	  , ""  , ""	     , "" , 50  , .T. } )
+			aAdd( _aParAux , { 1 , "A Compensar ate" 	, MV_PAR11, "@D"	  , ""  , ""	     , "" , 50  , .T. } )
 			aAdd( _aParAux , { 3 , "Novo Layout de Comp."	, MV_PAR12, { "Sim" , "Nao"  }		, 50 , ""	, .F. } )
 
 			For nI := 1 To Len( _aParAux )
 				aAdd( _aParRet , _aParAux[nI][03] )
 			Next nI
 				//aParametros, cTitle                          , @aRet   ,[bOk]  , [ aButtons ] [ lCentered ] [ nPosX ] [ nPosy ] [ oDlgWizard ] [ cLoad ] [ lCanSave ] [ lUserSave ] 
-			IF !ParamBox( _aParAux , "Selecione os filtros" , @_aParRet,  _bOK , /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
-				//RETURN .F.
+			If !ParamBox( _aParAux , "Selecione os filtros" , @_aParRet,  _bOK , /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
+				//Return .F.
 				_lContinua := .F.
 			Else
 
@@ -250,39 +230,39 @@ USER Function MFIN023(nPosArotina,lExecAuto)
 				_cFiltro := 'E1_SALDO > 0 '
 
 				If !Empty(MV_PAR01)
-					_cFiltro += " .AND. DTOS(SE1->E1_EMISSAO) >= '" + DTOS(MV_PAR01) +"' "
+					_cFiltro += " .And. DToS(SE1->E1_EMISSAO) >= '" + DToS(MV_PAR01) +"' "
 				EndIf
 
 				If !Empty(MV_PAR02)
-					_cFiltro += " .AND. DTOS(SE1->E1_EMISSAO) <= '" + DTOS(MV_PAR02) +"' "
+					_cFiltro += " .And. DToS(SE1->E1_EMISSAO) <= '" + DToS(MV_PAR02) +"' "
 				EndIf
 
-				If !Empty(Alltrim(MV_PAR03))
-					_cFiltro += " .AND. SE1->E1_CLIENTE >= '" + Alltrim(MV_PAR03) + "' "
+				If !Empty(AllTrim(MV_PAR03))
+					_cFiltro += " .And. SE1->E1_CLIENTE >= '" + AllTrim(MV_PAR03) + "' "
 				EndIf
 
-				If !Empty(Alltrim(MV_PAR04))
-					_cFiltro += " .AND. SE1->E1_LOJA >= '" + Alltrim(MV_PAR04) + "' "
+				If !Empty(AllTrim(MV_PAR04))
+					_cFiltro += " .And. SE1->E1_LOJA >= '" + AllTrim(MV_PAR04) + "' "
 				EndIf
 				
-				If !Empty(Alltrim(MV_PAR05))
-					_cFiltro += " .AND. SE1->E1_CLIENTE <= '" + Alltrim(MV_PAR05) + "' "
+				If !Empty(AllTrim(MV_PAR05))
+					_cFiltro += " .And. SE1->E1_CLIENTE <= '" + AllTrim(MV_PAR05) + "' "
 				EndIf
 
-				If !Empty(Alltrim(MV_PAR06))
-					_cFiltro += " .AND. SE1->E1_LOJA <= '" + Alltrim(MV_PAR06) + "' "
+				If !Empty(AllTrim(MV_PAR06))
+					_cFiltro += " .And. SE1->E1_LOJA <= '" + AllTrim(MV_PAR06) + "' "
 				EndIf
 
-				If !Empty(Alltrim(MV_PAR07))
-					_cFiltro += " .AND. ALLTRIM(SE1->E1_TIPO) $ '"+ALLTRIM(MV_PAR07)+"' "
+				If !Empty(AllTrim(MV_PAR07))
+					_cFiltro += " .And. AllTrim(SE1->E1_TIPO) $ '"+AllTrim(MV_PAR07)+"' "
 				EndIf
 
-				If !Empty(Alltrim(MV_PAR08))
-					_cFiltro += " .AND. ALLTRIM(SE1->E1_PREFIXO) $ '"+ALLTRIM(MV_PAR08)+"' "
+				If !Empty(AllTrim(MV_PAR08))
+					_cFiltro += " .And. AllTrim(SE1->E1_PREFIXO) $ '"+AllTrim(MV_PAR08)+"' "
 				EndIf
 
-				If !Empty(Alltrim(MV_PAR09))
-					_cFiltro += " .AND. !(ALLTRIM(SE1->E1_CLIENTE) $ '"+ALLTRIM(MV_PAR09)+"') "
+				If !Empty(AllTrim(MV_PAR09))
+					_cFiltro += " .And. !(AllTrim(SE1->E1_CLIENTE) $ '"+AllTrim(MV_PAR09)+"') "
 				EndIf
 				
 			EndIf
@@ -310,8 +290,8 @@ USER Function MFIN023(nPosArotina,lExecAuto)
 			//MV_PAR13 : Calcula Comissao sobre valores de RA  
 			//MV_PAR14 : Reutiliza taxas informadas
 
-			dbSetOrder(1)
-			dbSeek(xFilial("SE1"))
+			DBSetOrder(1)
+			DBSeek(xFilial("SE1"))
 			
 			_oBrowse := FWMBrowse():New()
 			_oBrowse:SetAlias("SE1")
@@ -328,9 +308,9 @@ USER Function MFIN023(nPosArotina,lExecAuto)
 
 	//Restaura o ambiente
 	SetKey (VK_F12)
-	dbSelectArea("SE1")
-	dbSetOrder(1)
-	dbGoTo( nSavRec )
+	DBSelectArea("SE1")
+	DBSetOrder(1)
+	DBGoTo( nSavRec )
 	
 	//Limpa as variáveis estáticas utilizadas para o motor de retenções
 	LimpaVarMR()
@@ -343,15 +323,12 @@ Return(.T.)
 Programa----------: MFIN023
 Autor-------------: Igor Melgaço
 Data da Criacao---: 28/08/2023
-===============================================================================================================================
 Descrição---------: Marcação dos titulos para compensação.  
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------:  
 ===============================================================================================================================
 */ 
-USER Function fA23Comp(cAlias,cCampo,nOpcE,oDlgPae,cLoteFat,cOrigem,aNumLay, lAutomato,lFast)
+User Function fA23Comp(cAlias,cCampo,nOpcE,oDlgPae,cLoteFat,cOrigem,aNumLay, lAutomato,lFast)
 Local lPanelFin	:= IsPanelFin()
 Local nX
 Local nI
@@ -390,7 +367,7 @@ Local lPccBxCr		:= FPccBxCr()
 Local lIrPjBxCr	:= FIrPjBxCr()
 Local nTotIrAbt	:= 0
 Local nLoop			:= 0
-LOCAL nSalvRec		:= SE1->(Recno())
+Local nSalvRec		:= SE1->(Recno())
 Local lAplVlMin 	:= .T.
 Local nVlMinImp 	:= GetNewPar("MV_VL10925",5000)
 Local nTotCsAbt		:= 0
@@ -400,8 +377,8 @@ Local aImpPcc		:= {0,0,0}
 
 //Retencao do ISS pela emissao (1) ou baixa (2)
 Local nTotIssAbt	:= 0
-Local lCalcIssBx 	:= !Empty( SE5->( FieldPos( "E5_VRETISS" ) ) ) .and. !Empty( SE1->( FieldPos( "E1_SEQBX"   ) ) ) .and. ;
-						!Empty( SE1->( FieldPos( "E1_TRETISS" ) ) ) .and. GetNewPar("MV_MRETISS","1") == "2"
+Local lCalcIssBx 	:= !Empty( SE5->( FieldPos( "E5_VRETISS" ) ) ) .And. !Empty( SE1->( FieldPos( "E1_SEQBX"   ) ) ) .And. ;
+						!Empty( SE1->( FieldPos( "E1_TRETISS" ) ) ) .And. GetNewPar("MV_MRETISS","1") == "2"
 
 Local nTotAdto		:= 0
 Local lBaixaAbat	:= .F.
@@ -492,18 +469,18 @@ DEFAULT aNumLay 	:= {}
 Default lAutomato := .F.
 Default lFast     := .T.
 
-PRIVATE nPosPis	:= 14		//Posicao Pis na Tela
-PRIVATE nPosCof	:= 15		//Posicao Cofins na Tela
-PRIVATE nPosCsl	:= 16		//Posicao Csll na Tela
-PRIVATE nPosIrf	:= 17		//Posicao IRRF na Tela
-PRIVATE cTipoOr	:= SE1->E1_TIPO
-PRIVATE nPosBPCC 	:= 24
-PRIVATE nPosBPCR 	:= 25
-PRIVATE nPosBIRF 	:= 26
-PRIVATE aTitulos	:= {}
-PRIVATE aRecNo 	:= {}
-PRIVATE aRegSE1 	:= {}
-PRIVATE aBaixaSE5 := {}
+Private nPosPis	:= 14		//Posicao Pis na Tela
+Private nPosCof	:= 15		//Posicao Cofins na Tela
+Private nPosCsl	:= 16		//Posicao Csll na Tela
+Private nPosIrf	:= 17		//Posicao IRRF na Tela
+Private cTipoOr	:= SE1->E1_TIPO
+Private nPosBPCC 	:= 24
+Private nPosBPCR 	:= 25
+Private nPosBIRF 	:= 26
+Private aTitulos	:= {}
+Private aRecNo 	:= {}
+Private aRegSE1 	:= {}
+Private aBaixaSE5 := {}
 PRIVATE	cFILFIN023 := SE1->E1_FILIAL
 PRIVATE	cPrefixo := SE1->E1_PREFIXO
 PRIVATE	cNum		:= SE1->E1_NUM
@@ -527,44 +504,44 @@ Private aFlagCTB 	:= {}
 Private lUsaFlag 	:= SuperGetMV( "MV_CTBFLAG" , .T. /*lHelp*/, .F. /*cPadrao*/)
 Private aImpIR		:= {}     //array que armazena o IR na baixa
 //PCC Baixa CR
-PRIVATE nPis 		:= 0
-PRIVATE nCofins   := 0
-PRIVATE nCsll		:= 0
-PRIVATE nIss		:= 0
-PRIVATE nInss		:= 0
-PRIVATE aDadosRef := {0,0,0,0,0,0,0} //Array(7)
-PRIVATE aDadosRet := {0,0,0,0,0,0,0} //Array(7)
-PRIVATE nVlRetPis	:= 0
-PRIVATE nVlRetCof	:= 0
-PRIVATE nVlRetCsl	:= 0
-PRIVATE nDiferImp	:= 0
-PRIVATE nValRec		:= 0
-PRIVATE nOldValRec	:= 0
-PRIVATE lRetParc  	:= .T.
-PRIVATE nIrrf 	  		:= 0
-PRIVATE ntotIrbx  	:= 0
-PRIVATE nIndVld   	:= 0
-PRIVATE nRecVld   	:= 0
-PRIVATE nValCorCM 	:= 0
-PRIVATE nTotImpbx  	:= 0 //Total de impostos calculados na baixa, quando posiciona !lCredito
+Private nPis 		:= 0
+Private nCofins   := 0
+Private nCsll		:= 0
+Private nIss		:= 0
+Private nInss		:= 0
+Private aDadosRef := {0,0,0,0,0,0,0} //Array(7)
+Private aDadosRet := {0,0,0,0,0,0,0} //Array(7)
+Private nVlRetPis	:= 0
+Private nVlRetCof	:= 0
+Private nVlRetCsl	:= 0
+Private nDiferImp	:= 0
+Private nValRec		:= 0
+Private nOldValRec	:= 0
+Private lRetParc  	:= .T.
+Private nIrrf 	  		:= 0
+Private ntotIrbx  	:= 0
+Private nIndVld   	:= 0
+Private nRecVld   	:= 0
+Private nValCorCM 	:= 0
+Private nTotImpbx  	:= 0 //Total de impostos calculados na baixa, quando posiciona !lCredito
 Private aDadosRA1 	:= {{},{},{},{},{},{},{},{},{},{},{},{}}
 Private lRaRtImp  	:= FRaRtImp()       //Define se ha retencao de impostos PCC/IRPJ no R.A
 Private nValAbat		:= 0
-PRIVATE lNcc			:= SE1->E1_TIPO $ MV_CRNEG
-PRIVATE lF330SE5    	:= Existblock("F330SE5")
-PRIVATE aRecSe5     	:= {}
-PRIVATE nValPis		:= 0
-PRIVATE nValCofins	:= 0
-PRIVATE nValCsll	:= 0
-PRIVATE nAbatRa	:= 0
+Private lNcc			:= SE1->E1_TIPO $ MV_CRNEG
+Private lF330SE5    	:= Existblock("F330SE5")
+Private aRecSe5     	:= {}
+Private nValPis		:= 0
+Private nValCofins	:= 0
+Private nValCsll	:= 0
+Private nAbatRa	:= 0
 Private nSldNF		:= 0
 Private nAbatNf	:= 0
-PRIVATE nValorNf	:= 0
-PRIVATE lF330DESC	:= ExistBlock("F330DESC")
-PRIVATE lDESC		:= .F.
-PRIVATE nDesFin 	:= 0
-PRIVATE nDescP		:= 0
-PRIVATE nDescD		:= 0
+Private nValorNf	:= 0
+Private lF330DESC	:= ExistBlock("F330DESC")
+Private lDESC		:= .F.
+Private nDesFin 	:= 0
+Private nDescP		:= 0
+Private nDescD		:= 0
 Private nValorRa	:= 0
 Private nSldRa		:= 0
 Private nParciais	:= 0
@@ -577,14 +554,14 @@ Private nCslBaseC := 0
 Private nIrfBase	:= 0
 Private aSelFil	:= {}
 Private lVldSEQ	:= .F.
-PRIVATE lFilterMark	:= .F.	//Filter mark for function FINA330Filt
-PRIVATE cTitFilt	as Character
-PRIVATE cPayType  	as Character
-PRIVATE cSortField	as Character
-PRIVATE cSortType	as Character
-PRIVATE nSel		as Numeric
-PRIVATE nRadio		as Numeric
-PRIVATE cNumCont	as Character
+Private lFilterMark	:= .F.	//Filter mark For function FINA330Filt
+Private cTitFilt	as Character
+Private cPayType  	as Character
+Private cSortField	as Character
+Private cSortType	as Character
+Private nSel		as Numeric
+Private nRadio		as Numeric
+Private cNumCont	as Character
 
 nA			    := 0
 nTotIrAbt		:= 0
@@ -600,7 +577,7 @@ nPosMarca		:= 8
 nTamSeq		:= __nTamSeq	
 
 nRecno := SE1->(Recno())
-lRA := Iif(SE1->E1_TIPO $ "RA |NCC",.T.,.F.)
+lRA := IIf(SE1->E1_TIPO $ "RA |NCC",.T.,.F.)
 
 If Empty(__cPiE1Sld) 
 	__cPiE1Sld := PesqPict("SE1","E1_SALDO")
@@ -622,22 +599,22 @@ If dDataBase > dLastPcc
 EndIf
 aPcc[1]	:= .F.
 
-If SE1->E1_TIPO $ MVRECANT+"/"+MV_CRNEG .or. cOrigem =="MATA465"
+If SE1->E1_TIPO $ MVRECANT+"/"+MV_CRNEG .Or. cOrigem =="MATA465"
 	lCredito := .T.
-Endif
+EndIf
 
 If !FA330Lock(,SE1->(Recno()))
 	Return
-Endif
+EndIf
 
-aArea := GetArea()
+aArea := FWGetArea()
 
 aPcc[1]	:= .F.
 
 //Se vier do mata465 ou da LOCXNF, forca os valores dos parametros
 If cOrigem == "MATA465"
-	MV_PAR07 := mv_par03		// Mostra Lancto Contabil
-	MV_PAR09 := mv_par05		// Contabiliza On-Line
+	MV_PAR07 := MV_PAR03		// Mostra Lancto Contabil
+	MV_PAR09 := MV_PAR05		// Contabiliza On-Line
 	MV_PAR01 := 1 				// Considera Loja  Sim/Nao
 	MV_PAR02 := 1 				// Considera Cliente Original/Outros
 	MV_PAR03 :=	SE1->E1_CLIENTE // Do Cliente
@@ -651,13 +628,13 @@ If cOrigem == "MATA465"
 	MV_PAR13 := 1				// Calcula Comissao sobre valores de RA
 	MV_PAR14 := 2				// Reutiliza taxas informadas
     // obs.: nao eh necessario voltar aos valores originais no final, pois a
-    // propria MATA465 recompoe os valores dos mv_parxx depois da chamada U_fa23comp()
+    // propria MATA465 recompoe os valores dos MV_PARxx depois da chamada U_fa23comp()
 ElseIf cOrigem == "COMPENSANCC"
 	Pergunte("FIN330",.F.)
 	MV_PAR03 := SE1->E1_CLIENTE  		// Do Cliente
 	MV_PAR04 := SE1->E1_CLIENTE 		// Ate Cliente
 
-	dbSelectArea("SE1")
+	DBSelectArea("SE1")
 EndIf
 
 If Type("MV_PAR02")<>'N'
@@ -678,7 +655,7 @@ Else
 	nPosVa		:= If(__lMotRet,28,27)
 EndIf
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 If ExistBlock("F330DTFIN")
 	lVldDtFin := ExecBlock("F330DTFIN",.F.,.F.)
@@ -687,9 +664,9 @@ EndIf
 //³ Verifica se data do movimento n„o ‚ menor que data limite de ³
 //³ movimentacao no financeiro    										  ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-If lVldDtFin .and. !DtMovFin(,,"2")
+If lVldDtFin .And. !DtMovFin(,,"2")
 	Return
-Endif
+EndIf
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ N„o permite que t¡tulos j  baixados possam ser acessados. ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -704,7 +681,7 @@ EndIf
 //³Nao permitir esta operacao, pois ele precisa ser transferido   ³
 //³antes pelas rotinas do SIGALOJA.                               ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-If Upper(AllTrim(SE1->E1_SITUACA)) $ "I|J" .AND. Upper(AllTrim(SE1->E1_ORIGEM)) $ "LOJA010|LOJA701|FATA701"
+If Upper(AllTrim(SE1->E1_SITUACA)) $ "I|J" .And. Upper(AllTrim(SE1->E1_ORIGEM)) $ "LOJA010|LOJA701|FATA701"
 	Help(" ",1,"NOUSACLJ")
 	Return
 EndIf
@@ -717,8 +694,8 @@ If cTipoTit $ MVPROVIS
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Recupera a Integridade dos dados     ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	dbSelectArea("SE1")
-	dbSetOrder(nIndexAtu)
+	DBSelectArea("SE1")
+	DBSetOrder(nIndexAtu)
 	DeleteObject(oOk)
 	DeleteObject(oNo)
 	FA330aUnlock()
@@ -746,7 +723,7 @@ If lIntPFS .And. AllTrim(SE1->E1_ORIGEM) == 'JURA069'
 	EndIf
 EndIf
 
-If Type("mv_par15") == 'N' .And. mv_par15 == 2
+If Type("MV_PAR15") == 'N' .And. MV_PAR15 == 2
 	lJuros := .F.
 EndIf
 
@@ -775,7 +752,7 @@ F330Static()
 
 While .T.
 
-	If lFinTp01 .And. FINTP01(.T.)	// Restringe o uso do programa Financeiro Quando a origem do titulo for de origem Totvs Incorporação RM
+	If lFinTp01 .And. FINTP01(.T.)	// Restringe o uso do programa Financeiro Quando a origem do titulo For de origem Totvs Incorporação RM
 		Exit
 	EndIf
 
@@ -794,7 +771,7 @@ While .T.
 	If !lCredito .And. lF330DESC
 		lDESC:= ExecBlock("F330DESC",.F.,.F.)
 		If lDESC
-			nDesFin:= IIf(SE1->E1_DESCFIN > 0 .And. SE1->E1_VENCREA-dBaixa >= SE1->E1_DIADESC .and. SE1->E1_DESCONT == 0,SE1->E1_VALOR * (SE1->E1_DESCFIN/100),0)
+			nDesFin:= IIf(SE1->E1_DESCFIN > 0 .And. SE1->E1_VENCREA-dBaixa >= SE1->E1_DIADESC .And. SE1->E1_DESCONT == 0,SE1->E1_VALOR * (SE1->E1_DESCFIN/100),0)
 			nDescP := nDesFin
 		EndIf
 	EndIf
@@ -807,19 +784,19 @@ While .T.
 		oModelVa 	:= NIL
 	EndIf
 
-	If mv_par08 == 1 .Or. lRaRtImp .Or. lRaRtImpMR
+	If MV_PAR08 == 1 .Or. lRaRtImp .Or. lRaRtImpMR
 		nTotAbtIni 	:= SumAbatRec( cPrefixo, cNum, cParcela, SE1->E1_MOEDA, "S", dBaixa,,, @nTotCsAbt, @nTotPisAbt, @nTotCofAbt,,,, @nTotIssAbt )
 		
 		If !lCredito
 			If __lIrfMR
 				If __lIrfBxMR .And. !__lRaRtIrf 
 					nIrrf := __nIrfCaMR
-				EndIF
+				EndIf
 			Else
 				If lIrPjBxCr .And. !lRaRtImp
 					nIrrf := FCaIrBxCR( nValRec )
 				EndIf
-			EndIF
+			EndIf
 	
 			If !lCalcIssBx
 				If lPropBx
@@ -833,7 +810,7 @@ While .T.
 		EndIf
 				
 		nSaldo := SE1->E1_SALDO + SE1->E1_SDACRES - SE1->E1_SDDECRE - nDesFin + nValVa
-		If ( !lRaRtImp .And. !lRaRtImpMR ) .Or. ( !lNcc .And. mv_par08 == 1 )
+		If ( !lRaRtImp .And. !lRaRtImpMR ) .Or. ( !lNcc .And. MV_PAR08 == 1 )
 			nSaldo := nSaldo - nTotAbtIni
 		EndIf
 		If lPropBx
@@ -842,7 +819,7 @@ While .T.
 		
 	Else
 		nSaldo := SE1->E1_SALDO + SE1->E1_SDACRES - SE1->E1_SDDECRE - nDesFin + nValVa
-	Endif
+	EndIf
 
 	//Verifica se o titulo já possui impostos gerados pela rotina de Borderô de Recebimento de Imposto (FINA061).
 	nPisFina061	:= 0
@@ -854,30 +831,30 @@ While .T.
 	nRegSE5	:=	SE5->(Recno())
 		
 	If lPccBxCr .And. lIrPjBxCr
-		dbSelectArea("SE5")
-		SE5->( dbSetOrder( 2 ) ) //FILIAL + TIPODOC + PREFIXO + NUMERO + PARCELA + TIPO
-		If SE5->( dbSeek( xFilial("SE5") + "BA" + SE1->E1_PREFIXO + SE1->E1_NUM + SE1->E1_PARCELA + SE1->E1_TIPO ) )
+		DBSelectArea("SE5")
+		SE5->( DBSetOrder( 2 ) ) //FILIAL + TIPODOC + PREFIXO + NUMERO + PARCELA + TIPO
+		If SE5->( DBSeek( xFilial("SE5") + "BA" + SE1->E1_PREFIXO + SE1->E1_NUM + SE1->E1_PARCELA + SE1->E1_TIPO ) )
 			While !SE5->( Eof() ) .And. SE5->E5_FILIAL == xFilial("SE5") ;
 			.And. SE5->E5_TIPODOC + SE5->E5_PREFIXO + SE5->E5_NUMERO + SE5->E5_PARCELA + SE5->E5_TIPO == "BA" + SE1->E1_PREFIXO + SE1->E1_NUM + SE1->E1_PARCELA + SE1->E1_TIPO
 			
 				If ( "FINA061" $ Subst( SE5->E5_HISTOR, 1, 7 ) ) .And. SE5->E5_MOTBX $ "PCC_IRF"						
-					If Alltrim(SE5->E5_MOTBX) == "PCC"
+					If AllTrim(SE5->E5_MOTBX) == "PCC"
 					   nPisFina061	+= SE5->E5_VRETPIS
 					   nCofFina061	+= SE5->E5_VRETCOF
 					   nCslFina061	+= SE5->E5_VRETCSL
-					ElseIf Alltrim(SE5->E5_MOTBX) == "IRF"
+					ElseIf AllTrim(SE5->E5_MOTBX) == "IRF"
 					   nIrfFina061	+= SE5->E5_VRETIRF
-					Endif
-				Endif					
-				SE5->( DbSkip() )
-		   Enddo
-		Endif
-	Endif
-	SE5->( dbGoTo( nRegSE5 ) )
+					EndIf
+				EndIf					
+				SE5->( DBSkip() )
+		   EndDo
+		EndIf
+	EndIf
+	SE5->( DBGoTo( nRegSE5 ) )
 
-	If ( nPisFina061 + nCofFina061 + nCslFina061 + nIrfFina061 ) > 0 .And. mv_par08 == 2
+	If ( nPisFina061 + nCofFina061 + nCslFina061 + nIrfFina061 ) > 0 .And. MV_PAR08 == 2
    		nSaldo	+= nPisFina061 + nCofFina061 + nCslFina061 + nIrfFina061
-	Endif
+	EndIf
 	
 	If !lCredito
 		nAcresc := SE1->E1_SDACRES
@@ -914,7 +891,7 @@ While .T.
 				nParciais += aBaixaSE5[nX][8]				
 				If lPccBxCR .And. ( lRaRtImp .Or. lRaRtImpMR ) //somar impostos PCC
 					nParciais += aBaixaSE5[nX][18] + aBaixaSE5[nX][19] + aBaixaSE5[nX][20] + aBaixaSE5[nX][30] + aBaixaSE5[nX][32] + aBaixaSE5[nX][33]
-				Endif
+				EndIf
 				nIss += aBaixaSE5[nX][32]
 				nInss += aBaixaSE5[nX][33]
 			Next
@@ -927,7 +904,7 @@ While .T.
 			nParciais := SE1->E1_VALOR - SE1->E1_SALDO
 		EndIf
 		
-		If ( !lRartImp .And. !lRaRtImpMR .And. mv_par08 == 1 .And. SE1->E1_TIPO == MVNOTAFIS .And. !lBq10925 ) .Or. ( lPropBx .And. ( ( ( !lRartImp .And. !lRaRtImpMR ) .And. mv_par08 == 2) .Or. ( lRartImp .Or. lRaRtImpMR ) ) .And. !lCredito)
+		If ( !lRartImp .And. !lRaRtImpMR .And. MV_PAR08 == 1 .And. SE1->E1_TIPO == MVNOTAFIS .And. !lBq10925 ) .Or. ( lPropBx .And. ( ( ( !lRartImp .And. !lRaRtImpMR ) .And. MV_PAR08 == 2) .Or. ( lRartImp .Or. lRaRtImpMR ) ) .And. !lCredito)
 			nParciais := SE1->E1_VALOR - SE1->E1_SALDO
 		EndIf
 		
@@ -950,10 +927,10 @@ While .T.
 				If SE1->E1_TIPO <> MVRECANT 
 					If "MATA" $ SE1->E1_ORIGEM
 				 		nBasePcc 	:= FBaseRPCC(nValRec)
-				 		nBasePcc 	:= Iif(ValType(nBasePcc) != "N", nValRec, nBasePcc)
+				 		nBasePcc 	:= IIf(ValType(nBasePcc) != "N", nValRec, nBasePcc)
 				 		lMata460	:= .T.
 				 	EndIf
-					aPcc		:= newMinPcc(dBaixa,Iif(lMata460, nBasePcc, nValRec),SE1->E1_NATUREZ,"R",SE1->E1_CLIENTE+SE1->E1_LOJA)
+					aPcc		:= newMinPcc(dBaixa,IIf(lMata460, nBasePcc, nValRec),SE1->E1_NATUREZ,"R",SE1->E1_CLIENTE+SE1->E1_LOJA)
 					nPis		:= aPcc[2]
 					nCofins		:= aPcc[3]
 					nCsll		:= aPcc[4]
@@ -979,7 +956,7 @@ While .T.
 		EndIf
 		
 		If !__lPccMR			
-			If lRartImp .And. lPccBxCr .and. SE1->E1_TIPO <> MVRECANT
+			If lRartImp .And. lPccBxCr .And. SE1->E1_TIPO <> MVRECANT
 				nPropPCC	:= SE1->E1_SALDO/SE1->E1_BASEPIS
 				If dDataBase <= dLastPcc
 					nPis		:= SE1->E1_PIS * nPropPCC
@@ -992,16 +969,16 @@ While .T.
 				Else
 					nIss		:= SE1->E1_ISS * nPropPCC
 					nInss		:= SE1->E1_INSS * nPropPCC
-				Endif
+				EndIf
 			EndIf
-		Endif
+		EndIf
 		
 		If !lCredito
 			If __lIrfMR
 				nIrrf := __nIrfCaMR
 			Else
-				nIrrf := FCaIrBxCR( nValRec + Iif( lRaRtImp .And. SE1->E1_TIPO $ MVRECANT, nPis + nCofins + nCsll + nIrrf, 0 ),, lRaRtImp )
-			Endif
+				nIrrf := FCaIrBxCR( nValRec + IIf( lRaRtImp .And. SE1->E1_TIPO $ MVRECANT, nPis + nCofins + nCsll + nIrrf, 0 ),, lRaRtImp )
+			EndIf
 		EndIf
 				
 		If ( nPosIr := aScan( aImpIR, {|x| x[2] = SE1->(REcno())} ) ) = 0
@@ -1016,18 +993,18 @@ While .T.
 		EndIf
 		
 		If !__lPccMR .And. !aPcc[1]
-			If aDadosRet[1] <= nVlMinImp .and. ( aDadosRet[1] + nSaldo > nVlMinImp ) .and. !lRaRtImp .and. lPccBxCr .and. SE1->E1_TIPO <> MVRECANT
+			If aDadosRet[1] <= nVlMinImp .And. ( aDadosRet[1] + nSaldo > nVlMinImp ) .And. !lRaRtImp .And. lPccBxCr .And. SE1->E1_TIPO <> MVRECANT
 				nValPis		:= SE1->E1_PIS
 				nValCofins 	:= SE1->E1_COFINS
 				nValCsll	:= SE1->E1_CSLL
 				nValorNf	:= SE1->E1_VALOR
-			Elseif aDadosRet[1] <= nVlMinImp .and. ( aDadosRet[1] + nSaldo <= nVlMinImp ) .and. !lRaRtImp .and. lPccBxCr .and. SE1->E1_TIPO <> MVRECANT
+			ElseIf aDadosRet[1] <= nVlMinImp .And. ( aDadosRet[1] + nSaldo <= nVlMinImp ) .And. !lRaRtImp .And. lPccBxCr .And. SE1->E1_TIPO <> MVRECANT
 				nProp	:= (aDadosRet[1] + SE1->E1_SALDO) / SE1->E1_VALOR
 				nValPis	:= SE1->E1_PIS * nProp
 				nValCofins := SE1->E1_COFINS * nProp
 				nValCsll	:= SE1->E1_CSLL * nProp
 				nValorNf	:= SE1->E1_VALOR
-			ElseIf aDadosRet[1] > nVlMinImp .and. ( aDadosRet[1] + nSaldo > nVlMinImp ) .and. !lRaRtImp .and. lPccBxCr .and. SE1->E1_TIPO <> MVRECANT
+			ElseIf aDadosRet[1] > nVlMinImp .And. ( aDadosRet[1] + nSaldo > nVlMinImp ) .And. !lRaRtImp .And. lPccBxCr .And. SE1->E1_TIPO <> MVRECANT
 				nValPis	:= SE1->E1_PIS
 				nValCofins := SE1->E1_COFINS
 				nValCsll	:= SE1->E1_CSLL
@@ -1071,24 +1048,24 @@ While .T.
 				Else
 					aImpIR[nPosIr][1] := nIrrf
 				EndIf
-			Endif
+			EndIf
 			
-		Endif	
+		EndIf	
 	ElseIf lIrPjBxCr .And. ( !lRaRtImp .And. !lRaRtImpMR )
 		nSaldo -= nIrrf
 	EndIf
 
 	If nPis + nCofins + nCsll + nIrrf > 0 .And. SE1->E1_TIPO <> MV_CRNEG .And. SE1->E1_TIPO <> MVRECANT
 		lRetMinAux := ( ( lRaRtImpMR .And. __nPisCaMR + __nCofCaMR + __nCslCaMR + __nIrfCaMR > 0 ) .Or. ( lRaRtImp .And. aDadosRet[1] > nVlMinImp ) )
-		If ( !lRartImp .And. !lRaRtImpMR ) .Or. lRetMinAux .AND. MV_PAR08 == 2
+		If ( !lRartImp .And. !lRaRtImpMR ) .Or. lRetMinAux .And. MV_PAR08 == 2
 			nValRec -= ( nPis + nCofins + nCsll + nIrrf + nIss + nInss )  
 		    nTotImpbx += ( nPis + nCofins + nCsll + nIrrf + nIss + nInss )
 		EndIf
 	EndIf
 
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-	//³ Se for chamada da mata465 , nao mostrar a janela de parametros   ³
-	//³ e forçar o valor de nOpca con valor 1. (Loc. Arg.).              ³
+	//³ Se For chamada da mata465 , nao mostrar a janela de parametros   ³
+	//³ e Forçar o valor de nOpca con valor 1. (Loc. Arg.).              ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 	If cOrigem != "MATA465"
 		If lPanelFin  //Chamado pelo Painel Financeiro
@@ -1108,12 +1085,12 @@ While .T.
 				nFrameLen 	:= 245
 			
 			
-			If !lAutomato .and. !lFast
+			If !lAutomato .And. !lFast
 				DEFINE MSDIALOG oDlg FROM	88,	31 TO 275,nOdlgLen TITLE STR0036 PIXEL //"Compensaçäo de Adiantamentos"
 			EndIf
 	   EndIf
 	   
-	   If !lAutomato .and. !lFast
+	   If !lAutomato .And. !lFast
 		   oDlg:lMaximized := .F.
 		   oPanel := TPanel():New(0,0,'',oDlg,, .T., .T.,, ,20,20)
 		   oPanel:Align := CONTROL_ALIGN_ALLCLIENT
@@ -1122,16 +1099,16 @@ While .T.
 		   @ 031+nEspLin, 002+nEspLarg TO 062+nEspLin, 245+nEspLarg OF oPanel	PIXEL
 	
 		   @ 015+nEspLin, 006+nEspLarg MSGET cPrefixo                SIZE 19, 10 OF oPanel PIXEL
-		   @ 015+nEspLin, 032+nEspLarg MSGET cNum VALID !EMPTY(cNum) SIZE 70, 10 OF oPanel PIXEL
+		   @ 015+nEspLin, 032+nEspLarg MSGET cNum VALID !Empty(cNum) SIZE 70, 10 OF oPanel PIXEL
 		   @ 015+nEspLin, 105+nEspLarg MSGET cParcela                SIZE 20, 10 OF oPanel PIXEL
 	
 		   If !lCredito
 		   		@ 015+nEspLin, 129+nEspLarg MSGET cTipoTit PICTURE "@!" VALID !Empty(cTipoTit) .AND.;
-		   		  !cTipoTit $ MVABATIM .AND. ;
+		   		  !cTipoTit $ MVABATIM .And. ;
 		   		  !(cTipoTit $ MVRECANT+"/"+MV_CRNEG) SIZE 12, 10 OF oPanel PIXEL
 		   Else
 		   		@ 015+nEspLin, 129+nEspLarg MSGET cTipoTit PICTURE "@!" VALID !Empty(cTipoTit) .AND.;
-		   		  !cTipoTit $ MVABATIM .AND. ;
+		   		  !cTipoTit $ MVABATIM .And. ;
 		   		  (cTipoTit $ MVRECANT+"/"+MV_CRNEG) SIZE 12, 10 OF oPanel PIXEL
 		   EndIf
 			
@@ -1141,38 +1118,38 @@ While .T.
 		   	@ 047+nEspLin, 006+nEspLarg MSGET nSaldo When .F. 	Picture "@E 9999,999,999.99" SIZE 50, 10 OF oPanel PIXEL
 		   	@ 047+nEspLin, 060+nEspLarg MSGET nMoeda when .F.	SIZE 18, 10 OF oPanel PIXEL
 		   	@ 047+nEspLin, 085+nEspLarg MSGET nVlrCompe			Picture "@E 9999,999,999.99";
-				Valid nVlrCompe >= 0 .AND. STR(nVlrCompe,17,2) <= STR(nSaldo,17,2) ;
+				Valid nVlrCompe >= 0 .And. Str(nVlrCompe,17,2) <= Str(nSaldo,17,2) ;
 				SIZE 52, 10 OF oPanel PIXEL HASBUTTON
 			@ 047+nEspLin, 142+nEspLarg MSGET dBaixa Valid dBaixa >= SE1->E1_EMISSAO  .And. (If( lVldDtFin, DtMovFin(dBaixa,,"2"), .T.)) ;
 				SIZE 48, 10 OF oPanel PIXEL HASBUTTON
 			@ 047+nEspLin, 194+nEspLarg CHECKBOX oChkBox VAR lCheck PROMPT STR0117 ; // "Tit. Marcados"
 				SIZE 60,15 OF oPanel PIXEL
 
-			@ 007+nEspLin, 006+nEspLarg SAY STR0006  SIZE 21, 7 OF oPanel PIXEL  //"Prefixo"
-		   	@ 007+nEspLin, 032+nEspLarg SAY STR0007  SIZE 22, 7 OF oPanel PIXEL  //"N£mero"
-		   	@ 006+nEspLin, 105+nEspLarg SAY STR0008  SIZE 23, 7 OF oPanel PIXEL  //"Parcela"
-		   	@ 006+nEspLin, 129+nEspLarg SAY STR0009  SIZE 14, 7 OF oPanel PIXEL  //"Tipo"
-		   	@ 006+nEspLin, 155+nEspLarg SAY STR0010  SIZE 34, 7 OF oPanel PIXEL  //"Cliente   "
-		   	@ 006+nEspLin, 226+nEspLarg SAY STR0011  SIZE 14, 7 OF oPanel PIXEL  //"Loja"
-		   	@ 038+nEspLin, 006+nEspLarg SAY STR0012  SIZE 34, 7 OF oPanel PIXEL  //"Saldo"
-		   	@ 038+nEspLin, 060+nEspLarg SAY STR0013  SIZE 21, 7 OF oPanel PIXEL  //"Moeda"
-		   	@ 038+nEspLin, 085+nEspLarg SAY STR0014  SIZE 55, 7 OF oPanel PIXEL  //"Valor a compensar"
-		   	@ 038+nEspLin, 142+nEspLarg SAY STR0015  SIZE 45, 7 OF oPanel PIXEL  //"Data da Baixa"
+			@ 007+nEspLin, 006+nEspLarg Say STR0006  SIZE 21, 7 OF oPanel PIXEL  //"Prefixo"
+		   	@ 007+nEspLin, 032+nEspLarg Say STR0007  SIZE 22, 7 OF oPanel PIXEL  //"N£mero"
+		   	@ 006+nEspLin, 105+nEspLarg Say STR0008  SIZE 23, 7 OF oPanel PIXEL  //"Parcela"
+		   	@ 006+nEspLin, 129+nEspLarg Say STR0009  SIZE 14, 7 OF oPanel PIXEL  //"Tipo"
+		   	@ 006+nEspLin, 155+nEspLarg Say STR0010  SIZE 34, 7 OF oPanel PIXEL  //"Cliente   "
+		   	@ 006+nEspLin, 226+nEspLarg Say STR0011  SIZE 14, 7 OF oPanel PIXEL  //"Loja"
+		   	@ 038+nEspLin, 006+nEspLarg Say STR0012  SIZE 34, 7 OF oPanel PIXEL  //"Saldo"
+		   	@ 038+nEspLin, 060+nEspLarg Say STR0013  SIZE 21, 7 OF oPanel PIXEL  //"Moeda"
+		   	@ 038+nEspLin, 085+nEspLarg Say STR0014  SIZE 55, 7 OF oPanel PIXEL  //"Valor a compensar"
+		   	@ 038+nEspLin, 142+nEspLarg Say STR0015  SIZE 45, 7 OF oPanel PIXEL  //"Data da Baixa"
 	   
 			If UsaSeqCor()
-		   		SX3->(DbSetorder(2))
-				SX3->(DbSeek("E5_DIACTB"))
+		   		SX3->(DBSetOrder(2))
+				SX3->(DBSeek("E5_DIACTB"))
 				cCodDiario  := Criavar("E5_DIACTB",.T.)
 				cTitDiar :=  AllTrim(X3TITULO())
-				@ 038+nEspLin, 195+nEspLarg SAY cTitDiar SIZE 45, 7 OF oPanel PIXEL
+				@ 038+nEspLin, 195+nEspLarg Say cTitDiar SIZE 45, 7 OF oPanel PIXEL
 				@ 047+nEspLin, 195+nEspLarg MSGET cCodDiario F3 "CVL" SIZE 20, 10 OF oPanel Valid VldCodSeq( cCodDiario ) When CtbWdia() PIXEL HASBUTTON
-				SX3->(DbSetorder(1))
+				SX3->(DBSetOrder(1))
 			EndIf
 		EndIf
 		
 		If lPanelFin  //Chamado pelo Painel Financeiro
 			aButtonTxt := {}
-			AADD(aButtonTxt,{STR0037,STR0037, {||U_Fa330SetMo()}})
+			aAdd(aButtonTxt,{STR0037,STR0037, {||U_Fa330SetMo()}})
 
 			ACTIVATE MSDIALOG oDlg ON INIT FaMyBar(oDlg,;
 			{|| If(Fa330TudOk(nVlrCompe),(nOpca:=1,oDLg:End()),)},;
@@ -1190,19 +1167,19 @@ While .T.
 					@ 068+nEspLin, 005+nEspLarg BUTTON STR0037 SIZE 50,nMoedaHght ACTION (U_Fa330SetMo()) OF oPanel PIXEL //Taxas Moedas
 	
 					/* GESTAO - inicio */
-					//Se o SE1 for Compartilhado entre todas as Empresas não exibe o Botao para Selecao das Filiais
+					//Se o SE1 For Compartilhado entre todas as Empresas não exibe o Botao para Selecao das Filiais
 					If !lSE1Comp
-						DEFINE SBUTTON Var oBtFilial FROM 68,162 TYPE 05 ACTION { || aSelFil := U_Fa330Fil() } ENABLE OF oPanel
+						DEFINE SBUTTON Var oBtFilial FROM 68,162 Type 05 ACTION { || aSelFil := U_Fa330Fil() } ENABLE OF oPanel
 						oBtFilial:cCaption := STR0070		//"Filiais"
 						oBtFilial:cToolTip := STR0071		//"Seleciona filiais"
 					EndIf
 					/* GESTAO - fim */
 				
-					DEFINE SBUTTON FROM 68, 190 TYPE 1 ENABLE ACTION (If(Fa330TudOk(nVlrCompe),(nOpca:=1,oDLg:End()),)) OF oPanel
-					DEFINE SBUTTON FROM 68, 218 TYPE 2 ENABLE ACTION oDlg:End() OF oPanel
+					DEFINE SBUTTON FROM 68, 190 Type 1 ENABLE ACTION (If(Fa330TudOk(nVlrCompe),(nOpca:=1,oDLg:End()),)) OF oPanel
+					DEFINE SBUTTON FROM 68, 218 Type 2 ENABLE ACTION oDlg:End() OF oPanel
 				
 					ACTIVATE MSDIALOG oDlg CENTERED
-				else
+				Else
 					If Fa330TudOk(nVlrCompe)
 						nOpca:=1
 					EndIf
@@ -1265,15 +1242,15 @@ While .T.
 	EndIf
 	
 	If nOpca == 0
-		dbSelectArea(cAlias)
-		dbSetOrder(nIndexAtu)
+		DBSelectArea(cAlias)
+		DBSetOrder(nIndexAtu)
 		deleteObject(oOk)
 		deleteObject(oNo)
 		FA330aUnlock()
 		Return
 	EndIf
 	
-	DbSelectArea("SE1")
+	DBSelectArea("SE1")
 	
 	//Os valores exibidos em tela o serao na Moeda 1	
 	If lPccBxCr
@@ -1288,8 +1265,8 @@ While .T.
 				If nVlrCompe > 0
 					aPcc	:= newMinPcc(dBaixa,nVlrCompe,SE1->E1_NATUREZ,"R",SE1->E1_CLIENTE+SE1->E1_LOJA)
 				Else
-					If dBaixa <> dDatabase .and. SE1->E1_TIPO <> MVRECANT //Alterou a data de baixa e nao alterou o valor
-						aPcc := newMinPcc(dBaixa,Iif(lMata460, nBasePcc, nOldVal),SE1->E1_NATUREZ,"R",SE1->E1_CLIENTE+SE1->E1_LOJA)
+					If dBaixa <> dDatabase .And. SE1->E1_TIPO <> MVRECANT //Alterou a data de baixa e nao alterou o valor
+						aPcc := newMinPcc(dBaixa,IIf(lMata460, nBasePcc, nOldVal),SE1->E1_NATUREZ,"R",SE1->E1_CLIENTE+SE1->E1_LOJA)
 					EndIf
 				EndIf
 				
@@ -1298,21 +1275,21 @@ While .T.
 					nCofins		:=	aPcc[3]
 					nCsll		:=  aPcc[4]
 					nPisCalc	:= nPis
-					nPisBaseC	:= Iif(nVlrCompe	> 0,nVlrCompe ,nOldVal)
-					nPisBaseR 	:= Iif(nVlrCompe	> 0,nVlrCompe ,nOldVal)
+					nPisBaseC	:= IIf(nVlrCompe	> 0,nVlrCompe ,nOldVal)
+					nPisBaseR 	:= IIf(nVlrCompe	> 0,nVlrCompe ,nOldVal)
 					nCofCalc	:= nCofins	
-					nCofBaseC	:= Iif(nVlrCompe	> 0,nVlrCompe ,nOldVal)
-					nCofBaseR 	:= Iif(nVlrCompe	> 0,nVlrCompe ,nOldVal)
+					nCofBaseC	:= IIf(nVlrCompe	> 0,nVlrCompe ,nOldVal)
+					nCofBaseR 	:= IIf(nVlrCompe	> 0,nVlrCompe ,nOldVal)
 					nCslCalc	:= nCsll	
-					nCslBaseC	:= Iif(nVlrCompe	> 0,nVlrCompe ,nOldVal)
-					nCslBaseR 	:= Iif(nVlrCompe	> 0,nVlrCompe ,nOldVal)								
+					nCslBaseC	:= IIf(nVlrCompe	> 0,nVlrCompe ,nOldVal)
+					nCslBaseR 	:= IIf(nVlrCompe	> 0,nVlrCompe ,nOldVal)								
 				EndIf
 				
 				
 				If SE1->E1_BASEIRF < SE1->E1_VALOR
-					nIrrf := Iif(nVlrCompe	> 0,nVlrCompe ,nOldVal)*(nIrrf/SE1->E1_VALOR)
+					nIrrf := IIf(nVlrCompe	> 0,nVlrCompe ,nOldVal)*(nIrrf/SE1->E1_VALOR)
 				Else
-					nIrrf := nIrrf * (Iif(nVlrCompe	> 0,nVlrCompe ,nOldVal) / SE1->E1_BASEIRF)
+					nIrrf := nIrrf * (IIf(nVlrCompe	> 0,nVlrCompe ,nOldVal) / SE1->E1_BASEIRF)
 				EndIf
 				
 			EndIf
@@ -1326,16 +1303,16 @@ While .T.
 					nValRec -= ( nPis + nCofins + nCsll + nIrrf + nIss + nInss )
 					nTotImpbx := ( nPis + nCofins + nCsll + nIrrf + nIss + nInss )
 					nSaldo := SE1->E1_SALDO - nPis - nCofins - nCsll
-					If nVlrCompe == 0 .and. !lIrPjBxCr
+					If nVlrCompe == 0 .And. !lIrPjBxCr
 						nSaldo := nSaldo - SE1->E1_IRRF
 					EndIf
 				EndIf
-			Endif
+			EndIf
 		EndIf
 
 		nValor := nVlrCompe
 		If nVlrCompe > 0 .And. nVlrCompe - nPis - nCofins - nCsll - nIrrf > 0 
-			If !( ( !lRartimp .And. !lRaRtImpMR ) .And. mv_par08 == 2 )  .And. !lBq10925
+			If !( ( !lRartimp .And. !lRaRtImpMR ) .And. MV_PAR08 == 2 )  .And. !lBq10925
 				nValor := nValor - nPis - nCofins - nCsll - nIrrf
 			EndIf
 		EndIf
@@ -1370,7 +1347,7 @@ While .T.
 		cTitulo     := SE1->E1_NUM
 		nSaldoTit   := SE1->E1_SALDO
 		cHist       := SE1->E1_HIST
-		cTpTit      := Alltrim(SE1->E1_TIPO)
+		cTpTit      := AllTrim(SE1->E1_TIPO)
 
 		cQuery := " SELECT D1_FILIAL, D1_FORNECE, D1_LOJA, D1_SERIE, MAX(D1_NFORI) D1_NFORI, MAX(D1_SERIORI) D1_SERIORI,F1_FORMUL  "
 		cQuery += " FROM " + RetSqlName("SD1") + " SD1 "
@@ -1385,25 +1362,25 @@ While .T.
 
 		cQuery := ChangeQuery(cQuery)
 
-		If SELECT(cAliasSD1) > 0
-			(cAliasSD1)->(DBCLOSEAREA())
+		If Select(cAliasSD1) > 0
+			(cAliasSD1)->(DBCloseArea())
 		EndIf
 		
-		dbUseArea(.T.,"TOPCONN",TCGENQRY(,,cQuery), cAliasSD1,.f.,.t.)
+		dbUseArea(.T.,"TOPCONN",TCGENQRY(,,cQuery), cAliasSD1,.F.,.T.)
 
-		If (cAliasSD1)->(!EOF())
-			(cAliasSD1)->(DBGOTOP())
+		If (cAliasSD1)->(!Eof())
+			(cAliasSD1)->(DBGoTop())
 			cNfOriginal := (cAliasSD1)->(D1_NFORI)
 			cNfOrig   := (cAliasSD1)->(D1_NFORI) + " / " +(cAliasSD1)->(D1_SERIORI)
-			cFomulP   := Alltrim((cAliasSD1)->(F1_FORMUL) )
-			cFormular :=  Iif(cFomulP=="S","Sim","Nao")
+			cFomulP   := AllTrim((cAliasSD1)->(F1_FORMUL) )
+			cFormular :=  IIf(cFomulP=="S","Sim","Nao")
 		EndIf
 
-		(cAliasSD1)->(DBCLOSEAREA())
+		(cAliasSD1)->(DBCloseArea())
 		
 		cNFChave := ""
 
-		If Alltrim(cTpTit) <> "NDC"
+		If AllTrim(cTpTit) <> "NDC"
 			If cFomulP == "S"
 				cNFChave := cNfOriginal
 			Else
@@ -1416,25 +1393,25 @@ While .T.
 
 				cQuery := ChangeQuery(cQuery)
 
-				If SELECT(cAliasSE1) > 0
-					(cAliasSE1)->(DBCLOSEAREA())
+				If Select(cAliasSE1) > 0
+					(cAliasSE1)->(DBCloseArea())
 				EndIf
 				
-				dbUseArea(.T.,"TOPCONN",TCGENQRY(,,cQuery), cAliasSE1,.f.,.t.)
+				dbUseArea(.T.,"TOPCONN",TCGENQRY(,,cQuery), cAliasSE1,.F.,.T.)
 
-				If (cAliasSE1)->(!EOF())
-					(cAliasSE1)->(DBGOTOP())
+				If (cAliasSE1)->(!Eof())
+					(cAliasSE1)->(DBGoTop())
 					cNFChave := (cAliasSE1)->E1_NUM //Subs((cAliasSE1)->(E1_HIST),13,9) 
 					cHist := (cAliasSE1)->E1_NUM 
 				EndIf
 
-				(cAliasSE1)->(DBCLOSEAREA())			
+				(cAliasSE1)->(DBCloseArea())			
 			EndIf
 		Else
 			For nHi := 1 to Len(cHist)
 				If Subs(cHist,nHi,1) $ "0123456789"
 					cNFChave += Subs(cHist,nHi,1)
-				Endif
+				EndIf
 			Next
 		EndIf
 
@@ -1443,11 +1420,11 @@ While .T.
 		oPanel := TPanel():New(0,0,'',oDlg,, .T., .T.,, ,20,20,.T.,.T. )
 		oPanel:Align := CONTROL_ALIGN_TOP
 		
-		@003,005 Say STR0073 + Pad(Getmv("MV_SIMB"+Alltrim(STR(nMoeda))),4)  PIXEL Of oPanel  // "Compensaçäo de Titulos - Valores expressos em "
+		@003,005 Say STR0073 + Pad(Getmv("MV_SIMB"+AllTrim(Str(nMoeda))),4)  PIXEL Of oPanel  // "Compensaçäo de Titulos - Valores expressos em "
 		
 		//Montando cabecalho do list box³
 		If _nLayout = 1
-			If mv_par02 == 2 // Considera Cliente == Não
+			If MV_PAR02 == 2 // Considera Cliente == Não
 				nPosPis 	:= 17
 				nPosCof 	:= 18
 				nPosCsl 	:= 19
@@ -1747,7 +1724,7 @@ While .T.
 					aTitulos[oTitulo:nAt,32]}}//Vendedor
 			EndIf
 		Else
-			If mv_par02 == 2 // Considera Cliente == Não
+			If MV_PAR02 == 2 // Considera Cliente == Não
 				nPosPis 	:= 17
 				nPosCof 	:= 18
 				nPosCsl 	:= 19
@@ -2051,41 +2028,41 @@ While .T.
 	
 	If !lAutomato
 		If !cPaisLoc $ "BRA|RUS"
-			oTitulo:bHeaderClick := {|oObj,nCol| Iif( nCol == 1, fMarkAll( @aTitulos, @nValTot ), Nil ), oTitulo:Refresh(), oGet01:Refresh()}
-		EndIF
+			oTitulo:bHeaderClick := {|oObj,nCol| IIf( nCol == 1, fMarkAll( @aTitulos, @nValTot ), Nil ), oTitulo:Refresh(), oGet01:Refresh()}
+		EndIf
 		
 		oTitulo:Align := CONTROL_ALIGN_ALLCLIENT
 		//---
 
-		@  1, 140 SAY "Total seleccionado" PIXEL OF oPanel SIZE 70,7
+		@  1, 140 Say "Total seleccionado" PIXEL OF oPanel SIZE 70,7
 		@  8, 140 MSGET oGet01 VAR nValTot PICTURE "@E 999,999,999.99" WHEN .F. PIXEL OF oPanel SIZE 70,7
 
-		//@  4, 350 SAY "Nota / Serie Orig" PIXEL OF oPanel SIZE 70,7
+		//@  4, 350 Say "Nota / Serie Orig" PIXEL OF oPanel SIZE 70,7
 		//@  4, 400 MSGET oGet02 VAR cNfOrig  WHEN .F. PIXEL OF oPanel SIZE 70,7
 
-		@  1, 220 SAY "Nr. Título" PIXEL OF oPanel SIZE 70,7
+		@  1, 220 Say "Nr. Título" PIXEL OF oPanel SIZE 70,7
 		@  8, 220 MSGET oGet02 VAR cTitulo  WHEN .F. PIXEL OF oPanel SIZE 70,7
 
-		@  1, 300 SAY "Formulário Proprio" PIXEL OF oPanel SIZE 70,7
+		@  1, 300 Say "Formulário Proprio" PIXEL OF oPanel SIZE 70,7
 		@  8, 300 MSGET oGet02 VAR cFormular  WHEN .F. PIXEL OF oPanel SIZE 70,7
 
-		@  1, 380 SAY "Nota / Serie Orig" PIXEL OF oPanel SIZE 70,7
+		@  1, 380 Say "Nota / Serie Orig" PIXEL OF oPanel SIZE 70,7
 		@  8, 380 MSGET oGet03 VAR cNfOrig  WHEN .F. PIXEL OF oPanel SIZE 70,7
 
-		@  1, 460 SAY "Saldo do Titulo" PIXEL OF oPanel SIZE 70,7
+		@  1, 460 Say "Saldo do Titulo" PIXEL OF oPanel SIZE 70,7
 		@  8, 460 MSGET oGet04 VAR nSaldoTit PICTURE "@E 999,999,999.99" WHEN .F. PIXEL OF oPanel SIZE 70,7
 
-		@  1, 540 SAY "Histórico" PIXEL OF oPanel SIZE 70,7
+		@  1, 540 Say "Histórico" PIXEL OF oPanel SIZE 70,7
 		@  8, 540 MSGET oGet05 VAR cHist  WHEN .F. PIXEL OF oPanel SIZE 120,7
 		
 		nLinhaMark := 0
 		If _nLayout = 2
-			For ni := 1 To len(aTitulos)
-				If Alltrim(aTitulos[ni,2]) == Alltrim(cNFChave)
+			For ni := 1 To Len(aTitulos)
+				If AllTrim(aTitulos[ni,2]) == AllTrim(cNFChave)
 					aTitulos:=FA330Troca(ni,@aTitulos,oGet01,,@oTitulo,,.T.)
 					oTitulo:Refresh()
 					nLinhaMark := ni
-				Endif
+				EndIf
 			Next
 		EndIf
 
@@ -2118,29 +2095,29 @@ While .T.
 		   	ExecBlock("F330BOTON",.F.,.F.)
    		EndIf
 
-		   DEFINE SBUTTON FROM 4,Iif(cPaisLoc != "RUS",325,425) TYPE 1 ACTION (nValor := nVlrCompe,nOpca := 1,IF(Fa330OK(@nValTot,.F.,lPccBxCR),oDlg:End(),nOpca:=0)) ENABLE OF oPanel2 PIXEL
+		   DEFINE SBUTTON FROM 4,IIf(cPaisLoc != "RUS",325,425) Type 1 ACTION (nValor := nVlrCompe,nOpca := 1,If(Fa330OK(@nValTot,.F.,lPccBxCR),oDlg:End(),nOpca:=0)) ENABLE OF oPanel2 PIXEL
 			If cOrigem != "LOJA800"
-			   DEFINE SBUTTON FROM 4,Iif(cPaisLoc != "RUS",360,460) TYPE 2 ACTION oDlg:End() ENABLE OF oPanel2 PIXEL
+			   DEFINE SBUTTON FROM 4,IIf(cPaisLoc != "RUS",360,460) Type 2 ACTION oDlg:End() ENABLE OF oPanel2 PIXEL
 			EndIf
 		EndIf
 
    Else
    	If !lAutomato
 			aButtonTxt := {}
-			AADD(aButtonTxt,{STR0124,STR0124, {||U_F330Button(lPccBxCr,oTitulo,oGet01,.T.)}})
-			AADD(aButtonTxt,{STR0061,STR0044, {||U_F330Button(lPccBxCr,oTitulo,oGet01,.F.)}})
-			AADD(aButtonTxt,{STR0001,STR0001, {||U_PesqListBox(@oTitulo,aTitulos)}})
+			aAdd(aButtonTxt,{STR0124,STR0124, {||U_F330Button(lPccBxCr,oTitulo,oGet01,.T.)}})
+			aAdd(aButtonTxt,{STR0061,STR0044, {||U_F330Button(lPccBxCr,oTitulo,oGet01,.F.)}})
+			aAdd(aButtonTxt,{STR0001,STR0001, {||U_PesqListBox(@oTitulo,aTitulos)}})
 		EndIf
    EndIf
 
 	If lPanelFin  //Chamado pelo Painel Financeiro
 	   If cOrigem != "LOJA800"
 		   ACTIVATE MSDIALOG oDlg ON INIT (oTitulo:Refresh(), FaMyBar(oDlg,;
-		   	{||nValor := nVlrCompe,nOpca := 1,IF(Fa330OK(@nValTot,.F.,lPccBxCR),oDlg:End(),nOpca:=0)},;
+		   	{||nValor := nVlrCompe,nOpca := 1,If(Fa330OK(@nValTot,.F.,lPccBxCR),oDlg:End(),nOpca:=0)},;
 				{||oDlg:End()},,aButtonTxt))
 		Else
 		   ACTIVATE MSDIALOG oDlg ON INIT (oTitulo:Refresh(), FaMyBar(oDlg,;
-		   	{||nValor := nVlrCompe,nOpca := 1,IF(Fa330OK(@nValTot,.F.,lPccBxCR),oDlg:End(),nOpca:=0)},;
+		   	{||nValor := nVlrCompe,nOpca := 1,If(Fa330OK(@nValTot,.F.,lPccBxCR),oDlg:End(),nOpca:=0)},;
 				,,aButtonTxt))
 		EndIf
 	Else
@@ -2166,10 +2143,10 @@ While .T.
 
 				For nX := 1 to Len(aTitulos)
 					For nI := 1 to Len (aRetAuto[2])
-						If aTitulos[nX,1] == Padr(aRetAuto[2,nI,1],Len(aTitulos[nX,1])) .AND. ;//Prefixo
-							aTitulos[nX,2] == Padr(aRetAuto[2,nI,2],Len(aTitulos[nX,2])) .AND. ;//Titulo
-							aTitulos[nX,3] == Padr(aRetAuto[2,nI,3],Len(aTitulos[nX,3])) .AND. ;//Parcela
-							aTitulos[nX,4] == Padr(aRetAuto[2,nI,4],Len(aTitulos[nX,4]))        //Tipo
+						If aTitulos[nX,1] == PadR(aRetAuto[2,nI,1],Len(aTitulos[nX,1])) .And. ;//Prefixo
+							aTitulos[nX,2] == PadR(aRetAuto[2,nI,2],Len(aTitulos[nX,2])) .And. ;//Titulo
+							aTitulos[nX,3] == PadR(aRetAuto[2,nI,3],Len(aTitulos[nX,3])) .And. ;//Parcela
+							aTitulos[nX,4] == PadR(aRetAuto[2,nI,4],Len(aTitulos[nX,4]))        //Tipo
 				
 							aTitulos[nX,8] := .T.
 							If !lSelAuto
@@ -2206,9 +2183,9 @@ While .T.
 		
 		dDtEmis	:= SE1->E1_EMISSAO
 		
-		DbSelectArea("SE1")
+		DBSelectArea("SE1")
 		nOrdSE1		:= IndexOrd()
-		dbGotop()
+		DBGoTop()
 		lPadrao		:= VerPadrao(cPadrao)
 		VALOR 		:= 0
 		ABATIMENTO 	:= 0
@@ -2237,7 +2214,7 @@ While .T.
 										
 				If MV_PAR02 == 2
 					nPos := 25
-				Endif
+				EndIf
 				If aTitulos[nTit,8]
 					lMarcado := .T.
 				EndIf
@@ -2268,7 +2245,7 @@ While .T.
 						lRet := .F.
 					Else
 						If _lMOMS68
-							AADD(__aContrat,{ nRecno,aTitulos[nTit][__nPosRecn],nSaldoComp})
+							aAdd(__aContrat,{ nRecno,aTitulos[nTit][__nPosRecn],nSaldoComp})
 						EndIf
 
 						aAdd(_aMarc, aTitulos[nTit][__nPosRecn] )
@@ -2277,34 +2254,34 @@ While .T.
 
 					lMarcado := .F.
 
-				Endif
+				EndIf
 			Next
 
-			SE1->(Dbgoto(nRecno))
+			SE1->(DBGoTo(nRecno))
 
 			DBSelectArea("SE5")
 			DBSetOrder(7) //	E5_FILIAL+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA+E5_SEQ
 			If DBSeek(SE1->(E1_FILIAL+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO))
-				Do While SE1->(E1_FILIAL+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO) == SE5->(E5_FILIAL+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO) .AND. SE5->(!EOF())
-					AADD(aRecSe5,SE5->(Recno()))
-					SE5->(DbSkip())
+				While SE1->(E1_FILIAL+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO) == SE5->(E5_FILIAL+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO) .And. SE5->(!Eof())
+					aAdd(aRecSe5,SE5->(Recno()))
+					SE5->(DBSkip())
 				EndDo
 			EndIf
 
 			For nTit := 1 to Len(_aMarc)
-				SE1->(Dbgoto(_aMarc[nTit]))
+				SE1->(DBGoTo(_aMarc[nTit]))
 
 				DBSelectArea("SE5")
 				DBSetOrder(7) //	E5_FILIAL+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA+E5_SEQ
 				If DBSeek(SE1->(E1_FILIAL+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO))
-					Do While SE1->(E1_FILIAL+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO) == SE5->(E5_FILIAL+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO) .AND. SE5->(!EOF())
-						AADD(aRecSe5,SE5->(Recno()))
-						SE5->(DbSkip())
+					While SE1->(E1_FILIAL+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO) == SE5->(E5_FILIAL+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO) .And. SE5->(!Eof())
+						aAdd(aRecSe5,SE5->(Recno()))
+						SE5->(DBSkip())
 					EndDo
 				EndIf
 			Next
 
-			SE1->(Dbgoto(nRecno))
+			SE1->(DBGoTo(nRecno))
 
 			If lF330SE5 
 				ExecBlock("F330SE5",.F.,.F.,{aRecSe5})
@@ -2312,7 +2289,7 @@ While .T.
 			
 		//Final  da protecao via TTS
 		End Transaction
-	Endif
+	EndIf
 	Exit
 EndDo
 cFILFIN023 := CriaVar("E1_FILIAL")
@@ -2332,9 +2309,9 @@ nValTot	 := 0
 PcoFinLan("000016")
 
 // Recupera a Integridade dos dados
-dbSelectArea("SE1")
-dbSetOrder(nIndexAtu)
-dbGoTo(nTitIni)
+DBSelectArea("SE1")
+DBSetOrder(nIndexAtu)
+DBGoTo(nTitIni)
 
 DeleteObject(oOk)
 DeleteObject(oNo)
@@ -2357,15 +2334,15 @@ Return (.T.)
 */
 Static Function fa330Cli( )
 Local cAlias := Alias( )
-dbSelectArea("SA1")
-dbSeek(xFilial("SA1")+cCliente)
-IF !Found()
+DBSelectArea("SA1")
+DBSeek(xFilial("SA1")+cCliente)
+If !Found()
 	Help(" ",1,"A330CLI")
 	Return .F.
 Else
-	cLoja:=Iif(Empty(cLoja),SA1->A1_LOJA,cLoja)
-EndIF
-dbSelectArea(cAlias)
+	cLoja:=IIf(Empty(cLoja),SA1->A1_LOJA,cLoja)
+EndIf
+DBSelectArea(cAlias)
 Return .T.
 
 /*/
@@ -2382,10 +2359,10 @@ Return .T.
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
-Static FuncTion fa330Loja()
-LOCAL cAlias:=Alias()
-LOCAL nOrdSe1 := 0
-LOCAL lRet := .T.
+Static Function fa330Loja()
+Local cAlias:=Alias()
+Local nOrdSe1 := 0
+Local lRet := .T.
 
 //PCREQ-3782 - Bloqueio por situação de cobrança
 Local cLstCart := FN022LSTCB(1,'0007')	//Lista das situacoes de cobranca (Carteira)
@@ -2395,19 +2372,19 @@ If Funname() == "FINA740"
 	SetKey (VK_F12)
 EndIf
 
-dbSelectArea("SA1")
-dbSeek(xFilial("SA1")+cCliente+cLoja)
-IF !Found()
+DBSelectArea("SA1")
+DBSeek(xFilial("SA1")+cCliente+cLoja)
+If !Found()
 	Help(" ",1,"A330LOJA")
 	lRet := .F.
-Endif
+EndIf
 If lRet
-	dbSelectArea("SE1")
+	DBSelectArea("SE1")
 	nOrdSe1 := IndexOrd()
-	SE1->(dbSetOrder(2))
-	//If dbSeek(xFilial("SE1")+cCliente+cLoja+cPrefixo+cNum+cParcela+cTipoTit)
-	If dbSeek(cFILFIN023+cCliente+cLoja+cPrefixo+cNum+cParcela+cTipoTit)
-		If mv_par05 == 2 .and. !(E1_SITUACA $ cLstCart)
+	SE1->(DBSetOrder(2))
+	//If DBSeek(xFilial("SE1")+cCliente+cLoja+cPrefixo+cNum+cParcela+cTipoTit)
+	If DBSeek(cFILFIN023+cCliente+cLoja+cPrefixo+cNum+cParcela+cTipoTit)
+		If MV_PAR05 == 2 .And. !(E1_SITUACA $ cLstCart)
 			Help(" ",1,"F330CARTE")
 			lRet := .F.
 
@@ -2415,15 +2392,15 @@ If lRet
 		ElseIf !(E1_SITUACA $ cLstNoBlq)
 			Help(" ",1,"F330BLOQD",,STR0079,1,0)	//"Não é possível realizar a operação pois o título se encontra em situação de cobrança que não permite manutenção ou movimento financeiro do titulo."
 			lRet := .F.
-		Endif
+		EndIf
 	Else
 		Help(" ",1,"NOTIT")
 		lRet := .F.
-	Endif
-	dbSetOrder(nOrdSe1)
-Endif
+	EndIf
+	DBSetOrder(nOrdSe1)
+EndIf
 
-dbSelectArea(cAlias)
+DBSelectArea(cAlias)
 
 Return lRet
 
@@ -2439,27 +2416,27 @@ Return lRet
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 /*/
-STATIC Function Fa330Tit(dEmissao,cOrigem,lCredito,aNumLay,lAutomato)
+Static Function Fa330Tit(dEmissao,cOrigem,lCredito,aNumLay,lAutomato)
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Salva a Integridade dos dados de Entrada 						  ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-LOCAL cSavArea 	:= alias()
+Local cSavArea 	:= alias()
 Local cAliasSE1	:= "SE1"
-LOCAL lMarca	:= .T.
-LOCAL lF330RIO  := ExistBlock("F330RIO")
-LOCAL lF330CMP  := ExistBlock("F330CMP")
+Local lMarca	:= .T.
+Local lF330RIO  := ExistBlock("F330RIO")
+Local lF330CMP  := ExistBlock("F330CMP")
 Local lFI330ALT	:= ExistBlock("FI330ALT")
-LOCAL nSavOrd	:= IndexOrd()
-LOCAL nRecNo	:= RecNo()
-LOCAL nTotComp	:= 0
-LOCAL nVlBasico := 0
+Local nSavOrd	:= IndexOrd()
+Local nRecNo	:= Recno()
+Local nTotComp	:= 0
+Local nVlBasico := 0
 Local nDecs     := MsDecimais(nMoeda)
 Local bWhile    := {|| .T.}
-LOCAL nRecEmp  	:= SM0->(RecNo())
-LOCAL cEmpAnt  	:= SM0->M0_CODIGO
-LOCAL cFilDe
-LOCAL cFilAte
+Local nRecEmp  	:= SM0->(RecNo())
+Local cEmpAnt  	:= SM0->M0_CODIGO
+Local cFilDe
+Local cFilAte
 Local cCgcClie
 Local cNomClie
 Local nX 		:= 0
@@ -2472,7 +2449,7 @@ Local lPccBxCr	:= FPccBxCr()								    	//Controla o Pis Cofins e Csll na baixa
 Local lIrPjBxCr	:= FIrPjBxCr()									   //Controla IRPJ na baixa
 Local aOldBaixaSE5
 Local aBxSE5		:= {}
-LOCAL nTotAdto		:= 0
+Local nTotAdto		:= 0
 Local lBaixaAbat	:= .F.
 Local nVlrBaixa		:= 0
 Local lBxCec		:= .F.
@@ -2494,9 +2471,9 @@ Local nProp         := 0 //proporcao da baixa
 Local nValVa		:= 0 //valor acessório
 
 //--- Tratamento Gestao Corporativa
-Local lGestao   	:= Iif( lFWCodFil, FWSizeFilial() > 2, .F. )	// Indica se usa Gestao Corporativa
+Local lGestao   	:= IIf( lFWCodFil, FWSizeFilial() > 2, .F. )	// Indica se usa Gestao Corporativa
 //
-Local cFilFwSE1 	:= IIF( lGestao, FwFilial("SE1") , xFilial("SE1") )
+Local cFilFwSE1 	:= IIf( lGestao, FwFilial("SE1") , xFilial("SE1") )
 Local lSE1Exclusivo := .F.
 Local nMoedaP		:= 1
 Local nMoedaD		:= 1
@@ -2559,7 +2536,7 @@ lPropRA 	:= SuperGetMv("MV_COMPCR",,.F.)                     //Verifica se vai p
 If cPaisLoc == "RUS"
 	cSelect += ",E1_F5QCODE,E1_CONUNI"
 EndIf 
-aCamposKey 	:= STRTOKARR(cUserKey,"+")
+aCamposKey 	:= StrTokArr(cUserKey,"+")
 
 cEmpAnt  	:= SM0->M0_CODIGO
 lRaRtImpMR 	:= ( __lPccMR .And. __lRaRtPcc ) .Or. ( __lIrfMR .And. __lRaRtIrf ) .Or. ( __lIssMR .And. __lRaRtIss )
@@ -2584,7 +2561,7 @@ If ValType(nIrrf) <> "N"
 	nIrrf	:= 0
 EndIf
 	
-//Se o SE1 não for Compartilhado entre todas as Empresas
+//Se o SE1 não For Compartilhado entre todas as Empresas
 If !lSE1Comp
 	If lGestao
 		If !Empty(cFilFwSE1)
@@ -2606,18 +2583,18 @@ If MV_PAR08 == 1 .Or. ( lRaRtImp .Or. lRaRtImpMR )
 	nTotAbat := If(Type("nTotAbat") != "N",SumAbatRec( SE1->E1_PREFIXO,SE1->E1_NUM,SE1->E1_PARCELA,SE1->E1_MOEDA, "S"  ,dBaixa,,@nTotIrAbt,@nTotCsAbt,@nTotPisAbt,@nTotCofAbt,),nTotAbat)
 Else
 	nTotAbat :=If(Type("nTotAbat") != "N",0,nTotAbat)
-Endif
+EndIf
 nValComp := If(Type("nValComp") != "N",0,nValComp)
 
 For nX := 1 to Len(aCamposKey)
-	If AT("STR(",UPPER(aCamposKey[nX])) > 0
-		aCamposKey[nX] := Substr(aCamposKey[nX], AT("(",aCamposKey[nX])+1, AT(",",aCamposKey[nX])-AT("(",aCamposKey[nX])-1)
+	If AT("Str(",Upper(aCamposKey[nX])) > 0
+		aCamposKey[nX] := SubStr(aCamposKey[nX], AT("(",aCamposKey[nX])+1, AT(",",aCamposKey[nX])-AT("(",aCamposKey[nX])-1)
 	ElseIf AT("(",aCamposKey[nX]) > 0 .Or. AT(")",aCamposKey[nX]) > 0 //Removo da String potenciais chamadas de funcao
-		aCamposKey[nX] := Substr(aCamposKey[nX], AT("(",aCamposKey[nX])+1, AT(")",aCamposKey[nX])-AT("(",aCamposKey[nX])-1)
+		aCamposKey[nX] := SubStr(aCamposKey[nX], AT("(",aCamposKey[nX])+1, AT(")",aCamposKey[nX])-AT("(",aCamposKey[nX])-1)
 	EndIf
 	If !(aCamposKey[nX] $ cSelect)
 		cSelect += ","+aCamposKey[nX]
-	Endif
+	EndIf
 Next
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -2627,43 +2604,43 @@ If ExistBlock("FA330ORD")
 	nOrdSE1 := ExecBlock("FA330ORD",.F.,.F.)
 	If ValType(nOrdSE1) == "N"
 		aAreaSIX := SIX->(GetArea())
-		If SIX->(DbSeek("SE1" + RetAsc(nOrdSE1,1,.T.))) 
-			SE1->(DbSetOrder(nOrdSE1))
+		If SIX->(DBSeek("SE1" + RetAsc(nOrdSE1,1,.T.))) 
+			SE1->(DBSetOrder(nOrdSE1))
 			aIndexPE := StrToKarr2(SE1->(IndexKey()),"+",.T.)
 			If Len(aIndexPE) > 0
 				For nX := 1 to Len(aIndexPE)
 				
-					nNumAT1	:= AT("STR(",UPPER(aIndexPE[nX]))
+					nNumAT1	:= AT("Str(",Upper(aIndexPE[nX]))
 					nNumAT2	:= AT("(",aIndexPE[nX])
 					nNumAT3 := AT(",",aIndexPE[nX])
 					nNumAT4	:= AT(")",aIndexPE[nX])
 				
 					If nNumAT1 > 0
-						aIndexPE[nX] := Substr(aIndexPE[nX], nNumAT2 + 1, nNumAT3 - nNumAT2 - 1)
+						aIndexPE[nX] := SubStr(aIndexPE[nX], nNumAT2 + 1, nNumAT3 - nNumAT2 - 1)
 					ElseIf nNumAT2 > 0 .Or. nNumAT3 > 0 
-						aIndexPE[nX] := Substr(aIndexPE[nX], nNumAT2 + 1, nNumAT4 - nNumAT2 - 1)
+						aIndexPE[nX] := SubStr(aIndexPE[nX], nNumAT2 + 1, nNumAT4 - nNumAT2 - 1)
 					EndIf
 					If !(aIndexPE[nX] $ cSelect)
 						cSelect += "," + aIndexPE[nX]
-					Endif
+					EndIf
 				Next nX
 			Else
 				If !l330Auto
 					Help(" ",1, "FA330ORD",,STR0090,1,0) //"O retorno do Ponto de Entrada 'FA330ORD' esta incorreto. O indice do P.E. não será utilizado."
-				Endif
-			Endif
+				EndIf
+			EndIf
 		Else
 			If !l330Auto
 				Help(" ",1, "FA330ORD",,STR0090,1,0) //"O retorno do Ponto de Entrada 'FA330ORD' esta incorreto. O indice do P.E. não será utilizado."
-			Endif
-		Endif
-		RestArea(aAreaSIX)
+			EndIf
+		EndIf
+		FWRestArea(aAreaSIX)
 	Else
 		If !l330Auto
 			Help(" ",1, "FA330ORD",,STR0090,1,0) //"O retorno do Ponto de Entrada 'FA330ORD' esta incorreto. O indice do P.E. não será utilizado."
-		Endif
-	Endif
-Endif
+		EndIf
+	EndIf
+EndIf
 
 dBaixa := If (Type("dBaixa") != "D",dDataBase,dBaixa)
 
@@ -2672,36 +2649,36 @@ dBaixa := If (Type("dBaixa") != "D",dDataBase,dBaixa)
 // 2 = Nao verifica o valor minimo de retencao
 If SE1->E1_APLVLMN == "2"
 	lAplVlMin := .F.
-Endif
+EndIf
 
 cOrdemSE1 := SE1->(IndexKey())
-SE1->(dbSetOrder(1))
+SE1->(DBSetOrder(1))
 
 If cOrigem == "COMPENSANCC"
-	mv_par10 := 2
+	MV_PAR10 := 2
 EndIf
-If mv_par10 == 2
+If MV_PAR10 == 2
 	cFilDe := cFilAnt
 	cFilAte:= cFilAnt
 Else
-	cFilDe := mv_par11
-	cFilAte:= mv_par12
-Endif
+	cFilDe := MV_PAR11
+	cFilAte:= MV_PAR12
+EndIf
 
-dbSelectArea("SX3")
-dbSetOrder(2)
+DBSelectArea("SX3")
+DBSetOrder(2)
 
 MsSeek("E1_SALDO")
-aadd(aStruQry,{"E1_SALDO",SX3->X3_TIPO,SX3->X3_TAMANHO,SX3->X3_DECIMAL})
+aAdd(aStruQry,{"E1_SALDO",SX3->X3_TIPO,SX3->X3_TAMANHO,SX3->X3_DECIMAL})
 
 MsSeek("E1_EMISSAO")
-aadd(aStruQry,{"E1_EMISSAO",SX3->X3_TIPO,SX3->X3_TAMANHO,SX3->X3_DECIMAL})
+aAdd(aStruQry,{"E1_EMISSAO",SX3->X3_TIPO,SX3->X3_TAMANHO,SX3->X3_DECIMAL})
 
 MsSeek("E1_MOEDA")
-aadd(aStruQry,{"E1_MOEDA",SX3->X3_TIPO,SX3->X3_TAMANHO,SX3->X3_DECIMAL})
+aAdd(aStruQry,{"E1_MOEDA",SX3->X3_TIPO,SX3->X3_TAMANHO,SX3->X3_DECIMAL})
 
-dbSelectArea("SE1")
-dbSetOrder(2)
+DBSelectArea("SE1")
+DBSetOrder(2)
 
 cAliasSE1 := "QRYSE1"
 cAliasSA1 := "QRYSE1"
@@ -2741,27 +2718,27 @@ EndIf
 
 If _lMOMS68 
 	cQuery += " SE1.E1_TIPO = 'NF' AND "
-	If  !Empty(Alltrim(SE1->E1_VEND1))
+	If  !Empty(AllTrim(SE1->E1_VEND1))
 		cQuery += " SE1.E1_VEND1 = '"+SE1->E1_VEND1+"' AND "
 	EndIf
 EndIf
 
 /* GESTAO - inicio */
-//Se o SE1 for Compartilhado entre todas as Empresas
+//Se o SE1 For Compartilhado entre todas as Empresas
 If lSE1Comp
 	cQuery += "SE1.E1_FILIAL = '" + FWxFilial("SE1") + "' AND "
 Else
 	If lSE1Exclusivo
 		If !Empty(aSelFil)
 			cQuery += "SE1.E1_FILIAL " + GetRngFil( aSelFil, "SE1", .T., @cTmpSE1Fil) + " AND "
-			Aadd(aTmpSE1Fil,cTmpSE1Fil)
+			aAdd(aTmpSE1Fil,cTmpSE1Fil)
 		Else
-			If mv_par10 == 2
+			If MV_PAR10 == 2
 				cQuery += "SE1.E1_FILIAL = '" + xFilial("SE1") + "' AND "  
 			Else 
 				cQuery += "SE1.E1_FILIAL >= '" + cFilDe + "' AND SE1.E1_FILIAL <= '" + cFilAte + "' AND "  
 			EndIf	
-		Endif
+		EndIf
 	Else
 		If !Empty(aSelFil)
 			For nR := 1 to Len(aSelFil)
@@ -2774,30 +2751,30 @@ Else
 			Next
 			cQuery += "SE1.E1_FILORIG IN (" + cSE1Fil + ") AND "
 		Else
-			If mv_par10 == 2
+			If MV_PAR10 == 2
 				cQuery += "SE1.E1_FILORIG = '" + cFilAnt + "' AND "  
 			Else
 				cQuery += "SE1.E1_FILORIG >= '" + cFilDe + "' AND  SE1.E1_FILORIG <= '" + cFilAte  + "' AND "  
 			EndIf 
-		Endif
+		EndIf
 	EndIf
 EndIf
 /* GESTAO - fim */
 
-If mv_par02 == 1
+If MV_PAR02 == 1
 	cQuery += "SE1.E1_CLIENTE = '"+cCliente+"' AND "
 Else
-	cQuery += "SE1.E1_CLIENTE >= '"+mv_par03+"' AND "
-	cQuery += "SE1.E1_CLIENTE <= '"+mv_par04+"' AND "
+	cQuery += "SE1.E1_CLIENTE >= '"+MV_PAR03+"' AND "
+	cQuery += "SE1.E1_CLIENTE <= '"+MV_PAR04+"' AND "
 EndIf
-If mv_par01 == 1 .And. mv_par02 == 1
+If MV_PAR01 == 1 .And. MV_PAR02 == 1
 	cQuery += "SE1.E1_LOJA = '"+cLoja+"' AND "
-Endif
+EndIf
 
-If ( lRaRtImp .Or. lRaRtImpMR ) .And. lRatFields .and. !(SE1->E1_TIPO $ MV_CRNEG)
+If ( lRaRtImp .Or. lRaRtImpMR ) .And. lRatFields .And. !(SE1->E1_TIPO $ MV_CRNEG)
 	If !lCredito
 		cQuery +="( ( "
-	Endif
+	EndIf
 	
 	If lPccBxCr
 		If !__lPccMR .Or. ( !__lPccMR .And. __lRaRtPcc )
@@ -2876,12 +2853,12 @@ If ( lRaRtImp .Or. lRaRtImpMR ) .And. lRatFields .and. !(SE1->E1_TIPO $ MV_CRNEG
 	If !lCredito
 		cQuery +=  " E1_TIPO IN "+ FormatIn(MVRECANT,",") + ") OR "
 		cQuery +=  " E1_TIPO IN "+ FormatIn(MV_CRNEG,",") + ") AND "
-	Endif
+	EndIf
 
-Endif
+EndIf
 
-If mv_par05 == 2
-	cQuery += "(SE1.E1_SITUACA IN "+FormatIN(cLstCart,"|")+" OR "
+If MV_PAR05 == 2
+	cQuery += "(SE1.E1_SITUACA IN "+FormatIn(cLstCart,"|")+" OR "
 Else
 	//PCREQ-3782 - Bloqueio por situação de cobrança
 	cQuery += "(SE1.E1_SITUACA IN "+FormatIn(cLstNoBlq,'|')+" OR "
@@ -2905,18 +2882,18 @@ cQuery += "SE1.E1_SITUACA NOT IN ('I','J')) AND "
 		ElseIf !(cTipoTit $ MVRECANT) .And. !(cTipoTit $ MV_CRNEG )
 			cQuery += " ( SE1.E1_TIPO IN " + FormatIn(MVRECANT,",") + " OR  "
 			cQuery += "SE1.E1_TIPO IN " + FormatIn( MV_CRNEG,cSep) + ") AND "
-		Endif
-	Endif
+		EndIf
+	EndIf
 
 
 cQuery += "SE1.E1_TIPO NOT IN " + FormatIn(MVABATIM,"|") + " AND "
 cQuery += "SE1.E1_SALDO > 0 AND "
 
 If _lMOMS68
-	cQuery += "SE1.E1_EMISSAO <= '"+DtoS(dDatabase)+ "' AND "
+	cQuery += "SE1.E1_EMISSAO <= '"+DToS(dDatabase)+ "' AND "
 Else
-	cQuery += "SE1.E1_EMISSAO >= '"+DtoS(_dDtCompDe)+ "' AND "
-	cQuery += "SE1.E1_EMISSAO <= '"+DtoS(_dDtCompAte)+ "' AND "
+	cQuery += "SE1.E1_EMISSAO >= '"+DToS(_dDtCompDe)+ "' AND "
+	cQuery += "SE1.E1_EMISSAO <= '"+DToS(_dDtCompAte)+ "' AND "
 EndIf
 
 cQuery += "SE1.D_E_L_E_T_ = ' ' AND "
@@ -2924,10 +2901,10 @@ cQuery += "SE1.D_E_L_E_T_ = ' ' AND "
 /* GESTAO - inicio */
 If !Empty(aSelFil)
 	cQuery += "SA1.A1_FILIAL " + GetRngFil( aSelFil, "SA1", .T., @cTmpSE1Fil) + " AND "
-	Aadd(aTmpSE1Fil,cTmpSE1Fil)
+	aAdd(aTmpSE1Fil,cTmpSE1Fil)
 Else
 	cQuery += "SA1.A1_FILIAL = '"+ xFilial("SA1")+"' AND "
-Endif
+EndIf
 /* GESTAO - fim */
 
 cQuery += "SA1.D_E_L_E_T_ = ' ' "
@@ -2937,24 +2914,24 @@ If lTitRAMex //Manejo de Anticipo - Mexico. Tratamento para nao exibir titulo de
 	/* GESTAO - inicio */
 	If !Empty(aSelFil)
 		cQuery += " AND SED.ED_FILIAL " + GetRngFil( aSelFil, "SED", .T., @cTmpSE1Fil)
-		Aadd(aTmpSE1Fil,cTmpSE1Fil)
+		aAdd(aTmpSE1Fil,cTmpSE1Fil)
 	Else
-		cQuery += "	AND SED.ED_FILIAL = '" + XFilial("SED") + "'"
-	Endif
+		cQuery += "	AND SED.ED_FILIAL = '" + xFilial("SED") + "'"
+	EndIf
 	/* GESTAO - fim */
 	cQuery += " AND SED.D_E_L_E_T_	= '' "
-	cQuery += "	AND SE1.E1_TIPO		<> '" + Substr(MVRECANT,1,3) + "'" //"RA" no Mexico
+	cQuery += "	AND SE1.E1_TIPO		<> '" + SubStr(MVRECANT,1,3) + "'" //"RA" no Mexico
 	cQuery += "	AND SE1.E1_ORIGEM	<> 'FINA087A' AND "
 	cQuery += " SE1.D_E_L_E_T_ = ' ' "
 	cQuery += "	AND SED.ED_OPERADT	<> '1' AND " //Operacao de adiantamento igual a SIM
 	cQuery += " SE1.E1_SALDO > 0 AND "
 	cQuery += " SE1.D_E_L_E_T_ = ' ' AND "
-	If mv_par02 == 2
+	If MV_PAR02 == 2
    		cQuery += "SE1.E1_CLIENTE = '"+cCliente+"'"
 	Else
-   		cQuery += "SE1.E1_CLIENTE >= '"+mv_par03+"' AND "
-   		cQuery += "SE1.E1_CLIENTE <= '"+mv_par04+"'"
-	Endif
+   		cQuery += "SE1.E1_CLIENTE >= '"+MV_PAR03+"' AND "
+   		cQuery += "SE1.E1_CLIENTE <= '"+MV_PAR04+"'"
+	EndIf
 EndIf
 
 If lExclus // Integração SIGAPFS x SIGAFIN
@@ -2969,28 +2946,28 @@ EndIf
 
 
 If lFa330Qry
-	cQuery := Execblock("FA330QRY",.f.,.f.,{ cQuery }  )			// permite manipualção das query
-Endif
+	cQuery := Execblock("FA330QRY",.F.,.F.,{ cQuery }  )			// permite manipualção das query
+EndIf
 
 cQuery := ChangeQuery(cQuery)
-dbUseArea(.T.,"TOPCONN",TCGENQRY(,,cQuery),cAliasSE1,.f.,.t.)
+dbUseArea(.T.,"TOPCONN",TCGENQRY(,,cQuery),cAliasSE1,.F.,.T.)
 
 For nX := 1 To Len(aStruQry)
 	If ( aStruQry[nX][2] <> "C" )
-		TcSetField(cAliasSE1,aStruQry[nX][1],aStruQry[nX][2],aStruQry[nX][3],aStruQry[nX][4])
+		TCSetField(cAliasSE1,aStruQry[nX][1],aStruQry[nX][2],aStruQry[nX][3],aStruQry[nX][4])
 	EndIf
 Next nX
 
 bWhile := {|| (cAliasSE1)->(!Eof()) }
 
-ProcRegua((cAliasSE1)->(Reccount()),STR0032 )
+ProcRegua((cAliasSE1)->(RecCount()),STR0032 )
 
 aTitulos := {}
 aRecNo := {}
 
 While .T.
 
-	dbSelectArea(cAliasSE1)
+	DBSelectArea(cAliasSE1)
 	cFilAnt := IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL )
 
 	nIndVld:=IndexOrd()
@@ -3010,34 +2987,34 @@ While .T.
 
 		//PONTO DE ENTRADA F330RIO Tratamento de "filtragem" de titulos de adiantamento a serem
 		//considerados ou nÆo no array dos adiantamentos a serem compen sados. Retorno l¢gico
-		IF lF330RIO
+		If lF330RIO
 			If !(ExecBlock("F330RIO",.F.,.F.))
-				dbSkip()
+				DBSkip()
 				Loop
 			EndIf
 		EndIf
 
-		dbselectArea("SE1")
+		DBSelectArea("SE1")
 
-		SE1->( dbSetOrder( 1 ) ) //E1_FILIAL+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO
-		SE1->( dbSeek( (cAliasSE1)->(E1_FILIAL) + (cAliasSE1)->(E1_PREFIXO + E1_NUM + E1_PARCELA + E1_TIPO) ) )
+		SE1->( DBSetOrder( 1 ) ) //E1_FILIAL+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO
+		SE1->( DBSeek( (cAliasSE1)->(E1_FILIAL) + (cAliasSE1)->(E1_PREFIXO + E1_NUM + E1_PARCELA + E1_TIPO) ) )
 				
-		dbselectArea(cAliasSE1)
+		DBSelectArea(cAliasSE1)
 
 		//Na finalizacao do Lay-Away, seleciona somente os titulos gerados pela emissao do mesmo - Loc. EUA|POR
 		If cOrigem == "LOJA800"
-		   nPosNumLay  := Ascan(aNumLay,AllTrim((cAliasSE1)->E1_NUM))
+		   nPosNumLay  := aScan(aNumLay,AllTrim((cAliasSE1)->E1_NUM))
 		   If nPosNumLay == 0 .And. Len(aNumLay) > 0
-		       dbSkip()
+		       DBSkip()
 			   Loop
 		   EndIf
 		EndIf
 
 		//ANGOLA|BRASIL - Nao permitir compensar titulos de adiantamento relacionado a pedido
 		If cPaisLoc $ "ANG|BRA"
-			FIE->(dbSetOrder(2))
+			FIE->(DBSetOrder(2))
 			If FIE->(MsSeek(xFilial("FIE")+"R"+(cAliasSE1)->(E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO)))
-				(cAliasSE1)->(dbSkip())
+				(cAliasSE1)->(DBSkip())
 				Loop
 			EndIf
 		EndIf
@@ -3045,7 +3022,7 @@ While .T.
 		//Situacao de cobranca que impede movimentacao
 		If lCredito
 			If !(F023VerBlq("1","0007",SE1->E1_SITUACA,.F.))
-				(cAliasSE1)->(dbSkip())
+				(cAliasSE1)->(DBSkip())
 				Loop
 			EndIf
 		EndIf
@@ -3082,7 +3059,7 @@ While .T.
 		If lCredito .And. lF330DESC
 			lDESC := ExecBlock("F330DESC",.F.,.F.)
 			If lDESC
-				nDesFin:= IIf(SE1->E1_DESCFIN > 0 .And. SE1->E1_VENCREA-dBaixa >= SE1->E1_DIADESC .and. SE1->E1_DESCONT == 0,SE1->E1_VALOR * (SE1->E1_DESCFIN/100),0)
+				nDesFin:= IIf(SE1->E1_DESCFIN > 0 .And. SE1->E1_VENCREA-dBaixa >= SE1->E1_DIADESC .And. SE1->E1_DESCONT == 0,SE1->E1_VALOR * (SE1->E1_DESCFIN/100),0)
 				nDescD := nDesFin
 			EndIf	
 		EndIf
@@ -3109,7 +3086,7 @@ While .T.
 							nTaxaMov := (cAliasSE1)->E1_TXMDCOR
 						Else
 							nTaxaMov := U_Fa330Tx2((cAliasSE1)->E1_MOEDA,(cAliasSE1)->E1_TXMOEDA)
-						Endif
+						EndIf
 					EndIf
 				Else
 					nTaxaMov := RecMoeda(dDtMov, (cAliasSE1)->E1_MOEDA)   //obs moeda diferente de 1 sem taxa contratada está pegando a taxa do dia
@@ -3118,16 +3095,16 @@ While .T.
 			ElseIf __lTxConP 	//Verifica se o título da partida possui taxa contratada
 				nTaxaMov := __nTxMoedP
 			Else
-				nTaxaMov := RecMoeda(dDtMov, nMoeda) //obs pegando por padrão a taxa do dia do movimento
+				nTaxaMov := RecMoeda(dDtMov, nMoeda) //obs pegando por PadRão a taxa do dia do movimento
 				//nTaxaMov := __nTxMoedP 
 			EndIf
-		EndIF
+		EndIf
 
-		If ( nVlBasico > nTotComp .or. nTotComp == 0 )  .And. Fa330Lock(Nil, (cAliasSE1)->RECSE1, .F.) .and.  !((cAliasSE1)->E1_TIPO $ MV_CRNEG) 
+		If ( nVlBasico > nTotComp .Or. nTotComp == 0 )  .And. Fa330Lock(Nil, (cAliasSE1)->RECSE1, .F.) .And.  !((cAliasSE1)->E1_TIPO $ MV_CRNEG) 
 	    	lMarca := .T.		// marca para vers„o WIN
-			nValPre := IIF (nTotComp == 0 , nVlBasico, nVlBasico - nTotComp)
+			nValPre := IIf (nTotComp == 0 , nVlBasico, nVlBasico - nTotComp)
 			If cPaisLoc == "BRA"				
-				If (mv_par08 == 1 .Or. ( ( lRaRtImp .Or. lRaRtImpMR ) .And. !lNcc)) .And. !((cAliasSE1)->E1_TIPO $ MVRECANT+"/"+MV_CRNEG )
+				If (MV_PAR08 == 1 .Or. ( ( lRaRtImp .Or. lRaRtImpMR ) .And. !lNcc)) .And. !((cAliasSE1)->E1_TIPO $ MVRECANT+"/"+MV_CRNEG )
 					nTotCsAbt	:= 0
 					nTotPisAbt	:= 0
 					nTotCofAbt	:= 0
@@ -3142,7 +3119,7 @@ While .T.
 								nIrrf := FCaIrBxCR(SE1->E1_SALDO)
 			  				EndIf
 			  				
-			  				If (nPosIr := ascan( aImpIR, {|x| x[2] = SE1->(REcno())} ) ) = 0
+			  				If (nPosIr := aScan( aImpIR, {|x| x[2] = SE1->(REcno())} ) ) = 0
 				  		 		aAdd(aImpIR,{nIrrf,SE1->(Recno())})
 				  		 		nPosIr := Len( aImpIR )
 			   				Else
@@ -3168,7 +3145,7 @@ While .T.
 								nIrrf := FCaIrBxCR(SE1->E1_SALDO) 
 							EndIf
 							
-							If ( nPosIr := ascan( aImpIR, {|x| x[2]=SE1->(REcno())} ) ) = 0
+							If ( nPosIr := aScan( aImpIR, {|x| x[2]=SE1->(REcno())} ) ) = 0
 					  			aAdd(aImpIR,{nIrrf,SE1->(Recno())})
 					  			nPosIr := Len( aImpIR )
 				   			Else
@@ -3193,7 +3170,7 @@ While .T.
 				EndIf
 								
 				If dDataBase < dLastPcc
-					If nPis <> E1_PIS .and. nCofins <> E1_COFINS .and. nCsll <> E1_CSLL .and. nIrrf <> E1_IRRF  // Garantir a integridade do valor dos impostos 
+					If nPis <> E1_PIS .And. nCofins <> E1_COFINS .And. nCsll <> E1_CSLL .And. nIrrf <> E1_IRRF  // Garantir a integridade do valor dos impostos 
 						nPis    := aImpPccIr[1]
 						nCofins := aImpPccIr[2]
 						nCsll   := aImpPccIr[3]
@@ -3204,27 +3181,27 @@ While .T.
 				nValComp := 0
 				
 				If lMarca
-					nValComp := Iif (nValPre > Round(NoRound(xMoeda((cAliasSE1)->E1_SALDO - nTotAbat +(cAliasSE1)->E1_SDACRES-(cAliasSE1)->E1_SDDECRE+nValVa,(cAliasSE1)->E1_MOEDA,nMoeda,,3,nTaxaMov,U_Fa330Tx2(nMoeda,nTxMoeda)),3),2) , ;
+					nValComp := IIf (nValPre > Round(NoRound(xMoeda((cAliasSE1)->E1_SALDO - nTotAbat +(cAliasSE1)->E1_SDACRES-(cAliasSE1)->E1_SDDECRE+nValVa,(cAliasSE1)->E1_MOEDA,nMoeda,,3,nTaxaMov,U_Fa330Tx2(nMoeda,nTxMoeda)),3),2) , ;
 										xMoeda((cAliasSE1)->E1_SALDO - nTotAbat+(cAliasSE1)->E1_SDACRES-(cAliasSE1)->E1_SDDECRE+nValVa,(cAliasSE1)->E1_MOEDA,nMoeda,,5,nTaxaMov,U_Fa330Tx2(nMoeda,nTxMoeda)), nVlBasico-nTotComp)
 				EndIf
 			EndIf
 			
 			//PONTO DE ENTRADA F330CMP
 			//Tratamento de valor a ser compensado em determinado titulo permitindo que o usuario possa calcular o valor do titulo NDF ou PA a ser compensado
-			IF lF330CMP
+			If lF330CMP
 				nValComp:= ExecBlock("F330CMP",.F.,.F.)
 			EndIf
 			
 			nTotComp += nValComp
 		Else
 			If lAutomato
-				nValPre := IIF (nTotComp == 0 , nVlBasico, nVlBasico - nTotComp)
-				nValComp := Iif (nValPre > Round(NoRound(xMoeda((cAliasSE1)->E1_SALDO - nTotAbat +(cAliasSE1)->E1_SDACRES-(cAliasSE1)->E1_SDDECRE+nValVa,(cAliasSE1)->E1_MOEDA,nMoeda,,3,U_Fa330Tx2((cAliasSE1)->E1_MOEDA,(cAliasSE1)->E1_TXMOEDA),U_Fa330Tx2(nMoeda,nTxMoeda)),3),2) , ;
+				nValPre := IIf (nTotComp == 0 , nVlBasico, nVlBasico - nTotComp)
+				nValComp := IIf (nValPre > Round(NoRound(xMoeda((cAliasSE1)->E1_SALDO - nTotAbat +(cAliasSE1)->E1_SDACRES-(cAliasSE1)->E1_SDDECRE+nValVa,(cAliasSE1)->E1_MOEDA,nMoeda,,3,U_Fa330Tx2((cAliasSE1)->E1_MOEDA,(cAliasSE1)->E1_TXMOEDA),U_Fa330Tx2(nMoeda,nTxMoeda)),3),2) , ;
 							xMoeda((cAliasSE1)->E1_SALDO - nTotAbat+(cAliasSE1)->E1_SDACRES-(cAliasSE1)->E1_SDDECRE+nValVa,(cAliasSE1)->E1_MOEDA,nMoeda,,5,U_Fa330Tx2((cAliasSE1)->E1_MOEDA,(cAliasSE1)->E1_TXMOEDA),U_Fa330Tx2(nMoeda,nTxMoeda)),;
 							nVlBasico-nTotComp)
 			EndIf
 			If cPaisLoc == "BRA"
-				If (mv_par08 == 1 .Or. ( lRaRtImp .Or. lRaRtImpMR ) ) .And. !((cAliasSE1)->E1_TIPO $ MVRECANT+"/"+MV_CRNEG )
+				If (MV_PAR08 == 1 .Or. ( lRaRtImp .Or. lRaRtImpMR ) ) .And. !((cAliasSE1)->E1_TIPO $ MVRECANT+"/"+MV_CRNEG )
 					nTotCsAbt	:= 0
 					nTotPisAbt	:= 0
 					nTotCofAbt	:= 0
@@ -3268,7 +3245,7 @@ While .T.
 				
 				//Não compensa títulos moedas estrang s/ taxa de moeda
 				If __lNoTxMov .And. Empty(nTaxaMov+__nTxMoedP) 
-					(cAliasSE1)->(DbSkip())
+					(cAliasSE1)->(DBSkip())
 					Loop
 				EndIf			
 			EndIf
@@ -3308,14 +3285,14 @@ While .T.
 				
 				If F330RaRtIm(@aDadosRA1)
 					If !lAutomato .Or. ( lAutomato .And. lMarca )					
-						nValLim 	:= If(aDadosRA1[7][len(aDadosRA1[7])]>nVlBasico,nVlBasico,aDadosRA1[7][len(aDadosRA1[7])])
+						nValLim 	:= If(aDadosRA1[7][Len(aDadosRA1[7])]>nVlBasico,nVlBasico,aDadosRA1[7][Len(aDadosRA1[7])])
 						nTotComp	-= nValComp
-						If !(nTotComp + If(aDadosRA1[8][len(aDadosRA1[8])]>nVlBasico,nVlBasico,aDadosRA1[8][len(aDadosRA1[8])]) > nVlBasico) 
-							nValComp 	:= If(aDadosRA1[8][len(aDadosRA1[8])]>nVlBasico,nVlBasico,aDadosRA1[8][len(aDadosRA1[8])])
+						If !(nTotComp + If(aDadosRA1[8][Len(aDadosRA1[8])]>nVlBasico,nVlBasico,aDadosRA1[8][Len(aDadosRA1[8])]) > nVlBasico) 
+							nValComp 	:= If(aDadosRA1[8][Len(aDadosRA1[8])]>nVlBasico,nVlBasico,aDadosRA1[8][Len(aDadosRA1[8])])
 						EndIf
 						
-						If mv_par08 == 2 .And. !lCredito .And. lRartImp
-							nValComp:= Iif( SE1->E1_SALDO > nValLim, nValComp, SE1->E1_SALDO)
+						If MV_PAR08 == 2 .And. !lCredito .And. lRartImp
+							nValComp:= IIf( SE1->E1_SALDO > nValLim, nValComp, SE1->E1_SALDO)
 						EndIf 
 						
 						nTotComp	+= nValComp
@@ -3325,7 +3302,7 @@ While .T.
 				EndIf
 								
 				If dDatabase >= dLastPcc .And. ( lRartImp .Or. lRaRtImpMR ) .And. lCredito
-					If aDadosRA1[7][len(aDadosRA1[7])] < nVlBasico 
+					If aDadosRA1[7][Len(aDadosRA1[7])] < nVlBasico 
 						If nValLim + nPis + nCofins + nCsll <> SE1->E1_SALDO //somente deve descontar os impostos quando o valor estiver bruto
 							nValLim		:= nValLim - nPis - nCofins - nCsll
 							nValComp	:= nValLim
@@ -3334,7 +3311,7 @@ While .T.
 				EndIf
 													
 				If nMoedaP <> nMoedaD
-					nValLim	:= Iif(nSaldo>nVAlSld,nVAlSld,nSaldo) 					    
+					nValLim	:= IIf(nSaldo>nVAlSld,nVAlSld,nSaldo) 					    
 					nTotComp	-= nValComp
 					nValComp 	:= nValLim
 					nTotComp	+= nValComp
@@ -3348,10 +3325,10 @@ While .T.
 					nCsll 	:= __nCslCaMR
 					
 					If !lCredito .Or. ( lCredito .And. MV_PAR08 == 1 )
-						If nSaldo > ( nVAlSld - Iif( lPccBxCr, ( nPis + nCofins + nCsll), 0) - nTotAbat )
-							nValLim := nVAlSld - Iif( lPccBxCr, ( nPis + nCofins + nCsll), 0) - nTotAbat
+						If nSaldo > ( nVAlSld - IIf( lPccBxCr, ( nPis + nCofins + nCsll), 0) - nTotAbat )
+							nValLim := nVAlSld - IIf( lPccBxCr, ( nPis + nCofins + nCsll), 0) - nTotAbat
 						Else
-							nValLim := nSaldo - Iif( lPccBxCr, ( nPis + nCofins + nCsll), 0) - nTotAbat
+							nValLim := nSaldo - IIf( lPccBxCr, ( nPis + nCofins + nCsll), 0) - nTotAbat
 						EndIf
 					Else
 						nValLim := SE1->E1_SALDO /*nSaldo*/ - nTotAbat
@@ -3361,14 +3338,14 @@ While .T.
 						nSldNF := SE1->E1_SALDO
 					EndIf
 				Else				
-					If ( !lRaRtImp .And. mv_par08 == 1 .And. lPccBxCr .And. SE1->E1_TIPO <> MVRECANT )
+					If ( !lRaRtImp .And. MV_PAR08 == 1 .And. lPccBxCr .And. SE1->E1_TIPO <> MVRECANT )
 						If dDataBase < dLastPcc
 							f070TotMes( dBaixa , .T. )
 						EndIf
 					EndIf
 								
 					If dDataBase < dLastPcc
-			  			If !lRaRtImp .and. lPccBxCr .and. (cAliasSE1)->E1_TIPO <> MVRECANT .and. nPis+nCofins+nCsll+nIrrf > 0 .And. aDadosret[1] <= nVlMinImp 
+			  			If !lRaRtImp .And. lPccBxCr .And. (cAliasSE1)->E1_TIPO <> MVRECANT .And. nPis+nCofins+nCsll+nIrrf > 0 .And. aDadosret[1] <= nVlMinImp 
 			  				If nSldRa > SE1->E1_SALDO 
 			  					nProp		:= (SE1->E1_SALDO) / SE1->E1_VALOR
 			  				Else
@@ -3378,7 +3355,7 @@ While .T.
 								nValPis		:= SE1->E1_PIS * nProp
 								nValCofins	:= SE1->E1_COFINS * nProp
 								nValCsll	:= SE1->E1_CSLL * nProp
-								If (nSldRa >= SE1->E1_SALDO .and. aDadosRet[1]+SE1->E1_SALDO > nVlMinImp) .or. (nSldRa <= SE1->E1_SALDO .and. aDadosRet[1]+nSldRa > nVlMinImp)  
+								If (nSldRa >= SE1->E1_SALDO .And. aDadosRet[1]+SE1->E1_SALDO > nVlMinImp) .Or. (nSldRa <= SE1->E1_SALDO .And. aDadosRet[1]+nSldRa > nVlMinImp)  
 									nPis		:= aDadosRet[2] + nValPis 
 									nCofins		:= aDadosRet[3] + nValCofins
 									nCsll		:= aDadosRet[4] + nValCsll
@@ -3388,25 +3365,25 @@ While .T.
 									nCsll		:= nValCsll
 								EndIf
 							EndIf 	
-							nValLim 	:= Iif( nSaldo > (nVAlSld - nPis - nCofins - nCsll - nTotAbat), (nVAlSld - nPis - nCofins - nCsll - nTotAbat) , Iif (aDadosRet[1]+nSaldo <= nVlMinImp, nSaldo, (nSaldo - nPis - nCofins - nCsll - nTotAbat)) )
-						ElseIf !lRaRtImp .and. lPccBxCr .and. (cAliasSE1)->E1_TIPO <> MVRECANT .and. nPis+nCofins+nCsll+nIrrf > 0 .AND. aDadosret[1] > nVlMinImp .and. SE1->E1_SALDO <> SE1->E1_VALOR
+							nValLim 	:= IIf( nSaldo > (nVAlSld - nPis - nCofins - nCsll - nTotAbat), (nVAlSld - nPis - nCofins - nCsll - nTotAbat) , IIf (aDadosRet[1]+nSaldo <= nVlMinImp, nSaldo, (nSaldo - nPis - nCofins - nCsll - nTotAbat)) )
+						ElseIf !lRaRtImp .And. lPccBxCr .And. (cAliasSE1)->E1_TIPO <> MVRECANT .And. nPis+nCofins+nCsll+nIrrf > 0 .And. aDadosret[1] > nVlMinImp .And. SE1->E1_SALDO <> SE1->E1_VALOR
 							nValPis		:= nPis
 							nValCofins	:= nCofins
 							nValCsll	:= nCsll
 							nPis		:= (nValPis * (SE1->E1_SALDO/ SE1->E1_VALOR))
 							nCofins		:= (nValCofins * (SE1->E1_SALDO/ SE1->E1_VALOR))
 							nCsll		:= (nValCsll * (SE1->E1_SALDO/ SE1->E1_VALOR))	
-							nValLim 	:= Iif( nSaldo > (nVAlSld -nPis - nCofins - nCsll-nTotAbat) , (nVAlSld - nPis - nCofins - nCsll - nTotAbat) , (nSaldo - nPis - nCofins - nCsll - nTotAbat) )
+							nValLim 	:= IIf( nSaldo > (nVAlSld -nPis - nCofins - nCsll-nTotAbat) , (nVAlSld - nPis - nCofins - nCsll - nTotAbat) , (nSaldo - nPis - nCofins - nCsll - nTotAbat) )
 							nAbatRa		:= nTotAbat
 							nSldNF		:= SE1->E1_SALDO
-						ElseIf !lRaRtImp .or. (lRaRtImp .and. (cAliasSE1)->(E1_PIS + E1_CSLL + E1_COFINS) == 0)
-							If nValComp > 0 .and. (nSaldo <> nValComp)
+						ElseIf !lRaRtImp .Or. (lRaRtImp .And. (cAliasSE1)->(E1_PIS + E1_CSLL + E1_COFINS) == 0)
+							If nValComp > 0 .And. (nSaldo <> nValComp)
 								nPis	:= aDadosRet[2] + ((nValComp * nValPis)/nValorNf) 
 								nCofins	:= aDadosRet[3] + ((nValComp * nValCofins)/nValorNf)
 								nCsll	:= aDadosRet[4] + ((nValComp * nValCsll)/nValorNf)
-			  					nValLim := Iif(!lRartImp,Max(nVAlSld , nValComp),Iif( nValComp > nVAlSld , nVAlSld , nValComp ))
+			  					nValLim := IIf(!lRartImp,Max(nVAlSld , nValComp),IIf( nValComp > nVAlSld , nVAlSld , nValComp ))
 			  				Else
-			  					If nValPis > 0 .AND. aDadosret[1] <= nVlMinImp .and. aDadosRet[1]+nValComp <= nVlMinImp
+			  					If nValPis > 0 .And. aDadosret[1] <= nVlMinImp .And. aDadosRet[1]+nValComp <= nVlMinImp
 			  						nPis	:= nValPis
 			  						nCofins	:= nValCofins
 			  						nCsll	:= nValCsll
@@ -3414,15 +3391,15 @@ While .T.
 			  					If lCredito
 			  						nAbatNf	:= nTotAbat
 			  					EndIf
-			  					nValLim := Iif( nSaldo > nVAlSld , nVAlSld , nSaldo )
+			  					nValLim := IIf( nSaldo > nVAlSld , nVAlSld , nSaldo )
 			  				EndIf
 			  			EndIf
 			  		Else
-		  				If lCredito .and. mv_par08 == 2 .and. !lRartImp .and. nValSld+nPis+nCofins+nCsll <= SE1->E1_SALDO
+		  				If lCredito .And. MV_PAR08 == 2 .And. !lRartImp .And. nValSld+nPis+nCofins+nCsll <= SE1->E1_SALDO
 		  					nValSld	+= nPis+nCofins+nCsll
 		  				EndIf
-		  				nValRec2 := Iif(nValRec < SE1->E1_SALDO,nValRec,SE1->E1_SALDO)
-		  				If !(!lCredito .and. !lRartImp)
+		  				nValRec2 := IIf(nValRec < SE1->E1_SALDO,nValRec,SE1->E1_SALDO)
+		  				If !(!lCredito .And. !lRartImp)
 		  					aPcc		:= newMinPcc(dBaixa,nValRec2,SE1->E1_NATUREZ,"R",SE1->E1_CLIENTE+SE1->E1_LOJA)
 			  				nPis		:= aPcc[2]
 							nCofins		:= aPcc[3]
@@ -3443,14 +3420,14 @@ While .T.
 								nIrrf 	:= FCaIrBxCR(nValRec2)
 							EndIf
 		  				EndIf
-		  				nValLim := Iif(nSaldo>nVAlSld,nVAlSld,nSaldo)
+		  				nValLim := IIf(nSaldo>nVAlSld,nVAlSld,nSaldo)
 			  		EndIf
 		  				  		
 		  			If SE1->E1_TIPO <> MVRECANT .And. nValLim > SE1->E1_SALDO - nTotAbat .And. MV_PAR08 == 1
 					    // Só faz a subtração do nValLim se o mesmo não ficar negativo
 						If nValLim - nTotAbat >= 0
 							nValLim -= nTotAbat
-							If ( SE1->E1_SALDO - nTotAbat - iif(lPccBxCr,nPis + nCofins + nCsll, 0 ) ) > nValLim
+							If ( SE1->E1_SALDO - nTotAbat - IIf(lPccBxCr,nPis + nCofins + nCsll, 0 ) ) > nValLim
 								nValLim := ( SE1->E1_SALDO - nTotAbat )
 							EndIf
 						// Se não subtrair o valor em nTotBat, verifica se o saldo atual do titulo esta inferior ao nValLim
@@ -3482,7 +3459,7 @@ While .T.
 			
 				EndIf
 
-			Endif
+			EndIf
 
 			//Verifica se o titulo já possui impostos gerados pela rotina de Borderô de Recebimento de Imposto (FINA061).
 			nPisFina061	:=	0
@@ -3492,45 +3469,45 @@ While .T.
 			nRegSE5		:=	SE5->(Recno())
 			nOrdSE5		:=	SE5->(IndexOrd())		
 			If lPccBxCr .Or. lIrPjBxCr                                                                                               			
-				dbSelectArea("SE5")
-				SE5->(dbSetOrder(2)) //FILIAL + TIPODOC + PREFIXO + NUMERO + PARCELA + TIPO
+				DBSelectArea("SE5")
+				SE5->(DBSetOrder(2)) //FILIAL + TIPODOC + PREFIXO + NUMERO + PARCELA + TIPO
 				If SE5->(DBSeek(xFilial("SE5")+"BA"+SE1->E1_PREFIXO+SE1->E1_NUM+SE1->E1_PARCELA+SE1->E1_TIPO))
-					While !SE5->(Eof()) .and. SE5->E5_FILIAL==xFilial("SE5") .And. ;
+					While !SE5->(Eof()) .And. SE5->E5_FILIAL==xFilial("SE5") .And. ;
 						SE5->E5_TIPODOC+SE5->E5_PREFIXO+SE5->E5_NUMERO+SE5->E5_PARCELA+SE5->E5_TIPO=="BA"+SE1->E1_PREFIXO+SE1->E1_NUM+SE1->E1_PARCELA+SE1->E1_TIPO		
 				
 						If ("FINA061" $ Subst(SE5->E5_HISTOR,1,7)) .And. SE5->E5_MOTBX $ "PCC_IRF"						
-							If Alltrim(SE5->E5_MOTBX) == "PCC"
+							If AllTrim(SE5->E5_MOTBX) == "PCC"
 							   nPisFina061	+= SE5->E5_VRETPIS
 							   nCofFina061	+=	SE5->E5_VRETCOF
 							   nCslFina061	+= SE5->E5_VRETCSL
-							ElseIf Alltrim(SE5->E5_MOTBX) == "IRF"
+							ElseIf AllTrim(SE5->E5_MOTBX) == "IRF"
 							   nIrfFina061	+= SE5->E5_VRETIRF
-							Endif
-						Endif					
-						SE5->(DbSkip())		
-			   		Enddo
-				Endif
-			Endif
-	   		SE5->(Dbgoto(nRegSE5))
-			SE5->(Dbsetorder(nOrdSE5))													                  
+							EndIf
+						EndIf					
+						SE5->(DBSkip())		
+			   		EndDo
+				EndIf
+			EndIf
+	   		SE5->(DBGoTo(nRegSE5))
+			SE5->(DBSetOrder(nOrdSE5))													                  
 
 			If ( nPisFina061 + nCofFina061 + nCslFina061 + nIrfFina061 ) > 0
 				//Caso o titulo possua bordero de recebimento de imposto gerado na rotina FINA061 devo recompor base no caso de não abater os impostos
 				//ou  abater os impostos e tiver compensando de RA para NF. Senão devo zerar as variaveis para não afetar o processamento. 
-			  	If  mv_par08 == 1 
+			  	If  MV_PAR08 == 1 
 					nPisFina061	:=	0
 					nCofFina061	:=	0
 					nCslFina061	:=	0
 					nIrfFina061	:=	0
-				Endif		
-			Endif					
+				EndIf		
+			EndIf					
 			lNcc2 := (cAliasSE1)->E1_TIPO $ MV_CRNEG
       		
       		If ( lRaRtImp .Or. lRaRtImpMR ) .And. lPccBxCr .And. !lNcc .And. lCredito
                	nSaldoNF := (cAliasSE1)->E1_SALDO - aDadosRA1[3][Len(aDadosRA1[3])] - aDadosRA1[4][Len(aDadosRA1[4])] - aDadosRA1[5][Len(aDadosRA1[5])]
             Else
                	nSaldoNF := (cAliasSE1)->E1_SALDO
-            Endif
+            EndIf
 	        
 			If MV_PAR02 == 2 // Considera Cliente == Não
 				DBSelectArea("SA1")
@@ -3538,28 +3515,28 @@ While .T.
 				nPosSA1   := Recno()
 				DBSetOrder(1)
 				DBSeek(xFilial("SA1")+(cAliasSE1)->E1_CLIENTE+(cAliasSE1)->E1_LOJA)
-				dbSelectArea(cAliasSE1)
+				DBSelectArea(cAliasSE1)
 				If lF330DESC
 					lDESC := ExecBlock("F330DESC",.F.,.F.)
 					If lDESC
-						nDesFin:= IIf(SE1->E1_DESCFIN > 0 .And. SE1->E1_VENCREA-dBaixa >= SE1->E1_DIADESC .and. SE1->E1_DESCONT == 0,SE1->E1_VALOR * (SE1->E1_DESCFIN/100),0)
+						nDesFin:= IIf(SE1->E1_DESCFIN > 0 .And. SE1->E1_VENCREA-dBaixa >= SE1->E1_DIADESC .And. SE1->E1_DESCONT == 0,SE1->E1_VALOR * (SE1->E1_DESCFIN/100),0)
 					EndIf
 				EndIf
 				
 				If __lMotRet				
-					AADD(aTitulos,{;
+					aAdd(aTitulos,{;
 					(cAliasSE1)->E1_PREFIXO,;  //1
 					(cAliasSE1)->E1_NUM,;      //2
 					(cAliasSE1)->E1_PARCELA,;  //3 
 					(cAliasSE1)->E1_TIPO,;     //4
 					(cAliasSE1)->E1_LOJA,;     //5
-					Transform(xMoeda((nSaldoNF+ nPisFina061+nCofFina061+nCslFina061+nIrfFina06)+(cAliasSE1)->E1_SDACRES-Iif(nProp>0,(nImp*nProp),0)-(cAliasSE1)->E1_SDDECRE- Iif(  Type("nTotAbat") <> "N" .OR. MV_PAR08== 2 ,0,nTotAbat) - nDesFin + nValVa,(cAliasSE1)->E1_MOEDA,nMoeda,,5,U_Fa330Tx2(nMoedaP,nTaxaP),U_Fa330Tx2(nMoedaD,nTaxaD)),"@E 9999,999,999.99"),; //06
+					Transform(xMoeda((nSaldoNF+ nPisFina061+nCofFina061+nCslFina061+nIrfFina06)+(cAliasSE1)->E1_SDACRES-IIf(nProp>0,(nImp*nProp),0)-(cAliasSE1)->E1_SDDECRE- IIf(  Type("nTotAbat") <> "N" .Or. MV_PAR08== 2 ,0,nTotAbat) - nDesFin + nValVa,(cAliasSE1)->E1_MOEDA,nMoeda,,5,U_Fa330Tx2(nMoedaP,nTaxaP),U_Fa330Tx2(nMoedaD,nTaxaD)),"@E 9999,999,999.99"),; //06
 					Transform(nValComp + nPisFina061+nCofFina061+nCslFina061+nIrfFina061, "@E 9999,999,999.99"),; //07
 					lMarca,; //8
 					nValComp + nPisFina061+nCofFina061+nCslFina061+nIrfFina061,; //09
 					(cAliasSE1)->(E1_CLIENTE)+"-"+(cAliasSE1)->(E1_LOJA),; //10
 					(cAliasSE1)->E1_NOMCLI,;//11
-					Transform(SA1->A1_CGC,Substr(PicPes(SA1->A1_PESSOA),1,at("%",PicPes(SA1->A1_PESSOA))-1)),; //12
+					Transform(SA1->A1_CGC,SubStr(PicPes(SA1->A1_PESSOA),1,at("%",PicPes(SA1->A1_PESSOA))-1)),; //12
 					Transform(xMoeda((cAliasSE1)->E1_SDACRES,(cAliasSE1)->E1_MOEDA,nMoeda,,5,U_Fa330TxMd((cAliasSE1)->E1_MOEDA,(cAliasSE1)->E1_TXMOEDA),U_Fa330Tx2(nMoeda,nTxMoeda)),"@E 9999,999,999.99"),; //13
 					Transform(xMoeda((cAliasSE1)->E1_SDDECRE,(cAliasSE1)->E1_MOEDA,nMoeda,,5,U_Fa330TxMd((cAliasSE1)->E1_MOEDA,(cAliasSE1)->E1_TXMOEDA),U_Fa330Tx2(nMoeda,nTxMoeda)),"@E 9999,999,999.99"),; //14
 					(cAliasSE1)->E1_HIST,; //15
@@ -3580,26 +3557,26 @@ While .T.
 					Transform(nValorPcc,"@E 9999,999,999.99"),; //30 Motor
 					Transform(nValVa,"@E 9999,999,999.99"),;	//31 Valor acessório	
 					nTaxaMov,;//32 Taxa do título
-					DTOC(STOD((cAliasSE1)->E1_VENCREA)),; // 33  Venc real
+					DToC(SToD((cAliasSE1)->E1_VENCREA)),; // 33  Venc real
 					(cAliasSE1)->E1_VEND1,; // 34 Vendedor
 					Posicione("SA3",1,xFilial("SA3")+(cAliasSE1)->E1_VEND1,"A3_NOME"),;  // 35 Nome
-					DTOC(STOD((cAliasSE1)->E1_EMIS2)) }) 
+					DToC(SToD((cAliasSE1)->E1_EMIS2)) }) 
 					__nPosVrTit := 26
 					__nPosRecn  := 23
 				Else
-				AADD(aTitulos,{;
+				aAdd(aTitulos,{;
 					(cAliasSE1)->E1_PREFIXO,;
 					(cAliasSE1)->E1_NUM,;
 					(cAliasSE1)->E1_PARCELA,;
 					(cAliasSE1)->E1_TIPO,;
 					(cAliasSE1)->E1_LOJA,;
-					Transform(xMoeda((nSaldoNF+ nPisFina061+nCofFina061+nCslFina061+nIrfFina06)+(cAliasSE1)->E1_SDACRES-Iif(nProp>0,(nImp*nProp),0)-(cAliasSE1)->E1_SDDECRE- Iif(  Type("nTotAbat") <> "N" .OR. MV_PAR08== 2 ,0,nTotAbat) - nDesFin + nValVa,(cAliasSE1)->E1_MOEDA,nMoeda,,5,U_Fa330Tx2(nMoedaP,nTaxaP),U_Fa330Tx2(nMoedaD,nTaxaD)),"@E 9999,999,999.99"),; //06
+					Transform(xMoeda((nSaldoNF+ nPisFina061+nCofFina061+nCslFina061+nIrfFina06)+(cAliasSE1)->E1_SDACRES-IIf(nProp>0,(nImp*nProp),0)-(cAliasSE1)->E1_SDDECRE- IIf(  Type("nTotAbat") <> "N" .Or. MV_PAR08== 2 ,0,nTotAbat) - nDesFin + nValVa,(cAliasSE1)->E1_MOEDA,nMoeda,,5,U_Fa330Tx2(nMoedaP,nTaxaP),U_Fa330Tx2(nMoedaD,nTaxaD)),"@E 9999,999,999.99"),; //06
 					Transform(nValComp + nPisFina061+nCofFina061+nCslFina061+nIrfFina061, "@E 9999,999,999.99"),; //07
 					lMarca,;
 					nValComp + nPisFina061+nCofFina061+nCslFina061+nIrfFina061,; //09
 					(cAliasSE1)->(E1_CLIENTE)+"-"+(cAliasSE1)->(E1_LOJA),;
 					(cAliasSE1)->E1_NOMCLI,;
-					Transform(SA1->A1_CGC,Substr(PicPes(SA1->A1_PESSOA),1,at("%",PicPes(SA1->A1_PESSOA))-1)),;
+					Transform(SA1->A1_CGC,SubStr(PicPes(SA1->A1_PESSOA),1,at("%",PicPes(SA1->A1_PESSOA))-1)),;
 					Transform(xMoeda((cAliasSE1)->E1_SDACRES,(cAliasSE1)->E1_MOEDA,nMoeda,,5,U_Fa330TxMd((cAliasSE1)->E1_MOEDA,(cAliasSE1)->E1_TXMOEDA),U_Fa330Tx2(nMoeda,nTxMoeda)),"@E 9999,999,999.99"),;
 					Transform(xMoeda((cAliasSE1)->E1_SDDECRE,(cAliasSE1)->E1_MOEDA,nMoeda,,5,U_Fa330TxMd((cAliasSE1)->E1_MOEDA,(cAliasSE1)->E1_TXMOEDA),U_Fa330Tx2(nMoeda,nTxMoeda)),"@E 9999,999,999.99"),;
 					(cAliasSE1)->E1_HIST,;
@@ -3619,10 +3596,10 @@ While .T.
 					Transform(nValorPcc,"@E 9999,999,999.99"),;//29 Base de calculo e retenção do IRF
 					Transform(nValVa,"@E 9999,999,999.99"),;//30 Valor acessório	
 					nTaxaMov,;//31 Taxa do título
-					DTOC(STOD((cAliasSE1)->E1_VENCREA)),; // 32  Venc real
+					DToC(SToD((cAliasSE1)->E1_VENCREA)),; // 32  Venc real
 					(cAliasSE1)->E1_VEND1,; // 33 Vendedor
 					Posicione("SA3",1,xFilial("SA3")+(cAliasSE1)->E1_VEND1,"A3_NOME"),;
-					DTOC(STOD((cAliasSE1)->E1_EMIS2)) })   
+					DToC(SToD((cAliasSE1)->E1_EMIS2)) })   
 					__nPosVrTit := 26
 					__nPosRecn := 23
 				EndIf
@@ -3631,7 +3608,7 @@ While .T.
 				nPosxRet := 30
 				nReg330 := 23 // Posição 23 do aTitulos				 
 				If ( lRaRtImp .Or. lRaRtImpMR ) .And. ( lPccBxCr .Or. lIRPJBxCr ) .And. !lNcc
-					lRetMinAux := ( ( !__lPccMR .And. (aDadosRet[1] > nVlMinImp) .OR. ((cAliasSE1)->E1_PIS > 0 .OR. (cAliasSE1)->E1_COFINS  > 0 .OR. (cAliasSE1)->E1_CSLL > 0 .OR. (cAliasSE1)->E1_IRRF > 0) ) .Or. ( __lPccMR .And. __nPisCaMR + __nCofCaMR + __nCslCaMR > 0 ) )
+					lRetMinAux := ( ( !__lPccMR .And. (aDadosRet[1] > nVlMinImp) .Or. ((cAliasSE1)->E1_PIS > 0 .Or. (cAliasSE1)->E1_COFINS  > 0 .Or. (cAliasSE1)->E1_CSLL > 0 .Or. (cAliasSE1)->E1_IRRF > 0) ) .Or. ( __lPccMR .And. __nPisCaMR + __nCofCaMR + __nCslCaMR > 0 ) )
 					If lRetMinAux
    						aTitulos[nLin][nPosPis]:= Transform(aDadosRA1[3][nLin]   ,X3Picture("E1_PIS"))
 						aTitulos[nLin][nPosCof]:= Transform(aDadosRA1[4][nLin]   ,X3Picture("E1_COFINS"))
@@ -3647,11 +3624,11 @@ While .T.
 					If Type("oTitulo") == "O"
 						oTitulo:aArray:=aTitulos
   						oTitulo:Refresh()
-					Endif
-				Endif
+					EndIf
+				EndIf
 
 				SA1->(DBSetOrder(nIndexSA1))
-				SA1->(DBGoto(nPosSA1))
+				SA1->(DBGoTo(nPosSA1))
 				
 			Else	// MV_PAR02 <> 2 // Considera Cliente == Sim
 				nPosxRet	:= 27
@@ -3662,7 +3639,7 @@ While .T.
 					(cAliasSE1)->E1_PARCELA,;					//03
 					(cAliasSE1)->E1_TIPO,;						//04
 					(cAliasSE1)->E1_LOJA,;						//05
-					Transform(xMoeda(nSaldoNF+(cAliasSE1)->E1_SDACRES-Iif(nProp>0,(nImp*nProp),0)-(cAliasSE1)->E1_SDDECRE- Iif(  Type("nTotAbat") <> "N" .OR. MV_PAR08== 2,0,nTotAbat) - nDesFin + nValVa,(cAliasSE1)->E1_MOEDA,nMoeda,,5,U_Fa330Tx2(nMoedaP,nTaxaP),U_Fa330Tx2(nMoedaD,nTaxaD)),"@E 9999,999,999.99"),; //06
+					Transform(xMoeda(nSaldoNF+(cAliasSE1)->E1_SDACRES-IIf(nProp>0,(nImp*nProp),0)-(cAliasSE1)->E1_SDDECRE- IIf(  Type("nTotAbat") <> "N" .Or. MV_PAR08== 2,0,nTotAbat) - nDesFin + nValVa,(cAliasSE1)->E1_MOEDA,nMoeda,,5,U_Fa330Tx2(nMoedaP,nTaxaP),U_Fa330Tx2(nMoedaD,nTaxaD)),"@E 9999,999,999.99"),; //06
 					Transform(nValComp,"@E 9999,999,999.99"),;//07
 					lMarca,;										//08
 					nValComp + nPisFina061+nCofFina061+nCslFina061+nIrfFina061,;										//09
@@ -3686,10 +3663,10 @@ While .T.
 					Transform(nValorPcc,"@E 9999,999,999.99"),; //27 PCC Baixa CR - Irrf		//18
 					Transform(nValVa,"@E 9999,999,999.99"),;//28 Valor acessório	
 					nTaxaMov,;//29 Taxa do título
-					DTOC(STOD((cAliasSE1)->E1_VENCREA)),; // 30  Venc real
+					DToC(SToD((cAliasSE1)->E1_VENCREA)),; // 30  Venc real
 					(cAliasSE1)->E1_VEND1,; // 31 Vendedor
 					Posicione("SA3",1,xFilial("SA3")+(cAliasSE1)->E1_VEND1,"A3_NOME"),; // 32 Nome
-					DTOC(STOD((cAliasSE1)->E1_EMIS2)) })  //33 Emissão
+					DToC(SToD((cAliasSE1)->E1_EMIS2)) })  //33 Emissão
 
 					__nPosVrTit := 23
 					__nPosRecn := 20
@@ -3699,7 +3676,7 @@ While .T.
 					(cAliasSE1)->E1_PARCELA,;					//03
 					(cAliasSE1)->E1_TIPO,;						//04
 					(cAliasSE1)->E1_LOJA,;						//05
-					Transform(xMoeda(nSaldoNF+(cAliasSE1)->E1_SDACRES-Iif(nProp>0,(nImp*nProp),0)-(cAliasSE1)->E1_SDDECRE- Iif(  Type("nTotAbat") <> "N" .OR. MV_PAR08== 2,0,nTotAbat) - nDesFin + nValVa,(cAliasSE1)->E1_MOEDA,nMoeda,,5,U_Fa330Tx2(nMoedaP,nTaxaP),U_Fa330Tx2(nMoedaD,nTaxaD)),"@E 9999,999,999.99"),; //06
+					Transform(xMoeda(nSaldoNF+(cAliasSE1)->E1_SDACRES-IIf(nProp>0,(nImp*nProp),0)-(cAliasSE1)->E1_SDDECRE- IIf(  Type("nTotAbat") <> "N" .Or. MV_PAR08== 2,0,nTotAbat) - nDesFin + nValVa,(cAliasSE1)->E1_MOEDA,nMoeda,,5,U_Fa330Tx2(nMoedaP,nTaxaP),U_Fa330Tx2(nMoedaD,nTaxaD)),"@E 9999,999,999.99"),; //06
 					Transform(nValComp,"@E 9999,999,999.99"),;//07
 					lMarca,;										//08
 					nValComp + nPisFina061+nCofFina061+nCslFina061+nIrfFina061,;										//09
@@ -3722,10 +3699,10 @@ While .T.
 					Transform(nValorPcc,"@E 9999,999,999.99"),;//26 Base de calculo e retenção do IRF
 					Transform(nValVa,"@E 9999,999,999.99"),; //27 Valor acessório
 					nTaxaMov,;//28 Taxa do título
-					DTOC(STOD((cAliasSE1)->E1_VENCREA)),; // 29  Venc real
+					DToC(SToD((cAliasSE1)->E1_VENCREA)),; // 29  Venc real
 					(cAliasSE1)->E1_VEND1,; // 30 Vendedor
 					Posicione("SA3",1,xFilial("SA3")+(cAliasSE1)->E1_VEND1,"A3_NOME"),; //32 Nome
-					DTOC(STOD((cAliasSE1)->E1_EMIS2)) })  //33 Emissão 
+					DToC(SToD((cAliasSE1)->E1_EMIS2)) })  //33 Emissão 
 
 					__nPosVrTit := 23
 					__nPosRecn := 20
@@ -3733,7 +3710,7 @@ While .T.
 
 				nlin := Len(aTitulos)
 				nReg330 := 20 // Posição 20 do aTitulos				
-				If ( lRaRtImp .Or. lRaRtImpMR ) .And. (lPccBxCr .Or. lIRPJBxCr) .And. !lNcc .And. ((cAliasSE1)->E1_PIS > 0 .OR. (cAliasSE1)->E1_COFINS  > 0 .OR. (cAliasSE1)->E1_CSLL > 0 .OR. (cAliasSE1)->E1_IRRF > 0)
+				If ( lRaRtImp .Or. lRaRtImpMR ) .And. (lPccBxCr .Or. lIRPJBxCr) .And. !lNcc .And. ((cAliasSE1)->E1_PIS > 0 .Or. (cAliasSE1)->E1_COFINS  > 0 .Or. (cAliasSE1)->E1_CSLL > 0 .Or. (cAliasSE1)->E1_IRRF > 0)
 					aTitulos[nLin][nPosPis]:= Transform(aDadosRA1[3][nLin]   ,X3Picture("E1_PIS"))
 					aTitulos[nLin][nPosCof]:= Transform(aDadosRA1[4][nLin]   ,X3Picture("E1_COFINS"))
 					aTitulos[nLin][nPosCsl]:= Transform(aDadosRA1[5][nLin]   ,X3Picture("E1_CSLL"))
@@ -3742,9 +3719,9 @@ While .T.
 						aTitulos[nLin][nPosxRet]:= Transform(aDadosRA1[12][nLin]   ,X3Picture("E1_IRRF"))
 					EndIf
 					aTitulos[nLin][6] := Transform(xMoeda(aDadosRA1[7][nLin],(cAliasSE1)->E1_MOEDA,nMoeda,,5,U_Fa330Tx2(nMoedaP,nTaxaP),U_Fa330Tx2(nMoedaD,nTaxaD)),"@E 9999,999,999.99")
-				Endif
+				EndIf
 			    
-			Endif
+			EndIf
 			
 			If __lMotRet .And. __lImpEmis
 				aTitulos[nLin][nPosxRet]:= Transform(__nImpMR   ,X3Picture("E1_IRRF"))
@@ -3752,7 +3729,7 @@ While .T.
 					
 			If lFI330ALT
 				aTitulos:=ExecBlock("FI330ALT",.F.,.F.,{aTitulos})
-			EndIF
+			EndIf
 			
 			If __lNoTxMov
 				__nTxMoedP := 0
@@ -3769,7 +3746,7 @@ While .T.
 	      		cNomClie := SA1->A1_NOME
 
 	      		DBSetOrder(nIndexSA1)
-	      		DBGoto(nPosSA1)
+	      		DBGoTo(nPosSA1)
 	     	   
 	      		DBSelectArea(cAliasSE1)
 	      		If nValLim==0
@@ -3783,8 +3760,8 @@ While .T.
 					Else
 						nValLim:= (cAliasSE1)->E1_SALDO
 						nValComp:= If(lMarca,nValComp,(cAliasSE1)->E1_SALDO)
-					Endif
-				Endif
+					EndIf
+				EndIf
 				If cPaisLoc != "RUS"		
 					aAdd(aTitulos,{(cAliasSE1)->E1_PREFIXO,;
 										(cAliasSE1)->E1_NUM,;
@@ -3844,8 +3821,8 @@ While .T.
 						nValLim:= (cAliasSE1)->E1_SALDO
 						nValComp:= If(lMarca,nValComp,(cAliasSE1)->E1_SALDO)
 
-					Endif
-				Endif
+					EndIf
+				EndIf
 
 				nVAlSld := (cAliasSE1)->(E1_SALDO+E1_SDACRES-E1_SDDECRE) - nDesFin  
 				
@@ -3893,7 +3870,7 @@ While .T.
 
 		aAdd( aRecNo, (cAliasSE1)->RECSE1 )
 		
-		(cAliasSE1)->(dbSkip())
+		(cAliasSE1)->(DBSkip())
 	EndDo
 	
 	Exit
@@ -3908,8 +3885,8 @@ EndIf
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Recupera a Integridade dos dados	  ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-dbSelectArea("SM0")
-dbGoto(nRecEmp)
+DBSelectArea("SM0")
+DBGoTo(nRecEmp)
 cFilAnt := IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL )
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -3919,7 +3896,7 @@ nValTot := 0
 For nX := 1 to Len(aTitulos)
 	If aTitulos[nX,8]
 		nValtot += U_Fa330VTit(aTitulos[nX,7])
-	Endif
+	EndIf
 Next
 
 /* GESTAO - inicio */
@@ -3927,18 +3904,18 @@ If !Empty(aTmpSE1Fil)
 	For nX := 1 TO Len(aTmpSE1Fil)
 		CtbTmpErase(aTmpSE1Fil[nX])
     Next
-Endif
+EndIf
 /* GESTAO - fim */
-dbSelectArea(cAliasSE1)
-dbCloseArea()
-dbSelectArea("SE1")
+DBSelectArea(cAliasSE1)
+DBCloseArea()
+DBSelectArea("SE1")
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Recupera a Integridade dos dados	  ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-dbSelectArea(cSavArea)
-dbSetOrder(nSavOrd)
-dbGoto(nRecNo)
+DBSelectArea(cSavArea)
+DBSetOrder(nSavOrd)
+DBGoTo(nRecNo)
 RestVarMR( aImpMRBrw )
 
 Return( aTitulos )
@@ -3954,14 +3931,14 @@ Return( aTitulos )
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 /*/
-USER Function Fa330VTit(aTitulo,cTipoTit,cValor)
-LOCAL nValor
-cValor := IIF (cValor == NIL,aTitulo,cValor)
+User Function Fa330VTit(aTitulo,cTipoTit,cValor)
+Local nValor
+cValor := IIf (cValor == NIL,aTitulo,cValor)
 If ValType(cValor)=="N"
 	nValor := cValor
 Else
 	nValor := DesTrans(cValor)
-Endif
+EndIf
 Return nValor
 
 
@@ -3996,10 +3973,10 @@ If cPaisLoc <> "BRA"
 	lMarcado	:=	.F.
 	For nX	:=1 	To Len(aTitulos)
 		If aTitulos[nX][8]
-			//Forcar a saida do FOR
+			//Forcar a saida do For
 			lMarcado	:=	.T.
 			nX	:=	Len(aTitulos)+1
-		Endif
+		EndIf
 	Next
 EndIf
 
@@ -4027,7 +4004,7 @@ If lRet  // Valida se o Saldo esta de acordo com o titulo.
 	For nX:=1 to Len(aTitulos)
 		If aTitulos[nX,8]
 			nValtot += U_Fa330VTit(aTitulos[nX,7])
-			If lCredito .and. lRartImp .and. lPccBxCr 
+			If lCredito .And. lRartImp .And. lPccBxCr 
 				nValTot	-= U_Fa330VTit(aTitulos[nX,14])
 				nValTot	-= U_Fa330VTit(aTitulos[nX,15])
 				nValTot	-= U_Fa330VTit(aTitulos[nX,16])
@@ -4043,7 +4020,7 @@ If lRet  // Valida se o Saldo esta de acordo com o titulo.
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Verifica se o Vlr. Informado e'igual ao calculado.      ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	If Str(nValtot,17,2) != Str(nValor,17,2) .and. nValor != 0 .And. nOpca == 1
+	If Str(nValtot,17,2) != Str(nValor,17,2) .And. nValor != 0 .And. nOpca == 1
 		Help(" ",1,"U_FA23COMP")
 		lRet	:=	.F.
 	EndIf
@@ -4059,17 +4036,17 @@ If lRet  // Valida se o Saldo esta de acordo com o titulo.
 
 EndIf 
 
-If ExistBlock("Fa330Vld") .and. lRet
+If ExistBlock("Fa330Vld") .And. lRet
 	aAreaSE1 := SE1->(GetArea())
-	SE1->(DbSetOrder(nIndVld))
-	SE1->(DbGoTo(nRecVld))
+	SE1->(DBSetOrder(nIndVld))
+	SE1->(DBGoTo(nRecVld))
 	lRet := ExecBlock("Fa330Vld")
-	RestArea(aAreaSE1)
+	FWRestArea(aAreaSE1)
 EndIf
 
 If UsaSeqCor()
 	If !CTBvldDiario(cCodDiario,dDataBase)
-		Return(.f.)
+		Return(.F.)
 	EndIf
 EndIf
 
@@ -4080,7 +4057,6 @@ Return lRet  //"Confirma marca‡„o de T¡tulos ?"###"Aten‡„o"
 Programa----------: FA330Troca
 Autor-------------: Igor Melgaço
 Data da Criacao---: 28/08/2023
-===============================================================================================================================
 Descrição---------: Troca o flag para marcado ou nao,aceitando valor. 
 ===============================================================================================================================
 */ 
@@ -4100,7 +4076,7 @@ Local nPosIr	:= 0
 Local cLimite  	:= ''
 Local nValOld  	:= 0
 Local nPos 	   	:= 0
-LOCAL nTotAbat 	:= 0
+Local nTotAbat 	:= 0
 Local aAreaSE1 	:= SE1->(GetArea())
 Local nItemRA	:= 0
 Local nItemOu	:= 0
@@ -4157,19 +4133,19 @@ If cPaisLoc == "BRA"
 	cSalTit := U_Fa330VTit(aTitulos[nIt,6 ])
 	cLimite := U_Fa330VTit(aTitulos[nIt,nPos]) //Limite de Compensação
 	nVezes  := If(lTodos,Len(aArray),1)
-	If mv_par02 == 1
+	If MV_PAR02 == 1
 		nAcresc := U_Fa330VTit(aTitulos[nIt,10])
 		nValVa	:= U_Fa330VTit(aTitulos[nIt,If(__lMotRet,28,27)])
 	Else
 		nAcresc := U_Fa330VTit(aTitulos[nIt,13])
 		nValVa	:= U_Fa330VTit(aTitulos[nIt,If(__lMotRet,31,30)])
-	Endif
+	EndIf
 	If ( lPccBxCr .Or. lIRPJBxCr ) .And. ( lRaRtImp .Or. lRaRtImpMR )
-		cValor  := U_Fa330VTit(aTitulos[nIt,Iif(MV_PAR02== 2, 25,22)])
+		cValor  := U_Fa330VTit(aTitulos[nIt,IIf(MV_PAR02== 2, 25,22)])
 	EndIf
 Else
 	cValor  := U_Fa330VTit(aTitulos[nIt,6 ])
-	If mv_par02 == 1
+	If MV_PAR02 == 1
 		cSaldo  := U_Fa330VTit(aTitulos[nIt,14])
 	Else
 		cSaldo  := U_Fa330VTit(aTitulos[nIt,17])
@@ -4187,7 +4163,7 @@ For xy := 1 to Len(aTitulos)
 	EndIf
 Next
 
-cSaldo := Iif(cSaldo > nSaldo - nVlComp,nSaldo - nVlComp,cSaldo)
+cSaldo := IIf(cSaldo > nSaldo - nVlComp,nSaldo - nVlComp,cSaldo)
 nValOld	:= cSaldo
 
 For nY := 1 to nVezes
@@ -4206,9 +4182,9 @@ For nY := 1 to nVezes
 			cSaldo  := U_Fa330VTit(aTitulos[nIt, 14])
 			cLimite := U_Fa330VTit(aTitulos[nIt, 14])
 		EndIf
-	Endif
+	EndIf
 
-	If lMarkAll .and. lTodos
+	If lMarkAll .And. lTodos
 		aArray[nIt,8] := .T.
 	Else
 		aArray[nIt,8] := !aArray[nIt,8]
@@ -4216,15 +4192,15 @@ For nY := 1 to nVezes
 
 	If ( lPccBxCr .Or. lIRPJBxCr ) .And. ( lRaRtImp .Or. lRaRtImpMR ) .And. !lNcc
 		aDadosRA1[9][nIt] := aArray[nIt,8]
-	Endif
+	EndIf
 
 	If aArray[nIt,8]
 
-		If FA330Lock(aArray[nIt,1]+aArray[nIt,2]+aArray[nIt,3]+aArray[nIt,4],,,aArray[nIt,Iif(MV_PAR02== 2, 16,13)])
+		If FA330Lock(aArray[nIt,1]+aArray[nIt,2]+aArray[nIt,3]+aArray[nIt,4],,,aArray[nIt,IIf(MV_PAR02== 2, 16,13)])
 
 			If !lTodos
 				If cPaisLoc == "BRA"
-					If aArray[nIt,4] $ MV_CRNEG .And. (mv_par08 == 1 .Or. ( lRaRtImp .Or. lRaRtImpMR ) )
+					If aArray[nIt,4] $ MV_CRNEG .And. (MV_PAR08 == 1 .Or. ( lRaRtImp .Or. lRaRtImpMR ) )
 						F330VALNCC(@aArray,nIt, cValor < cLimite, .T.)
 						cSaldo  := nSaldo - nVlComp
 					EndIf
@@ -4232,7 +4208,7 @@ For nY := 1 to nVezes
 						cLimite := U_Fa330VTit(aArray[nIt,nPos]) //Limite de Compensação
 						cValor	:= U_Fa330VTit(aArray[nIt,nPos]) //Limite de Compensação
 					Else
-						If !lNcc .or. (lNCC .and. cValor > cSaldo)
+						If !lNcc .Or. (lNCC .And. cValor > cSaldo)
 							cLimite := cSaldo
 							cValor	:= cSaldo
 						EndIf
@@ -4246,7 +4222,7 @@ For nY := 1 to nVezes
 						If cPaisLoc == "BRA" .And. MV_PAR02 == 2
 							nPosRec	:= 23
 						EndIf
-						SE1->( dbGoTo( aArray[nIt, nPosRec] ) )
+						SE1->( DBGoTo( aArray[nIt, nPosRec] ) )
 						//Verifica as configurações de impostos pelo motor de retenção
 						__lTCnfgMR := F330VldImp()
 	
@@ -4287,12 +4263,12 @@ For nY := 1 to nVezes
 						If lIrPjBxCr
 							If !__lIrfMR
 								If MV_PAR02 == 1
-									aArray[nIt,26] := Iif( Eval(bEval), Val(StrTran(Replace(aArray[nIt,26],".",""),",",".")), aArray[nIt,26])
+									aArray[nIt,26] := IIf( Eval(bEval), Val(StrTran(Replace(aArray[nIt,26],".",""),",",".")), aArray[nIt,26])
 									nIrrf := FCaIrBxCR(If(MV_PAR08 == 1 .And. aArray[nIt,26] > 0, aArray[nIt,26], nVlrSldPcc),,(SE1->E1_VALOR <> SE1->E1_SALDO .And. lRaRtImp ) )
 								Else
-									aArray[nIt,29] := Iif( Eval(bEval), Val(StrTran(Replace(aArray[nIt,29],".",""),",",".")), aArray[nIt,29])
+									aArray[nIt,29] := IIf( Eval(bEval), Val(StrTran(Replace(aArray[nIt,29],".",""),",",".")), aArray[nIt,29])
 									nIrrf := FCaIrBxCR(If(MV_PAR08 == 1 .And. aArray[nIt,29] > 0, aArray[nIt,29], nVlrSldPcc),,(SE1->E1_VALOR <> SE1->E1_SALDO .And. lRaRtImp ) )
-								Endif
+								EndIf
 								aArray[nIt,nPosIrf] := Transf(nIrrf,cPicE1IRRF)
 								aTitulos[nIt,nPosIrf]:= Transf(nIrrf,cPicE1IRRF)
 								If cValor + nPis + nCofins + nCsll + nIrrf >  Val(StrTran(Replace(aArray[nIt][6],".",""),",",".")) 
@@ -4340,7 +4316,7 @@ For nY := 1 to nVezes
 				EndIf
 				
 				If !cPaisLoc $ "EUA|RUS"
-					If !FA330SIT(aTitulos,Iif(MV_PAR02 == 2, aTitulos[nIt,23],aTitulos[nIt,20]))
+					If !FA330SIT(aTitulos,IIf(MV_PAR02 == 2, aTitulos[nIt,23],aTitulos[nIt,20]))
 						aTitulos[nIt][8] := .F.
 						Return(aTitulos)
 					EndIf
@@ -4353,20 +4329,20 @@ For nY := 1 to nVezes
 					@ 7, 68 MSGET cValor Picture "@E 9999,999,999.99" VALID cValor <= cSaldo  .And. cValor > 0 .And. ;
 																			cValor >= (nAcresc + (If(nValVa > 0, nValVa, 0))) ;
 																			SIZE 54, 10 OF oDlg PIXEL hasbutton
-					@ 8, 9 SAY STR0014  SIZE 54, 7 OF oDlg PIXEL  //"Valor a compensar"
+					@ 8, 9 Say STR0014  SIZE 54, 7 OF oDlg PIXEL  //"Valor a compensar"
 
 					If aArray[nIt,4] $ MV_CRNEG .Or. lNcc
 
-						@ 21, 2 SAY STR0072  SIZE 120, 60 OF oDlg PIXEL //"Ao selecionar esse titulo os impostos calculados na baixa serão desconsiderados"
+						@ 21, 2 Say STR0072  SIZE 120, 60 OF oDlg PIXEL //"Ao selecionar esse titulo os impostos calculados na baixa serão desconsiderados"
 
 					EndIf
 
-					DEFINE SBUTTON FROM 37, 71 TYPE 1 ENABLE ACTION (nOpca:=1,If((cValor <= cSaldo  .AND. cValor > 0 .AND. cValor >= nAcresc .AND. If(cPaisLoc== "BRA", cValor<=cLimite, cValor <= cSalTit)),oDLg:End(),nOpca:=0)) OF oDlg
-					DEFINE SBUTTON FROM 37, 99 TYPE 2 ENABLE ACTION oDlg:End() OF oDlg
+					DEFINE SBUTTON FROM 37, 71 Type 1 ENABLE ACTION (nOpca:=1,If((cValor <= cSaldo  .And. cValor > 0 .And. cValor >= nAcresc .And. If(cPaisLoc== "BRA", cValor<=cLimite, cValor <= cSalTit)),oDLg:End(),nOpca:=0)) OF oDlg
+					DEFINE SBUTTON FROM 37, 99 Type 2 ENABLE ACTION oDlg:End() OF oDlg
 
 					ACTIVATE MSDIALOG oDlg
 				Else
-					If cValor <= cSaldo  .AND. cValor > 0 .AND. cValor >= nAcresc .AND. (cPaisLoc== "BRA", cValor<=cLimite, cValor <= cSalTit)
+					If cValor <= cSaldo  .And. cValor > 0 .And. cValor >= nAcresc .And. (cPaisLoc== "BRA", cValor<=cLimite, cValor <= cSalTit)
 						nOpca := 1
 					Else
 						nOpca:=0
@@ -4386,10 +4362,10 @@ For nY := 1 to nVezes
 				If ( lRaRtImp .Or. lRaRtImpMR ) .And. !lNcc .And. Type("aDadosRA1[9][nIt]") == "A"
 					aDadosRA1[9][nIt] := .F.
 				EndIf
-				If aArray[nIt,4] $ MV_CRNEG .And. (mv_par08 == 1 .Or. ( lRaRtImp .Or. lRaRtImpMR ) ) .And. !Empty( cLimite )
+				If aArray[nIt,4] $ MV_CRNEG .And. (MV_PAR08 == 1 .Or. ( lRaRtImp .Or. lRaRtImpMR ) ) .And. !Empty( cLimite )
 					F330VALNCC(@aArray,nIt, cValor < cLimite, .F.)
 					cSaldo  := nSaldo - nVlComp
-					cLimite := U_Fa330VTit(aTitulos[nIt,Iif(cPaisLoc != "RUS",nPos,14)]) //Limite de Compensação
+					cLimite := U_Fa330VTit(aTitulos[nIt,IIf(cPaisLoc != "RUS",nPos,14)]) //Limite de Compensação
 				EndIf
 			EndIf
 			
@@ -4397,33 +4373,33 @@ For nY := 1 to nVezes
 			
 				If lCredito .And. SE1->E1_TIPO == MV_CRNEG
 					If !cPaisLoc $ "EUA|RUS"
-						dbSelectArea("SE1")
+						DBSelectArea("SE1")
 						If MV_PAR02 == 2
-							dbGoTo(aArray[nIt,23])
+							DBGoTo(aArray[nIt,23])
 						Else
-							dbGoTo(aArray[nIt,20])
+							DBGoTo(aArray[nIt,20])
 					    EndIf
 				    EndIf
 					nValAbat := SomaAbat(SE1->E1_PREFIXO,SE1->E1_NUM,SE1->E1_PARCELA,"R",SE1->E1_MOEDA,,SE1->E1_CLIENTE,,SE1->E1_FILIAL)
-					RestArea(aAreaSE1)
+					FWRestArea(aAreaSE1)
 				EndIf
 							
 				//Pcc Baixa CR
 				//Caso a compensacao tenha partido de um Adiantamento
 				If lCredito .And. (SE1->E1_TIPO <> MV_CRNEG) .And. ( !lRaRtImp .And. !lRaRtImpMRt ) .And. cPaisLoc == "BRA"
-					dbSelectArea("SE1")					 				
+					DBSelectArea("SE1")					 				
 					If MV_PAR02 == 2
-						dbGoTo(aArray[nIt,23])
+						DBGoTo(aArray[nIt,23])
 					Else
-				   		dbGoTo(aArray[nIt,20])
-				    Endif
+				   		DBGoTo(aArray[nIt,20])
+				    EndIf
 				    
-					If mv_par08 == 1 .Or. ( lRaRtImp .Or. lRaRtImpMR )
+					If MV_PAR08 == 1 .Or. ( lRaRtImp .Or. lRaRtImpMR )
 						nTotAbat := SomaAbat(SE1->E1_PREFIXO,SE1->E1_NUM,SE1->E1_PARCELA,"R",SE1->E1_MOEDA,,SE1->E1_CLIENTE,,SE1->E1_FILIAL)
 						nValAbat := nTotAbat
 					Else
 						nTotAbat := 0
-					Endif
+					EndIf
 					
 					nOldValRec	:= nValOld
 					If cValor > cLimite
@@ -4458,11 +4434,11 @@ For nY := 1 to nVezes
 					EndIf
 															
 					If ( lRartimp .Or. lRaRtImpMR ) .And. ( !( cValor + nPis + nCofins + nCsll == SE1->E1_SALDO ) )
-						U_F330CalcPCC( nIt, aArray, @cValor + Iif( cValor == cSalTit, nTotAbat, 0 ), cValor < cLimite )
+						U_F330CalcPCC( nIt, aArray, @cValor + IIf( cValor == cSalTit, nTotAbat, 0 ), cValor < cLimite )
 					EndIf
 
 					If !__lPccMR .And. dDatabase <= dLastPcc
-						If !lRaRtImp .and. mv_par08 == 1 .and. lPccBxCr .and. SE1->E1_TIPO <> MVRECANT .and. nPis+nCofins+nCsll+nIrrf > 0 .AND. aDadosret[1] < nVlMinImp .and. aDadosRet[1]+nValRec > nVlMinImp
+						If !lRaRtImp .And. MV_PAR08 == 1 .And. lPccBxCr .And. SE1->E1_TIPO <> MVRECANT .And. nPis+nCofins+nCsll+nIrrf > 0 .And. aDadosret[1] < nVlMinImp .And. aDadosRet[1]+nValRec > nVlMinImp
 		  					nProp	:= (aDadosret[1]+ nValRec) / nSaldo
 							nPis	:= SE1->E1_PIS * nProp
 							nCofins := SE1->E1_COFINS * nProp
@@ -4475,7 +4451,7 @@ For nY := 1 to nVezes
 					If nMoeda <> SE1->E1_MOEDA .And. cValor == NoRound(xMoeda(SE1->E1_SALDO,SE1->E1_MOEDA,nMoeda,SE1->E1_EMISSAO,5,U_Fa330Tx2(nMoeda,nTxMoeda)),2) 
 						aArray[nIt,9] := xMoeda(SE1->E1_SALDO,SE1->E1_MOEDA,nMoeda,SE1->E1_EMISSAO,5,U_Fa330Tx2(nMoeda,nTxMoeda))
 					Else
-						aArray[nIt,9] := Iif(lMSal .And. cValor > cOldVl,cOldVl,cValor)
+						aArray[nIt,9] := IIf(lMSal .And. cValor > cOldVl,cOldVl,cValor)
 					EndIf
 					
 					If lIrPjBxCr .And. lCredito .And. (SE1->E1_TIPO <> MV_CRNEG) 
@@ -4507,12 +4483,12 @@ For nY := 1 to nVezes
 					EndIf
 
 					If (lPccBxCr .Or. lIRPJBxCr) .And. ( lRaRtImp .Or. lRaRtImpMR ) .And. !lNcc
-						dbSelectArea("SE1")
+						DBSelectArea("SE1")
 						If MV_PAR02 == 2
-							dbGoTo(aArray[nIt,23])
+							DBGoTo(aArray[nIt,23])
 						Else
-				   			dbGoTo(aArray[nIt,20])
-				    	Endif
+				   			DBGoTo(aArray[nIt,20])
+				    	EndIf
 				    	
 						If lCredito
 							nItemOU := aScan(aDadosRA1[2],{|x| x==SE1->(Recno())})
@@ -4618,7 +4594,7 @@ For nY := 1 to nVezes
 										If cValor < cLimite
 									   		cValor := cValor - (aDadosRA1[3][nItemRA]+aDadosRA1[4][nItemRA]+aDadosRA1[5][nItemRA]+aDadosRA1[6][nItemRA];
 																+aDadosRA1[10][nItemRA]+aDadosRA1[11][nItemRA])
-										Endif
+										EndIf
 									Else
 										If cValor < cLimite
 											cValor := cValor - (nPis+nCofins+nCsll)
@@ -4645,8 +4621,8 @@ For nY := 1 to nVezes
 								
 				If cPaisLoc != "RUS" .And. lPccBxCr .And. ( !lRaRtImp .And. !lRaRtImpMR )
 					nTotAbat := SomaAbat(SE1->E1_PREFIXO,SE1->E1_NUM,SE1->E1_PARCELA,"R",SE1->E1_MOEDA,,SE1->E1_CLIENTE,,SE1->E1_FILIAL)
-					If ((cValor <= cLimite .and. SE1->E1_SALDO - nPis -nCofins - nCsll - nTotAbat <> cValor) .Or.;
-					(SE1->(E1_PIS+E1_CSLL+E1_COFINS) > 0 .And. (nPis+nCofins+nCsll) == 0 .And. cValor <= cLimite .And. mv_par08 == 1)) //essa cond ocorre quando os tít são marca indiv, removido a seleç e depois selec todos.
+					If ((cValor <= cLimite .And. SE1->E1_SALDO - nPis -nCofins - nCsll - nTotAbat <> cValor) .Or.;
+					(SE1->(E1_PIS+E1_CSLL+E1_COFINS) > 0 .And. (nPis+nCofins+nCsll) == 0 .And. cValor <= cLimite .And. MV_PAR08 == 1)) //essa cond ocorre quando os tít são marca indiv, removido a seleç e depois selec todos.
 						For nX:=1 to Len(aArray) // verifica todos os títulos ja marcados
 							If	aArray[nX,8] 
 								nVTit += U_Fa330VTit(aArray[nX,7])
@@ -4655,14 +4631,14 @@ For nY := 1 to nVezes
 						If lMSal
 							cValor	:= cOldVl
 						EndIf
-						__nProp := Round((cValor + Iif(lIrPjBxCr, SE1->E1_IRRF, 0) + SE1->(E1_PIS + E1_COFINS + E1_CSLL) + SE1->E1_DECRESC + nTotAbat) / SE1->E1_SALDO, 2)
+						__nProp := Round((cValor + IIf(lIrPjBxCr, SE1->E1_IRRF, 0) + SE1->(E1_PIS + E1_COFINS + E1_CSLL) + SE1->E1_DECRESC + nTotAbat) / SE1->E1_SALDO, 2)
 						If ( nVtit + cValor == SE1->E1_VALOR - SE1->E1_PIS - SE1->E1_COFINS - SE1->E1_CSLL - nTotAbat ) .Or. ( nVtit + cValor == SE1->E1_VALOR - nPis - nCofins - nCsll - nTotAbat )
-							nAltVal := SE1->E1_SALDO - nVtit // se os titulos ja marcados + o titulo do momento for igual o liquido, deve calcular pelo restante do saldo.
+							nAltVal := SE1->E1_SALDO - nVtit // se os titulos ja marcados + o titulo do momento For igual o liquido, deve calcular pelo restante do saldo.
 						Else
-							nAltVal := Iif(MV_PAR08==1 .Or. ( cPaisLoc == 'BRA' .And. __nProp == 1 ), (cValor + Iif(lIrPjBxCr, SE1->E1_IRRF, 0) + If(cPaisLoc == 'BRA' .And. __nProp == 1, SE1->(E1_PIS + E1_COFINS + E1_CSLL), Iif(lTodos, 0, SE1->(E1_PIS + E1_COFINS + E1_CSLL) ) ) + SE1->E1_DECRESC + nTotAbat), cValor)
+							nAltVal := IIf(MV_PAR08==1 .Or. ( cPaisLoc == 'BRA' .And. __nProp == 1 ), (cValor + IIf(lIrPjBxCr, SE1->E1_IRRF, 0) + If(cPaisLoc == 'BRA' .And. __nProp == 1, SE1->(E1_PIS + E1_COFINS + E1_CSLL), IIf(lTodos, 0, SE1->(E1_PIS + E1_COFINS + E1_CSLL) ) ) + SE1->E1_DECRESC + nTotAbat), cValor)
 						EndIf
 						
-						If (aArray[nIt,4] $ MV_CRNEG .and.  SE1->E1_SALDO - nTotAbat == cValor) .or. (lNCC .and.  SE1->E1_SALDO - nValAbat == cValor ) .Or. ( nAltVal > SE1->E1_SALDO ) 
+						If (aArray[nIt,4] $ MV_CRNEG .And.  SE1->E1_SALDO - nTotAbat == cValor) .Or. (lNCC .And.  SE1->E1_SALDO - nValAbat == cValor ) .Or. ( nAltVal > SE1->E1_SALDO ) 
 							//baixa total
 							nAltVal := SE1->E1_SALDO
 						EndIf
@@ -4696,7 +4672,7 @@ For nY := 1 to nVezes
 								cValor := cValor - nPis - nCofins - nCsll
 							EndIf
 							If !__lIrfMR
-								cValor := cValor - Iif ( lIrPjBxCr, nIrrf, 0 )
+								cValor := cValor - IIf ( lIrPjBxCr, nIrrf, 0 )
 							EndIf
 						EndIf
 					
@@ -4706,7 +4682,7 @@ For nY := 1 to nVezes
 					EndIf
 				EndIf
 				
-				If lTodos .And. lPccBxCr .And. ( !lRaRtImp .And. !lRaRtImpMR ) .And. mv_par08 == 1
+				If lTodos .And. lPccBxCr .And. ( !lRaRtImp .And. !lRaRtImpMR ) .And. MV_PAR08 == 1
 					aArray[nIt,7] := Transf((cValor-nPis-nCofins-nCsll),__cPiE1Sld)
 					//Vld para ñ gerar mov.diferentes
 					cValor := If(lBq10925, Val(StrTran(aArray[nIt,7], ".", "")), cValor) 
@@ -4751,11 +4727,11 @@ For nY := 1 to nVezes
 			If cPaisLoc == "BRA"
 				aArray[nIt,9] := 0
 				If lCredito
-					dbSelectArea("SE1")
+					DBSelectArea("SE1")
 					If MV_PAR02 == 2
-						dbGoTo(aArray[nIt,23])
+						DBGoTo(aArray[nIt,23])
 					Else
-				   		dbGoTo(aArray[nIt,20])
+				   		DBGoTo(aArray[nIt,20])
 				    EndIf
 				    
 				    //Motor de retenções
@@ -4768,14 +4744,14 @@ For nY := 1 to nVezes
 						lIrPjBxCr 	:= ( __lIrfMR .And. __lIrfBxMR ) .Or. ( !__lIrfMR .And. lIrfBxAux )
 					EndIf
 				    
-					If mv_par08 == 1 .Or. ( lRaRtImp .Or. lRaRtImpMR )
+					If MV_PAR08 == 1 .Or. ( lRaRtImp .Or. lRaRtImpMR )
 						nTotAbat := SomaAbat(SE1->E1_PREFIXO,SE1->E1_NUM,SE1->E1_PARCELA,"R",SE1->E1_MOEDA,,SE1->E1_CLIENTE)
 					Else
 						nTotAbat := 0
 					EndIf
 
 					U_F330CalcPCC(nIt,aArray,@cValor+If(cValor==cSalTit,nTotAbat,0),cValor < cLimite)
-				Endif
+				EndIf
 				
 				If lIrPjBxCr .And. lCredito
 					If !__lIrfMR
@@ -4784,7 +4760,7 @@ For nY := 1 to nVezes
 						nIrrf := 0
 					EndIf
 					
-					If ( nPosIr := ascan(aImpIR,{|x| x[2]=SE1->(REcno())}) ) = 0
+					If ( nPosIr := aScan(aImpIR,{|x| x[2]=SE1->(REcno())}) ) = 0
 						aAdd(aImpIR,{nIrrf,SE1->(Recno())})
 						nPosIr := Len( aImpIR )
 					Else
@@ -4794,7 +4770,7 @@ For nY := 1 to nVezes
 			EndIf
 		EndIf
 
-		FA330UnLock(aArray[nIt,1]+aArray[nIt,2]+aArray[nIt,3]+aArray[nIt,4],,aArray[nIt,Iif(MV_PAR02== 2, 16,13)])
+		FA330UnLock(aArray[nIt,1]+aArray[nIt,2]+aArray[nIt,3]+aArray[nIt,4],,aArray[nIt,IIf(MV_PAR02== 2, 16,13)])
 
 	EndIf
 	
@@ -4803,7 +4779,7 @@ Next
 For nX:=1 to Len(aArray)
 	If	aArray[nX,8]
 		nValtot += U_Fa330VTit(aArray[nX,7])
-	Endif
+	EndIf
 Next
 
 nIt := nOldIt
@@ -4816,7 +4792,7 @@ If ExistBlock("F330ATLIS")
 	ExecBlock("F330ATLIS",.F.,.F., {  , 2 , nValTot, nValor } )
 EndIf  
 
-RestArea(aAreaSE1)
+FWRestArea(aAreaSE1)
 RestVarMR( aImpMRBrw )
 
 Return aArray
@@ -4833,7 +4809,7 @@ Return aArray
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
-USER Function Fa330SetMo(lAutomato)
+User Function Fa330SetMo(lAutomato)
 Local oDlg
 Local nLenMoedas	:= Len(aTxMoedas)
 Local nI            := 1
@@ -4858,10 +4834,10 @@ If nLenMoedas > 1
 			For nI := 1 To nLenMoedas-1
 				cBlKMoeda := "{|| aTxMoedas["+AllTrim(Str(ni+1))+",1]}"
 				aAdd(aSay, TSay():New(1+(ni*12),010,&cBlKMoeda,oDlg,,, .F., .F., .T.,.T.,,,,, .F., .F., .F., .F.))
-				aAdd(aGet, TGet():New((ni*12)-2,060,&("{|x| If(x <> NIL,aTxMoedas["+AllTRim(Str(ni+1))+",2] := x,aTxMoedas["+Str(ni+1)+",2])}"),oDlg,45,,aTxMoedas[nI+1,3],,,,,,,.T.,,,,.F.,.T.,,.F.,.F.,,,,.F.,,.T.))
+				aAdd(aGet, TGet():New((ni*12)-2,060,&("{|x| If(x <> NIL,aTxMoedas["+AllTrim(Str(ni+1))+",2] := x,aTxMoedas["+Str(ni+1)+",2])}"),oDlg,45,,aTxMoedas[nI+1,3],,,,,,,.T.,,,,.F.,.T.,,.F.,.F.,,,,.F.,,.T.))
 			Next nI
 
-		DEFINE  SButton FROM (nLinTelaD + 5),80 TYPE 1 Action (oDlg:End() ) ENABLE OF oDlg  PIXEL
+		DEFINE  SButton FROM (nLinTelaD + 5),80 Type 1 Action (oDlg:End() ) ENABLE OF oDlg  PIXEL
 		ACTIVATE MSDIALOG oDlg CENTERED
 	EndIf
 	If lExistM .And. nI >= nMoeda
@@ -4897,22 +4873,22 @@ Local lRet := .T.
 Default nVlrCompe := 0
 
 Do Case
-Case EMPTY(cNum)
+Case Empty(cNum)
 	lRet := .F.
 Case !fa330Cli()
 	lRet := .F.
 Case !Fa330Loja()
 	lRet := .F.
-Case !(nValor >= 0 .AND. STR(nValor,17,2) <= STR(nSaldo,17,2))
+Case !(nValor >= 0 .And. Str(nValor,17,2) <= Str(nSaldo,17,2))
 	lRet := .F.
 Case !(dBaixa >= SE1->E1_EMISSAO)
 	lRet := .F.
 Case !lCredito
-	If Empty(cTipoTit) .Or.	!(!cTipoTit $ MVABATIM .AND. 	!(cTipoTit $ MVRECANT+"/"+MV_CRNEG))
+	If Empty(cTipoTit) .Or.	!(!cTipoTit $ MVABATIM .And. 	!(cTipoTit $ MVRECANT+"/"+MV_CRNEG))
 		lRet := .F.
 	EndIf
 Case lCredito
-	If Empty(cTipoTit) .Or. !(!cTipoTit $ MVABATIM .AND. (cTipoTit $ MVRECANT+"/"+MV_CRNEG))
+	If Empty(cTipoTit) .Or. !(!cTipoTit $ MVABATIM .And. (cTipoTit $ MVRECANT+"/"+MV_CRNEG))
 		lRet := .F.
 	EndIf
 
@@ -4948,7 +4924,7 @@ Static Function fMarkAll(aTit As Array, nValor As Numeric, lEstorno As Logical) 
 	
 	Default lEstorno := .F.
 
-	nPosMarca := Iif( lEstorno, 11, nPosMarca )
+	nPosMarca := IIf( lEstorno, 11, nPosMarca )
 
 	If Len(aTit) > 0
 		For nI := 1 to Len(aTit)
@@ -4966,9 +4942,9 @@ Static Function fMarkAll(aTit As Array, nValor As Numeric, lEstorno As Logical) 
 	Else
 		nValTot := 0
 		aEval( @aTit, {|e| e[nPosMarca] := !lRet, ;
-						   Iif( e[nPosMarca], ( Iif( U_Fa330VTit(e[7]) = 0, e[7] := e[6], Nil ), nValTot += U_Fa330VTit(e[7]),;
-						   Iif( cPaisLoc=="BRA", e[9] := DesTrans(e[7]), IIf( MV_PAR02 == 02, e[12] := DesTrans(e[7]), .T. ) ) ),;
-						   ( e[7] := Transf(0,"@E 9999,999,999.99"), Iif( cPaisloc=="BRA", e[9] := DesTrans(e[7]), IIf( MV_PAR02 == 02, e[12] := e[7], e[11] := e[7] ) ) ) ) } )
+						   IIf( e[nPosMarca], ( IIf( U_Fa330VTit(e[7]) = 0, e[7] := e[6], Nil ), nValTot += U_Fa330VTit(e[7]),;
+						   IIf( cPaisLoc=="BRA", e[9] := DesTrans(e[7]), IIf( MV_PAR02 == 02, e[12] := DesTrans(e[7]), .T. ) ) ),;
+						   ( e[7] := Transf(0,"@E 9999,999,999.99"), IIf( cPaisloc=="BRA", e[9] := DesTrans(e[7]), IIf( MV_PAR02 == 02, e[12] := e[7], e[11] := e[7] ) ) ) ) } )
 	EndIf
 
 Return lRet
@@ -4996,9 +4972,9 @@ Static Function fDsMarkAll(aTit As Array, nValor As Numeric) As Logical
 	
 	nValTot := 0
 	aEval( @aTit, {|e| e[nPosMarca] := .F., ;
-					   Iif( e[nPosMarca], ( Iif( U_Fa330VTit(e[7]) = 0, e[7] := e[6], Nil ), nValTot += U_Fa330VTit(e[7]),;
-					   Iif( cPaisLoc=="BRA", e[9] := DesTrans(e[7]), IIf( MV_PAR02 == 02, e[12] := DesTrans(e[7]), .T. ) ) ),;
-					   ( e[7] := Transf(0,"@E 9999,999,999.99"), Iif( cPaisloc=="BRA", e[9] := DesTrans(e[7]), IIf( MV_PAR02 == 02, e[12] := e[7], e[11] := e[7] ) ) ) ) } )
+					   IIf( e[nPosMarca], ( IIf( U_Fa330VTit(e[7]) = 0, e[7] := e[6], Nil ), nValTot += U_Fa330VTit(e[7]),;
+					   IIf( cPaisLoc=="BRA", e[9] := DesTrans(e[7]), IIf( MV_PAR02 == 02, e[12] := DesTrans(e[7]), .T. ) ) ),;
+					   ( e[7] := Transf(0,"@E 9999,999,999.99"), IIf( cPaisloc=="BRA", e[9] := DesTrans(e[7]), IIf( MV_PAR02 == 02, e[12] := e[7], e[11] := e[7] ) ) ) ) } )
 
 Return lRet
 
@@ -5007,11 +4983,8 @@ Return lRet
 Programa----------: Fa23Leg
 Autor-------------: Igor Melgaço
 Data da Criacao---: 28/08/2023
-===============================================================================================================================
 Descrição---------: Cria uma janela contendo a legenda da mBrowse 
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------:  
 ===============================================================================================================================
 */ 
@@ -5023,9 +4996,9 @@ Local aLegenda := {	{"ENABLE"		, 	STR0051	},; //"Titulo nao Compensado"
 
 If nReg = Nil	// Chamada direta da funcao onde nao passa, via menu Recno eh passado
 	uRetorno := {}
-	Aadd(uRetorno, {'E1_SALDO =  0', aLegenda[2][1]})			// Titulo Compensado Totalmente
-	Aadd(uRetorno, {'E1_SALDO =  E1_VALOR', aLegenda[1][1]}) // Titulo nao Compensado
-	Aadd(uRetorno, {'E1_SALDO <> 0', aLegenda[3][1]})			// Titulo Compensado Parcialmente
+	aAdd(uRetorno, {'E1_SALDO =  0', aLegenda[2][1]})			// Titulo Compensado Totalmente
+	aAdd(uRetorno, {'E1_SALDO =  E1_VALOR', aLegenda[1][1]}) // Titulo nao Compensado
+	aAdd(uRetorno, {'E1_SALDO <> 0', aLegenda[3][1]})			// Titulo Compensado Parcialmente
 Else
 	BrwLegenda(cCadastro,STR0047,aLegenda)  //"Legenda"
 EndIf
@@ -5049,11 +5022,11 @@ User Function PesqListBox(oListBox,aListBox)
 Local nFound
 Local aParam	:= {}
 
-PRIVATE mv_par01 // Declara as variaveis private para não conflitar com as variaveis da pergunte
-PRIVATE mv_par02
-PRIVATE mv_par03
+Private MV_PAR01 // Declara as variaveis Private para não conflitar com as variaveis da pergunte
+Private MV_PAR02
+Private MV_PAR03
 
-If ParamBox( { { 1,STR0001 ,Padr(__PesqList,200),"@" 	 ,""  ,""    ,"" ,120 ,.T. },;
+If ParamBox( { { 1,STR0001 ,PadR(__PesqList,200),"@" 	 ,""  ,""    ,"" ,120 ,.T. },;
 				{5,STR0056,.F.,90,,.F.},;
 				{5,STR0057,.F.,90,,.F.} }, STR0001 , aParam, , , , , , , , .F. )
 
@@ -5066,9 +5039,9 @@ If ParamBox( { { 1,STR0001 ,Padr(__PesqList,200),"@" 	 ,""  ,""    ,"" ,120 ,.T.
 		EndIf
 	Else
 		If aParam[3]
-			nFound := aScan(aListBox,{|x| aScan(x,{|x| UPPER(AllTrim(aParam[1]))$UPPER(AllTrim(x)) } )>0 },oListBox:nAt+1)
+			nFound := aScan(aListBox,{|x| aScan(x,{|x| Upper(AllTrim(aParam[1]))$Upper(AllTrim(x)) } )>0 },oListBox:nAt+1)
 		Else
-			nFound := aScan(aListBox,{|x| aScan(x,{|x| UPPER(AllTrim(aParam[1]))$UPPER(AllTrim(x)) } )>0 })
+			nFound := aScan(aListBox,{|x| aScan(x,{|x| Upper(AllTrim(aParam[1]))$Upper(AllTrim(x)) } )>0 })
 		EndIf
 	EndIf
 	If nFound <= 0
@@ -5125,25 +5098,25 @@ Local aRotina   := { {STR0001, "AxPesqui"    , 0, 1,, .F. },;  //"Pesquisar"
 If lFA330LIB
 	aRetorno := ExecBlock("FA330LIB",.F.,.F.,{aRotina})
 	aRotina := AClone(aRetorno)
-Endif
+EndIf
 
 Return(aRotina)
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 
 Static Function FA330aUnlock()
-Local aArea := GetArea()
+Local aArea := FWGetArea()
 If aRLocks == Nil
 	aRLocks:={}
-Endif
+EndIf
 //**********************************************
 // Retirado para permitir utilizacao de rotina *
 // automatica dentro de transacao no banco     *
 //**********************************************
 //AEval(aRLocks,{|x,y| SE1->(MsRUnlock(x))})
-AEval(aRLocks,{|x,y| SE1->(DbGoTo(x)),MsUnLock() })
+AEval(aRLocks,{|x,y| SE1->(DBGoTo(x)),MSUnLock() })
 aRLocks:={}
-RestArea(aArea)
+FWRestArea(aArea)
 Return
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
@@ -5158,8 +5131,8 @@ EndIf
 If nRecno <> Nil
 	SE1->(MsGoto(nRecno))
 Else
-	aArea	:=	getArea()
-	SE1->(DbSetOrder(1))
+	aArea	:=	FWGetArea()
+	SE1->(DBSetOrder(1))
 	SE1->(MsSeek(cfilorig+cChave))
 EndIf
 
@@ -5168,15 +5141,15 @@ EndIf
 // automatica dentro de transacao no banco     *
 // **********************************************
 //SE1->(MsRUnlock(SE1->(Recno())))
-SE1->(MsUnlock())
+SE1->(MSUnLock())
 
-If (nPosRec:=Ascan(aRLocks,SE1->(REcno()))) > 0
+If (nPosRec:=aScan(aRLocks,SE1->(REcno()))) > 0
 	Adel(aRlocks,nPosRec)
 	aSize(aRlocks,Len(aRlocks)-1)
 EndIf
 
 If aArea <> Nil
-	RestArea(aArea)
+	FWRestArea(aArea)
 EndIf
 
 Return
@@ -5190,26 +5163,26 @@ DEFAULT lHelp	:=	.T.
 
 If aRLocks == Nil
 	aRLocks:={}
-Endif
+EndIf
 
 If nRecno <> Nil
 	SE1->(MsGoto(nRecno))
 Else
 	aArea	:=	SE1->(getArea())
-	SE1->(DbSetOrder(1))
+	SE1->(DBSetOrder(1))
 	SE1->(MsSeek(cfilorig+cChave))
-Endif
+EndIf
 
 If  SE1->(RecLock("SE1",.F.))
-	AAdd(aRLocks, SE1->(Recno()))
+	aAdd(aRLocks, SE1->(Recno()))
 	lRet	:=	.T.
 ElseIf lHelp
 	MsgAlert(STR0060)
-Endif
+EndIf
 
 If aArea <> Nil
-	RestArea(aArea)
-Endif
+	FWRestArea(aArea)
+EndIf
 
 Return lRet
 
@@ -5233,7 +5206,7 @@ User Function FinA330T(aParam)
 	FinA330(aParam[1])
 	FinVisual(FinWindow:cAliasFile,FinWindow,(FinWindow:cAliasFile)->(Recno()),.T.)
 	ReCreateBrow("SE1",FinWindow)
-	dbSelectArea("SE1")
+	DBSelectArea("SE1")
 
 	INCLUI := .F.
 	ALTERA := .F.
@@ -5291,15 +5264,15 @@ If cPaisLoc == "BRA" .And. lPccBxCr
 		nPosRec := 23
 		nPosBPCC := 27
 		nPosBPCR := 28
-	Endif
+	EndIf
 
-	SE1->( dbGoTo( aArray[nIt, nPosRec] ) )
+	SE1->( DBGoTo( aArray[nIt, nPosRec] ) )
 	nValrec := cValor 	//Esta variavel esta numerica apesar da notacao.
 	nOldValRec := nValRec
 
 	If !__lPccMR
 	
-		cRetCli := Iif(Empty(SA1->A1_ABATIMP),"1",SA1->A1_ABATIMP)
+		cRetCli := IIf(Empty(SA1->A1_ABATIMP),"1",SA1->A1_ABATIMP)
 	
 		If aArray[nIt,8]
 			If cRetCli == "1"  //Calculo do sistema
@@ -5307,7 +5280,7 @@ If cPaisLoc == "BRA" .And. lPccBxCr
 				For nX := nIt To Len(aArray)
 					If	aArray[nX,8]
 						nValRec   += U_Fa330VTit(aArray[nX,7])
-						If mv_par08 == 2
+						If MV_PAR08 == 2
 							nValRec   += U_Fa330VTit(aArray[nX,nPosPis])
 							nValRec   += U_Fa330VTit(aArray[nX,nPosCof])
 							nValRec   += U_Fa330VTit(aArray[nX,nPosCsl])
@@ -5349,7 +5322,7 @@ If cPaisLoc == "BRA" .And. lPccBxCr
 					nPis	:= aPcc[2]
 					nCofins	:= aPcc[3]
 					nCsll	:= aPcc[4]
-					If !lAltValor .and. !lRartimp .and. mv_par08 == 1 .and. !lCredito /*SE1->E1_TIPO == MVNOTAFIS*/ .and. (SE1->E1_SALDO - Iif(lPccBxCr,0,nPis - nCofins - nCsll) - nTAbt <> nValRec )//.and. SE1->E1_SALDO - nPis - nCofins - nCsll - nTAbt == SE1->E1_SALDO) // compensado pelo valor liquido 
+					If !lAltValor .And. !lRartimp .And. MV_PAR08 == 1 .And. !lCredito /*SE1->E1_TIPO == MVNOTAFIS*/ .And. (SE1->E1_SALDO - IIf(lPccBxCr,0,nPis - nCofins - nCsll) - nTAbt <> nValRec )//.and. SE1->E1_SALDO - nPis - nCofins - nCsll - nTAbt == SE1->E1_SALDO) // compensado pelo valor liquido 
 						nValPcc	:= nValRec
 						aPcc	:= newMinPcc(dBaixa,nValPcc,SE1->E1_NATUREZ,"R",SE1->E1_CLIENTE+SE1->E1_LOJA)
 						nPis	:= aPcc[2]
@@ -5409,7 +5382,7 @@ If cPaisLoc == "BRA" .And. lPccBxCr
 				nVlRetPis	:= 0
 				nVlRetCof	:= 0
 				nVlRetCsl	:= 0
-			Endif
+			EndIf
 		Else
 			nPis		:= 0
 			nCofins		:= 0
@@ -5417,7 +5390,7 @@ If cPaisLoc == "BRA" .And. lPccBxCr
 			nVlRetPis	:= 0
 			nVlRetCof	:= 0
 			nVlRetCsl	:= 0
-		Endif
+		EndIf
 
 		cValor	:= nValRec
 	
@@ -5431,7 +5404,7 @@ If cPaisLoc == "BRA" .And. lPccBxCr
 		
 	EndIf
 	
-	If mv_par08 == 1
+	If MV_PAR08 == 1
 		aArray[nIt,nPosPis] := Transform(nPis,"@E 99,999,999.99")
 		aArray[nIt,nPosCof] := Transform(nCofins,"@E 99,999,999.99")
 		aArray[nIt,nPosCsl] := Transform(nCsll,"@E 99,999,999.99")
@@ -5440,7 +5413,7 @@ If cPaisLoc == "BRA" .And. lPccBxCr
 	If !__lPccMR
 		aArray[nIt,nPosBPCC] := Transform(nPisBaseC,"@E 99,999,999.99")
 		aArray[nIt,nPosBPCR] := Transform(nPisBaseR,"@E 99,999,999.99")
-	Endif
+	EndIf
 	
 	If MV_PAR02 == 2
 		If !__lPccMR
@@ -5452,10 +5425,10 @@ If cPaisLoc == "BRA" .And. lPccBxCr
 			aArray[nIt,nPVRCof] := Transform(nCofins,"@E 99,999,999.99")
 			aArray[nIt,nPVRCsl] := Transform(nCsll,"@E 99,999,999.99")
 		EndIf
-	Endif
+	EndIf
 	
 	For ni := 1 To Len(aTitulos)
-		nRecTit	:= recno()
+		nRecTit	:= Recno()
 		If ValType(aTitulos[ni,20]) <> "C"
 			If nRecTit == aTitulos[ni][20]
 				aTitulos[ni][14]	:= aArray[nIt,nPosPis]
@@ -5478,19 +5451,19 @@ User Function F330Button(lPccBxCr,oTitulo,oGet01,lMarkAll)
 Default lMarkAll := .F. 
 nValTot := 0
 
-If (lPccBxCr .and. lCredito) 
+If (lPccBxCr .And. lCredito) 
 	aTitulos := FA330Troca(oTitulo:nAt,aTitulos,oGet01,.T.,,lMarkAll)
 Else
 	If lMarkAll  // Marca Todos 
 		//FA330Lock(cChave,nRecno,lHelp,cfilOrig)
-	   //aEval(aTitulos, {|e| IIf(Fa330Lock(e[1]+e[2]+e[3]+e[4],,,Iif(MV_PAR02== 2, e[16],e[13]),.F.), (e[8] := .T.) , Nil ), If(e[8],(If(U_Fa330VTit(e[7])=0,e[7]:=e[6],Nil),nValTot += U_Fa330VTit(e[7]),e[9]:=DesTrans(e[7])),(e[7]:=Transf(0,"@E 9999,999,999.99"), e[9]:=DesTrans(e[7]) ))})
-	   //aEval(aTitulos, {|e| IIf(Fa330Lock(e[1]+e[2]+e[3]+e[4],,,Iif(MV_PAR02== 2, e[16],e[13]),.F.), (e[8] := .T.) , Nil ), If(e[8],(If(U_Fa330VTit(e[7])=0,e[7]:=e[6],Nil),nValTot += U_Fa330VTit(e[7]),e[9]:=DesTrans(e[7])),(e[7]:=Transf(0,"@E 9999,999,999.99"), e[9]:=DesTrans(e[7]) ))})
-		aEval(aTitulos, {|e| IIf(Fa330Lock(e[1]+e[2]+e[3]+e[4],,,Iif(MV_PAR02== 2, e[16],e[13])), (e[8] := .T.) , Nil ), If(e[8],(If(U_Fa330VTit(e[7])=0,e[7]:=e[6],Nil),nValTot += U_Fa330VTit(e[7]),e[9]:=DesTrans(e[7])),(e[7]:=Transf(0,"@E 9999,999,999.99"), e[9]:=DesTrans(e[7]) ))})
-		aEval(aTitulos, {|e| IIf(Fa330Lock(e[1]+e[2]+e[3]+e[4],,,Iif(MV_PAR02== 2, e[16],e[13])), (e[8] := .T.) , Nil ), If(e[8],(If(U_Fa330VTit(e[7])=0,e[7]:=e[6],Nil),nValTot += U_Fa330VTit(e[7]),e[9]:=DesTrans(e[7])),(e[7]:=Transf(0,"@E 9999,999,999.99"), e[9]:=DesTrans(e[7]) ))})
+	   //aEval(aTitulos, {|e| IIf(Fa330Lock(e[1]+e[2]+e[3]+e[4],,,IIf(MV_PAR02== 2, e[16],e[13]),.F.), (e[8] := .T.) , Nil ), If(e[8],(If(U_Fa330VTit(e[7])=0,e[7]:=e[6],Nil),nValTot += U_Fa330VTit(e[7]),e[9]:=DesTrans(e[7])),(e[7]:=Transf(0,"@E 9999,999,999.99"), e[9]:=DesTrans(e[7]) ))})
+	   //aEval(aTitulos, {|e| IIf(Fa330Lock(e[1]+e[2]+e[3]+e[4],,,IIf(MV_PAR02== 2, e[16],e[13]),.F.), (e[8] := .T.) , Nil ), If(e[8],(If(U_Fa330VTit(e[7])=0,e[7]:=e[6],Nil),nValTot += U_Fa330VTit(e[7]),e[9]:=DesTrans(e[7])),(e[7]:=Transf(0,"@E 9999,999,999.99"), e[9]:=DesTrans(e[7]) ))})
+		aEval(aTitulos, {|e| IIf(Fa330Lock(e[1]+e[2]+e[3]+e[4],,,IIf(MV_PAR02== 2, e[16],e[13])), (e[8] := .T.) , Nil ), If(e[8],(If(U_Fa330VTit(e[7])=0,e[7]:=e[6],Nil),nValTot += U_Fa330VTit(e[7]),e[9]:=DesTrans(e[7])),(e[7]:=Transf(0,"@E 9999,999,999.99"), e[9]:=DesTrans(e[7]) ))})
+		aEval(aTitulos, {|e| IIf(Fa330Lock(e[1]+e[2]+e[3]+e[4],,,IIf(MV_PAR02== 2, e[16],e[13])), (e[8] := .T.) , Nil ), If(e[8],(If(U_Fa330VTit(e[7])=0,e[7]:=e[6],Nil),nValTot += U_Fa330VTit(e[7]),e[9]:=DesTrans(e[7])),(e[7]:=Transf(0,"@E 9999,999,999.99"), e[9]:=DesTrans(e[7]) ))})
 	Else
-	   //aEval(aTitulos, {|e| IIf(!e[8].And.Fa330Lock(e[1]+e[2]+e[3]+e[4],,,Iif(MV_PAR02== 2, e[16],e[13]),.F.), (e[8] := .T.) , If(e[8], (Fa330UnLock(e[1]+e[2]+e[3]+e[4],,Iif(MV_PAR02== 2, e[16],e[13]),.F.),e[8] := .F. ),Nil)       ), If(e[8],(If(U_Fa330VTit(e[7])=0,e[7]:=e[6],Nil),nValTot += U_Fa330VTit(e[7]),e[9]:=DesTrans(e[7])),(e[7]:=Transf(0,"@E 9999,999,999.99"), e[9]:=DesTrans(e[7]) ))})
-		aEval(aTitulos, {|e| IIf(!e[8].And.Fa330Lock(e[1]+e[2]+e[3]+e[4],,,Iif(MV_PAR02== 2, e[16],e[13])), (e[8] := .T.) , If(e[8], (Fa330UnLock(e[1]+e[2]+e[3]+e[4],,Iif(MV_PAR02== 2, e[16],e[13])),e[8] := .F. ),Nil)       ), If(e[8],(If(U_Fa330VTit(e[7])=0,e[7]:=e[6],Nil),nValTot += U_Fa330VTit(e[7]),e[9]:=DesTrans(e[7])),(e[7]:=Transf(0,"@E 9999,999,999.99"), e[9]:=DesTrans(e[7]) ))})
-	Endif
+	   //aEval(aTitulos, {|e| IIf(!e[8].And.Fa330Lock(e[1]+e[2]+e[3]+e[4],,,IIf(MV_PAR02== 2, e[16],e[13]),.F.), (e[8] := .T.) , If(e[8], (Fa330UnLock(e[1]+e[2]+e[3]+e[4],,IIf(MV_PAR02== 2, e[16],e[13]),.F.),e[8] := .F. ),Nil)       ), If(e[8],(If(U_Fa330VTit(e[7])=0,e[7]:=e[6],Nil),nValTot += U_Fa330VTit(e[7]),e[9]:=DesTrans(e[7])),(e[7]:=Transf(0,"@E 9999,999,999.99"), e[9]:=DesTrans(e[7]) ))})
+		aEval(aTitulos, {|e| IIf(!e[8].And.Fa330Lock(e[1]+e[2]+e[3]+e[4],,,IIf(MV_PAR02== 2, e[16],e[13])), (e[8] := .T.) , If(e[8], (Fa330UnLock(e[1]+e[2]+e[3]+e[4],,IIf(MV_PAR02== 2, e[16],e[13])),e[8] := .F. ),Nil)       ), If(e[8],(If(U_Fa330VTit(e[7])=0,e[7]:=e[6],Nil),nValTot += U_Fa330VTit(e[7]),e[9]:=DesTrans(e[7])),(e[7]:=Transf(0,"@E 9999,999,999.99"), e[9]:=DesTrans(e[7]) ))})
+	EndIf
 EndIf
 
 oTitulo:Refresh()
@@ -5517,13 +5490,13 @@ User Function Fa330VldDt(aArray, nOpc)
 Local lRet := .T.
 DEFAULT nOpc := 5
 
-If lRet .and. SuperGetMv("MV_BXDTFIN",,"1") == "2"
+If lRet .And. SuperGetMv("MV_BXDTFIN",,"1") == "2"
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ A data da baixa deve ser passada como parametro, pois tanto ³
 	//³ o cancelamento como a exclusao devem ser validados pela     ³
 	//³ data de baixa e nao pela data base do sistema.              ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	IF nOpc == 4  //Exclusao
+	If nOpc == 4  //Exclusao
 		lRet := DtMovFin(CtoD(aArray[06]),!l330Auto,"2")
 	Else
 		lRet := DtMovFin( ,!l330Auto,"2")
@@ -5561,18 +5534,18 @@ Default lAcrDes		:= .F.
 //³ [4] -> Taxa do dia atual    ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-If nMoeda2 > 0 .And. lExistTxMd .AND. (nMoeda2<>SE1->E1_MOEDA)
-	If aTxMoedas[nMoeda2][2] <> aTxMoedas[nMoeda2][4] .and. (aTxMoedas[nMoeda2][2]<>0)
+If nMoeda2 > 0 .And. lExistTxMd .And. (nMoeda2<>SE1->E1_MOEDA)
+	If aTxMoedas[nMoeda2][2] <> aTxMoedas[nMoeda2][4] .And. (aTxMoedas[nMoeda2][2]<>0)
 		nTx := aTxMoedas[nMoeda2][2]
-	Elseif (nTx <> aTxMoedas[nMoeda2][4]) .and. (aTxMoedas[nMoeda2][4]<>0)
+	ElseIf (nTx <> aTxMoedas[nMoeda2][4]) .And. (aTxMoedas[nMoeda2][4]<>0)
 		nTx := aTxMoedas[nMoeda2][4]
-	Endif
-ELSEIF (nMoeda2==SE1->E1_MOEDA)
+	EndIf
+ElseIf (nMoeda2==SE1->E1_MOEDA)
 	// se a moeda do titulo principal é 2 e a do titulo posicionado tb, nao convertemos pois os valores serao expressos em U$
 	If !lAcrDes
 		nTx := 1
-	Endif
-Endif
+	EndIf
+EndIf
 
 Return( nTx )
 
@@ -5606,7 +5579,7 @@ Default nMoeda2 	:= 0
 
 // Esta função só deve ser chamada pela rotina de compensação a pagar
 If nMoeda2 > 0 .And. lExistTxMd .And. (__lCmTxCon .And. SE1->E1_TXMOEDA > 0)
-	If aTxMoedas[nMoeda2][2] <> aTxMoedas[nMoeda2][4] .and. (aTxMoedas[nMoeda2][2]<>0)
+	If aTxMoedas[nMoeda2][2] <> aTxMoedas[nMoeda2][4] .And. (aTxMoedas[nMoeda2][2]<>0)
 		nTx := aTxMoedas[nMoeda2][2]
 	ElseIf (nTx == 0)
 		nTx := aTxMoedas[nMoeda2][4]
@@ -5641,7 +5614,7 @@ Return( nTx )
 
 Static Function F330RaRtIm(aDadosRA1,cValDig,nItemRA,nItemOU, lAltValor)
 
-Local aArea	  		:= GetArea()
+Local aArea	  		:= FWGetArea()
 Local lRet			:= .T.
 Local nBaseRA  		:= 0
 Local nSaldoRA 		:= 0
@@ -5695,42 +5668,42 @@ Else
 EndIf
 
 If aDadosRA1[1][nItLcRA] <> 0
-	SE1->(dbGoto(aDadosRA1[1][nItLcRA]))
+	SE1->(DBGoTo(aDadosRA1[1][nItLcRA]))
 	If SE1->E1_SALDO <> SE1->E1_VALOR //indica que houve baixa parcial
 		nProp := SE1->E1_SALDO/SE1->E1_VALOR
-	Endif
+	EndIf
 	nBaseRA 	:= SE1->E1_BASEIRF * nProp
 	nSaldoRA 	:= SE1->E1_SALDO
 	If lRaRtImp 
 		nSaldoRA += (SE1->E1_PRISS * nProp)+ (SE1->E1_PRINSS* nProp)
 		nPrIsRA  := SE1->E1_PRISS * nProp
 		nPrInRA	 := SE1->E1_PRINSS * nProp
-	Endif
+	EndIf
 
 	If lCredito
 		nSaldoCMP := SE1->E1_SALDO
 	EndIf
 
-	If cValDig <> 0 .and. cValDig <> nSaldoRA .and. lAltValor
+	If cValDig <> 0 .And. cValDig <> nSaldoRA .And. lAltValor
 		nSaldoRA := cValdig
 	EndIf
 
-	SE5->(dbSetOrder(2))
-	SE5->(dbSeek( xFilial("SE5")+"RA"+SE1->E1_PREFIXO+SE1->E1_NUM+SE1->E1_PARCELA+SE1->E1_TIPO))
-	While (SE5->(!Eof()) .and. xFilial("SE5") == SE5->E5_FILIAL .And.	;
+	SE5->(DBSetOrder(2))
+	SE5->(DBSeek( xFilial("SE5")+"RA"+SE1->E1_PREFIXO+SE1->E1_NUM+SE1->E1_PARCELA+SE1->E1_TIPO))
+	While (SE5->(!Eof()) .And. xFilial("SE5") == SE5->E5_FILIAL .And.	;
 			SE5->E5_TIPODOC == "RA" .And. 				;
 			SE5->E5_PREFIXO == SE1->E1_PREFIXO .And.				;
 			SE5->E5_NUMERO == SE1->E1_NUM .And.					;
 			SE5->E5_PARCELA == SE1->E1_PARCELA )
 
 		If SE5->E5_RECPAG != "R"
-			SE5->(dbSkip())
+			SE5->(DBSkip())
 			Loop
-		Endif
+		EndIf
 
 		//Verifica se tem baixa cancelada
 		If TemBxCanc(SE5->(E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA+E5_SEQ),.T.,SE5->E5_FILIAL)
-			SE5->(dbskip())
+			SE5->(DBSkip())
 			Loop
 		EndIf
 
@@ -5738,7 +5711,7 @@ If aDadosRA1[1][nItLcRA] <> 0
 		//³ Verifica Cliente 	³
 		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 		If SE5->E5_CLIFOR != SE1->E1_CLIENTE
-			SE5->(dbSkip( ))
+			SE5->(DBSkip( ))
 			Loop
 		EndIf
 
@@ -5765,15 +5738,15 @@ If aDadosRA1[1][nItLcRA] <> 0
 
 		Exit
 
-	Enddo
+	EndDo
 
-	If Len(aDadosRA1[8]) > 0 .and. lCredito
+	If Len(aDadosRA1[8]) > 0 .And. lCredito
 		For ni := 1 to Len(aDadosRA1[8])
 			nSaldoCMP -= aDadosRA1[8][ni]
 		Next ni
 	EndIf
 
-	If Round(nSaldoRa+nPisRA+nCofRA+nCslRA+nIrfRA,2) <> Round(nBaseRA,2) .and. nBaseRA <> 0
+	If Round(nSaldoRa+nPisRA+nCofRA+nCslRA+nIrfRA,2) <> Round(nBaseRA,2) .And. nBaseRA <> 0
 		nTxSaldo	:= nSaldoRA/nBaseRA//-(nPisRA+nCofRA+nCslRA+nIrfRA)))
 		nPisRA		:= Round(nPisRA*nTxSaldo,2)
 		nCofRA		:= Round(nCofRA*nTxSaldo,2)
@@ -5790,12 +5763,12 @@ If aDadosRA1[1][nItLcRA] <> 0
 		nItLcOU := Len(aDadosRA1[2])
 	EndIf
 
-	If lRaRtImp .and. !lAltValor 
+	If lRaRtImp .And. !lAltValor 
 		nSaldoRA -= (SE1->E1_PRISS*nProp)+ (SE1->E1_PRINSS *nProp)
-	Endif
+	EndIf
 	nProp:=1
 	If aDadosRA1[2][nItLcOU] <> 0 
-		SE1->(dbGoto(aDadosRA1[2][nItLcOU]))
+		SE1->(DBGoTo(aDadosRA1[2][nItLcOU]))
 		If SE1->E1_SALDO <> SE1->E1_VALOR //indica que houve baixa parcial			
 			nPropPis	:= SE1->E1_SALDO/SE1->E1_BASEPIS
 			nPropCof	:= SE1->E1_SALDO/SE1->E1_BASECOF
@@ -5803,7 +5776,7 @@ If aDadosRA1[1][nItLcRA] <> 0
 			nPropIr		:= SE1->E1_SALDO/SE1->E1_BASEIRF
 			nPropIss	:= SE1->E1_SALDO/SE1->E1_BASEISS
 			nPropIns	:= SE1->E1_SALDO/SE1->E1_BASEINS
-		Endif
+		EndIf
 
 		nBasOUPis 	:= SE1->E1_BASEPIS * nPropPis
 		nBasOUCof 	:= SE1->E1_BASECOF * nPropCof
@@ -5812,11 +5785,11 @@ If aDadosRA1[1][nItLcRA] <> 0
 		nBasOUIss 	:= SE1->E1_BASEISS * nPropIss
 		nBasOUIns 	:= SE1->E1_BASEINS * nPropIns
 
-		If MV_PAR08 == 1 .AND. !lRaRtImp
+		If MV_PAR08 == 1 .And. !lRaRtImp
 			nSaldoOU	:= SE1->E1_SALDO-(SE1->(E1_PIS+E1_COFINS+E1_CSLL+E1_IRRF)*nProp)
 		Else
 			nSaldoOU	:= SE1->E1_SALDO
-		Endif
+		EndIf
 		nPisOU		:= SE1->E1_PIS * nProp
 		nCofOU		:= SE1->E1_COFINS* nProp
 		nCslOU		:= SE1->E1_CSLL* nProp
@@ -5826,7 +5799,7 @@ If aDadosRA1[1][nItLcRA] <> 0
 			nSaldoOU -= ((SE1->E1_ISS* nProp)+ (SE1->E1_INSS* nProp))
 			nPrIsOU	 := SE1->E1_ISS * nProp
 			nPrInOU	 := SE1->E1_INSS* nProp
-		Endif
+		EndIf
 
 		If !lCredito .And. !lRaRtImp .And. !IsInCallStack("FA330Troca")
 			nSaldoCMP := SE1->E1_SALDO-SE1->(E1_PIS+E1_COFINS+E1_CSLL+E1_IRRF)
@@ -5835,11 +5808,11 @@ If aDadosRA1[1][nItLcRA] <> 0
 		EndIf
 
 
-		If cValDig <> 0 .and. cValDig <> nSaldoOU
+		If cValDig <> 0 .And. cValDig <> nSaldoOU
 			nSaldoOU := cValdig
 		EndIf
 
-		If Len(aDadosRA1[8]) > 0 .and. !lCredito
+		If Len(aDadosRA1[8]) > 0 .And. !lCredito
 			For ni := 1 to Len(aDadosRA1[8])
 				If aDadosRA1[1][nItLcRA] <> aDadosRA1[1][ni] .And. aDadosRA1[9][ni]
 					If aTitulos[ni][9] == aDadosRA1[8][ni]
@@ -5851,25 +5824,25 @@ If aDadosRA1[1][nItLcRA] <> 0
 			Next ni
 		EndIf
 		
-		If cValDig <> 0 .and. cValDig <> nSaldoRA .And. lRaRtImp .And. IsInCallStack("FA330Troca") .and. !lCredito
+		If cValDig <> 0 .And. cValDig <> nSaldoRA .And. lRaRtImp .And. IsInCallStack("FA330Troca") .And. !lCredito
 			nBaseRA:= nSaldoCMP 
 		EndIf 	
 
 
 		If lCredito
-			nTxPis 		:= IIF( (nBasOUPis/nBaseRA) > 1 , 1 , (nBasOUPis/nBaseRA) )
-			nTxCof		:= IIF( (nBasOUCof/nBaseRA) > 1 , 1 , (nBasOUCof/nBaseRA) )
-			nTxCsl		:= IIF( (nBasOUCsl/nBaseRA) > 1 , 1 , (nBasOUCsl/nBaseRA) )
-			nTxIr 		:= IIF( (nBasOUIr/nBaseRA)  > 1 , 1 , (nBasOUIr/nBaseRA)  )
-			nTxIss		:= IIF( (nBasOUIss/nBaseRA) > 1 , 1 , (nBasOUIss/nBaseRA) )
-			nTxIns		:= IIF( (nBasOUIns/nBaseRA) > 1 , 1 , (nBasOUIns/nBaseRA) )				
+			nTxPis 		:= IIf( (nBasOUPis/nBaseRA) > 1 , 1 , (nBasOUPis/nBaseRA) )
+			nTxCof		:= IIf( (nBasOUCof/nBaseRA) > 1 , 1 , (nBasOUCof/nBaseRA) )
+			nTxCsl		:= IIf( (nBasOUCsl/nBaseRA) > 1 , 1 , (nBasOUCsl/nBaseRA) )
+			nTxIr 		:= IIf( (nBasOUIr/nBaseRA)  > 1 , 1 , (nBasOUIr/nBaseRA)  )
+			nTxIss		:= IIf( (nBasOUIss/nBaseRA) > 1 , 1 , (nBasOUIss/nBaseRA) )
+			nTxIns		:= IIf( (nBasOUIns/nBaseRA) > 1 , 1 , (nBasOUIns/nBaseRA) )				
 		Else
-			nTxPis 		:= IIF( (nBaseRA/nBasOUPis) > 1 , 1 , (nBaseRA/nBasOUPis) )
-			nTxCof		:= IIF( (nBaseRA/nBasOUCof) > 1 , 1 , (nBaseRA/nBasOUCof) )
-			nTxCsl		:= IIF( (nBaseRA/nBasOUCsl) > 1 , 1 , (nBaseRA/nBasOUCsl) )
-			nTxIr 		:= IIF( (nBaseRA/nBasOUIr)  > 1 , 1 , (nBaseRA/nBasOUIr)  )
-			nTxIss		:= IIF( (nBaseRA/nBasOUIss) > 1 , 1 , (nBaseRA/nBasOUIss) )
-			nTxIns		:= IIF( (nBaseRA/nBasOUIns) > 1 , 1 , (nBaseRA/nBasOUIns) )			
+			nTxPis 		:= IIf( (nBaseRA/nBasOUPis) > 1 , 1 , (nBaseRA/nBasOUPis) )
+			nTxCof		:= IIf( (nBaseRA/nBasOUCof) > 1 , 1 , (nBaseRA/nBasOUCof) )
+			nTxCsl		:= IIf( (nBaseRA/nBasOUCsl) > 1 , 1 , (nBaseRA/nBasOUCsl) )
+			nTxIr 		:= IIf( (nBaseRA/nBasOUIr)  > 1 , 1 , (nBaseRA/nBasOUIr)  )
+			nTxIss		:= IIf( (nBaseRA/nBasOUIss) > 1 , 1 , (nBaseRA/nBasOUIss) )
+			nTxIns		:= IIf( (nBaseRA/nBasOUIns) > 1 , 1 , (nBaseRA/nBasOUIns) )			
 		EndIf
 
 		If lCredito
@@ -5879,7 +5852,7 @@ If aDadosRA1[1][nItLcRA] <> 0
 			nIrfOU		:= If(nIrfRa<>0 .Or. ( lCredito .And. nBaseRA <= SE1->E1_SALDO ),Round(nIrfRA*nTxIr,2),Round(nIrfOU*nTxIr,2))
 			nPrIsOU		:= If(nPrIsRA<>0,Round(nPrIsRA*nTxIss,2),Round(nPrIsOU*nTxIss,2))
 			nPrInOU		:= If(nPrInRA<>0,Round(nPrInRA*nTxIns,2),Round(nPrInOU*nTxIns,2))
-			If (SA1->A1_MINIRF == "2" .And. (nIrfOU <= SuperGetMv("MV_VLRETIR",.T.,10)) ) .OR. nIrfOU < 0
+			If (SA1->A1_MINIRF == "2" .And. (nIrfOU <= SuperGetMv("MV_VLRETIR",.T.,10)) ) .Or. nIrfOU < 0
 				nIrfOU	:= 0
 			EndIf
 		Else
@@ -5889,7 +5862,7 @@ If aDadosRA1[1][nItLcRA] <> 0
 			nIrfRA		:= If(nIrfOU<>0,Round(nIrfOU*nTxIr,2),Round(nIrfRA*nTxIr,2))
 			nPrIsRA		:= If(nPrIsOU<>0,Round(nPrIsOU*nTxIss,2),Round(nPrIsRA*nTxIss,2))
 			nPrInRA		:= If(nPrInOU<>0,Round(nPrInOU*nTxIns,2),Round(nPrInRA*nTxIns,2))
-			If (SA1->A1_MINIRF == "2" .And. (nIrfRA <= SuperGetMv("MV_VLRETIR",.T.,10)) ) .OR. nIrfRA < 0
+			If (SA1->A1_MINIRF == "2" .And. (nIrfRA <= SuperGetMv("MV_VLRETIR",.T.,10)) ) .Or. nIrfRA < 0
 				nIrfRA	:= 0
 			EndIf
 		EndIf
@@ -5956,7 +5929,7 @@ If lRet
 
 EndIf
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return(lRet)
 
@@ -5980,7 +5953,7 @@ User Function Fa330Fil() As Array
 	aRet	:= {}
 
 	If MsgYesNo(STR0066 + " " + STR0067 + CRLF + CRLF + STR0068 + CRLF + CRLF + STR0069,STR0018)
-		//"Serão selecionados somente os títulos das filiais escolhidas." + " " + "Se nenhuma for escolhida serão considerados somente os da filial corrente." + CRLF + CRLF + "Importante: Algumas entidades, como clientes, bancos etc, podem possuir um código na filial A, porém na filial B, esse mesmo código não necessariamente representa a mesma entidade." + CRLF + CRLF + "Deseja continuar com a seleção de filiais?"
+		//"Serão selecionados somente os títulos das filiais escolhidas." + " " + "Se nenhuma For escolhida serão considerados somente os da filial corrente." + CRLF + CRLF + "Importante: Algumas entidades, como clientes, bancos etc, podem possuir um código na filial A, porém na filial B, esse mesmo código não necessariamente representa a mesma entidade." + CRLF + CRLF + "Deseja continuar com a seleção de filiais?"
 		aRet := AdmGetFil(.F.,.T.,"SE1")
 	Else
 		aRet := {}
@@ -6045,15 +6018,15 @@ Static Function F330VALNCC(aArray As Array, nX As Numeric, lAltValor As Logical,
 		EndIf
 	EndIf
 	If lSoma
-		nLim := U_Fa330VTit(aArray[nX,Iif(cPaisLoc != "RUS",nPos,6)])
+		nLim := U_Fa330VTit(aArray[nX,IIf(cPaisLoc != "RUS",nPos,6)])
 		nSaldo+= nImpBx*nProp
 		nLim += nImpBx *nProp
 		If nLim <= aArray[nX,(nPos-1)]
 			aArray[nX,nPos]:= Transf(nLim,__cPiE1Sld)
-		Endif
+		EndIf
 	
 	Else
-		nLim := U_Fa330VTit(aArray[nX,Iif(cPaisLoc != "RUS",nPos,6)])
+		nLim := U_Fa330VTit(aArray[nX,IIf(cPaisLoc != "RUS",nPos,6)])
 		nSaldo-= nImpBx *nProp
 		nLim -= nImpBx *nProp
 		If nLim <= aArray[nX,(nPos-1)]
@@ -6088,7 +6061,7 @@ de titulos a receber.
 @author  TOTVS
 @version P12
 @since   03/02/2017
-@return  Array, Array contendo o resultado da execucao e a mensagem Xml de retorno.
+@Return  Array, Array contendo o resultado da execucao e a mensagem Xml de retorno.
          aRet[1] - (boolean) Indica o resultado da execução da função
          aRet[2] - (caracter) Mensagem Xml para envio
 
@@ -6246,7 +6219,7 @@ Static Function F330CalImp( cNatMR As Char, cCliMR As Char, cLojaMR As Char, cFi
 	
 	aImposE		:= {}
 	nVlParcl	:= 0
-	aArea 		:= GetArea()
+	aArea 		:= FWGetArea()
 	
 	cTitPosic := SE1->E1_FILORIG + SE1->E1_PREFIXO + SE1->E1_NUM + SE1->E1_PARCELA + SE1->E1_TIPO + SE1->E1_CLIENTE + SE1->E1_LOJA
 	cChaveAux := FWxFilial( "SE1", SE1->E1_FILIAL ) + "|" + SE1->E1_PREFIXO + "|" + SE1->E1_NUM + "|" + SE1->E1_PARCELA + "|" + SE1->E1_TIPO + "|" + SE1->E1_CLIENTE + "|" + SE1->E1_LOJA	
@@ -6333,7 +6306,7 @@ Static Function F330CalImp( cNatMR As Char, cCliMR As Char, cLojaMR As Char, cFi
 		EndIf
 		
 		__nBaseMR	:= SE1->E1_VALOR - nVlParcl
-		nBaseMR 	:= Iif( nVlParcl > 0, __nBaseMR, nBaseMR )
+		nBaseMR 	:= IIf( nVlParcl > 0, __nBaseMR, nBaseMR )
 	EndIf
 	
 	__aImpos := FINCalImp( "2", cNatMR, cCliMR, cLojaMR, cFilMR, nBaseMR, dDataMR, .T., {}, cTipoTitMR, cChaveAux)
@@ -6365,8 +6338,8 @@ Static Function F330CalImp( cNatMR As Char, cCliMR As Char, cLojaMR As Char, cFi
 	If __lIrfMR
 		nIrrf := __nIrfCaMR
 	EndIf
-	RestArea(aArea)
-Return Nil
+	FWRestArea(aArea)
+Return
 
 //-----------------------------------------------------------------------------------------------------
 /*/{Protheus.doc} LimpaVarMR()
@@ -6388,7 +6361,7 @@ Static Function LimpaVarMR()
 	__aTxMoed0	:= Nil
 	__nTxMoedP	:= 0
 	
-Return Nil
+Return
 
 //-----------------------------------------------------------------------------------------------------
 /*/{Protheus.doc} ClrVarMRCf()
@@ -6413,7 +6386,7 @@ Static Function ClrVarMRCf()
 	__lImpEmis	:= .F.
 	__nImpEst	:= 0
 	
-Return Nil
+Return
 
 //-----------------------------------------------------------------------------------------------------
 /*/{Protheus.doc} ClrVarMRCl()
@@ -6437,14 +6410,14 @@ Static Function ClrVarMRCl()
 	aSize ( __aImpos, 0 )
 	__aImpos := {}
 	
-Return Nil
+Return
 
 //-----------------------------------------------------------------------------------------------------
 /*/{Protheus.doc} PegaVarMR()
 Função para guardar os valores das variáveis estáticas utilizadas para o motor de retenções, 
 para poder restaurá-los sem precisar realizar o cáluclo do motor novamente.
 
-@return aRet, vetor com os dados das variáveis estáticas usadas para o motor de retenções.
+@Return aRet, vetor com os dados das variáveis estáticas usadas para o motor de retenções.
 
 @author Pedro Alencar
 @since 26/01/2018
@@ -6513,14 +6486,14 @@ Static Function RestVarMR( aVarMR As Array )
 			nPis 	:= __nPisCaMR 
 			nCofins := __nCofCaMR
 			nCsll 	:= __nCslCaMR
-		EndIF
+		EndIf
 		
 		If __lIrfMR
 			nIrrf := __nIrfCaMR
 		EndIf
-	Endif
+	EndIf
 	
-Return Nil
+Return
 
 //-----------------------------------------------------------------------------------------------------
 /*/{Protheus.doc} FA330SIT
@@ -6531,7 +6504,7 @@ Função para verificação do campo E1_SITUACA do titulo
 @version   12
 @since     02/02/2018
 
-@return cSituac - retorna a situação do titulo 
+@Return cSituac - retorna a situação do titulo 
 /*/
 //-----------------------------------------------------------------------------------------------------
 
@@ -6546,26 +6519,26 @@ Static Function FA330SIT(aTitulos,nRecE1)
 	If nRecE1 == 0
 		For nX := 1  To Len(aTitulos)
 			If MV_PAR02 == 2
-				SE1->(DbGoTo(aTitulos[nX][23]))
+				SE1->(DBGoTo(aTitulos[nX][23]))
 			Else
-				SE1->(DbGoTo(aTitulos[nX][20]))
-			Endif
+				SE1->(DBGoTo(aTitulos[nX][20]))
+			EndIf
 			
 			If MV_PAR05 == 2 .And. !(SE1->E1_SITUACA $ cLstCart) .And. aTitulos[nX][8]
 				Help(" ",1,"F330CARTE")
 				lRet := .F.
 				Exit
-			Endif
+			EndIf
 		Next nX
 	Else
-		SE1->(DbGoTo(nRecE1))
+		SE1->(DBGoTo(nRecE1))
 		If MV_PAR05 == 2 .And. !(SE1->E1_SITUACA $ cLstCart)
 			Help(" ",1,"F330CARTE")
 			lRet := .F.
-		Endif
-	Endif
+		EndIf
+	EndIf
 	
-	RestArea(aAreaE1)
+	FWRestArea(aAreaE1)
 Return lRet
 
 //------------------------------
@@ -6614,7 +6587,7 @@ Static Function F330Static()
 	EndIf
 	__lTxConP := .F.
 	If SE1->E1_MOEDA != 1
-		If (SE1->E1_TXMOEDA > 0 .Or. mv_par14 == 2)
+		If (SE1->E1_TXMOEDA > 0 .Or. MV_PAR14 == 2)
 			If SE1->E1_TXMDCOR > 0
 				__nTxMoedP := SE1->E1_TXMDCOR
 				__lTxConP	:= .T.
@@ -6625,7 +6598,7 @@ Static Function F330Static()
 		ElseIf __lTxMoed
 			aTxMoedas[SE1->E1_MOEDA,2] := __nTxMoedP
 		EndIf
-	ElseIf mv_par14 == 2
+	ElseIf MV_PAR14 == 2
 		aTxMoedas := __aTxMoed0
 	EndIf
 	__nTxMoedD := 0
@@ -6651,15 +6624,14 @@ Static Function F330Static()
 		__lCalcCM  := SuperGetMv("MV_CALCCM", .F., "N") == "S"
 	EndIf
 	
-	__nCasDec  := TamSx3("E1_TXMOEDA")[2]	
-Return Nil
+	__nCasDec  := TamSX3("E1_TXMOEDA")[2]	
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: F23MovRA
 Autor-------------: Igor Melgaço
 Data da Criacao---: 28/08/2023
-===============================================================================================================================
 Descrição---------: Verifica se o RA possui movimento bancário  
 ===============================================================================================================================
 */ 
@@ -6677,8 +6649,8 @@ Default lVerMov := .T.
 //Inicializa variáveis
 cQry 	  := ""
 cTblTmp   := ""
-cCampoChq := Padr("", TamSX3("E5_NUMCHEQ")[1])
-aArea     := GetArea()
+cCampoChq := PadR("", TamSX3("E5_NUMCHEQ")[1])
+aArea     := FWGetArea()
 
 If lVerMov
 	If __oMovRA == Nil
@@ -6726,15 +6698,15 @@ Else
 	cTblTmp := MpSysOpenQuery(cQry)
 EndIf
 
-(cTblTmp)->(DbGotop())
+(cTblTmp)->(DBGoTop())
 
 If (cTblTmp)->(!Eof())
-	dDtMov := If(Empty((cTblTmp)->E5_DATA), dDataBase, STOD((cTblTmp)->E5_DATA))
+	dDtMov := If(Empty((cTblTmp)->E5_DATA), dDataBase, SToD((cTblTmp)->E5_DATA))
 	aMovRA := {.T., dDtMov, (cTblTmp)->E5_TIPODOC}
 EndIf
 
-(cTblTmp)->(DbCloseArea())
-RestArea(aArea)
+(cTblTmp)->(DBCloseArea())
+FWRestArea(aArea)
 
 Return aMovRA
 
@@ -6818,10 +6790,10 @@ Static Function FBaseRPCC(nValorRec As Numeric, lCalcPCC As Logical) As Numeric
 		For nX := 1 to Len(aBase)
 			nBase := aBase[nX][2]
 		Next
-	Endif
+	EndIf
 	
-	nParc := IF(Type("nParciais") != "N", 0, nParciais)// real
-	nValorRec := IIF(ReadVar() == "NVALREC" .or. ReadVar() == "NVALESTRANG", nValorRec, nBase)
+	nParc := If(Type("nParciais") != "N", 0, nParciais)// real
+	nValorRec := IIf(ReadVar() == "NVALREC" .Or. ReadVar() == "NVALESTRANG", nValorRec, nBase)
 	nValBase := nBase
 	
 	If SE1->E1_MOEDA > 1

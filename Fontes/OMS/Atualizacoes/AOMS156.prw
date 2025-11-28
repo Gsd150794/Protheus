@@ -8,11 +8,11 @@
 ===============================================================================================================================
 */
 
-#INCLUDE "FWMBROWSE.CH"
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "TOPCONN.CH"
-#INCLUDE "RWMAKE.CH"
+#Include "FWMBROWSE.CH"
+#Include "FWMVCDEF.CH"
+#Include "TOTVS.ch"
+#Include "TOPCONN.CH"
+#Include "RWMAKE.CH"
 
 /*
 ===============================================================================================================================
@@ -40,7 +40,7 @@ _oBrowse:SetFilterDefault(' SX5->X5_TABELA = "ZL" ')
 _oBrowse:SetOnlyFields({"X5_CHAVE","X5_DESCRI"})
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -161,7 +161,7 @@ Local _cAliasQry := "" As Character
 Local _cMenPro:= "" As Character
 Local _cMenRes:= "" As Character
 
-If _nOper == MODEL_OPERATION_INSERT .OR. _nOper == MODEL_OPERATION_UPDATE
+If _nOper == MODEL_OPERATION_INSERT .Or. _nOper == MODEL_OPERATION_UPDATE
 
    _cAliasQry := GetNextAlias()
 
@@ -171,7 +171,7 @@ If _nOper == MODEL_OPERATION_INSERT .OR. _nOper == MODEL_OPERATION_UPDATE
    _cQry += " AND X5_TABELA = 'ZL' "
    _cQry += " AND X5_DESCRI = '"+_cDesc+"' "
    If _nOper == MODEL_OPERATION_UPDATE
-      _cQry += " AND SX5.R_E_C_N_O_ <> '"+Alltrim(Str(SX5->(Recno())))+"' "
+      _cQry += " AND SX5.R_E_C_N_O_ <> '"+AllTrim(Str(SX5->(Recno())))+"' "
    EndIf
    _cQry += " AND SX5.D_E_L_E_T_ = ' ' "
 
@@ -179,7 +179,7 @@ If _nOper == MODEL_OPERATION_INSERT .OR. _nOper == MODEL_OPERATION_UPDATE
 
    MPSysOpenQuery( _cQry , _cAliasQry)
 
-   If (_cAliasQry)->(!EOF())
+   If (_cAliasQry)->(!Eof())
       _lRet := .F.
       _cMenPro:= "Já existe um Subtipo de Contrato com a mesma descrição."
       _cMenRes:= "Prencha o campo com uma descrição diferente."
@@ -199,7 +199,7 @@ ElseIf _nOper == MODEL_OPERATION_DELETE
 
    MPSysOpenQuery( _cQry , _cAliasQry)
 
-   If (_cAliasQry)->(!EOF())
+   If (_cAliasQry)->(!Eof())
       _lRet := .F.
       _cMenPro:= "Não é possivel excluir esse registro pois existem registros relacionados a esse Subtipo no cadastro de Contratos/Acordo Comercial."
       _cMenRes:= "Exclua os registros de contratos ou altere esses registros para outro subtipo. Caso isso nâo seja possivel a Exclusão desse subtipo não poderá ser efetuada."
@@ -229,12 +229,12 @@ User Function AOMS156G(_cFilial As Character,_cCod As Character) As Character
 
    _aAreaSX5 := GetArea("SX5")
 
-   DbSelectArea("SX5")
-   DbSetOrder(1)
-   DbSeek(_cFilial+_cCod)
+   DBSelectArea("SX5")
+   DBSetOrder(1)
+   DBSeek(_cFilial+_cCod)
    _cRetorno := SX5->SX5_DESC
    
-   RestArea(_aAreaSX5)
+   FWRestArea(_aAreaSX5)
 
 Return _cRetorno
 
@@ -296,7 +296,7 @@ MPSysOpenQuery( _cQry , _cAliasQry)
 
 _cRet := StrZero(Val((_cAliasQry)->X5_CHAVE)+1,2)
 
-Do While !MayIUseCode( "SX5"+xFilial("SX5")+"ZL"+_cRet)  //verifica se esta na memoria, sendo usado
+While !MayIUseCode( "SX5"+xFilial("SX5")+"ZL"+_cRet)  //verifica se esta na memoria, sendo usado
 	_cRet := StrZero(Val(_cRet)+1,2)					 // busca o proximo numero disponivel
 EndDo
 

@@ -10,11 +10,7 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -47,7 +43,7 @@ Begin Sequence
 	
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -139,7 +135,7 @@ Begin Sequence
    _oSect0_A:Enable() 
    _oSect1_A:Enable()
 
-   IF MV_PAR05 = 1
+   If MV_PAR05 = 1
       _oSect1_A:Cell("CODIMATR"    ):Disable()
       _oSect1_A:Cell("APELEMPRCONT"):Disable()
       _oSect1_A:Cell("NUMETELE"    ):Disable()
@@ -149,7 +145,7 @@ Begin Sequence
       _oSect1_A:Cell("DATAVALIASO" ):Disable()
       _oSect1_A:Cell("DATATREISEGU"):Disable()
       _oSect1_A:Cell("TIPOTERC"    ):Disable()
-   ENDIF
+   EndIf
       
    //====================================================================================================
    // Monta a query de dados.
@@ -172,7 +168,7 @@ Begin Sequence
    _cQry += " A.DATANASC, "  
    _cQry += " F.CODIEMPRCONT, "
    _cQry += " F.NOMEEMPRCONT, "
-   IF MV_PAR05 = 2
+   If MV_PAR05 = 2
       _cQry+="F.APELEMPRCONT, "
       _cQry+="F.NUMETELE, "
       _cQry+="F.MAILCONT, "
@@ -183,7 +179,7 @@ Begin Sequence
       _cQry+="A.CODIMATR, "
       _cQry+="A.TIPOCONT, "
       _cQry+="A.TIPOTERC, "
-   ENDIF
+   EndIf
    _cQry += " H.ICARD, "
    _cQry += " H.DATAINIC, "
    _cQry += " H.DATAFINA "
@@ -211,13 +207,13 @@ Begin Sequence
    _cQry := _cQry + _cOrder
    
    If Select("TRBCOL") <> 0
-	  TRBCOL->(DbCloseArea())
+	  TRBCOL->(DBCloseArea())
    EndIf
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry(,,_cQry) , "TRBCOL" , .T. , .F. )
    	
-   DbSelectArea("TRBCOL")
-   TRBCOL->(dbGoTop())
+   DBSelectArea("TRBCOL")
+   TRBCOL->(DBGoTop())
 
    Count to _ntotRegs	
    _oReport:SetMeter(_ntotRegs)	
@@ -229,9 +225,9 @@ Begin Sequence
    //====================================================================================================
    // Inicia processo de impressão.
    //====================================================================================================		
-   TRBCOL->(dbGoTop())
+   TRBCOL->(DBGoTop())
    
-   Do While !TRBCOL->(Eof())
+   While !TRBCOL->(Eof())
 		
       If _oReport:Cancel()
 		 Exit
@@ -246,7 +242,7 @@ Begin Sequence
       
 	  _oSect0_A:Cell("CODIEMPRCONT"):SetValue(TRBCOL->CODIEMPRCONT) // Codigo da empresa
       _oSect0_A:Cell("NOMEEMPRCONT"):SetValue(TRBCOL->NOMEEMPRCONT) // Nome da empresa
-	  _oSect0_A:Printline()
+	  _oSect0_A:PrintLine()
 	  
 	  _oSect1_A:Init()
       
@@ -256,7 +252,7 @@ Begin Sequence
       
       _cCodEmpresa := TRBCOL->CODIEMPRCONT
 
-      Do While ! TRBCOL->(Eof()) .And. _cCodEmpresa == TRBCOL->CODIEMPRCONT
+      While ! TRBCOL->(Eof()) .And. _cCodEmpresa == TRBCOL->CODIEMPRCONT
          _cCodFil := StrZero(TRBCOL->CODIEMPR,2)
          
          //====================================================================================================
@@ -264,25 +260,25 @@ Begin Sequence
          //====================================================================================================		   
          If ! Empty(MV_PAR01) // Nome Colaborador
             If ! _cCodFil $ MV_PAR01
-               TRBCOL->(DbSkip())
+               TRBCOL->(DBSkip())
                Loop
             EndIf
          EndIf
          
          _nTotGeral     += 1
          
-         If Year(TRBCOL->DATAFINA) = 1900 .OR. TRBCOL->DATAFINA > DATE() //1-TRABALHANDO 
-             IF MV_PAR04 = 2
-               TRBCOL->(DbSkip())
+         If Year(TRBCOL->DATAFINA) = 1900 .Or. TRBCOL->DATAFINA > Date() //1-TRABALHANDO 
+             If MV_PAR04 = 2
+               TRBCOL->(DBSkip())
                Loop
-             ENDIF
+             EndIf
             _nTotAtivos    += 1
             _nTotGAtivos   += 1 
          Else//2-DESLIGADO 
-             IF MV_PAR04 = 1
-               TRBCOL->(DbSkip())
+             If MV_PAR04 = 1
+               TRBCOL->(DBSkip())
                Loop
-             ENDIF
+             EndIf
             _nTotGInativos += 1
             _nTotInativos  += 1
          EndIf
@@ -290,7 +286,7 @@ Begin Sequence
           
 	     _cCodFil := StrZero(TRBCOL->CODIEMPR,2)
 	  
-	     _nI := Ascan(_aFiliais,{|x| x[5] == _cCodFil})
+	     _nI := aScan(_aFiliais,{|x| x[5] == _cCodFil})
 	     If _nI > 0 
 	        _cDescFilial := _cCodFil + "-" + _aFiliais[_nI,7]
 	     Else
@@ -306,7 +302,7 @@ Begin Sequence
          _oSect1_A:Cell("DATAFINA"):SetValue(TRBCOL->DATAFINA)         // Data Final
          _oSect1_A:Cell("DESCTIPOCOLA"):SetValue(TRBCOL->DESCTIPOCOLA) // Tipo Colaborador
          
-         If Year(TRBCOL->DATAFINA) = 1900 .OR. TRBCOL->DATAFINA > DATE() //1-TRABALHANDO 
+         If Year(TRBCOL->DATAFINA) = 1900 .Or. TRBCOL->DATAFINA > Date() //1-TRABALHANDO 
             _cDESCSITU := "TRABALHANDO"
          Else//2-DESLIGADO 
             _cDESCSITU := "DESLIGADO"
@@ -340,7 +336,7 @@ Begin Sequence
          EndIf
          _oSect1_A:Cell("TIPOCONT"):SetValue(TpContrato) // Tipo de Contrato
          
-        IF MV_PAR05 = 2
+        If MV_PAR05 = 2
            _oSect1_A:Cell("APELEMPRCONT"):SetValue(TRBCOL->APELEMPRCONT)
            _oSect1_A:Cell("NUMETELE"    ):SetValue(TRBCOL->NUMETELE   )
            _oSect1_A:Cell("MAILCONT"    ):SetValue(TRBCOL->MAILCONT   )
@@ -360,11 +356,11 @@ Begin Sequence
            EndIf
            _oSect1_A:Cell("TIPOTERC"):SetValue(TpTerceiro) 
      
-	     ENDIF
+	     EndIf
   
-	     _oSect1_A:Printline()
+	     _oSect1_A:PrintLine()
          
-         TRBCOL->(dbSkip())
+         TRBCOL->(DBSkip())
       EndDo
       
       //====================================================================================================

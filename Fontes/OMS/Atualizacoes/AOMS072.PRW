@@ -7,16 +7,18 @@
 Josué Danich      | 23/04/2019 | Ajuste de campos obrigatórios com valores zerados - Chamado 28909  
 Jerry             | 12/07/2019 | Ajuste de campos Filial ao Gravar Ocorrencia por Ordem de Carga - Chamado 29959
 Lucas Borges      | 14/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
-==============================================================================================================================================================
+==============================================================================================================================================================================================
 Analista - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
-==============================================================================================================================================================
-Vanderlei- Alex Wallauer - 26/09/24 - 15/10/24 -  47942  - Colocada a gravacao das Previsões de entrega (U_AOMS3DTSF2) da ocorrecia da Parte 2.
-Alex     - Alex Wallauer - 16/01/24 - 20/03/25 -  49966  - CORREÇÃO DE ERROR.LOG: argument #0 error, expected N->U,function dbgoto on U_AOMS072R(AOMS072.PRW) line : 872
+==============================================================================================================================================================================================
+Alex     - Alex Wallauer - 16/01/24 - 20/03/25 -  49966  - CORREÇÃO DE ERROR.LOG: argument #0 error, expected N->U,function DBGoTo on U_AOMS072R(AOMS072.PRW) Line : 872
 Jerry    - Alex Wallauer - 10/02/25 - 20/03/25 -  49042  - Ajustes para trartar notas ficais de Transferencia de troca nota. 
 Jerry    - Alex Wallauer - 29/07/25 - 01/08/25 -  49733  - Criação e tratamento do novo campo ZF5_CAUCUS para informar o Causador do Custo.
-==============================================================================================================================================================
+Vandelei - Alex Wallauer - 16/05/25 - 02/09/25 -  50481  - Controle de entregas redirecionadas para operador logístico. 
+Jerry    - Alex Wallauer - 15/08/25 - 02/09/25 -  51229  - Colocado o envio de email para o #comercial por nota e por ocorrencias de uma carga.
+Jerry    - Alex Wallauer - 20/08/25 - 02/09/25 -  49733  - Colocado colunas novas no Browse de marca e desmarca das notas: F2_I_PENCL e C5_I_AGEND 
+Jerry    - Alex Wallauer - 03/09/25 - 03/09/25 -  51229  - Inclusao das validações da data de ocorrrecia.
+==============================================================================================================================================================================================
 */
-
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
@@ -90,17 +92,17 @@ Local _lRet := .T.
 Local _aOrd := SaveOrd({"DAK"})
 
 Begin Sequence 
-   DAK->(DbSetOrder(1))
+   DAK->(DBSetOrder(1))
    
    If _cCampo == "MV_PAR01" .Or. _cCampo == "PROCESSAR"
       If Empty(MV_PAR01)
-         u_itmsg("O preenchimento do código da carga é obrigatório.","Atenção",,1)
+         U_ITMsg("O preenchimento do código da carga é obrigatório.","Atenção",,1)
          _lRet := .F.
          Break
       EndIf                           
                
-      If ! DAK->(DbSeek(xFilial("DAK")+MV_PAR01))
-         u_itmsg("O código de carga informado não existe.","Atenção",,1)
+      If ! DAK->(DBSeek(xFilial("DAK")+MV_PAR01))
+         U_ITMsg("O código de carga informado não existe.","Atenção",,1)
          _lRet := .F.
          Break      
       EndIf                                               
@@ -108,13 +110,13 @@ Begin Sequence
    ElseIf _cCampo == "MV_PAR02" .Or. _cCampo == "PROCESSAR"
       If Empty(MV_PAR02)
          MV_PAR02:="01"
-         //u_itmsg("O preenchimento da sequência da carga é obrigatório.","Atenção",,1)
+         //U_ITMsg("O preenchimento da sequência da carga é obrigatório.","Atenção",,1)
          //_lRet := .F.
          //Break
       EndIf
                                
-      If ! DAK->(DbSeek(xFilial("DAK")+MV_PAR01+MV_PAR02))
-         u_itmsg("O código e sequência de carga informado não existe: "+MV_PAR01+MV_PAR02,"Atenção",,1)
+      If ! DAK->(DBSeek(xFilial("DAK")+MV_PAR01+MV_PAR02))
+         U_ITMsg("O código e sequência de carga informado não existe: "+MV_PAR01+MV_PAR02,"Atenção",,1)
          _lRet := .F.
          Break      
       EndIf
@@ -155,7 +157,7 @@ Private _lMontaTela := .T.
 
 Begin Sequence
    If ! U_AOMS072V("PROCESSAR")  
-      u_itmsg("Para iniciar o processamento, deve-se preencher corretamente a tela de perguntas","Atenção",,1)
+      U_ITMsg("Para iniciar o processamento, deve-se preencher corretamente a tela de perguntas","Atenção",,1)
       Break
    EndIf
 
@@ -171,24 +173,27 @@ Begin Sequence
    //================================================================================
    // Cria tabela temporária.
    //================================================================================                                    
-   Aadd(_aCamposTab,{"WK_OK"     ,"C",2		                ,0 })
-   Aadd(_aCamposTab,{"F2_FILIAL" ,"C",TamSX3("F2_FILIAL")[1] ,0 })
-   Aadd(_aCamposTab,{"F2_DOC"    ,"C",TamSX3("F2_DOC")[1]    ,0 })   
-   Aadd(_aCamposTab,{"F2_SERIE"  ,"C",TamSX3("F2_SERIE")[1]  ,0 })
-   Aadd(_aCamposTab,{"F2_CLIENTE","C",TamSX3("F2_CLIENTE")[1],0 })
-   Aadd(_aCamposTab,{"F2_LOJA"   ,"C",TamSX3("F2_LOJA")[1]   ,0 })
-   Aadd(_aCamposTab,{"A1_NOME"   ,"C",TamSX3("A1_NOME")[1]   ,0 })
-   Aadd(_aCamposTab,{"WK_STATUS" ,"C",1                      ,0 })   
-   Aadd(_aCamposTab,{"WK_RECNO"  ,"N",10                     ,0 })
-   Aadd(_aCamposTab,{"F2_I_LOCEM","C",TamSX3("F2_I_LOCEM")[1],0 })
-   Aadd(_aCamposTab,{"F2_I_REDP" ,"C",TamSX3("F2_I_REDP" )[1],0 })
-   Aadd(_aCamposTab,{"F2_I_RELO" ,"C",TamSX3("F2_I_RELO" )[1],0 })
-   Aadd(_aCamposTab,{"F2_I_OPER" ,"C",TamSX3("F2_I_OPER" )[1],0 })
-   Aadd(_aCamposTab,{"F2_I_OPLO" ,"C",TamSX3("F2_I_OPLO" )[1],0 })
-   Aadd(_aCamposTab,{"C5_I_TRCNF","C",3,0 })
-   Aadd(_aCamposTab,{"WK_NFCARR" ,"C",LEN(SF2->F2_FILIAL)+LEN(SF2->F2_DOC)+LEN(SF2->F2_SERIE)+2,0 })
-   Aadd(_aCamposTab,{"WK_PEDCAR" ,"C",LEN(SC5->C5_I_FILFT)+LEN(SC5->C5_I_PDFT)+1,0 })   
-   Aadd(_aCamposTab,{"WK_PEDFAT" ,"C",LEN(SC5->C5_I_FLFNC)+LEN(SC5->C5_I_PDPR)+1,0 })   
+   aAdd(_aCamposTab,{"WK_OK"     ,"C",2		                ,0 })
+   aAdd(_aCamposTab,{"F2_FILIAL" ,"C",TamSX3("F2_FILIAL")[1] ,0 })
+   aAdd(_aCamposTab,{"F2_DOC"    ,"C",TamSX3("F2_DOC")[1]    ,0 })   
+   aAdd(_aCamposTab,{"F2_SERIE"  ,"C",TamSX3("F2_SERIE")[1]  ,0 })
+   aAdd(_aCamposTab,{"F2_CLIENTE","C",TamSX3("F2_CLIENTE")[1],0 })
+   aAdd(_aCamposTab,{"F2_LOJA"   ,"C",TamSX3("F2_LOJA")[1]   ,0 })
+   aAdd(_aCamposTab,{"A1_NOME"   ,"C",TamSX3("A1_NOME")[1]   ,0 })
+   aAdd(_aCamposTab,{"WK_STATUS" ,"C",1                      ,0 })   
+   aAdd(_aCamposTab,{"WK_RECNO"  ,"N",10                     ,0 })
+   aAdd(_aCamposTab,{"F2_I_LOCEM","C",TamSX3("F2_I_LOCEM")[1],0 })
+   aAdd(_aCamposTab,{"F2_I_REDP" ,"C",TamSX3("F2_I_REDP" )[1],0 })
+   aAdd(_aCamposTab,{"F2_I_RELO" ,"C",TamSX3("F2_I_RELO" )[1],0 })
+   aAdd(_aCamposTab,{"F2_I_OPER" ,"C",TamSX3("F2_I_OPER" )[1],0 })
+   aAdd(_aCamposTab,{"F2_I_OPLO" ,"C",TamSX3("F2_I_OPLO" )[1],0 })
+   aAdd(_aCamposTab,{"F2_I_PENCL","D",08,0})
+   aAdd(_aCamposTab,{"C5_I_TRCNF","C",03,0})
+   aAdd(_aCamposTab,{"C5_I_AGEND","C",30,0})
+   aAdd(_aCamposTab,{"ZF5_MERENT","C",03,0})
+   aAdd(_aCamposTab,{"WK_NFCARR" ,"C",Len(SF2->F2_FILIAL)+Len(SF2->F2_DOC)+Len(SF2->F2_SERIE)+2,0 })
+   aAdd(_aCamposTab,{"WK_PEDCAR" ,"C",Len(SC5->C5_I_FILFT)+Len(SC5->C5_I_PDFT)+1,0 })   
+   aAdd(_aCamposTab,{"WK_PEDFAT" ,"C",Len(SC5->C5_I_FLFNC)+Len(SC5->C5_I_PDPR)+1,0 })   
     //================================================================================
    // Verifica se ja existe um arquivo com mesmo nome, se sim deleta.
    //================================================================================
@@ -208,35 +213,38 @@ Begin Sequence
    _lRet := U_AOMS072D(MV_PAR01,MV_PAR02,_oSelf)
 
    If ! _lRet
-      u_itmsg("NÃO existem notas para esta carga!",,,1)
+      U_ITMsg("NÃO existem notas para esta carga!",,,1)
       Break
    EndIf
    
    //================================================================================
    // Monta colunas do MsSelect()
    //================================================================================
-                    //Campo         , "" , Titulo                                           , Picture   
-   Aadd( _aCampos , { "WK_OK"		 ,    , "Marca"                                          ,"@!"})
-   Aadd( _aCampos , { "F2_FILIAL" , "" , Getsx3cache("F2_FILIAL" ,"X3_TITULO"), Getsx3cache("F2_FILIAL" ,"X3_PICTURE")} ) 
-   Aadd( _aCampos , { "F2_DOC"	 , "" , Getsx3cache("F2_DOC"    ,"X3_TITULO"), Getsx3cache("F2_DOC"    ,"X3_PICTURE")} )   
-   Aadd( _aCampos , { "F2_SERIE"	 , "" , Getsx3cache("F2_SERIE"  ,"X3_TITULO"), Getsx3cache("F2_SERIE"  ,"X3_PICTURE")} )    
-   Aadd( _aCampos , { "F2_CLIENTE", "" , Getsx3cache("F2_CLIENTE","X3_TITULO"), Getsx3cache("F2_CLIENTE","X3_PICTURE")} )
-   Aadd( _aCampos , { "F2_LOJA"	 , "" , Getsx3cache("F2_LOJA"   ,"X3_TITULO"), Getsx3cache("F2_LOJA"   ,"X3_PICTURE")} )
-   Aadd( _aCampos , { "A1_NOME"   , "" , Getsx3cache("A1_NOME"   ,"X3_TITULO"), Getsx3cache("A1_NOME"   ,"X3_PICTURE")} )
-   Aadd( _aCampos , { "F2_I_LOCEM", "" , Getsx3cache("F2_I_LOCEM","X3_TITULO"), Getsx3cache("F2_I_LOCEM","X3_PICTURE")} )
-   Aadd( _aCampos , { "F2_I_REDP" , "" , Getsx3cache("F2_I_REDP" ,"X3_TITULO"), Getsx3cache("F2_I_REDP" ,"X3_PICTURE")} )
-   Aadd( _aCampos , { "F2_I_RELO" , "" , Getsx3cache("F2_I_RELO" ,"X3_TITULO"), Getsx3cache("F2_I_RELO" ,"X3_PICTURE")} )
-   Aadd( _aCampos , { "F2_I_OPER" , "" , Getsx3cache("F2_I_OPER" ,"X3_TITULO"), Getsx3cache("F2_I_OPER" ,"X3_PICTURE")} )
-   Aadd( _aCampos , { "F2_I_OPLO" , "" , Getsx3cache("F2_I_OPLO" ,"X3_TITULO"), Getsx3cache("F2_I_OPLO" ,"X3_PICTURE")} )
-   Aadd( _aCampos , { "C5_I_TRCNF", "" , "Troca Nota?",""} )   
-   Aadd( _aCampos,  { "WK_NFCARR" , "" , "Nota de Carregamento"  ,"@!"} )
-   Aadd( _aCampos,  { "WK_PEDCAR" , "" , "Pedido de Carregamento","@!"} )
-   Aadd( _aCampos,  { "WK_PEDFAT" , "" , "Pedido de Faturamento" ,"@!"} )
+                    //Campo       , "" , Titulo                                           , Picture   
+   aAdd( _aCampos , { "WK_OK"		 ,    , " ",""})
+   aAdd( _aCampos , { "F2_FILIAL" , "" , Getsx3cache("F2_FILIAL" ,"X3_TITULO"), Getsx3cache("F2_FILIAL" ,"X3_PICTURE")} ) 
+   aAdd( _aCampos , { "F2_DOC"	 , "" , Getsx3cache("F2_DOC"    ,"X3_TITULO"), Getsx3cache("F2_DOC"    ,"X3_PICTURE")} )   
+   aAdd( _aCampos , { "F2_SERIE"	 , "" , Getsx3cache("F2_SERIE"  ,"X3_TITULO"), Getsx3cache("F2_SERIE"  ,"X3_PICTURE")} )    
+   aAdd( _aCampos , { "F2_CLIENTE", "" , Getsx3cache("F2_CLIENTE","X3_TITULO"), Getsx3cache("F2_CLIENTE","X3_PICTURE")} )
+   aAdd( _aCampos , { "F2_LOJA"	 , "" , Getsx3cache("F2_LOJA"   ,"X3_TITULO"), Getsx3cache("F2_LOJA"   ,"X3_PICTURE")} )
+   aAdd( _aCampos , { "A1_NOME"   , "" , Getsx3cache("A1_NOME"   ,"X3_TITULO"), Getsx3cache("A1_NOME"   ,"X3_PICTURE")} )
+   aAdd( _aCampos , { "F2_I_LOCEM", "" , Getsx3cache("F2_I_LOCEM","X3_TITULO"), Getsx3cache("F2_I_LOCEM","X3_PICTURE")} )
+   aAdd( _aCampos , { "C5_I_AGEND", "" , "Tipo de Entrega",""} ) 
+   aAdd( _aCampos , { "F2_I_PENCL", "" , "Previsão de Entrega do Cliente",""} ) 
+   aAdd( _aCampos , { "ZF5_MERENT", "" , "Mercadoria entregue?",""} ) 
+   aAdd( _aCampos , { "F2_I_REDP" , "" , Getsx3cache("F2_I_REDP" ,"X3_TITULO"), Getsx3cache("F2_I_REDP" ,"X3_PICTURE")} )
+   aAdd( _aCampos , { "F2_I_RELO" , "" , Getsx3cache("F2_I_RELO" ,"X3_TITULO"), Getsx3cache("F2_I_RELO" ,"X3_PICTURE")} )
+   aAdd( _aCampos , { "F2_I_OPER" , "" , Getsx3cache("F2_I_OPER" ,"X3_TITULO"), Getsx3cache("F2_I_OPER" ,"X3_PICTURE")} )
+   aAdd( _aCampos , { "F2_I_OPLO" , "" , Getsx3cache("F2_I_OPLO" ,"X3_TITULO"), Getsx3cache("F2_I_OPLO" ,"X3_PICTURE")} )
+   aAdd( _aCampos , { "C5_I_TRCNF", "" , "Troca Nota?",""} ) 
+   aAdd( _aCampos,  { "WK_NFCARR" , "" , "Nota de Carregamento"  ,"@!"} )
+   aAdd( _aCampos,  { "WK_PEDCAR" , "" , "Pedido de Carregamento","@!"} )
+   aAdd( _aCampos,  { "WK_PEDFAT" , "" , "Pedido de Faturamento" ,"@!"} )
 
    _bOk := {|| If(U_AOMS072O(),(_lRet := .T., _oDlgSelect:End()),)}
    _bCancel := {|| _lRet := .F., _oDlgSelect:End()}
 
-   TRBSF2->(DbGotop())
+   TRBSF2->(DBGoTop())
 
    //================================================================================
    // Monta a tela de dados com MSSELECT.
@@ -245,11 +253,11 @@ Begin Sequence
    _nCol1 := 0
    _nLin2 := _aSizeAut[6] * 0.079023  // 55
    _nCol2 := _aSizeAut[5] * 0.126138  // 194
-   _lRet  := .F.//PQ SE APERTAR ESC OU O BOTÃO X DA TELA , DÁ ERRO LOG.//CORREÇÃO DE ERROR.LOG: argument #0 error, expected N->U,function dbgoto on U_AOMS072R(AOMS072.PRW) line : 872
+   _lRet  := .F.//PQ SE APERTAR ESC OU O BOTÃO X DA TELA , DÁ ERRO LOG.//CORREÇÃO DE ERROR.LOG: argument #0 error, expected N->U,function DBGoTo on U_AOMS072R(AOMS072.PRW) Line : 872
    
    _aButtons:={}
-   AADD(_aButtons,{"",{|| U_AOMS072M("T") },"Marc/Des","Marca/Desmarca Todos"})
-   AADD(_aButtons,{"",{|| U_AOMS072L()    },"Legenda" ,"Legenda"})
+   aAdd(_aButtons,{"",{|| U_AOMS072M("T") },"Marc/Des","Marca/Desmarca Todos"})
+   aAdd(_aButtons,{"",{|| U_AOMS072L()    },"Legenda" ,"Legenda"})
 
    Define MsDialog _oDlgSelect Title _cTitulo From _nLin1,_nCol1 To _nLin2,_nCol2 Of oMainWnd 
               
@@ -291,14 +299,14 @@ User Function AOMS072L()
 Local _aLegenda := {}
 
 Begin Sequence
-   Aadd(_aLegenda,{"BR_VERDE"    ,"Nota Fiscal não cadastrada." })
-   Aadd(_aLegenda,{"BR_VERMELHO" ,"Nota Fiscal já cadastrada." })
+   aAdd(_aLegenda,{"BR_VERDE"    ,"Nota Fiscal não cadastrada." })
+   aAdd(_aLegenda,{"BR_VERMELHO" ,"Nota Fiscal já cadastrada." })
 
    BrwLegenda("Gestão de Ocorrências de Frete", "Legenda", _aLegenda)
 
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -331,20 +339,20 @@ Begin Sequence
    If _cTipoMarca == "P"
       TRBSF2->WK_OK := _cSimboloMarca 
    Else
-      TRBSF2->(DbGoTop())
-      Do While ! TRBSF2->(Eof())
+      TRBSF2->(DBGoTop())
+      While ! TRBSF2->(Eof())
          TRBSF2->WK_OK := _cSimboloMarca 
-         TRBSF2->(DbSkip())
+         TRBSF2->(DBSkip())
       EndDo
    
    EndIf
            
 End Sequence
 
-TRBSF2->(DbGoTo(_nRegAtu)) 
+TRBSF2->(DBGoTo(_nRegAtu)) 
 _oMarkSelect:oBrowse:Refresh()
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -389,38 +397,38 @@ User Function AOMS072D(_cCodCarga As String, _cSeqCarga As String, _oself As Obj
    EndIf   
 
    COUNT TO _nTotreg
-   (_cAlias)->( DbGotop() )
+   (_cAlias)->( DBGoTop() )
    
    _oself:SetRegua1( _nTotreg ) // Determina o tamanho da regua de processamento.   
    
-   ZF5->(DbSetOrder(1))
-   SF2->(DbSetOrder(1))
+   ZF5->(DBSetOrder(1))
+   SF2->(DBSetOrder(1))
    
-   Do While ! (_cAlias)->(Eof())      
+   While ! (_cAlias)->(Eof())      
 
-      SF2->(DbGoTo((_cAlias)->NRECNO))
+      SF2->(DBGoTo((_cAlias)->NRECNO))
       _cWKNFCARR:=""
       _cWKPEDCAR:=""
       _cWKPEDFAT:=""
       _cChaveSF2:=(_cAlias)->F2_FILIAL+(_cAlias)->F2_DOC
-      //QUANDO A NFE FOR DE TRANSFERÊNCIA, REFERENTE A TROCA NOTA, ALTERAR OS DADOS PARA NFE DE FATURAMENTO
-      IF (POSICIONE("SC5",,_cChaveSF2,"C5_I_TRCNF","IT_NOTA") = "S") 
+      //QUANDO A NFE For DE TRANSFERÊNCIA, REFERENTE A TROCA NOTA, ALTERAR OS DADOS PARA NFE DE FATURAMENTO
+      If (Posicione("SC5",,_cChaveSF2,"C5_I_TRCNF","IT_NOTA") = "S") 
          
-         IF SC5->C5_I_OPER = "20" //TRANSFERÊNCIA DA TROCA NOTA
+         If SC5->C5_I_OPER = "20" //TRANSFERÊNCIA DA TROCA NOTA
             _cWKNFCARR:=SF2->F2_FILIAL+" "+SF2->F2_DOC+"-"+SF2->F2_SERIE // NOTA   DE CARREGAMENTO OK (COLUNA BROWSE)
             _cWKPEDCAR:=SF2->F2_FILIAL+" "+SF2->F2_I_PEDID               // PEDIDO DE CARREGAMENTO OK (COLUNA BROWSE)
             _cWKPEDFAT:=SC5->C5_I_FILFT+SC5->C5_I_PDFT                   // FILIAL + PEDIDO DE FATURAMENTO
-            _cNotaFat :=POSICIONE("SC5",1,_cWKPEDFAT,"C5_NOTA")          // POSICIONADO NO SC5 P/ PEGAR A NOTA DE FATURAMENTO
+            _cNotaFat :=Posicione("SC5",1,_cWKPEDFAT,"C5_NOTA")          // POSICIONADO NO SC5 P/ PEGAR A NOTA DE FATURAMENTO
             _cWKPEDFAT:=SC5->C5_I_FILFT+" "+SC5->C5_I_PDFT               // PEDIDO DE FATURAMENTO  OK (COLUNA BROWSE)
             _cChaveSF2:=SC5->C5_FILIAL+_cNotaFat+SC5->C5_SERIE           // FILAIL + NOTA + SERIE DE FATURAMENTO PARA POSICIONAR
-            IF !SF2->(DbSeek(_cChaveSF2))
-               (_cAlias)->(DbSkip())
-               LOOP
-            ENDIF
+            If !SF2->(DBSeek(_cChaveSF2))
+               (_cAlias)->(DBSkip())
+               Loop
+            EndIf
          Else//FATURAMENTO DA TROCA NOTA
             _cWKPEDFAT:=SF2->F2_FILIAL+" "+SF2->F2_I_PEDID               // PEDIDO DE FATURAMENTO OK (COLUNA BROWSE)
             _cWKPEDCAR:=SC5->C5_I_FLFNC+SC5->C5_I_PDPR                   // FILIAL + PEDIDO DE CARREGAMENTO
-            _cNotaCarr:=POSICIONE("SC5",1,_cWKPEDCAR,"C5_NOTA")          // POSICIONADO NO SC5 P/ PEGAR A NOTA DE CARREGAMENTO
+            _cNotaCarr:=Posicione("SC5",1,_cWKPEDCAR,"C5_NOTA")          // POSICIONADO NO SC5 P/ PEGAR A NOTA DE CARREGAMENTO
             _cWKPEDCAR:=SC5->C5_I_FLFNC+" "+SC5->C5_I_PDPR               // PEDIDO DE CARREGAMENTO OK (COLUNA BROWSE)
             _cWKNFCARR:=SC5->C5_FILIAL+" "+_cNotaCarr+"-"+SC5->C5_SERIE  // NOTA DE CARREGAMENTO   OK (COLUNA BROWSE)
          EndIf
@@ -428,7 +436,7 @@ User Function AOMS072D(_cCodCarga As String, _cSeqCarga As String, _oself As Obj
        EndIf
 
       _cStatus := '0' 
-      If ZF5->(DbSeek(_cChaveSF2))
+      If ZF5->(DBSeek(_cChaveSF2))
          _cStatus := '1'
       EndIf
                                      
@@ -448,18 +456,25 @@ User Function AOMS072D(_cCodCarga As String, _cSeqCarga As String, _oself As Obj
       TRBSF2->F2_I_RELO  := SF2->F2_I_RELO 
       TRBSF2->F2_I_OPER  := SF2->F2_I_OPER 
       TRBSF2->F2_I_OPLO  := SF2->F2_I_OPLO
-      TRBSF2->C5_I_TRCNF := IF(SC5->C5_I_TRCNF='S','SIM','NÃO')
+      TRBSF2->F2_I_PENCL := SF2->F2_I_PENCL
+      TRBSF2->C5_I_TRCNF := If(SC5->C5_I_TRCNF='S','SIM','NÃO')
       TRBSF2->WK_NFCARR  := _cWKNFCARR  
       TRBSF2->WK_PEDCAR  := _cWKPEDCAR
       TRBSF2->WK_PEDFAT  := _cWKPEDFAT 
+      If !Empty(SC5->C5_I_AGEND)
+         TRBSF2->C5_I_AGEND := SC5->C5_I_AGEND+"-"+U_TipoEntrega(SC5->C5_I_AGEND)
+      EndIf
+      If _cStatus = '1'
+         TRBSF2->ZF5_MERENT := If(ZF5->ZF5_MERENT='S','SIM','NÃO')
+      EndIf
                              
-      (_cAlias)->(DbSkip())
+      (_cAlias)->(DBSkip())
    EndDo                
       
  End Sequence
  
  If Select((_cAlias)) > 0
-    (_cAlias)->(DbCloseArea())
+    (_cAlias)->(DBCloseArea())
  EndIf
  
  RestOrd(_aOrd,.T.)
@@ -484,20 +499,20 @@ Local _lRet := .F.
 Local _nRegAtu := TRBSF2->(Recno())
 
 Begin Sequence
-   TRBSF2->(DbGoTop())
-   Do While ! TRBSF2->(Eof())
+   TRBSF2->(DBGoTop())
+   While ! TRBSF2->(Eof())
       If ! Empty(TRBSF2->WK_OK)
          _lRet := .T.
          Exit
       EndIf
-      TRBSF2->(DbSkip())
+      TRBSF2->(DBSkip())
    EndDo     
    If ! _lRet 
-      u_itmsg("Não existem dados selecionados para inclusão de notas fiscais por carga.","Atenção",,1)        
+      U_ITMsg("Não existem dados selecionados para inclusão de notas fiscais por carga.","Atenção",,1)        
    EndIf
 End Sequence           
 
-TRBSF2->(DbGoto(_nRegAtu))
+TRBSF2->(DBGoTo(_nRegAtu))
 
 Return _lRet
 
@@ -582,7 +597,7 @@ Begin Sequence
    _cCamposCapa += 'ZF5_PLACA;'
    _cCamposCapa += 'ZF5_DATAS;'
    _cCamposCapa += 'ZF5_HORAS;'
-
+ 
    //================================================================================
    // Define um aRotina Genérico apenas para utilização da função MsGetDados. 
    // Para utilizar esta função é necessário definir um array aRotina.
@@ -598,7 +613,7 @@ Begin Sequence
    // Este array define os campos que poderão ser exibidos na tela principal definido
    // com a função MsGetDados.
    //================================================================================                                  
-   aAdd(_aCamposCapa,"NOUSER")
+   aAdd(_aCamposCapa,"NOUSER")//Tem que tirar os campos de usuario pq todos são de usuarios que vão para os itens
 
    //================================================================================
    // Cria tabela temporária.
@@ -607,25 +622,23 @@ Begin Sequence
    _aorder := {}
 
    For nX := 1 To Len(_aZF5)
-
-         aAdd( _azf5[nx] , Getsx3cache(_aZF5[nX][1],"X3_ORDEM") )
-
+       aAdd( _aZF5[nx] , Getsx3cache(_aZF5[nX][1],"X3_ORDEM") )
    Next
 
-   _aZF5 := asort(_aZF5,,, {|x,y| x[5] < y[5] })
+   _aZF5 := aSort(_aZF5,,, {|x,y| x[5] < y[5] })
+   
+   For _nnj := 1 to Len(_aZF5)
+       If _aZF5[_nnj][1] == "ZF5_MERENT"//Esse campo foi retirado para não soberpor o conteudo do campo ZF5_MERENT das notas fiscais já cadastradas.
+          Loop
+       EndIf
 
-   
-   For _nnj := 1 to len(_aZF5)
-   
-         &("M->"+alltrim(_aZF5[_nnj][1])) := CriaVar(alltrim(_aZF5[_nnj][1]))
-         
-          If alltrim(_aZF5[_nnj][1]) $ _cCamposCapa  // Campos de capa
-             Aadd(_aCamposCapa,alltrim(_aZF5[_nnj][1]))
-          Else
-        
-            _nUsado += 1
-            
-              AADD( aHeader, { trim(getsx3cache(_aZF5[_NNJ][1],"X3_TITULO") ),;
+       &("M->"+AllTrim(_aZF5[_nnj][1])) := CriaVar(AllTrim(_aZF5[_nnj][1]))
+
+       If AllTrim(_aZF5[_nnj][1]) $ _cCamposCapa  // Campos de capa
+          aAdd(_aCamposCapa,AllTrim(_aZF5[_nnj][1]))
+       Else
+          _nUsado += 1
+          aAdd( aHeader, { trim(getsx3cache(_aZF5[_NNJ][1],"X3_TITULO") ),;
                      getsx3cache(_aZF5[_NNJ][1],"X3_CAMPO")		,;
                      getsx3cache(_aZF5[_NNJ][1],"X3_PICTURE")		,;
                      getsx3cache(_aZF5[_NNJ][1],"X3_TAMANHO")		,;
@@ -635,12 +648,10 @@ Begin Sequence
                      getsx3cache(_aZF5[_NNJ][1],"X3_TIPO")			,;
                      getsx3cache(_aZF5[_NNJ][1],"X3_ARQUIVO")		,;
                      getsx3cache(_aZF5[_NNJ][1],"X3_CONTEXT")	})
-            
        EndIf
-   
    Next
  
-   Aadd(aCols,Array(_nUsado+1))
+   aAdd(aCols,Array(_nUsado+1))
 
    For _nI := 1 To _nUsado    
        aCols[1][_nI] := CriaVar(aHeader[_nI][2])
@@ -648,18 +659,18 @@ Begin Sequence
    aCols[1][_nUsado+1] := .F.
 
    //================================================================================
-   // Carrega dados na tabela temporária.
+   // Carrega dados na tabela temporária da primeira nota fiscal marcada
    //================================================================================
-   IF !U_AOMS072R("DIGITACAO")
+   If !U_AOMS072R("DIGITACAO")
       BREAK
-   ENDIF
+   EndIf
                                                                                                                                                     
    //================================================================================
    // Tela de Manutenção
    //================================================================================
    _aObjects := {} 
-   AAdd( _aObjects, { 100, 100, .T., .T. } )
-   AAdd( _aObjects, { 100, 100, .T., .T. } )
+   aAdd( _aObjects, { 100, 100, .T., .T. } )
+   aAdd( _aObjects, { 100, 100, .T., .T. } )
 
    _aInfo := { _aSizeAut[ 1 ], _aSizeAut[ 2 ], _aSizeAut[ 3 ], _aSizeAut[ 4 ], 3, 3 } 
 
@@ -678,7 +689,7 @@ Begin Sequence
    Activate MsDialog _oDlgEnch On Init EnchoiceBar(_oDlgEnch,_bOk,_bCancel) 
    
    If _lRet   
-      u_itmsg("Inclusão de ocorrências de frete por carga realizada com sucesso!","Atenção",,2)
+      U_ITMsg("Inclusão de ocorrências de frete por carga realizada com sucesso!","Atenção",,2)
    EndIf
    
 End Sequence
@@ -706,7 +717,12 @@ User Function AOMS072E(_cChamada)
  Local _cNumNf, _cSerieNf
  Local _nVlCobradoTon, _nPeso, _cCarga, _nI
  Local _lNF_OK
- Local _nFORTER, _nLOJTER, _nNOMTER, _nCUSTO
+ Local _nFORTER:=0 As Numeric // Posição do campo Fornecedor Terceiros
+ Local _nLOJTER:=0 As Numeric // Posição do campo Loja Terceiros
+ Local _nNOMTER:=0 As Numeric // Posição do campo Nome Terceiros
+ Local _nCUSTO :=0 As Numeric // Posição do campo Custo Total
+
+
  Private _lxRet := .T.
  
  Begin Sequence 
@@ -722,25 +738,23 @@ User Function AOMS072E(_cChamada)
            _nNOMTER := _nI // Nome Terceiros
         ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_CUSTO"
            _nCUSTO := _nI // CUSTO TOTAL
-        ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_CUSTOI"
-           _nCUSTOI := _nI // CUSTO ITALAC 
-        ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_CUSTOR"
-           _nCUSTOR := _nI // CUSTO REPRESENTANTE
-        ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_CUSTOC"
-           _nCUSTOC := _nI // CUSTO CLIENTE  
-        ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_CUSTER"
-           _nCUSTER := _nI // custo Terceiros  
-        ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_CUSTOT"
-           _nCUSTOT := _nI // custo Terceiros      
-        ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_TIPO"
-           _nCUSTIP := _nI // tipo  
-        ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_TIPOC"
-           _nCUSTIC := _nI // tipo  
-        ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_MOTCUS"
-           _nCUSMOT := _nI // tipo  
-        ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_STATUS"
-           _nCUSTIP := _nI // tipo      
-        EndIf    
+        //ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_CUSTOR"
+        //   _nCUSTOR := _nI // CUSTO REPRESENTANTE
+        //ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_CUSTOC"
+        //   _nCUSTOC := _nI // CUSTO CLIENTE  
+        //ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_CUSTER"
+        //   _nCUSTER := _nI // custo Terceiros  
+        //ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_CUSTOT"
+        //   _nCUSTOT := _nI // custo Terceiros      
+        //ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_TIPO"
+        //   _nCUSTIP := _nI // tipo  
+        //ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_TIPOC"
+        //   _nCUSTIC := _nI // tipo  
+        //ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_MOTCUS"
+        //   _nCUSMOT := _nI // tipo  
+        //ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_STATUS"
+        //   _nPosStatus := _nI // tipo      
+        EndIf
     Next          
     
     //================================================================================
@@ -748,14 +762,14 @@ User Function AOMS072E(_cChamada)
     //================================================================================
     If _cChamada == "GRAVACAO"
        If !Obrigatorio(aGets,aTela) // Valida a digitação de dados na tela principal
-          u_itmsg("É necessário informar o conteúdo de todos os campos obrigatorios antes da gravação das ocorrências.","Atenção",,1)
+          U_ITMsg("É necessário informar o conteúdo de todos os campos obrigatorios antes da gravação das ocorrências.","Atenção",,1)
           _lxRet := .F.
           Break
        EndIf
        _lNF_OK := .F.
        
-       TRBSF2->(DbGoTop())
-       Do While ! TRBSF2->(Eof())
+       TRBSF2->(DBGoTop())
+       While ! TRBSF2->(Eof())
           If ! Empty(TRBSF2->WK_OK)
              _nTotNf += 1
              If TRBSF2->(F2_FILIAL+F2_DOC + F2_SERIE) == M->ZF5_FILIAL + M->ZF5_DOCOC + M->ZF5_SEROC
@@ -763,20 +777,71 @@ User Function AOMS072E(_cChamada)
              EndIf             
           EndIf
           
-          TRBSF2->(DbSkip())                     
+          TRBSF2->(DBSkip())                     
        EndDo
        
        If ! _lNF_OK
-          u_itmsg("A nota fiscal "+M->ZF5_FILIAL+" - "+M->ZF5_DOCOC+" - "+M->ZF5_SEROC+" não faz parte das notas fiscais selecionadas para inclusão de ocorrencias.", "Atenção",,1)
+          U_ITMsg("A nota fiscal "+M->ZF5_FILIAL+" - "+M->ZF5_DOCOC+" - "+M->ZF5_SEROC+" não faz parte das notas fiscais selecionadas para inclusão de ocorrencias.", "Atenção",,1)
           _lxRet := .F.
        EndIf
        
        If _lxRet
-          _lxRet := U_AOMS072Q()
+          _lxRet := U_AOMS072Q() // VALIDACAO DO OK FINAL DA TELA 
        EndIf
-  
+       Break//*** SAIDA ******************************************************************************
+
      EndIf
  
+    //*************** QUANDO A FUNÇÃO CHAMADA DOS VALIDS DOS CAMPOS *****************
+    If _cChamada == 'ZF5_OLRCOD'
+       nPosTIPOO := aScan(aHeader,{|x| AllTrim(x[2]) == "ZF5_TIPOO" })
+       nPosOLRLOJ:= aScan(aHeader,{|x| AllTrim(x[2]) == "ZF5_OLRLOJ"})
+       nPosOLRNOM:= aScan(aHeader,{|x| AllTrim(x[2]) == "ZF5_OLRNOM"})
+       ZFC->(DBSetOrder(1))
+       ZFC->(DBSeek(xFilial("ZFC")+aCols[N,nPosTIPOO]))
+       If !Empty(M->ZF5_OLRCOD)
+          If ZFC->ZFC_OLREDI  <> "S"
+             U_ITMsg('Tipo de ocorrecia não é de redirecionamento. (ZFC_OLREDI<>"S").','Atenção',;
+                     'O Codigo do operador logistico do redirecionamento não pode ser informado.',,,,.T.)
+             _lxRet := .F.
+             aCols[N,nPosOLRLOJ] := Space(Len(ZF5->ZF5_OLRLOJ))
+             aCols[N,nPosOLRNOM] := Space(Len(ZF5->ZF5_OLRNOM))
+          ElseIf SA2->(DBSeek(xFilial("SA2")+M->ZF5_OLRCOD)) 
+             aCols[N,nPosOLRLOJ] := SA2->A2_LOJA
+             aCols[N,nPosOLRNOM] := SA2->A2_NOME
+          Else
+             U_ITMsg("Código de Transportadora não cadastrado  no cadastro de fornecedores.","Atenção",,,,,.T.)
+             _lxRet := .F.
+          EndIf
+       Else
+          If ZFC->ZFC_OLREDI == "S"
+             U_ITMsg('Tipo de ocorrecia é de redirecionamento. (ZFC_OLREDI="S").','Atenção',;
+                     "Informe o Codigo+loja do operador logistico do redirecionamento.",,,,.T.)
+             _lxRet := .F.
+          Else
+             aCols[N,nPosOLRLOJ] := Space(Len(ZF5->ZF5_OLRLOJ))
+             aCols[N,nPosOLRNOM] := Space(Len(ZF5->ZF5_OLRNOM))
+          EndIf
+       EndIf
+       Break//*** SAIDA ******************************************************************************
+   
+    ElseIf _cChamada == 'ZF5_OLRLOJ'
+       nPosOLRCOD:= aScan(aHeader,{|x| AllTrim(x[2]) == "ZF5_OLRCOD"})
+       nPosOLRNOM:= aScan(aHeader,{|x| AllTrim(x[2]) == "ZF5_OLRNOM"})
+       If !Empty(aCols[N,nPosOLRCOD]) .Or. !Empty(M->ZF5_OLRLOJ)
+          If SA2->(DBSeek(xFilial("SA2")+aCols[N,nPosOLRCOD]+M->ZF5_OLRLOJ))
+             aCols[N,nPosOLRNOM] := LEFT(SA2->A2_NOME,Len(ZF5->ZF5_OLRNOM) )
+          Else
+             U_ITMsg("Código+loja de Transportadora não cadastrado no cadastro de fornecedores.","Atenção",,,,,.T.)
+             _lxRet := .F.
+          EndIf
+       Else//Se os 2 em branco, limpa
+          aCols[N,nPosOLRNOM] :=  Space(Len(ZF5->ZF5_OLRNOM))
+       EndIf
+       Break//*** SAIDA ******************************************************************************
+   
+    EndIf
+
     _nCustoTer := M->ZF5_CUSTER // aCols[N,27]   
         
     If Empty(_nCustoTer)
@@ -784,38 +849,37 @@ User Function AOMS072E(_cChamada)
     EndIf
   
     _cCodFor  := M->ZF5_FORTER // aCols[N,28] 
-  
     _cLojaFor := M->ZF5_LOJTER // aCols[N,29] 
-    
     _cNomeFor := M->ZF5_NOMTER // aCols[N,30]  
     
-    SA2->(DbSetOrder(1))
-    SF2->(DbSetOrder(1))
-    SC5->(DbSetOrder(1))
-  
+    SA2->(DBSetOrder(1))
+    SF2->(DBSetOrder(1))
+    SC5->(DBSetOrder(1))  
  
     If _cChamada == 'ZF5_CUSTER'
+       
        If Empty(_nCustoTer)                
           aCols[N,_nFORTER] := Space(6)  // ZF5_FORTER
           aCols[N,_nLOJTER] := Space(4)  // ZF5_LOJTER
           aCols[N,_nNOMTER] := Space(40) // ZF5_NOMTER 
        ElseIf Empty(_cCodFor)       
-          SA2->(DbSeek(xFilial("SA2")+_cForPadrao))
+          SA2->(DBSeek(xFilial("SA2")+_cForPadrao))
           aCols[N,_nFORTER] := SA2->A2_COD   // ZF5_FORTER
           aCols[N,_nLOJTER] := SA2->A2_LOJA  // ZF5_LOJTER
           aCols[N,_nNOMTER] := SA2->A2_NOME  // ZF5_NOMTER 
        EndIf 
        
     ElseIf _cChamada == 'ZF5_FORTER'
+       
        If ! _lCustoPreenchido .And. ! Empty(_cCodFor)
-          u_itmsg("O campo custo de terceiro precisa ser preenchido.","Atenção",,1)
+          U_ITMsg("O campo custo de terceiro precisa ser preenchido.","Atenção",,1)
           _lxRet := .F.
           Break
        EndIf
        
        If _lCustoPreenchido 
-          If ! SA2->(DbSeek(xFilial("SA2")+_cCodFor))
-             u_itmsg("Código de Terceiro não cadastrado no cadastro de fornecedores.","Atenção",,1)
+          If ! SA2->(DBSeek(xFilial("SA2")+_cCodFor))
+             U_ITMsg("Código de Terceiro não cadastrado no cadastro de fornecedores.","Atenção",,1)
              _lxRet := .F.
              Break
           Else   
@@ -825,15 +889,16 @@ User Function AOMS072E(_cChamada)
        EndIf
        
     ElseIf _cChamada == 'ZF5_LOJTER'
+       
        If ! _lCustoPreenchido .And. ! Empty(_cLojaFor)
-          u_itmsg("O campo custo de terceiro precisa ser preenchido.","Atenção",,1)
+          U_ITMsg("O campo custo de terceiro precisa ser preenchido.","Atenção",,1)
           _lxRet := .F.
           Break
        EndIf
        
        If _lCustoPreenchido 
-          If ! SA2->(DbSeek(xFilial("SA2")+_cCodFor+_cLojaFor))
-             u_itmsg("Código+Loja de Terceiro não cadastrado no cadastro de fornecedores.","Atenção",,1)
+          If ! SA2->(DBSeek(xFilial("SA2")+_cCodFor+_cLojaFor))
+             U_ITMsg("Código+Loja de Terceiro não cadastrado no cadastro de fornecedores.","Atenção",,1)
              _lxRet := .F.
              Break
           Else
@@ -842,24 +907,26 @@ User Function AOMS072E(_cChamada)
        EndIf
        
     ElseIf _cChamada == 'ZF5_NOMTER'
+       
        If ! _lCustoPreenchido .And. ! Empty(_cNomeFor)
-          u_itmsg("O campo custo de terceiro precisa ser preenchido.","Atenção",,1)
+          U_ITMsg("O campo custo de terceiro precisa ser preenchido.","Atenção",,1)
           _lxRet := .F.
           Break
        EndIf
        
     ElseIf _cChamada == 'ZF5_AGENDA'
+       
        _cNumNf   := M->ZF5_DOCOC
        _cSerieNf := M->ZF5_SEROC      
-       SF2->(DbSeek(xFilial("SF2")+_cNumNf))
-       SC5->(DbSeek(SF2->(F2_FILIAL+F2_I_PEDID)))
+       SF2->(DBSeek(xFilial("SF2")+_cNumNf))
+       SC5->(DBSeek(SF2->(F2_FILIAL+F2_I_PEDID)))
        M->ZF5_AGENDA := AllTrim(SC5->C5_MENNOTA)        
                                       
        
     ElseIf _cChamada == 'ZF5_VALTON'        
        _nVlCobradoTon := 0  
-       _cCarga := POSICIONE("SF2",1,XFILIAL("SF2")+ALLTRIM(M->ZF5_DOCOC),"F2_CARGA") 
-       _nPeso  := POSICIONE("DAK",1,XFILIAL("ZF5")+ALLTRIM(_cCarga),"DAK_PESO") 
+       _cCarga := Posicione("SF2",1,xFilial("SF2")+AllTrim(M->ZF5_DOCOC),"F2_CARGA") 
+       _nPeso  := Posicione("DAK",1,xFilial("ZF5")+AllTrim(_cCarga),"DAK_PESO") 
        _nCusto := aCols[N,_nCUSTO] // ZF5_CUSTO
        
        _nVlCobradoTon  += (_nCusto / (_nPeso / 1000))
@@ -869,9 +936,9 @@ User Function AOMS072E(_cChamada)
  
  End Sequence
  
- If _lxRet .And. u_itmsg("Confirma a inclusão das ocorrências de frete, para TODAS AS NOTAS fiscais selecionadas?", "Atenção",,2,2,2)
-    FWMSGRUN(,{|oproc| _lxRet := U_AOMS072G(oproc) },'Aguarde processamento...','Gravando dados...')
- Else
+ If _cChamada == "GRAVACAO" .And. _lxRet .And. U_ITMsg("Confirma a inclusão das ocorrências de frete, para TODAS AS NOTAS fiscais selecionadas?", "Atenção",,2,2,2)
+    FWMsgRun(,{|oproc| _lxRet := U_AOMS072G(oproc) },'Aguarde processamento...','Gravando dados...')
+ ElseIf _cChamada == "GRAVACAO"
     _lxRet := .F.   
  EndIf
  
@@ -899,21 +966,21 @@ Local _cret As String, _cret3 As String, _cret4 As String
 
 Begin Sequence         
    If _cChamada == "DIGITACAO"
-      TRBSF2->(DbGoTop())
+      TRBSF2->(DBGoTop())
       _nRegNf :=TRBSF2->WK_RECNO
-      Do While ! TRBSF2->(Eof())
+      While ! TRBSF2->(Eof())
          If ! Empty(TRBSF2->WK_OK)
             _nRegNf := TRBSF2->WK_RECNO
             Exit
          EndIf
       
-         TRBSF2->(DbSkip())
+         TRBSF2->(DBSkip())
       EndDo
-      IF _nRegNf > 0   
-         SF2->(DbGoTo(_nRegNf))
+      If _nRegNf > 0   
+         SF2->(DBGoTo(_nRegNf))
       Else
-         BREAK
-      ENDIF
+         BREAK // Se não encontrou nenhuma nota fiscal selecionada, sai da função.
+      EndIf
    EndIf 
    _lRet:=.T.
    //_cChamada == #GRAVACAO
@@ -923,19 +990,19 @@ Begin Sequence
    M->ZF5_CARGA  := SF2->F2_CARGA
    M->ZF5_SEQCAR := SF2->F2_SEQCAR                                
    
-   SC5->(DbSeek(SF2->(F2_FILIAL+F2_I_PEDID)))
+   SC5->(DBSeek(SF2->(F2_FILIAL+F2_I_PEDID)))
    M->ZF5_AGENDA := AllTrim(SC5->C5_MENNOTA)  
    M->ZF5_DATAE :=  SC5->C5_I_DTENT     
 
    If ! Empty(SF2->F2_CARGA)    
-      DAK->(Dbsetorder(1))
-      DAK->(Dbseek(SF2->F2_FILIAL+SF2->F2_CARGA))
+      DAK->(DBSetOrder(1))
+      DAK->(DBSeek(SF2->F2_FILIAL+SF2->F2_CARGA))
 
-      DA4->(Dbsetorder(1))         
-      DA4->(Dbseek(xFilial("DA4")+DAK->DAK_MOTORI))  
+      DA4->(DBSetOrder(1))         
+      DA4->(DBSeek(xFilial("DA4")+DAK->DAK_MOTORI))  
     
-      DA3->(Dbsetorder(1))         
-      DA3->(Dbseek(xFilial("DA3")+DAK->DAK_CAMINH))  
+      DA3->(DBSetOrder(1))         
+      DA3->(DBSeek(xFilial("DA3")+DAK->DAK_CAMINH))  
 
       M->ZF5_MOTORI := DAK->DAK_MOTORI
       M->ZF5_TIPOV := DA3->DA3_I_TPVC
@@ -945,7 +1012,7 @@ Begin Sequence
      If Val(_cret3) > 0
         If Len(_cret3) == 11
             _cret += " - " + Transform(Val(_cret3),"@R (99) 99999-9999")
-         ElseIf len(_cret3) == 10
+         ElseIf Len(_cret3) == 10
             _cret += " - " + Transform(Val(_cret3),"@R (99) 9999-9999")
          EndIf
       EndIf
@@ -958,10 +1025,10 @@ Begin Sequence
    EndIf 
  
    If ! Empty(SF2->F2_VEND1)
-      SA3->(Dbsetorder(1))         
-      SA3->(Dbseek(xFilial("SA3")+SF2->F2_VEND1))  
+      SA3->(DBSetOrder(1))         
+      SA3->(DBSeek(xFilial("SA3")+SF2->F2_VEND1))  
         
-     _cret  := Substr(alltrim(SA3->A3_NOME),1,30)
+     _cret  := SubStr(AllTrim(SA3->A3_NOME),1,30)
      _cret3 := SA3->A3_TEL
      _cret4 := SA3->A3_DDDTEL
    
@@ -977,49 +1044,49 @@ Begin Sequence
       M->ZF5_NREPRE := _cret 
    EndIf	
 
-   If ! Empty(SF2->F2_VEND2)
+   If !Empty(SF2->F2_VEND2)
 
-       SA3->(Dbsetorder(1))         
-      SA3->(Dbseek(xFilial("SA3")+SF2->F2_VEND2))
+      SA3->(DBSetOrder(1))         
+      SA3->(DBSeek(xFilial("SA3")+SF2->F2_VEND2))
       
-        _cret  := Substr(alltrim(SA3->A3_NOME),1,30)
-     _cret3 := SA3->A3_TEL
-     _cret4 := SA3->A3_DDDTEL
-   
-     If Val(_cret3) > 0
-       If Len(_cret3) == 9
-         _cret += " - (" + _cret4 + ") " + Transform(Val(_cret3),"@R  99999-9999")
-       ElseIf Len(_cret3) == 8
-         _cret += " - (" + _cret4 + ") " + Transform(Val(_cret3),"@R  9999-9999")
-       EndIf
+      _cret  := SubStr(AllTrim(SA3->A3_NOME),1,30)
+      _cret3 := SA3->A3_TEL
+      _cret4 := SA3->A3_DDDTEL
+    
+      If Val(_cret3) > 0
+         If Len(_cret3) == 9
+           _cret += " - (" + _cret4 + ") " + Transform(Val(_cret3),"@R  99999-9999")
+         ElseIf Len(_cret3) == 8
+           _cret += " - (" + _cret4 + ") " + Transform(Val(_cret3),"@R  9999-9999")
+         EndIf
       EndIf	
       M->ZF5_COORD := SF2->F2_VEND2
       M->ZF5_NCOOR := _cret
    EndIf 
 
-   If ! Empty(SF2->F2_CLIENTE)   
-     SA1->(DbSetOrder(1))
-     SA1->(Dbseek(xfilial("SA1") + SF2->F2_CLIENTE + SF2->F2_LOJA))
+   If !Empty(SF2->F2_CLIENTE)   
+      SA1->(DBSetOrder(1))
+      SA1->(DBSeek(xFilial("SA1") + SF2->F2_CLIENTE + SF2->F2_LOJA))
       
-     _cret  := Substr(SA1->A1_NREDUZ,1,30) 
-     _cret3 := AllTrim(SA1->A1_TEL)
+      _cret  := SubStr(SA1->A1_NREDUZ,1,30) 
+      _cret3 := AllTrim(SA1->A1_TEL)
       _cret4 := AllTrim(SA1->A1_DDD)
    
-     If Val(_cret3) > 0
-       If Len(_cret3) == 9
-         _cret += " - (" + _cret4 + ") " + Transform(Val(_cret3),"@R  99999-9999")
-       ElseIf Len(_cret3) == 8
-         _cret += " - (" + _cret4 + ") " + Transform(Val(_cret3),"@R  9999-9999")
-       EndIf
-     EndIf  
+      If Val(_cret3) > 0
+         If Len(_cret3) == 9
+           _cret += " - (" + _cret4 + ") " + Transform(Val(_cret3),"@R  99999-9999")
+         ElseIf Len(_cret3) == 8
+           _cret += " - (" + _cret4 + ") " + Transform(Val(_cret3),"@R  9999-9999")
+         EndIf
+      EndIf  
       M->ZF5_CIDADE := SA1->A1_MUN
       M->ZF5_CLIENT := SF2->F2_CLIENTE   		
       M->ZF5_LOJA   := SF2->F2_LOJA
       M->ZF5_NCLIEN := _cret
    EndIf	
 
-   If ! Empty(SF2->F2_EST)
-     M->ZF5_UF := SF2->F2_EST
+   If !Empty(SF2->F2_EST)
+      M->ZF5_UF := SF2->F2_EST
    EndIf
 
    If Empty(SF2->F2_CARGA) //SE TIVER CARGA PEGA DA CARGA SENÃO DO SF2
@@ -1035,8 +1102,8 @@ Begin Sequence
    M->ZF5_PESON := SF2->F2_PBRUTO
 
    If ! Empty(SF2->F2_VOLUME1)
-     _cret := Transform(SF2->F2_VOLUME1,"@E 999,999")
-     _cret += "  " + AllTrim(SF2->F2_ESPECI1) 
+      _cret := Transform(SF2->F2_VOLUME1,"@E 999,999")
+      _cret += "  " + AllTrim(SF2->F2_ESPECI1) 
       M->ZF5_VOLUM := _cret
    EndIf
 
@@ -1071,35 +1138,40 @@ Local _nSeqCod
 
 Begin Sequence
 
-   DBSELECTAREA("TRBSF2")
+   DBSelectArea("TRBSF2")
     _nTot:=nConta:=0
     COUNT TO _nTot
-    _cTot:=ALLTRIM(STR(_nTot))
+    _cTot:=AllTrim(Str(_nTot))
 
-   TRBSF2->(DbGoTop())
-   Do While ! TRBSF2->(Eof())
+    _cMensNF:=""
+    _nTipo  :=2
+    _lEmail := .F.
+
+   TRBSF2->(DBGoTop())
+   While ! TRBSF2->(Eof())
 
       nConta++
 
       If Empty(TRBSF2->WK_OK)
-         TRBSF2->(DbSkip())
+         TRBSF2->(DBSkip())
          Loop
       EndIf
       _lRet := .T.
-      oProc:cCaption := ("Gravando NF: "+SF2->F2_DOC+" - "+STRZERO(nConta,5) +" de "+ _cTot )
+      oProc:cCaption := ("Gravando NF: "+SF2->F2_DOC+" - "+StrZero(nConta,5) +" de "+ _cTot )
       ProcessMessages()
 
-      SF2->(DbGoTo(TRBSF2->WK_RECNO))   
+      SF2->(DBGoTo(TRBSF2->WK_RECNO))   
       
       _nSeqCod := U_AOMS072S(SF2->F2_FILIAL, SF2->F2_DOC, SF2->F2_SERIE)
       
-      U_AOMS072R("#GRAVACAO") // Carrega as variaveis de memoria para cada nota fiscal (SF2) posicionada.
+      U_AOMS072R("#GRAVACAO") // CARREGA AS VARIAVEIS DE MEMORIA (M->) PARA CADA NOTA FISCAL (SF2) POSICIONADA.
                    
       _nPercNf := 100 / _nTotNf /100
+      _aDadosEmailCom := {} // Array para armazenar os dados de email do #comercial
 
       For _nI := 1 To Len(aCols)
           
-          ZF5->(Reclock("ZF5",.T.))
+          ZF5->(RecLock("ZF5",.T.))
           ZF5->ZF5_FILIAL := M->ZF5_FILIAL//xFilial("ZF5")
           
           For _nJ := 1 To Len(_aCamposCapa)           
@@ -1108,7 +1180,6 @@ Begin Sequence
               EndIf
               &("ZF5->"+AllTrim(_aCamposCapa[_nJ])) := &("M->"+AllTrim(_aCamposCapa[_nJ]))
           Next
-
                  
           For _nJ := 1 To Len(aHeader)     
               If AllTrim(aHeader[_nJ,2]) $ "ZF5_CUSTO/ZF5_CUSTOC/ZF5_CUSTOI/ZF5_CUSTOR/ZF5_CUSTOT"
@@ -1122,28 +1193,57 @@ Begin Sequence
           
           ZF5->ZF5_CODIGO := StrZero(_nSeqCod,6) // U_AOMS003k()           
           _nSeqCod += 1
-          ZF5->(DbCommit())
-          ZF5->(MsUnLock())
+          ZF5->(MSUnLock())
+
+          If (ZF5->ZF5_STATUS == '000006'.AND. Posicione("ZFC",1,xFilial("ZFC")+ZF5->ZF5_TIPOO,"ZFC_ENVREP") = "S")
+             _lEmail := .T. //ENVIA WF AO #comercial
+             _aOcorreIt:= {}
+             aAdd(_aOcorreIt,ZF5->ZF5_DTOCOR)//01
+             aAdd(_aOcorreIt,ZF5->ZF5_CODIGO)//02
+             aAdd(_aOcorreIt,ZF5->ZF5_MOTIVO)//03
+             aAdd(_aOcorreIt,ZF5->ZF5_MOTCUS)//04
+             aAdd(_aOcorreIt,ZF5->ZF5_TIPOO )//05
+             aAdd(_aOcorreIt,ZF5->ZF5_TRANSP)//06
+             aAdd(_aOcorreIt,ZF5->ZF5_LJTRAN)//07
+             aAdd(_aOcorreIt,ZF5->ZF5_NTRANS)//08
+             aAdd(_aDadosEmailCom,_aOcorreIt)
+          EndIf
+
       Next
 
-      oProc:cCaption := ("Gravando NF: "+SF2->F2_DOC+" - "+STRZERO(nConta,5) +" de "+ _cTot+", Calculo de Datas..." )
+      oProc:cCaption := ("Gravando NF: "+SF2->F2_DOC+" - "+StrZero(nConta,5) +" de "+ _cTot+", Calculo de Datas..." )
       ProcessMessages()
 
       _aREcZF5:={}
-      ZF5->(dbSetOrder(1))
-      If ZF5->(dbSeek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE))
-         DO WHILE ZF5->(!EOF()) .AND. SF2->F2_FILIAL == ZF5->ZF5_FILIAL;
-                                .AND. SF2->F2_DOC    == ZF5->ZF5_DOCOC;
-                                .AND. SF2->F2_SERIE  == ZF5->ZF5_SEROC
-           AADD(_aREcZF5,ZF5->(RECNO()))
-           ZF5->(DBSKIP())
-           ENDDO  
+      ZF5->(DBSetOrder(1))
+      If ZF5->(DBSeek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE))
+         While ZF5->(!Eof()) .And. SF2->F2_FILIAL == ZF5->ZF5_FILIAL;
+                                .And. SF2->F2_DOC    == ZF5->ZF5_DOCOC;
+                                .And. SF2->F2_SERIE  == ZF5->ZF5_SEROC
+           aAdd(_aREcZF5,ZF5->(RECNO()))
+           ZF5->(DBSkip())
+           EndDo  
       EndIf
 
       U_AOMS3DTSF2("AOMS072",_aREcZF5)//FUNÇÃO CHAMADA NO AOMS003/74 TB E ESTA NO AOMS003.PRW
 
-      TRBSF2->(DbSkip())
+      If _lEmail //ENVIA WF AO #comercial
+         _cMensagem:=""
+         ZF5->(DBSeek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE))
+         For _nI := 1 TO Len(_aDadosEmailCom)
+             U_AOMS3Comercial(_aDadosEmailCom[_nI])
+         Next _nI
+         _lEmail := .F.
+         _cMensNF+="NF: "+AllTrim(SF2->F2_DOC)+"-"+AllTrim(SF2->F2_SERIE) + CRLF + _cMensagem
+      EndIf
+
+      TRBSF2->(DBSkip())
    EndDo
+    
+   If Len(_aDadosEmailCom) > 0
+      U_ITMsgLog(_cMensNF, "RESULTADO DOS ENVIOS DOS E-MAILs",1,.F.)
+      //U_ITMsg(_cMensNF,"Envio do E-MAIL",,_nTipo)
+   EndIf    
    
 End Sequence
 
@@ -1155,7 +1255,7 @@ Programa--------: AOMS072Q
 Autor-----------: Julio de Paula Paz
 Data da Criacao-: 28/07/2016
 ===============================================================================================================================
-Descrição-------: Realiza as validações no aCols/dados de detalhe.
+Descrição-------: Realiza as validações no aCols/dados de detalhe.  VALIDACAO DO OK FINAL DA TELA 
 ===============================================================================================================================
 Parametros------: Nenhum
 ===============================================================================================================================
@@ -1221,10 +1321,6 @@ Begin Sequence
           _nDOCDEV := _nI // Nota Fiscal de devolução 
        ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_SERDEV"
           _nSERDEV := _nI // Nota Fiscal de devolução
-       ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_TIPOC"
-          _nCUSTIP := _nI // Tipo de ocorrÊncia
-       ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_TIPOC"
-          _nCUSTIC := _nI // Tipo de custo
        ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_MOTCUS"
           _nCUSMOT := _nI // Motivo do custo 
        ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_DOCDEV"
@@ -1234,9 +1330,17 @@ Begin Sequence
        ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_CAUCUS"
           _nZF5_CAUCUS := _nI //   Causador do Custo.
        ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_VLRTOT"
-          _nZF5_VLRTOT := _nI //   Valor total da ocorrência 
+          _nZF5_VLRTOT := _nI // Valor total da ocorrência 
        ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_VALEMB"
-          _nZF5_VALEMB := _nI //Valor Embutido no Frete     
+          _nZF5_VALEMB := _nI // Valor Embutido no Frete
+       ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_OLRCOD"
+          _nZF5_OLRCOD := _nI // Código do operador logístico do redirecionamento
+       ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_OLRLOJ"
+          _nZF5_OLRLOJ := _nI // Loja do operador logístico do redirecionamento
+       ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_CODIGO"
+          _nZF5_CODIGO := _nI // Codigo da ocorrência
+       ElseIf AllTrim(aHeader[_nI,2]) == "ZF5_DTOCOR"
+          _nZF5_DTOCOR := _nI // Codigo da ocorrência
        EndIf    
    Next
 
@@ -1264,89 +1368,121 @@ Begin Sequence
        _nvalter      := aCols[_nI,_nCUSTER]
        _nValoco      := aCols[_nI,_nZF5_VLRTOT]
        _nValemb      := aCols[_nI,_nZF5_VALEMB]
+       _cZF5_OLRCOD  := aCols[_nI,_nZF5_OLRCOD] // Código do operador logístico do redirecionamento
+       _cZF5_OLRLOJ  := aCols[_nI,_nZF5_OLRLOJ] // Loja do operador logístico do redirecionamento
+       _cCodigo      := AllTrim(aCols[_nI,_nZF5_CODIGO]) // Código da ocorrência por nota
+       _dDataOcorr   := aCols[_nI,_nZF5_DTOCOR]
        
        //Validando campos obrigatórios
-       If (empty(aCols[_ni,_nCUSTIP]) .OR. ((empty(aCols[_ni,_nCUSTIC]) .OR. empty(aCols[_ni,_nCUSMOT])) .and. acols[_ni][_nCusto] > 0) .OR. empty(aCols[_ni,_nCUSSTA]) ) 
-          Help( ,, "Atenção 001",, "Existem campos obrigatórios não preenchidos (Tipo ocorrência, Tipo custo, motivo de custo e/ou Status)",1,0)
+       If (Empty(_cTipoOcorr) .Or. ((Empty(_cTipoCusto) .Or. Empty(aCols[_nI,_nCUSMOT])) .And. _nvaltot > 0) .Or. Empty(aCols[_nI,_nCUSSTA]) ) 
+          Help( ,, "Atenção 001",, 'Ocorrência ' + _cCodigo + " - Existem campos obrigatórios não preenchidos (Tipo ocorrência, Tipo custo, motivo de custo e/ou Status)",1,0)
           _lRet := .F.
           Exit 
-
-      Endif   
+      EndIf   
 
        //Validando total de valores de cada linha  		  		
        If _nvaltot <> (_nvaltransp+_nvalita+_nvalrep+_nvalcli+_nvalter+_nValemb)                 
-          Help( ,, "Atenção 002",, "Custo total da ocorrência deve ser igual à somatória dos custos Italac, cliente, representante, transportador e terceiros ",1,0)
+          Help( ,, "Atenção 002",, 'Ocorrência ' + _cCodigo + " - Custo total da ocorrência deve ser igual à somatória dos custos Italac, cliente, representante, transportador e terceiros ",1,0)
          _lRet := .F.
          Exit    
-       Endif
+       EndIf
 
        //Validando total de valores de cada linha  		  		
        If _nvaloco <> (_nvaltransp+_nvalita+_nvalrep+_nvalcli+_nvalter)
-          Help( ,, 'Atenção 003',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Custo da ocorrência deve ser igual à somatória dos custos Italac, ' + ;
+          Help( ,, 'Atenção 003',, 'Ocorrência ' + _cCodigo + ' - Custo da ocorrência deve ser igual à somatória dos custos Italac, ' + ;
                    ' cliente, representante, transportador, terceiros ' , 1, 0, .F. )
            _lRet := .F.
           Exit
        EndIf
 
        //Validando total de valores de cada linha  		  		
-       If _nvaltot > 0 .AND. Empty(aCols[_nI,_nZF5_CAUCUS] )
-          Help( ,, 'Atenção 004',,'Se tem Valor de custo o campo "Causador do Custo" deve ser informado.', 1, 0, .F. )
+       If _nvaltot > 0 .And. Empty(aCols[_nI,_nZF5_CAUCUS] )
+          Help( ,, 'Atenção 004',,'Ocorrência ' + _cCodigo + ' - Se tem Valor de custo o campo "Causador do Custo" deve ser informado.', 1, 0, .F. )
           _lRet := .F.
           Exit
        EndIf
 
-       ZFC->(DbSetOrder(1))
-       ZFC->(DbSeek(xFilial("ZFC")+_cTipoOcorr))  
-   
+       ZFC->(DBSetOrder(1))
+       If ZFC->(DBSeek(xFilial("ZFC")+_cTipoOcorr))  
+          If ZFC->ZFC_OLREDI  == "S"
+             If Empty(_cZF5_OLRCOD) .Or. Empty(_cZF5_OLRLOJ)
+                _lRet := .F.
+                U_ITMsg('Ocorrência ' + _cCodigo + ' - Tipo de ocorrecia é de redirecionamento. (ZFC_OLREDI="S").','Atenção',;
+                        "Informe o Codigo do operador logistico do redirecionamento.",,,,.T.)
+                Break
+             EndIf
+          Else
+             If !Empty(_cZF5_OLRCOD) .Or. !Empty(_cZF5_OLRLOJ)
+                _lRet := .F.
+                U_ITMsg('Ocorrência ' + _cCodigo + ' - Tipo de ocorrecia não é de redirecionamento. (ZFC_OLREDI<>"S").','Atenção',;
+                        'O Codigo do operador logistico do redirecionamento não pode ser informado.',,,,.T.)
+                Break
+             EndIf
+          EndIf
+       EndIf
+
+       If _dDataOcorr > Date() .And. ZFC->ZFC_DTTRAN <> "F"
+          Help( ,, 'Atenção',, 'Ocorrência ' + _cCodigo + ', Data da ocorrencia '+DToC(_dDataOcorr)+' não pode ser maior que Hoje.' , 1, 0 )
+          _lRet := .F.
+          Break
+       EndIf
+ 
+       SF2->(DBSeek(xFilial("SF2")+M->ZF5_DOCOC+M->ZF5_SEROC))
+       If _dDataOcorr < SF2->F2_EMISSAO
+          Help( ,, 'Atenção',, 'Ocorrência ' + _cCodigo + ', Data da ocorrencia '+DToC(_dDataOcorr)+' não pode ser menor que emissao da NF: '+DToC(SF2->F2_EMISSAO) , 1, 0 )
+          _lRet := .F.
+          Break
+       EndIf
+
        If !Empty(ZFC->ZFC_CUSTO) .And. ZFC->ZFC_CUSTO <>  _cTipoCusto
           _lRet := .F.
-          Help( ,, "Atenção",, "O tipo de custo informado, difere do tipo de custo do tipo de ocorrência.", 1, 0 )
+          Help( ,, "Atenção",, 'Ocorrência ' + _cCodigo + " - O tipo de custo informado, difere do tipo de custo do tipo de ocorrência.", 1, 0 )
           Exit
        ElseIf _cTipoCusto == "I" // Italac
           If Empty(_nCustoIt)
              _lRet := .F.
-             Help( ,, "Atenção",, "O campo custo italac deve ser preenchido.", 1, 0 )
+             Help( ,, "Atenção",, 'Ocorrência ' + _cCodigo + " - O campo custo italac deve ser preenchido.", 1, 0 )
              Exit
           ElseIf ! Empty(_nCustoRepr) .Or. ! Empty(_nCustoCli) .Or. ! Empty(_nCustoTerc)
              _lRet := .F.
-             Help( ,, "Atenção",, "Por ter selecionado o tipo de custo Italac, você deve preencher apenas o campo de valor de custo Italac.", 1, 0 )
+             Help( ,, "Atenção",, 'Ocorrência ' + _cCodigo + " - Por ter selecionado o tipo de custo Italac, você deve preencher apenas o campo de valor de custo Italac.", 1, 0 )
              Exit
           EndIf
        ElseIf _cTipoCusto == "T" // Transportador
           If Empty(_nCustoTransp)
              _lRet := .F.
-             Help( ,, "Atenção",, "O campo custo transportador deve ser preenchido.", 1, 0 )        
+             Help( ,, "Atenção",, 'Ocorrência ' + _cCodigo + " - O campo custo transportador deve ser preenchido.", 1, 0 )        
              Exit
           EndIf
        ElseIf _cTipoCusto == "R" // Representante
           If Empty(_nCustoRepr)
              _lRet := .F.
-             Help( ,, "Atenção",, "O campo custo representante deve ser preenchido.", 1, 0 )
+             Help( ,, "Atenção",, 'Ocorrência ' + _cCodigo + " - O campo custo representante deve ser preenchido.", 1, 0 )
              Exit
           ElseIf ! Empty(_nCustoCli) .Or. ! Empty(_nCustoTerc) .Or. !Empty(_nCustoIt)
              _lRet := .F.
-             Help( ,, "Atenção",, "Por ter selecionado o tipo de custo Representante, você deve preencher apenas o campo de valor de custo Representante.", 1, 0 )
+             Help( ,, "Atenção",, 'Ocorrência ' + _cCodigo + " - Por ter selecionado o tipo de custo Representante, você deve preencher apenas o campo de valor de custo Representante.", 1, 0 )
              Exit
           EndIf           
        ElseIf _cTipoCusto == "C" // Cliente
           If Empty(_nCustoCli)
              _lRet := .F.
-             Help( ,, "Atenção",, "O campo custo cliente precisa ser preenchido.", 1, 0 )
+             Help( ,, "Atenção",, 'Ocorrência ' + _cCodigo + " - O campo custo cliente precisa ser preenchido.", 1, 0 )
              Exit
           ElseIf ! Empty(_nCustoRepr) .Or. ! Empty(_nCustoTerc) .Or. !Empty(_nCustoIt)
              _lRet := .F.
-             Help( ,, "Atenção",, "Por ter selecionado o tipo de custo Cliente, você deve preencher apenas o campo de valor de custo Cliente.", 1, 0 )
+             Help( ,, "Atenção",, 'Ocorrência ' + _cCodigo + " - Por ter selecionado o tipo de custo Cliente, você deve preencher apenas o campo de valor de custo Cliente.", 1, 0 )
              Exit
           EndIf
 
        ElseIf _cTipoCusto == "3" // Terceiros 
           If Empty(_nCustoTerc)
              _lRet := .F.
-             Help( ,, "Atenção",, "O campo custo de Terceiros precisa ser preenchido.", 1, 0 )
+             Help( ,, "Atenção",, 'Ocorrência ' + _cCodigo + " - O campo custo de Terceiros precisa ser preenchido.", 1, 0 )
              Exit
           ElseIf ! Empty(_nCustoRepr) .Or. !Empty(_nCustoIt) .Or. ! Empty(_nCustoCli)
              _lRet := .F.
-             Help( ,, "Atenção",, "Por ter selecionado o tipo de custo Terceiro, você deve preencher apenas o campo de valor de custo Terceiro.", 1, 0 )
+             Help( ,, "Atenção",, 'Ocorrência ' + _cCodigo + " - Por ter selecionado o tipo de custo Terceiro, você deve preencher apenas o campo de valor de custo Terceiro.", 1, 0 )
              Exit
           EndIf          
        EndIf
@@ -1354,14 +1490,14 @@ Begin Sequence
        If _cGerDevol == "S"
           If Empty(_cNfDev) .Or. Empty(_cSerDev)
              _lRet := .F. 
-             Help( ,, "Atenção",, "O numero e série da nota fiscal de devolução devem ser preenchidos, pois o tipo de custo informado gera devolução.", 1, 0 )
+             Help( ,, "Atenção",, 'Ocorrência ' + _cCodigo + " - O numero e série da nota fiscal de devolução devem ser preenchidos, pois o tipo de custo informado gera devolução.", 1, 0 )
              Exit
           EndIf
        EndIf
        
        If !Empty(ZFC->ZFC_SERVI) .And. _cServOcorr <> ZFC->ZFC_SERVI 
           _lRet := .F. 
-          Help( ,, "Atenção",, "O tipo de serviço informado difere de tipo de serviço do tipo de ocorrência.", 1, 0 )
+          Help( ,, "Atenção",, 'Ocorrência ' + _cCodigo + " - O tipo de serviço informado difere de tipo de serviço do tipo de ocorrência.", 1, 0 )
           Exit
        EndIf       
    Next
@@ -1390,20 +1526,20 @@ Local _nRet := 0
 Local _nRegAtu := ZF5->(Recno())
 
 Begin Sequence
-   ZF5->(DbSetOrder(1)) // ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC
-   ZF5->(DbSeek(_cCodFilial+U_ITKEY(_cNrNf,"ZF5_DOCOC")+U_ITKEY(_cSerieNf,"ZF5_SEROC")))
-   Do While ! ZF5->(Eof()) .And. ZF5->(ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC) == _cCodFilial+_cNrNf+_cSerieNf
+   ZF5->(DBSetOrder(1)) // ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC
+   ZF5->(DBSeek(_cCodFilial+U_ITKEY(_cNrNf,"ZF5_DOCOC")+U_ITKEY(_cSerieNf,"ZF5_SEROC")))
+   While ! ZF5->(Eof()) .And. ZF5->(ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC) == _cCodFilial+_cNrNf+_cSerieNf
       If Val(AllTrim(ZF5->ZF5_CODIGO)) > _nRet
          _nRet := Val(AllTrim(ZF5->ZF5_CODIGO)) 
       EndIf
       
-      ZF5->(DbSkip()) 
+      ZF5->(DBSkip()) 
    EndDo
 
    _nRet += 1
    
 End Sequence
 
-ZF5->(DbGoTo(_nRegAtu))
+ZF5->(DBGoTo(_nRegAtu))
 
 Return _nRet

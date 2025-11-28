@@ -9,8 +9,10 @@ Alex Walauer  |11/04/2023| Chamado 42499. Foi adicionado 2 novos filtros: "Situa
 Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
-#Include 'Protheus.ch'
-#INCLUDE 'TOPCONN.CH'
+
+#Include "TOTVS.ch"
+#Include 'TOPCONN.CH'
+
 /*
 ===============================================================================================================================
 Programa----------: RCOM014
@@ -32,21 +34,21 @@ _cSelecSAJ:="SELECT DISTINCT AJ_GRCOM             FROM "+RETSQLNAME("SAJ")+" SAJ
 
 _aItalac_F3:={}//       1           2         3                      4                      5          6                      7         8          9         10         11        12
 //AD(_aItalac_F3,{"1CPO_CAMPO1",_cTabela,_nCpoChave            , _nCpoDesc              ,_bCondTab    , _cTitAux           , _nTamChv , _aDados  , _nMaxSel , _lFilAtual,_cMVRET,_bValida})
-AADD(_aItalac_F3,{"MV_PAR03" ,_cSelecSC7,{|Tab| (Tab)->C7_NUM }, {|Tab|DTOC(STOD((Tab)->C7_EMISSAO))},,"Pedidos"           ,          ,          ,60        ,.T.        ,       , } )
-AADD(_aItalac_F3,{"MV_PAR04" ,_cSelecSAL,{|Tab| (Tab)->AL_COD }, {|Tab|(Tab)->AL_DESC}  ,             ,"Grupo Aprovadores" ,          ,          ,          ,.T.        ,       , } )
-AADD(_aItalac_F3,{"MV_PAR05" ,"SAK"     ,2                     ,4                       ,             ,"Aprovadores"} )
-AADD(_aItalac_F3,{"MV_PAR06" ,_cSelecSAJ,{|Tab|(Tab)->AJ_GRCOM}, {|Tab|(Tab)->AJ_GRCOM} ,             ,"Grupo Compradores" ,          ,          ,          ,.T.        ,       , } )
-AADD(_aItalac_F3,{"MV_PAR07" ,"SY1"     ,                      ,                        ,             ,"Compradores"} )
+aAdd(_aItalac_F3,{"MV_PAR03" ,_cSelecSC7,{|Tab| (Tab)->C7_NUM }, {|Tab|DToC(SToD((Tab)->C7_EMISSAO))},,"Pedidos"           ,          ,          ,60        ,.T.        ,       , } )
+aAdd(_aItalac_F3,{"MV_PAR04" ,_cSelecSAL,{|Tab| (Tab)->AL_COD }, {|Tab|(Tab)->AL_DESC}  ,             ,"Grupo Aprovadores" ,          ,          ,          ,.T.        ,       , } )
+aAdd(_aItalac_F3,{"MV_PAR05" ,"SAK"     ,2                     ,4                       ,             ,"Aprovadores"} )
+aAdd(_aItalac_F3,{"MV_PAR06" ,_cSelecSAJ,{|Tab|(Tab)->AJ_GRCOM}, {|Tab|(Tab)->AJ_GRCOM} ,             ,"Grupo Compradores" ,          ,          ,          ,.T.        ,       , } )
+aAdd(_aItalac_F3,{"MV_PAR07" ,"SY1"     ,                      ,                        ,             ,"Compradores"} )
 
 If !Pergunte("RCOM014",.T.)
-   return
+   Return
 EndIf
 
 U_ITLOGACS( "RCOM014" )
 
-cTimeInicial:=TIME()
+cTimeInicial:=Time()
 
-FWMSGRUN( ,{|oProc|  RCOM014R(oProc) } , "SC7 - Hora Inicial: "+cTimeInicial+", Aguarde...",  )
+FWMsgRun( ,{|oProc|  RCOM014R(oProc) } , "SC7 - Hora Inicial: "+cTimeInicial+", Aguarde...",  )
 
 Return
 
@@ -56,17 +58,15 @@ Return
 Programa----------: RCOM014R
 Autor-------------: Alex Wallauer
 Data da Criacao---: 25/04/2019
-===============================================================================================================================
 Descrição---------: Função que imprime o relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function RCOM014R(oProc)
+
 Local cQry1		:= ""
-LOCAL _cAlias  := GetNextAlias()
+Local _cAlias  := GetNextAlias()
 
    oProc:cCaption :=  "Selelecionado Pedidos, Aguarde... "
    ProcessMessages()
@@ -84,37 +84,37 @@ cQry1 += "        R_E_C_N_O_ RECSC7 "
 cQry1 += "FROM " + RetSqlName("SC7") + " SC7  "
 cQry1 += " WHERE SC7.C7_FILIAL = '"+xFilial("SC7")+" ' "
 
-IF !EMPTY(MV_PAR02)
-   cQry1 += " AND C7_EMISSAO BETWEEN '" + DtoS(MV_PAR01) + "' AND '" + DtoS(MV_PAR02) + "' "
-ElseIf !EMPTY(MV_PAR01)
-   cQry1 += " AND C7_EMISSAO >= '" + DtoS(MV_PAR01) + "' "
-ENDIF   
+If !Empty(MV_PAR02)
+   cQry1 += " AND C7_EMISSAO BETWEEN '" + DToS(MV_PAR01) + "' AND '" + DToS(MV_PAR02) + "' "
+ElseIf !Empty(MV_PAR01)
+   cQry1 += " AND C7_EMISSAO >= '" + DToS(MV_PAR01) + "' "
+EndIf   
 
 cQry1 +=  " AND  SC7.C7_FILIAL||SC7.C7_NUM IN "
 cQry1 +=  "  (SELECT CR_FILIAL||CR_NUM FROM " + RetSqlName("SCR") + " SCR 
 cQry1 +=  "    WHERE CR_FILIAL = SC7.C7_FILIAL AND CR_NUM = SC7.C7_NUM  AND SCR.D_E_L_E_T_ = ' '  AND SCR.CR_DATALIB = ' ' "
 
 If !Empty(MV_PAR04)
-	cQry1 += " AND CR_GRUPO IN "+FormatIn(ALLTRIM(MV_PAR04),";")
+	cQry1 += " AND CR_GRUPO IN "+FormatIn(AllTrim(MV_PAR04),";")
 EndIf
 If !Empty(MV_PAR05)
-	cQry1 += " AND CR_APROV IN "+FormatIn(ALLTRIM(MV_PAR05),";")
+	cQry1 += " AND CR_APROV IN "+FormatIn(AllTrim(MV_PAR05),";")
 EndIf
 cQry1 +=  "  )"
 
 //Filtra grupo de compras
 If !Empty(MV_PAR03)
-	cQry1 += " AND C7_NUM IN "+FormatIn(ALLTRIM(MV_PAR03),";")
+	cQry1 += " AND C7_NUM IN "+FormatIn(AllTrim(MV_PAR03),";")
 EndIf
 	
 //Filtra grupo de compras
 If !Empty(MV_PAR06)
-	cQry1 += " AND C7_GRUPCOM IN "+FormatIn(ALLTRIM(MV_PAR06),";")
+	cQry1 += " AND C7_GRUPCOM IN "+FormatIn(AllTrim(MV_PAR06),";")
 EndIf
 
 //Filtra comprador
 If !Empty(MV_PAR07)
-	cQry1 += " AND C7_COMPRA  IN "+FormatIn(ALLTRIM(MV_PAR07),";")
+	cQry1 += " AND C7_COMPRA  IN "+FormatIn(AllTrim(MV_PAR07),";")
 EndIf
 
 cQry1 += "  AND SC7.D_E_L_E_T_ = ' ' AND C7_RESIDUO <> 'S' "
@@ -124,137 +124,137 @@ cQry1 += "ORDER BY C7_FILIAL, C7_NUM, C7_EMISSAO "
 MPSysOpenQuery( cQry1, _cAlias ) 
 
 nTotal:=nConta:=0
-dbSelectArea(_cAlias)
+DBSelectArea(_cAlias)
 COUNT TO nTotal
-(_cAlias)->(dbGoTop())
+(_cAlias)->(DBGoTop())
 _aDados:={}
-nTotal:=ALLTRIM(STR(nTotal))
-nTam:=LEN(nTotal)+1
-SCR->(DBSETORDER(1))
+nTotal:=AllTrim(Str(nTotal))
+nTam:=Len(nTotal)+1
+SCR->(DBSetOrder(1))
 
-DO While !(_cAlias)->(Eof())
+While !(_cAlias)->(Eof())
 
    nConta++
-   oProc:cCaption :=  "Lendo "+STRZERO(nConta,nTam)+" de "+nTotal +" - Lendo Pedido " +(_cAlias)->C7_NUM
+   oProc:cCaption :=  "Lendo "+StrZero(nConta,nTam)+" de "+nTotal +" - Lendo Pedido " +(_cAlias)->C7_NUM
    ProcessMessages()   
-   _dDtUltLib:=STOD((_cAlias)->C7_EMISSAO)
+   _dDtUltLib:=SToD((_cAlias)->C7_EMISSAO)
    _cObs:=""
-   SCR->(DBSEEK(xfilial("SCR")+"PC"+ALLTRIM((_cAlias)->C7_NUM)))
+   SCR->(DBSeek(xFilial("SCR")+"PC"+AllTrim((_cAlias)->C7_NUM)))
    _cAprov:=SCR->CR_APROV
    _cGrupo:=SCR->CR_GRUPO
    _lLoop:=.F.
-   DO WHILE SCR->(!EOF()) .AND. xfilial("SCR")+"PC"+ALLTRIM((_cAlias)->C7_NUM) == SCR->CR_FILIAL+SCR->CR_TIPO+ALLTRIM(SCR->CR_NUM)
-      IF EMPTY(SCR->CR_DATALIB)//ULTIMO Pendente
-         IF MV_PAR08 = 1 
-            IF !SCR->CR_APROV $ ALLTRIM(MV_PAR05)
+   While SCR->(!Eof()) .And. xFilial("SCR")+"PC"+AllTrim((_cAlias)->C7_NUM) == SCR->CR_FILIAL+SCR->CR_TIPO+AllTrim(SCR->CR_NUM)
+      If Empty(SCR->CR_DATALIB)//ULTIMO Pendente
+         If MV_PAR08 = 1 
+            If !SCR->CR_APROV $ AllTrim(MV_PAR05)
                _lLoop:=.T.
-               EXIT
-            ENDIF
-         ENDIF
+               Exit
+            EndIf
+         EndIf
          _cAprov:=SCR->CR_APROV  
          _cGrupo:=SCR->CR_GRUPO
-         EXIT
+         Exit
       Else
-          IF SCR->CR_STATUS = "04"
-             IF MV_PAR09 = 2 
+          If SCR->CR_STATUS = "04"
+             If MV_PAR09 = 2 
                 _lLoop:=.T.
-                EXIT
-             ENDIF
-             _cObs:="Bloqueado por "+ALLTRIM(POSICIONE("SAK",1,xfilial("SAK")+SCR->CR_APROV,"AK_NOME"))+" ("+SCR->CR_GRUPO+")"
-          ENDIF
-          IF SCR->CR_STATUS = "06"
-             IF MV_PAR09 = 2 
+                Exit
+             EndIf
+             _cObs:="Bloqueado por "+AllTrim(Posicione("SAK",1,xFilial("SAK")+SCR->CR_APROV,"AK_NOME"))+" ("+SCR->CR_GRUPO+")"
+          EndIf
+          If SCR->CR_STATUS = "06"
+             If MV_PAR09 = 2 
                 _lLoop:=.T.
-                EXIT
-             ENDIF
-             _cObs:="Rejeitado por "+ALLTRIM(POSICIONE("SAK",1,xfilial("SAK")+SCR->CR_APROV,"AK_NOME"))+" ("+SCR->CR_GRUPO+")"
-          ENDIF
+                Exit
+             EndIf
+             _cObs:="Rejeitado por "+AllTrim(Posicione("SAK",1,xFilial("SAK")+SCR->CR_APROV,"AK_NOME"))+" ("+SCR->CR_GRUPO+")"
+          EndIf
          _dDtUltLib:=SCR->CR_DATALIB
-      ENDIF 
+      EndIf 
       _cAprov:=SCR->CR_APROV
       _cGrupo:=SCR->CR_GRUPO
-      SCR->(DBSKIP()) 
-   ENDDO
+      SCR->(DBSkip()) 
+   EndDo
    
-   IF _lLoop
-	   (_cAlias)->(DBSKIP())
-      LOOP
-   ENDIF
+   If _lLoop
+	   (_cAlias)->(DBSkip())
+      Loop
+   EndIf
 
    _aItens:={}
-	AADD(_aItens,(_cAlias)->C7_NUM)
-	AADD(_aItens,STOD((_cAlias)->C7_EMISSAO))
-	AADD(_aItens,ALLTRIM((_cAlias)->C7_PRODUTO)+" - "+POSICIONE("SB1",1,xfilial("SB1")+(_cAlias)->C7_PRODUTO,"B1_DESC") )
-	AADD(_aItens,Transform((_cAlias)->C7_QUANT,PesqPict("SC7","C7_QUANT")))
-	AADD(_aItens,Transform((_cAlias)->C7_TOTAL,PesqPict("SC7","C7_TOTAL")))
-	AADD(_aItens,STOD((_cAlias)->C7_DATPRF))
-	AADD(_aItens,_cAprov+" - "+ALLTRIM(POSICIONE("SAK",1,xfilial("SAK")+_cAprov,"AK_NOME"))+" ("+SCR->CR_GRUPO+")" )
-	AADD(_aItens,_dDtUltLib)
-	AADD(_aItens,ALLTRIM(STR( ( DATE()-STOD((_cAlias)->C7_EMISSAO) )  ) ))  
-	AADD(_aItens,(_cAlias)->C7_COMPRA +" - "+ALLTRIM(POSICIONE("SY1",1,xfilial("SY1")+(_cAlias)->C7_COMPRA,"Y1_NOME"))+" ("+(_cAlias)->C7_GRUPCOM+")" )
-	AADD(_aItens,_cObs)
-	AADD(_aItens,(_cAlias)->RECSC7)
+	aAdd(_aItens,(_cAlias)->C7_NUM)
+	aAdd(_aItens,SToD((_cAlias)->C7_EMISSAO))
+	aAdd(_aItens,AllTrim((_cAlias)->C7_PRODUTO)+" - "+Posicione("SB1",1,xFilial("SB1")+(_cAlias)->C7_PRODUTO,"B1_DESC") )
+	aAdd(_aItens,Transform((_cAlias)->C7_QUANT,PesqPict("SC7","C7_QUANT")))
+	aAdd(_aItens,Transform((_cAlias)->C7_TOTAL,PesqPict("SC7","C7_TOTAL")))
+	aAdd(_aItens,SToD((_cAlias)->C7_DATPRF))
+	aAdd(_aItens,_cAprov+" - "+AllTrim(Posicione("SAK",1,xFilial("SAK")+_cAprov,"AK_NOME"))+" ("+SCR->CR_GRUPO+")" )
+	aAdd(_aItens,_dDtUltLib)
+	aAdd(_aItens,AllTrim(Str( ( DATE()-SToD((_cAlias)->C7_EMISSAO) )  ) ))  
+	aAdd(_aItens,(_cAlias)->C7_COMPRA +" - "+AllTrim(Posicione("SY1",1,xFilial("SY1")+(_cAlias)->C7_COMPRA,"Y1_NOME"))+" ("+(_cAlias)->C7_GRUPCOM+")" )
+	aAdd(_aItens,_cObs)
+	aAdd(_aItens,(_cAlias)->RECSC7)
 
-   AADD(_aDados,_aItens)
-	(_cAlias)->(dbSkip())
-ENDDO
+   aAdd(_aDados,_aItens)
+	(_cAlias)->(DBSkip())
+EndDo
 
-IF LEN(_aDados) = 0 
-    U_ITMSG("Não há dados para essa seleção",'Atenção!',,3)
-ENDIF
+If Len(_aDados) = 0 
+    U_ITMsg("Não há dados para essa seleção",'Atenção!',,3)
+EndIf
 
-DO WHILE LEN(_aDados) > 0 
+While Len(_aDados) > 0 
    _aTit:={}
    _aSiz:={}
 
-   AADD(_aTit,'Pedido') 
-   AADD(_aSiz,20)
-   AADD(_aTit,'Emissao')
-   AADD(_aSiz,25)
-   AADD(_aTit,'Produto')
-   AADD(_aSiz,100)
-   AADD(_aTit,'Quantidade')
-   AADD(_aSiz,35)
-   AADD(_aTit,'Valor')
-   AADD(_aSiz,30)
-   AADD(_aTit,'Entrega')
-   AADD(_aSiz,20)
-   AADD(_aTit,'Aprovador Pendente')
-   AADD(_aSiz,150)
-   AADD(_aTit,'Pendente desde')
-   AADD(_aSiz,50)
-   AADD(_aTit,'Dias Pendente')
-   AADD(_aSiz,50)
-   AADD(_aTit,'Comprador')
-   AADD(_aSiz,150)
-   AADD(_aTit,'Obeservacao')
-   AADD(_aSiz,200)
-   AADD(_aTit,'Registro')
-   _nCampo:=LEN(_aTit)
-   AADD(_aSiz,20)
+   aAdd(_aTit,'Pedido') 
+   aAdd(_aSiz,20)
+   aAdd(_aTit,'Emissao')
+   aAdd(_aSiz,25)
+   aAdd(_aTit,'Produto')
+   aAdd(_aSiz,100)
+   aAdd(_aTit,'Quantidade')
+   aAdd(_aSiz,35)
+   aAdd(_aTit,'Valor')
+   aAdd(_aSiz,30)
+   aAdd(_aTit,'Entrega')
+   aAdd(_aSiz,20)
+   aAdd(_aTit,'Aprovador Pendente')
+   aAdd(_aSiz,150)
+   aAdd(_aTit,'Pendente desde')
+   aAdd(_aSiz,50)
+   aAdd(_aTit,'Dias Pendente')
+   aAdd(_aSiz,50)
+   aAdd(_aTit,'Comprador')
+   aAdd(_aSiz,150)
+   aAdd(_aTit,'Obeservacao')
+   aAdd(_aSiz,200)
+   aAdd(_aTit,'Registro')
+   _nCampo:=Len(_aTit)
+   aAdd(_aSiz,20)
 
-   _cMsgTop:="Pedidos encontrados - H.I.: "+cTimeInicial+" H.F.: "+TIME()
+   _cMsgTop:="Pedidos encontrados - H.I.: "+cTimeInicial+" H.F.: "+Time()
 
-   _cTitulo:="Par. 1 : "+DTOC(MV_PAR01)+"; Par. 2 : "+DTOC(MV_PAR02)+"; Par. 3 : "+ALLTRIM(MV_PAR03)+"; Par. 4 : "+ALLTRIM(MV_PAR04)+;
-           "; Par. 5 : "+ALLTRIM(MV_PAR05)+"; Par. 6 : "+ALLTRIM(MV_PAR06)+"; Par. 7 : "+ALLTRIM(MV_PAR07)
+   _cTitulo:="Par. 1 : "+DToC(MV_PAR01)+"; Par. 2 : "+DToC(MV_PAR02)+"; Par. 3 : "+AllTrim(MV_PAR03)+"; Par. 4 : "+AllTrim(MV_PAR04)+;
+           "; Par. 5 : "+AllTrim(MV_PAR05)+"; Par. 6 : "+AllTrim(MV_PAR06)+"; Par. 7 : "+AllTrim(MV_PAR07)
    _aBbuttons:={}
-	AADD(_aBbuttons,{"",{|| U_RCOM014AP()},"","Consulta Aprovadores"}) 
-	AADD(_aBbuttons,{"",{|| U_RCOM014V() },"","Visualizar Pedido de Compras"}) 
+	aAdd(_aBbuttons,{"",{|| U_RCOM014AP()},"","Consulta Aprovadores"}) 
+	aAdd(_aBbuttons,{"",{|| U_RCOM014V() },"","Visualizar Pedido de Compras"}) 
    
    
-   bOk:={|| IF(U_ITMSG("Confirma Gerar EXCEL ?",'Atenção!',,2,2,2) , DlgToExcel( { { "ARRAY" , _cTitulo , _aTit , _aDados } } )  ,.F. )   }
+   bOk:={|| If(U_ITMsg("Confirma Gerar EXCEL ?",'Atenção!',,2,2,2) , DlgToExcel( { { "ARRAY" , _cTitulo , _aTit , _aDados } } )  ,.F. )   }
 
    //                           , _aCols  ,_lMaxSiz,_nTipo,_cMsgTop, _lSelUnc ,_aSizes , _nCampo , bOk , bCancel, _aBbuttons )
       U_ITListBox(_cTitulo,_aTit,_aDados  , .T.    , 3    ,_cMsgTop,          ,_aSiz   ,         , bOk ,        , _aBbuttons )
                                                                                                   
 
-   IF  !U_ITMSG("Confirma Sair ?",'Atenção!',,3,2,2)
-       LOOP
-   ENDIF
+   If  !U_ITMsg("Confirma Sair ?",'Atenção!',,3,2,2)
+       Loop
+   EndIf
 
-    EXIT
+    Exit
 
-ENDDO
+EndDo
 
 Return
 
@@ -263,47 +263,43 @@ Return
 Programa----------: RCOM014AP
 Autor-------------: Alex Wallauer
 Data da Criacao---: 11/01/2023
-===============================================================================================================================
 Descrição---------: Consulta Aprovadores
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-USER Function RCOM014AP()
-LOCAL _nRec:=oLbxAux:aArray[oLbxAux:nAt][_nCampo]
+User Function RCOM014AP()
 
-IF _nRec > 0
-   SC7->(DBGOTO(_nRec))
+Local _nRec:=oLbxAux:aArray[oLbxAux:nAt][_nCampo]
+
+If _nRec > 0
+   SC7->(DBGoTo(_nRec))
    aRotina := {{"XX","XX",0,2,0,NIL}}
-   a120Posic("SC7",SC7->(RECNO()),1,IF(SC7->C7_TIPO == 1,'PC','AE'),.F.,.F.)
-ENDIF
+   a120Posic("SC7",SC7->(RECNO()),1,If(SC7->C7_TIPO == 1,'PC','AE'),.F.,.F.)
+EndIf
 
-RETURN .T.
+Return .T.
 
 /*
 ===============================================================================================================================
 Programa----------: RCOM014V
 Autor-------------: Alex Wallauer
 Data da Criacao---: 11/01/2023
-===============================================================================================================================
 Descrição---------: Função utilizada para visualizar Pedido de Compras A120Pedido()
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function RCOM014V()
+
 Local aArea	
-LOCAL _nRec:=oLbxAux:aArray[oLbxAux:nAt][_nCampo]
+Local _nRec:=oLbxAux:aArray[oLbxAux:nAt][_nCampo]
 
-IF _nRec > 0
+If _nRec > 0
 
-   aArea:= GetArea()
+   aArea:= FWGetArea()
 
-   SC7->(DBGOTO(_nRec))
+   SC7->(DBGoTo(_nRec))
    l120Auto	:= .F.
    cCadastro:= "Pedido de Compras"
    nTipoPed	:= 1
@@ -313,8 +309,8 @@ IF _nRec > 0
 
    A120Pedido("SC7",SC7->(Recno()),1)
 
-   RestArea(aArea)
+   FWRestArea(aArea)
 
-ENDIF
+EndIf
 
 Return

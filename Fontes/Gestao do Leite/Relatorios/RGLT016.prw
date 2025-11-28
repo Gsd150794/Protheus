@@ -2,32 +2,24 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Heder José    | 08/12/2009 | Acerto posicionamento das colunas.
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 03/07/2019 | Revisão de fontes. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 05/07/2019 | Corrigido valores duplicados. Chamado 29880
+Heder José    |08/12/2009| Acerto posicionamento das colunas.
+Lucas Borges  |03/07/2019| Chamado 28346. Revisão de fontes.
+Lucas Borges  |05/07/2019| Chamado 29880. Corrigido valores duplicados.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT016
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 09/12/2008
-===============================================================================================================================
 Descrição---------: Folha a pagar do Fretista - Lista os Fretistas com seus eventos e respectivos valores totalizando o valor 
 					liquido a pagar
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -75,11 +67,8 @@ Return
 Programa----------: RUNREPORT
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 09/12/2008
-===============================================================================================================================
 Descrição---------: Funcão auxiliar chamada pela RPTSTATUS. A função RPTSTATUS monta a janela com a régua de processamento
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -138,7 +127,7 @@ BeginSql alias _cAlias
 	 ORDER BY ZL8.ZL8_COD
 EndSql
 
-While !(_cAlias)->(EOf())
+While !(_cAlias)->(Eof())
 	aAdd(aStruct,{(_cAlias)->ZL8_COD,(_cAlias)->ZL8_NREDUZ,0})
 	(_cAlias)->(DBSkip())
 EndDo
@@ -150,20 +139,20 @@ For _nX:=1 To Len(aStruct)
 Next _nX
 
 // cabecalho
-Cabec2:=padr("CODIGO LINHA",29)
-Cabec2+=padr("VOLUME",10)
-Cabec2+=padr("KM RODADO",10)
-Cabec2+=padr("VIAGENS",9)
+Cabec2:=PadR("CODIGO LINHA",29)
+Cabec2+=PadR("VOLUME",10)
+Cabec2+=PadR("KM RODADO",10)
+Cabec2+=PadR("VIAGENS",9)
 For _nX:=1 To Len(aStruct)		
 	If _nX<=nMaxCol
-		Cabec2 += padr(aStruct[_nX,2],nTamCmp)
+		Cabec2 += PadR(aStruct[_nX,2],nTamCmp)
 	EndIf
 	If _nX == Len(aStruct)
-		Cabec2 += padr("OUTROS",nTamCmp)
+		Cabec2 += PadR("OUTROS",nTamCmp)
 	EndIf
 Next _nX
 
-Cabec2:=padr(Cabec2,206)
+Cabec2:=PadR(Cabec2,206)
 Cabec2+="VLR LIQUIDO"
 
 _cAlias := GetNextAlias()
@@ -194,7 +183,7 @@ SetRegua(nqtdregs)
 
 (_cAlias)->(DBGoTop())
 
-While (_cAlias)->(!EOf())
+While (_cAlias)->(!Eof())
 
 	IncRegua()
 
@@ -246,7 +235,7 @@ While (_cAlias)->(!EOf())
 	
 	nPos1:=58
 	For _nX:=1 To Len(aStruct)
-		nVlrEvt := u_getEvtFrt(xfilial("ZLD"),MV_PAR01,(_cAlias)->ZLD_LINROT,(_cAlias)->ZLD_FRETIS,(_cAlias)->ZLD_LJFRET,aStruct[_nX,1],MV_PAR02)
+		nVlrEvt := u_getEvtFrt(xFilial("ZLD"),MV_PAR01,(_cAlias)->ZLD_LINROT,(_cAlias)->ZLD_FRETIS,(_cAlias)->ZLD_LJFRET,aStruct[_nX,1],MV_PAR02)
 		aStruct[_nX,3] += nVlrEvt // total geral
 		If _nX <= nMaxCol
 			@nLin,nPos1 PSay nVlrEvt Picture "@E 999,999.99"
@@ -357,11 +346,8 @@ Return
 Programa----------: showSubTotal
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 11/12/2008
-===============================================================================================================================
 Descrição---------: Imprime subtotal do fretista
-===============================================================================================================================
 Parametros--------: nLin
-===============================================================================================================================
 Retorno-----------: nLin
 ===============================================================================================================================
 */

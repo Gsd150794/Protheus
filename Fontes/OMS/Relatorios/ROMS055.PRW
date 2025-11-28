@@ -15,15 +15,15 @@ Analista - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
 ==============================================================================================================================================================
 Bremmer  - Alex Wallauer - 11/10/24 - 11/10/24 -  47942  - Correção da Gravação e tratamento do campo novo ZF5_CHVNDT da chave do Titulo NDT.
 Jerry    - Alex Wallauer - 29/01/25 - 05/02/25 -  49663  - Novo tratamento do campo ZF5_CHVNDT da chave do Titulo para gravar a parcela e colocar no e-mail.
-Alex     - Igor Melgaço  - 02/05/25 - 06/05/25 -  50525  - Ajuste para remoção de diretório local C:\SMARTCLIENT\.
+Alex     - Igor Melgaço  - 02/05/25 - 06/05/25 -  50525  - Ajuste para remoção de diretório Local C:\SMARTCLIENT\.
 ==============================================================================================================================================================
 */
 
 // Definicoes de Includes e Defines da Rotina.
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "RPTDEF.CH"
-#INCLUDE "TBICONN.CH"
-#INCLUDE "FONT.CH"
+#Include "TOTVS.ch"
+#Include "RPTDEF.CH"
+#Include "TBICONN.CH"
+#Include "FONT.CH"
 #Include 'totvs.ch'
 
 /*
@@ -45,67 +45,67 @@ User Function ROMS055I()
  Local _limp   := .F. As Logical
  Local _cFilSeek As Character
  
- ZF5->(Dbsetorder(1))
- If ZF5->(Dbseek(_cfilial+_cdococ))
+ ZF5->(DBSetOrder(1))
+ If ZF5->(DBSeek(_cfilial+_cdococ))
 
-    Do while ZF5->ZF5_FILIAL == _cfilial .and. ZF5->ZF5_DOCOC == _cdococ  .AND. ZF5->(!EOF()())
+    While ZF5->ZF5_FILIAL == _cfilial .And. ZF5->ZF5_DOCOC == _cdococ  .And. ZF5->(!Eof()())
 
-       IF !(ZF5->ZF5_NDEBIT = 'S')
-          ZF5->(DBSKIP())  
-          LOOP
-       ENDIF
+       If !(ZF5->ZF5_NDEBIT = 'S')
+          ZF5->(DBSkip())  
+          Loop
+       EndIf
         _cFilSeek := _cfilial
 
-        SC5->(Dbsetorder(1))
-        If SC5->(Dbseek(_cfilial+ZF5->ZF5_PEDIDO))
+        SC5->(DBSetOrder(1))
+        If SC5->(DBSeek(_cfilial+ZF5->ZF5_PEDIDO))
             If  ( SC5->C5_I_TRCNF = "S" .And. _cFilial <> SC5->C5_I_FLFNC) // Qdo Troca Nota o Título NDT é gerado na Filial de Carregamento.
                 _cFilSeek := SC5->C5_I_FLFNC
             EndIf
         EndIf	
 
-        _ccodigo:= alltrim(str(val(ZF5->ZF5_CODIGO)))
+        _ccodigo:= AllTrim(Str(Val(ZF5->ZF5_CODIGO)))
         _cFornece:=""
         _cLoja:=""
         If ZF5->ZF5_TIPOC == "T"
-           _cFornece := ALLTRIM(ZF5->ZF5_TRANSP)
+           _cFornece := AllTrim(ZF5->ZF5_TRANSP)
            _cLoja    := ZF5->ZF5_LJTRAN
-        Elseif ZF5->ZF5_TIPOC == "3"
+        ElseIf ZF5->ZF5_TIPOC == "3"
            _cFornece := ZF5->ZF5_FORTER
            _cLoja    := ZF5->ZF5_LOJTER
-        Endif
+        EndIf
 
-        IF !EMPTY(ZF5->ZF5_CHVNDT)
-           IF LEN(ALLTRIM(ZF5->ZF5_CHVNDT)) = LEN(SE2->E2_FILIAL+SE2->E2_PREFIXO+SE2->E2_NUM)//CHAVE SEM PARCELA
+        If !Empty(ZF5->ZF5_CHVNDT)
+           If Len(AllTrim(ZF5->ZF5_CHVNDT)) = Len(SE2->E2_FILIAL+SE2->E2_PREFIXO+SE2->E2_NUM)//CHAVE SEM PARCELA
               _cSeekSE2:=ZF5->ZF5_CHVNDT + "01" + "NDF"//A chave e o cfilant já estam com a filial certa
            Else//CHAVE COM PARCELA - NOVO
               _cSeekSE2:=ZF5->ZF5_CHVNDT + "NDF"+_cFornece+_cLoja//A chave e o cfilant já estam com a filai certa
-           Endif
-        ELSE
-           _cSeekSE2:=_cFilSeek+"NDT"+SUBSTR(ZF5->ZF5_DOCOC,2,8) + _ccodigo + "01" + "NDF"
+           EndIf
+        Else
+           _cSeekSE2:=_cFilSeek+"NDT"+SubStr(ZF5->ZF5_DOCOC,2,8) + _ccodigo + "01" + "NDF"
         EndIf
 
-        SE2->(Dbsetorder(1)) // E2_FILIAL+E2_PREFIXO+E2_NUM   +E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
+        SE2->(DBSetOrder(1)) // E2_FILIAL+E2_PREFIXO+E2_NUM   +E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
             
-           If SE2->(Dbseek(_cSeekSE2))   
+           If SE2->(DBSeek(_cSeekSE2))   
 
                _limp := .T.
-               FwMsgRun(,{|| ROMS055E()},,"Aguarde, imprimindo nota de débito...")
+               FWMsgRun(,{|| ROMS055E()},,"Aguarde, imprimindo nota de débito...")
                
-           Endif
+           EndIf
            
-           ZF5->(DBSKIP())
+           ZF5->(DBSkip())
            
-       Enddo
+       EndDo
        
        If !_limp
        
-           u_itmsg("Não foram localizadas notas de débito para essa ocorrência","Atenção",,1)
+           U_ITMsg("Não foram localizadas notas de débito para essa ocorrência","Atenção",,1)
            
-       Endif
+       EndIf
        
  Else
-     u_itmsg("Ocorrência não localizada","Atenção",,1)
- Endif
+     U_ITMsg("Ocorrência não localizada","Atenção",,1)
+ EndIf
  
  FwRestArea(_aArea)
  FwRestArea(_aAreaF5)
@@ -126,9 +126,9 @@ Retorno-----------: Nenhum
 User Function ROMS055()
  Local _aArea:= FWGetArea() As Array
 
- FwMsgRun(,{|| ROMS055E()},,"Aguarde, gerando nota de débito...")
+ FWMsgRun(,{|| ROMS055E()},,"Aguarde, gerando nota de débito...")
 
- RestArea(_aArea)
+ FWRestArea(_aArea)
 Return
 
 
@@ -215,19 +215,19 @@ Static Function ROMS055E()
  oPrint:Say( (nLinIni+035) , (nColIni+375) , "NOTA DE DÉBITO DE TRANSPORTE" , oFont14 )
  oPrint:Say( (nLinIni+050) , (nColIni+700) , "Nº " + SE2->E2_FILIAL + "/" + SE2->E2_NUM+ "-" + SE2->E2_PARCELA , oFont14 )
  oPrint:Say( (nLinIni+070) , (nColIni+700) , "R$ " + transform(SE2->E2_VALOR,"@E 999,999.99") , oFont14 )
- oPrint:Say( (nLinIni+090) , (nColIni+700) , "Emissão: " + dtoc(SE2->E2_EMISSAO) , oFont14 )
- oPrint:Say( (nLinIni+110) , (nColIni+700) , "Vencimento: " + dtoc(SE2->E2_VENCTO) , oFont14 )
- SM0->(dbSetOrder(1))
- SM0->(dbSeek(cEmpAnt + _cFilial))
+ oPrint:Say( (nLinIni+090) , (nColIni+700) , "Emissão: " + DToC(SE2->E2_EMISSAO) , oFont14 )
+ oPrint:Say( (nLinIni+110) , (nColIni+700) , "Vencimento: " + DToC(SE2->E2_VENCTO) , oFont14 )
+ SM0->(DBSetOrder(1))
+ SM0->(DBSeek(cEmpAnt + _cFilial))
  oPrint:Say( (nLinIni+080) , (nColIni+020) , AllTrim(SM0->M0_NOMECOM) , oFont08 )
  oPrint:Say( (nLinIni+090) , (nColIni+020) , AllTrim(SM0->M0_ENDCOB) , oFont08 )
  oPrint:Say( (nLinIni+100) , (nColIni+020) , "CEP: " + SubStr(AllTrim(SM0->M0_CEPCOB),1,2) + "." + SubStr(AllTrim(SM0->M0_CEPCOB),3,3) + "-" + SubStr(AllTrim(SM0->M0_CEPCOB),6,3) + " - " + SubStr(AllTrim(SM0->M0_CIDCOB),1,50) + " - " + AllTrim(SM0->M0_ESTCOB) , oFont08 )
  oPrint:Say( (nLinIni+110) , (nColIni+020) , 'TEL:(' + SubStr(SM0->M0_TEL,4,2) + ')' + SubStr(SM0->M0_TEL,7,4) + '-' +SubStr(SM0->M0_TEL,11,4) + " - " + 'FAX:(' + SubStr(SM0->M0_FAX,4,2) + ')' + SubStr(SM0->M0_FAX,7,4) + '-' +SubStr(SM0->M0_FAX,11,4), oFont08 )
  oPrint:Say( (nLinIni+120) , (nColIni+020) , "CNPJ/CPF:" + ROMS055CN(SM0->M0_CGC) , oFont08 )
  oPrint:Say( (nLinIni+130) , (nColIni+020) , "I.E:" + AllTrim(SM0->M0_INSC) , oFont08 )
- dbSelectARea("SA2")
- dbSetOrder(1)
- dbSeek(xFilial("SA2") + SE2->E2_FORNECE+SE2->E2_LOJA)
+ DBSelectArea("SA2")
+ DBSetOrder(1)
+ DBSeek(xFilial("SA2") + SE2->E2_FORNECE+SE2->E2_LOJA)
  
  oPrint:Say( (nLinIni+080) , (nColIni+260) , AllTrim(SA2->A2_NOME) + " - " + SA2->A2_COD + "/" + SA2->A2_LOJA , oFont08 )
  oPrint:Say( (nLinIni+090) , (nColIni+260) ,  AllTrim(SA2->A2_END) , oFont08 )
@@ -237,19 +237,19 @@ Static Function ROMS055E()
  
  
  nLinAux := nLinIni + 220
- oPrint:Say( (nLinAux) , (nColIni+40) ,  "Nota de débito referente a ocorrência de frete no. " + alltrim(ZF5->ZF5_CODIGO) + " da nota fiscal " + alltrim(ZF5->ZF5_DOCOC) + " da carga " + alltrim(ZF5->ZF5_CARGA) + ".", oFont14 )
+ oPrint:Say( (nLinAux) , (nColIni+40) ,  "Nota de débito referente a ocorrência de frete no. " + AllTrim(ZF5->ZF5_CODIGO) + " da nota fiscal " + AllTrim(ZF5->ZF5_DOCOC) + " da carga " + AllTrim(ZF5->ZF5_CARGA) + ".", oFont14 )
  
- oPrint:Say( (nLinAux+30) , (nColIni+40) ,  "Destino: " + alltrim(ZF5->ZF5_NCLIEN) + ", " + alltrim(ZF5->ZF5_CIDADE) + " - " + ZF5->ZF5_UF + ".", oFont14 )
+ oPrint:Say( (nLinAux+30) , (nColIni+40) ,  "Destino: " + AllTrim(ZF5->ZF5_NCLIEN) + ", " + AllTrim(ZF5->ZF5_CIDADE) + " - " + ZF5->ZF5_UF + ".", oFont14 )
  
- oPrint:Say( (nLinAux+60) , (nColIni+40) ,  "Data de carregamento: " + dtoc(ZF5->ZF5_DTCAR) + ",  data da ocorrência: " + dtoc(ZF5->ZF5_DTINI) + ".", oFont14 )
+ oPrint:Say( (nLinAux+60) , (nColIni+40) ,  "Data de carregamento: " + DToC(ZF5->ZF5_DTCAR) + ",  data da ocorrência: " + DToC(ZF5->ZF5_DTINI) + ".", oFont14 )
  
- oPrint:Say( (nLinAux+90) , (nColIni+40) ,  "Placa do Veículo: " + alltrim(ZF5->ZF5_PLACA)  + ".", oFont14 )
+ oPrint:Say( (nLinAux+90) , (nColIni+40) ,  "Placa do Veículo: " + AllTrim(ZF5->ZF5_PLACA)  + ".", oFont14 )
  
- oPrint:Say( (nLinAux+120) , (nColIni+40) ,  " Motorista: " + alltrim(ZF5->ZF5_DMOTOR) + ".", oFont14 )
+ oPrint:Say( (nLinAux+120) , (nColIni+40) ,  " Motorista: " + AllTrim(ZF5->ZF5_DMOTOR) + ".", oFont14 )
  
- oPrint:Say( (nLinAux+150) , (nColIni+40) ,  "Motivo da ocorrência: " + alltrim(ZF5->ZF5_MOTIVO)  + ".", oFont14 )
+ oPrint:Say( (nLinAux+150) , (nColIni+40) ,  "Motivo da ocorrência: " + AllTrim(ZF5->ZF5_MOTIVO)  + ".", oFont14 )
  
- oPrint:Say( (nLinAux+180) , (nColIni+40) ,  "Motivo do custo: " + alltrim(ZF5->ZF5_MOTCUS)  + ".", oFont14 )
+ oPrint:Say( (nLinAux+180) , (nColIni+40) ,  "Motivo do custo: " + AllTrim(ZF5->ZF5_MOTCUS)  + ".", oFont14 )
 
  _cEmail := SA2->A2_EMAIL
 
@@ -262,7 +262,7 @@ Static Function ROMS055E()
      _cAnexo := cPathSrvJ + cFileName
  EndIf
  
- cNreduz := alltrim(posicione("SA2",1,xfilial("SA2")+SE2->E2_FORNECE+SE2->E2_LOJA,"A2_NREDUZ"))
+ cNreduz := AllTrim(Posicione("SA2",1,xFilial("SA2")+SE2->E2_FORNECE+SE2->E2_LOJA,"A2_NREDUZ"))
  
  _cAssunto := "Nota de débito de transporte - " + SE2->E2_FILIAL + "/" + SE2->E2_NUM+ "-" + SE2->E2_PARCELA + " - ITALAC - " + SubStr(AllTrim(SM0->M0_CIDCOB),1,50) + " - " + AllTrim(SM0->M0_ESTCOB) + ":" + cNReduz + Space(30)
 
@@ -277,7 +277,7 @@ Static Function ROMS055E()
  //========================================================
  ROMS055D(cPathSrvJ + cFileName)
  
- RestArea(_aArea)
+ FWRestArea(_aArea)
  FwRestArea(_aAreaM0)
 
 Return
@@ -391,21 +391,21 @@ Static Function ROMS055M(_cAnexo As Character, _cEmail As Character, _cCc As Cha
     _lBotao:=.F.
  EndIf
  
- If (Len(PswRet()) # 0) // Quando nao for rotina automatica do configurador
+ If (Len(PswRet()) # 0) // Quando nao For rotina automatica do configurador
      _csetor:= AllTrim(PswRet()[1][12])		// Pega departamento do usuario
- Endif
+ EndIf
  
  
- If empty(alltrim(_csetor))
+ If Empty(AllTrim(_csetor))
       _csetor := "Logistica"
- Endif
+ EndIf
  
- cHtml := 'À '+ posicione("SA2",1,xfilial("SA2")+SE2->E2_FORNECE+SE2->E2_LOJA,"A2_NREDUZ") +','
+ cHtml := 'À '+ Posicione("SA2",1,xFilial("SA2")+SE2->E2_FORNECE+SE2->E2_LOJA,"A2_NREDUZ") +','
  cHtml += '<br><br>'
  cHtml += '&nbsp;&nbsp;&nbsp;Segue anexo Nota de débito de transporte - ' + SE2->E2_FILIAL + "/"  + SE2->E2_NUM+ "-" + SE2->E2_PARCELA + ' de nossa Unidade Industrial '+ cCidUni +' conforme negociado em ocorrência de frete.<br>'
  cHtml += '&nbsp;&nbsp;&nbsp;Favor confirmar o recebimento, retornando com o seu CIENTE!'
  cHtml += '<br><br>'
- cHtml += '<font color="#FF0000"><b><u>Título: ' + SE2->E2_NUM+ "-" + SE2->E2_PARCELA + ' no valor de ' + transform(SE2->E2_VALOR,"@E 999,999.99") + ' com vencimento em ' + dtoc(SE2->E2_VENCTO) +'. </u></b><br><br></font>'
+ cHtml += '<font color="#FF0000"><b><u>Título: ' + SE2->E2_NUM+ "-" + SE2->E2_PARCELA + ' no valor de ' + transform(SE2->E2_VALOR,"@E 999,999.99") + ' com vencimento em ' + DToC(SE2->E2_VENCTO) +'. </u></b><br><br></font>'
  cHtml += '<br><br>'
  
  
@@ -461,8 +461,8 @@ Static Function ROMS055M(_cAnexo As Character, _cEmail As Character, _cCc As Cha
  cHtml +=             '<span style="font-size:12.0pt;font-family:'+"'"+'Times New Roman'+"'"+','+"'"+'serif'+"'"+';mso-fareast-language:PT-BR"></span></p>
  cHtml +=             '<p class=MsoNormal style="mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;text-align:justify">'
  cHtml +=             '<span style="font-size:7.5pt;font-family:'+"'"+'Times New Roman'+"'"+','+"'"+'serif'+"'"+';color:#1D2668;mso-fareast-language:PT-BR">
- cHtml +=                 'Esta mensagem é destinada exclusivamente para fins profissionais, para a(s) pessoa(s) a quem for dirigida, podendo conter informação confidencial e legalmente privilegiada. '
- cHtml +=                 'Ao recebê-la, se você não for destinatário desta mensagem, fica automaticamente notificado de abster-se a divulgar, copiar, distribuir, examinar ou, de qualquer forma, utilizar '
+ cHtml +=                 'Esta mensagem é destinada exclusivamente para fins profissionais, para a(s) pessoa(s) a quem For dirigida, podendo conter informação confidencial e legalmente privilegiada. '
+ cHtml +=                 'Ao recebê-la, se você não For destinatário desta mensagem, fica automaticamente notificado de abster-se a divulgar, copiar, distribuir, examinar ou, de qualquer forma, utilizar '
  cHtml +=                 'sua informação, por configurar ato ilegal. Caso você tenha recebido esta mensagem indevidamente, solicitamos que nos retorne este e-mail, promovendo, concomitantemente sua '
  cHtml +=                 'eliminação de sua base de dados, registros ou qualquer outro sistema de controle. Fica desprovida de eficácia e validade a mensagem que contiver vínculos obrigacionais, expedida '
  cHtml +=                 'por quem não detenha poderes de representação, bem como não esteja legalmente habilitado para utilizar o referido endereço eletrônico, configurando falta grave conforme nossa '
@@ -478,38 +478,38 @@ Static Function ROMS055M(_cAnexo As Character, _cEmail As Character, _cCc As Cha
     //======
     // Para:
     //======
-    @ 005, 006 SAY oPara PROMPT "Para:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+    @ 005, 006 Say oPara PROMPT "Para:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
     @ 005, 030 MSGET oGetPara VAR cGetPara SIZE 256, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 PIXEL
 
     //===========
     // Com cópia:
     //===========
-    @ 021, 006 SAY oCc PROMPT "Cc:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+    @ 021, 006 Say oCc PROMPT "Cc:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
     @ 021, 030 MSGET oGetCc VAR cGetCc SIZE 256, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 PIXEL
 
     //=========
     // Assunto:
     //=========
-    @ 037, 006 SAY oAssunto PROMPT "Assunto:" SIZE 022, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+    @ 037, 006 Say oAssunto PROMPT "Assunto:" SIZE 022, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
     @ 037, 030 MSGET oGetAssun VAR cGetAssun SIZE 256, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 PIXEL
 
     //======
     // Anexo
     //======
-    @ 053, 006 SAY oAnexo PROMPT "Anexo:" SIZE 019, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+    @ 053, 006 Say oAnexo PROMPT "Anexo:" SIZE 019, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
     @ 053, 030 MSGET oGetAnx VAR cGetAnx SIZE 256, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 READONLY PIXEL
 
     //==========
     // Mensagem:
     //==========
-    @ 069, 006 SAY oMens PROMPT "Mensagem:" SIZE 030, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+    @ 069, 006 Say oMens PROMPT "Mensagem:" SIZE 030, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
     _oFont		:= TFont():New( 'Courier new' ,, 12 , .F. )
     _oScrAux	:= TSimpleEditor():New( 080 , 006 , oDlgMail , 285 , 105 ,,,,, .T. )
     
     _oScrAux:Load( cHtml )
-    IF _lBotao
+    If _lBotao
        @ 189, 154 BUTTON oButEnv PROMPT "&Visualizar"	SIZE 037, 012 OF oDlgMail ACTION ( ShellExecute("open", cGetAnxl, "", cPatLocal, 1) ) PIXEL
-    EndIF
+    EndIf
     @ 189, 201 BUTTON oButEnv PROMPT "&Enviar"		SIZE 037, 012 OF oDlgMail ACTION ( nOpcA := 1 , cHtml := _oScrAux:RetText() , oDlgMail:End() ) PIXEL
     @ 189, 245 BUTTON oButCan PROMPT "&Cancelar"	SIZE 037, 012 OF oDlgMail ACTION ( nOpcA := 2 , oDlgMail:End() ) PIXEL
 
@@ -520,20 +520,20 @@ Static Function ROMS055M(_cAnexo As Character, _cEmail As Character, _cCc As Cha
     //====================================
     // Chama a função para envio do e-mail
     //====================================
-    cGetPara  := Lower(ALLTRIM(cGetPara))
-    cGetCc    := Lower(ALLTRIM(cGetCc))
+    cGetPara  := Lower(AllTrim(cGetPara))
+    cGetCc    := Lower(AllTrim(cGetCc))
     _cEmailUsr:= Lower(AllTrim(UsrRetMail(__cUserId)))
-    U_ITENVMAIL( _cEmailUsr, cGetPara,cGetCc, cMailCom, ALLTRIM(cGetAssun), cHtml, cGetAnx, _aConfig[01], _aConfig[02], _aConfig[03], _aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog )
+    U_ITENVMAIL( _cEmailUsr, cGetPara,cGetCc, cMailCom, AllTrim(cGetAssun), cHtml, cGetAnx, _aConfig[01], _aConfig[02], _aConfig[03], _aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog )
  
      _cEmlLog := Upper(_cEmlLog)
      If !Empty( _cEmlLog ) .And. "SUCESSO" $ _cEmlLog
-        U_ITMSG("E-mail enviado com SUCESSO para: "+cGetPara+", "+cGetCc,'Atenção!',,2) // OK
+        U_ITMsg("E-mail enviado com SUCESSO para: "+cGetPara+", "+cGetCc,'Atenção!',,2) // OK
      Else
-        U_ITMSG("E-mail NÃO enviado para: "+cGetPara+", "+cGetCc,'Atenção!',_cEmlLog,1)
+        U_ITMsg("E-mail NÃO enviado para: "+cGetPara+", "+cGetCc,'Atenção!',_cEmlLog,1)
      EndIf
  
  Else
-     u_itmsg( 'Envio de e-mail cancelado pelo usuário.' , 'Atenção!' , ,1 )
+     U_ITMsg( 'Envio de e-mail cancelado pelo usuário.' , 'Atenção!' , ,1 )
  EndIf
 
 Return
@@ -554,7 +554,7 @@ Static Function ROMS055D(cFile As Character)
  If File(cFile)
     nRet := fErase(cFile)
     If nRet <> 0
-        u_itconout("Erro ao excluir o arquivo: " + cFile + " - Erro: " + str(FError()))
+        u_itconout("Erro ao excluir o arquivo: " + cFile + " - Erro: " + Str(FError()))
     EndIf
  EndIf
 
@@ -579,7 +579,7 @@ Static Function ROMS055CN(cCPFCNPJ As Character)
  If Len(AllTrim(cCPFCNPJ)) == 11//CPF
      cCampFormat:=SubStr(cCPFCNPJ,1,3) + "." + SubStr(cCPFCNPJ,4,3) + "." + SubStr(cCPFCNPJ,7,3) + "-" + SubStr(cCPFCNPJ,10,2) 
  Else//CNPJ
-     cCampFormat:=Substr(cCPFCNPJ,1,2)+"."+Substr(cCPFCNPJ,3,3)+"."+Substr(cCPFCNPJ,6,3)+"/"+Substr(cCPFCNPJ,9,4)+"-"+ Substr(cCPFCNPJ,13,2)
+     cCampFormat:=SubStr(cCPFCNPJ,1,2)+"."+SubStr(cCPFCNPJ,3,3)+"."+SubStr(cCPFCNPJ,6,3)+"/"+SubStr(cCPFCNPJ,9,4)+"-"+ SubStr(cCPFCNPJ,13,2)
  EndIf
     
 Return cCampFormat

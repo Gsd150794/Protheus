@@ -2,34 +2,24 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 14/11/2019 | Corrigida transferência de empréstimos. Chamado 31192
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 10/02/2020 | Corrigida efetivação de empréstimos. Chamado 31974
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 29/12/2020 | Retirada função UCFG001. Chamado 35123
+Lucas Borges  |14/11/2019| Chamado 31192. Corrigida transferência de empréstimos.
+Lucas Borges  |10/02/2020| Chamado 31974. Corrigida efetivação de empréstimos.
+Lucas Borges  |29/12/2020| Chamado 35123. Retirada função UCFG001.
 ===============================================================================================================================
 */
 
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-#INCLUDE 'Protheus.ch' 
-#INCLUDE "FWMVCDEF.CH"
-
-#DEFINE CRLF	Chr(13)+Chr(10)
+#Include "TOTVS.ch" 
+#Include "FWMVCDEF.CH"
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT016
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Rotina para lançamentos dos empréstimos de terceiros, cópia do AGLT012 - Chamado 11132
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -37,7 +27,7 @@ User Function AGLT016
 
 Local _oBrowse := Nil
 
-Private	_cNUseAp	:= Substr(UsrFullName(RetCodUsr()),1,GetSX3Cache("ZLN_NUSEAP","X3_TAMANHO"))
+Private	_cNUseAp	:= SubStr(UsrFullName(RetCodUsr()),1,GetSX3Cache("ZLN_NUSEAP","X3_TAMANHO"))
 Private _cMatUsr	:= FWSFAllUsers({RetCodUsr()},{"USR_FILIAL","USR_CODFUNC"})[1][3]+FWSFAllUsers({RetCodUsr()},{"USR_FILIAL","USR_CODFUNC"})[1][4]
 Private	_cTipo01	:= SuperGetMV("LT_3EMPTP1",.F.,"NDF")
 Private	_cTipo02	:= SuperGetMV("LT_3EMPTP2",.F.,"NF")
@@ -46,7 +36,7 @@ Private _cPrefixo	:= ""
 
 If dDataBase <> LastDate(dDataBase)
 	MsgStop("Operações permitidas somente com ultimo dia do mês!",'AGLT01601')
-	Return()
+	Return
 EndIf
 
 //====================================================================================================
@@ -67,18 +57,15 @@ _oBrowse:AddLegend( "ZLN_STATUS == '6'" , 'GRAY'	, 'Transferência'	)
 
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MenuDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Rotina para criação do menu da tela principal
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -106,11 +93,8 @@ Return( _aRotina )
 Programa----------: ModelDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Rotina para montagem do modelo de dados para o processamento
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -124,7 +108,7 @@ Local _aGatAux	:= {}
 //====================================================================================================
 // Monta a estrutura de gatilhos
 //====================================================================================================
-_aGatAux := FwStruTrigger( 'ZLN_SA2COD' , 'ZLN_SA2LJ' , 'SA2->A2_LOJA' , .T. , 'SA2' , 1 , 'xFilial("SA2")+M->ZLN_SA2COD+IF(SA2->A2_COD==M->ZLN_SA2COD,SA2->A2_LOJA,"")' )
+_aGatAux := FwStruTrigger( 'ZLN_SA2COD' , 'ZLN_SA2LJ' , 'SA2->A2_LOJA' , .T. , 'SA2' , 1 , 'xFilial("SA2")+M->ZLN_SA2COD+If(SA2->A2_COD==M->ZLN_SA2COD,SA2->A2_LOJA,"")' )
 _oStruZLN:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 _aGatAux := FwStruTrigger( 'ZLN_SA2COD' , 'ZLN_SA2NOM' , 'SA2->A2_NOME' , .T. , 'SA2' , 1 , 'xFilial("SA2")+M->(ZLN_SA2COD)' )
@@ -172,11 +156,8 @@ Return( _oModel )
 Programa----------: ViewDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Rotina para montar a View de Dados para exibição
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -212,11 +193,8 @@ Return( _oView )
 Programa----------: AGLT016L
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Rotina para processamento da validação inicial das operações
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -224,7 +202,7 @@ Static Function AGLT016L( _oModel )
 
 Local _nOper		:= _oModel:GetOperation()
 Local _lRet			:= .T.
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 
 If _nOper == MODEL_OPERATION_DELETE .Or. _nOper == MODEL_OPERATION_UPDATE
 	If ZLN->ZLN_STATUS <> '1'
@@ -234,7 +212,7 @@ If _nOper == MODEL_OPERATION_DELETE .Or. _nOper == MODEL_OPERATION_UPDATE
 	EndIf
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _lRet )
 
@@ -243,17 +221,14 @@ Return( _lRet )
 Programa----------: VALIDCOMIT
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Rotina para processamento da validação final das operações ao confirmar o modelo de dados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function VALIDCOMIT( _oModel )
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _lRet		:= .T.
 Local _cCODSA2	:= ''
 Local _cLOJSA2	:= ''
@@ -274,7 +249,7 @@ EndIf
 If _lRet .And. _dDtVenc < _dDtCred
 	Help(NIL, NIL, "AGLT01605", NIL, "Não é permitido informar uma data de 1º vencimento menor que a data do Crédito!", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Verique as datas informadas!"})
 	_lRet := .F.
-EndIF
+EndIf
 
 If _lRet .And. _nOper == MODEL_OPERATION_INSERT
 	
@@ -305,7 +280,7 @@ If _lRet .And. _nOper == MODEL_OPERATION_INSERT
 	EndIf
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return( _lRet )
 
@@ -314,11 +289,8 @@ Return( _lRet )
 Programa----------: AGLT016JUR
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Gatilho que calcula juros e cria os itens com vencimento e valores das prestações
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -337,7 +309,7 @@ Local _nValPag		:= 0
 Local _nI			:= 0
 Local _nRest		:= 0
 Local _aVenctos		:= {}
-Local _dDtAux		:= StoD('')
+Local _dDtAux		:= SToD('')
 
 Local _nTxJuro		:= 0
 Local _nTemp		:= 0
@@ -369,7 +341,7 @@ If ( _nValTot <> 0 ) .And. ( _nParc <> 0 )
 			_nValPag *= ( ( _nJuros / 100 ) + 1 )
 		Next _nI
 		
-		_nTxJuro	:= round( ( _nJuros / 100 ) , 3 )
+		_nTxJuro	:= Round( ( _nJuros / 100 ) , 3 )
 		_nTemp		:= ( 1 + _nTxJuro )
 		
 		For _nI:=1 To int(_nParc) - 1
@@ -459,11 +431,8 @@ Return( _nValPag )
 Programa----------: AGLT016A
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Rotina para processamento da Avaliação de solicitações (Aprovar/Reprovar)
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -471,18 +440,15 @@ User Function AGLT016A()
 
 FWExecView( '[ Avaliação da Solicitação ]' , 'AGLT016' , 4 ,, {|| .T. } , {|| AGLT016ATU() } , 010 )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT016ATU
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Rotina para atualizar a solicitação com os dados da avaliação (Aprovar/Reprovar)
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -530,11 +496,8 @@ Return( _lRet )
 Programa----------: AGLT016T
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Rotina de processamento de Avaliação/Efetivação múltipla de solicitações
-===============================================================================================================================
 Parametros--------: _cTpAplic : 1= Avaliação / 2= Efetivação
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -556,11 +519,11 @@ Private oOk			:= LoadBitmap( GetResources(), "LBOK" )
 Private oNo			:= LoadBitmap( GetResources(), "LBNO" )
 
 If !Pergunte(cPerg)
-	Return()
+	Return
 EndIf
 
-ZLN->( DbSetOrder(1) )
-ZLN->( DbGoTop() )
+ZLN->( DBSetOrder(1) )
+ZLN->( DBGoTop() )
 
 Processa({|| AGLT016GET( _cTpAplic ) })
 
@@ -569,7 +532,7 @@ If Len( aDados ) == 0
 	MsgStop('Nao Foram encontrados registros de solicitações para o processamento! É preciso que existam solicitações '	+;
 				IIf( _cTpAplic == 1 , '"em aberto"' , '"aprovadas"' )											+;
 				' para processar a '+ IIf( _cTpAplic == 1 , '"Avaliação Múltipla"' , '"Efetivação Múltipla"' ) +'!.' ,"AGLT01609" )
-	Return()
+	Return
 	
 EndIf
 
@@ -597,20 +560,20 @@ DEFINE MSDIALOG oDlg TITLE "Emprestimos - "+ IIf( _cTpAplic == 1 , "Aprovar" , "
 								aDados[oF3:nAt][05]														,;
 								aDados[oF3:nAt][06]														,;
 								aDados[oF3:nAt][07]														,;
-					DtoC( StoD(	aDados[oF3:nAt][10] ) )													,;
-					DtoC( StoD(	aDados[oF3:nAt][11] ) )													,;
+					DToC( SToD(	aDados[oF3:nAt][10] ) )													,;
+					DToC( SToD(	aDados[oF3:nAt][11] ) )													,;
 								aDados[oF3:nAt][12]														}}
 	
 	oF3:bHeaderClick := {|| AGLT016MTD() , oF3:Refresh() }
 	
-	DEFINE SBUTTON FROM 160,010 TYPE 01 ACTION Processa( {|| nOpcA := 1 , AGLT016APR( aDados , _cTpAplic ) , oDlg:End() } )	ENABLE OF oDlg
-	DEFINE SBUTTON FROM 160,050 TYPE 02 ACTION ( nOpcA := 0 , oDlg:End() )													ENABLE OF oDlg
+	DEFINE SBUTTON FROM 160,010 Type 01 ACTION Processa( {|| nOpcA := 1 , AGLT016APR( aDados , _cTpAplic ) , oDlg:End() } )	ENABLE OF oDlg
+	DEFINE SBUTTON FROM 160,050 Type 02 ACTION ( nOpcA := 0 , oDlg:End() )													ENABLE OF oDlg
 	
 	@160,090 Button	OemToAnsi( "Visualizar"			) Size 50,11 OF oDlg PIXEL Action {|| ZLN->(DBSeek(xFilial("ZLN")+aDados[oF3:nAt][02])), FWExecView( '[ Avaliação da Solicitação ]' , 'AGLT016' , 1 ,, {|| .T. } ,, 010 ) }
 	@160,150 Button	OemToAnsi( "Imprimir"			) Size 50,11 OF oDlg PIXEL Action {|| U_RGLT030( aDados ) }
 	@160,210 Button	OemToAnsi( "Análise Financeira"	) Size 50,11 OF oDlg PIXEL Action {|| U_RGLT045( aDados[oF3:nAt][08] , aDados[oF3:nAt][09] ) }
 	
-	@162,280 SAY	"Valor Total:"															OF oDlg PIXEL
+	@162,280 Say	"Valor Total:"															OF oDlg PIXEL
 	@160,310 MSGET	oVlrTotal VAR _nVlrTot PICTURE "@E 99,999,999.99" WHEN .F. SIZE 50,10	OF oDlg PIXEL
 	
 	//====================================================================================================
@@ -621,22 +584,19 @@ DEFINE MSDIALOG oDlg TITLE "Emprestimos - "+ IIf( _cTpAplic == 1 , "Aprovar" , "
 
 ACTIVATE MSDIALOG oDlg CENTERED
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT016E
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Rotina de processamento do Estorno de processamentos das solicitações
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User function AGLT016E()
+User Function AGLT016E()
 
 Local nParcelas	:= 0
 Local _lOk		:= .T.
@@ -644,7 +604,7 @@ Local _lOk		:= .T.
 If ZLN->ZLN_STATUS <> "4" .And. ZLN->ZLN_STATUS <> "2"
 
 	MsgStop("Essa solicitacao nao pode ser Estornada por nao ter sido Efetivada/Aprovada!","AGLT01610")
-	Return()
+	Return
 	
 EndIf
 
@@ -674,7 +634,7 @@ If ZLN->ZLN_STATUS == '4'
 	EndIf
 	
 	If !MsgYesNo( "Essa rotina irá cancelar a efetivacao dessa solicitacao. Deseja continuar?" )
-		Return()
+		Return
 	EndIf
 	
 	Begin Transaction
@@ -682,12 +642,12 @@ If ZLN->ZLN_STATUS == '4'
     	//====================================================================================================
 	    // Deleta o Título no Financeiro
 	    //====================================================================================================
-	   	If AGLT016DE2( _cPrefixo , ZLN->ZLN_COD , padr("1",TamSx3("E2_PARCELA")[1]) , "NF " , ZLN->ZLN_SA2COD , ZLN->ZLN_SA2LJ , _cNaturez )
+	   	If AGLT016DE2( _cPrefixo , ZLN->ZLN_COD , PadR("1",TamSX3("E2_PARCELA")[1]) , "NF " , ZLN->ZLN_SA2COD , ZLN->ZLN_SA2LJ , _cNaturez )
 	   	    
 	   		// Deleta as Parcelas
 			For nParcelas := 1 To Int( ZLN->ZLN_PARC )
 			
-		    	If !AGLT016DE2( _cPrefixo , ZLN->ZLN_COD , PadR(AllTrim(Str(nParcelas)) , TamSx3("E2_PARCELA")[1]) , "NDF" , ZLN->ZLN_SA2COD , ZLN->ZLN_SA2LJ , _cNaturez )
+		    	If !AGLT016DE2( _cPrefixo , ZLN->ZLN_COD , PadR(AllTrim(Str(nParcelas)) , TamSX3("E2_PARCELA")[1]) , "NDF" , ZLN->ZLN_SA2COD , ZLN->ZLN_SA2LJ , _cNaturez )
 		    		_lOk := .F.
 		    	EndIf
 		    	
@@ -703,7 +663,7 @@ If ZLN->ZLN_STATUS == '4'
 		
 	   		ZLN->( RecLock( 'ZLN' , .F. ) )
 		    ZLN->ZLN_STATUS := '2'
-		    ZLN->( MsUnLock() )
+		    ZLN->( MSUnLock() )
 		    
 		Else
 		
@@ -720,51 +680,47 @@ If ZLN->ZLN_STATUS == '4'
 ElseIf ZLN->ZLN_STATUS == '2'
 
 	If !MsgYesNo( "Essa rotina irá cancelar a aprovação dessa solicitacao. Deseja continuar?" )
-		Return()
+		Return
 	EndIf
 
 	ZLN->( RecLock( 'ZLN' , .F. ) )
 	
 	    ZLN->ZLN_STATUS := '1'
-	    ZLN->ZLN_DTAPRO := StoD('')
+	    ZLN->ZLN_DTAPRO := SToD('')
 	    ZLN->ZLN_USERAP	:= ''
 	    ZLN->ZLN_NUSEAP	:= ''
 	    
-    ZLN->( MsUnLock() )
+    ZLN->( MSUnLock() )
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT016DE2
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Rotina para processar a exclusão de títulos no Financeiro
-===============================================================================================================================
-Uso---------------: Italac
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static function AGLT016DE2( _cPrefixo , _cNum , _cParcela , _cTipo , _cForn , _cLoja , _cNaturez )
+Static Function AGLT016DE2( _cPrefixo , _cNum , _cParcela , _cTipo , _cForn , _cLoja , _cNaturez )
 
 Local _aAutoSE2	:= {}
 Local _lOk		:= .T.
 Local _nModAux	:= nModulo
 Local _cModAux	:= cModulo
 
-Private lMsErroAuto := .f.
+Private lMsErroAuto := .F.
 
-AAdd( _aAutoSE2 , { "E2_PREFIXO"	, _cPrefixo		, Nil } )
-AAdd( _aAutoSE2 , { "E2_NUM"		, _cNum			, nil } )
-AAdd( _aAutoSE2 , { "E2_PARCELA"	, _cParcela		, nil } )
-AAdd( _aAutoSE2 , { "E2_TIPO"		, _cTipo		, nil } )
-AAdd( _aAutoSE2 , { "E2_NATUREZ"	, _cNaturez		, nil } )
-AAdd( _aAutoSE2 , { "E2_FORNECE"	, _cForn		, nil } )
-AAdd( _aAutoSE2 , { "E2_LOJA"		, _cLoja		, nil } )
+aAdd( _aAutoSE2 , { "E2_PREFIXO"	, _cPrefixo		, Nil } )
+aAdd( _aAutoSE2 , { "E2_NUM"		, _cNum			, nil } )
+aAdd( _aAutoSE2 , { "E2_PARCELA"	, _cParcela		, nil } )
+aAdd( _aAutoSE2 , { "E2_TIPO"		, _cTipo		, nil } )
+aAdd( _aAutoSE2 , { "E2_NATUREZ"	, _cNaturez		, nil } )
+aAdd( _aAutoSE2 , { "E2_FORNECE"	, _cForn		, nil } )
+aAdd( _aAutoSE2 , { "E2_LOJA"		, _cLoja		, nil } )
 
 nModulo := 6
 cModulo := "FIN"
@@ -801,11 +757,8 @@ Return( _lOk )
 Programa----------: AGLT016GET
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Rotina que verIfica e monta a estrutura de dados para o processamento
-===============================================================================================================================
 Parametros--------: _cTpAplic = 1-Em aberto 2-Aprovada
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -827,7 +780,7 @@ EndCase
 
 BeginSql alias _cAlias
 	SELECT ZLN_COD, ZLN_SA2COD, ZLN_SA2LJ, A2_NOME, ZLN_TOTAL, ZLN_JUROS, ZLN_JUROS, ZLN_VLRPAR, ZLN_VENCTO, ZLN_DTCRED, ZLN_OBS, ZLN_PARC
-	FROM %table:ZLN% ZLN, %table:SA2% SA2
+	FROM %Table:ZLN% ZLN, %Table:SA2% SA2
 	WHERE ZLN.D_E_L_E_T_ = ' '
 	AND SA2.D_E_L_E_T_ = ' '
 	AND A2_COD = ZLN_SA2COD
@@ -866,19 +819,16 @@ EndDo
 
 (_cAlias)->( DBCloseArea() )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT016RCL
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Rotina que recalcula o totalizador de acordo com os registros selecionados
-===============================================================================================================================
 Parametros--------: _aLista    - Lista de dados
 ------------------: _nPosTotal - Posição do valor que deve ser totalizado
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -896,19 +846,16 @@ For _nI := 1 To Len( _aLista )
 	
 Next _nI
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT016APR
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
-Descrição---------: Rotina que processa a gravação das Avaliações/Efetivações
-===============================================================================================================================
+Descrição---------: Rotina que Processa a gravação das Avaliações/Efetivações
 Parametros--------: _aGrava	- Dados para a gravação
 ------------------: _cTipo	- Tipo de Processamento ( 1 - Aprovação / 2 - Efetivação )
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -923,7 +870,7 @@ Local _dMV_DATAFIN:= GetMV( 'MV_DATAFIN' )
 
 ProcRegua( Len( _aGrava ) )
 
-For _nI := 1 to len(_aGrava)
+For _nI := 1 to Len(_aGrava)
 
 	IncProc( "Gerando Titulo "+ _aGrava[_nI][02] )
 	_lValid := .T.
@@ -935,24 +882,24 @@ For _nI := 1 to len(_aGrava)
 	//====================================================================================================
 	If _aGrava[_nI][01] == .T.
 	
-		ZLN->( DBSetorder(1) )
-		If ZLN->( DBSeek( XFILIAL("ZLN") + _aGrava[_nI][02] ) )
+		ZLN->( DBSetOrder(1) )
+		If ZLN->( DBSeek( xFilial("ZLN") + _aGrava[_nI][02] ) )
 			
 			//====================================================================================================
 			// Valida a data de liberação para não dar erro no ExecAuto
 			//====================================================================================================
 			If _cTipo == 2
 			
-				IF dDataBase < _dMV_DATAFIN
+				If dDataBase < _dMV_DATAFIN
 					MsgStop("Não é possível efetivar a solicitação ["+ ZLN->ZLN_COD +"]!"+ CRLF			 																		+;
-								"A data de Efetivação ["+ DtoC( dDataBase ) +"] é anterior à data Limite Contábil para lançamentos Financeiros ["+ DtoC(_dMV_DATAFIN) +"]."	,;
+								"A data de Efetivação ["+ DToC( dDataBase ) +"] é anterior à data Limite Contábil para lançamentos Financeiros ["+ DToC(_dMV_DATAFIN) +"]."	,;
 								"AGLT01614")
 					_lValid := .F.
 				EndIf
 				
 				If _lValid .And. dDataBase > ZLN->ZLN_VENCTO
 					MsgStop("Não é possível efetivar a solicitação ["+ ZLN->ZLN_COD +"]!"+ CRLF+;
-								"A data de Efetivação ["+ DtoC( dDataBase ) +"] é posterior à data do 1º Vencimento configurada ["+ DtoC( ZLN->ZLN_VENCTO ) +"]."	,;
+								"A data de Efetivação ["+ DToC( dDataBase ) +"] é posterior à data do 1º Vencimento configurada ["+ DToC( ZLN->ZLN_VENCTO ) +"]."	,;
 								"AGLT01615")
 					_lValid := .F.
 				EndIf
@@ -978,8 +925,8 @@ For _nI := 1 to len(_aGrava)
 	  					aTItens	:= {}
 	  					
 	  					ZLQ->( DBSetOrder(1) )
-	  					ZLQ->( DBSeek( XFILIAL("ZLN") + ZLN->ZLN_COD ) )
-	  					While ZLQ->( !Eof() ) .And. XFILIAL("ZLN") + ZLN->ZLN_COD == ZLQ->(ZLQ_FILIAL+ZLQ_COD)
+	  					ZLQ->( DBSeek( xFilial("ZLN") + ZLN->ZLN_COD ) )
+	  					While ZLQ->( !Eof() ) .And. xFilial("ZLN") + ZLN->ZLN_COD == ZLQ->(ZLQ_FILIAL+ZLQ_COD)
 	  					
 	  					    aAdd( aTItens , { ZLQ->ZLQ_VECTO , ZLQ->ZLQ_VALOR } )
 	  					    
@@ -991,7 +938,7 @@ For _nI := 1 to len(_aGrava)
 					
 	  				EndIf
 	  				
-				ZLN->( MSUNLOCK() )
+				ZLN->( MSUnLock() )
 			
 			EndIf
 			
@@ -1002,17 +949,17 @@ For _nI := 1 to len(_aGrava)
 	//====================================================================================================
 	Else
 
-		ZLN->( DBSetorder(1) )
-		If ZLN->( DBSeek( XFILIAL("ZLN") + _aGrava[_nI][02] ) )
+		ZLN->( DBSetOrder(1) )
+		If ZLN->( DBSeek( xFilial("ZLN") + _aGrava[_nI][02] ) )
 		
-			ZLN->( RECLOCK( "ZLN" , .F. ) )
+			ZLN->( RecLock( "ZLN" , .F. ) )
 			
 				ZLN->ZLN_DTAPRO := ddatabase
 				ZLN->ZLN_STATUS := "3"
 				ZLN->ZLN_USERAP := _cMatUsr
 				ZLN->ZLN_NUSEAP := _cNUseAp
 				
-			ZLN->( MSUNLOCK() )
+			ZLN->( MSUnLock() )
 		
 		EndIf	
  		 
@@ -1026,18 +973,15 @@ For _nI := 1 to len(_aGrava)
 	
 Next _nI
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT016MTD
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
-Descrição---------: Rotina que processa a inversão da seleção ao clicar no cabeçalho do ListBox
-===============================================================================================================================
+Descrição---------: Rotina que Processa a inversão da seleção ao clicar no cabeçalho do ListBox
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1057,18 +1001,15 @@ AGLT016RCL( aDados , 5 )
 
 oVlrTotal:Refresh()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT016IE2
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Cria titulos no contas a receber referentes ao emprestimo
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1117,7 +1058,7 @@ Begin Transaction
 
 BeginSql alias _cAlias
 	SELECT COUNT(1) QTD
-	FROM %table:SE2%
+	FROM %Table:SE2%
 	WHERE D_E_L_E_T_ = ' '
 	AND E2_FILIAL = %xFilial:SE2%
 	AND E2_PREFIXO = %exp:_cPrefixo%
@@ -1133,7 +1074,7 @@ If (_cAlias)->QTD == 0
 		// Gravando título à pagar
 		//====================================================================================================
 		If _nI < Len( aItens )
-			nValor	:= Round( aCab[4] / len(aItens) , 2 )
+			nValor	:= Round( aCab[4] / Len(aItens) , 2 )
 			nRest	+= nValor
 		Else
 			nValor	:= aCab[4] - nRest
@@ -1141,22 +1082,22 @@ If (_cAlias)->QTD == 0
 		
 		_aAutoSE2 := {}
 		
-		AAdd( _aAutoSE2 , { "E2_PREFIXO"	, _cPrefixo			, nil } )		
-		AAdd( _aAutoSE2 , { "E2_NUM"		, aCab[1]			, nil } )
-		AAdd( _aAutoSE2 , { "E2_PARCELA"	, AllTrim(str(_nI))	, nil } )	
-		AAdd( _aAutoSE2 , { "E2_TIPO"		, _cTipo01			, nil } )
-		AAdd( _aAutoSE2 , { "E2_NATUREZ"	, _cNaturez			, nil } ) 
-		AAdd( _aAutoSE2 , { "E2_FORNECE"	, aCab[2]			, nil } )	
-		AAdd( _aAutoSE2 , { "E2_LOJA"		, aCab[3]			, nil } )	
-		AAdd( _aAutoSE2 , { "E2_EMISSAO"	, aCab[5]			, nil } )
-		AAdd( _aAutoSE2 , { "E2_EMIS1"		, aCab[5]			, nil } )
-		AAdd( _aAutoSE2 , { "E2_VENCTO"		, aItens[_nI,1]		, nil } )
-		AAdd( _aAutoSE2 , { "E2_VALOR"		, nValor			, nil } )
-		AAdd( _aAutoSE2 , { "E2_HIST"		, "GLT "+_DescHist+" TERCEIROS " + AllTrim( STR( _nI ) ) +"/"+ AllTrim( STR( Len( aItens ) ) ) , Nil } )
-		AAdd( _aAutoSE2 , { "E2_DATALIB"	, aCab[7]			, nil } )
-		AAdd( _aAutoSE2 , { "E2_USUALIB"	, cUserName			, nil } )
-		AAdd( _aAutoSE2 , { "E2_ACRESC"		, Round( aItens[_nI][02] - nValor , 2 )			, nil } )
-		AAdd( _aAutoSE2 , { "E2_ORIGEM"		, "AGLT016"			, nil } )
+		aAdd( _aAutoSE2 , { "E2_PREFIXO"	, _cPrefixo			, nil } )		
+		aAdd( _aAutoSE2 , { "E2_NUM"		, aCab[1]			, nil } )
+		aAdd( _aAutoSE2 , { "E2_PARCELA"	, AllTrim(Str(_nI))	, nil } )	
+		aAdd( _aAutoSE2 , { "E2_TIPO"		, _cTipo01			, nil } )
+		aAdd( _aAutoSE2 , { "E2_NATUREZ"	, _cNaturez			, nil } ) 
+		aAdd( _aAutoSE2 , { "E2_FORNECE"	, aCab[2]			, nil } )	
+		aAdd( _aAutoSE2 , { "E2_LOJA"		, aCab[3]			, nil } )	
+		aAdd( _aAutoSE2 , { "E2_EMISSAO"	, aCab[5]			, nil } )
+		aAdd( _aAutoSE2 , { "E2_EMIS1"		, aCab[5]			, nil } )
+		aAdd( _aAutoSE2 , { "E2_VENCTO"		, aItens[_nI,1]		, nil } )
+		aAdd( _aAutoSE2 , { "E2_VALOR"		, nValor			, nil } )
+		aAdd( _aAutoSE2 , { "E2_HIST"		, "GLT "+_DescHist+" TERCEIROS " + AllTrim( Str( _nI ) ) +"/"+ AllTrim( Str( Len( aItens ) ) ) , Nil } )
+		aAdd( _aAutoSE2 , { "E2_DATALIB"	, aCab[7]			, nil } )
+		aAdd( _aAutoSE2 , { "E2_USUALIB"	, cUserName			, nil } )
+		aAdd( _aAutoSE2 , { "E2_ACRESC"		, Round( aItens[_nI][02] - nValor , 2 )			, nil } )
+		aAdd( _aAutoSE2 , { "E2_ORIGEM"		, "AGLT016"			, nil } )
 				
 		lMsErroAuto := .F.
 		
@@ -1184,19 +1125,19 @@ If (_cAlias)->QTD == 0
 	//====================================================================================================
 	_aAutoSE2 := {}
 	
-	AAdd( _aAutoSE2 , { "E2_PREFIXO"	, _cPrefixo						, nil } )
-	AAdd( _aAutoSE2 , { "E2_NUM"		, aCab[1]						, nil } )
-	AAdd( _aAutoSE2 , { "E2_PARCELA"	, "1"							, nil } )
-	AAdd( _aAutoSE2 , { "E2_TIPO"		, _cTipo02						, nil } )
-	AAdd( _aAutoSE2 , { "E2_NATUREZ"	, _cNaturez						, nil } )
-	AAdd( _aAutoSE2 , { "E2_FORNECE"	, aCab[2]						, nil } )
-	AAdd( _aAutoSE2 , { "E2_LOJA"		, aCab[3]						, nil } )
-	AAdd( _aAutoSE2 , { "E2_EMISSAO"	, aCab[7]						, nil } )
-	AAdd( _aAutoSE2 , { "E2_EMIS1"		, aCab[7]						, nil } )
-	AAdd( _aAutoSE2 , { "E2_VENCTO"		, aCab[8]						, nil } )
-	AAdd( _aAutoSE2 , { "E2_VALOR"		, aCab[4]						, nil } )
-	AAdd( _aAutoSE2 , { "E2_HIST"		,"GLT "+_DescHist+" TERCEIROS"	, nil } )
-	AAdd( _aAutoSE2 , { "E2_ORIGEM"		,"AGLT016"						, nil } )
+	aAdd( _aAutoSE2 , { "E2_PREFIXO"	, _cPrefixo						, nil } )
+	aAdd( _aAutoSE2 , { "E2_NUM"		, aCab[1]						, nil } )
+	aAdd( _aAutoSE2 , { "E2_PARCELA"	, "1"							, nil } )
+	aAdd( _aAutoSE2 , { "E2_TIPO"		, _cTipo02						, nil } )
+	aAdd( _aAutoSE2 , { "E2_NATUREZ"	, _cNaturez						, nil } )
+	aAdd( _aAutoSE2 , { "E2_FORNECE"	, aCab[2]						, nil } )
+	aAdd( _aAutoSE2 , { "E2_LOJA"		, aCab[3]						, nil } )
+	aAdd( _aAutoSE2 , { "E2_EMISSAO"	, aCab[7]						, nil } )
+	aAdd( _aAutoSE2 , { "E2_EMIS1"		, aCab[7]						, nil } )
+	aAdd( _aAutoSE2 , { "E2_VENCTO"		, aCab[8]						, nil } )
+	aAdd( _aAutoSE2 , { "E2_VALOR"		, aCab[4]						, nil } )
+	aAdd( _aAutoSE2 , { "E2_HIST"		,"GLT "+_DescHist+" TERCEIROS"	, nil } )
+	aAdd( _aAutoSE2 , { "E2_ORIGEM"		,"AGLT016"						, nil } )
 	
 	lMsErroAuto	:= .F.
 	
@@ -1221,19 +1162,19 @@ Else
 	MsgStop("Já foram encontrados títulos para esse fornecedor e o processo será abortado. Acione a TI/Sistemas.","AGLT01618")
 	lok1 := .F.
 EndIf
-(_cAlias)->(DbCloseArea())
+(_cAlias)->(DBCloseArea())
 
-If lok1 .and. lok2
+If lok1 .And. lok2
 	
 	//====================================================================================================
 	// Grava solicitação como efetivada
 	//====================================================================================================
-	ZLN->( DBSetorder(1) )
+	ZLN->( DBSetOrder(1) )
 	If ZLN->( DBSeek( xFilial('ZLN') + aCab[1] ) )
 	
 		ZLN->( RecLock( 'ZLN' , .F. ) )
 	   	ZLN->ZLN_STATUS := "4"
-		ZLN->( MsUnlock() )
+		ZLN->( MSUnLock() )
 	
 	Else
 			
@@ -1251,18 +1192,15 @@ EndIf
 
 End Transaction
 
-Return( lok1 .and. lok2 )
+Return( lok1 .And. lok2 )
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT016MRK
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Rotina que realiza a marcação dos registros
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1290,11 +1228,8 @@ Return( aArray )
 Programa----------: AGLT016V
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Rotina que realiza datas
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1328,11 +1263,8 @@ Return( _lRet )
 Programa----------: AGLT016B
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Rotina que possibilita realizar a transferencia do emprestimo para determinado produtor informado.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1353,7 +1285,7 @@ Local oSay6		:= Nil
 Local oSay7		:= Nil
 Local oFont12b	:= Nil
 Local nopc		:= 0  
-Local _aArea	:= GetArea()       
+Local _aArea	:= FWGetArea()       
 Local lVldTrans	:= .F.   
 Local cGDescri	:= Space(70)
 Private cGEmprest	:= Space(09)
@@ -1373,12 +1305,12 @@ Define Font oFont12b   Name "Courier New"       Size 0,-12 Bold  // Tamanho 12 N
 // Monta tela para configuração da transferência
 DEFINE MSDIALOG oDlg TITLE "Transferência de Empréstimos" FROM 000,000 TO 350,425 COLORS 0,16777215 PIXEL
 
-    @ 039, 012 SAY oSay1     PROMPT "Empréstimo:"			SIZE 031,007 OF oDlg COLORS 0,16777215 PIXEL
-    @ 059, 012 SAY oSay2     PROMPT "Fornecedor:"			SIZE 031,007 OF oDlg COLORS 0,16777215 PIXEL
-    @ 059, 120 SAY oSay3     PROMPT "Loja:"       			SIZE 025,007 OF oDlg COLORS 0,16777215 PIXEL
-    @ 079, 012 SAY oSay5     PROMPT "Descrição:"  			SIZE 025,007 OF oDlg COLORS 0,16777215 PIXEL
-    @ 099, 012 SAY oSay6     PROMPT "1 Vencto: "  			SIZE 030,007 OF oDlg COLORS 0,16777215 PIXEL
-    @ 119, 012 SAY oSay7     PROMPT "Observação:"			SIZE 030,007 OF oDlg COLORS 0,16777215 PIXEL
+    @ 039, 012 Say oSay1     PROMPT "Empréstimo:"			SIZE 031,007 OF oDlg COLORS 0,16777215 PIXEL
+    @ 059, 012 Say oSay2     PROMPT "Fornecedor:"			SIZE 031,007 OF oDlg COLORS 0,16777215 PIXEL
+    @ 059, 120 Say oSay3     PROMPT "Loja:"       			SIZE 025,007 OF oDlg COLORS 0,16777215 PIXEL
+    @ 079, 012 Say oSay5     PROMPT "Descrição:"  			SIZE 025,007 OF oDlg COLORS 0,16777215 PIXEL
+    @ 099, 012 Say oSay6     PROMPT "1 Vencto: "  			SIZE 030,007 OF oDlg COLORS 0,16777215 PIXEL
+    @ 119, 012 Say oSay7     PROMPT "Observação:"			SIZE 030,007 OF oDlg COLORS 0,16777215 PIXEL
     
     @ 035, 044 MSGET oGEmprest VAR cGEmprest	SIZE 060,010 OF oDlg COLORS 0, 16777215 PIXEL F3 "ZLN" Valid !Empty(cGEmprest) .And. ExistCPO("ZLN", cGEmprest, 1) 
     @ 055, 044 MSGET oGFornec  VAR cGFornec		SIZE 060,010 OF oDlg COLORS 0, 16777215 PIXEL F3 "SA2" Valid !Empty(cGFornec) .And. AGLT016VLF(cGFornec, @cGLjForn, @cGDescri)
@@ -1387,27 +1319,24 @@ DEFINE MSDIALOG oDlg TITLE "Transferência de Empréstimos" FROM 000,000 TO 350,42
     @ 095, 044 MSGET oPriVenct VAR dDtPriVen	SIZE 060,010 OF oDlg COLORS 0, 16777215 PIXEL Valid !Empty(dDtPriVen)
     @ 115, 044 GET	 oMObs     VAR cMObs		SIZE 160,033 OF oDlg MULTILINE COLORS 0, 16777215 HSCROLL PIXEL Valid !Empty(cMObs)
 
-ACTIVATE MSDIALOG oDlg CENTERED ON INIT EnchoiceBar(oDlg,{|| MsgRun("Realizando a validação da transferência...",,{||CursorWait(),lVldTrans:=VldTransf(cGEmprest,cGFornec,cGLjForn,cMObs,dDtPriVen),CursorArrow()}),IIf(lVldTrans,Eval({|| nopc:=1,oDlg:End()}),)}, {||oDlg:End()},,)    
+ACTIVATE MSDIALOG oDlg CENTERED ON INIT EnchoiceBar(oDlg,{|| MsgRun("Realizando a validação da transferência...",,{||CursorWait(),lVldTrans:=VldTransf(cGEmprest,cGFornec,cGLjForn,cMObs,dDtPriVen),CursorArroIIf}),IIf(lVldTrans,Eval({|| nopc:=1,oDlg:End()}),)}, {||oDlg:End()},,)    
 
-// Caso confirmado, processa a transferência
+// Caso confirmado, Processa a transferência
 If nopc == 1
  	MsgRun( "Processando a transferência..." , 'Aguarde!' , {|| CursorWait() , ProcTransf() , CursorArrow() } )
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: VldTransf
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Rotina que valida os dados informados pelo usuário
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1498,11 +1427,8 @@ Return( _lRet )
 Programa----------: ProcTransf
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
-Descrição---------: Rotina que processa a transferência do empréstimo
-===============================================================================================================================
+Descrição---------: Rotina que Processa a transferência do empréstimo
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1663,7 +1589,7 @@ Else
 					ZLN->ZLN_HORTRA := Time()
 					ZLN->ZLN_OBSTRA := cMObs
 					
-        			ZLN->( MsUnlock() )
+        			ZLN->( MSUnLock() )
         			
         		EndIf
         		
@@ -1691,18 +1617,15 @@ Else
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: BaixaSE2
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
-Descrição---------: Rotina que processa as baixas de Títulos via ExecAuto
-===============================================================================================================================
+Descrição---------: Rotina que Processa as baixas de Títulos via ExecAuto
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1721,7 +1644,7 @@ Private lMsHelpAuto:= .T.
 //==========================================================
 DBSelectArea("SE2")
 SE2->( DBSetOrder(1) )
-If SE2->( DBSeek( xFILIAL("SE2") + cPrefixo + cNroTit + cParcela + cTipo + cFornec + cLjForn ) )
+If SE2->( DBSeek( xFilial("SE2") + cPrefixo + cNroTit + cParcela + cTipo + cFornec + cLjForn ) )
 
 	If Empty(SE2->E2_DATALIB) //Se nao foi liberado ainda
 	
@@ -1746,7 +1669,7 @@ aTitulo := {	{ "E2_PREFIXO"		, cPrefixo							, Nil },;
 				{ "AUTMOTBX"		, cMotBaixa							, Nil },;
 				{ "AUTDTBAIXA"		, dDataBase							, Nil },;
 				{ "AUTDTCREDITO"	, dDataBase							, Nil },;
-				{ "AUTBENEF"		, cFornec +" - "+ ALLTRIM(cA2Nome)	, Nil },;
+				{ "AUTBENEF"		, cFornec +" - "+ AllTrim(cA2Nome)	, Nil },;
 				{ "AUTHIST"			, cHist								, Nil },;
 				{ "AUTVLRPG"		, nVlrBx							, Nil } }
 
@@ -1759,7 +1682,7 @@ cModulo := "FIN"
 // SigaAuto de Baixa de Contas a Pagar
 MSExecAuto( {|x,y| Fina080(x,y) } , aTitulo , 3 )
 
-SE2->( MsUnLock() )
+SE2->( MSUnLock() )
 
 // Restaura o modulo em uso
 nModulo := nModAnt
@@ -1780,11 +1703,8 @@ Return
 Programa----------: incEmprest
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
-Descrição---------: Rotina que processa a inclusão de empréstimos
-===============================================================================================================================
+Descrição---------: Rotina que Processa a inclusão de empréstimos
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1805,7 +1725,7 @@ If SA2->( DBSeek( xFilial("SA2") + cGFornec + cGLjForn ) )
 		ZLN->ZLN_SA2NOM	:= SA2->A2_NOME
 		ZLN->ZLN_DATA	:= dDataBase
 		ZLN->ZLN_OBS	:= "Transferência: "+ cGEmprest
-		ZLN->ZLN_VENCTO	:= StoD( _aTitulos[1][8] ) // Passa o menor vencimento
+		ZLN->ZLN_VENCTO	:= SToD( _aTitulos[1][8] ) // Passa o menor vencimento
 		ZLN->ZLN_TOTAL	:= nTotSaldo-_nTotAcDc
 		ZLN->ZLN_PARC	:= Len( _aTitulos )
 		ZLN->ZLN_JUROS	:= _nJuros
@@ -1823,7 +1743,7 @@ If SA2->( DBSeek( xFilial("SA2") + cGFornec + cGLjForn ) )
 		ZLN->ZLN_HORTRA	:= Time()
 		ZLN->ZLN_OBSTRA	:= cMObs
 	
-	ZLN->( MsUnlock() )
+	ZLN->( MSUnLock() )
 	
 	//=======================================
 	// Gera as NDF que o fornecedor ira pagar
@@ -1835,11 +1755,11 @@ If SA2->( DBSeek( xFilial("SA2") + cGFornec + cGLjForn ) )
 		    ZLQ->ZLQ_FILIAL	:= xFilial("ZLQ")
 			ZLQ->ZLQ_COD	:= _nCodEmp
 			ZLQ->ZLQ_ITEM	:= StrZero( _nX , 3 )
-			ZLQ->ZLQ_VECTO	:= StoD( _aTitulos[_nX][8] )
+			ZLQ->ZLQ_VECTO	:= SToD( _aTitulos[_nX][8] )
 			ZLQ->ZLQ_VALOR	:= _aTitulos[_nX][9]+_aTitulos[_nX][13]+_aTitulos[_nX][14]
 		    ZLQ->ZLQ_CHAVET	:= xFilial("ZLQ") + _aTitulos[_nX][1] + _aTitulos[_nX][3] + _aTitulos[_nX][4] + _aTitulos[_nX][2] + _aTitulos[_nX][5] + _aTitulos[_nX][6]
 		
-		ZLQ->( MsUnlock() )
+		ZLQ->( MSUnLock() )
 	
 	Next _nX
 		
@@ -1853,18 +1773,15 @@ Else
 	MsgStop("Nao foi encontrado os dados do cadastro do fornecedor indicado para gerar o(a) " + _cTipo + "  de transferência. Favor checar se os dados foram corretamente inseridos.","AGLT01630")
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: incSE2
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição-------: Cria titulos no contas a pagar referentes a NDF'S do novo emprestimo
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -1878,7 +1795,7 @@ Private lMsErroAuto := .F.
 
 BeginSql alias _cAlias
 	SELECT COUNT(1) NREG
-	FROM %table:SE2%
+	FROM %Table:SE2%
 	WHERE D_E_L_E_T_ = ' '
 	AND E2_FILIAL = %xFilial:SE2%
 	AND E2_PREFIXO = %exp:_cPrefixo%
@@ -1894,23 +1811,23 @@ If(_cAlias)->NREG == 0
 	
 		_aAutoSE2 := {}
 		
-		AAdd( _aAutoSE2 , { "E2_PREFIXO"	, _cPrefixo									, Nil } )
-		AAdd( _aAutoSE2 , { "E2_NUM"		, _nCodEmp									, Nil } )
-		AAdd( _aAutoSE2 , { "E2_PARCELA"	, alltrim( str(_nX) )						, Nil } )
-		AAdd( _aAutoSE2 , { "E2_TIPO"		, _cTipo01									, Nil } )
-		AAdd( _aAutoSE2 , { "E2_NATUREZ"	, _cNaturez									, Nil } )
-		AAdd( _aAutoSE2 , { "E2_FORNECE"	, cGFornec									, Nil } )
-		AAdd( _aAutoSE2 , { "E2_LOJA"		, cGLjForn									, Nil } )
-		AAdd( _aAutoSE2 , { "E2_EMISSAO"	, dDataBase									, Nil } )
-		AAdd( _aAutoSE2 , { "E2_EMIS1"		, dDataBase									, Nil } )
-		AAdd( _aAutoSE2 , { "E2_VENCTO"		, DataValida(StoD( _aTitulos[_nX][8] ))		, Nil } )
-		AAdd( _aAutoSE2 , { "E2_VALOR"		, _aTitulos[_nX][9]							, Nil } )
-		AAdd( _aAutoSE2 , { "E2_HIST"		, "TRANSFERENCIA " + Upper(_cTipo) + ":" + cGEmprest	, Nil } )
-		AAdd( _aAutoSE2 , { "E2_DATALIB"	, StoD(_aTitulos[_nX][12])					, Nil } )
-		AAdd( _aAutoSE2 , { "E2_USUALIB"	, cUserName									, Nil } )
-		AAdd( _aAutoSE2 , { "E2_ACRESC"		, _aTitulos[_nX][13]						, Nil } )
-		AAdd( _aAutoSE2 , { "E2_DECRESC"	, _aTitulos[_nX][14]						, Nil } )
-		AAdd( _aAutoSE2 , { "E2_ORIGEM"		, "AGLT016"									, Nil } )
+		aAdd( _aAutoSE2 , { "E2_PREFIXO"	, _cPrefixo									, Nil } )
+		aAdd( _aAutoSE2 , { "E2_NUM"		, _nCodEmp									, Nil } )
+		aAdd( _aAutoSE2 , { "E2_PARCELA"	, AllTrim( Str(_nX) )						, Nil } )
+		aAdd( _aAutoSE2 , { "E2_TIPO"		, _cTipo01									, Nil } )
+		aAdd( _aAutoSE2 , { "E2_NATUREZ"	, _cNaturez									, Nil } )
+		aAdd( _aAutoSE2 , { "E2_FORNECE"	, cGFornec									, Nil } )
+		aAdd( _aAutoSE2 , { "E2_LOJA"		, cGLjForn									, Nil } )
+		aAdd( _aAutoSE2 , { "E2_EMISSAO"	, dDataBase									, Nil } )
+		aAdd( _aAutoSE2 , { "E2_EMIS1"		, dDataBase									, Nil } )
+		aAdd( _aAutoSE2 , { "E2_VENCTO"		, DataValida(SToD( _aTitulos[_nX][8] ))		, Nil } )
+		aAdd( _aAutoSE2 , { "E2_VALOR"		, _aTitulos[_nX][9]							, Nil } )
+		aAdd( _aAutoSE2 , { "E2_HIST"		, "TRANSFERENCIA " + Upper(_cTipo) + ":" + cGEmprest	, Nil } )
+		aAdd( _aAutoSE2 , { "E2_DATALIB"	, SToD(_aTitulos[_nX][12])					, Nil } )
+		aAdd( _aAutoSE2 , { "E2_USUALIB"	, cUserName									, Nil } )
+		aAdd( _aAutoSE2 , { "E2_ACRESC"		, _aTitulos[_nX][13]						, Nil } )
+		aAdd( _aAutoSE2 , { "E2_DECRESC"	, _aTitulos[_nX][14]						, Nil } )
+		aAdd( _aAutoSE2 , { "E2_ORIGEM"		, "AGLT016"									, Nil } )
 		
 		lMsErroAuto := .F.
 		
@@ -1945,18 +1862,15 @@ Return( .T. )
 Programa--------: AGLT016VLF
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição-------: Valida o fornecedor
-===============================================================================================================================
 Parametros------: cGFornec , cGLjForn , cGDescri
-===============================================================================================================================
 Retorno---------: _lRet
 ===============================================================================================================================
 */
 Static Function AGLT016VLF( cGFornec , cGLjForn , cGDescri )
 
 Local _lRet := .T.
-Local _cChave := IIF(Empty(cGLjForn),cGFornec,cGFornec+cGLjForn)
+Local _cChave := IIf(Empty(cGLjForn),cGFornec,cGFornec+cGLjForn)
 
 DBSelectArea("SA2")
 SA2->( DBSetOrder(1) )
@@ -1982,11 +1896,8 @@ Return( _lRet )
 Programa----------: AGLT016C
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Rotina desenvolvida para realizar o estorno de uma transferencia de emprestimo
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -2002,10 +1913,10 @@ Private _cCodEmpOr	:= ""
 Private _cTipo		:= ""
 
 If !Pergunte(cPerg,.T.) 
-     return
+     Return
 EndIf      
 
-dBSetOrder(1)
+DBSetOrder(1)
 
 Processa( {||lProcEstor:=vldEstorno()}/*bAction*/, "Aguarde..."/*cTitle */, "Processando validações para realizar o estorno!"/*cMsg */,.F./*lAbort */)
      
@@ -2021,11 +1932,8 @@ Return
 Programa----------: vldEstorno
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Valida se pode ser reaizado o estorno da transferência
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -2034,7 +1942,7 @@ Static Function vldEstorno()
 Local _lRet		:= .T.
 Local _cAlias	:= GetNextAlias()
 
-If ZLN->(DbSeek(xFilial('ZLN')+MV_PAR01)) .And. ZLN->ZLN_STATUS == "6"
+If ZLN->(DBSeek(xFilial('ZLN')+MV_PAR01)) .And. ZLN->ZLN_STATUS == "6"
 	_cCodEmp	:= ZLN->ZLN_COD   //Armazena o codigo do emprestimo transferido a ser estornado
 	_cCodForn	:= ZLN->ZLN_SA2COD
 	_cLjForn	:= ZLN->ZLN_SA2LJ      
@@ -2062,7 +1970,7 @@ If ZLN->(DbSeek(xFilial('ZLN')+MV_PAR01)) .And. ZLN->ZLN_STATUS == "6"
 	//Verifica se o mvimento a ser estornado sofre alguma baixa, pois somente podera ser realizado o estorno de um movimento que não sofreu nenhuma baixa
 	BeginSql alias _cAlias
 		SELECT COUNT(1) QTD
-		FROM %table:SE2%
+		FROM %Table:SE2%
 		WHERE D_E_L_E_T_ = ' '
 		AND E2_FILIAL = %xFilial:SE2%
 		AND E2_PREFIXO = %exp:_cPrefixo%
@@ -2082,7 +1990,7 @@ Else
 	_lRet:= .F.
 EndIf
 
-(_cAlias)->(DbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return _lRet     
 
@@ -2091,11 +1999,8 @@ Return _lRet
 Programa----------: ProcEstor
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Processa o estorno
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -2137,11 +2042,8 @@ Return
 Programa----------: ExcluiSE2
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Exlcui titulo no contas a pagar via SigaAuto
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -2149,7 +2051,7 @@ Static Function ExcluiSE2()
 
 Local nModAnt	:= nModulo
 Local cModAnt	:= cModulo
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _aAutoSE2	:= {}
 Local _nContReg	:= 0
 Local _cAlias	:= GetNextAlias()
@@ -2158,7 +2060,7 @@ Private lMsHelpAuto:= .T.
 
 BeginSql alias _cAlias
 	SELECT E2_PREFIXO, E2_NUM, E2_PARCELA, E2_TIPO, E2_FORNECE, E2_LOJA
-	FROM %table:SE2%
+	FROM %Table:SE2%
 	WHERE D_E_L_E_T_ = ' '
 	AND E2_FILIAL = %xFilial:SE2%
 	AND E2_PREFIXO = %exp:_cPrefixo%
@@ -2168,16 +2070,16 @@ BeginSql alias _cAlias
 EndSql
 	
 COUNT TO _nContReg //Contabiliza o numero de registros encontrados pela query  
-(_cAlias)->(DbGoTop())
+(_cAlias)->(DBGoTop())
 
 //=============================================
 //Econtrou registros para realizar a exclusao
 //=============================================
 If _nContReg > 0
 	While (_cAlias)->(!Eof()) .And. !lDeuErro
-		DbSelectArea("SE2")
-		SE2->(DbSetOrder(1))
-		If SE2->(DbSeek(xFILIAL("SE2")+(_cAlias)->(E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA)))
+		DBSelectArea("SE2")
+		SE2->(DBSetOrder(1))
+		If SE2->(DBSeek(xFilial("SE2")+(_cAlias)->(E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA)))
 			
 			//=============================================
 			//Array com os dados a serem passados para o SigaAuto
@@ -2216,16 +2118,16 @@ If _nContReg > 0
 			cModulo := cModAnt           
 		EndIf	
 	
-		(_cAlias)->(DbSkip())
+		(_cAlias)->(DBSkip())
 	EndDo  
-(_cAlias)->(DbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Else
 	lDeuErro := .T.
 	MsgStop("Não foi(ram) econtrado(s) título(s) no financeiro para realizar a exclusão. Favor acionar a área de TI/Sistemas.","AGLT01638")
 EndIf   
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return  
 
@@ -2234,11 +2136,8 @@ Return
 Programa----------: CancBxSE2
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Cancela Baixa de titulo no contas a pagar via SigaAuto
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -2246,7 +2145,7 @@ Static Function CancBxSE2()
 
 Local nModAnt		:= nModulo
 Local cModAnt		:= cModulo
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local _nContReg		:= 0      
 Local _cMotBaixa	:= GetMv("IT_MOTBXTR") 
 Local _aTitulo		:= {}
@@ -2264,14 +2163,14 @@ Private lMsHelpAuto	:= .T.
 
 BeginSql alias _cAliasZLQ
 	SELECT ZLQ_VALOR,ZLQ_CHAVET
-	FROM %table:ZLQ%
+	FROM %Table:ZLQ%
 	WHERE D_E_L_E_T_ = ' '
 	AND ZLQ_FILIAL = %xFilial:ZLQ%
 	AND ZLQ_COD = %exp:_cCodEmp%
 EndSql
 	
 COUNT TO _nContReg //Contabiliza o numero de registros encontrados pela query  
-(_cAliasZLQ)->(DbGoTop())
+(_cAliasZLQ)->(DBGoTop())
 
 If _nContReg > 0
 	While !(_cAliasZLQ)->(Eof()) .And. !lDeuErro
@@ -2290,7 +2189,7 @@ If _nContReg > 0
 			//============================================================================================
 			BeginSql alias _cAliasSE5
 				SELECT E5_FILIAL,E5_PREFIXO,E5_NUMERO,E5_PARCELA,E5_TIPO,E5_VALOR,E5_SEQ,E5_MOTBX,E5_DATA,E5_CLIFOR,E5_LOJA
-				FROM %table:SE5%
+				FROM %Table:SE5%
 				WHERE D_E_L_E_T_ = ' '
 				AND E5_TIPODOC = 'BA'
 				AND E5_SITUACA <> 'C'
@@ -2306,11 +2205,11 @@ If _nContReg > 0
 			EndSql
 
 			COUNT TO _cContReg //Contabiliza o numero de registros encontrados pela query  
-			(_cAliasSE5)->(DbGoTop())
+			(_cAliasSE5)->(DBGoTop())
 			If _cContReg > 0        
 				While !(_cAliasSE5)->(Eof()) .And. !lDeuErro
-					DbSelectArea("SE2")
-					SE2->(DbSetOrder(1))
+					DBSelectArea("SE2")
+					SE2->(DBSetOrder(1))
 					
 					_aTitulo := {{"E2_PREFIXO",(_cAliasSE5)->E5_PREFIXO						,Nil},;
 					{"E2_NUM"	    ,(_cAliasSE5)->E5_NUMERO          						,Nil},;
@@ -2353,9 +2252,9 @@ If _nContReg > 0
 					  	Mostraerro()
 				    EndIf       				    		
 													
-					(_cAliasSE5)->(DbSkip())			
+					(_cAliasSE5)->(DBSkip())			
 				EndDo
-				(_cAliasSE5)->(DbCloseArea())
+				(_cAliasSE5)->(DBCloseArea())
 			Else
 				lDeuErro := .T.
 				MsgStop("Não foram econtrados dados para a realização do cancelamento das baixas no financeiro do(a) " + _cTipo + " de origem. Favor acionar a equipe de TI/Sistemas.","AGLT01640")
@@ -2365,9 +2264,9 @@ If _nContReg > 0
 			MsgStop("A chave de estorno do(a) " + _cTipo +" " + _cCodEmp + " esta vazia. Favor acionar a equipe de TI/Sistemas.", "AGLT01641")
 		EndIf	
 		
-		(_cAliasZLQ)->(DbSkip())
+		(_cAliasZLQ)->(DBSkip())
 	EndDo
-	(_cAliasZLQ)->(DbCloseArea())	  
+	(_cAliasZLQ)->(DBCloseArea())	  
 //=============================================================
 //Nao encontrou dados do emprestimo de origem
 //=============================================================
@@ -2376,7 +2275,7 @@ Else
 	MsgStop("Não foram encontrados os dados do(a)" + _cTipo +" " + _cCodEmp + " Favor acionar a equipe de TI/Sistemas.", "AGLT01642")
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -2385,31 +2284,28 @@ Return
 Programa----------: ProcZLN
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Atualiza registros na ZLN
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function ProcZLN()
 
-Local _aArea:= GetArea()
+Local _aArea:= FWGetArea()
                    
 //Efetua exclusao do cabecalho do emprestimo transferido bem como de seus itens
-If ZLN->(DbSeek(xFilial("ZLN") + _cCodEmp))  
+If ZLN->(DBSeek(xFilial("ZLN") + _cCodEmp))  
 	ZLN->(RecLock("ZLN",.F.)) 
 		ZLN->(dbDelete())
-	ZLN->(MsUnlock())    
+	ZLN->(MSUnLock())    
 	
-	ZLQ->(DbSetOrder(1))
-	If ZLQ->(DbSeek(xFilial("ZLQ") + _cCodEmp))  
+	ZLQ->(DBSetOrder(1))
+	If ZLQ->(DBSeek(xFilial("ZLQ") + _cCodEmp))  
 		While !ZLQ->(Eof()) .And. xFilial("ZLQ") == ZLQ->ZLQ_FILIAL .And. _cCodEmp == ZLQ->ZLQ_COD
 			ZLQ->(RecLock("ZLQ",.F.))    
 				ZLQ->(dbDelete())  
-			ZLQ->(MsUnlock()) 
-		ZLQ->(DbSkip())
+			ZLQ->(MSUnLock()) 
+		ZLQ->(DBSkip())
 		EndDo  
 	//Nao foram encontrados os dados dos itens do emprestimo para realizar a sua exclusao
 	Else  
@@ -2430,7 +2326,7 @@ If !lDeuErro
 	ZLN->(dbCommit()) 
 	ZLQ->(dbCommit()) 
 
-	If ZLN->(dbSeek(xFilial("ZLN") + _cCodEmpOr))   
+	If ZLN->(DBSeek(xFilial("ZLN") + _cCodEmpOr))   
 		ZLN->(RecLock("ZLN",.F.))    
 	 		ZLN->ZLN_STATUS:= "4" //Efetivado     
         	ZLN->ZLN_CODTRA:= ""
@@ -2438,7 +2334,7 @@ If !lDeuErro
 			ZLN->ZLN_DATTRA:= CtoD("")
 			ZLN->ZLN_HORTRA:= ""
 			ZLN->ZLN_OBSTRA:= ""    			
-		ZLN->(MsUnlock()) 
+		ZLN->(MSUnLock()) 
 	Else
 		lDeuErro := .T.
 		Help(NIL, NIL, "AGLT01645", NIL, "Não foram encontrados os dados do cabecalho do(A)" + _cTipo +" " + _cCodEmp + " para realizar a sua alteração na tabela ZLN.";
@@ -2446,7 +2342,7 @@ If !lDeuErro
 	EndIf
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -2455,9 +2351,7 @@ Return
 Programa----------: NroSeq
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/03/2019
-===============================================================================================================================
 Descrição---------: Busca numero de sequencia da baixa no array de baixas do titulo
-===============================================================================================================================
 Parametros--------: cPrefixo   = Prefixo do titulo a ser cancelado a baixa
 					cNum       = Numero do titulo a ser cancelado a baixa
 					cParc      = Parcela do titulo a ser cancelado a baixa
@@ -2465,7 +2359,6 @@ Parametros--------: cPrefixo   = Prefixo do titulo a ser cancelado a baixa
 					cFor       = Fornecedor do titulo a ser cancelado a baixa
 					cLoja      = Loja do Fornecedor do titulo a ser cancelado a baixa
 					cSeq       = Sequencia da baixa
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -2482,17 +2375,17 @@ Private nTotImpost:= 0
 Private nTotAdto  := 0
 Private aBaixaSE5 := {}
 
-DbSelectArea("SE2")
-SE2->(DbSetOrder(1))
-SE2->(DbSeek(xFilial("SE2")+cPrefixo+cNum+cParcela+cTipo+cFor+cLoja))
+DBSelectArea("SE2")
+SE2->(DBSetOrder(1))
+SE2->(DBSeek(xFilial("SE2")+cPrefixo+cNum+cParcela+cTipo+cFor+cLoja))
 
 //Funcao Padrao do Sistema que retorna um array com as baixas a serem canceladas
 aBaixaSE5 := Sel080Baixa("VL /V2 /BA /RA /CP /LJ /NCC/",cPrefixo,cNum,cParcela,cTipo,@nTotAdto,@lBaixaAbat,cFor,cLoja,@lBxCec,.T.,@lNotBax,@nTotImpost,@lAglImp)
-For nPos := 1 to len(aBaixaSE5)
-	If Substr(aBaixaSE5[nPos],LEN(aBaixaSE5[nPos])-1,2) == cSeq
+For nPos := 1 to Len(aBaixaSE5)
+	If SubStr(aBaixaSE5[nPos],Len(aBaixaSE5[nPos])-1,2) == cSeq
 		nRet := nPos
 		Exit
-	Endif
+	EndIf
 Next nPos
 
 Return nRet

@@ -10,23 +10,15 @@ Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "rwmake.ch"
-#INCLUDE "protheus.ch"
-#INCLUDE "topconn.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MEST003
 Autor-------------: Guilherme Diogo
 Data da Criacao---: 23/10/2012
-===============================================================================================================================
 Descrição---------: Rotina para realizar o acerto do saldo em estoque de acordo com a planilha do almoxarifado (Tabela ZZR)
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -41,18 +33,15 @@ Private	_cPerg     := "MEST003"
 
 tNewProcess():New( _cFunction, _cTitle, _bProcess, _cDescri, _cPerg,,,,,,.T.)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MEST003PRC
 Autor-------------: Guilherme Diogo
 Data da Criacao---: 23/10/2012
-===============================================================================================================================
 Descrição---------: Funcao responsavel por realizar a importacao dos dados.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -119,19 +108,19 @@ If MV_PAR03 == 1
 	_cQuery += "   B1.B1_GRUPO   GRUPO, "
 	_cQuery += "   B1.B1_LOCPAD  ARMAZEM, "
 	_cQuery += "   B1.B1_MSBLQL  STATUS1 "
-	If !empty(MV_PAR05)
+	If !Empty(MV_PAR05)
 		_cQuery += " FROM "+RetSqlName("SB1")+" B1 JOIN "+RetSqlName("ZZR")+" ZZR ON B1.B1_COD = ZZR.ZZR_COD " //INCLUIDA VALIDAÇÃO COM ZZR
 		_cQuery += " WHERE "
 		_cQuery += " B1.D_E_L_E_T_ = ' ' AND ZZR.D_E_L_E_T_ = ' ' "
-		_cQuery += " AND ZZR.ZZR_DOC = '"+Alltrim(MV_PAR05)+"' " //ZERAR SOMENTE PRODUTOS DO DOC DA PLANILHA DE INVENTÁRIO
+		_cQuery += " AND ZZR.ZZR_DOC = '"+AllTrim(MV_PAR05)+"' " //ZERAR SOMENTE PRODUTOS DO DOC DA PLANILHA DE INVENTÁRIO
 	Else
 		_cQuery += " FROM "+RetSqlName("SB1")+" B1 "
 		_cQuery += " WHERE "                    
 		_cQuery += " B1.D_E_L_E_T_ = ' ' "
-	Endif
+	EndIf
 	_cQuery += " AND  B1.B1_FILIAL = '" + xFilial("SB1") + "'"
-	_cQuery += IIf( !Empty( MV_PAR06 ) , " AND B1.B1_TIPO IN "+ FormatIn( Alltrim( MV_PAR06 ) , ';' )	, "" ) 
-	_cQuery += IIf( !Empty( MV_PAR02 ) , " AND B1.B1_GRUPO IN "+ FormatIn( Alltrim( MV_PAR02 ) , ';' )	, "" ) 
+	_cQuery += IIf( !Empty( MV_PAR06 ) , " AND B1.B1_TIPO IN "+ FormatIn( AllTrim( MV_PAR06 ) , ';' )	, "" ) 
+	_cQuery += IIf( !Empty( MV_PAR02 ) , " AND B1.B1_GRUPO IN "+ FormatIn( AllTrim( MV_PAR02 ) , ';' )	, "" ) 
 	
 	If Select(_cTBSB1) > 0 
 	 	(_cTBSB1)->( DBCloseArea() )
@@ -144,15 +133,15 @@ If MV_PAR03 == 1
 	
 		oSelf:SetRegua1( _nRegSB1 )
 		
-		AADD( _aLog , "FUNÇÃO MEST003"								)		                 
-		AADD( _aLog , "DATA DE PROCESSAMENTO: " + DTOC( DATE() )	)
-		AADD( _aLog , "HORA DO INICIO DO PROCESSAMENTO: "+ TIME()	)
+		aAdd( _aLog , "FUNÇÃO MEST003"								)		                 
+		aAdd( _aLog , "DATA DE PROCESSAMENTO: " + DToC( Date() )	)
+		aAdd( _aLog , "HORA DO INICIO DO PROCESSAMENTO: "+ Time()	)
 		
 		oSelf:SaveLog( "INICIO - ZERA SB2" )
 		
-	    AADD( _aLog , "INICIO - ZERA SB2"							)
+	    aAdd( _aLog , "INICIO - ZERA SB2"							)
 		
-		(_cTBSB1)->( DBGotop() )
+		(_cTBSB1)->( DBGoTop() )
 		
 		While (_cTBSB1)->( !Eof() )
 		
@@ -165,12 +154,12 @@ If MV_PAR03 == 1
 				
 				If _cStatus == "1"
 					
-					SB1->( Reclock( "SB1" , .F. ) )
+					SB1->( RecLock( "SB1" , .F. ) )
 					SB1->B1_MSBLQL := "2"
-					SB1->( MsUnlock() )
+					SB1->( MSUnLock() )
 					
 					oSelf:SaveLog(	"O PRODUTO "+ AllTrim(_cCod) +" ESTÁ BLOQUEADO EM SEU CADASTRO." )
-					AADD( _aLog ,	"O PRODUTO "+ AllTrim(_cCod) +" ESTÁ BLOQUEADO EM SEU CADASTRO." )
+					aAdd( _aLog ,	"O PRODUTO "+ AllTrim(_cCod) +" ESTÁ BLOQUEADO EM SEU CADASTRO." )
 				
 				EndIf
 			
@@ -186,9 +175,9 @@ If MV_PAR03 == 1
 				_nVatu1 := SB2->B2_VATU1
 				_nCm1   := SB2->B2_CM1
 				
-				If !( _nQatu == 0 .AND. _nVatu1 == 0 )
+				If !( _nQatu == 0 .And. _nVatu1 == 0 )
 					
-					If _nQatu == 0 .AND. _nVatu1 > 0
+					If _nQatu == 0 .And. _nVatu1 > 0
                         _aToSD3 := {}
 						_aCab   := {}
 						_aSD3   := {}
@@ -198,7 +187,7 @@ If MV_PAR03 == 1
                         
                         _aCab := {  { "D3_FILIAL"   , xFilial("SD3")	, Nil },;
                                    	{ "D3_TM"       ,"997"              , NIL },;
-									{ "D3_TM"       ,Alltrim(MV_PAR09)  , NIL },;
+									{ "D3_TM"       ,AllTrim(MV_PAR09)  , NIL },;
 									{ "D3_CC"       ,"        "         , NIL },;
                                     { "D3_EMISSAO"  ,DDATABASE          , NIL }}
 
@@ -209,7 +198,7 @@ If MV_PAR03 == 1
 									{ "D3_CUSTO3"	, _nVatu1			, NIL },; //INCLUIDO POR ERICH BUTTNER DIA 23/09/13 - GRAVAR O CAMPO DE CUSTO3 (UFIR)
 									{ "D3_I_OBS"    , _cObs				, NIL } }
 
-                        AADD(_aToSD3,_aSD3)
+                        aAdd(_aToSD3,_aSD3)
 
 						BEGIN TRANSACTION
 					
@@ -223,14 +212,14 @@ If MV_PAR03 == 1
 								EndIf
 								
 								oSelf:SaveLog(	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCod) )
-								AADD( _aLog ,	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCod) )
+								aAdd( _aLog ,	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCod) )
 								DisarmTransaction()
 								
 							EndIf
 						
 						END TRANSACTION
 					
-					ElseIf _nQatu == 0 .AND. _nVatu1 < 0
+					ElseIf _nQatu == 0 .And. _nVatu1 < 0
 					    
 						_nVatu1	:= _nVatu1 * -1
                         _aToSD3 := {}
@@ -252,7 +241,7 @@ If MV_PAR03 == 1
 									{ "D3_CUSTO3"	, _nVatu1			, NIL },; //INCLUIDO POR ERICH BUTTNER DIA 23/09/13 - GRAVAR O CAMPO DE CUSTO3 (UFIR)
 									{ "D3_I_OBS"    , _cObs				, NIL } }
 
-                        AADD(_aToSD3,_aSD3)
+                        aAdd(_aToSD3,_aSD3)
 
 						BEGIN TRANSACTION
 						
@@ -267,14 +256,14 @@ If MV_PAR03 == 1
 								EndIf
 							
 								oSelf:SaveLog(	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCod) )
-								AADD( _aLog ,	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCod) )
+								aAdd( _aLog ,	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCod) )
 								DisarmTransaction()
 								
 							EndIf
 						
 						END TRANSACTION
 						
-					ElseIf _nQatu > 0 .AND. _nQatu <= 99999999.99 .AND. _nVatu1 == 0
+					ElseIf _nQatu > 0 .And. _nQatu <= 99999999.99 .And. _nVatu1 == 0
 					
                         _aToSD3 := {}
 						_aCab   := {}
@@ -295,7 +284,7 @@ If MV_PAR03 == 1
 									{ "D3_CUSTO3"	, 0     			, NIL },; //INCLUIDO POR ERICH BUTTNER DIA 23/09/13 - GRAVAR O CAMPO DE CUSTO3 (UFIR)
 									{ "D3_I_OBS"    , _cObs				, NIL } }
                         
-                        AADD(_aToSD3,_aSD3)
+                        aAdd(_aToSD3,_aSD3)
 
 						BEGIN TRANSACTION
 						
@@ -310,14 +299,14 @@ If MV_PAR03 == 1
 								EndIf
 								
 								oSelf:SaveLog(	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCod) )
-								AADD( _aLog ,	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCod) )
+								aAdd( _aLog ,	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCod) )
 								DisarmTransaction()
 								
 							EndIf
 						
 						END TRANSACTION
 						
-					ElseIf _nQatu > 0 .AND. _nQatu <= 99999999.99 .AND. _nVatu1 > 0
+					ElseIf _nQatu > 0 .And. _nQatu <= 99999999.99 .And. _nVatu1 > 0
 						
                         _aToSD3 := {}
 						_aCab   := {}
@@ -338,7 +327,7 @@ If MV_PAR03 == 1
 									{ "D3_CUSTO3"	, _nVatu1			, NIL },; //INCLUIDO POR ERICH BUTTNER DIA 23/09/13 - GRAVAR O CAMPO DE CUSTO3 (UFIR)
 									{ "D3_I_OBS"    , _cObs				, NIL } }
 
-                        AADD(_aToSD3,_aSD3)
+                        aAdd(_aToSD3,_aSD3)
 
 						BEGIN TRANSACTION
 						
@@ -353,14 +342,14 @@ If MV_PAR03 == 1
 								EndIf
 								
 								oSelf:SaveLog(	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCod) )
-								AADD( _aLog ,	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCod) )
+								aAdd( _aLog ,	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCod) )
 								DisarmTransaction()
 								
 							EndIf
 							
 						END TRANSACTION
 						
-					ElseIf _nQatu < 0 .AND. _nVatu1 >= 0
+					ElseIf _nQatu < 0 .And. _nVatu1 >= 0
 						
 						_nQatu	:= _nQatu * -1
                         _aToSD3 := {}
@@ -382,7 +371,7 @@ If MV_PAR03 == 1
 									{ "D3_CUSTO3"	, 0     			, NIL },; //INCLUIDO POR ERICH BUTTNER DIA 23/09/13 - GRAVAR O CAMPO DE CUSTO3 (UFIR)
 									{ "D3_I_OBS"    , _cObs				, NIL } }
 
-                        AADD(_aToSD3,_aSD3)
+                        aAdd(_aToSD3,_aSD3)
 
 						BEGIN TRANSACTION
 							
@@ -397,14 +386,14 @@ If MV_PAR03 == 1
 								EndIf
 								
 								oSelf:SaveLog(	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCod) )
-								AADD( _aLog ,	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCod) )
+								aAdd( _aLog ,	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCod) )
 								DisarmTransaction()
 								
 							EndIf
 							
 						END TRANSACTION
 						
-					ElseIf _nQatu < 0 .AND. _nVatu1 < 0
+					ElseIf _nQatu < 0 .And. _nVatu1 < 0
 						 
 						_nQatu  := _nQatu * -1
 						_nVatu1 := _nVatu1 * -1 
@@ -427,7 +416,7 @@ If MV_PAR03 == 1
 									{ "D3_CUSTO3"	, _nVatu1  			, NIL },; //INCLUIDO POR ERICH BUTTNER DIA 23/09/13 - GRAVAR O CAMPO DE CUSTO3 (UFIR)
 									{ "D3_I_OBS"    , _cObs				, NIL } }
 
-                        AADD(_aToSD3,_aSD3)
+                        aAdd(_aToSD3,_aSD3)
 
 						BEGIN TRANSACTION
 							
@@ -442,7 +431,7 @@ If MV_PAR03 == 1
 								EndIf
 								
 								oSelf:SaveLog(	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCod) )
-								AADD( _aLog ,	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCod) )
+								aAdd( _aLog ,	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCod) )
 								DisarmTransaction()
 								
 							EndIf
@@ -461,9 +450,9 @@ If MV_PAR03 == 1
 			
 				If _cStatus == "1"
 				
-					SB1->( Reclock( "SB1" , .F. ) )
+					SB1->( RecLock( "SB1" , .F. ) )
 					SB1->B1_MSBLQL := _cStatus
-					SB1->( MsUnlock() )
+					SB1->( MSUnLock() )
 				
 				EndIf
 				
@@ -477,8 +466,8 @@ If MV_PAR03 == 1
     EndIf
     
     oSelf:SaveLog(	"FINAL - ZERA SB2" ) 
-	AADD( _aLog ,	"FINAL - ZERA SB2" ) 
-	AADD( _aLog ,	"HORA DO FIM DO PROCESSAMENTO: "+ TIME() )
+	aAdd( _aLog ,	"FINAL - ZERA SB2" ) 
+	aAdd( _aLog ,	"HORA DO FIM DO PROCESSAMENTO: "+ Time() )
 
 //================================================================================
 // Saldo ZZR
@@ -505,10 +494,10 @@ ElseIf MV_PAR03 == 2
 	_cQuery += " 		AND ZZR.ZZR_FILIAL = '"+ xFilial("ZZR")	+"' "
 	_cQuery += " 		AND ZZR.ZZR_STATUS = '1' "
 	_cQuery += " 		AND ZZR.ZZR_DOC IN "+ FormatIn( MV_PAR05 , ';' )											
-	_cQuery += IIf( !Empty( _cArmaz ) , " AND ZZR.ZZR_LOCAL IN "+ FormatIn( Alltrim( _cArmaz ) , ';' )	, "" ) 
+	_cQuery += IIf( !Empty( _cArmaz ) , " AND ZZR.ZZR_LOCAL IN "+ FormatIn( AllTrim( _cArmaz ) , ';' )	, "" ) 
 	_cQuery += " 		AND B1.B1_FILIAL = '"+ xFilial("SB1")	+"' "
-	_cQuery += IIf( !Empty( MV_PAR06 ) , " AND B1.B1_TIPO IN "+ FormatIn( Alltrim( MV_PAR06 ) , ';' )	, "" ) 
-	_cQuery += IIf( !Empty( MV_PAR02 ) , " AND B1.B1_GRUPO IN "+ FormatIn( Alltrim( MV_PAR02 ) , ';' )	, "" ) 
+	_cQuery += IIf( !Empty( MV_PAR06 ) , " AND B1.B1_TIPO IN "+ FormatIn( AllTrim( MV_PAR06 ) , ';' )	, "" ) 
+	_cQuery += IIf( !Empty( MV_PAR02 ) , " AND B1.B1_GRUPO IN "+ FormatIn( AllTrim( MV_PAR02 ) , ';' )	, "" ) 
 
 
 	If Select(_cTBZZR) > 0 
@@ -522,12 +511,12 @@ ElseIf MV_PAR03 == 2
 	
 		oSelf:SetRegua1(_nRegZZR)
 		
-		AADD( _aLog , "FUNÇÃO MEST003"								)		                 
-		AADD( _aLog , "DATA DE PROCESSAMENTO: "+ DTOC( DATE() )		)
-		AADD( _aLog , "HORA DO INICIO DO PROCESSAMENTO: "+ TIME()	)
+		aAdd( _aLog , "FUNÇÃO MEST003"								)		                 
+		aAdd( _aLog , "DATA DE PROCESSAMENTO: "+ DToC( Date() )		)
+		aAdd( _aLog , "HORA DO INICIO DO PROCESSAMENTO: "+ Time()	)
 		
 		oSelf:SaveLog(	"INICIO - SALDO ZZR" )
-	    AADD( _aLog ,	"INICIO - SALDO ZZR" )
+	    aAdd( _aLog ,	"INICIO - SALDO ZZR" )
 		
 		(_cTBZZR)->( DBGoTop() )
 		
@@ -544,7 +533,7 @@ ElseIf MV_PAR03 == 2
 			If _cStatus == "1"
 				
 				oSelf:SaveLog(	"O PRODUTO " + AllTrim(_cCodZZR) + " ESTÁ BLOQUEADO EM SEU CADASTRO." )
-				AADD( _aLog ,	"O PRODUTO " + AllTrim(_cCodZZR) + " ESTÁ BLOQUEADO EM SEU CADASTRO." )
+				aAdd( _aLog ,	"O PRODUTO " + AllTrim(_cCodZZR) + " ESTÁ BLOQUEADO EM SEU CADASTRO." )
 				
 			Else
 	
@@ -556,8 +545,8 @@ ElseIf MV_PAR03 == 2
 				SD3->( DBSetOrder(3) )
 				
                 _aCab := {  { "D3_FILIAL"   , xFilial("SD3")	, Nil },;
-                           	{ "D3_TM"		,Alltrim(MV_PAR08)  , Nil },; //{ "D3_TM"       ,"497"              , NIL },;
-                            { "D3_CC"       ,ALLTRIM(MV_PAR04)  , NIL },;
+                           	{ "D3_TM"		,AllTrim(MV_PAR08)  , Nil },; //{ "D3_TM"       ,"497"              , NIL },;
+                            { "D3_CC"       ,AllTrim(MV_PAR04)  , NIL },;
                             { "D3_EMISSAO"  ,DDATABASE          , NIL }}
 
                 _aSD3 := {	{ "D3_COD"		, _cCodZZR			, NIL },;
@@ -567,7 +556,7 @@ ElseIf MV_PAR03 == 2
 							{ "D3_CUSTO3"	, _nCusZZR  	    , NIL },; //INCLUIDO POR ERICH BUTTNER DIA 23/09/13 - GRAVAR O CAMPO DE CUSTO3 (UFIR)
 							{ "D3_I_OBS"    , _cObs				, NIL } }
 
-                AADD(_aToSD3,_aSD3)
+                aAdd(_aToSD3,_aSD3)
 
 				BEGIN TRANSACTION
 				
@@ -582,16 +571,16 @@ ElseIf MV_PAR03 == 2
 						EndIf
 								
 						oSelf:SaveLog(	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCodZZR) )
-						AADD( _aLog ,	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCodZZR) )
+						aAdd( _aLog ,	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCodZZR) )
 						DisarmTransaction()
 						
 					Else
 					
 						//se movimentou ok muda o registro do ZZR para processado	
-						ZZR->(dbgoto((_cTBZZR)->REG))
+						ZZR->(DBGoTo((_cTBZZR)->REG))
 						RecLock("ZZR",.F.)
 						ZZR->ZZR_STATUS := "2"
-						ZZR->(MsUnlock())
+						ZZR->(MSUnLock())
 					
 					EndIf
 				
@@ -607,8 +596,8 @@ ElseIf MV_PAR03 == 2
     EndIf
 	
 	oSelf:SaveLog(	"FINAL - SALDO ZZR" ) 
-	AADD( _aLog ,	"FINAL - SALDO ZZR" )
-	AADD( _aLog ,	"HORA DO FIM DO PROCESSAMENTO: " + TIME() )
+	aAdd( _aLog ,	"FINAL - SALDO ZZR" )
+	aAdd( _aLog ,	"HORA DO FIM DO PROCESSAMENTO: " + Time() )
 
 //================================================================================
 // Indicador de Produtos
@@ -637,10 +626,10 @@ ElseIf MV_PAR03 == 3
 	_cQuery += " 		AND ZZR.ZZR_FILIAL = '"+ xFilial("ZZR")	+"' "
 	//_cQuery += " 		AND ZZR.ZZR_STATUS = '1' "
 	_cQuery += " 		AND ZZR.ZZR_DOC IN "+ FormatIn( MV_PAR05 , ';' )											
-	_cQuery += IIf( !Empty( _cArmaz ) , " AND ZZR.ZZR_LOCAL IN "+ FormatIn( Alltrim( _cArmaz ) , ';' )	, "" ) 
+	_cQuery += IIf( !Empty( _cArmaz ) , " AND ZZR.ZZR_LOCAL IN "+ FormatIn( AllTrim( _cArmaz ) , ';' )	, "" ) 
 	_cQuery += " 		AND B1.B1_FILIAL = '"+ xFilial("SB1")	+"' "
-	_cQuery += IIf( !Empty( MV_PAR06 ) , " AND B1.B1_TIPO IN "+ FormatIn( Alltrim( MV_PAR06 ) , ';' )	, "" ) 
-	_cQuery += IIf( !Empty( MV_PAR02 ) , " AND B1.B1_GRUPO IN "+ FormatIn( Alltrim( MV_PAR02 ) , ';' )	, "" ) 
+	_cQuery += IIf( !Empty( MV_PAR06 ) , " AND B1.B1_TIPO IN "+ FormatIn( AllTrim( MV_PAR06 ) , ';' )	, "" ) 
+	_cQuery += IIf( !Empty( MV_PAR02 ) , " AND B1.B1_GRUPO IN "+ FormatIn( AllTrim( MV_PAR02 ) , ';' )	, "" ) 
 	
 	If Select(_cTBSBZ) > 0 
 		(_cTBSBZ)->( DBCloseArea() )
@@ -653,12 +642,12 @@ ElseIf MV_PAR03 == 3
 	    
 		oSelf:SetRegua1( _nRegSBZ )
 		
-		AADD( _aLog , "FUNÇÃO MEST003"								)		                 
-		AADD( _aLog , "DATA DE PROCESSAMENTO: "+ DTOC( DATE() )		)
-		AADD( _aLog , "HORA DO INICIO DO PROCESSAMENTO: "+ TIME()	)
+		aAdd( _aLog , "FUNÇÃO MEST003"								)		                 
+		aAdd( _aLog , "DATA DE PROCESSAMENTO: "+ DToC( Date() )		)
+		aAdd( _aLog , "HORA DO INICIO DO PROCESSAMENTO: "+ Time()	)
 		
 		oSelf:SaveLog(	"INICIO - INDICADOR DE PRODUTOS" )
-	    AADD( _aLog ,	"INICIO - INDICADOR DE PRODUTOS" )
+	    aAdd( _aLog ,	"INICIO - INDICADOR DE PRODUTOS" )
 		
 		(_cTBSBZ)->( DBGoTop() )
 		
@@ -681,16 +670,16 @@ ElseIf MV_PAR03 == 3
 					SBZ->BZ_ESTSEG  := _nMinSBZ
 		      		SBZ->BZ_EMAX    := _nMaxSBZ
 		            
-				SBZ->( MsUnlock() )
+				SBZ->( MSUnLock() )
 				
 				//se movimentou ok muda o registro do ZZR para processado	
-				ZZR->(dbgoto((_cTBSBZ)->REG))
+				ZZR->(DBGoTo((_cTBSBZ)->REG))
 				RecLock("ZZR",.F.)
 				ZZR->ZZR_STATUS := "2"
-				ZZR->(MsUnlock())
+				ZZR->(MSUnLock())
 			
-			 	oSelf:SaveLog(	"O PRODUTO "+ ALLTRIM(_cCodSBZ) +" TEVE O CADASTRO DE INDICADOR ATUALIZADO." )
-			 	AADD( _aLog ,	"O PRODUTO "+ ALLTRIM(_cCodSBZ) +" TEVE O CADASTRO DE INDICADOR ATUALIZADO." )
+			 	oSelf:SaveLog(	"O PRODUTO "+ AllTrim(_cCodSBZ) +" TEVE O CADASTRO DE INDICADOR ATUALIZADO." )
+			 	aAdd( _aLog ,	"O PRODUTO "+ AllTrim(_cCodSBZ) +" TEVE O CADASTRO DE INDICADOR ATUALIZADO." )
 			 	
 			EndIf
 			
@@ -702,8 +691,8 @@ ElseIf MV_PAR03 == 3
 	EndIf
 	
 	oSelf:SaveLog(	"FINAL - INDICADOR DE PRODUTOS" )
-	AADD( _aLog ,	"FINAL - INDICADOR DE PRODUTOS" )
-	AADD( _aLog ,	"HORA DO FIM DO PROCESSAMENTO: "+ TIME() )
+	aAdd( _aLog ,	"FINAL - INDICADOR DE PRODUTOS" )
+	aAdd( _aLog ,	"HORA DO FIM DO PROCESSAMENTO: "+ Time() )
 
 
 //================================================================================
@@ -731,10 +720,10 @@ ElseIf MV_PAR03 == 4
 	_cQuery += " 		AND ZZR.ZZR_FILIAL = '"+ xFilial("ZZR")	+"' "
 	_cQuery += " 		AND ZZR.ZZR_STATUS = '1' "
 	_cQuery += " 		AND ZZR.ZZR_DOC IN "+ FormatIn( MV_PAR05 , ';' )											
-	_cQuery += IIf( !Empty( _cArmaz ) , " AND ZZR.ZZR_LOCAL IN "+ FormatIn( Alltrim( _cArmaz ) , ';' )	, "" ) 
+	_cQuery += IIf( !Empty( _cArmaz ) , " AND ZZR.ZZR_LOCAL IN "+ FormatIn( AllTrim( _cArmaz ) , ';' )	, "" ) 
 	_cQuery += " 		AND B1.B1_FILIAL = '"+ xFilial("SB1")	+"' "
-	_cQuery += IIf( !Empty( MV_PAR06 ) , " AND B1.B1_TIPO IN "+ FormatIn( Alltrim( MV_PAR06 ) , ';' )	, "" ) 
-	_cQuery += IIf( !Empty( MV_PAR02 ) , " AND B1.B1_GRUPO IN "+ FormatIn( Alltrim( MV_PAR02 ) , ';' )	, "" ) 
+	_cQuery += IIf( !Empty( MV_PAR06 ) , " AND B1.B1_TIPO IN "+ FormatIn( AllTrim( MV_PAR06 ) , ';' )	, "" ) 
+	_cQuery += IIf( !Empty( MV_PAR02 ) , " AND B1.B1_GRUPO IN "+ FormatIn( AllTrim( MV_PAR02 ) , ';' )	, "" ) 
 
 
 	If Select(_cTBZZR) > 0 
@@ -748,12 +737,12 @@ ElseIf MV_PAR03 == 4
 	
 		oSelf:SetRegua1(_nRegZZR)
 		
-		AADD( _aLog , "FUNÇÃO MEST003 - CORRECAO VALORES"			)		                 
-		AADD( _aLog , "DATA DE PROCESSAMENTO: "+ DTOC( DATE() )		)
-		AADD( _aLog , "HORA DO INICIO DO PROCESSAMENTO: "+ TIME()	)
+		aAdd( _aLog , "FUNÇÃO MEST003 - CORRECAO VALORES"			)		                 
+		aAdd( _aLog , "DATA DE PROCESSAMENTO: "+ DToC( Date() )		)
+		aAdd( _aLog , "HORA DO INICIO DO PROCESSAMENTO: "+ Time()	)
 		
 		oSelf:SaveLog(	"INICIO - SALDO ZZR" )
-	    AADD( _aLog ,	"INICIO - SALDO ZZR" )
+	    aAdd( _aLog ,	"INICIO - SALDO ZZR" )
 		
 		(_cTBZZR)->( DBGoTop() )
 		
@@ -770,7 +759,7 @@ ElseIf MV_PAR03 == 4
 			If _cStatus == "1"
 				
 				oSelf:SaveLog(	"O PRODUTO " + AllTrim(_cCodZZR) + " ESTÁ BLOQUEADO EM SEU CADASTRO." )
-				AADD( _aLog ,	"O PRODUTO " + AllTrim(_cCodZZR) + " ESTÁ BLOQUEADO EM SEU CADASTRO." )
+				aAdd( _aLog ,	"O PRODUTO " + AllTrim(_cCodZZR) + " ESTÁ BLOQUEADO EM SEU CADASTRO." )
 				
 			Else
 	
@@ -782,11 +771,11 @@ ElseIf MV_PAR03 == 4
 				SD3->( DBSetOrder(3) )
 				
                 
-				iF _nCusZZR > 0
+				If _nCusZZR > 0
 				
 					_aCab := {  { "D3_FILIAL"   , xFilial("SD3")	, Nil },;
-                      	      { "D3_TM"       ,Alltrim(MV_PAR08)    , NIL },;
-                          	  { "D3_CC"       ,ALLTRIM(MV_PAR04)  , NIL },;
+                      	      { "D3_TM"       ,AllTrim(MV_PAR08)    , NIL },;
+                          	  { "D3_CC"       ,AllTrim(MV_PAR04)  , NIL },;
                          	   { "D3_EMISSAO"  ,DDATABASE          , NIL }}
 
                 	_aSD3 := {	{ "D3_COD"		, _cCodZZR			, NIL },;
@@ -796,7 +785,7 @@ ElseIf MV_PAR03 == 4
 								{ "D3_CUSTO3"	, _nCusZZR  	    , NIL },; //INCLUIDO POR ERICH BUTTNER DIA 23/09/13 - GRAVAR O CAMPO DE CUSTO3 (UFIR)
 								{ "D3_I_OBS"    , _cObs				, NIL } }
 
-                	AADD(_aToSD3,_aSD3)
+                	aAdd(_aToSD3,_aSD3)
 
 					BEGIN TRANSACTION
 				
@@ -811,16 +800,16 @@ ElseIf MV_PAR03 == 4
 							EndIf
 								
 							oSelf:SaveLog(	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCodZZR) )
-							AADD( _aLog ,	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCodZZR) )
+							aAdd( _aLog ,	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCodZZR) )
 							DisarmTransaction()
 						
 						Else
 					
 							//se movimentou ok muda o registro do ZZR para processado	
-							ZZR->(dbgoto((_cTBZZR)->REG))
+							ZZR->(DBGoTo((_cTBZZR)->REG))
 							RecLock("ZZR",.F.)
 							ZZR->ZZR_STATUS := "2"
-							ZZR->(MsUnlock())
+							ZZR->(MSUnLock())
 					
 						EndIf
 				
@@ -828,8 +817,8 @@ ElseIf MV_PAR03 == 4
 				Else
 					_nCusZZR:= _nCusZZR*-1
 					_aCab := {  { "D3_FILIAL"   , xFilial("SD3")	, Nil },;
-                      	      	{ "D3_TM"       ,Alltrim(MV_PAR09)  , NIL },;
-                          	  	{ "D3_CC"       ,ALLTRIM(MV_PAR04)  , NIL },;
+                      	      	{ "D3_TM"       ,AllTrim(MV_PAR09)  , NIL },;
+                          	  	{ "D3_CC"       ,AllTrim(MV_PAR04)  , NIL },;
                          	   { "D3_EMISSAO"  ,DDATABASE          , NIL }}
 
                 	_aSD3 := {	{ "D3_COD"		, _cCodZZR			, NIL },;
@@ -839,7 +828,7 @@ ElseIf MV_PAR03 == 4
 								{ "D3_CUSTO3"	, _nCusZZR  	    , NIL },; //INCLUIDO POR ERICH BUTTNER DIA 23/09/13 - GRAVAR O CAMPO DE CUSTO3 (UFIR)
 								{ "D3_I_OBS"    , _cObs				, NIL } }
 
-                	AADD(_aToSD3,_aSD3)
+                	aAdd(_aToSD3,_aSD3)
 
 					BEGIN TRANSACTION
 				
@@ -854,23 +843,23 @@ ElseIf MV_PAR03 == 4
 							EndIf
 								
 							oSelf:SaveLog(	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCodZZR) )
-							AADD( _aLog ,	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCodZZR) )
+							aAdd( _aLog ,	"ERRO AO PROCESSAR O PRODUTO " + AllTrim(_cCodZZR) )
 							DisarmTransaction()
 						
 						Else
 					
 							//se movimentou ok muda o registro do ZZR para processado	
-							ZZR->(dbgoto((_cTBZZR)->REG))
+							ZZR->(DBGoTo((_cTBZZR)->REG))
 							RecLock("ZZR",.F.)
 							ZZR->ZZR_STATUS := "2"
-							ZZR->(MsUnlock())
+							ZZR->(MSUnLock())
 					
 						EndIf
 				
 					END TRANSACTION
 
 				EndIf
-			Endif
+			EndIf
 		(_cTBZZR)->( DBSkip() )
    		EndDo
    		
@@ -879,8 +868,8 @@ ElseIf MV_PAR03 == 4
     EndIf
 	
 	oSelf:SaveLog(	"FINAL - SALDO ZZR" ) 
-	AADD( _aLog ,	"FINAL - SALDO ZZR" )
-	AADD( _aLog ,	"HORA DO FIM DO PROCESSAMENTO: " + TIME() )
+	aAdd( _aLog ,	"FINAL - SALDO ZZR" )
+	aAdd( _aLog ,	"HORA DO FIM DO PROCESSAMENTO: " + Time() )
 
 
 
@@ -893,18 +882,15 @@ U_ITLOGACS('MEST003')
 
 U_MEST003()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MEST003C
 Autor-------------: Guilherme Diogo
 Data da Criacao---: 23/10/2012
-===============================================================================================================================
 Descrição---------: Rotina que permite gravar o LOG referente ao processamento
-===============================================================================================================================
 Parametros--------: _aLog - registro de eventos a ser salvo
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -920,20 +906,20 @@ Aviso( "Salvar Log em TXT" , "Este programa ira gerar um arquivo texto com o Log
 _cArq := cGetFile( "Documento Texto |*.TXT" , OemToAnsi("Salvar Arquivo Como...") , 0 , "C:\" , .T. , GETF_LOCALHARD+GETF_NETWORKDRIVE )
 
 If Empty(_cArq)
-     Return()
+     Return
 EndIf
 
-_nPos := At( ".TXT" , UPPER(_cArq) )
+_nPos := At( ".TXT" , Upper(_cArq) )
 
 If _nPos == 0
-     _cArq := Alltrim(_cArq) + ".TXT"
+     _cArq := AllTrim(_cArq) + ".TXT"
 EndIf
 
 _nHdl := FCreate(_cArq)
 
 If _nHdl == -1
      MsgAlert( "O arquivo de nome "+_cArq+" nao pode ser criado!" , "Atencao!" )
-     Return()
+     Return
 EndIf
 
 ProcRegua( Len(_aLog) )
@@ -943,7 +929,7 @@ For _nI := 1 To Len(_aLog)
 	FWrite( _nHdl , _aLog[_nI] + chr(13) + chr(10) )
 	
 	If FError() # 0
-   		MsgAlert ( "ERRO AO GRAVAR NO ARQUIVO: "+ str( FError() ) )
+   		MsgAlert ( "ERRO AO GRAVAR NO ARQUIVO: "+ Str( FError() ) )
    		Exit
 	EndIf
 	
@@ -958,18 +944,15 @@ MsgInfo( "Arquivo TXT gerado com sucesso!" )
 //volta a tela inicial
 U_MEST003()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MEST003C
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 25/08/2015
-===============================================================================================================================
 Descrição---------: Rotina para montar consulta de documentos de inventário (ZZR)
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1011,7 +994,7 @@ EndDo
 (_cAlias)->( DBCloseArea() )
 
 //Se tiver documentos válidos cria a consulta
-If len(_aDados) > 0
+If Len(_aDados) > 0
 
 	If U_ITListBox( _cTitAux , { '__' , 'Documento', 'OBS' } , @_aDados , .F. , 2 , 'Selecione os documentos desejados: ' )
 
@@ -1025,13 +1008,13 @@ If len(_aDados) > 0
 	
 		&( ReadVar() ) := SubStr( _cRet , 1 , Len(_cRet) - 1 )
 		
-	Endif
+	EndIf
 
 //se não tiver documentos válidos alerta e sai
 Else
 	
 	alert("Não há documentos válidos!")
 	
-Endif
+EndIf
 
 Return( .T. )

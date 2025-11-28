@@ -2,27 +2,22 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 15/05/2024 | Chamado 47107. Jerry. Alteracao de "Dt.Cheg.Oper.Log" p/ "Dt Ocorr Oper Log" de "Dt.Cheg.Cliente" p/ "Dt.Ocorr.Cliente"
-Julio Paz     | 08/07/2024 | Chamado 47784. Correção de error log na rotina de canhotos de notas fiscais ao informa data para Oper.Log.
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Alex Wallauer |13/11/2024| Chamado 46161. Gravação dos campos F2_I_OUSER/F2_I_ODATA/F2_I_OHORA quando alterar a Dt Entrega no Op.Log (Dt.Canhoto) 
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |18/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
 ===============================================================================================================================
-Analista    - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
-==============================================================================================================================================================
-Jerry       - Alex Wallauer - 12/09/24 - 13/11/24 - 46161   - Gravação dos campos F2_I_OUSER/F2_I_ODATA/F2_I_OHORA quando alterar a Dt Entrega no Op.Log (Dt.Canhoto) 
-==============================================================================================================================================================
 */
 
-#Include "PROTHEUS.CH"
+#Include "TOTVS.ch"
 #Include "RWMAKE.CH"
 #Include "Colors.ch"
 #Include "FWMVCDef.Ch"
-#Include "topconn.Ch"
 
 /*
 ===============================================================================================================================
-Programa----------: MOMS016 
+Programa----------: MOMS016
 Autor-------------: Fabiano Dias
 Data da Criacao---: 04/07/2011
 Descrição---------: Funcao responsavel por realizar o lancamento da data de entrega do canhoto no sistema.
@@ -41,21 +36,21 @@ Private _cNOperLog := ""
 // Valida a parametrização inicial e chama função para montagem da tela para
 // seleção das NF que terão os recebimentos de canhoto informados.
 //================================================================================
-DO WHILE .T.
+While .T.
 
    If Pergunte(_cPerg,.T.)
 	
-	  IF MOMS016L()
-	     LOOP
-	  ENDIF
+	  If MOMS016L()
+	     Loop
+	  EndIf
 
    EndIf
    
-   EXIT 
+   Exit 
 
-ENDDO
+EndDo
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -87,8 +82,8 @@ If _nOpcao == 1
 	_cFiltro2 += " AND F2.F2_FILIAL = '" + xFilial("SF2") + "' "
 
 	//Da data de faturamento inicial a final
-	_cFiltro  += " AND F2.F2_EMISSAO BETWEEN '" + DtoS(MV_PAR01) + "' AND '" + DtoS(MV_PAR02) + "' "
-	_cFiltro2 += " AND F2.F2_EMISSAO BETWEEN '" + DtoS(MV_PAR01) + "' AND '" + DtoS(MV_PAR02) + "' "
+	_cFiltro  += " AND F2.F2_EMISSAO BETWEEN '" + DToS(MV_PAR01) + "' AND '" + DToS(MV_PAR02) + "' "
+	_cFiltro2 += " AND F2.F2_EMISSAO BETWEEN '" + DToS(MV_PAR01) + "' AND '" + DToS(MV_PAR02) + "' "
 	
 	//Da nota fiscal inicial a final
 	_cFiltro  += " AND F2.F2_DOC BETWEEN '" + MV_PAR03 + "' AND '" + MV_PAR04 + "'"
@@ -101,7 +96,7 @@ If _nOpcao == 1
 	If MV_PAR07 == 2
 		_cFiltro	+= " AND F2.F2_I_DTRC <> '        ' "
 		_cFiltro2	+= " AND F2.F2_I_DTRC <> '        ' "
-	ElseIF MV_PAR07 == 1
+	ElseIf MV_PAR07 == 1
 		_cFiltro	+= " AND F2.F2_I_DTRC = '        ' "
 		_cFiltro2	+= " AND F2.F2_I_DTRC = '        ' "
 	EndIf
@@ -136,12 +131,12 @@ If _nOpcao == 1
 			F2.F2_VALBRUT	AS VLRNF,
 			F2.F2_I_OBRC	AS OBSERV,
 			F2.R_E_C_N_O_   AS SF2_REC
-		FROM %table:SF2% F2
-		JOIN %table:SA1% A1 ON A1.A1_COD = F2.F2_CLIENTE AND A1.A1_LOJA = F2.F2_LOJA
-		JOIN %table:ACY% CY ON CY.ACY_GRPVEN = A1.A1_GRPVEN
-		JOIN %table:DAK% DAK ON DAK.DAK_FILIAL = F2.F2_FILIAL AND DAK.DAK_COD = F2.F2_CARGA
-		JOIN %table:DA4% DA4 ON DA4.DA4_COD = DAK.DAK_MOTORI
-		JOIN %table:SA2% A2 ON F2.F2_I_CTRA = A2.A2_COD AND F2.F2_I_LTRA = A2.A2_LOJA 
+		FROM %Table:SF2% F2
+		JOIN %Table:SA1% A1 ON A1.A1_COD = F2.F2_CLIENTE AND A1.A1_LOJA = F2.F2_LOJA
+		JOIN %Table:ACY% CY ON CY.ACY_GRPVEN = A1.A1_GRPVEN
+		JOIN %Table:DAK% DAK ON DAK.DAK_FILIAL = F2.F2_FILIAL AND DAK.DAK_COD = F2.F2_CARGA
+		JOIN %Table:DA4% DA4 ON DA4.DA4_COD = DAK.DAK_MOTORI
+		JOIN %Table:SA2% A2 ON F2.F2_I_CTRA = A2.A2_COD AND F2.F2_I_LTRA = A2.A2_LOJA 
 		WHERE
 			F2.%NotDel%
 		AND A1.%NotDel%
@@ -175,9 +170,9 @@ If _nOpcao == 1
 			F2.F2_VALBRUT	AS VLRNF,
 			F2.F2_I_OBRC	AS OBSERV,
 			F2.R_E_C_N_O_   AS SF2_REC
-		FROM %table:SF2% F2
-		JOIN %table:SA1% A1 ON A1.A1_COD = F2.F2_CLIENTE AND A1.A1_LOJA = F2.F2_LOJA
-		JOIN %table:ACY% CY ON CY.ACY_GRPVEN = A1.A1_GRPVEN
+		FROM %Table:SF2% F2
+		JOIN %Table:SA1% A1 ON A1.A1_COD = F2.F2_CLIENTE AND A1.A1_LOJA = F2.F2_LOJA
+		JOIN %Table:ACY% CY ON CY.ACY_GRPVEN = A1.A1_GRPVEN
 		WHERE
 			F2.%NotDel%
 		AND A1.%NotDel%
@@ -207,8 +202,8 @@ If _nOpcao == 1
 			F2.F2_VALBRUT	AS VLRNF,
 			F2.F2_I_OBRC	AS OBSERV,
 			F2.R_E_C_N_O_   AS SF2_REC
-		FROM %table:SF2% F2
-		JOIN %table:SA2% A2 ON A2.A2_COD = F2.F2_CLIENTE AND A2.A2_LOJA = F2.F2_LOJA
+		FROM %Table:SF2% F2
+		JOIN %Table:SA2% A2 ON A2.A2_COD = F2.F2_CLIENTE AND A2.A2_LOJA = F2.F2_LOJA
 		WHERE
 			F2.%NotDel%
 		AND	A2.%NotDel%
@@ -218,12 +213,12 @@ If _nOpcao == 1
 	EndSql
 
     DBSelectArea( _cAlias )
-    (_cAlias)->( DBGotop() )
-    COUNT TO _nNumReg
+    (_cAlias)->( DBGoTop() )
+    COUNT To _nNumReg
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -289,29 +284,29 @@ Define Font oFont12b Name "Courier New" Size 0,-12 Bold  // Tamanho 12 Negrito
 //===============================================================================================
 _cAliasDad:= GetNextAlias()
 
-fwmsgrun( ,{|| MOMS016Q(1,_cAliasDad)} , 'Aguarde' , "Selecionando as notas fiscais..."  )
+FWMsgRun( ,{|| MOMS016Q(1,_cAliasDad)} , 'Aguarde' , "Selecionando as notas fiscais..."  )
 
 //===============================================================================================
 // Nao existem registros para exibir
 //===============================================================================================
 If _nNumReg == 0
 
-	U_ITMSG("Não foram encontradas notas fiscais de acordo com os parâmetros fornecidos.",;
+	U_ITMsg("Não foram encontradas notas fiscais de acordo com os parâmetros fornecidos.",;
 			"Informação",;
 			"Favor checar se os parâmetros foram fornecidos corretamente.",1)
-	RETURN .T.
+	Return .T.
 	    
 Else
 
 	//===============================================================================================
 	// Cria o arquivo Temporario para insercao dos dados selecionados
 	//===============================================================================================
-	fwMsgRun( , {||  MOMS016C(_cAlias)  }, 'Aguarde', 'Montando a estrutura de dados...' )
+	FWMsgRun( , {||  MOMS016C(_cAlias)  }, 'Aguarde', 'Montando a estrutura de dados...' )
 	
 	//==============================================================================================
 	// Insere os dados no arquivo temporario criado
 	//===============================================================================================
-    fwmsgrun( , {|| MOMS016K(_cAlias,_cAliasDad)} , 'Aguarde', "Inserindo os dados selecionados..."  )
+    FWMsgRun( , {|| MOMS016K(_cAlias,_cAliasDad)} , 'Aguarde', "Inserindo os dados selecionados..."  )
 	
 	//==============================================================================================
 	// Faz o calculo automatico de dimensoes de objetos
@@ -332,8 +327,8 @@ Else
 	aAdd( aBotoes , { "PESQUISA"	, {|| MOMS016E(_cAlias)	} , "Pesquisar..."					, "Pesquisar"	} )
 	aAdd( aBotoes , { "S4WB005N"	, {|| MOMS016U(_cAlias)	} , "Visualizar N.F."				, "N.F."		} )
 	aAdd( aBotoes , { "BMPVISUAL"	, {|| MOMS016P(_cAlias)	} , "Filtrar N.F."					, "Filtro"		} )
-	Aadd( aBotoes , { "RESPONSA"	, {|| MOMS016N(_cAlias)	} , "Fornecer data do Canhoto..."	, "Canhoto"		} )
-	Aadd( aBotoes , { 'NOTE'        , {|| U_AOMS003(" ZF5->ZF5_FILIAL == '"+xFilial("ZF5")+"' .AND. ZF5->ZF5_DOCOC ==  '"+&(_cAlias+'->'+_cAlias+'_DOC')+"' .AND. ZF5->ZF5_SEROC ==  '"+&(_cAlias+'->'+_cAlias+"_SERIE")+"' ")},"Ocorrências de frete","Ocorrências de frete"})  
+	aAdd( aBotoes , { "RESPONSA"	, {|| MOMS016N(_cAlias)	} , "Fornecer data do Canhoto..."	, "Canhoto"		} )
+	aAdd( aBotoes , { 'NOTE'        , {|| U_AOMS003(" ZF5->ZF5_FILIAL == '"+xFilial("ZF5")+"' .And. ZF5->ZF5_DOCOC ==  '"+&(_cAlias+'->'+_cAlias+'_DOC')+"' .And. ZF5->ZF5_SEROC ==  '"+&(_cAlias+'->'+_cAlias+"_SERIE")+"' ")},"Ocorrências de frete","Ocorrências de frete"})  
 
 	//===============================================================================================
 	// Cria a tela para selecao dos Titulos
@@ -358,19 +353,19 @@ Else
 			nHeight	:= 143
 			nWidth	:= 315
 			
-		Endif                    
+		EndIf                    
 
 		DBSelectArea(_cAlias)     
-		(_cAlias)->( DBGotop() )
+		(_cAlias)->( DBGoTop() )
 		
 		oBrowse := TCBrowse():New( 15,01,aPosObj1[1,3]+07,aPosObj1[1,4]-10,,,{20,20,20,20,20,20,20,20,30,20,20,17,20,20,20,15,20,30},oDlg1,,,,,{||},, oFont01 ,,,,,.F.,_cAlias,.T.,,.F.,,.T.,.T.)
 
-		For x:=1 to (Len(aStruct)-1)
+		For x:=1 To (Len(aStruct)-1)
 			
 			If aStruct[x,1] == _cAlias + "_STATUS"
-				oBrowse:AddColumn( TCColumn():New("",{|| IIF(&(_cAlias + '->' + _cAlias + "_STATUS") == Space(2),oNO,oOK)},,,,"CENTER",,.T.,.F.,,,,.F.,) )
+				oBrowse:AddColumn( TCColumn():New("",{|| IIf(&(_cAlias + '->' + _cAlias + "_STATUS") == Space(2),oNO,oOK)},,,,"CENTER",,.T.,.F.,,,,.F.,) )
 			Else
-				oBrowse:AddColumn( TCColumn():New(OemToAnsi(aTitulo[x,2]),&("{ || " + _cAlias + '->' + aStruct[x,1]+"}"),aTitulo[x,3],,,if(aStruct[x,2]=="N","RIGHT","LEFT"),,.F.,.F.,,,,.F.,) )
+				oBrowse:AddColumn( TCColumn():New(OemToAnsi(aTitulo[x,2]),&("{ || " + _cAlias + '->' + aStruct[x,1]+"}"),aTitulo[x,3],,,If(aStruct[x,2]=="N","RIGHT","LEFT"),,.F.,.F.,,,,.F.,) )
 			EndIf     
 			
 		Next x
@@ -382,10 +377,10 @@ Else
 		oBrowse:bLDblClick := {|| MOMS016S(_cAlias,&(_cAlias + '->' + _cAlias + "_STATUS")) }
 		
     	//Evento quando o usuario clica na coluna desejada
-		oBrowse:bHeaderClick := {|oBrowse, nCol| nColuna:= nCol,fwMsgRun(,{|| MOMS016O(_cAlias,nColuna) },"Processando...","Organizando registros...") }
+		oBrowse:bHeaderClick := {|oBrowse, nCol| nColuna:= nCol,FWMsgRun(,{|| MOMS016O(_cAlias,nColuna) },"Processando...","Organizando registros...") }
 		
 	
-	ACTIVATE MSDIALOG oDlg1 ON INIT ( EnchoiceBar( oDlg1 , {|| Eval({|| nOpca := 1,oDlg1:End()})} , {|| nOpca := 2,oDlg1:End()},,aBotoes,,,,,,.f.,,),oPanel:Align	:= CONTROL_ALIGN_TOP, oBrowse :Align	:= CONTROL_ALIGN_ALLCLIENT, oBrowse:Refresh() )
+	ACTIVATE MSDIALOG oDlg1 ON INIT ( EnchoiceBar( oDlg1 , {|| Eval({|| nOpca := 1,oDlg1:End()})} , {|| nOpca := 2,oDlg1:End()},,aBotoes,,,,,,.F.,,),oPanel:Align	:= CONTROL_ALIGN_TOP, oBrowse :Align	:= CONTROL_ALIGN_ALLCLIENT, oBrowse:Refresh() )
     // ACTIVATE MSDIALOG oDlg	ON INIT    EnchoiceBar(oDlg  ,{ || EVAL(bOk,oDlg)                    },{ || EVAL(bCancel,oDlg) }   ,,aButtons,,,,,,_lHasOk,,) CENTERED
 	//===============================================================================================
 	// Fecha a area de uso do arquivo temporario no Protheus.
@@ -394,7 +389,7 @@ Else
 	
 EndIf
 
-RETURN (nOpca=1)
+Return (nOpca=1)
 
 /*
 ===============================================================================================================================
@@ -438,25 +433,25 @@ aAdd( aStruct , { "SF2_REC"           , "N" , 14,0    } )
 //=================================================================================
 // Armazena no array aCampos o nome, descricao dos campos e picture
 //=================================================================================
-AAdd( aTitulo , { _cAlias +"_STATUS"  , "  "					, "  "													} )
-AAdd( aTitulo , { _cAlias +"_STATC"   , "Status do canhoto"  	, ""	                                                } )
-AAdd( aTitulo , { _cAlias +"_TIPONF"  , "Tipo N.F."  			, "@!"													} )
-AAdd( aTitulo , { _cAlias +"_DOC"     , "Nota fiscal"			, "@!"													} )
-AAdd( aTitulo , { _cAlias +"_SERIE"   , "Serie"      			, "@!"													} )
-AAdd( aTitulo , { _cAlias +"_DTREC"   , "Dt.canhoto"    		, "@!"													} )
-AAdd( aTitulo , { _cAlias +"_DTOP"    , "Ent.oplog.dt.canhoto"  , "@!"	   												} )
-AAdd( aTitulo , { _cAlias +"_DTLOGE"  , "Dt.ent.operador"   	, "@!"													} )
-AAdd( aTitulo , { _cAlias +"_DTEMIS"  , "Emissao"    			, "@!"													} )
-AAdd( aTitulo , { _cAlias +"_CGC"     , "CPF/CNPJ"   			, "@!"													} )
-AAdd( aTitulo , { _cAlias +"_CODCLI"  , "Cliente"    			, "@!"													} )
-AAdd( aTitulo , { _cAlias +"_LOJCLI"  , "Loja"       		  	, "@!"													} )
-AAdd( aTitulo , { _cAlias +"_DESCLI"  , "Descricao do cliente"	, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"	} )
-AAdd( aTitulo , { _cAlias +"_CODRED"  , "Rede"		 			, "@!"													} )
-AAdd( aTitulo , { _cAlias +"_DESRED"  , "Descricao da rede"   	, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"						} )
-AAdd( aTitulo , { _cAlias +"_CARGA"   , "Carga"      			, "@!"													} )
-AAdd( aTitulo , { _cAlias +"_CONDPG"  , "Cond.pgto"  			, "@!"													} )
-AAdd( aTitulo , { _cAlias +"_VLRNF"   , "Valor N.F." 			, PESQPICT("SF2","F2_VALBRUT")							} )
-AAdd( aTitulo , { _cAlias +"_OBSRV"   , "Observ.receb.canhoto"	, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"	} )
+aAdd( aTitulo , { _cAlias +"_STATUS"  , "  "					, "  "													} )
+aAdd( aTitulo , { _cAlias +"_STATC"   , "Status do canhoto"  	, ""	                                                } )
+aAdd( aTitulo , { _cAlias +"_TIPONF"  , "Tipo N.F."  			, "@!"													} )
+aAdd( aTitulo , { _cAlias +"_DOC"     , "Nota fiscal"			, "@!"													} )
+aAdd( aTitulo , { _cAlias +"_SERIE"   , "Serie"      			, "@!"													} )
+aAdd( aTitulo , { _cAlias +"_DTREC"   , "Dt.canhoto"    		, "@!"													} )
+aAdd( aTitulo , { _cAlias +"_DTOP"    , "Ent.oplog.dt.canhoto"  , "@!"	   												} )
+aAdd( aTitulo , { _cAlias +"_DTLOGE"  , "Dt.ent.operador"   	, "@!"													} )
+aAdd( aTitulo , { _cAlias +"_DTEMIS"  , "Emissao"    			, "@!"													} )
+aAdd( aTitulo , { _cAlias +"_CGC"     , "CPF/CNPJ"   			, "@!"													} )
+aAdd( aTitulo , { _cAlias +"_CODCLI"  , "Cliente"    			, "@!"													} )
+aAdd( aTitulo , { _cAlias +"_LOJCLI"  , "Loja"       		  	, "@!"													} )
+aAdd( aTitulo , { _cAlias +"_DESCLI"  , "Descricao do cliente"	, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"	} )
+aAdd( aTitulo , { _cAlias +"_CODRED"  , "Rede"		 			, "@!"													} )
+aAdd( aTitulo , { _cAlias +"_DESRED"  , "Descricao da rede"   	, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"						} )
+aAdd( aTitulo , { _cAlias +"_CARGA"   , "Carga"      			, "@!"													} )
+aAdd( aTitulo , { _cAlias +"_CONDPG"  , "Cond.pgto"  			, "@!"													} )
+aAdd( aTitulo , { _cAlias +"_VLRNF"   , "Valor N.F." 			, PESQPICT("SF2","F2_VALBRUT")							} )
+aAdd( aTitulo , { _cAlias +"_OBSRV"   , "Observ.receb.canhoto"	, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"	} )
 
 //=================================================================================
 // Verifica se ja existe um arquivo com mesmo nome, se sim deleta
@@ -481,7 +476,7 @@ _otemp:Create()
 //=================================================================================
 DBSelectArea( _cAlias )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -510,19 +505,19 @@ While (_cAliasDad)->( !Eof() )
 	//C=Aguardando Conf;A=Aprovado;R=Reprovado;N=Nao recepcionado
 	//================================================================================
 	_cstat := U_MOMS016J((_cAliasDad)->DOCUMENTO,(_cAliasDad)->SERIE)
-	If !EMPTY(ALLTRIM(MV_PAR13))
+	If !Empty(AllTrim(MV_PAR13))
 	
-		IF (_cstat == "Nao recepcionado" .AND. !("N" $ MV_PAR13)) .OR.;
-		   (_cstat == "Aprovado"         .AND. !("A" $ MV_PAR13)) .OR.;
-		   (_cstat == "Reprovado"        .AND. !("R" $ MV_PAR13)) .OR.;
-		   (_cstat == "Aguardando Conf"  .AND. !("C" $ MV_PAR13)) 
+		If (_cstat == "Nao recepcionado" .And. !("N" $ MV_PAR13)) .OR.;
+		   (_cstat == "Aprovado"         .And. !("A" $ MV_PAR13)) .OR.;
+		   (_cstat == "Reprovado"        .And. !("R" $ MV_PAR13)) .OR.;
+		   (_cstat == "Aguardando Conf"  .And. !("C" $ MV_PAR13)) 
 		   
 		   (_cAliasDad)->( DBSkip() )
 		   Loop
 			
-		Endif
+		EndIf
 		
-	Endif
+	EndIf
 			
 	
 	//================================================================================
@@ -552,18 +547,18 @@ While (_cAliasDad)->( !Eof() )
 		
 	EndCase
 	
-	DbSelectArea(_cAlias)
+	DBSelectArea(_cAlias)
 	(_cAlias)->( RecLock( _cAlias , .T. ) )
 		
 		&( _cAlias +'->'+ _cAlias +'_STATUS'	) := Space(2)
 		&( _cAlias +'->'+ _cAlias +'_TIPONF'	) := _cTipoNf
 		&( _cAlias +'->'+ _cAlias +'_DOC'		) := (_cAliasDad)->DOCUMENTO
 		&( _cAlias +'->'+ _cAlias +'_SERIE'		) := (_cAliasDad)->SERIE
-		&( _cAlias +'->'+ _cAlias +'_DTREC'		) := StoD( (_cAliasDad)->DTRECEB )
-		&( _cAlias +'->'+ _cAlias +'_DTOP'		) := StoD( (_cAliasDad)->F2_I_DTOP )
-		&( _cAlias +'->'+ _cAlias +'_DTLOGE'	) := StoD( (_cAliasDad)->DENOLEDI)
-		&( _cAlias +'->'+ _cAlias +'_DTEMIS'	) := StoD( (_cAliasDad)->DTEMIS )
-		&( _cAlias +'->'+ _cAlias +'_CGC'		) := IIF( Len(AllTrim((_cAliasDad)->CGC)) == 14 , Transform(AllTrim((_cAliasDad)->CGC) , "@R! NN.NNN.NNN/NNNN-99") , Transform(AllTrim((_cAliasDad)->CGC) , "@R 999.999.999-99" ) )
+		&( _cAlias +'->'+ _cAlias +'_DTREC'		) := SToD( (_cAliasDad)->DTRECEB )
+		&( _cAlias +'->'+ _cAlias +'_DTOP'		) := SToD( (_cAliasDad)->F2_I_DTOP )
+		&( _cAlias +'->'+ _cAlias +'_DTLOGE'	) := SToD( (_cAliasDad)->DENOLEDI)
+		&( _cAlias +'->'+ _cAlias +'_DTEMIS'	) := SToD( (_cAliasDad)->DTEMIS )
+		&( _cAlias +'->'+ _cAlias +'_CGC'		) := IIf( Len(AllTrim((_cAliasDad)->CGC)) == 14 , Transform(AllTrim((_cAliasDad)->CGC) , "@R! NN.NNN.NNN/NNNN-99") , Transform(AllTrim((_cAliasDad)->CGC) , "@R 999.999.999-99" ) )
 		&( _cAlias +'->'+ _cAlias +'_CODCLI'	) := (_cAliasDad)->CODCLI
 		&( _cAlias +'->'+ _cAlias +'_LOJCLI'	) := (_cAliasDad)->LOJA
 		&( _cAlias +'->'+ _cAlias +'_DESCLI'	) := (_cAliasDad)->RAZSOCIAL
@@ -576,14 +571,14 @@ While (_cAliasDad)->( !Eof() )
 		&( _cAlias +'->'+ _cAlias +'_STATC'		) := _cstat
 		(_cAlias)->SF2_REC                        := (_cAliasDad)->SF2_REC
 		
-	(_cAlias)->( MsUnlock() )
+	(_cAlias)->( MSUnLock() )
 
 (_cAliasDad)->( DBSkip() )
 EndDo
 
 (_cAliasDad)->( DBCloseArea() )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -613,13 +608,13 @@ For _nI := 1 To Len( _aColunas )
 	//================================================================================
 	If _nCol == _aColunas[_nI][01]
 		oBrowse:SetHeaderImage( _aColunas[_nI][01] , "COLDOWN"	)
-	Else     
+	Else
 		oBrowse:SetHeaderImage( _aColunas[_nI][01] , "COLRIGHT"	)
 	EndIf
 
 Next _nI
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -638,7 +633,7 @@ If _cStatus == Space(2)
 	
 	(_cAlias)->( RecLock( _cAlias , .F. ) )
 	&( _cAlias +'->'+ _cAlias +'_STATUS' ) := 'XX'
-	(_cAlias)->( MsUnlock() )
+	(_cAlias)->( MSUnLock() )
 	
 	nQtdTit++
 	
@@ -646,7 +641,7 @@ Else
 	
 	(_cAlias)->( RecLock( _cAlias , .F. ) )
 	&( _cAlias +'->'+ _cAlias +'_STATUS' ) := Space(2)
-	(_cAlias)->( MsUnlock() )
+	(_cAlias)->( MSUnLock() )
 	
 	nQtdTit--
 	
@@ -659,7 +654,7 @@ oQtda:Refresh()
 oBrowse:DrawSelect()
 oBrowse:Refresh(.T.)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -674,7 +669,7 @@ Retorno-----------: Nenhum
 */
 Static Function MOMS016O( _cAlias , _nColuna )
 
-Local _aArea:= GetArea()
+Local _aArea:= FWGetArea()
 
 Do Case
 
@@ -682,7 +677,7 @@ Do Case
 	Case _nColuna == 1
 	
 		DBSelectArea(_cAlias)
-		(_cAlias)->(dbGotop())
+		(_cAlias)->(DBGoTop())
 		
 		While (_cAlias)->(!Eof())   
 		
@@ -691,7 +686,7 @@ Do Case
 			
 				RecLock( _cAlias , .F. )
 				&(_cAlias+'->'+_cAlias+'_STATUS'):= 'XX'
-				(_cAlias)->( MsUnlock() )
+				(_cAlias)->( MSUnLock() )
 				
 				nQtdTit++
 			
@@ -700,7 +695,7 @@ Do Case
 			
 				RecLock( _cAlias , .F. )
 				&(_cAlias+'->'+_cAlias+'_STATUS') := Space(2)
-				(_cAlias)->( MsUnlock() )
+				(_cAlias)->( MSUnLock() )
 				
 				nQtdTit--
 			
@@ -713,7 +708,7 @@ Do Case
 		
 		oQtda:Refresh()
 		
-		restArea(_aArea)
+		FWRestArea(_aArea)
 	
 	//Status do canhoto
 	Case _nColuna == 2
@@ -762,12 +757,12 @@ EndCase
 
 MOMS016G( _nColuna )
 
-(_cAlias)->(dbGotop())
+(_cAlias)->(DBGoTop())
 
 oBrowse:DrawSelect()
 oBrowse:Refresh(.T.)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -788,15 +783,15 @@ Local aCombForm		:= { "CNPJ" , "CPF" }
 Local nOpca			:= 0
 Local nI			:= 0
 
-Private cGet1		:= SPACE(22)
+Private cGet1		:= Space(22)
 Private oGet1		:= Nil
 Private cComboBx1	:= ""
 Private cCombForm	:= ""
 
 //================================================================================
-// DEFINE MSDIALOG oDlg TITLE "Pesquisar" FROM 178,181 TO 259,697 PIXEL
+// DEFINE MSDIALOG oDlg TITLE "Pesquisar" FROM 178,181 To 259,697 PIXEL
 //================================================================================
-@178,181 TO 259,697 Dialog oDlg Title "Pesquisar"
+@178,181 To 259,697 Dialog oDlg Title "Pesquisar"
 
 @004,003 ComboBox cComboBx1 Items aComboBx1	OF oDlg Size 213,010 PIXEL ON CHANGE MOMS016B(oDlg)
 @020,003 MsGet oGet1 Var cGet1				OF oDlg Size 212,009 PIXEL COLOR CLR_BLACK Picture "@!"
@@ -804,19 +799,15 @@ Private cCombForm	:= ""
 @046,003 Say OemToAnsi("Escolha o formato para CPF/CNPJ:")	OF oDlg PIXEL
 @041,092 ComboBox cCombForm Items aCombForm 				OF oDlg PIXEL Size 050,010 ON CHANGE MOMS016M()
 
-DEFINE SBUTTON FROM 004,227 TYPE 1 ENABLE ACTION (nOpca:=1,oDlg:End()) OF oDlg
-DEFINE SBUTTON FROM 021,227 TYPE 2 ENABLE ACTION (nOpca:=0,oDlg:End()) OF oDlg
+DEFINE SBUTTON FROM 004,227 Type 1 ENABLE ACTION (nOpca:=1,oDlg:End()) OF oDlg
+DEFINE SBUTTON FROM 021,227 Type 2 ENABLE ACTION (nOpca:=0,oDlg:End()) OF oDlg
 
 ACTIVATE MSDIALOG oDlg CENTERED
 
 If nOpca == 1
-
 	If !Empty(cGet1)
-	
 		For nI := 1 To Len( aComboBx1 )
-		
 			If cComboBx1 == aComboBx1[nI]
-			
 				DBSelectArea(_cAlias)
 				(_cAlias)->( DBSetOrder(nI) )
 				(_cAlias)->( DBGoTop() )
@@ -824,26 +815,17 @@ If nOpca == 1
 				
 				oBrowse:DrawSelect()
 				oBrowse:Refresh(.T.)
-				
 				Exit
-				
 			EndIf
-			
 		Next nI
-	
 	Else
-	
-		U_ITMSG("Favor informar um conteúdo a ser pesquisado.",;
+		U_ITMsg("Favor informar um conteúdo a ser pesquisado.",;
 				"Pesquisa de Dados",;
 				"Para realizar a pesquisa é necessário que se forneça o conteúdo a ser pesquisado.",3)
-		
-		
-	
 	EndIf
-
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -858,20 +840,16 @@ Retorno-----------: Nenhum
 Static Function MOMS016M()
 
 If cCombForm == "CPF"
-
 	cGet1 := Space(14)
 	oGet1:Picture := "@E 999.999.999-99"
-	
 Else
-
 	cGet1 := Space(18)
 	oGet1:Picture := "@R! NN.NNN.NNN/NNNN-99"
-	
 EndIf
 
 oGet1:SetFocus()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -886,31 +864,26 @@ Retorno-----------: Nenhum
 Static Function MOMS016B( oDlg )
 
 If cComboBx1 == "NOTA FISCAL + SERIE + CLIENTE + LOJA"
-
-	cGet1			:= SPACE(22)
+	cGet1			:= Space(22)
 	oGet1:Picture	:= "@!"
 	oDlg:nHeight	:= 110
 
 ElseIf cComboBx1 == "DESCRICAO DO CLIENTE"
-
 	cGet1			:= Space(50)
 	oGet1:Picture	:= "@!"
 	oDlg:nHeight	:= 110
 
 ElseIf cComboBx1 == "CPF/CNPJ"
-
 	cGet1			:= Space(18)
 	oGet1:Picture	:= "@R! NN.NNN.NNN/NNNN-99"
 	oDlg:nHeight	:= 145
 
 ElseIf cComboBx1 == "CLIENTE + LOJA"
-
 	cGet1			:= Space(10)
 	oGet1:Picture	:= "@!"
 	oDlg:nHeight	:= 110
 
 ElseIf cComboBx1 == "CARGA"
-
 	cGet1			:= Space(06)
 	oGet1:Picture	:="@!"
 	oDlg:nHeight	:= 110
@@ -919,7 +892,7 @@ EndIf
 
 oGet1:SetFocus()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -933,13 +906,11 @@ Retorno-----------: Nenhum
 */
 Static Function MOMS016U(_cAlias)
 
-Local aArea			:= GetArea()
+Local aArea			:= FWGetArea()
 Local aRotBack		:= {}
 Local cCadBack		:= ''
 Local lRet			:= .T.
-
 Local nBack			:= 0
-
 Local _cFilial		:= xFilial("SD2")
 Local _cDoc			:= &(_cAlias+'->'+_cAlias+'_DOC')
 Local _cSerie		:= &(_cAlias+'->'+_cAlias+'_SERIE')
@@ -947,17 +918,15 @@ Local _cCliente		:= &(_cAlias+'->'+_cAlias+'_CODCLI')
 Local _cLoja		:= &(_cAlias+'->'+_cAlias+'_LOJCLI')
 
 If Type( "N" ) == "N"
-
 	nBack := n
 	n     := 1
-	
 EndIf
 
 //================================================================================
 // Caso exista, faz uma copia do aRotina
 //================================================================================
 If Type( "aRotina" ) == "A"
-	aRotBack := AClone( aRotina )
+	aRotBack := aClone( aRotina )
 EndIf
 
 //================================================================================
@@ -973,17 +942,15 @@ EndIf
 DBSelectArea("SD2")   
 SD2->( DBSetOrder(3) ) //D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM
 If SD2->( DBSeek( _cFilial + _cDoc + _cSerie + _cCliente + _cLoja ) )
-
 	aRotina := { { "" , "AxPesqui" , 2 } , { "" , "a920NFSAI" , 0 , 2 } }
 	A920NFSAI( "SD2" , SD2->( Recno() ) , 2 )
-
 EndIf
 
 //================================================================================
 // Restaura o aRotina
 //================================================================================
 If ValType( aRotBack ) == "A"
-	aRotina := AClone( aRotBack )
+	aRotina := aClone( aRotBack )
 EndIf
 
 //================================================================================
@@ -997,7 +964,7 @@ If ValType( nBack ) == "N"
 	n := nBack
 EndIf
 
-RestArea( aArea )
+FWRestArea( aArea )
 
 Return( lRet )
 
@@ -1019,7 +986,7 @@ Local _cAliasDad	:= ""
 // Chama tela para selecao do Filtro
 //================================================================================
 If !Pergunte( _cPerg , .T. )
-	Return()
+	Return
 EndIf
 
 //=================================================================================
@@ -1029,36 +996,32 @@ _cAliasDad := GetNextAlias()
 
 _nNumReg:= 0
 
-fwmsgrun( , {|| MOMS016Q(1,_cAliasDad)} , 'Aguarde', "Selecionando as notas fiscais..."  )
+FWMsgRun( , {|| MOMS016Q(1,_cAliasDad)} , 'Aguarde', "Selecionando as notas fiscais..."  )
 
 If _nNumReg > 0
 
 	//=================================================================================
 	// Cria o arquivo Temporario para insercao dos dados selecionados
 	//=================================================================================
-	fwMsgRun( , {|| MOMS016C(_cAlias) },  'Aguarde', "Montando a estrutura de dados..."  )
+	FWMsgRun( , {|| MOMS016C(_cAlias) },  'Aguarde', "Montando a estrutura de dados..."  )
 
 	//=================================================================================
 	// Insere os dados no arquivo temporario criado
 	//=================================================================================
-    fwmsgrun( ,{|| MOMS016K(_cAlias,_cAliasDad)} , 'Aguarde', "Inserindo os dados selecionados..."  )
+    FWMsgRun( ,{|| MOMS016K(_cAlias,_cAliasDad)} , 'Aguarde', "Inserindo os dados selecionados..."  )
 
 	DBSelectArea(_cAlias)
-	(_cAlias)->( DBGotop() )
-	
-	
+	(_cAlias)->( DBGoTop() )
 Else
-
-	U_ITMSG("Não foram encontradas notas fiscais de acordo com os parâmetros fornecidos.",;
+	U_ITMsg("Não foram encontradas notas fiscais de acordo com os parâmetros fornecidos.",;
 			"Informação",;
 			"Favor checar se os parâmetros foram fornecidos corretamente.",1)
-	
 EndIf
 
 oBrowse:DrawSelect()
 oBrowse:Refresh(.T.)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1076,9 +1039,8 @@ Static Function MOMS016N(_cAlias)
 Private _nOpcao := 0
 
 If nQtdTit > 0
-
 	DBSelectArea( _cAlias )
-	(_cAlias)->( DBGotop() )
+	(_cAlias)->( DBGoTop() )
 	
 	While (_cAlias)->( !Eof() )
 		
@@ -1107,27 +1069,24 @@ If nQtdTit > 0
 			MOMS016I(_cAlias)
 			_nOpcao := 0
 			
-		Endif
+		EndIf
 		
 	(_cAlias)->( DBSkip() )
 	EndDo
 	
-	(_cAlias)->( DBGotop() )
+	(_cAlias)->( DBGoTop() )
 	
 	nQtdTit := IIf( nQtdTit < 0 , 0 , nQtdTit )
 	
 	oQtda:Refresh()
 	
 Else
-
-	U_ITMSG("Para realizar a execução desta rotina é necessário selecionar pelo menos um registro de dados.",;
+	U_ITMsg("Para realizar a execução desta rotina é necessário selecionar pelo menos um registro de dados.",;
 			"Informação",;
 			"Favor selecionar as notas desejadas para realizar a inserção dos dados do canhoto.",3)
-	
-	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1166,10 +1125,7 @@ Local cGTipNF		:= &( _cAlias +'->'+ _cAlias +'_TIPONF' )
 Local oGVlrNF		:= Nil
 Local cGVlrNF		:= AllTrim( Transform( &( _cAlias +'->'+ _cAlias +'_VLRNF' ) , PesqPict( "SF2" , "F2_VALBRUT" ) ) )
 Local oGetstat      := Nil
-//Local oGetDtop      := Nil
 Local _nLin1, _nLin2
-
-//Local oGetOperLog   := Nil
 Local cNOperLog     := ""
 
 //------ carrega as datas com os dados da nota do produto
@@ -1181,10 +1137,9 @@ Local _dEntrCL  //:= SF2->F2_I_DENCL // Data de entrega no cliente
 Local _cAprOperL  := ""
 Local _aBotoes  := {}
 
-Private cGetstat      := IIF(EMPTY(&(_cAlias+'->'+_cAlias+'_STATC')),"Nao recepcionado",ALLTRIM(&(_cAlias+'->'+_cAlias+'_STATC')))  
+Private cGetstat      := IIf(Empty(&(_cAlias+'->'+_cAlias+'_STATC')),"Nao recepcionado",AllTrim(&(_cAlias+'->'+_cAlias+'_STATC')))  
 
 Private cGetDtCanh  := &(_cAlias+'->'+_cAlias+'_DTREC') 
-//Private cGetDtOp  := &(_cAlias+'->'+_cAlias+'_DTLOG') 
 Private _dEntrOL    := Ctod("") // SF2->F2_I_DENOL // Data de entrega no operador logístico  EDI // NÃO pode MAIS ser editado.
 Private _dEntOLCha  := Ctod("") // SF2->F2_I_DTOP  // Data em que o Transportador Entregou efetivamente a Carga no Operador Logístico // pode ser editado.
 
@@ -1198,44 +1153,42 @@ _dEntrCL  := Ctod("") // Data de entrega no cliente
 cAprovacao:=""
 cNOperLog := ""
 
-IF (_cAlias)->SF2_REC <> 0
-   SF2->(DBGOTO((_cAlias)->SF2_REC))
+If (_cAlias)->SF2_REC <> 0
+   SF2->(DBGoTo((_cAlias)->SF2_REC))
    cAprovCanh  := ""
-   ZGJ->(Dbsetorder(1))
-   IF ZGJ->(Dbseek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE))
+   ZGJ->(DBSetOrder(1))
+   If ZGJ->(DBSeek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE))
       cGetstat    := ZGJ->ZGJ_STATUS
       cGetDtCanh  := ZGJ->ZGJ_DTENT
-      cAprovCanh  := UsrFullName(ALLTRIM(ZGJ->ZGJ_APROVA))
-      cDatavCanh  := DTOC(ZGJ->ZGJ_DATAA)
+      cAprovCanh  := UsrFullName(AllTrim(ZGJ->ZGJ_APROVA))
+      cDatavCanh  := DToC(ZGJ->ZGJ_DATAA)
       cHoravCanh  := ZGJ->ZGJ_HORAA
       cGetObser   := ZGJ->ZGJ_OBS
-   ELSE
+   Else
       cGetDtCanh  := SF2->F2_I_DTRC // data do cliente 
-      cDatavCanh  := DTOC(SF2->F2_I_CDATA)
+      cDatavCanh  := DToC(SF2->F2_I_CDATA)
       cHoravCanh  := SF2->F2_I_CHORA
       cGetObser   := SF2->F2_I_OBRC
-      IF !EMPTY(cGetDtCanh)
+      If !Empty(cGetDtCanh)
          cGetstat := "Aprovado"
-      ENDIF
-   ENDIF
-
-   //cAprovCanh  := "" // UsrFullName((__cUserId))
+      EndIf
+   EndIf
 
    _cAprOperL  := ""
 
-   IF EMPTY(cAprovCanh)//Pq o conteudo do campo ZGJ_APROVA dos antigos não é __cUserID, coloquei a partir de 16/06/2022
+   If Empty(cAprovCanh)//Pq o conteudo do campo ZGJ_APROVA dos antigos não é __cUserId, coloquei a partir de 16/06/2022
       cAprovCanh  := UsrFullName((SF2->F2_I_CUSER))
-   ENDIF
-   IF EMPTY(cAprovCanh)//Pq se conteudo do campo F2_I_CUSER for branco e o ZGJ_APROVA for o antigo vai ele mesmo
+   EndIf
+   If Empty(cAprovCanh)//Pq se conteudo do campo F2_I_CUSER For branco e o ZGJ_APROVA For o antigo vai ele mesmo
       cAprovCanh  := ZGJ->ZGJ_APROVA
-   ENDIF
-   cAprovacao:=ALLTRIM(cAprovCanh)
-   IF !EMPTY(CTOD(cDatavCanh))
+   EndIf
+   cAprovacao:=AllTrim(cAprovCanh)
+   If !Empty(CTOD(cDatavCanh))
       cAprovacao+=" - "+cDatavCanh
-   ENDIF
-   IF !EMPTY(cHoravCanh)
+   EndIf
+   If !Empty(cHoravCanh)
       cAprovacao+=" - "+cHoravCanh
-   ENDIF
+   EndIf
 
    //------ carrega as datas Operador Logistico/Redespacho e Clientes com os dados da nota do produto
    _dPrevEOL := SF2->F2_I_PENOL // Previsão de entrega no operador logístico 
@@ -1248,48 +1201,48 @@ IF (_cAlias)->SF2_REC <> 0
    _dEntrCL  := SF2->F2_I_DENCL // Data de entrega no cliente  EDI
    
    If ! Empty(SF2->F2_I_OUSER)
-      _cAprOperL  := UsrFullName(SF2->F2_I_OUSER) + " - " + DToc(SF2->F2_I_ODATA) + " - " + SF2->F2_I_OHORA
+      _cAprOperL  := UsrFullName(SF2->F2_I_OUSER) + " - " + DToC(SF2->F2_I_ODATA) + " - " + SF2->F2_I_OHORA
    EndIf 
 
-ENDIF
+EndIf
 
 _nLin1 := 29  // soma 27
 _nLin2 := 37  // soma 27
 
-aAdd( _aBotoes, {'NOTE'     ,{||U_AOMS003(" ZF5->ZF5_FILIAL == '"+xFilial("ZF5")+"' .AND. ZF5->ZF5_DOCOC ==  '"+cGNumNF+"' .AND. ZF5->ZF5_SEROC ==  '"+cGSerie+"' " )},"Ocorrências de frete"})  
+aAdd( _aBotoes, {'NOTE'     ,{||U_AOMS003(" ZF5->ZF5_FILIAL == '"+xFilial("ZF5")+"' .And. ZF5->ZF5_DOCOC ==  '"+cGNumNF+"' .And. ZF5->ZF5_SEROC ==  '"+cGSerie+"' " )},"Ocorrências de frete"})  
 
-DEFINE MSDIALOG oDlg2 TITLE "ALTERAÇÃO DOS DADOS DO RECEBIMENTO DO CANHOTO" FROM 000, 000  TO 600, 1200  of oDlg1 PIXEL // 450, 1200 
+DEFINE MSDIALOG oDlg2 TITLE "ALTERAÇÃO DOS DADOS DO RECEBIMENTO DO CANHOTO" FROM 000, 000  To 600, 1200  of oDlg1 PIXEL // 450, 1200 
 
 	oPanel	:= TPanel():New( 0 , 0 , '' , oDlg2 ,, .T. , .T. ,,, 315 , 100 , .T. , .T. )
 
-	@ 002, 014 SAY "Tipo da N.F."				SIZE 032, 007 PIXEL OF oPanel  
+	@ 002, 014 Say "Tipo da N.F."				SIZE 032, 007 PIXEL OF oPanel  
 	@ 010, 014 MSGET oGTipNF VAR cGTipNF		SIZE 060, 010 PIXEL OF oPanel READONLY
 	
-	@ 002, 098 SAY "Numero da N.F."				SIZE 048, 007 PIXEL OF oPanel 
+	@ 002, 098 Say "Numero da N.F."				SIZE 048, 007 PIXEL OF oPanel 
 	@ 010, 097 MSGET oGNumNF VAR cGNumNF		SIZE 060, 010 PIXEL OF oPanel READONLY
 	
-	@ 002, 193 SAY "Serie"						SIZE 025, 007 PIXEL OF oPanel 
+	@ 002, 193 Say "Serie"						SIZE 025, 007 PIXEL OF oPanel 
 	@ 010, 193 MSGET oGSerie VAR cGSerie		SIZE 060, 010 PIXEL OF oPanel READONLY
 	
-	@ 002, 268 SAY "Cliente/Loja"				SIZE 033, 007 PIXEL OF oPanel 
+	@ 002, 268 Say "Cliente/Loja"				SIZE 033, 007 PIXEL OF oPanel 
 	@ 010, 268 MSGET oGCliente VAR cGCliente	SIZE 060, 010 PIXEL OF oPanel READONLY
 	
-	@ 002, 343 SAY "Descrição do Cliente"		SIZE 067, 007 PIXEL OF oPanel 
+	@ 002, 343 Say "Descrição do Cliente"		SIZE 067, 007 PIXEL OF oPanel 
 	@ 010, 343 MSGET oGDescCli VAR cGDescCli	SIZE 200, 010 PIXEL OF oPanel READONLY
 	
-	@ 029, 014 SAY "CNPJ/CPF"					SIZE 025, 007 PIXEL OF oPanel 
+	@ 029, 014 Say "CNPJ/CPF"					SIZE 025, 007 PIXEL OF oPanel 
 	@ 037, 014 MSGET oGCGC VAR cGCGC			SIZE 060, 010 PIXEL OF oPanel READONLY
 	
-	@ 029, 097 SAY "Codigo da Rede/Descrição"	SIZE 074, 007 PIXEL OF oPanel 
+	@ 029, 097 Say "Codigo da Rede/Descrição"	SIZE 074, 007 PIXEL OF oPanel 
 	@ 037, 097 MSGET oGRede VAR cGRede			SIZE 074, 010 PIXEL OF oPanel READONLY
 	
-	@ 029, 193 SAY "Emissão"					SIZE 025, 007 PIXEL OF oPanel 
+	@ 029, 193 Say "Emissão"					SIZE 025, 007 PIXEL OF oPanel 
 	@ 037, 193 MSGET oGEmissao VAR cGEmissao	SIZE 060, 010 PIXEL OF oPanel READONLY
 	
-	@ 029, 268 SAY "Carga"						SIZE 025, 007 PIXEL OF oPanel 
+	@ 029, 268 Say "Carga"						SIZE 025, 007 PIXEL OF oPanel 
 	@ 037, 268 MSGET oGCarga VAR cGCarga		SIZE 060, 010 PIXEL OF oPanel READONLY
 	
-	@ 029, 343 SAY "Valor da N.F."				SIZE 036, 007 PIXEL OF oPanel 
+	@ 029, 343 Say "Valor da N.F."				SIZE 036, 007 PIXEL OF oPanel 
 	@ 037, 343 MSGET oGVlrNF VAR cGVlrNF		SIZE 060, 010 PIXEL OF oPanel READONLY
 
 	//Só mostra campo de data de operador logistico para notas que tem operador logistico ou ocorrência de op logistico
@@ -1299,19 +1252,19 @@ DEFINE MSDIALOG oDlg2 TITLE "ALTERAÇÃO DOS DADOS DO RECEBIMENTO DO CANHOTO" FROM
         _nLin1 += 27
         _nLin2 += 27
 
-        @ _nLin1 , 014 SAY "Prev.Entrega Oper.Logistico"   SIZE 081, 007 PIXEL OF oPanel            
+        @ _nLin1 , 014 Say "Prev.Entrega Oper.Logistico"   SIZE 081, 007 PIXEL OF oPanel            
         @ _nLin2 , 014 MSGET _dPrevEOL                     SIZE 060, 010 PIXEL OF oPanel   WHEN .F. 
         
-		@ _nLin1 , 098 SAY "Dt.Ocorr.Oper.Logistico"       SIZE 081, 007 PIXEL OF oPanel            //"Dt.Chegada Oper.Logistico" 
+		@ _nLin1 , 098 Say "Dt.Ocorr.Oper.Logistico"       SIZE 081, 007 PIXEL OF oPanel            //"Dt.Chegada Oper.Logistico" 
         @ _nLin2 , 097 MSGET _dChegOL                      SIZE 060, 010 PIXEL OF oPanel   WHEN .F. 
 
-        @ _nLin1 , 182 SAY "Dt. Entrega Op. Log. (EDI)"    SIZE 081, 007 PIXEL OF oPanel 
+        @ _nLin1 , 182 Say "Dt. Entrega Op. Log. (EDI)"    SIZE 081, 007 PIXEL OF oPanel 
         @ _nLin2 , 182 MSGET _dEntrOL                      SIZE 060, 010 PIXEL OF oPanel   WHEN .F. // NÃO pode MAIS ser editado.
 
-        @ _nLin1 , 266 SAY "Entrega no OpLog (Dt.Canhoto)" SIZE 081, 007 PIXEL OF oPanel
+        @ _nLin1 , 266 Say "Entrega no OpLog (Dt.Canhoto)" SIZE 081, 007 PIXEL OF oPanel
         @ _nLin2 , 266 MSGET _dEntOLCha                    SIZE 060, 010 PIXEL OF oPanel   
 
-	    @ _nLin1, 415 SAY   "Usuario Alt.Dt.Entrega Opl- Data - Hora:" SIZE 300, 007 PIXEL OF oPanel    
+	    @ _nLin1, 415 Say   "Usuario Alt.Dt.Entrega Opl- Data - Hora:" SIZE 300, 007 PIXEL OF oPanel    
         @ _nLin2, 415 MSGET _cAprOperL                                 SIZE 165, 010 PIXEL OF oPanel  WHEN .F.
 
     EndIf 
@@ -1319,20 +1272,20 @@ DEFINE MSDIALOG oDlg2 TITLE "ALTERAÇÃO DOS DADOS DO RECEBIMENTO DO CANHOTO" FROM
     _nLin1 += 27
     _nLin2 += 27
 
-	@ _nLin1 , 014 SAY "Prev.Entrega Cliente"            SIZE 081, 007 PIXEL OF oPanel           
+	@ _nLin1 , 014 Say "Prev.Entrega Cliente"            SIZE 081, 007 PIXEL OF oPanel           
     @ _nLin2 , 014 MSGET  _dPrevECL                      SIZE 060, 010 PIXEL OF oPanel   WHEN .F.
 
-    @ _nLin1 , 098 SAY "Dt.Ocorrencia Cliente"           SIZE 081, 007 PIXEL OF oPanel  //"Dt.Chegada Cliente"
+    @ _nLin1 , 098 Say "Dt.Ocorrencia Cliente"           SIZE 081, 007 PIXEL OF oPanel  //"Dt.Chegada Cliente"
     @ _nLin2 , 097 MSGET  _dChegCL                       SIZE 060, 010 PIXEL OF oPanel   WHEN .F.
 
-    @ _nLin1 , 182 SAY "Dt.Entrega Cliente (EDI)"        SIZE 081, 007 PIXEL OF oPanel
+    @ _nLin1 , 182 Say "Dt.Entrega Cliente (EDI)"        SIZE 081, 007 PIXEL OF oPanel
     @ _nLin2 , 182 MSGET  _dEntrCL                       SIZE 060, 010 PIXEL OF oPanel   WHEN .F.
 
-	@ _nLin1 , 266 SAY "Entrega no Cliente (Dt.Canhoto)" SIZE 081, 007 PIXEL OF oPanel  // Canhoto Transp. // 056 // "Enterega no Cliente"
-	@ _nLin2 , 266 MSGET oGetDtCanh VAR cGetDtCanh	     SIZE 060, 010 PIXEL OF oPanel  VALID { || cGetStat := IIF(alltrim(cGetStat)=="Nao recepcionado","Nao recepcionado","Aprovado")}  // 064
+	@ _nLin1 , 266 Say "Entrega no Cliente (Dt.Canhoto)" SIZE 081, 007 PIXEL OF oPanel  // Canhoto Transp. // 056 // "Enterega no Cliente"
+	@ _nLin2 , 266 MSGET oGetDtCanh VAR cGetDtCanh	     SIZE 060, 010 PIXEL OF oPanel  VALID { || cGetStat := IIf(AllTrim(cGetStat)=="Nao recepcionado","Nao recepcionado","Aprovado")}  // 064
 	
     _nColU:=415
-    @ _nLin1, _nColU SAY "Usuario Apr. Canhoto - Data - Hora:" SIZE 300, 007 PIXEL OF oPanel    
+    @ _nLin1, _nColU Say "Usuario Apr. Canhoto - Data - Hora:" SIZE 300, 007 PIXEL OF oPanel    
     @ _nLin2, _nColU MSGET cAprovacao                          SIZE 165, 010 PIXEL OF oPanel  WHEN .F.
 
 	_ncol := 97
@@ -1340,66 +1293,62 @@ DEFINE MSDIALOG oDlg2 TITLE "ALTERAÇÃO DOS DADOS DO RECEBIMENTO DO CANHOTO" FROM
 	_nLin1 += 27
     _nLin2 += 27
     
-	@ _nLin1 , 014 SAY "Status"					    SIZE 040, 007 PIXEL OF oPanel // 056
-	@ _nLin2 , 014 MSCOMBOBOX oGetStat VAR cGetStat ITEMS IIF(alltrim(cGetStat)=="Nao recepcionado",{"Nao recepcionado"},{"Aguardando Conf","Aprovado","Reprovado"}) SIZE 074, 010 PIXEL OF oPanel  // 064
+	@ _nLin1 , 014 Say "Status"					    SIZE 040, 007 PIXEL OF oPanel // 056
+	@ _nLin2 , 014 MSCOMBOBOX oGetStat VAR cGetStat ITEMS IIf(AllTrim(cGetStat)=="Nao recepcionado",{"Nao recepcionado"},{"Aguardando Conf","Aprovado","Reprovado"}) SIZE 074, 010 PIXEL OF oPanel  // 064
 
-	@ _nLin1 , 098 SAY "Observação"					SIZE 040, 007 PIXEL OF oPanel  // 056
+	@ _nLin1 , 098 Say "Observação"					SIZE 040, 007 PIXEL OF oPanel  // 056
 	@ _nLin2 , 098 MSGET oGetObser VAR cGetObser	SIZE 250, 010 PIXEL OF oPanel  // 064
 
-	If alltrim(cGetStat)!="Nao recepcionado" .or. cfilant $ U_ITGETMV("ITFILESTC","01;90") //Filiais que lêem canhoto sempre tenta procurar na Estec
+	If AllTrim(cGetStat)!="Nao recepcionado" .Or. cfilant $ SuperGetMV("IT_FILESTC",.F.,"01;90") //Filiais que lêem canhoto sempre tenta procurar na Estec
 
 		//Carrega canhoto da página da Estec
 		_lreti := .F.
-		fwmsgrun( ,{|oproc|_lreti :=  U_CARCANHO(cfilant,alltrim(cGNumNF),oproc,.F.) } , "Aguarde!", "Carregando imagem do canhoto..."  )
+		FWMsgRun( ,{|oproc|_lreti :=  U_CARCANHO(cfilant,AllTrim(cGNumNF),oproc,.F.) } , "Aguarde!", "Carregando imagem do canhoto..."  )
 	
-		oTBitmap1 := TBitmap():New(140,014,170,300,,"\temp\canhoto" + alltrim(cGNumNF)+ "_" + AllTrim(cfilant) + ".jpg",.T.,opanel,,,.F.,.F.,,,.F.,,.T.,,.F.) // 090,014,170,300
+		oTBitmap1 := TBitmap():New(140,014,170,300,,"\temp\canhoto" + AllTrim(cGNumNF)+ "_" + AllTrim(cfilant) + ".jpg",.T.,opanel,,,.F.,.F.,,,.F.,,.T.,,.F.) // 090,014,170,300
     
 		oTBitmap1:lAutoSize := .T. 
 		
 		//Se achou canhoto sem muro já muda de não recepcionado para aguardando confirmação e grava muro
-		If _lreti .and. alltrim(cGetStat) == "Nao recepcionado"
+		If _lreti .And. AllTrim(cGetStat) == "Nao recepcionado"
 		
 			cGetStat := "Aguardando Conf"
 			
-			If ZGJ->(Dbseek(cfilant+alltrim(cGNumNF))) 
-			
-				Reclock("ZGJ",.F.)
-				
+			If ZGJ->(DBSeek(cfilant+AllTrim(cGNumNF))) 
+				RecLock("ZGJ",.F.)
 			Else
-			
-				Reclock("ZGJ",.T.)
-			
-			Endif
+				RecLock("ZGJ",.T.)
+			EndIf
 			
 			ZGJ->ZGJ_FILIAL := cfilant
-			ZGJ->ZGJ_NOTA  := alltrim(cGNumNF)
-			ZGJ->ZGJ_SERIE := Alltrim(cGSerie)
-			ZGJ->ZGJ_DTENT := stod("")
-			ZGJ->ZGJ_DATAI := DATE()
-			ZGJ->ZGJ_HORAI := TIME()
+			ZGJ->ZGJ_NOTA  := AllTrim(cGNumNF)
+			ZGJ->ZGJ_SERIE := AllTrim(cGSerie)
+			ZGJ->ZGJ_DTENT := SToD("")
+			ZGJ->ZGJ_DATAI := Date()
+			ZGJ->ZGJ_HORAI := Time()
 			ZGJ->ZGJ_STATUS:= "Aguardando Conf"
-			ZGJ->(Msunlock())
+			ZGJ->(MSUnLock())
 		
-		Endif
+		EndIf
 		
-	Endif
+	EndIf
 		
 	oGetDtCanh:SetFocus()	  
 
-ACTIVATE MSDIALOG oDlg2 ON INIT ( EnchoiceBar( oDlg2 , {|| IIF( MOMS016V( cGEmissao , cGetDtCanh , &( _cAlias +'->'+ _cAlias +'_DTREC' ),cGNumNF, cGSerie ) , Eval( {|| _nOpcao := 1 , oDlg2:End() } ) , ) } , {|| _nOpcao := 2 , oDlg2:End() } ,,_aBotoes ) ,oPanel:Align	:= CONTROL_ALIGN_ALLCLIENT )//oBrowse:Refresh() )
+ACTIVATE MSDIALOG oDlg2 ON INIT ( EnchoiceBar( oDlg2 , {|| IIf( MOMS016V( cGEmissao , cGetDtCanh , &( _cAlias +'->'+ _cAlias +'_DTREC' ),cGNumNF, cGSerie ) , Eval( {|| _nOpcao := 1 , oDlg2:End() } ) , ) } , {|| _nOpcao := 2 , oDlg2:End() } ,,_aBotoes ) ,oPanel:Align	:= CONTROL_ALIGN_ALLCLIENT )//oBrowse:Refresh() )
 
 //================================================================================
 // Confirma reprovação do canhoto
 //================================================================================
-If alltrim(cGetStat) == "Reprovado" .AND. _nopcao == 1
+If AllTrim(cGetStat) == "Reprovado" .And. _nopcao == 1
 	
-	If !u_itmsg("Confirma reprovação do canhoto?","Atenção","CTE não será liberado para pagamento!",3,2,2)
+	If !U_ITMsg("Confirma reprovação do canhoto?","Atenção","CTE não será liberado para pagamento!",3,2,2)
 		
 		_nopcao := 2
 			
-	Endif
+	EndIf
 		
-Endif
+EndIf
 
 //================================================================================
 // Caso o usuario tenho confirmado a data de recebimento de canhoto e a observacao
@@ -1411,13 +1360,13 @@ If _nOpcao == 1
 	&( _cAlias +'->'+ _cAlias +'_DTOP'  ) := _dEntOLCha
 //	&( _cAlias +'->'+ _cAlias +'_DTLOGE') := _dEntrOL// NÃO pode MAIS ser editado.
 	&( _cAlias +'->'+ _cAlias +'_OBSRV' ) := cGetObser
-	&( _cAlias +'->'+ _cAlias +'_STATC' ) := IIF(EMPTY(&(_cAlias+'->'+_cAlias+'_STATC')),"Nao recepcionado",ALLTRIM(cGetStat))  
+	&( _cAlias +'->'+ _cAlias +'_STATC' ) := IIf(Empty(&(_cAlias+'->'+_cAlias+'_STATC')),"Nao recepcionado",AllTrim(cGetStat))  
 
 EndIf
 
 //Apaga os arquivos gerados para mostrar o canhoto
-ferase("\temp\canhoto" + alltrim(cGNumNF) + "_" + AllTrim(cfilant) + ".pdf")
-ferase("\temp\canhoto" + alltrim(cGNumNF) + "_" + AllTrim(cfilant) + ".jpg")
+ferase("\temp\canhoto" + AllTrim(cGNumNF) + "_" + AllTrim(cfilant) + ".pdf")
+ferase("\temp\canhoto" + AllTrim(cGNumNF) + "_" + AllTrim(cfilant) + ".jpg")
 
 Return( _nOpcao )
 
@@ -1439,51 +1388,43 @@ Static Function MOMS016V( _dDtEmis , _dDtRecCan , _dDtRecAnt, cGNumNF , cGSerie 
 
 Local _lRet := .T.
 
-
 //================================================================================
 // Valida se a data de recebimento de canhoto informada eh maior que a data de 
 // emissao da nota fiscal e se não é maior que a data atual
 //================================================================================
-If ( _dDtRecCan < _dDtEmis .And. _dDtRecCan <> StoD('') ) .Or. _dDtRecCan > Date()
-
-	U_ITMSG("Não foi fornecida uma Data de Entrega no Cliente (Dt.Canhoto) válida.",;
+If ( _dDtRecCan < _dDtEmis .And. _dDtRecCan <> SToD('') ) .Or. _dDtRecCan > Date()
+	U_ITMsg("Não foi fornecida uma Data de Entrega no Cliente (Dt.Canhoto) válida.",;
 			"Informação",;
 			"Favor informar uma Data de Entrega no Cliente (Dt.Canhoto) que seja maior ou igual a data de emissão da nota fiscal e menor ou igual a data atual.",1)
-	
 	_lRet := .F.
-
 EndIf
 
 //================================================================================
 // Valida se o usuario deseja apagar uma data de recebimento de canhoto informada
 //================================================================================
-If _lRet .And. _dDtRecCan == StoD('') .And. _dDtRecAnt <> StoD('')
-
-	If !( U_ITMSG( "Deseja apagar os dados de recebimento do canhoto?" , "Confirmação",,3,2,2 ) )
-	 
+If _lRet .And. _dDtRecCan == SToD('') .And. _dDtRecAnt <> SToD('')
+	If !( U_ITMsg( "Deseja apagar os dados de recebimento do canhoto?" , "Confirmação",,3,2,2 ) )
 		_lRet		:= .F.
 		cGetDtCanh	:= _dDtRecAnt
-	
 	EndIf
-	
 EndIf
 
-If _lRet .And. _loplog .AND. !EMPTY(_dEntOLCha) .AND. (_dEntOLCha < _dDtEmis) 	
+If _lRet .And. _loplog .And. !Empty(_dEntOLCha) .And. (_dEntOLCha < _dDtEmis) 	
    If ValType(cGNumNF)  == Nil 
       cGNumNF := ""
-   Else 
+   Else
       cGNumNF := AllTrim(cGNumNF)
    EndIf 
 
    If ValType(cGSerie)  == Nil 
       cGSerie := ""
-   Else 
+   Else
       cGSerie := AllTrim(cGSerie)
    EndIf 
 
-   U_ItMsg("Data de Entrega no OL (Dt.Canhoto): "+DTOC(_dEntOLCha)+" precisa ser maior ou igual a data de emissão: "+DTOC(_dDtEmis)+" da nota de saída: "+cGNumNF+"-"+cGSerie,"Atenção",,1)
+   U_ITMsg("Data de Entrega no OL (Dt.Canhoto): "+DToC(_dEntOLCha)+" precisa ser maior ou igual a data de emissão: "+DToC(_dDtEmis)+" da nota de saída: "+cGNumNF+"-"+cGSerie,"Atenção",,1)
    _lRet:= .F.
-ENDIF
+EndIf
 
 Return( _lRet )
 
@@ -1508,21 +1449,14 @@ Local _lGrvOperL     := .F.  // Indica se houve alterações nas datas informadas 
 Local _lGrvCanho     := .F.  // Indica se houve alterações nas datas informados do canhoto.
 Local _lTrocaNota    := .F.
 Local _lTriangu      := .F.
-//Local _aAreaSF2      := {}
-//Local _cFilialAux    := ""
-//Local _cPedidoAux    := ""
-Local _cOperTriangular:= ALLTRIM(U_ITGETMV( "IT_OPERTRI","05,42"))// Tipos de operações da operação trigular
+Local _cOperTriangular:= AllTrim(SuperGetMV("IT_OPERTRI",.F.,"05,42"))// Tipos de operações da operação trigular
 Local _cOperRemessa   := RIGHT(_cOperTriangular,2)//42
-//Local _cOperFat     := LEFT(_cOperTriangular,2)//05
 
 _dDtReceb	:= &( _cAlias +'->'+ _cAlias +'_DTREC' )
 _dEntOLCha  := &( _cAlias +'->'+ _cAlias +'_DTOP'  )
-//_dEntrOL  := &( _cAlias +'->'+ _cAlias +'_DTLOGE')// NÃO pode MAIS ser editado.
 _cObserv	:= &( _cAlias +'->'+ _cAlias +'_OBSRV' )
 
-//================================================================================
 // Posiciona na tabela SF2 para alteracao dos dados do canhoto
-//================================================================================
 DBSelectArea("SF2")
 SF2->( DBSetOrder(2) ) //F2_FILIAL+F2_CLIENTE+F2_LOJA+F2_DOC+F2_SERIE
 If SF2->( DBSeek( xFilial("SF2") + &( _cAlias +'->( '+ _cAlias +'_CODCLI + '+ _cAlias +'_LOJCLI + '+ _cAlias +'_DOC + '+ _cAlias +'_SERIE )' ) ) )
@@ -1552,7 +1486,7 @@ If SF2->( DBSeek( xFilial("SF2") + &( _cAlias +'->( '+ _cAlias +'_CODCLI + '+ _c
 		EndIf
 	
 	//================================================================================
-	//	Se a NF não consta na ZZN e a carga for vazia passa
+	//	Se a NF não consta na ZZN e a carga For vazia passa
 	//================================================================================
 	ElseIf _lRetNota
 	
@@ -1563,37 +1497,27 @@ If SF2->( DBSeek( xFilial("SF2") + &( _cAlias +'->( '+ _cAlias +'_CODCLI + '+ _c
 	//================================================================================
 	//	Verifica se é Troca Nota
 	//================================================================================
-	SC5->(Dbsetorder(1))
-	If SC5->(Dbseek(SF2->F2_FILIAL+ALLTRIM(SF2->F2_I_PEDID)))
+	SC5->(DBSetOrder(1))
+	If SC5->(DBSeek(SF2->F2_FILIAL+AllTrim(SF2->F2_I_PEDID)))
 
 	   If SC5->C5_I_OPER = '51' 
-		  U_ITMSG("A DATA DE CANHOTO INFORMADA É REFERENTE AO PEDIDO DE PALLET RETORNO.","ATENÇÃO",,3)
+		  U_ITMsg("A DATA DE CANHOTO INFORMADA É REFERENTE AO PEDIDO DE PALLET RETORNO.","ATENÇÃO",,3)
 	   EndIf
 
-	   IF SC5->C5_I_OPER = _cOperRemessa//42
-	  	  //_cFilialAux  := SC5->C5_FILIAL //Filial de Faturamento
-	  	  //_cPedidoAux  := SC5->C5_I_PVFAT//Pedido de Faturamento
+	   If SC5->C5_I_OPER = _cOperRemessa//42
 	  	  _lTriangu:=.T.
 		  _lReplica:=.T.
-       ENDIF
+       EndIf
 
-	   IF SC5->C5_I_TRCNF == "S" .AND. SC5->C5_I_OPER <> "20" //.AND. SC5->C5_NUM == SC5->C5_I_PDPR
+	   If SC5->C5_I_TRCNF == "S" .And. SC5->C5_I_OPER <> "20" //.AND. SC5->C5_NUM == SC5->C5_I_PDPR
   	  	  _lTrocaNota:=.T.
 		  _lReplica  :=.T.
-	  	  //If SC5->C5_NUM == SC5->C5_I_PDPR//Faturamento
-	  	  //	 //_cFilialAux := SC5->C5_I_FILFT //Filial de Faturamento
-	  	  //	 //_cPedidoAux := SC5->C5_I_PDFT  //Pedido de Faturamento
-	  	  //ElseIf SC5->C5_NUM == SC5->C5_I_PDFT//Carregamento
-	  	  //	 //_cFilialAux := SC5->C5_I_FLFNC //Filial de Carregamento
-	  	  //	 //_cPedidoAux := SC5->C5_I_PDPR  //Pedido de Carregamento
-	  	  //	 _lTrocaNota := .T.
-	  	  //EndIf
 	   EndIf
 	
 	EndIf
 	//================================================================================
 	//	Se passou pelas validações grava os dados do canhoto
-	//  Se for aprovação grava sempre
+	//  Se For aprovação grava sempre
 	//================================================================================
 	If (SF2->F2_I_DTRC <> _dDtReceb) //.And. !Empty(_dDtReceb) 	   
 	   _lGrvCanho := .T.  // Indica se houve alterações nas datas informados do canhoto.
@@ -1603,17 +1527,14 @@ If SF2->( DBSeek( xFilial("SF2") + &( _cAlias +'->( '+ _cAlias +'_CODCLI + '+ _c
 	   _lGrvOperL := .T.  // Indica se houve alterações nas datas informadas pelo operador logístico.
 	EndIf 
     
-	If (_lRetNota .And. _lRetCarga) .OR. alltrim(&( _cAlias +'->'+ _cAlias +'_STATC' )) != "Reprovado"
+	If (_lRetNota .And. _lRetCarga) .Or. AllTrim(&( _cAlias +'->'+ _cAlias +'_STATC' )) != "Reprovado"
      
 		//Só grava SF2 para liberar cte se o canhoto não foi reprovado
-		If alltrim(&( _cAlias +'->'+ _cAlias +'_STATC' )) != "Reprovado"
+		If AllTrim(&( _cAlias +'->'+ _cAlias +'_STATC' )) != "Reprovado"
 		
 			SF2->( RecLock( "SF2" , .F. ) )
 			SF2->F2_I_DTRC:= _dDtReceb
             SF2->F2_I_DTOP:=_dEntOLCha // Data em que o Transportador Entregou efetivamente a Carga no Operador Logístico // pode ser editado.
-//------------------------------------------------------------------------
-          //SF2->F2_I_DENOL := _dEntrOL  // Data de entrega no operador logístico  EDI // NÃO pode MAIS ser editado.
-//------------------------------------------------------------------------
 			SF2->F2_I_OBRC	:= _cObserv
             SF2->F2_I_CORIG := "MOMS016"
             
@@ -1624,81 +1545,81 @@ If SF2->( DBSeek( xFilial("SF2") + &( _cAlias +'->( '+ _cAlias +'_CODCLI + '+ _c
 		    EndIf
 
             If _lGrvCanho
-			   SF2->F2_I_CUSER := __cUserID // Usuário de aprovação do canhoto.
+			   SF2->F2_I_CUSER := __cUserId // Usuário de aprovação do canhoto.
                SF2->F2_I_CDATA := Date()    // Data de digitação do Canhoto.
                SF2->F2_I_CHORA := Time()    // hora de digitação do Canhoto.
 			EndIf 
     		
-			SF2->( MsUnlock() )
+			SF2->( MSUnLock() )
 		
-		Elseif  alltrim(&( _cAlias +'->'+ _cAlias +'_STATC' )) == "Reprovado"
+		ElseIf  AllTrim(&( _cAlias +'->'+ _cAlias +'_STATC' )) == "Reprovado"
 		
 			SF2->( RecLock( "SF2" , .F. ) )
 			SF2->F2_I_DTRC	:= ctod(" ")
 			SF2->F2_I_OBRC	:= _cObserv
-			SF2->F2_I_CUSER := __cUserID
-			SF2->F2_I_CDATA := DATE()
-			SF2->F2_I_CHORA := TIME()
+			SF2->F2_I_CUSER := __cUserId
+			SF2->F2_I_CDATA := Date()
+			SF2->F2_I_CHORA := Time()
             SF2->F2_I_CORIG := "MOMS016"
-			SF2->( MsUnlock() )
+			SF2->( MSUnLock() )
 		
-		Endif
+		EndIf
 		
 		//================================================================================
 		//	Atualiza muro de canhoto com a Estec
 		//================================================================================
-		ZGJ->(Dbsetorder(1))
-		If ZGJ->(Dbseek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE))
+		ZGJ->(DBSetOrder(1))
+		If ZGJ->(DBSeek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE))
 		 
 			If ZGJ->ZGJ_STATUS <> &( _cAlias +'->'+ _cAlias +'_STATC' ) 
-			    If !EMPTY(_dDtReceb) .And. ZGJ->ZGJ_DTENT <> _dDtReceb
+			    If !Empty(_dDtReceb) .And. ZGJ->ZGJ_DTENT <> _dDtReceb
 				   ZGJ->( RecLock( "ZGJ" , .F. ) )
 				   ZGJ->ZGJ_DTENT	:= _dDtReceb
 				   ZGJ->ZGJ_OBS	:= _cObserv
-			       IF !EMPTY(_dDtReceb) //CHAMADO 39375. Quando informado uma Data de Canhoto e existir tabela de Controle de Digitalização de Canhoto (ZGJ) gravar o status da digitalização igual a "Aprovado" e Data de Entrega 
+			       If !Empty(_dDtReceb) //CHAMADO 39375. Quando informado uma Data de Canhoto e existir tabela de Controle de Digitalização de Canhoto (ZGJ) gravar o status da digitalização igual a "Aprovado" e Data de Entrega 
 				      ZGJ->ZGJ_STATUS := "Aprovado"
-				   ELSE
+				   Else
 				      ZGJ->ZGJ_STATUS := &( _cAlias +'->'+ _cAlias +'_STATC' ) 
-				   ENDIF
-				   ZGJ->ZGJ_DATAA := DATE()
-				   ZGJ->ZGJ_HORAA := TIME()
-				   ZGJ->ZGJ_APROVA := __cUserID
-				   ZGJ->( MsUnlock() )
+				   EndIf
+				   ZGJ->ZGJ_DATAA := Date()
+				   ZGJ->ZGJ_HORAA := Time()
+				   ZGJ->ZGJ_APROVA := __cUserId
+				   ZGJ->( MSUnLock() )
 				EndIf 
-			ELSEIF !EMPTY(_dDtReceb) //CHAMADO 39375. Quando informado uma Data de Canhoto e existir tabela de Controle de Digitalização de Canhoto (ZGJ) gravar o status da digitalização igual a "Aprovado" e Data de Entrega 
+			ElseIf !Empty(_dDtReceb) //CHAMADO 39375. Quando informado uma Data de Canhoto e existir tabela de Controle de Digitalização de Canhoto (ZGJ) gravar o status da digitalização igual a "Aprovado" e Data de Entrega 
 				ZGJ->( RecLock( "ZGJ" , .F. ) )
 				ZGJ->ZGJ_DTENT	:= _dDtReceb
 				ZGJ->ZGJ_OBS	:= _cObserv
 				ZGJ->ZGJ_STATUS := "Aprovado"
-				ZGJ->ZGJ_DATAA  := DATE()
-				ZGJ->ZGJ_HORAA  := TIME()
-				ZGJ->ZGJ_APROVA := __cUserID
-				ZGJ->( MsUnlock() )
-			ENDIF
+				ZGJ->ZGJ_DATAA  := Date()
+				ZGJ->ZGJ_HORAA  := Time()
+				ZGJ->ZGJ_APROVA := __cUserId
+				ZGJ->( MSUnLock() )
+			EndIf
 		
-		Endif
+		EndIf
 		
 		//================================================================================
 		//	Encerra monitor de pedidos se houver e se o canhoto não estiver reprovado
 		//=============================================================================== 
-		SC5->(Dbsetorder(1))
-		SC5->(Dbseek(SF2->F2_FILIAL+SF2->F2_I_PEDID))
+		SC5->(DBSetOrder(1))
+		SC5->(DBSeek(SF2->F2_FILIAL+SF2->F2_I_PEDID))
 
-		IF !(alltrim(SC5->C5_I_OPER) $ AllTrim(U_ITGETMV( 'IT_MPVOP' , '50/51/02'))) 
+		If !(AllTrim(SC5->C5_I_OPER) $ AllTrim(SuperGetMV('IT_MPVOP',.T.,'50/51/02')))
 		
 			aheader := {}
 			acols := {}
-			aadd(aheader,{1,"C6_ITEM"})
-			aadd(aheader,{2,"C6_PRODUTO"})
-			aadd(aheader,{3,"C6_LOCAL"})
+			aAdd(aheader,{1,"C6_ITEM"})
+			aAdd(aheader,{2,"C6_PRODUTO"})
+			aAdd(aheader,{3,"C6_LOCAL"})
 
-			SC6->(Dbsetorder(1))
-			SC6->(Dbseek(SC5->C5_FILIAL+SC5->C5_NUM))
+			SC6->(DBSetOrder(1))
+			SC6->(DBSeek(SC5->C5_FILIAL+SC5->C5_NUM))
 		
-			Do while SC6->(!EOF()) .AND. SC5->C5_FILIAL == SC6->C6_FILIAL .AND. SC5->C5_NUM == SC6->C6_NUM
-				aadd(acols,{SC6->C6_ITEM,SC6->C6_PRODUTO,SC6->C6_LOCAL})
-				SC6->(Dbskip())
-			Enddo
+			While SC6->(!Eof()) .And. SC5->C5_FILIAL == SC6->C6_FILIAL .And. SC5->C5_NUM == SC6->C6_NUM
+				aAdd(acols,{SC6->C6_ITEM,SC6->C6_PRODUTO,SC6->C6_LOCAL})
+				SC6->(DBSkip())
+			EndDo
 
             _cFilCarreg := SC5->C5_FILIAL 
             If ! Empty(SC5->C5_I_FLFNC)
@@ -1707,34 +1628,34 @@ If SF2->( DBSeek( xFilial("SF2") + &( _cAlias +'->( '+ _cAlias +'_CODCLI + '+ _c
 
 			_dDTNECE := SC5->C5_I_DTENT - (U_OMSVLDENT(SC5->C5_I_DTENT,SC5->C5_CLIENTE,SC5->C5_LOJACLI,SC5->C5_I_FILFT,SC5->C5_NUM,1, ,_cFilCarreg,SC5->C5_I_OPER,SC5->C5_I_TPVEN))
 
-			IF !EMPTY(_dDtReceb) .and. alltrim(&( _cAlias +'->'+ _cAlias +'_STATC' )) != "Reprovado"
+			If !Empty(_dDtReceb) .And. AllTrim(&( _cAlias +'->'+ _cAlias +'_STATC' )) != "Reprovado"
 				_cJUSCOD := "012"//"RECEBIMENTO DE CANHOTO"
-				_cCOMENT := "*** Encerrado por recebimento do canhoto - entrega em " + dtoc(_dDtReceb)
+				_cCOMENT := "*** Encerrado por recebimento do canhoto - entrega em " + DToC(_dDtReceb)
 				_cLENCMON := 'S'
-			ELSEIF EMPTY(_dDtReceb) 
+			ElseIf Empty(_dDtReceb) 
 				_cJUSCOD:= "013"//"ESTORNO DE RECEBIMENTO DE CANHOTO"
 				_cCOMENT := "*** Estorno do recebimento do canhoto."
 				_cLENCMON:= 'I'
-			ELSEIF alltrim(&( _cAlias +'->'+ _cAlias +'_STATC' )) == "Reprovado"
+			ElseIf AllTrim(&( _cAlias +'->'+ _cAlias +'_STATC' )) == "Reprovado"
 				_cJUSCOD:= "013"//"ESTORNO DE RECEBIMENTO DE CANHOTO"
 				_cCOMENT := "*** Reprovacao do recebimento do canhoto. - " + _cObserv
 				_cLENCMON:= 'I'
-			ENDIF
+			EndIf
 
 			U_GrvMonitor(,,_cJUSCOD,_cCOMENT,_cLENCMON,_dDTNECE,SC5->C5_I_DTENT,SC5->C5_I_DTENT)
      
-		ENDIF
+		EndIf
 
 		//===============================================================================
         //REPLICA OS CAMPOS DO PEDIDO PRINCIPAL PARA OS GERADOS 
 		//=============================================================================== 
-	    If (_lTrocaNota .OR. _lTriangu) .AND. _lReplica
+	    If (_lTrocaNota .Or. _lTriangu) .And. _lReplica
 	 	   U_Repl2DtsTransTime( SF2->(RECNO()) , SF2->F2_I_OBRC ) //FUNÇÃO ESTA NO AOMS054.PRW 
-	    Endif
+	    EndIf
 	
 	Else
 	
-		U_ITMSG("Não foi possível a modificação da data de recebimento do canhoto refente a NF ",;
+		U_ITMsg("Não foi possível a modificação da data de recebimento do canhoto refente a NF ",;
 				"Informação",;
 				&( _cAlias +'->'+ _cAlias +'_DOC' ) +"/"+ AllTrim( &( _cAlias +'->'+ _cAlias +'_SERIE' ) )	+;
 				", uma vez que já foi efetuado o lançamento de CTR x NF Saída. "	+ ;
@@ -1761,12 +1682,11 @@ User Function MOMS016J(_cdoc, _cserie)
 
 Local _cstatus := "Nao recepcionado"   //,"Aguardando Conf","Aprovado","Reprovado"
 
-ZGJ->(Dbsetorder(1))
-If ZGJ->(Dbseek(xfilial("ZGJ")+_cdoc+_cserie))
+ZGJ->(DBSetOrder(1))
+If ZGJ->(DBSeek(xFilial("ZGJ")+_cdoc+_cserie))
 
-  _cstatus := alltrim(ZGJ->ZGJ_STATUS)
+  _cstatus := AllTrim(ZGJ->ZGJ_STATUS)
 
-Endif
-
+EndIf
 
 Return _cstatus

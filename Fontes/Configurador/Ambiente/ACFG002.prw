@@ -2,17 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alexandre V.  | 20/07/2015 | Atualização da rotina para melhoria de controles de gravação e alteração. Chamado 11001
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 17/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Alexandre V.  |20/07/2015 | Chamado 11001. Atualização da rotina para melhoria de controles de gravação e alteração.
+Lucas Borges  |17/10/2019 | Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
+Julio Paz     |22/08/2025 | Chamado 51857. Correção de Error Log na rotina Cadastro de Parâmetros Italac [CFG ITALAC]
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes e Defines da Rotina.
-//====================================================================================================
-#Include "Protheus.Ch"
+
+#Include "TOTVS.ch"
 #Include "DBTree.Ch"
 
 /*
@@ -20,11 +18,8 @@ Lucas Borges  | 17/10/2019 | Removidos os Warning na compilação da release 12.1.
 Programa----------: ACFG002
 Autor-------------: Alexandre Villar
 Data da Criacao---: 25/06/2015
-===============================================================================================================================
 Descrição---------: Rotina para manutenção do cadastro de parâmetros das rotinas específicas - Chamado 10618
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -58,7 +53,7 @@ If !_lAcesso
 									'um usuário com acesso ou, se necessário, '		,;
 									'solicite o acesso à área de TI/ERP.'			} , 3  )
 	
-	Return()
+	Return
 	
 EndIf
 
@@ -108,18 +103,15 @@ Define MsDialog _oDlg Title 'Manutenção dos Parâmetros Específicos - Italac' Fro
 
 Activate MsDialog _oDlg CENTERED
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: ACFG002PAR
 Autor-------------: Alexandre Villar
 Data da Criacao---: 25/06/2015
-===============================================================================================================================
 Descrição---------: Rotina que faz a leitura dos parâmetros já cadastrados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: _aPar - Array contendo a estrutura dos parâmetros
 ===============================================================================================================================
 */
@@ -141,26 +133,30 @@ If Select(_cAlias) > 0
 	(_cAlias)->( DBCloseArea() )
 EndIf
 
-DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T., .F. )
-
+//DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T., .F. )
+MPSysOpenQuery( _cQuery , _cAlias)
+   
 DBSelectArea(_cAlias)
+
 (_cAlias)->( DBGoTop() )
-While (_cAlias)->( !Eof() ) .And. !Empty( (_cAlias)->ZP1_MODULO )
-	
-	aAdd( _aPar , {	(_cAlias)->ZP1_MODULO										,;
-					U_ITNOMAMB( (_cAlias)->ZP1_MODULO )							,;
-					ALLTRIM( X3Combo( "ZP1_GRUPO" , (_cAlias)->ZP1_GRUPO ) )	,;
-					(_cAlias)->ZP1_ROTINA										,;
-					AllTrim( (_cAlias)->ZP1_DESROT )							,;
-					(_cAlias)->ZP1_FILPAR										,;
-					(_cAlias)->ZP1_PARAM										,;
-					(_cAlias)->ZP1_DESCRI										,;
-					ALLTRIM( X3Combo( "ZP1_TIPO" , (_cAlias)->ZP1_TIPO ) )		,;
-					(_cAlias)->ZP1_CONTEU										,;
-					''															,;
-					(_cAlias)->R_E_C_N_O_										})
-	
-(_cAlias)->( DBSkip() )
+
+While (_cAlias)->( !Eof() ) //.And. !Empty( (_cAlias)->ZP1_MODULO )
+	If ! Empty( (_cAlias)->ZP1_MODULO )
+	   aAdd( _aPar , {	(_cAlias)->ZP1_MODULO										,;
+		  			    U_ITNOMAMB( (_cAlias)->ZP1_MODULO )							,;
+					    AllTrim( X3Combo( "ZP1_GRUPO" , (_cAlias)->ZP1_GRUPO ) )	,;
+					    (_cAlias)->ZP1_ROTINA										,;
+					    AllTrim( (_cAlias)->ZP1_DESROT )							,;
+					    (_cAlias)->ZP1_FILPAR										,;
+					    (_cAlias)->ZP1_PARAM										,;
+					    (_cAlias)->ZP1_DESCRI										,;
+					    AllTrim( X3Combo( "ZP1_TIPO" , (_cAlias)->ZP1_TIPO ) )		,;
+					    (_cAlias)->ZP1_CONTEU										,;
+					    ''															,;
+					    (_cAlias)->R_E_C_N_O_										})
+    EndIf 
+
+    (_cAlias)->( DBSkip() )
 EndDo
 
 (_cAlias)->( DBCloseArea() )
@@ -172,11 +168,8 @@ Return( _aPar )
 Programa--------: ACFG002V
 Autor-----------: Alexandre Villar
 Data da Criacao-: 25/06/2015
-===============================================================================================================================
 Descrição-------: Rotina para validar o preenchimento de campos na inclusão/alteração
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -184,7 +177,7 @@ User Function ACFG002V( _cFilPar , _cParam )
 
 Local _lRet		:= .T.
 Local _cQuery	:= ''
-Local _cALias	:= ''
+Local _cAlias	:= ''
 
 If !Empty(_cFilPar) .And. Empty( Posicione( 'SM0' , 1 , cEmpAnt + _cFilPar , 'M0_FILIAL' ) )
 	_lRet := .F.
@@ -193,7 +186,7 @@ EndIf
 
 If _lRet .And. !Empty( _cParam )
 
-	_cALias := GetNextAlias()
+	_cAlias := GetNextAlias()
 	
 	//====================================================================================================
 	// Valida se o parâmetro já foi cadastrado anteriormente
@@ -204,16 +197,17 @@ If _lRet .And. !Empty( _cParam )
 		(_cAlias)->( DBCloseArea() )
 	EndIf
 	
-	DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T. , .F. )
+	//DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T. , .F. )
+	MPSysOpenQuery( _cQuery , _cAlias)
 	
 	DBSelectArea(_cAlias)
 	(_cAlias)->( DBGoTop() )
-	IF (_cAlias)->( !Eof() )
+	If (_cAlias)->( !Eof() )
 		
 		_lRet := .F.
 		MessageBox( 'O parâmetro informado já foi cadastrado anteriormente: '							+CRLF+CRLF	+;
 					' Módulo: ' + (_cAlias)->ZP1_MODULO +' - '+ U_ITNOMAMB( (_cAlias)->ZP1_MODULO )		+CRLF		+;
-					' Grupo:  ' + ALLTRIM( X3Combo( "ZP1_GRUPO" , (_cAlias)->ZP1_GRUPO ) )				+CRLF		+;
+					' Grupo:  ' + AllTrim( X3Combo( "ZP1_GRUPO" , (_cAlias)->ZP1_GRUPO ) )				+CRLF		+;
 					' Rotina: ' + AllTrim( (_cAlias)->ZP1_ROTINA )										+CRLF+CRLF	+;
 					'--Caso necessário verifique o parâmetro já cadastrado!'							, 'Atenção'	, 48 )
 		
@@ -230,17 +224,14 @@ Return( _lRet )
 Programa--------: ACFG002G
 Autor-----------: Alexandre Villar
 Data da Criacao-: 25/06/2015
-===============================================================================================================================
 Descrição-------: Rotina para gatilhos de campos
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
 User Function ACFG002G( _nOpc )
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cRet		:= ''
 Local _cQuery	:= ''
 Local _cAlias	:= GetNextAlias()
@@ -257,7 +248,8 @@ Do Case
 			(_cAlias)->( DBCloseArea() )
 		EndIf
 		
-		DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T., .F. )
+		//DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T., .F. )
+		MPSysOpenQuery( _cQuery , _cAlias)
 		
 		DBSelectArea(_cAlias)
 		(_cAlias)->( DBGoTop() )
@@ -277,7 +269,7 @@ Do Case
 		
 EndCase
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _cRet )
 
@@ -286,11 +278,8 @@ Return( _cRet )
 Programa--------: ACFG002PES
 Autor-----------: Alexandre Villar
 Data da Criacao-: 02/07/2015
-===============================================================================================================================
 Descrição-------: Rotina para pesquisa de Rotinas/Parâmetros
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -309,7 +298,7 @@ If ParamBox( _aParAux , "Informar os dados para a Consulta:" , @_aParRet , {|| .
 	
 	For _nI := 1 To Len( _aParam )
 	
-		If IIF( ValType(_aParRet[01]) == 'N' , ( _aParRet[01] == 1 ) , ( Upper(AllTrim(_aParRet[01])) == 'ROTINA' ) )
+		If IIf( ValType(_aParRet[01]) == 'N' , ( _aParRet[01] == 1 ) , ( Upper(AllTrim(_aParRet[01])) == 'ROTINA' ) )
 			
 			If AllTrim( _aParRet[02] ) $ _aParam[_nI][04]
 				_cCarSeek := _aParam[_nI][11]
@@ -337,18 +326,15 @@ If !Empty( _cCarSeek )
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: ACFG002MTD
 Autor-----------: Alexandre Villar
 Data da Criacao-: 02/07/2015
-===============================================================================================================================
 Descrição-------: Rotina para montagem da estrutura de dados do menu
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -445,18 +431,15 @@ Next _nI
 
 _oTree:TreeSeek( _cCargo )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: ACFG002DDM
 Autor-----------: Alexandre Villar
 Data da Criacao-: 02/07/2015
-===============================================================================================================================
 Descrição-------: Rotina para montagem dos dados dos parâmetros do Grid
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -516,11 +499,8 @@ Return( _aRet )
 Programa--------: ACFG002MLB
 Autor-----------: Alexandre Villar
 Data da Criacao-: 02/07/2015
-===============================================================================================================================
 Descrição-------: Rotina para montagem dos dados dos parâmetros no ListBox
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -540,24 +520,21 @@ _oLbxAux:bLine := {|| {	_aDados[_oLbxAux:nAt][06]	,;
 
 _oLbxAux:Refresh()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: ACFG002MLB
 Autor-----------: Alexandre Villar
 Data da Criacao-: 02/07/2015
-===============================================================================================================================
 Descrição-------: Rotina para manutenção dos cadastros do menu
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
 Static Function ACFG002AMN( _nOpca )
 
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local _oDlgInc		:= Nil
 Local _oModulo		:= Nil
 Local _oGrupo 		:= Nil
@@ -579,7 +556,7 @@ If _nOpca == 2
 	    If Empty( _aChaves[_nPosAux][05] )
 	    	
 			MsgInfo( 'Somente no nível de "Rotinas" são permitidas alterações! Selecione uma rotina e tente novamente.' , 'Atenção!' )
-			Return()
+			Return
 	    	
 	    Else
 	    	
@@ -598,7 +575,7 @@ If _nOpca == 2
 	Else
 		
 		MsgInfo( 'Falha na inicialização da rotina de manutenção dos menus.' , 'Atenção!' )
-		Return()
+		Return
 	
 	EndIf
 
@@ -622,24 +599,21 @@ DEFINE MSDIALOG _oDlgInc TITLE "Inclusão de Rotinas"	FROM 0,0 TO 190,470 PIXEL
 	@ 057,008 MsGet _oDesRot Var _cDesRot 					PIXEL OF _oDlgInc Size 200,009 COLOR CLR_BLACK
 	
 	@ 078,158 Button "Cancelar"	Size 035,012 PIXEL OF _oDlgInc Action( _oDlgInc:End() )
-	@ 078,195 Button "Ok"		Size 035,012 PIXEL OF _oDlgInc Action( MsgRun( "Gravando o menu..."	, "Aguarde!" , {|| IIF( ACFG002GMN(_nOpca,_nRegZP1,_cCargo,_cModulo,_cGrupo,_cRotina,_cDesRot) , _oDlgInc:End() , Nil ) } ) )
+	@ 078,195 Button "Ok"		Size 035,012 PIXEL OF _oDlgInc Action( MsgRun( "Gravando o menu..."	, "Aguarde!" , {|| IIf( ACFG002GMN(_nOpca,_nRegZP1,_cCargo,_cModulo,_cGrupo,_cRotina,_cDesRot) , _oDlgInc:End() , Nil ) } ) )
 
 ACTIVATE MSDIALOG _oDlgInc CENTERED
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: ACFG002GMN
 Autor-----------: Alexandre Villar
 Data da Criacao-: 02/07/2015
-===============================================================================================================================
 Descrição-------: Rotina para gravação das configurações de menus
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -672,7 +646,8 @@ Else
 			(_cAlias)->( DBCloseArea() )
 		EndIf
 		
-		DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T. , .F. )
+		//DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T. , .F. )
+		MPSysOpenQuery( _cQuery , _cAlias)
 		
 		DBSelectArea(_cAlias)
 		(_cAlias)->( DBGoTop() )
@@ -699,7 +674,7 @@ Else
 			ZP1->ZP1_ROTINA		:= _cRotina
 			ZP1->ZP1_DESROT		:= _cDesRot
 			
-			ZP1->( MsUnLock() )
+			ZP1->( MSUnLock() )
 		
 		EndIf
 		
@@ -721,7 +696,8 @@ Else
 			(_cAlias)->( DBCloseArea() )
 		EndIf
 		
-		DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T. , .F. )
+		//DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T. , .F. )
+		MPSysOpenQuery( _cQuery , _cAlias)
 		
 		DBSelectArea(_cAlias)
 		(_cAlias)->( DBGoTop() )
@@ -734,7 +710,7 @@ Else
 			ZP1->ZP1_ROTINA		:= _cRotina
 			ZP1->ZP1_DESROT		:= _cDesRot
 			
-			ZP1->( MsUnLock() )
+			ZP1->( MSUnLock() )
 		
 		(_cAlias)->( DBSkip() )
 		EndDo
@@ -754,17 +730,14 @@ Return( _lRet )
 Programa--------: ACFG002APR
 Autor-----------: Alexandre Villar
 Data da Criacao-: 02/07/2015
-===============================================================================================================================
 Descrição-------: Rotina para manutenção do cadastro de parâmetros
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
 Static Function ACFG002APR( _nOpca , _oLbxAux )
 
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local _oDlgInc		:= Nil
 Local _oModulo		:= Nil
 Local _oGrupo 		:= Nil
@@ -792,12 +765,12 @@ Private _cModulo	:= Space( TamSX3('ZP1_MODULO')[01] )
 
 If Empty(_cCargo) .Or. Empty(_aChaves)
 	Aviso( 'Atenção!' , 'Falha na inicialização da função de manutenção, selecione uma Rotina ou Parâmetro e tente novamente.' , {'Voltar'} )
-	Return()
+	Return
 EndIf
 
 If ( _nPosCrg := aScan( _aChaves , {|x| x[02] == _cCargo } ) ) <= 0
 	Aviso( 'Atenção!' , 'Não foi possível identificar o ponto de manutenção do cadastro, selecione uma Rotina ou Parâmetro e tente novamente.' , {'Voltar'} )
-	Return()
+	Return
 EndIf
 
 _nPosChv := _oLbxAux:nAt
@@ -823,7 +796,7 @@ If Len(_oLbxAux:aArray) >= _nPosChv
 ElseIf _nOpca > 1
 	
 	Aviso( 'Atenção!' , 'Para essa operação é necessário selecionar um Parâmetro, verifique os dados selecionados e tente novamente.' , {'Voltar'} )
-	Return()
+	Return
 
 Else
 	
@@ -834,7 +807,7 @@ Else
 	If Empty(_cGrupo) .Or. Empty(_cRotina)
 	
 		Aviso( 'Atenção!' , 'Para essa operação é necessário selecionar uma Rotina ou Parâmetro, verifique os dados selecionados e tente novamente.' , {'Voltar'} )
-		Return()
+		Return
 		
 	Else
 		_cDesRot := AllTrim( Posicione( 'ZP1' , 1 , xFilial('ZP1') + _cModulo + _cRotina , "ZP1_DESROT" ) )
@@ -865,7 +838,7 @@ EndIf
 //====================================================================================================
 // Tela para escolha do produto.
 //====================================================================================================
-DEFINE MSDIALOG _oDlgInc TITLE "Manutenção de Parâmetros - "+ IIF( _nOpca == 1 , 'Incluir' , IIf( _nOpca == 2 , 'Alterar' , 'Excluir' ) ) FROM 0,0 TO 300,470 PIXEL
+DEFINE MSDIALOG _oDlgInc TITLE "Manutenção de Parâmetros - "+ IIf( _nOpca == 1 , 'Incluir' , IIf( _nOpca == 2 , 'Alterar' , 'Excluir' ) ) FROM 0,0 TO 300,470 PIXEL
 
 	@ 005,005 To 069,232 LABEL ''				PIXEL OF _oDlgInc
 	
@@ -900,22 +873,20 @@ DEFINE MSDIALOG _oDlgInc TITLE "Manutenção de Parâmetros - "+ IIF( _nOpca == 1 ,
 	@ 117,050 MsGet _oConteu Var _cConteu 				PIXEL OF _oDlgInc Size 150,009 COLOR CLR_BLACK WHEN ( _nOpca < 3 )
 	
 	@ 135,158 Button "Cancelar"	Size 035,012 PIXEL OF _oDlgInc Action( _oDlgInc:End() )
-	@ 135,195 Button "Ok"		Size 035,012 PIXEL OF _oDlgInc Action( MsgRun("Processando...","Aguarde!",{|| IIF( ACFG002GPR(_nOpca,_cCargo,_nRegZP1,_cModulo,_cGrupo,_cRotina,_cDesRot,_cFilPar,_cParam,_cDesPar,_cTipo,_cConteu) , _oDlgInc:End() , Nil ) } ) )
+	@ 135,195 Button "Ok"		Size 035,012 PIXEL OF _oDlgInc Action( MsgRun("Processando...","Aguarde!",{|| IIf( ACFG002GPR(_nOpca,_cCargo,_nRegZP1,_cModulo,_cGrupo,_cRotina,_cDesRot,_cFilPar,_cParam,_cDesPar,_cTipo,_cConteu) , _oDlgInc:End() , Nil ) } ) )
 
 ACTIVATE MSDIALOG _oDlgInc CENTERED
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: ACFG002GPR
 Autor-----------: Alexandre Villar
 Data da Criacao-: 02/07/2015
-===============================================================================================================================
 Descrição-------: Rotina para gravação dos dados de parâmetros
-===============================================================================================================================
 Parametros------: _nOpca   - Código da opção de operação (Incluir/Alterar/Excluir)
 ----------------: _cCargo  - Código de posicionamento no menu
 ----------------: _nRegZP1 - Recno do registro atual na tabela de parâmetros (ZP1)
@@ -928,7 +899,6 @@ Parametros------: _nOpca   - Código da opção de operação (Incluir/Alterar/Exclui
 ----------------: _cDesPar - Descrição do Parâmetro
 ----------------: _cTipo   - Tipo de dado do parâmetro (Caracter/Data/Numérico/Lógico)
 ----------------: _cConteu - Conteúdo do parâmetro
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -969,7 +939,7 @@ If ZP1->( DBSeek( xFilial('ZP1') + _cModulo + _cRotina + _cFilPar + _cParam ) )
 				ZP1->ZP1_DESCRI		:= _cDesPar
 				ZP1->ZP1_TIPO		:= _cTipo
 				ZP1->ZP1_CONTEU		:= _cConteu
-				ZP1->( MsUnLock() )
+				ZP1->( MSUnLock() )
 			
 			EndIf
 		
@@ -979,7 +949,7 @@ If ZP1->( DBSeek( xFilial('ZP1') + _cModulo + _cRotina + _cFilPar + _cParam ) )
 	
 		RecLock( 'ZP1' , .F. )
 		ZP1->( DBDelete() )
-		ZP1->( MsUnLock() )
+		ZP1->( MSUnLock() )
 		
 	EndIf
 	
@@ -997,7 +967,7 @@ Else
 			
 			MessageBox(	'O parâmetro informado já foi cadastrado em outra configuração de Rotina: '		+CRLF+CRLF+;
 						'- Módulo: '+ ZP1->ZP1_MODULO + U_ITNOMAMB( ZP1->ZP1_MODULO )	  				+CRLF+;
-						'- Grupo : '+ ALLTRIM( X3Combo( "ZP1_GRUPO" , ZP1->ZP1_GRUPO ) )				+CRLF+;
+						'- Grupo : '+ AllTrim( X3Combo( "ZP1_GRUPO" , ZP1->ZP1_GRUPO ) )				+CRLF+;
 						'- Rotina: '+ ZP1->ZP1_ROTINA									  				+CRLF+;
 						'- Descr.: '+ AllTrim( ZP1->ZP1_DESROT )										+CRLF+CRLF+;
 						'Verifique a configuração existente...'									, 'Atenção!' , 48 )
@@ -1017,7 +987,8 @@ Else
 				(_cAlias)->( DBCloseArea() )
 			EndIf
 			
-			DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T., .F. )
+			//DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T., .F. )
+			MPSysOpenQuery( _cQuery , _cAlias)
 			
 			DBSelectArea(_cAlias)
 			(_cAlias)->( DBGoTop() )
@@ -1032,7 +1003,7 @@ Else
 				
 					MessageBox(	'O parâmetro informado já foi cadastrado em outra configuração de Rotina: '	+CRLF+CRLF+;
 								'- Módulo: '+ ZP1->ZP1_MODULO +' - '+ U_ITNOMAMB( ZP1->ZP1_MODULO )			+CRLF+;
-								'- Grupo : '+ ALLTRIM( X3Combo( "ZP1_GRUPO" , ZP1->ZP1_GRUPO ) )			+CRLF+;
+								'- Grupo : '+ AllTrim( X3Combo( "ZP1_GRUPO" , ZP1->ZP1_GRUPO ) )			+CRLF+;
 								'- Rotina: '+ ZP1->ZP1_ROTINA									  			+CRLF+;
 								'- Descr.: '+ AllTrim( ZP1->ZP1_DESROT )									+CRLF+CRLF+;
 								'Verifique a configuração existente...'										, 'Atenção!' , 48 )
@@ -1072,13 +1043,13 @@ Else
 						ZP1->ZP1_TIPO		:= _cTipo
 						ZP1->ZP1_CONTEU		:= _cConteu
 					
-					ZP1->( MsUnLock() )
+					ZP1->( MSUnLock() )
 				
 				EndIf
 			
 			EndIf
 			
-		EndIF
+		EndIf
 	
 	ElseIf _lRet .And. _nOpca == 2
 		
@@ -1093,7 +1064,8 @@ Else
 			(_cAlias)->( DBCloseArea() )
 		EndIf
 		
-		DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T., .F. )
+		//DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T., .F. )
+		MPSysOpenQuery( _cQuery , _cAlias)
 		
 		DBSelectArea(_cAlias)
 		(_cAlias)->( DBGoTop() )
@@ -1122,7 +1094,7 @@ Else
 			ZP1->ZP1_DESCRI		:= _cDesPar
 			ZP1->ZP1_TIPO		:= _cTipo
 			ZP1->ZP1_CONTEU		:= _cConteu
-			ZP1->( MsUnLock() )
+			ZP1->( MSUnLock() )
 			
 		Else
 			
@@ -1138,7 +1110,7 @@ Else
 	
 	EndIf
 	
-EndIF
+EndIf
 
 If _lRet
 	ACFG002MTD( _cCargo )
@@ -1151,11 +1123,8 @@ Return( _lRet )
 Programa--------: ACFG002REL
 Autor-----------: Alexandre Villar
 Data da Criacao-: 02/07/2015
-===============================================================================================================================
 Descrição-------: Rotina para montar a relação de dados dos parâmetros para conferência/exportação
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -1180,10 +1149,10 @@ If Pergunte( _cPerg )
 	_cQuery += " AND ZP1.ZP1_GRUPO  IN "+ FormatIn( AllTrim( MV_PAR03 )  , ';' )
 	EndIf
 	If !Empty(MV_PAR04)
-	_cQuery += IIF( Empty(MV_PAR05)," AND "," AND ( " ) +" ( ZP1.ZP1_ROTINA LIKE '%"+ AllTrim( MV_PAR04 ) +"%' OR ZP1.ZP1_DESROT LIKE '%"+ AllTrim( MV_PAR04 ) +"%' ) "
+	_cQuery += IIf( Empty(MV_PAR05)," AND "," AND ( " ) +" ( ZP1.ZP1_ROTINA LIKE '%"+ AllTrim( MV_PAR04 ) +"%' OR ZP1.ZP1_DESROT LIKE '%"+ AllTrim( MV_PAR04 ) +"%' ) "
 	EndIf
 	If !Empty(MV_PAR05)
-	_cQuery += IIF( Empty(MV_PAR04)," AND "," OR ") +" ( ZP1.ZP1_PARAM  LIKE '%"+ AllTrim( MV_PAR05 ) +"%' OR ZP1.ZP1_DESCRI LIKE '%"+ AllTrim( MV_PAR05 ) +"%' ) "+ IIF( Empty(MV_PAR04) , "" , " ) " )
+	_cQuery += IIf( Empty(MV_PAR04)," AND "," OR ") +" ( ZP1.ZP1_PARAM  LIKE '%"+ AllTrim( MV_PAR05 ) +"%' OR ZP1.ZP1_DESCRI LIKE '%"+ AllTrim( MV_PAR05 ) +"%' ) "+ IIf( Empty(MV_PAR04) , "" , " ) " )
 	EndIf
 	_cQuery += " ORDER BY ZP1.ZP1_FILIAL, ZP1.ZP1_MODULO, ZP1.ZP1_GRUPO, ZP1.ZP1_ROTINA "
 	
@@ -1191,20 +1160,21 @@ If Pergunte( _cPerg )
 		(_cAlias)->( DBCloseArea() )
 	EndIf
 	
-	DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T., .F. )
+	//DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T., .F. )
+	MPSysOpenQuery( _cQuery , _cAlias)
 	
 	DBSelectArea(_cAlias)
 	(_cAlias)->( DBGoTop() )
 	While (_cAlias)->( !Eof() )
 		
 		aAdd( _aRelat , {	(_cAlias)->ZP1_MODULO +' - '+ U_ITNOMAMB( (_cAlias)->ZP1_MODULO )	,;
-							ALLTRIM( X3Combo( "ZP1_GRUPO" , (_cAlias)->ZP1_GRUPO ) )			,;
+							AllTrim( X3Combo( "ZP1_GRUPO" , (_cAlias)->ZP1_GRUPO ) )			,;
 							(_cAlias)->ZP1_ROTINA												,;
 							AllTrim( (_cAlias)->ZP1_DESROT )									,;
 							(_cAlias)->ZP1_FILPAR												,;
 							AllTrim( (_cAlias)->ZP1_PARAM )										,;
 							AllTrim( (_cAlias)->ZP1_DESCRI )									,;
-							ALLTRIM( X3Combo( "ZP1_TIPO" , (_cAlias)->ZP1_TIPO ) )				,;
+							AllTrim( X3Combo( "ZP1_TIPO" , (_cAlias)->ZP1_TIPO ) )				,;
 							AllTrim( (_cAlias)->ZP1_CONTEU )									})
 		
 	(_cAlias)->( DBSkip() )
@@ -1222,4 +1192,4 @@ Else
 	
 EndIf
 
-Return()
+Return

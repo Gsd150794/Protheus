@@ -12,16 +12,16 @@ Jerry             | 21/12/2020 | Ajustar regra que busca Comissão Válida por Pro
 -------------------------------------------------------------------------------------------------------------------------------
  Alex Wallauer    | 29/12/2020 | Retirada da chamada da função PswRet(1)[1][1] - Chamado 35108
 -------------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer    | 24/03/2022 | Alteracao da função U_ITMSG() para a função U_MT_ITMSG(). Chamado 38883
+ Alex Wallauer    | 24/03/2022 | Alteracao da função U_ITMsg() para a função U_MT_ITMSG(). Chamado 38883
 ==============================================================================================================================
 */
 
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#include "RwMake.ch"
-#include "TopConn.ch"
-#Include 'Protheus.ch'    
+#Include "RwMake.ch"
+#Include "TopConn.ch"
+#Include "TOTVS.ch"    
 
 /*
 ================================================================================================================================
@@ -36,14 +36,14 @@ Parametros--------: _cVendedor - vendedor do pedido
 					_ccliente - cliente do pedido
 					_clojacli - loja do pedido
 ================================================================================================================================
-Retorno-----------: _lret - Se tem contrato e regra válida ou não
+Retorno-----------: _lRet - Se tem contrato e regra válida ou não
 ================================================================================================================================
 */
 User Function AOMS049(_cVendedor, _lshow, _ccliente,_clojacli,_cRede)
 
-Local _nPosProd		:= ascan(aHeader,{|x| alltrim(Upper(x[2])) == "C6_PRODUTO" })
-Local _nPosTES		:= ascan(aHeader,{|x| alltrim(Upper(x[2])) == "C6_TES"     })  
-Local _nPosLibPe	:= aScan(aHeader,{|x| allTrim(Upper(x[2])) == 'C6_I_LIBPR' })
+Local _nPosProd		:= aScan(aHeader,{|x| AllTrim(Upper(x[2])) == "C6_PRODUTO" })
+Local _nPosTES		:= aScan(aHeader,{|x| AllTrim(Upper(x[2])) == "C6_TES"     })  
+Local _nPosLibPe	:= aScan(aHeader,{|x| AllTrim(Upper(x[2])) == 'C6_I_LIBPR' })
 
 Local _cTes			:= ""
 Local _cFiltro		:= "%" 	
@@ -51,7 +51,7 @@ Local _cAlias		:= ""
 Local _lRet			:= .T.    
 Local _lPosRegra	:= .F.
 
-Local _aArea		:= GetArea()	  
+Local _aArea		:= FWGetArea()	  
 
 Default _cVendedor	:= M->C5_VEND1
 Default _lshow 	    := .T.
@@ -61,7 +61,7 @@ Default _cRede      := M->C5_I_GRPVE
 
 //Private _cMatUsu	:= PswRet(1)[1][1] //Retorna o codigo do usuario logado
 
-If !aCols[n,len(aHeader)+1]    
+If !aCols[n,Len(aHeader)+1]    
                         	 
 	/*
 	//==================================================================
@@ -69,7 +69,7 @@ If !aCols[n,len(aHeader)+1]
 	//se um produto esta sem regra de comissao.                       
 	//==================================================================
 	*/
-	If AllTrim(aCols[n,_nPosProd]) <> '1003     16'  .and.   posicione("SB1",1,xfilial("SB1")+AllTrim(aCols[n,_nPosProd]),"B1_GRUPO") <> '0813' //Não verifica pallets                                                                  
+	If AllTrim(aCols[n,_nPosProd]) <> '1003     16'  .And.   Posicione("SB1",1,xFilial("SB1")+AllTrim(aCols[n,_nPosProd]),"B1_GRUPO") <> '0813' //Não verifica pallets                                                                  
 
 		_cTes     := Posicione("SF4",1,xFilial("SF4") + aCols[n,_nPosTES],"F4_DUPLIC")     
 		
@@ -96,15 +96,15 @@ If !aCols[n,len(aHeader)+1]
 				SELECT
 			          ZAE_PROD
 				FROM
-				      %table:ZAE%
+				      %Table:ZAE%
 				WHERE
 				      D_E_L_E_T_ = ' '  
 					  
 					  %exp:_cFiltro%	
 		    EndSql  
 		    
-		    dbSelectArea(_cAlias) 
-		    (_cAlias)->(dbGotop())      
+		    DBSelectArea(_cAlias) 
+		    (_cAlias)->(DBGoTop())      
 		    
 		    If (_cAlias)->(!Eof())    
 		    
@@ -113,11 +113,11 @@ If !aCols[n,len(aHeader)+1]
 		    		If AllTrim((_cAlias)->ZAE_PROD) == AllTrim(aCols[n,_nPosProd])
 		    		 
 		    			_lPosRegra:= .T.
-		    			exit
+		    			Exit
 		    		
 		    		EndIf
 		    	
-		    	(_cAlias)->(dbSkip())
+		    	(_cAlias)->(DBSkip())
 		    	EndDo
 		    
 				If !_lPosRegra 
@@ -127,26 +127,26 @@ If !aCols[n,len(aHeader)+1]
 				    	
 				    	If _lshow
 				    		U_MT_ITMSG(_cMens,"Atenção", "Contate o depto responsável pelo cadastro de regras de comissão",1)
-						ELSE
-						   If TYPE("_cAOMS074Vld") = "C" 
+						Else
+						   If Type("_cAOMS074Vld") = "C" 
                               _cAOMS074Vld += _cMens
-                           ENDIF
-				    	Endif
+                           EndIf
+				    	EndIf
 				    	 
 						_lRet := .F.
 				    	   
 				Else
 				
 					//Validação de contrato do cliente
-					_lret := AOMS049C(_lshow,_ccliente,_clojacli)
+					_lRet := AOMS049C(_lshow,_ccliente,_clojacli)
 		    
-				Endif	
+				EndIf	
 				
 		    
 		    EndIf
 		     
-		    dbSelectArea(_cAlias) 
-		    (_cAlias)->(dbCloseArea())
+		    DBSelectArea(_cAlias) 
+		    (_cAlias)->(DBCloseArea())
 		
 		EndIf   
 	
@@ -155,7 +155,7 @@ If !aCols[n,len(aHeader)+1]
 
 EndIf
 
-restArea(_aArea)	
+FWRestArea(_aArea)	
 
 Return _lRet
 
@@ -169,15 +169,15 @@ Descrição---------: Validação de contrato do cliente
 ===============================================================================================================================
 Parametros--------: Nenhum
 ===============================================================================================================================
-Retorno-----------: _lret - Se tem contrato válido ou não
+Retorno-----------: _lRet - Se tem contrato válido ou não
 ===============================================================================================================================
 */
 Static Function AOMS049C(_lshow,_ccliente,_clojacli)
 
-Local _lret := .T.
+Local _lRet := .T.
 Local _lAchou := .F.
 Local _ccontrato := ""
-Local _nPosProd		:= ascan(aHeader,{|x| alltrim(Upper(x[2])) == "C6_PRODUTO" })
+Local _nPosProd		:= aScan(aHeader,{|x| AllTrim(Upper(x[2])) == "C6_PRODUTO" })
 Local _lCliente		:= .F.
 Local _cQuery		:= ""
 Local _cQry			:= ""
@@ -186,8 +186,8 @@ Default _lshow := .T.
 Default _ccliente := M->C5_CLIENTE
 Default _clojacli := M->C5_LOJACLI
 				
-SA1->(dbSetOrder(1))
-SA1->(dbSeek(xFilial("SA1") + _ccliente + _clojacli ))
+SA1->(DBSetOrder(1))
+SA1->(DBSeek(xFilial("SA1") + _ccliente + _clojacli ))
 
 //=======================================================//
 // Procuro no cabeçalho se há contrato no cliente e loja //
@@ -199,13 +199,13 @@ _cQry += "  AND ZAZ_CLIENT = '" + SA1->A1_COD + "' "
 _cQry += "  AND ZAZ_LOJA = '" + SA1->A1_LOJA + "' "
 _cQry += "  AND ZAZ_STATUS = 'S' "
 _cQry += "  AND ZAZ_MSBLQL = '2' "
-_cQry += "  AND ZAZ_DTINI <= '" + Dtos(dDataBase) + "' AND ZAZ_DTFIM >= '" + Dtos(dDataBase) + "' "
+_cQry += "  AND ZAZ_DTINI <= '" + DToS(dDataBase) + "' AND ZAZ_DTFIM >= '" + DToS(dDataBase) + "' "
 _cQry += "  AND D_E_L_E_T_ = ' ' "
 
 dbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQry ) , "TRBCLI" , .T., .F. )
 
-dbSelectArea("TRBCLI")
-TRBCLI->(dbGoTop())
+DBSelectArea("TRBCLI")
+TRBCLI->(DBGoTop())
 
 If !TRBCLI->(Eof())
 	
@@ -224,8 +224,8 @@ If !TRBCLI->(Eof())
 
 	dbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , "TRBPRO" , .T., .F. )
 
-	dbSelectArea("TRBPRO")
-	TRBPRO->(dbGoTop())
+	DBSelectArea("TRBPRO")
+	TRBPRO->(DBGoTop())
 
 	If TRBPRO->(Eof())
 	
@@ -240,29 +240,29 @@ If !TRBCLI->(Eof())
 
 		dbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQryAux ) , "TMPPRO" , .T., .F. )
 
-		dbSelectArea("TMPPRO")
-		TMPPRO->(dbGoTop())
+		DBSelectArea("TMPPRO")
+		TMPPRO->(DBGoTop())
 
 		If !TMPPRO->(Eof())
 			_lAchou := .T.
 		EndIf
 
-		dbSelectArea("TMPPRO")
-		TMPPRO->(dbCloseArea())
+		DBSelectArea("TMPPRO")
+		TMPPRO->(DBCloseArea())
 	
 	Else
 		
 		_lAchou := .T.
 	
-	EndIF
+	EndIf
 
-	dbSelectArea("TRBPRO")
-	TRBPRO->(dbCloseArea())
+	DBSelectArea("TRBPRO")
+	TRBPRO->(DBCloseArea())
 
-EndIF
+EndIf
 
-dbSelectArea("TRBCLI")
-TRBCLI->(dbCloseArea())
+DBSelectArea("TRBCLI")
+TRBCLI->(DBCloseArea())
 
 If !_lAchou
 
@@ -277,13 +277,13 @@ If !_lAchou
 	_cQry += "  AND ZAZ_LOJA = ' ' "
 	_cQry += "  AND ZAZ_STATUS = 'S' "
 	_cQry += "  AND ZAZ_MSBLQL = '2' "
-	_cQry += "  AND ZAZ_DTINI <= '" + Dtos(dDataBase) + "' AND ZAZ_DTFIM >= '" + Dtos(dDataBase) + "' "
+	_cQry += "  AND ZAZ_DTINI <= '" + DToS(dDataBase) + "' AND ZAZ_DTFIM >= '" + DToS(dDataBase) + "' "
 	_cQry += "  AND D_E_L_E_T_ = ' ' "
 
 	dbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQry ) , "TRBCLI" , .T., .F. )
 
-	dbSelectArea("TRBCLI")
-	TRBCLI->(dbGoTop())
+	DBSelectArea("TRBCLI")
+	TRBCLI->(DBGoTop())
 
 	If !TRBCLI->(Eof())
 
@@ -302,8 +302,8 @@ If !_lAchou
 
 		dbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , "TRBPRO" , .T., .F. )
 	
-		dbSelectArea("TRBPRO")
-		TRBPRO->(dbGoTop())
+		DBSelectArea("TRBPRO")
+		TRBPRO->(DBGoTop())
 
 		If TRBPRO->(Eof())
 					
@@ -319,8 +319,8 @@ If !_lAchou
 
 			dbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQryAux ) , "TMPPRO" , .T., .F. )
 
-			dbSelectArea("TMPPRO")
-			TMPPRO->(dbGoTop())
+			DBSelectArea("TMPPRO")
+			TMPPRO->(DBGoTop())
 
 			If TMPPRO->(Eof())
 		
@@ -336,8 +336,8 @@ If !_lAchou
 
 				dbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQryAu1 ) , "TMPPR1" , .T., .F. )
 
-				dbSelectArea("TMPPR1")
-				TMPPR1->(dbGoTop())
+				DBSelectArea("TMPPR1")
+				TMPPR1->(DBGoTop())
 
 				If TMPPR1->(Eof())
 			
@@ -353,8 +353,8 @@ If !_lAchou
 
 					dbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQryAu2 ) , "TMPPR2" , .T., .F. )
 
-					dbSelectArea("TMPPR2")
-					TMPPR2->(dbGoTop())
+					DBSelectArea("TMPPR2")
+					TMPPR2->(DBGoTop())
 
 					If TMPPR2->(Eof())
 				
@@ -370,8 +370,8 @@ If !_lAchou
 	
 						dbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQryAu3 ) , "TMPPR3" , .T., .F. )
 	
-						dbSelectArea("TMPPR3")
-						TMPPR3->(dbGoTop())
+						DBSelectArea("TMPPR3")
+						TMPPR3->(DBGoTop())
 	
 						If TMPPR3->(Eof())
 					
@@ -387,8 +387,8 @@ If !_lAchou
 		
 							dbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQryAu4 ) , "TMPPR4" , .T., .F. )
 		
-							dbSelectArea("TMPPR4")
-							TMPPR4->(dbGoTop())
+							DBSelectArea("TMPPR4")
+							TMPPR4->(DBGoTop())
 
 							If !TMPPR4->(Eof())
 			
@@ -396,8 +396,8 @@ If !_lAchou
 			
 							EndIf
 		
-							dbSelectArea("TMPPR4")
-							TMPPR4->(dbCloseArea())
+							DBSelectArea("TMPPR4")
+							TMPPR4->(DBCloseArea())
 					
 						Else
 			
@@ -405,8 +405,8 @@ If !_lAchou
 					
 						EndIf
 	
-						dbSelectArea("TMPPR3")
-						TMPPR3->(dbCloseArea())
+						DBSelectArea("TMPPR3")
+						TMPPR3->(DBCloseArea())
 					
 					Else
 				
@@ -414,8 +414,8 @@ If !_lAchou
 					
 					EndIf
 
-					dbSelectArea("TMPPR2")
-					TMPPR2->(dbCloseArea())
+					DBSelectArea("TMPPR2")
+					TMPPR2->(DBCloseArea())
 			
 				Else
 			
@@ -423,8 +423,8 @@ If !_lAchou
 			
 				EndIf
 
-				dbSelectArea("TMPPR1")
-				TMPPR1->(dbCloseArea())
+				DBSelectArea("TMPPR1")
+				TMPPR1->(DBCloseArea())
 		
 			Else
 		
@@ -432,32 +432,32 @@ If !_lAchou
 		
 			EndIf
 
-			dbSelectArea("TMPPRO")
-			TMPPRO->(dbCloseArea())
+			DBSelectArea("TMPPRO")
+			TMPPRO->(DBCloseArea())
 		
 		Else
 		
 			_lAchou := .T.
 	
-		EndIF
+		EndIf
 
-		dbSelectArea("TRBPRO")
-		TRBPRO->(dbCloseArea())
+		DBSelectArea("TRBPRO")
+		TRBPRO->(DBCloseArea())
 
-	EndIF
+	EndIf
 
-	dbSelectArea("TRBCLI")
-	TRBCLI->(dbCloseArea())
+	DBSelectArea("TRBCLI")
+	TRBCLI->(DBCloseArea())
 					
 EndIf
 				
 				
-If !_lAchou .And. !Empty(_cContrato) .and.  posicione("SB1",1,xfilial("SB1")+AllTrim(aCols[n,_nPosProd]),"B1_TIPO") = 'PA' //Só para produtos acabados
+If !_lAchou .And. !Empty(_cContrato) .And.  Posicione("SB1",1,xFilial("SB1")+AllTrim(aCols[n,_nPosProd]),"B1_TIPO") = 'PA' //Só para produtos acabados
 				
 	U_MT_ITMSG( "O produto informado [" + AllTrim(aCols[n,_nPosProd]) + "] não existe na regra de contrato do cliente."	,"Atenção",;
 	"Contrato No. [" + _cContrato + "]. Por favor contactar o departamento financeiro.",1	 					)
 	_lRet := .F.
 				
-EndIF
+EndIf
 				
-Return _lret
+Return _lRet

@@ -8,11 +8,11 @@
 ===============================================================================================================================
 */
 
-#INCLUDE "FWMBROWSE.CH"
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "TOPCONN.CH"
-#INCLUDE "RWMAKE.CH"
+#Include "FWMBROWSE.CH"
+#Include "FWMVCDEF.CH"
+#Include "TOTVS.ch"
+#Include "TOPCONN.CH"
+#Include "RWMAKE.CH"
 
 /*
 ===============================================================================================================================
@@ -36,7 +36,7 @@ _oBrowse:SetMenuDef( 'AOMS154' )
 _oBrowse:SetDescription("Premissa Vs Produtos")
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -77,8 +77,8 @@ Retorno-----------: _oModel - Objeto do modelo de dados do MVC
 */ 
 Static Function ModelDef()
 Local _oModel := Nil
-Local _oStZ39CAB := FWFormStruct(1,"Z39",{ |x| ALLTRIM(x) $ 'Z39_COD, Z39_DESC, Z39_PERIOD' } )
-Local _oStZ39DET := FWFormStruct(1,"Z39",{ |x| ALLTRIM(x) $ 'Z39_PRODUT,Z39_DESCP,Z39_TIPO, Z39_UM, Z39_FATOR, Z39_TPCONV' } )
+Local _oStZ39CAB := FWFormStruct(1,"Z39",{ |x| AllTrim(x) $ 'Z39_COD, Z39_DESC, Z39_PERIOD' } )
+Local _oStZ39DET := FWFormStruct(1,"Z39",{ |x| AllTrim(x) $ 'Z39_PRODUT,Z39_DESCP,Z39_TIPO, Z39_UM, Z39_FATOR, Z39_TPCONV' } )
 
 _oModel := MPFormModel():New("AOMS154M",/*bPreValidacao*/ ,/*_bPosValidacao*/ ,/*bCommit*/,/*bCancel*/) 
 
@@ -113,8 +113,8 @@ Retorno-----------: _oView - Objeto de exibição do MVC
 */ 
 Static Function ViewDef()
 Local _oModel := FWLoadModel("AOMS154")
-Local _oStZ39CAB := FWFormStruct(2,"Z39",{ |x| ALLTRIM(x) $ 'Z39_COD, Z39_DESC, Z39_PERIOD' } )
-Local _oStZ39DET := FWFormStruct(2,"Z39",{ |x| ALLTRIM(x) $ 'Z39_PRODUT,Z39_DESCP,Z39_TIPO, Z39_UM, Z39_FATOR, Z39_TPCONV' } )
+Local _oStZ39CAB := FWFormStruct(2,"Z39",{ |x| AllTrim(x) $ 'Z39_COD, Z39_DESC, Z39_PERIOD' } )
+Local _oStZ39DET := FWFormStruct(2,"Z39",{ |x| AllTrim(x) $ 'Z39_PRODUT,Z39_DESCP,Z39_TIPO, Z39_UM, Z39_FATOR, Z39_TPCONV' } )
 Local _oView := Nil
 
 _oStZ39DET:RemoveField('Z39_DESC')

@@ -10,7 +10,7 @@ Lucas Borges  |04/06/2025| Chamado 50899, 50901. Corrgida a exportação do arquiv
 ===============================================================================================================================
 */
 
-#INCLUDE "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -105,15 +105,15 @@ Else
 	cQuery += " (SELECT ED.ED_DESCRIC FROM " + RetSqlName("SED") + " ED WHERE ED.ED_CODIGO = E2.E2_NATUREZ AND ED.D_E_L_E_T_= ' ') ED_DESCRIC "	 	
 	cQuery += "FROM " +RETSQLNAME("SE2")+" E2 "   
 	cQuery += " JOIN "+RETSQLNAME("SA2")+" SA2 ON E2.E2_FORNECE = SA2.A2_COD AND E2.E2_LOJA = SA2.A2_LOJA "   
-	cQuery += "WHERE E2.D_E_L_E_T_ <> '*' "
-	cQuery += " AND SA2.D_E_L_E_T_ <> '*' "
+	cQuery += "WHERE E2.D_E_L_E_T_ = ' ' "
+	cQuery += " AND SA2.D_E_L_E_T_ = ' ' "
 	cQuery += " AND E2.E2_FILIAL BETWEEN '"  + MV_PAR06    + "' AND '" + MV_PAR07    + "' "
 	cQuery += " AND E2.E2_EMISSAO BETWEEN '" + DToS(MV_PAR01)   + "' AND '" + DToS(MV_PAR02)   + "' "
-	cQuery += " AND E2.E2_VENCREA BETWEEN '" + DtoS(MV_PAR08)  + "' AND '" + DtoS(MV_PAR09)  + "' "
+	cQuery += " AND E2.E2_VENCREA BETWEEN '" + DToS(MV_PAR08)  + "' AND '" + DToS(MV_PAR09)  + "' "
 	cQuery += " AND E2.E2_NATUREZ BETWEEN '" + MV_PAR12  + "' AND '" + MV_PAR13  + "' " 
 	cQuery += cFiltro   
 	//================================================================================================================================================     
-	// Compoe saldo do titulo for iguar a Nao, ou seja, nao calcula saldo do titulo de acordo com a data informada pelo usuario e sim pelo saldo atual
+	// Compoe saldo do titulo For iguar a Nao, ou seja, nao calcula saldo do titulo de acordo com a data informada pelo usuario e sim pelo saldo atual
 	//================================================================================================================================================     
 	If !MV_PAR03 == 1
 		cQuery += " AND E2.E2_SALDO > 0"
@@ -135,8 +135,8 @@ Else
 	Count to nreg
 	_oSelf:SetRegua1(nreg)
 
-	(_cAliasSE2)->(Dbgotop())  
-	While (_cAliasSE2)->(!eof()) 
+	(_cAliasSE2)->(DBGoTop())  
+	While (_cAliasSE2)->(!Eof()) 
 		_oSelf:IncRegua1("Processando dados do Titulo: " + AllTrim((_cAliasSE2)->E2_NUM) + '/' + (_cAliasSE2)->E2_PARCELA)
 		
 		_nSaldoTit:= 0              
@@ -147,7 +147,7 @@ Else
 			//====================================================================================     			 		          
 			// Para que essa funcao funcione eh necessario que antes esteja posicionado no titulo
 			//====================================================================================     
-			SE2->(DbGoto((_cAliasSE2)->RECNOSE2))
+			SE2->(DBGoTo((_cAliasSE2)->RECNOSE2))
 			
 			_nSaldoTit:= SaldoTit((_cAliasSE2)->E2_PREFIXO,;             			//PREFIXO DO TITULO
 								(_cAliasSE2)->E2_NUM,;                 			//NUMERO DO TITULO
@@ -157,8 +157,8 @@ Else
 								"P",;                                  			//TIPO DA CARTEIRA A PAGAR OU RECEBER - P == PAGAR - R == RECEBER
 								(_cAliasSE2)->E2_FORNECE,;            			//CODIGO DO FORNECEDOR
 								nMoeda,; 								 			//CODIGO DA MOEDA CORRENTE 
-								StoD((_cAliasSE2)->E2_VENCREA),;        			//DATA DE CONVERSAO 
-								MV_PAR04,;                            			//DATA DA BAIXA A SER CONSIDERADA (RETROATIVA) - SER FOR IGUAL OU MAIOR CONSIDERA A BAIXA
+								SToD((_cAliasSE2)->E2_VENCREA),;        			//DATA DE CONVERSAO 
+								MV_PAR04,;                            			//DATA DA BAIXA A SER CONSIDERADA (RETROATIVA) - SER For IGUAL OU MAIOR CONSIDERA A BAIXA
 								(_cAliasSE2)->E2_LOJA,;              				//CODIGO DA LOJA DO FORNECEDOR DO TITULO CORRENTE
 								(_cAliasSE2)->E2_FILIAL,;   						//FILIAL DO TITULO
 								If(cPaisLoc=="BRA",(_cAliasSE2)->E2_TXMOEDA,0)) //TAXA DA MOEDA   
@@ -167,13 +167,13 @@ Else
 					//==================================================================     
 					If Str((_cAliasSE2)->E2_VALOR,17,2) == Str(_nSaldoTit,17,2) .And. (_cAliasSE2)->E2_DECRESC > 0 .And. (_cAliasSE2)->E2_SDDECRE == 0
 						_nSaldoTit -= SE2->E2_DECRESC
-					Endif
+					EndIf
 					//==================================================================     
 					// Soma Acrescimo para recompor o saldo na data escolhida.
 					//==================================================================     
 					If Str((_cAliasSE2)->E2_VALOR,17,2) == Str(_nSaldoTit,17,2) .And. (_cAliasSE2)->E2_ACRESC > 0 .And. (_cAliasSE2)->E2_SDACRES == 0
 						_nSaldoTit += SE2->E2_ACRESC
-					Endif		
+					EndIf		
 					//=========================              
 					// MVPAGANT == PA
 					// MV_CPNEG == NDF
@@ -188,7 +188,7 @@ Else
 						dOldData  := dDataBase
 						dDataBase := CTOD("31/12/40")
 
-						_nSaldoTit -= SomaAbat((_cAliasSE2)->E2_PREFIXO,(_cAliasSE2)->E2_NUM,(_cAliasSE2)->E2_PARCELA,"P",nMoeda,StoD((_cAliasSE2)->E2_VENCREA),(_cAliasSE2)->E2_FORNECE,(_cAliasSE2)->E2_LOJA)
+						_nSaldoTit -= SomaAbat((_cAliasSE2)->E2_PREFIXO,(_cAliasSE2)->E2_NUM,(_cAliasSE2)->E2_PARCELA,"P",nMoeda,SToD((_cAliasSE2)->E2_VENCREA),(_cAliasSE2)->E2_FORNECE,(_cAliasSE2)->E2_LOJA)
 
 						dDataBase := dOldData
 					EndIf
@@ -208,11 +208,11 @@ Else
 				DadosExpor(_cAliasSE2,_nSaldoTit, @aDadosExp)
 			EndIf
 
-		(_cAliasSE2)->(dbSkip())
+		(_cAliasSE2)->(DBSkip())
 	EndDo               
 		
-	dbSelectArea(_cAliasSE2)
-	(_cAliasSE2)->(dbCloseArea())                                             
+	DBSelectArea(_cAliasSE2)
+	(_cAliasSE2)->(DBCloseArea())                                             
 	//============================                                                                   
 	// Relatorio Analitico
 	//============================
@@ -231,15 +231,15 @@ Else
 	//========================
 	If MV_PAR15 == 1
 		For x:=1 To Len(aDadosExp)                                     
-			incProc("Gerando XML do Titulo: " + aDadosExp[x,6] + '/' + aDadosExp[x,7])
+			IncProc("Gerando XML do Titulo: " + aDadosExp[x,6] + '/' + aDadosExp[x,7])
 			//==============================
 			// Mostra SubTotal por Dia
 			//==============================
-			if aDadosExp[x,3] != cUltDay .and. nSubTotal <> 0
+			If aDadosExp[x,3] != cUltDay .And. nSubTotal <> 0
 				aAdd( aDados , { "" ,"Subtotal","","","","","","",nSubTotal,""  })	
 				aAdd( aDados , { "",""         ,"","","","","","","",""         })//Imprime Linhas em branco
 				nSubTotal:=0
-			Endif
+			EndIf
 			cUltDay := aDadosExp[x,3]
 		
 			//==================================
@@ -248,7 +248,7 @@ Else
 			cNome	 := Posicione("SA2",1,xFilial("SA2") + aDadosExp[x,4] + aDadosExp[x,5],"A2_NOME") 
 			cNome	 := RemovCar(AllTrim(cNome))//Funcao que remove caracteres especiais para nao ocorrer erro na geracao do xml	      
 			cNatureza:= RemovCar(AllTrim(aDadosExp[x,9])) 
-			aAdd( aDados , { DTOC(STOD(aDadosExp[x,3])) , ;
+			aAdd( aDados , { DToC(SToD(aDadosExp[x,3])) , ;
 									AllTrim(aDadosExp[x,4]) + '/' + AllTrim(aDadosExp[x,5]),;
 									AllTrim(cNome),;
 									aDadosExp[x,10],;
@@ -274,22 +274,22 @@ Else
 		//======================
 	Else         
 		For x:=1 To Len(aDadosExp)                                    
-			incProc("Gerando XML do Vencimento: " + DTOC(STOD(aDadosExp[x,3])))
+			IncProc("Gerando XML do Vencimento: " + DToC(SToD(aDadosExp[x,3])))
 		
 			// Mostra SubTotal por Dia
-			if aDadosExp[x,3] != cUltDay .and. nSubTotal <> 0
+			If aDadosExp[x,3] != cUltDay .And. nSubTotal <> 0
 				aAdd( aDados , { "" ,"Subtotal","","","","",nSubTotal  })	
 				aAdd( aDados , { "",""         ,"","","","",""         })//Imprime Linhas em branco
 				nSubTotal:=0
-			Endif                    
+			EndIf                    
 			
 			cUltDay := aDadosExp[x,3]
 
 			// Adiciona Dados no array
-			cNome	 := POSICIONE("SA2",1,XFILIAL("SA2")+aDadosExp[x,4]+aDadosExp[x,5],"A2_NOME") 
+			cNome	 := Posicione("SA2",1,xFilial("SA2")+aDadosExp[x,4]+aDadosExp[x,5],"A2_NOME") 
 			cNome	 := RemovCar(AllTrim(cNome))//Funcao que remove caracteres especiais para nao ocorrer erro na geracao do xml	      
 			cNatureza:= RemovCar(AllTrim(aDadosExp[x,7])) 
-			aAdd( aDados , { DTOC(STOD(aDadosExp[x,3])), AllTrim(aDadosExp[x,4]) + '/' + AllTrim(aDadosExp[x,5]),AllTrim(cNome),;
+			aAdd( aDados , { DToC(SToD(aDadosExp[x,3])), AllTrim(aDadosExp[x,4]) + '/' + AllTrim(aDadosExp[x,5]),AllTrim(cNome),;
 							aDadosExp[x,8],aDadosExp[x,6],cNatureza,aDadosExp[x,2]})	
 
 				nSubTotal+= aDadosExp[x,2]
@@ -301,7 +301,7 @@ Else
 		aAdd( aDados , { "" ,""        ,"","","","",""         })//Imprime Linhas em branco
 		aAdd( aDados , { "" ,"Total"   ,"","","","",nTotal     })
 
-	Endif
+	EndIf
 	
 	RayToXml(aDados,_oFile)
 
@@ -350,7 +350,7 @@ _cBuffer += ' <Worksheet ss:Name="Planilha"><Table> '
 //==================================
 // Convertendo Array
 //==================================
-for i:=1 to len(aTabela)        
+For i:=1 to Len(aTabela)        
 	If ValType(aTabela[i,1]) == "C"    
 		If aScan(aVenciment,{|x| x[1] == aTabela[i,1] }) == 0
 			_cBuffer+="<Row>"      
@@ -362,21 +362,21 @@ for i:=1 to len(aTabela)
 	// inicia linha
 	_cBuffer+="<Row>"
 	
-	for y:=2 to len(aTabela[i])
-		if ValType(aTabela[i,y]) == "N"
-			_cBuffer+='<Cell><Data ss:Type="Number">'+ALLTRIM(str(aTabela[i,y]))+'</Data></Cell>'
-		elseif ValType(aTabela[i,y]) == "D"
-		elseIf ValType(aTabela[i,y]) == "C"
+	For y:=2 to Len(aTabela[i])
+		If ValType(aTabela[i,y]) == "N"
+			_cBuffer+='<Cell><Data ss:Type="Number">'+AllTrim(Str(aTabela[i,y]))+'</Data></Cell>'
+		ElseIf ValType(aTabela[i,y]) == "D"
+		ElseIf ValType(aTabela[i,y]) == "C"
 			_cBuffer+='<Cell><Data ss:Type="String">'+aTabela[i,y]+'</Data></Cell>'  
-		else
+		Else
 			_cBuffer+='<Cell><Data ss:Type="String"></Data></Cell>'	
-		endif
-	next y
+		EndIf
+	Next y
 	//===================
 	// finaliza linha
 	//===================
 	_cBuffer+="</Row>"
-next i
+Next i
 
 //==================================
 // Rodape do XML
@@ -399,14 +399,14 @@ Retorno-----------: Nenhum
 */
 Static Function RemovCar(cString As Character)
 
-cString:= strtran(cString,'&',"")
-cString:= strtran(cString,'<',"")
-cString:= strtran(cString,'>',"")
-cString:= strtran(cString,'%',"")
-cString:= strtran(cString,'~',"")
-cString:= strtran(cString,'^',"") 
-cString:= strtran(cString,'´',"")
-cString:= strtran(cString,'`',"")
+cString:= StrTran(cString,'&',"")
+cString:= StrTran(cString,'<',"")
+cString:= StrTran(cString,'>',"")
+cString:= StrTran(cString,'%',"")
+cString:= StrTran(cString,'~',"")
+cString:= StrTran(cString,'^',"") 
+cString:= StrTran(cString,'´',"")
+cString:= StrTran(cString,'`',"")
 
 Return cString                
 
@@ -429,14 +429,14 @@ Local _cAlias := GetNextAlias() As Character
 Local nTam      := 0 As Numeric
 Local nMaxSelect:= 0 As Numeric
 Local aCat      := {} As Array
-Local MvRet     := Alltrim(ReadVar()) As Variant
+Local MvRet     := AllTrim(ReadVar()) As Variant
 Local MvPar     := "" As Character
 Local cTitulo   := "" As Character
 Local MvParDef  := "" As Character
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //==========================================================
 // Tratamento para carregar variaveis da lista de opcoes
@@ -454,10 +454,10 @@ BeginSql alias _cAlias
 	ORDER BY X5_CHAVE
 EndSql
 
-while (_cAlias)->(!eof()) 
+While (_cAlias)->(!Eof()) 
 	MvParDef += SubStr((_cAlias)->CHAVE,1,nTam)
 	aAdd(aCat,AllTrim((_cAlias)->DESCRI)) 
-	(_cAlias)->(dbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 (_cAlias)->(DBCloseArea())
 //======================================================================
@@ -476,11 +476,11 @@ EndIf
 If f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,.F.,nTam,nMaxSelect)        
 	// Tratamento para separar retorno com barra ";"
 	&MvRet := ""
-	for i:=1 to Len(MvPar) step nTam
-		if !(SubStr(MvPar,i,1) $ " |*")
+	For i:=1 to Len(MvPar) step nTam
+		If !(SubStr(MvPar,i,1) $ " |*")
 			&MvRet  += SubStr(MvPar,i,nTam) + ";"
-		endIf
-	next i
+		EndIf
+	Next i
 	// Trata para tirar o ultimo caracter
 	&MvRet := SubStr(&MvRet,1,Len(&MvRet)-1) 
 

@@ -2,26 +2,20 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor            |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE 'Protheus.ch' 
+#Include "TOTVS.ch" 
 
 /*
 ===============================================================================================================================
 Programa--------: RGLT069
 Autor-----------: Lucas Borges Ferreira
 Data da Criacao-: 03/11/2021
-===============================================================================================================================
 Descrição-------: Relatório Síntese das antecipações e empréstimos. Chamado 38597
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -40,11 +34,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Processa a montagem do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -99,11 +90,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Processa a impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -120,10 +108,10 @@ Local _nCountRec:= 0
 If MV_PAR01 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLM")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio
@@ -199,28 +187,28 @@ BeginSql alias _cAlias
 			WHERE ZLM.D_E_L_E_T_ = ' '
 			%exp:_cFiltro%
 			AND ZLM_TIPO = 'E'
-			AND SUBSTR(ZLM_SA2COD,1,1) = 'P'
+			AND SubStr(ZLM_SA2COD,1,1) = 'P'
 			GROUP BY ZLM_FILIAL, ZLM_SETOR, ZLM_TIPO) PEMP,
 		(SELECT ZLM_FILIAL, ZLM_SETOR, ZLM_TIPO, COUNT(1) QTD_ANT, SUM(ZLM_TOTAL) TOTAL_ANT
 			FROM %Table:ZLM% ZLM
 			WHERE ZLM.D_E_L_E_T_ = ' '
 			%exp:_cFiltro%
 			AND ZLM_TIPO = 'N'
-			AND SUBSTR(ZLM_SA2COD,1,1) = 'P'
+			AND SubStr(ZLM_SA2COD,1,1) = 'P'
 			GROUP BY ZLM_FILIAL, ZLM_SETOR, ZLM_TIPO) PANT,
 		(SELECT ZLM_FILIAL, ZLM_SETOR, ZLM_TIPO, COUNT(1) QTD_EMP, SUM(ZLM_TOTAL) TOTAL_EMP
 			FROM %Table:ZLM% ZLM
 			WHERE ZLM.D_E_L_E_T_ = ' '
 			%exp:_cFiltro%
 			AND ZLM_TIPO = 'E'
-			AND SUBSTR(ZLM_SA2COD,1,1) <> 'P'
+			AND SubStr(ZLM_SA2COD,1,1) <> 'P'
 			GROUP BY ZLM_FILIAL, ZLM_SETOR, ZLM_TIPO) TEMP,
 		(SELECT ZLM_FILIAL, ZLM_SETOR, ZLM_TIPO, COUNT(1) QTD_ANT, SUM(ZLM_TOTAL) TOTAL_ANT
 			FROM %Table:ZLM% ZLM
 			WHERE ZLM.D_E_L_E_T_ = ' '
 			%exp:_cFiltro%
 			AND ZLM_TIPO = 'N'
-			AND SUBSTR(ZLM_SA2COD,1,1) <> 'P'
+			AND SubStr(ZLM_SA2COD,1,1) <> 'P'
 			GROUP BY ZLM_FILIAL, ZLM_SETOR, ZLM_TIPO) TANT, ZL2010 ZL2
 	WHERE ZL2.D_E_L_E_T_ = ' '
 	AND ZL2_FILIAL = BASE.ZLM_FILIAL
@@ -250,18 +238,18 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 //==========================================================================
 // Query do relatório da secao 2
@@ -270,7 +258,7 @@ oReport:Section(2):BeginQuery()
 _cAlias := GetNextAlias()
 
 BeginSql alias _cAlias
-	SELECT CASE WHEN EMP.ZLM_DTCRED IS NULL THEN ANT.ZLM_DTCRED ELSE EMP.ZLM_DTCRED END ZLM_DTCRED,
+	SELECT Case WHEN EMP.ZLM_DTCRED IS NULL THEN ANT.ZLM_DTCRED Else EMP.ZLM_DTCRED END ZLM_DTCRED,
 		QTD_EMP, TOTAL_EMP, QTD_ANT, TOTAL_ANT
 	FROM (SELECT ZLM_TIPO, ZLM_DTCRED, COUNT(1) QTD_EMP, SUM(ZLM_TOTAL) TOTAL_EMP
 			FROM %Table:ZLM% ZLM
@@ -303,10 +291,10 @@ oReport:Section(2):EndQuery(/*Array com os parametros do tipo Range*/)
 oReport:Section(2):Init()
 oReport:SetMsgPrint("Imprimindo")
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(2):PrintLine()
 	oReport:IncMeter()
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(2):Finish()

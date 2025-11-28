@@ -1,30 +1,22 @@
 /*
 ===============================================================================================================================
-                          ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                          
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Alexandre Villar | 01/02/2015 | Atualização dos P.E. que interferem na rotina de Fechamento do Leite                                               
--------------------------------------------------------------------------------------------------------------------------------
- Josué Prestes    | 31/07/2018 | Inclusão de cálculo de supervisor - Chamado 25555     
--------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges     | 03/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
-------------------------------------------------------------------------------------------------------------------------------
- Julio Paz        | 21/01/2021 | Inclusão de tratamento para comissões do novo Gerente Nacional. Chamado 35183.  
+Josué Prestes |31/07/2018| Chamado 25555. Inclusão de cálculo de supervisor.
+Lucas Borges  |03/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
+Julio Paz     |21/01/2021| Chamado 35183. Inclusão de tratamento para comissões do novo Gerente Nacional.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MT100AGR
 Autor-------------: Fabiano Dias
 Data da Criacao---: 08/03/2010
-===============================================================================================================================
 Descrição---------: Ponto de entrada após commit do documento de entrada
 					Localização: Function A103NFiscal() responsável pelas funcionalidades de inclusão, alteração, exclusão de 
 					notas fiscais de entrada. 
@@ -33,16 +25,13 @@ Descrição---------: Ponto de entrada após commit do documento de entrada
 					utilizados, causando parada para outros usuarios que estavam acessando a base.
 					Para verificar em que opção o programa está, deverá ser testado o conteúdo das variáveis INCLUI e ALTERA.** 
 					Quando estiver em modo de EXCLUSÃO, ambas as variáveis ficam com conteúdo = .F. **
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function MT100AGR()
+User Function MT100AGR
      
-Local _aArea		:= GetArea()
-
+Local _aArea		:= FWGetArea()
 Local _cTipoNF		:= SF1->F1_TIPO
 Local _cNumeroNF	:= SF1->F1_DOC
 Local _cSerieNF		:= SF1->F1_SERIE
@@ -94,8 +83,8 @@ If _cTipoNF == 'D'
     
 	DBUseArea( .T. , "TOPCONN" , TCGenQry(,, cQuery ) , "TMPSD1" , .F. , .T. )
 	
-	DbSelectArea("TMPSD1")
-	TMPSD1->( DbGotop() )
+	DBSelectArea("TMPSD1")
+	TMPSD1->( DBGoTop() )
 	While TMPSD1->( !Eof() )
 	
 		_cNForiSD1	:= TMPSD1->D1_NFORI
@@ -128,8 +117,8 @@ If _cTipoNF == 'D'
 		
 		DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, cQuery ) , "TMPSD2" , .F. , .T. )
 		
-		DbSelectArea("TMPSD2")
-		TMPSD2->( DbGotop() )
+		DBSelectArea("TMPSD2")
+		TMPSD2->( DBGoTop() )
 		
 		//====================================================================================================
 		// Caso tenha sido gerado um valor de desconto contratual eh efetuado uma proporcao para armazenar
@@ -148,7 +137,7 @@ If _cTipoNF == 'D'
 			SD1->( DBSeek( _cFilial + _cNumeroNF + _cSerieNF + _cFornece + _cLjForn + _cProdtSD1 + _cItemSD1 ) )
 			SD1->( RecLock( "SD1" , .F. ) )
 			SD1->D1_I_VLRDC := cVlrDesc
-			SD1->( MsUnlock() )
+			SD1->( MSUnLock() )
 			
 			_cSomatDC += cVlrDesc
 		
@@ -162,32 +151,29 @@ If _cTipoNF == 'D'
 	
 		SF1->( RecLock( "SF1" , .F. ) )
 		SF1->F1_I_VLRDC := Round( _cSomatDC , 2 )
-		SF1->( MsUnlock() )
+		SF1->( MSUnLock() )
 	
 	EndIf
 
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: DevolComis
 Autor-------------: Fabiano Dias
 Data da Criacao---: 17/02/2011
-===============================================================================================================================
 Descrição---------: Funcao utilizada para gerar o debito na comissao na baixa na tabela SE3 para as notas de devolucao
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function DevolComis( _cNumeroNF , _cSerieNF , _cFornece , _cLjForn , _cFilial , _dDtDigit )
 
-Local _aAreaAux		:= GetArea()
+Local _aAreaAux		:= FWGetArea()
 Local _nX			:= 0
 Local _cAliasSD1	:= GetNextAlias()
 Local _cAliasSE1	:= GetNextAlias()
@@ -218,7 +204,7 @@ If INCLUI
 	// vendas que geraram financiero
 	//====================================================================================================
 	DBSelectArea( _cAliasSD1 )
-	(_cAliasSD1)->( DBGotop() )
+	(_cAliasSD1)->( DBGoTop() )
 	While (_cAliasSD1)->( !Eof() )
 	
 		//====================================================================================================
@@ -228,7 +214,7 @@ If INCLUI
 		Querys( _cAliasSD2 , 3 , (_cAliasSD1)->D1_NFORI , (_cAliasSD1)->D1_SERIORI , _cFornece , _cLjForn , _cFilial , (_cAliasSD1)->D1_COD , "" )
 		
 		DBSelectArea(_cAliasSD2)
-		(_cAliasSD2)->( DBGotop() )
+		(_cAliasSD2)->( DBGoTop() )
 		
 		//====================================================================================================
 		// Verifica se existe uma nota de venda de acordo com os dados da nota fiscal de origem
@@ -241,7 +227,7 @@ If INCLUI
 			Querys( _cAliasSE1 , 2 , (_cAliasSD1)->D1_NFORI , (_cAliasSD1)->D1_SERIORI , _cFornece , _cLjForn , _cFilial , "" , "" )
 			
 			DBSelectArea(_cAliasSE1)
-			(_cAliasSE1)->( DBGotop() )
+			(_cAliasSE1)->( DBGoTop() )
 			
 			//====================================================================================================
 			// Verifica se existe um financeiro gerado para nota indicada na devolucao, nao foi pego atraves da
@@ -458,8 +444,8 @@ If INCLUI
 					
 						Querys( _cAliasSA1 , 4 , "" , "" , _cFornece , _cLjForn , "" , "" , "" )
 						
-						dbSelectArea(_cAliasSA1)
-						(_cAliasSA1)->( DBGotop() )
+						DBSelectArea(_cAliasSA1)
+						(_cAliasSA1)->( DBGoTop() )
 						If (_cAliasSA1)->( !Eof() )
 						
 							_cCodVend	:= (_cAliasSA1)->A1_VEND
@@ -529,7 +515,7 @@ If INCLUI
 			SE3->E3_ORIGEM	:= 'D'
 			SE3->E3_I_ORIGE	:= 'MT100AGR'
 			
-		    SE3->( MsUnlock() )
+		    SE3->( MSUnLock() )
 		
 		Next _nX
 	
@@ -538,7 +524,7 @@ If INCLUI
 //====================================================================================================
 // Deleta comissao quando excluir uma nota de devolucao
 //====================================================================================================
-ElseIf !(INCLUI .AND. ALTERA)
+ElseIf !(INCLUI .And. ALTERA)
 	
 	DBSelectArea("SE3")    
 	SE3->( DBOrderNickName( "IT_COMISS" ) ) //E3_FILIAL+E3_NUM+E3_SERIE+E3_CODCLI+E3_LOJA 
@@ -558,7 +544,7 @@ ElseIf !(INCLUI .AND. ALTERA)
 			
 				RecLock("SE3",.F.)						
 				dbDelete()		       		 			       		 
-				SE3->(MsUnLock())    
+				SE3->(MSUnLock())    
 			
 			EndIf
 		
@@ -569,21 +555,18 @@ ElseIf !(INCLUI .AND. ALTERA)
 
 EndIf
 
-RestArea( _aAreaAux )
+FWRestArea( _aAreaAux )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: CalcComReg
 Autor-------------: Fabiano Dias
 Data da Criacao---: 17/02/2011
-===============================================================================================================================
 Descrição---------: Funcao que Calcula os valores de debito da comissao na baixa quando nao encontrar uma nota de venda
 ------------------: amarrada a nota de devolucao, com base nas regras de comissao cadastradas na tabela ZAE.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -607,7 +590,7 @@ While (_cAliasZAE)->( !Eof() )
 	//====================================================================================================
 	// 1 - Avalia se o cliente e loja sao iguais
 	//====================================================================================================
-	If ALLTRIM(_cFornece) == ALLTRIM( (_cAliasZAE)->ZAE_CLI ) .And. ALLTRIM(_cLjForn) == ALLTRIM( (_cAliasZAE)->ZAE_LOJA )
+	If AllTrim(_cFornece) == AllTrim( (_cAliasZAE)->ZAE_CLI ) .And. AllTrim(_cLjForn) == AllTrim( (_cAliasZAE)->ZAE_LOJA )
 		
 		ComisDev(	(_cAliasZAE)->ZAE_VEND , (_cAliasZAE)->ZAE_COMIS1 , (_cAliasZAE)->ZAE_CODSUP , (_cAliasZAE)->ZAE_COMIS2 , (_cAliasZAE)->ZAE_CODGER , (_cAliasZAE)->ZAE_COMIS3 ,;
 					_nQtdeDevo , _nVlrCalCo , _cNumeroNF , _cSerieNF , _cFornece , _cLjForn,(_cAliasZAE)->ZAE_COMIS4,(_cAliasZAE)->ZAE_CODSUI, (_cAliasZAE)->ZAE_COMIS5 ,(_cAliasZAE)->ZAE_CODGNC )
@@ -615,7 +598,7 @@ While (_cAliasZAE)->( !Eof() )
 	//====================================================================================================
 	// 2 - Avalia se o cliente eh igual e a loja esta em branco.
 	//====================================================================================================
-	ElseIf ALLTRIM(_cFornece) == ALLTRIM( (_cAliasZAE)->ZAE_CLI ) .And. Empty( (_cAliasZAE)->ZAE_LOJA )
+	ElseIf AllTrim(_cFornece) == AllTrim( (_cAliasZAE)->ZAE_CLI ) .And. Empty( (_cAliasZAE)->ZAE_LOJA )
 	
 		ComisDev(	(_cAliasZAE)->ZAE_VEND , (_cAliasZAE)->ZAE_COMIS1 , (_cAliasZAE)->ZAE_CODSUP , (_cAliasZAE)->ZAE_COMIS2 , (_cAliasZAE)->ZAE_CODGER , (_cAliasZAE)->ZAE_COMIS3 ,;
 					_nQtdeDevo , _nVlrCalCo , _cNumeroNF , _cSerieNF , _cFornece , _cLjForn,(_cAliasZAE)->ZAE_COMIS4,(_cAliasZAE)->ZAE_CODSUI, (_cAliasZAE)->ZAE_COMIS5 ,(_cAliasZAE)->ZAE_CODGNC )
@@ -623,7 +606,7 @@ While (_cAliasZAE)->( !Eof() )
 	//====================================================================================================
 	// 3 - Avalia se a Rede do cliente eh igual a rede informada na regra
 	//====================================================================================================
-	ElseIf ALLTRIM(_cGrpVenda) == ALLTRIM( (_cAliasZAE)->ZAE_GRPVEN )
+	ElseIf AllTrim(_cGrpVenda) == AllTrim( (_cAliasZAE)->ZAE_GRPVEN )
 	
 		ComisDev(	(_cAliasZAE)->ZAE_VEND , (_cAliasZAE)->ZAE_COMIS1 , (_cAliasZAE)->ZAE_CODSUP , (_cAliasZAE)->ZAE_COMIS2 , (_cAliasZAE)->ZAE_CODGER , (_cAliasZAE)->ZAE_COMIS3 ,;
 					_nQtdeDevo , _nVlrCalCo , _cNumeroNF , _cSerieNF , _cFornece , _cLjForn,(_cAliasZAE)->ZAE_COMIS4,(_cAliasZAE)->ZAE_CODSUI, (_cAliasZAE)->ZAE_COMIS5 ,(_cAliasZAE)->ZAE_CODGNC )
@@ -650,19 +633,16 @@ EndDo
 
 (_cAliasZAE)->( DBCloseArea() )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: ComisDev
 Autor-------------: Fabiano Dias
 Data da Criacao---: 17/02/2011
-===============================================================================================================================
 Descrição---------: Efetua os calculos da comissao quando nao existir uma nota de venda amarrada ou nao encontrada nos dados de
 ------------------: origem da nota devolucao, com base nas regras de comissao cadastradas na tabela ZAE
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -806,18 +786,15 @@ If _nComis4 > 0 .And. Len( AllTrim(_cVend4) ) > 0
 EndIf
 
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: Querys
 Autor-------------: Fabiano Dias
 Data da Criacao---: 17/02/2011
-===============================================================================================================================
-Descrição---------: Rotina que processa as consultas necessárias ao processamento e monta as áreas de trabalho temporárias
-===============================================================================================================================
+Descrição---------: Rotina que Processa as consultas necessárias ao processamento e monta as áreas de trabalho temporárias
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */

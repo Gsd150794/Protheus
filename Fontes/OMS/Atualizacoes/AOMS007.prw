@@ -11,9 +11,9 @@ Lucas Borges      | 15/10/2019 | Removidos os Warning na compilação da release 1
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#include "protheus.ch"
-#include "topconn.ch"
-#include "rwmake.ch"
+#Include "TOTVS.ch"
+#Include "topconn.ch"
+#Include "rwmake.ch"
 
 /*
 ===============================================================================================================================
@@ -34,17 +34,17 @@ User Function AOMS007()
 	Private cCadastro	:= "Cadastro de CEP"
 	Private aRotina		:= {}                
 
-	AADD(aRotina,{"Pesquisar"	,"AxPesqui",0,1})
-	AADD(aRotina,{"Visualizar"	,"AxVisual",0,2})
-	AADD(aRotina,{"Incluir"		,"AxInclui",0,3})
-	AADD(aRotina,{"Alterar"		,"AxAltera",0,4})
-	AADD(aRotina,{"Excluir"		,"U_ValZA5",0,5})
+	aAdd(aRotina,{"Pesquisar"	,"AxPesqui",0,1})
+	aAdd(aRotina,{"Visualizar"	,"AxVisual",0,2})
+	aAdd(aRotina,{"Incluir"		,"AxInclui",0,3})
+	aAdd(aRotina,{"Alterar"		,"AxAltera",0,4})
+	aAdd(aRotina,{"Excluir"		,"U_ValZA5",0,5})
 	
-	dbSelectArea(cAlias)
-	dbSetOrder(1)
+	DBSelectArea(cAlias)
+	DBSetOrder(1)
 	mBrowse(6,1,22,75,cAlias)
 
-return
+Return
 
 /*
 ===============================================================================================================================
@@ -61,7 +61,7 @@ Retorno---------: Nenhum
 */
 User Function ValZA5(cAlias,nReg,nOpc)
 
-	Local aArea 	:= GetArea()
+	Local aArea 	:= FWGetArea()
 	Local lRet		:= .T.
 	
 	Local aExist	:= {}
@@ -119,21 +119,21 @@ User Function ValZA5(cAlias,nReg,nOpc)
 	cQuery += " WHERE A1_ESTE = '" + cEst + "' AND A1_CEPE = '" + cCEP + "' AND D_E_L_E_T_ = ' '"
 	
 	dbUseArea( .T., "TOPCONN", TcGenQry(,,cQuery), "TEMP", .T., .F. )
-	dbSelectArea("TEMP")
+	DBSelectArea("TEMP")
 
-	while !eof()
+	While !Eof()
 		
-		if (TEMP->CONT > 0)
+		If (TEMP->CONT > 0)
 			aAdd ( aExist, {TEMP->TABELA, TEMP->CONT} )
 			lRet := .F.
-		endif
+		EndIf
 	    
-		dbSkip()
+		DBSkip()
 	end
 
-	TEMP->(dbCloseArea())
+	TEMP->(DBCloseArea())
 	
-	if (!lRet)
+	If (!lRet)
 
 		DEFINE MSDIALOG oDlg TITLE "AMARRAÇÕES DA TABELA DE CEP:" FROM 0,0 TO 240,500 PIXEL		
 		@ 10,10 LISTBOX oLbx FIELDS HEADER "Tabela", "Quant." SIZE 230,95 OF oDlg PIXEL
@@ -141,13 +141,13 @@ User Function ValZA5(cAlias,nReg,nOpc)
 		oLbx:SetArray( aExist )
 		oLbx:bLine := {|| aEval(aExist[oLbx:nAt],{|z,w| aExist[oLbx:nAt,w] } ) }
 		
-		DEFINE SBUTTON FROM 107,213 TYPE 1 ACTION oDlg:End() ENABLE OF oDlg
+		DEFINE SBUTTON FROM 107,213 Type 1 ACTION oDlg:End() ENABLE OF oDlg
 		ACTIVATE MSDIALOG oDlg CENTER
 		
-	else
+	Else
 		AxDeleta(cAlias,nReg,nOpc)
-	endif
+	EndIf
 	
-	RestArea(aArea)
+	FWRestArea(aArea)
 	
-return lRet
+Return lRet

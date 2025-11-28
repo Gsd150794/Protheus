@@ -10,7 +10,7 @@ Lucas Borges  |27/06/2025| Chamado 50617. Revisões diversas visando padronizar o
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -28,12 +28,12 @@ Local oproc 	:= Nil As Object
 Local _cPerg 	:= 'APON003' As Character
 Local _alog 	:= {} As Array
 Local _acab 	:= {"Filial","Relogio","Desc Relogio","Arquivo","Resultado"} As Array
-Local _ni		:= 0 As Numeric
+Local _nI		:= 0 As Numeric
 
 If !Pergunte(_cPerg)
 	FWAlertInfo("Processo cancelado pelo usuário.","APON00301")
 	Return
-Endif
+EndIf
 
 If ";" $ MV_PAR01
 	_afiliais := StrTokArr(MV_PAR01,";")
@@ -42,11 +42,11 @@ ElseIf Empty(MV_PAR01)
 	Return
 Else
 	_afiliais := {AllTrim(MV_PAR01)}
-Endif
+EndIf
 
-For _ni := 1 To Len(_afiliais)
-	FWMsgRun(,{|oproc| U_APON003I(oproc,MV_PAR02,MV_PAR03,.T.,_afiliais[_ni], @_alog),"Aguarde...","Iniciando processamento..."})
-Next _ni
+For _nI := 1 To Len(_afiliais)
+	FWMsgRun(,{|oproc| U_APON003I(oproc,MV_PAR02,MV_PAR03,.T.,_afiliais[_nI], @_alog),"Aguarde...","Iniciando processamento..."})
+Next _nI
 
 If Len(_alog) > 0
 	U_ITListBox( 'Processamento concluído' , _acab , _alog , .T. )
@@ -81,9 +81,9 @@ Default _alog := {}
 //Roda todos os relógios da filial
 SP0->(DBSetOrder(1))
 SP0->(DBGoTop())
-SP0->(DbSeek(_cfilial))
+SP0->(DBSeek(_cfilial))
 
-Do While AllTrim(SP0->P0_FILIAL) == AllTrim(_cfilial) .AND. SP0->(!Eof())
+While AllTrim(SP0->P0_FILIAL) == AllTrim(_cfilial) .And. SP0->(!Eof())
 	If SP0->P0_I_TIPO != "R"
 		SP0->(DBSkip())
 		Loop
@@ -128,7 +128,7 @@ Do While AllTrim(SP0->P0_FILIAL) == AllTrim(_cfilial) .AND. SP0->(!Eof())
 		
 		SM0->(DBGoTop())
 		
-		Do while SM0->(!Eof()) 
+		While SM0->(!Eof()) 
 			If AllTrim(SM0->M0_CODFIL) == AllTrim(_cfilial)
 				_ccnpj := SM0->M0_CGC
 				_crazao := SM0->M0_NOMECOM
@@ -138,24 +138,24 @@ Do While AllTrim(SP0->P0_FILIAL) == AllTrim(_cfilial) .AND. SP0->(!Eof())
 		
 		SM0->(DBGoTo(_nposori))
 		
-		_ddtini := SUBSTR(dtos(MV_PAR02),7,2) + SUBSTR(dtos(MV_PAR02),5,2) + SUBSTR(dtos(MV_PAR02),1,4) 
-		_ddtFIM := SUBSTR(dtos(MV_PAR03),7,2) + SUBSTR(dtos(MV_PAR03),5,2) + SUBSTR(dtos(MV_PAR03),1,4)
-		_ddtGER := SUBSTR(dtos(date()),7,2) + SUBSTR(dtos(date()),5,2) + SUBSTR(dtos(date()),1,4)
-		_chger := substr(time(),1,2) + substr(time(),4,2) 
-		_cpri := "00000000011" + _ccnpj + "000000000000" + padr(_crazao, 150) +  AllTrim(SP0->P0_REP) + _ddtini + _ddtFIM + _ddtGER + _chger
+		_ddtini := SubStr(DToS(MV_PAR02),7,2) + SubStr(DToS(MV_PAR02),5,2) + SubStr(DToS(MV_PAR02),1,4) 
+		_ddtFIM := SubStr(DToS(MV_PAR03),7,2) + SubStr(DToS(MV_PAR03),5,2) + SubStr(DToS(MV_PAR03),1,4)
+		_ddtGER := SubStr(DToS(date()),7,2) + SubStr(DToS(date()),5,2) + SubStr(DToS(date()),1,4)
+		_chger := SubStr(time(),1,2) + SubStr(time(),4,2) 
+		_cpri := "00000000011" + _ccnpj + "000000000000" + PadR(_crazao, 150) +  AllTrim(SP0->P0_REP) + _ddtini + _ddtFIM + _ddtGER + _chger
 		
 		_oFile:Write(_cpri + CRLF)
 		_cAlias := GetNextAlias()
-		BeginSQL alias _cAlias
+		BeginSql alias _cAlias
 			SELECT * FROM SURICATO.TBAFD 
 			WHERE TIPO_REG = 3 
-			AND NROCODINREP = %exp:ALLTRIM(SP0->P0_REP)%
+			AND NROCODINREP = %exp:AllTrim(SP0->P0_REP)%
 			AND DATAMARC >= TO_DATE(%exp:MV_PAR02%,'YYYYMMDD') 
 			AND DATAMARC <= TO_DATE(%exp:MV_PAR03%,'YYYYMMDD')
 			ORDER BY INFORM
 		EndSql
 		
-		Do while (_cAlias)->(!Eof())
+		While (_cAlias)->(!Eof())
 			_oFile:Write(AllTrim((_cAlias)->INFORM) + CRLF)
 			(_cAlias)->(DBSkip())
 			_ncon++

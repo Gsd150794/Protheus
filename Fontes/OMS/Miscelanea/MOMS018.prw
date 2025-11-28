@@ -24,7 +24,7 @@ Julio Paz         | 19/03/2024 | Chamado 46670 - Ajustes nas descrições dos títu
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -51,7 +51,7 @@ Local _lOpnAmb	:= Select("SX3") <= 0
 
 Default _lRDiario := .F.
 
-u_itconout( '[MOMS018]['+ DtoC(Date()) +" - "+ TIME() +'] - Relatório com _lRDiario = ' + ValType( _lRDiario )  )
+u_itconout( '[MOMS018]['+ DToC(Date()) +" - "+ Time() +'] - Relatório com _lRDiario = ' + ValType( _lRDiario )  )
 
 If ValType( _lRDiario ) # "L"
 	_lRDiario := .F.
@@ -65,7 +65,7 @@ If _lOpnAmb
 	RPCSetType(3)										   		  		//Nao consome licensas
 	RpcSetEnv( "01" , "01" ,,,, "SCHEDULE_EMAIL_RESUMO" , _aTables )	//seta o ambiente com a empresa 01 filial 01
 	Sleep( 5000 )												 		//Aguarda 5 segundos para que as jobs IPC subam
-    u_itconout( '[MOMS018]['+ DtoC(Date()) +" - "+ TIME() +'] - Gerando envio do arquivo HTML de Resumo de vendas desconsiderando devoluções' )
+    u_itconout( '[MOMS018]['+ DToC(Date()) +" - "+ Time() +'] - Gerando envio do arquivo HTML de Resumo de vendas desconsiderando devoluções' )
 
 EndIf
 
@@ -75,7 +75,7 @@ EndIf
 _cAlias := GetNextAlias()
 MOMS018QRY( 4 , _cAlias , _lRDiario )
 
-dbSelectArea(_cAlias)
+DBSelectArea(_cAlias)
 (_cAlias)->( DBGoTop() )
 
 //====================================================================================================
@@ -106,9 +106,9 @@ If _lOpnAmb
 	RpcClearEnv() //Limpa o ambiente, liberando a licença e fechando as conexões 
 EndIf
 
-u_itconout( '[MOMS018]['+ DtoC(Date()) +" - "+ TIME() +'] - Termino de execucao normal do envio do HTML de Resumo de vendas' )
+u_itconout( '[MOMS018]['+ DToC(Date()) +" - "+ Time() +'] - Termino de execucao normal do envio do HTML de Resumo de vendas' )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -116,7 +116,7 @@ Programa----------: MOMS018EXE
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 13/09/2011
 ===============================================================================================================================
-Descrição---------: Gera o arquivo HTML com o conteúdo do relatório e processa o envio por e-mail
+Descrição---------: Gera o arquivo HTML com o conteúdo do relatório e Processa o envio por e-mail
 ===============================================================================================================================
 Parametros--------: Nenhum
 ===============================================================================================================================
@@ -125,7 +125,7 @@ Retorno-----------: Nenhum
 */
 Static Function MOMS018EXE( _cEmail,_lRDiario )
 
-Local _cArqAnx		:= "\spool\resumo_vendas"+ STRTRAN( Time() , ":" , "'" ) +".html"
+Local _cArqAnx		:= "\spool\resumo_vendas"+ StrTran( Time() , ":" , "'" ) +".html"
 Local _aDadFil		:= {}
 Local _cArqHtm		:= ''
 Local _nHdl			:= 0
@@ -150,7 +150,7 @@ Local _cEmlLog		:= ''
 Local _dDtIni		:= FirstDay( Date() )
 Local _dDtFim		:= LastDay( Date() )
 
-Local _cDtGera		:= DtoC( Date() )  
+Local _cDtGera		:= DToC( Date() )  
 
 Local _cConfig		:= GetMV( "IT_CMWFEP" ,, "001" )
 Local _aConfig		:= U_ITCFGEML( _cConfig )
@@ -170,10 +170,10 @@ _aDadFil := MOMS018FIL(_lRDiario)
 //====================================================================================================
 // Define o cabecalho do HTML
 //====================================================================================================
-_cTxtHTM += '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">'
+_cTxtHTM += '<!DOCTYPE HTML Public "-//W3C//DTD HTML 4.0 Transitional//EN">'
 _cTxtHTM += '<HTML><HEAD><TITLE>.:: WF de Vendas - ITALAC ::.</TITLE>'
 _cTxtHTM += '<META content="text/html; charset=windows-1252" http-equiv=Content-Type></HEAD>'
-_cTxtHTM += '<style type="text/css"><!--'
+_cTxtHTM += '<style Type="text/css"><!--'
 _cTxtHTM += 'table.bordasimples { border-collapse: collapse; } '
 _cTxtHTM += 'table.bordasimples tr td { border:1px solid #777777; } '
 _cTxtHTM += 'td.grupos	{ font-family:VERDANA; font-size:18px; V-align:middle; background-color: #000099; color:#FFFFFF; } '
@@ -191,13 +191,13 @@ _cTxtHTM += '  <tr>'
 
 If _lRDiario
 	_cTxtHTM += '     <td class="grupos"><center>Resumo diário de vendas Grupo Italac</td>'
-	_cTxtHTM += '     <td class="grupos"><center>Ref. a Data '+ DtoC( _dDtIni ) + ' ( Gerado em '+ _cDtGera +' às '+ Transform( Time() , "@R 99:99" ) +')</td>'
+	_cTxtHTM += '     <td class="grupos"><center>Ref. a Data '+ DToC( _dDtIni ) + ' ( Gerado em '+ _cDtGera +' às '+ Transform( Time() , "@R 99:99" ) +')</td>'
 	
 Else
 	_cTxtHTM += '     <td class="grupos"><center>Vendas Grupo Italac</td>'
-	_cTxtHTM += '     <td class="grupos"><center>Período de '+ DtoC( _dDtIni ) +' ate '+ DtoC( _dDtFim ) +' ( Gerado em '+ _cDtGera +' às '+ Transform( Time() , "@R 99:99" ) +')</td>'
+	_cTxtHTM += '     <td class="grupos"><center>Período de '+ DToC( _dDtIni ) +' ate '+ DToC( _dDtFim ) +' ( Gerado em '+ _cDtGera +' às '+ Transform( Time() , "@R 99:99" ) +')</td>'
 	
-Endif
+EndIf
 _cTxtHTM += '  </tr>'
 _cTxtHTM += '</table>'
 _cTxtHTM += '<br>'
@@ -248,7 +248,7 @@ If Len(_aDadFil) > 0
 Else
 
 	_lRet := .F.
-	u_itconout('[MOMS018]['+ DtoC(Date()) +" - "+ TIME() +'] - Nao foram encontrados registros da primeira secao RESUMO FILIAL.' )
+	u_itconout('[MOMS018]['+ DToC(Date()) +" - "+ Time() +'] - Nao foram encontrados registros da primeira secao RESUMO FILIAL.' )
 
 EndIf
 
@@ -393,7 +393,7 @@ If !_lRDiario
 		//====================================================================================================
 		// Pega a descricao e valor liquido total da primeira filial conforme  dados do RESUMO POR FILIAL
 		//====================================================================================================
-		_nPosFil := AsCan( _aDadFil , {|W| W[1] == (_cAliasU)->FILIAL } )
+		_nPosFil := aScan( _aDadFil , {|W| W[1] == (_cAliasU)->FILIAL } )
 		
 		If _nPosFil > 0
 		
@@ -453,7 +453,7 @@ If !_lRDiario
 					//====================================================================================================
 					// Pega a descricao e valor liquido total da primeira filial conforme dados do RESUMO POR FILIAL.
 					//====================================================================================================
-					_nPosFil := AsCan( _aDadFil , {|W| W[1] == (_cAliasU)->FILIAL} )
+					_nPosFil := aScan( _aDadFil , {|W| W[1] == (_cAliasU)->FILIAL} )
 					
 					If _nPosFil > 0
 					
@@ -464,7 +464,7 @@ If !_lRDiario
 					Else
 					
 						_lRet := .F.
-						u_itconout( '[MOMS018]['+ DtoC(Date()) +" - "+ TIME() +'] - Filial: ' + (_cAliasU)->FILIAL + ' nao encontrado para pegar a descricao e valor total da Filial' )
+						u_itconout( '[MOMS018]['+ DToC(Date()) +" - "+ Time() +'] - Filial: ' + (_cAliasU)->FILIAL + ' nao encontrado para pegar a descricao e valor total da Filial' )
 						Exit
 						
 					EndIf 
@@ -566,7 +566,7 @@ If !_lRDiario
 		Else
 		
 			_lRet := .F.
-			u_itconout( '[MOMS018]['+ DtoC(Date()) +" - "+ TIME() +'] - Filial: '+ (_cAliasU)->FILIAL +' nao encontrado para pegar a descricao e valor total da Filial' )
+			u_itconout( '[MOMS018]['+ DToC(Date()) +" - "+ Time() +'] - Filial: '+ (_cAliasU)->FILIAL +' nao encontrado para pegar a descricao e valor total da Filial' )
 		
 		EndIf
 		
@@ -598,7 +598,7 @@ If _lRet
 	
 	If _nHdl == -1
 	
-		u_itconout( '[MOMS018]['+ DtoC(Date()) +" - "+ TIME() +'] - O arquivo de resumo de vendas nome '+ _cArqHtm +' nao pode ser criado!' )
+		u_itconout( '[MOMS018]['+ DToC(Date()) +" - "+ Time() +'] - O arquivo de resumo de vendas nome '+ _cArqHtm +' nao pode ser criado!' )
 		_lRet := .F.
 		
 	EndIf
@@ -620,12 +620,12 @@ If _lRet
 
      		_cEmlLog := ''
 			
-			u_itconout( '[MOMS018]['+ DtoC(Date()) +" - "+ TIME() +'] - Processando o envio do e-mail: '+ _cEmail )
-			U_ITENVMAIL( _aConfig[01] , _cEmail ,,, If(_lRDiario,'Resumo diario','Resumo')+' de vendas - Italac ['+ DtoC(Date()) +']' , _cMsgEml , _cArqAnx , _aConfig[01] , _aConfig[02] , _aConfig[03] , _aConfig[04] , _aConfig[05] , _aConfig[06] , _aConfig[07] , @_cEmlLog ) 
+			u_itconout( '[MOMS018]['+ DToC(Date()) +" - "+ Time() +'] - Processando o envio do e-mail: '+ _cEmail )
+			U_ITENVMAIL( _aConfig[01] , _cEmail ,,, If(_lRDiario,'Resumo diario','Resumo')+' de vendas - Italac ['+ DToC(Date()) +']' , _cMsgEml , _cArqAnx , _aConfig[01] , _aConfig[02] , _aConfig[03] , _aConfig[04] , _aConfig[05] , _aConfig[06] , _aConfig[07] , @_cEmlLog ) 
 			
-			IF !Empty( _cEmlLog )
-				u_itconout( '[MOMS018]['+ DtoC(Date()) +" - "+ TIME() +'] - Status do envio de e-mail: '+ _cEmlLog )
-			EndIF
+			If !Empty( _cEmlLog )
+				u_itconout( '[MOMS018]['+ DToC(Date()) +" - "+ Time() +'] - Status do envio de e-mail: '+ _cEmlLog )
+			EndIf
 		
 		EndIf
 		
@@ -633,14 +633,14 @@ If _lRet
 		// Remove o arquivo HTML criado posteriormente a finalizacao da tarefa de envio de e-mail.
 		//====================================================================================================
 		If FERASE(_cArqAnx) == -1
-		   u_itconout( '[MOMS018]['+ DtoC(Date()) +" - "+ TIME() +'] - Falha na exclusão do Arquivo HTML do FONTE MOMS018' )
-		Endif
+		   u_itconout( '[MOMS018]['+ DToC(Date()) +" - "+ Time() +'] - Falha na exclusão do Arquivo HTML do FONTE MOMS018' )
+		EndIf
 	
 	EndIf
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -728,7 +728,7 @@ Local _cCfops	:= U_ITCFOPS( 'V' ) //Somente considera CFOP de vendas
 Local _cFiltro	:= "% "
 
 Local _sDtInic	:= DToS( FirstDay( Date() ) )
-Local _sDtFinal	:= DtoS( LastDay(  Date() ) )
+Local _sDtFinal	:= DToS( LastDay(  Date() ) )
 
 Default _lRDiario := .F.
 

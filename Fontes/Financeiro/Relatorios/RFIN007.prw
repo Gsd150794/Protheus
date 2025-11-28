@@ -2,32 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor    |    Data    |                                             Motivo                                           
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Julio Paz       | 30/01/2019 | Realização de Ajustes no fonte para funcionar com o novo servidor Totvs Loboguará. Chamado 27795
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges    | 11/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Julio Paz     |30/01/2019| Chamado 27795. Realização de Ajustes no fonte para funcionar com o novo servidor Totvs Loboguará.
+Lucas Borges  |11/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ================================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#include "report.ch"
-#include "protheus.ch"      
-#include "rwmake.ch"
+#Include "TOTVS.ch"      
 
 /*
 ===============================================================================================================================
 Programa--------: RFIN007
 Autor-----------: Fabiano Dias
 Data da Criacao-: 15/07/2010 
-===============================================================================================================================
 Descrição-------: Relatorio financeiro que demonstra o que faturei x o que realmente recebi, demonstrando devolucoes,descontos
                   faltas de mercadorias e saldo em aberto.
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -100,11 +91,8 @@ Return
 Programa--------: RFIN007I
 Autor-----------: Fabiano Dias
 Data da Criacao-: 22/03/2010
-===============================================================================================================================
 Descrição-------: Funcao criada para imprimir a pagina de parametros do relatorio em modo grafico.
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -125,15 +113,15 @@ nLinha+= 080
 oPrint:Line(nLinha,nColInic,nLinha,nColFinal)
 nLinha+= 60
 
-Aadd(_aDadosPegunte,{"01", "Filial ?"      , "MV_PAR01"})       
-Aadd(_aDadosPegunte,{"02", "Da Emissao ?"  , "MV_PAR02"})           
-Aadd(_aDadosPegunte,{"03", "Ate Emissao ?" , "MV_PAR03"})
-Aadd(_aDadosPegunte,{"04", "De Cliente ?"  , "MV_PAR04"})           
-Aadd(_aDadosPegunte,{"05", "Loja ? "       , "MV_PAR05"})          
-Aadd(_aDadosPegunte,{"06", "Ate Cliente ?" , "MV_PAR06"})
-Aadd(_aDadosPegunte,{"07", "Loja ?"        , "MV_PAR07"})
-Aadd(_aDadosPegunte,{"08", "Rede ?"        , "MV_PAR08"})  
-Aadd(_aDadosPegunte,{"09", "Tipo ?"        , "MV_PAR09"})  // Analítico ## Sintético
+aAdd(_aDadosPegunte,{"01", "Filial ?"      , "MV_PAR01"})       
+aAdd(_aDadosPegunte,{"02", "Da Emissao ?"  , "MV_PAR02"})           
+aAdd(_aDadosPegunte,{"03", "Ate Emissao ?" , "MV_PAR03"})
+aAdd(_aDadosPegunte,{"04", "De Cliente ?"  , "MV_PAR04"})           
+aAdd(_aDadosPegunte,{"05", "Loja ? "       , "MV_PAR05"})          
+aAdd(_aDadosPegunte,{"06", "Ate Cliente ?" , "MV_PAR06"})
+aAdd(_aDadosPegunte,{"07", "Loja ?"        , "MV_PAR07"})
+aAdd(_aDadosPegunte,{"08", "Rede ?"        , "MV_PAR08"})  
+aAdd(_aDadosPegunte,{"09", "Tipo ?"        , "MV_PAR09"})  // Analítico ## Sintético
 
 For _nI := 1 To Len(_aDadosPegunte)          
 	nAux:= 1      
@@ -153,7 +141,7 @@ For _nI := 1 To Len(_aDadosPegunte)
     Else
        _cTexto := &(_aDadosPegunte[_nI,3])
        If ValType(_cTexto) == "D"
-          _cTexto := Dtoc(_cTexto)
+          _cTexto := DToC(_cTexto)
        EndIf   
        oPrint:Say (nLinha,1200,_cTexto,oFont14Prb)  		
     EndIf	
@@ -173,11 +161,8 @@ Return
 Programa--------: RFIN007C
 Autor-----------: Fabiano Dias
 Data da Criacao-: 22/03/2010
-===============================================================================================================================
 Descrição-------: Funcao criada para imprimir cabeçalho da página.
-===============================================================================================================================
 Parametros------: impNrPag - 
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -185,7 +170,7 @@ Retorno---------: Nenhum
 Static Function RFIN007C(impNrPag)
 
 Local cRaizServer := If(issrvunix(), "/", "\")    
-Local cTitulo     := "Relatório de valor de Vendas Faturadas x Valor Recebido - " + IIF(MV_PAR09 == 1,"Analitico","Sintetico") + " - Emissão de " +  dtoc(mv_par02) + " até " + dtoc(mv_par03)
+Local cTitulo     := "Relatório de valor de Vendas Faturadas x Valor Recebido -  "+IIf(MV_PAR09 == 1,"Analitico","Sintetico") + " - Emissão de " +  DToC(MV_PAR02) + " até " + DToC(MV_PAR03)
   
 nLinha:=0100
 
@@ -196,7 +181,7 @@ nLinha:=0100
 			oPrint:Say (nlinha,(nColInic + 2750),"SIGA/RFIN007",oFont12b)
 			oPrint:Say (nlinha + 100,(nColInic + 2750),"EMPRESA: " + AllTrim(SM0->M0_NOME) + '/' + AllTrim(SM0->M0_FILIAL),oFont12b)
 	EndIf
-	oPrint:Say (nlinha + 50,(nColInic + 2750),"DATA DE EMISSÃO: " + DtoC(DATE()),oFont12b)
+	oPrint:Say (nlinha + 50,(nColInic + 2750),"DATA DE EMISSÃO: " + DToC(DATE()),oFont12b)
 	nlinha+=(nSaltoLinha * 3)           
 	                                                   
 	oPrint:Say (nlinha,nColFinal / 2,cTitulo,oFont16b,nColFinal,,,2)
@@ -213,11 +198,8 @@ Return
 Programa--------: RFIN007CD
 Autor-----------: Fabiano Dias
 Data da Criacao-: 22/03/2010
-===============================================================================================================================
 Descrição-------: Funcao criada para imprimir cabeçalho de dados.
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -252,11 +234,8 @@ Return
 Programa--------: RFIN007CE()
 Autor-----------: Fabiano Dias
 Data da Criacao-: 22/03/2010
-===============================================================================================================================
 Descrição-------: Funcao criada para imprimir cabeçalho de dados Entrega.
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -293,9 +272,7 @@ Return
 Programa--------: RFIN007PD
 Autor-----------: Fabiano Dias
 Data da Criacao-: 22/03/2010
-===============================================================================================================================
 Descrição-------: Funcao criada para imprimir dados do relatório.
-===============================================================================================================================
 Parametros------: cRede
                   nFaturado
                   nRecebido
@@ -303,7 +280,6 @@ Parametros------: cRede
                   nDescContr
                   nOutros
                   nSldAbert        
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -333,9 +309,7 @@ Return
 Programa--------: RFIN007PA
 Autor-----------: Fabiano Dias
 Data da Criacao-: 22/03/2010
-===============================================================================================================================
 Descrição-------: Funcao criada para imprimir dados do relatório analítico.
-===============================================================================================================================
 Parametros------: cRede
                   nFaturado
                   nDescContr
@@ -345,7 +319,6 @@ Parametros------: cRede
                   nDifPesag
                   nOutros
                   nSldAbert        
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -377,9 +350,7 @@ Return
 Programa--------: RFIN007PT
 Autor-----------: Fabiano Dias
 Data da Criacao-: 22/03/2010
-===============================================================================================================================
 Descrição-------: Funcao criada para imprimir dados do relatório Totais.
-===============================================================================================================================
 Parametros------: cDescTot
                   nFaturado
                   nRecebido
@@ -387,7 +358,6 @@ Parametros------: cDescTot
                   nDescContr
                   nOutros
                   nSldAbert
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -418,9 +388,7 @@ Return
 Programa--------: RFIN007PN
 Autor-----------: Fabiano Dias
 Data da Criacao-: 22/03/2010
-===============================================================================================================================
 Descrição-------: Funcao criada para imprimir dados do relatório totais analítico.
-===============================================================================================================================
 Parametros------: cDescTot
                   nFaturado
                   nDescContr
@@ -430,7 +398,6 @@ Parametros------: cDescTot
                   nDifPesag
                   nOutros
                   nSldAbert) 
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */      
@@ -461,11 +428,8 @@ Return
 Programa--------: RFIN007BD
 Autor-----------: Fabiano Dias
 Data da Criacao-: 22/03/2010
-===============================================================================================================================
 Descrição-------: Funcao criada para imprimir dados do relatório quadros separadores de dados (Box)
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -489,11 +453,8 @@ Return
 Programa--------: RFIN007B2
 Autor-----------: Fabiano Dias
 Data da Criacao-: 22/03/2010
-===============================================================================================================================
 Descrição-------: Funcao criada para imprimir dados do relatório quadros separadores de dados (Box)
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -519,12 +480,9 @@ Return
 Programa--------: RFIN007QP
 Autor-----------: Fabiano Dias
 Data da Criacao-: 22/03/2010
-===============================================================================================================================
 Descrição-------: Funcao criada para quebra de página e impressão do cabeçalho da página.
-===============================================================================================================================
 Parametros------: nLinhas
                   impBox   
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */                                      
@@ -565,11 +523,8 @@ Return
 Programa--------: RFIN007DR()
 Autor-----------: Fabiano Dias
 Data da Criacao-: 22/03/2010
-===============================================================================================================================
 Descrição-------: Funcao criada para gerar os dados do relatório.
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -597,38 +552,38 @@ Local _aGrpVenda:= {}
 //Filtros                                    
 
 //FILIAL
-if !empty(alltrim(mv_par01))	             
+If !Empty(AllTrim(MV_PAR01))	             
 
-	if !empty(xFilial("SE1"))
-		cFiltro  += " AND E1.E1_FILIAL IN "   + FormatIn(mv_par01,";")
-	endif	                         
-	if !empty(xFilial("ACY"))
-		cFiltro  += " AND CY.ACY_FILIAL IN "  + FormatIn(mv_par01,";")
-	endif
-	if !empty(xFilial("SE5"))
-		cFilBaixa+= " AND E5.E5_FILIAL IN "   + FormatIn(mv_par01,";")
-	endif
+	If !Empty(xFilial("SE1"))
+		cFiltro  += " AND E1.E1_FILIAL IN "   + FormatIn(MV_PAR01,";")
+	EndIf	                         
+	If !Empty(xFilial("ACY"))
+		cFiltro  += " AND CY.ACY_FILIAL IN "  + FormatIn(MV_PAR01,";")
+	EndIf
+	If !Empty(xFilial("SE5"))
+		cFilBaixa+= " AND E5.E5_FILIAL IN "   + FormatIn(MV_PAR01,";")
+	EndIf
 	
-endif   
+EndIf   
 
 //DATA DE EMISSAO
-if !empty(mv_par02) .and. !empty(mv_par03)
-	cFiltro += " AND E1.E1_EMISSAO BETWEEN '" + dtos(mv_par02) + "' AND '" + dtos(mv_par03) + "'"
-endif            
+If !Empty(MV_PAR02) .And. !Empty(MV_PAR03)
+	cFiltro += " AND E1.E1_EMISSAO BETWEEN '" + DToS(MV_PAR02) + "' AND '" + DToS(MV_PAR03) + "'"
+EndIf            
               
        
 //DO CLIENTE AO CLIENTE
-cFiltro   += " AND E1.E1_CLIENTE BETWEEN '" + mv_par04 + "' AND '" + mv_par06 + "'"
-cFilBaixa += " AND E5.E5_CLIENTE BETWEEN '" + mv_par04 + "' AND '" + mv_par06 + "'"
+cFiltro   += " AND E1.E1_CLIENTE BETWEEN '" + MV_PAR04 + "' AND '" + MV_PAR06 + "'"
+cFilBaixa += " AND E5.E5_CLIENTE BETWEEN '" + MV_PAR04 + "' AND '" + MV_PAR06 + "'"
 
 //DA LOJA A LOJA DO CLIENTE
-cFiltro   += " AND E1.E1_LOJA BETWEEN '" + mv_par05 + "' AND '" + mv_par07 + "'"
-cFilBaixa += " AND E5.E5_LOJA BETWEEN '" + mv_par05 + "' AND '" + mv_par07 + "'"
+cFiltro   += " AND E1.E1_LOJA BETWEEN '" + MV_PAR05 + "' AND '" + MV_PAR07 + "'"
+cFilBaixa += " AND E5.E5_LOJA BETWEEN '" + MV_PAR05 + "' AND '" + MV_PAR07 + "'"
 
 //REDE
-If !Empty(mv_par08)  
+If !Empty(MV_PAR08)  
 
-	cFiltro   += " AND E1.E1_I_GPRVE IN "   + FormatIn(mv_par08,";")
+	cFiltro   += " AND E1.E1_I_GPRVE IN "   + FormatIn(MV_PAR08,";")
 
 EndIf
 
@@ -767,8 +722,8 @@ If MV_PAR09 == 2
 		EndSql    	   
     
 	//Faz o Grupamento por Rede dos dados 
-	dbSelectArea(oAlias)	      
-    (oAlias)->(dbGotop())             
+	DBSelectArea(oAlias)	      
+    (oAlias)->(DBGoTop())             
     
     ProcRegua((oAlias)->(RecCount()))  
     
@@ -795,11 +750,11 @@ If MV_PAR09 == 2
      	 
      	 EndIf                
     
-    (oAlias)->(dbSkip())
+    (oAlias)->(DBSkip())
     EndDo
     
-	dbSelectArea(oAlias)	      
-    (oAlias)->(dbCloseArea()) 
+	DBSelectArea(oAlias)	      
+    (oAlias)->(DBCloseArea()) 
 
 If Len(_aGrpVenda) > 0  
 
@@ -1004,8 +959,8 @@ EndIf
 		EndSql    	   
 	
 	//Faz o Grupamento por Rede dos dados 
-	dbSelectArea(oAlias)	      
-    (oAlias)->(dbGotop())       
+	DBSelectArea(oAlias)	      
+    (oAlias)->(DBGoTop())       
     
     ProcRegua((oAlias)->(RecCount()))        
     
@@ -1034,11 +989,11 @@ EndIf
      	 
      	 EndIf                
     
-    (oAlias)->(dbSkip())
+    (oAlias)->(DBSkip())
     EndDo             
 
-	dbSelectArea(oAlias)	      
-    (oAlias)->(dbCloseArea()) 
+	DBSelectArea(oAlias)	      
+    (oAlias)->(DBCloseArea()) 
 
 If Len(_aGrpVenda)   > 0          
 

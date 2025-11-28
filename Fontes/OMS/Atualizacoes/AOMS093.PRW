@@ -2,33 +2,27 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 08/08/2017 | Ajustes para versão 12 - Chamado 20782
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 03/09/2019 | Alterado ITGETMV por SuperGetMV. Help 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 16/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Lucas Borges  |03/09/2019| Chamado 28346. Alterado ITGETMV por SuperGetMV.
+Lucas Borges  |16/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25
+Lucas Borges  |18/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes e Defines da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'  
-#INCLUDE "TopConn.ch"
+
+#Include "TOTVS.ch"  
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS093
 Autor-------------: Alex Wallauer
 Data da Criacao---: 16/02/2017
-=========================================================================================================================================================
 Descrição---------: Rotina para Ler os dados das Viagens do SQ e dados da NF e gravar na tabela ZG4
-=========================================================================================================================================================
 Parametros--------: Nenhum
 =========================================================================================================================================================
 */  
 User Function AOMS093()
+
 Local _aCores     := {}
 Private aRotina   := {}
 Private cCadastro := "Integração das informações de Descarregamento (SmartQuesion)"
@@ -36,85 +30,80 @@ Private cNomArq   := ""
 Private _cMarca   := ""
 Private _nRecusado:=0
 Private _nConta   :=0
-PRIVATE _cTimeInicial:=TIME()
+Private _cTimeInicial:=Time()
 
 
 _lScheduler := ( Select("SX3") <= 0 )
 
-IF !_lScheduler
+If !_lScheduler
 
    //Grava Log de execução da rotina
    U_ITLOGACS()
 
-   Aadd(aRotina,{"Pesquisar"            ,"AxPesqui"   ,0,1})
-   Aadd(aRotina,{"Visualizar"           ,"AxVisual"   ,0,2})
-   Aadd(aRotina,{"Ler Dados SQ/NF"      ,"U_AOMS093I" ,0,3})   
-   Aadd(aRotina,{"Legenda"              ,"U_AOMS093L" ,0,6})
+   aAdd(aRotina,{"Pesquisar"            ,"AxPesqui"   ,0,1})
+   aAdd(aRotina,{"Visualizar"           ,"AxVisual"   ,0,2})
+   aAdd(aRotina,{"Ler Dados SQ/NF"      ,"U_AOMS093I" ,0,3})   
+   aAdd(aRotina,{"Legenda"              ,"U_AOMS093L" ,0,6})
    
-   Aadd(_aCores,{"ZG4_SITUAC == 'N'" ,"BR_VERDE" })
-   Aadd(_aCores,{"ZG4_SITUAC == 'P'" ,"BR_VERMELHO" })
-   Aadd(_aCores,{"ZG4_SITUAC == 'R'" ,"BR_AMARELO" })
-   Aadd(_aCores,{"ZFQ_SITUAC == 'O'" ,"BR_CANCEL" })
+   aAdd(_aCores,{"ZG4_SITUAC == 'N'" ,"BR_VERDE" })
+   aAdd(_aCores,{"ZG4_SITUAC == 'P'" ,"BR_VERMELHO" })
+   aAdd(_aCores,{"ZG4_SITUAC == 'R'" ,"BR_AMARELO" })
+   aAdd(_aCores,{"ZFQ_SITUAC == 'O'" ,"BR_CANCEL" })
 
-   DbSelectArea("ZG4")
-   ZG4->(DbSetOrder(1)) 
-   ZG4->(DbGoTop())
+   DBSelectArea("ZG4")
+   ZG4->(DBSetOrder(1)) 
+   ZG4->(DBGoTop())
 
 //  mBrowse(,,,,cAli>,<aFixe, <cCpo>, <nPar>, <cCorFun>, <nClickDef>, <aColors>, <cTopFun>, <cBotFun>, <nPar14>, <bInitBloc>, <lNoMnuFilter>, <lSeeAll>, <lChgAll>, <cExprFilTop>, <nInterval>, <uPar22>, <uPar23> )
     MBrowse(,,,,"ZG4",      ,       ,       ,          ,            , _aCores  ,          ,          ,         ,            ,               ,    .T.    )
 
-ELSE
-  
+Else
    AOMS093A()
-  
-ENDIF   
+EndIf   
 
-Return Nil    
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS093L
 Autor-------------: Alex Wallauer
 Data da Criacao---: 16/02/2017
-===============================================================================================================================
 Descrição---------: Rotina de Exibição da Legenda do MBrowse.
-===============================================================================================================================
 Parametros--------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS093L       
+
 Local _aLegenda := {}
 
-   Aadd(_aLegenda,{"BR_VERDE"    ,"Não Processado" })
-   Aadd(_aLegenda,{"BR_AMARELO"  ,"Rejeitada" })
-   Aadd(_aLegenda,{"BR_VERMELHO" ,"Processado" })
-   Aadd(_aLegenda,{"BR_CANCEL"   ,"Obsoleto" })   
+aAdd(_aLegenda,{"BR_VERDE"    ,"Não Processado" })
+aAdd(_aLegenda,{"BR_AMARELO"  ,"Rejeitada" })
+aAdd(_aLegenda,{"BR_VERMELHO" ,"Processado" })
+aAdd(_aLegenda,{"BR_CANCEL"   ,"Obsoleto" })   
 
-   BrwLegenda(cCadastro, "Legenda", _aLegenda)
+BrwLegenda(cCadastro, "Legenda", _aLegenda)
 
-Return Nil   
+Return   
 
 /*
 ===============================================================================================================================
 Função------------: AOMS093I
 Autor-------------: Alex Wallauer
 Data da Criacao---: 16/02/2017
-===============================================================================================================================
 Descrição---------: Rotina para Ler os dados das Viagens do SQ e gravar na tabela ZG4
-===============================================================================================================================
 Parametros--------: 
 ===============================================================================================================================
 */  
-User Function AOMS093I()
+User Function AOMS093I
 
 Local _cPerg   :="AGLT021"
-PRIVATE _lVersaoNew:=.T.
+Private _lVersaoNew:=.T.
 
-DO WHILE .T.
+While .T.
 
    If !Pergunte(_cPerg)
-      EXIT
-   ENDIF
+      Exit
+   EndIf
 
    _cFiltroFilial:= MV_PAR01
    _dDtini  := MV_PAR02
@@ -125,150 +114,137 @@ DO WHILE .T.
    U_AOMS093T()//Cria TRB
    
    _lOK:=.F.
-   _cTimeInicial:=TIME()
+   _cTimeInicial:=Time()
 
    oProcess:=MsNewProcess():New({|lEnd| _lOK:=U_AOMS93SQ(@oProcess, @lEnd) },'Hora Inicial: '+_cTimeInicial,"Atualizando dados...",.T.) 
    oProcess:Activate()
 
-   IF !_lOK 
-      LOOP
-   ENDIF
+   If !_lOK 
+      Loop
+   EndIf
 
-   IF AOMS93Tela()
+   If AOMS93Tela()
 
       cObs:=""
-      _cTimeInicial:=TIME()
+      _cTimeInicial:=Time()
       
       Processa( {|| cObs:=U_AOMS093G() } , 'Aguarde!' , 'Gravando Dados do SQ...' )
 
       AVISO( "Gravação concluida com Sucesso: " , cObs , {"OK"} ,2 ) 
+   Else
+      Exit
+   EndIf
+   Exit
+EndDo
 
-   ELSE
+If(SELECT("TRB_ZG4") # 0,TRB_ZG4->(E_EraseArq(cNomArq)),)
 
-      EXIT//LOOP
-
-   ENDIF
-		
-   EXIT
-
-ENDDO
-
-IF(SELECT("TRB_ZG4") # 0,TRB_ZG4->(E_EraseArq(cNomArq)),)
-
-RETURN .T.
+Return .T.
 /*
 ===============================================================================================================================
 Função------------: AOMS093T
 Autor-------------: Alex Wallauer
 Data da Criacao---: 16/02/2017
-===============================================================================================================================
 Descrição-------: Cria tabela temporária.
-===============================================================================================================================
 Parametros------: Nenhum                                                                                                       
 ===============================================================================================================================
 */
-User Function AOMS093T()
+User Function AOMS093T
+
 Local _aStrucZG4
 
 _cMarca  := GetMark() 
 
-   //================================================================================
-   // Verifica se ja existe um arquivo com mesmo nome, se sim fecha.
-   //================================================================================
-   If Select("TRB_ZG4") > 0
-      TRB_ZG4->( DBCloseArea() )
-   EndIf
-   DBSELECTAREA("ZG4")
-   //================================================================================
-   // Cria as estruturas das tabelas temporárias
-   //================================================================================
-   _aStrucZG4 := ZG4->(DbStruct())
-   Aadd(_aStrucZG4,{"WK_STATUS", "C", 1 ,0})
-   Aadd(_aStrucZG4,{"WK_MARCA" , "C", 2 ,0})
-   Aadd(_aStrucZG4,{"WKRECNO"  , "N", 10,0})
-   Aadd(_aStrucZG4,{"WK_MOTIVO", "C",200,0})
-   Aadd(_aStrucZG4,{"WK_DTFINAL","D",  8,0})
-   Aadd(_aStrucZG4,{"WK_HRFINAL","C", 10,0})
-	
-   cNomArq:=E_CriaTrab(,_aStrucZG4,"TRB_ZG4",,.F.)
+//================================================================================
+// Verifica se ja existe um arquivo com mesmo nome, se sim fecha.
+//================================================================================
+If Select("TRB_ZG4") > 0
+   TRB_ZG4->( DBCloseArea() )
+EndIf
+DBSelectArea("ZG4")
+//================================================================================
+// Cria as estruturas das tabelas temporárias
+//================================================================================
+_aStrucZG4 := ZG4->(DbStruct())
+aAdd(_aStrucZG4,{"WK_STATUS", "C", 1 ,0})
+aAdd(_aStrucZG4,{"WK_MARCA" , "C", 2 ,0})
+aAdd(_aStrucZG4,{"WKRECNO"  , "N", 10,0})
+aAdd(_aStrucZG4,{"WK_MOTIVO", "C",200,0})
+aAdd(_aStrucZG4,{"WK_DTFINAL","D",  8,0})
+aAdd(_aStrucZG4,{"WK_HRFINAL","C", 10,0})
 
-   //================================================================================
-   // Cria os indices para o arquivo.
-   //================================================================================
-   IndRegua( "TRB_ZG4" , cNomArq	, "Dtos(ZG4_DATA)+ZG4_HORA" ,,, 'Criando Indice'	) 
+cNomArq:=E_CriaTrab(,_aStrucZG4,"TRB_ZG4",,.F.)
+
+//================================================================================
+// Cria os indices para o arquivo.
+//================================================================================
+IndRegua( "TRB_ZG4" , cNomArq	, "DToS(ZG4_DATA)+ZG4_HORA" ,,, 'Criando Indice'	) 
    
-Return Nil
-
+Return
 
 /*
 ===============================================================================================================================
 Função------------: AOMS093A
 Autor-------------: Alex Wallauer
 Data da Criacao---: 16/02/2017
-===============================================================================================================================
 Descrição-------: Função para rodar a rotina de integração de forma agendada (Scheduller).
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum                  
 ===============================================================================================================================
 */
-STATIC Function AOMS093A()
+Static Function AOMS093A()
 
-   //================================================================================
-   // Abre ambiente
-   //================================================================================
-    u_itconout("AOMS093 - Log de Processamento - INICIO   - Integração SQ / NF -> RDC (ZG4) - "+DTOC(DATE())+" - "+TIME())
-	RPCSetType(3)
-	RpcSetEnv( "01" , "01" ,,,"ESP2", "SCHEDULE_WF_SOLICITACAO" , {'ZG4','SA2','DA3','DA4','ZLJ','ZL1'} )
-	Sleep( 5000 ) //Aguarda 5 segundos para subam as configurações do ambiente.
+//================================================================================
+// Abre ambiente
+//================================================================================
+   u_itconout("AOMS093 - Log de Processamento - INICIO   - Integração SQ / NF -> RDC (ZG4) - "+DToC(Date())+" - "+TIME())
+RPCSetType(3)
+RpcSetEnv( "01" , "01" ,,,"ESP2", "SCHEDULE_WF_SOLICITACAO" , {'ZG4','SA2','DA3','DA4','ZLJ','ZL1'} )
+Sleep( 5000 ) //Aguarda 5 segundos para subam as configurações do ambiente.
 
-   //================================================================================
-   // Cria Tabela Temporaria
-   //================================================================================
-   U_AOMS093T()
-   
-   //================================================================================
-   // Lê os dados do SQ e da NOTAS
-   //================================================================================
-   u_itconout("AOMS093 - Log de Processamento - LENDO    - Integração SQ / NF -> RDC (ZG4) - "+DTOC(DATE())+" - "+TIME())
-   U_AOMS93SQ()
+//================================================================================
+// Cria Tabela Temporaria
+//================================================================================
+U_AOMS093T()
 
-   //================================================================================
-   // Grava os dados 
-   //================================================================================
-   u_itconout("AOMS093 - Log de Processamento - GRAVANDO  - Integração SQ / NF -> RDC (ZG4) - "+DTOC(DATE())+" - "+TIME())
-   cObs:=U_AOMS093G()
-   
-   u_itconout(cObs)
-   u_itconout("AOMS093 - Log de Processamento - CONCLUIDO - Integração SQ / NF -> RDC (ZG4) - "+DTOC(DATE())+" - "+TIME())
+//================================================================================
+// Lê os dados do SQ e da NOTAS
+//================================================================================
+u_itconout("AOMS093 - Log de Processamento - LENDO    - Integração SQ / NF -> RDC (ZG4) - "+DToC(Date())+" - "+TIME())
+U_AOMS93SQ()
 
-   IF(SELECT("TRB_ZG4") # 0,TRB_ZG4->(E_EraseArq(cNomArq)),)
+//================================================================================
+// Grava os dados 
+//================================================================================
+u_itconout("AOMS093 - Log de Processamento - GRAVANDO  - Integração SQ / NF -> RDC (ZG4) - "+DToC(Date())+" - "+TIME())
+cObs:=U_AOMS093G()
 
-   //Grava Log de execução da rotina
-   U_ITLOGACS()
+u_itconout(cObs)
+u_itconout("AOMS093 - Log de Processamento - CONCLUIDO - Integração SQ / NF -> RDC (ZG4) - "+DToC(Date())+" - "+TIME())
 
-Return Nil
+If(SELECT("TRB_ZG4") # 0,TRB_ZG4->(E_EraseArq(cNomArq)),)
+
+//Grava Log de execução da rotina
+U_ITLOGACS()
+
+Return
 /*
 ===============================================================================================================================
 Função------------: AOMS93SQ
 Autor-------------: Alex Wallauer
 Data da Criacao---: 16/02/2017
-===============================================================================================================================
 Descrição-------: Função para busca os dados do SQ
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum                  
 =============================================================================================================================== 
 */
 User Function AOMS93SQ( _oProcess, _lEnd )
 
 Local _cWarning	 := '',_nMi,_nHr,nHr,_nI,_nXml,_nX
-Local _cCodEmpWS := U_ITGETMV( 'IT_EMPWEBSE' , '000001' )  
+Local _cCodEmpWS := SuperGetMV('IT_EMPWEBS',.F.,'000001')
 Local _lRetorno  := .T.
 
-PRIVATE _aHdrOut	:= {'POST https://italac.smartquestion.com.br/ws/WsSmartQuestionV9 HTTP/1.1'				,;//Ambiente de Produção
+Private _aHdrOut	:= {'POST https://italac.smartquestion.com.br/ws/WsSmartQuestionV9 HTTP/1.1'				,;//Ambiente de Produção
 						'Accept-Encoding: gzip,deflate'																		,;
 						'Content-Type: text/xml;charset=UTF-8'																,;
 						'SOAPAction: ""'																					,;
@@ -282,13 +258,13 @@ If !_lScheduler
 
 Else
 
-    _cTimeInicial := TIME()
-    _cFiltroFilial:= U_ITGETMV( 'IT_FILINTWS' , '01' )
+    _cTimeInicial := Time()
+    _cFiltroFilial:= SuperGetMV('IT_FILINTW',.F.,'')
 
-    cUSUARIO := SPACE(06)+"Administrador  "
-    cUsername:= "Schedure"
-    _dDtini  := DATE()
-    _dDtfim  := DATE()
+    cUSUARIO := Space(06)+"Administrador  "
+    cUserName:= "Schedure"
+    _dDtini  := Date()
+    _dDtfim  := Date()
     _lEnd    := .F.
     _cHoraI  := ""
     _cHoraF  := ""
@@ -320,155 +296,152 @@ _aXmlDia:= {}
 _cDiasT := _dDtfim-_dDtini+1
 If !_lScheduler
    _oProcess:SetRegua1(_cDiasT)
-ENDIF
-_cDiasT := ALLTRIM(STR(_cDiasT,10))
+EndIf
+_cDiasT := AllTrim(Str(_cDiasT,10))
 
 aHoras:={}
 _nHoraIni:=0
 _nHorafim:=23
-IF !EMPTY(_cHoraI) 
-   _nHoraIni:=VAL(_cHoraI)
-ENDIF
-IF !EMPTY(_cHoraF) 
-   _nHorafim:=VAL(_cHoraF)
-ENDIF
+If !Empty(_cHoraI) 
+   _nHoraIni:=Val(_cHoraI)
+EndIf
+If !Empty(_cHoraF) 
+   _nHorafim:=Val(_cHoraF)
+EndIf
 
-FOR _nHr := _nHoraIni to _nHorafim
+For _nHr := _nHoraIni To _nHorafim
 
-    _cHr := STRZERO(_nHr,2)
+    _cHr := StrZero(_nHr,2)
 
-    FOR _nMi := 0 to 5
+    For _nMi := 0 To 5
 
-       _cMi := STRZERO(_nMi,1)
+       _cMi := StrZero(_nMi,1)
 
-       AADD(aHoras,{"T"+_cHr+":"+_cMi+"0:00","T"+_cHr+":"+_cMi+"1:00"})// EM 01 E 01 MINUTOS
-       AADD(aHoras,{"T"+_cHr+":"+_cMi+"1:00","T"+_cHr+":"+_cMi+"2:00"})// EM 01 E 01 MINUTOS
-       AADD(aHoras,{"T"+_cHr+":"+_cMi+"2:00","T"+_cHr+":"+_cMi+"3:00"})// EM 01 E 01 MINUTOS
-       AADD(aHoras,{"T"+_cHr+":"+_cMi+"3:00","T"+_cHr+":"+_cMi+"4:00"})// EM 01 E 01 MINUTOS
-       AADD(aHoras,{"T"+_cHr+":"+_cMi+"4:00","T"+_cHr+":"+_cMi+"5:00"})// EM 01 E 01 MINUTOS
-       AADD(aHoras,{"T"+_cHr+":"+_cMi+"5:00","T"+_cHr+":"+_cMi+"6:00"})// EM 01 E 01 MINUTOS
-       AADD(aHoras,{"T"+_cHr+":"+_cMi+"6:00","T"+_cHr+":"+_cMi+"7:00"})// EM 01 E 01 MINUTOS
-       AADD(aHoras,{"T"+_cHr+":"+_cMi+"7:00","T"+_cHr+":"+_cMi+"8:00"})// EM 01 E 01 MINUTOS
-       AADD(aHoras,{"T"+_cHr+":"+_cMi+"8:00","T"+_cHr+":"+_cMi+"9:00"})// EM 01 E 01 MINUTOS
-       AADD(aHoras,{"T"+_cHr+":"+_cMi+"9:00","T"+_cHr+":"+_cMi+"9:59"})// EM 01 E 01 MINUTOS
+       aAdd(aHoras,{"T"+_cHr+":"+_cMi+"0:00","T"+_cHr+":"+_cMi+"1:00"})// EM 01 E 01 MINUTOS
+       aAdd(aHoras,{"T"+_cHr+":"+_cMi+"1:00","T"+_cHr+":"+_cMi+"2:00"})// EM 01 E 01 MINUTOS
+       aAdd(aHoras,{"T"+_cHr+":"+_cMi+"2:00","T"+_cHr+":"+_cMi+"3:00"})// EM 01 E 01 MINUTOS
+       aAdd(aHoras,{"T"+_cHr+":"+_cMi+"3:00","T"+_cHr+":"+_cMi+"4:00"})// EM 01 E 01 MINUTOS
+       aAdd(aHoras,{"T"+_cHr+":"+_cMi+"4:00","T"+_cHr+":"+_cMi+"5:00"})// EM 01 E 01 MINUTOS
+       aAdd(aHoras,{"T"+_cHr+":"+_cMi+"5:00","T"+_cHr+":"+_cMi+"6:00"})// EM 01 E 01 MINUTOS
+       aAdd(aHoras,{"T"+_cHr+":"+_cMi+"6:00","T"+_cHr+":"+_cMi+"7:00"})// EM 01 E 01 MINUTOS
+       aAdd(aHoras,{"T"+_cHr+":"+_cMi+"7:00","T"+_cHr+":"+_cMi+"8:00"})// EM 01 E 01 MINUTOS
+       aAdd(aHoras,{"T"+_cHr+":"+_cMi+"8:00","T"+_cHr+":"+_cMi+"9:00"})// EM 01 E 01 MINUTOS
+       aAdd(aHoras,{"T"+_cHr+":"+_cMi+"9:00","T"+_cHr+":"+_cMi+"9:59"})// EM 01 E 01 MINUTOS
 
-    NEXT   
+    Next   
 
-NEXT
+Next
 
-DO WHILE _dDtini <=  _dDtfim
+While _dDtini <=  _dDtfim
 
    If !_lScheduler
       _nDias++
-      _oProcess:IncRegua1("Lendo SQ v"+IF(_lVersaoNew,"14","9")+" dia: "+DTOC(_dDtini)+" - "+ALLTRIM(STR(_nDias,10))+" de "+_cDiasT+" dias..." )
-      _oProcess:SetRegua2(LEN(aHoras))
-   ENDIF
+      _oProcess:IncRegua1("Lendo SQ v"+If(_lVersaoNew,"14","9")+" dia: "+DToC(_dDtini)+" - "+AllTrim(Str(_nDias,10))+" de "+_cDiasT+" dias..." )
+      _oProcess:SetRegua2(Len(aHoras))
+   EndIf
    
-   FOR nHr:= 1 TO LEN(aHoras)
+   For nHr:= 1 To Len(aHoras)
        If !_lScheduler
           _oProcess:IncRegua2("Lendo Hora "+aHoras[nHr,1]+" de "+aHoras[nHr,2]+" ..." )
-       ENDIF
+       EndIf
 
        AOMS93BuscaSQ(_dDtini,_dDtfim,aHoras[nHr,1],aHoras[nHr,2])
 
        If _lEnd//houve cancelamento do processo
           Exit
-       Endif
-   NEXT
+       EndIf
+   Next
 
    If _lEnd//houve cancelamento do processo			
       MessageBox("Processamento Cancelado pelo usuario com Sucesso.","Atenção",16)
-      RETURN .F.	
+      Return .F.	
    EndIf	      	
 
    _dDtini++
 
-ENDDO
+EndDo
 
 _aUF := {} 
-aadd(_aUF,{"RO","11"});   aadd(_aUF,{"AC","12"});   aadd(_aUF,{"AM","13"});   aadd(_aUF,{"RR","14"});   aadd(_aUF,{"PA","15"});   aadd(_aUF,{"AP","16"})
-aadd(_aUF,{"TO","17"});   aadd(_aUF,{"MA","21"});   aadd(_aUF,{"PI","22"});   aadd(_aUF,{"CE","23"});   aadd(_aUF,{"RN","24"});   aadd(_aUF,{"PB","25"})
-aadd(_aUF,{"PE","26"});   aadd(_aUF,{"AL","27"});   aadd(_aUF,{"MG","31"});   aadd(_aUF,{"ES","32"});   aadd(_aUF,{"RJ","33"});   aadd(_aUF,{"SP","35"})
-aadd(_aUF,{"PR","41"});   aadd(_aUF,{"SC","42"});   aadd(_aUF,{"RS","43"});   aadd(_aUF,{"MS","50"});   aadd(_aUF,{"MT","51"});   aadd(_aUF,{"GO","52"})
-aadd(_aUF,{"DF","53"});   aadd(_aUF,{"SE","28"});   aadd(_aUF,{"BA","29"});   aadd(_aUF,{"EX","99"})
+aAdd(_aUF,{"RO","11"});   aAdd(_aUF,{"AC","12"});   aAdd(_aUF,{"AM","13"});   aAdd(_aUF,{"RR","14"});   aAdd(_aUF,{"PA","15"});   aAdd(_aUF,{"AP","16"})
+aAdd(_aUF,{"TO","17"});   aAdd(_aUF,{"MA","21"});   aAdd(_aUF,{"PI","22"});   aAdd(_aUF,{"CE","23"});   aAdd(_aUF,{"RN","24"});   aAdd(_aUF,{"PB","25"})
+aAdd(_aUF,{"PE","26"});   aAdd(_aUF,{"AL","27"});   aAdd(_aUF,{"MG","31"});   aAdd(_aUF,{"ES","32"});   aAdd(_aUF,{"RJ","33"});   aAdd(_aUF,{"SP","35"})
+aAdd(_aUF,{"PR","41"});   aAdd(_aUF,{"SC","42"});   aAdd(_aUF,{"RS","43"});   aAdd(_aUF,{"MS","50"});   aAdd(_aUF,{"MT","51"});   aAdd(_aUF,{"GO","52"})
+aAdd(_aUF,{"DF","53"});   aAdd(_aUF,{"SE","28"});   aAdd(_aUF,{"BA","29"});   aAdd(_aUF,{"EX","99"})
 
 If !_lScheduler
-   _oProcess:SetRegua1(LEN(_aXmlDia))
-ENDIF
+   _oProcess:SetRegua1(Len(_aXmlDia))
+EndIf
 
 _nRecusado:=0
 _nConta:=0
 SM0->(DBSetOrder(1))
-SA2->(DBSETORDER(1))
+SA2->(DBSetOrder(1))
 ZL0->(DBSetOrder(1))
 
-FOR _nXml := 1 TO LEN(_aXmlDia)
+For _nXml := 1 To Len(_aXmlDia)
 
    If _lEnd			//houve cancelamento do processo			
       MessageBox("Processamento Cancelado pelo usuario com Sucesso.","Atenção",16)
-      RETURN .F.	
+      Return .F.	
    EndIf	      	
 
-   _cDataLendo:=DTOC(_aXmlDia[_nXml,1])
+   _cDataLendo:=DToC(_aXmlDia[_nXml,1])
 
    If !_lScheduler
       _oProcess:IncRegua1("Processando dia: "+_cDataLendo )
-   ENDIF
+   EndIf
     
    _cErro:=""
    _aXml := {}
 
-   //Tira caracter extendido que dá erro de UTF
-//   _aXmlDia[_nXml,2] := strtran(_aXmlDia[_nXml,2],"º")
-//   _aXmlDia[_nXml,2] := strtran(_aXmlDia[_nXml,2],"ñ")
    _oXml := XmlParser(_aXmlDia[_nXml,2] , "_" , @_cErro , @_cWarning )
 
-    If !Empty(_cErro) .OR. ValType(_oXml) = 'U'//Tratamento de caracter extendido
+    If !Empty(_cErro) .Or. ValType(_oXml) = 'U'//Tratamento de caracter extendido
        _aXmlDia[_nXml,2] := ConverteXML(_aXmlDia[_nXml,2])//Tira caracter extendido que dá erro de UTF
 	   _oXml := XmlParser(_aXmlDia[_nXml,2] , "_" , @_cErro , @_cWarning )
-    ENDIF
+    EndIf
 
-    If !Empty(_cErro) .OR. ValType(_oXml) = 'U'//Tira a observaçõe pq elas são abertas para digitar qq coisa
+    If !Empty(_cErro) .Or. ValType(_oXml) = 'U'//Tira a observaçõe pq elas são abertas para digitar qq coisa
  
        _nAscI:=1
-       DO WHILE _nAscI > 0
+       While _nAscI > 0
           
           _nAscI:=AT("<observacao>" , _aXmlDia[_nXml,2] ) 
-          IF _nAscI > 0
+          If _nAscI > 0
              _nAscF:=AT("</observacao>", _aXmlDia[_nXml,2] ) 
-             IF _nAscF > 0
-                _nDel:=(_nAscF-_nAscI)+LEN("</observacao>")
+             If _nAscF > 0
+                _nDel:=(_nAscF-_nAscI)+Len("</observacao>")
 
-		        IF MSGYESNO( "Deletar? "+SUBSTR(_aXmlDia[_nXml,2],_nAscI,_nDel) , 'Atenção! (MGLT002.PRW)')
-                   _aXmlDia[_nXml,2] := STUFF(_aXmlDia[_nXml,2],_nAscI, _nDel ,"" )
-                ENDIF
-             ENDIF
-          ENDIF
+		        If MSGYESNO( "Deletar? "+SubStr(_aXmlDia[_nXml,2],_nAscI,_nDel) , 'Atenção! (MGLT002.PRW)')
+                   _aXmlDia[_nXml,2] := Stuff(_aXmlDia[_nXml,2],_nAscI, _nDel ,"" )
+                EndIf
+             EndIf
+          EndIf
        
-       ENDDO
+       EndDo
  
  	   _oXml := XmlParser(_aXmlDia[_nXml,2] , "_" , @_cErro , @_cWarning )
 
-    ENDIF   
+    EndIf   
 
-   If !Empty(_cErro) .OR. ValType(_oXml) = 'U'
-       IF ValType(_oXml) = 'U'
+   If !Empty(_cErro) .Or. ValType(_oXml) = 'U'
+       If ValType(_oXml) = 'U'
           _cErro+=" Sem retorno (NIL)"
-       ENDIF
-       _cErro:='Erro ao executar o XmlParser do xml no '+Chr(13)+Chr(10)+' periodo: '+_aXmlDia[_nXml,3]+" ate "+_aXmlDia[_nXml,4]+Chr(13)+Chr(10)+" Erro: ["+ALLTRIM(_cErro)+"]."
-       IF !_lScheduler
-	      IF !MSGNOYES(_cErro+Chr(13)+Chr(10)+"Deseja Continuar ?", 'Atenção!' , 48 )	      	      
-	         EXIT 
-	      ENDIF
-	   ELSE
+       EndIf
+       _cErro:='Erro ao executar o XmlParser do xml no '+Chr(13)+Chr(10)+' periodo: '+_aXmlDia[_nXml,3]+" ate "+_aXmlDia[_nXml,4]+Chr(13)+Chr(10)+" Erro: ["+AllTrim(_cErro)+"]."
+       If !_lScheduler
+	      If !MSGNOYES(_cErro+Chr(13)+Chr(10)+"Deseja Continuar ?", 'Atenção!' , 48 )	      	      
+	         Exit 
+	      EndIf
+	   Else
 	      u_itconout( _cErro )
 	   EndIf
 	   Loop
-   ENDIF
+   EndIf
 
    If ValType( XmlChildEx( _oXml:_SOAP_BODY:_NS2_GETEXECUCAODIATRABALHOCRIADOOUMODIFICADORESPONSE , "_RETURN" ) ) <> 'U'
 	  _aXml := _oXml:_SOAP_BODY:_NS2_GETEXECUCAODIATRABALHOCRIADOOUMODIFICADORESPONSE:_RETURN
-   EndIF
+   EndIf
 	
    If ValType(_aXml) == 'O'
  	  _aXml := { _aXml }
@@ -476,7 +449,7 @@ FOR _nXml := 1 TO LEN(_aXmlDia)
 
    If !_lScheduler
       _oProcess:SetRegua2(Len(_aXml))
-   ENDIF
+   EndIf
 
    For _nI := 1 To Len(_aXml)
 
@@ -485,46 +458,40 @@ FOR _nXml := 1 TO LEN(_aXmlDia)
       If ValType( XmlChildEX(_aXml[_nI] , "_CICLOVISITA" ) ) = 'O'
          _cFilial := SubStr( AllTrim( _aXml[_nI]:_CICLOVISITA:_CODIGO:TEXT ) , 1 , 2 )
          _cRotaReb:= AllTrim( _aXml[_nI]:_CICLOVISITA:_CODIGO:TEXT )
-      ENDIF
+      EndIf
 
       _cVIAGEM := Space(Len(ZLJ->ZLJ_VIAGEM))
       If ValType( XmlChildEX(_aXml[_nI] , "_NUMERO" ) ) = 'O'
          _cVIAGEM := StrZero( Val( _aXml[_nI]:_NUMERO:TEXT ) , Len(ZLJ->ZLJ_VIAGEM) )
-         _cVIAGEM := "S"+SUBSTR(_cVIAGEM,2)
-      ENDIF
+         _cVIAGEM := "S"+SubStr(_cVIAGEM,2)
+      EndIf
 
       _cDataLendo:=_aXmlDia[_nXml,1]
       _cHoraLeu:=""
       If ValType( XmlChildEX(_aXml[_nI] , "_DATAHORAULTIMAMODIFICACAO" ) ) = 'O'
          _cHoraLeu:=SubStr( _aXml[_nI]:_DATAHORAULTIMAMODIFICACAO:TEXT , 12 , 8 )
-      ENDIF
+      EndIf
 
       If !_lScheduler
          _oProcess:IncRegua2("Lendo Filial / Viagem: "+_cFilial+" / "+_cVIAGEM )
-      ENDIF
-
-      /////////////\/\/\/\/\/\/\/\/\//\/\/ VALIDACAO DA VIAGEM \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\//////////////////////////////////////////////
-
-      If Empty(_cFilial)
-
-         //AOMS93LogGrv(.F.,'Viagem recusada: Filial nao preenchida',.T.)
-         Loop//Na Viagem
-
-      Else
-
-         If SM0->( !DBSeek( cEmpAnt + _cFilial ) )
-            //AOMS93LogGrv(.F.,'Viagem recusada: Filial nao existe: '+_cFilial,.T.)
-            Loop//Na Viagem
-         EndIf
-
       EndIf
 
-      IF !EMPTY(_cFiltroFilial) .AND. !(_cFilial $ _cFiltroFilial)
+      // VALIDACAO DA VIAGEM
+
+      If Empty(_cFilial)
+         Loop//Na Viagem
+      Else
+         If SM0->( !DBSeek( cEmpAnt + _cFilial ) )
+            Loop//Na Viagem
+         EndIf
+      EndIf
+
+      If !Empty(_cFiltroFilial) .And. !(_cFilial $ _cFiltroFilial)
           Loop//Na Viagem
       EndIf
 
       _lAchouMoto:=.F.
-      _cMotorista:=SPACE(Len(ZLJ->ZLJ_MOTORI))
+      _cMotorista:=Space(Len(ZLJ->ZLJ_MOTORI))
       _cMotFilial:="  "
       _cCodtransp:=""
       _cLojtransp:=""
@@ -532,8 +499,8 @@ FOR _nXml := 1 TO LEN(_aXmlDia)
 
       If ValType( XmlChildEx( _aXml[_nI]:_USUARIO , "_CODIGO") ) <> 'U'//Só tem um motorista para todos os atendimentos
          _cMotorista:= AllTrim( _aXml[_nI]:_USUARIO:_CODIGO:TEXT)
-         _cMotFilial:= Substr(Alltrim(_cMotorista),LEN(alltrim(_cMotorista))-1,2)
-         _cMotorista:= Substr(Alltrim(_cMotorista),1,LEN(alltrim(_cMotorista))-2)
+         _cMotFilial:= SubStr(AllTrim(_cMotorista),Len(AllTrim(_cMotorista))-1,2)
+         _cMotorista:= SubStr(AllTrim(_cMotorista),1,Len(AllTrim(_cMotorista))-2)
 
          If ZL0->( DBSeek( _cFilial + _cMotorista ) )
            _cCodtransp   := ZL0->ZL0_FRETIS
@@ -560,26 +527,26 @@ FOR _nXml := 1 TO LEN(_aXmlDia)
                 If _aXml[_nI]:_CUSTOMFIELD[_nX]:_CODIGO:TEXT == "CODIGO_MATRIZ"
 
                    _cViagemMae := StrZero( Val(_aXml[_nI]:_CUSTOMFIELD[_nX]:_VALORTEXTO:TEXT  ), Len(ZLJ->ZLJ_VIAGEM) )
-                   _cViagemMae := "S"+SUBSTR(_cViagemMae,2)
+                   _cViagemMae := "S"+SubStr(_cViagemMae,2)
 
-                Endif
+                EndIf
 
-             Endif
+             EndIf
 
          Next _nX
 
-      ELSEIf ValType( XmlChildEx( _aXml[_nI] , "_CUSTOMFIELD" ) ) <> 'U'
+      ElseIf ValType( XmlChildEx( _aXml[_nI] , "_CUSTOMFIELD" ) ) <> 'U'
 
           If ValType( XmlChildEx( _aXml[_nI]:_CUSTOMFIELD , "_CODIGO" ) ) <> 'U'
 
              If _aXml[_nI]:_CUSTOMFIELD:_CODIGO:TEXT == "CODIGO_MATRIZ"
 
                 _cViagemMae := StrZero( Val(_aXml[_nI]:_CUSTOMFIELD:_VALORTEXTO:TEXT ), Len(ZLJ->ZLJ_VIAGEM) )
-                _cViagemMae := "S"+SUBSTR(_cViagemMae,2)
+                _cViagemMae := "S"+SubStr(_cViagemMae,2)
 
-             Endif
+             EndIf
 
-          Endif
+          EndIf
 
       EndIf
 
@@ -587,20 +554,20 @@ FOR _nXml := 1 TO LEN(_aXmlDia)
          _cRecusa += '[Codigo "'+_cFilial+' '+_cMotorista+' '+_cMotFilial+'" não existe no cadastro de motoristas] '
          _lPodeMarcar:=.F.
          _lAchouMoto:=.F.
-      ELSEIF !(_cMotFilial == _cFilial)
+      ElseIf !(_cMotFilial == _cFilial)
          _cRecusa += "[Filial da Viagem "+_cFilial+" difere da Filial do Motorista "+_cMotFilial+"] "
          _lPodeMarcar:=.F.
-         _lAchouMoto:=.F.//Já que vai rejeitar nao precisa fazer o WHILE do ZL1
+         _lAchouMoto:=.F.//Já que vai rejeitar nao precisa fazer o While do ZL1
       EndIf
-      SA2->(DBSETORDER(1))
-      IF !SA2->(DBSEEK(Xfilial("SA2")+_cCodtransp+_cLojtransp))
+      SA2->(DBSetOrder(1))
+      If !SA2->(DBSeek(xFilial("SA2")+_cCodtransp+_cLojtransp))
          _cRecusa += "[Transportador: "+_cCodtransp +' '+ _cLojtransp+" nao cadastrado] "
          _lPodeMarcar:=.F.
-      ENDIF
+      EndIf
 
       //Verifica se placa está no cadastro de motoristas
       _cPlacaS:=""
-      _cPlacaC:=SPACE(Len(ZG4->ZG4_CODCAV))
+      _cPlacaC:=Space(Len(ZG4->ZG4_CODCAV))
       If ValType( XmlChildEx( _aXml[_nI]:_VEICULOPRIMARIO , "_PLACA" ) ) <> 'U'
          _cPlacaS:= StrTran( AllTrim( _aXml[_nI]:_VEICULOPRIMARIO:_PLACA:TEXT ) , '-' , '' )
          _cPlacaC:= SubStr( _cPlacaS, 1 , 3 ) +'-'+ SubStr( _cPlacaS, 4 )
@@ -608,22 +575,22 @@ FOR _nXml := 1 TO LEN(_aXmlDia)
 
       _cVeiculo:=""
       _lAchouPlaca:=.F.
-      ZL1->( DBSetorder(2))
-      If _lAchouMoto .AND. ZL1->( DBSeek( _cFilial + _cPlacaS ) )
-         DO WHILE ZL1->(!EOF()) .AND. _cFilial + _cPlacaS == ZL1->ZL1_FILIAL + ZL1->ZL1_PLACA
-            IF ZL1->ZL1_MOTORI == _cMotorista
+      ZL1->( DBSetOrder(2))
+      If _lAchouMoto .And. ZL1->( DBSeek( _cFilial + _cPlacaS ) )
+         While ZL1->(!Eof()) .And. _cFilial + _cPlacaS == ZL1->ZL1_FILIAL + ZL1->ZL1_PLACA
+            If ZL1->ZL1_MOTORI == _cMotorista
                _cVeiculo   :=ZL1->ZL1_COD
                _lAchouPlaca:=.T.
-               EXIT
-            ENDIF
-            ZL1->(DBSKIP())
-         ENDDO
-      ENDIF
+               Exit
+            EndIf
+            ZL1->(DBSkip())
+         EndDo
+      EndIf
 
       _cPlaca      := _cPlacaS
       _cPlacaVagao := "9999999"
 
-      IF !_lAchouPlaca
+      If !_lAchouPlaca
 
          _cRecusa += '[Placa "' +_cFilial+' '+ _cPlacaC + '" + Motorista "'+_cMotorista+' '+_cMotFilial+'" não encontrado] '
          _lPodeMarcar:=.F.
@@ -641,63 +608,61 @@ FOR _nXml := 1 TO LEN(_aXmlDia)
          _cCodMunOri   := Posicione("SA2",3,xFilial("SA2")+_cCGC_Fil,"A2_COD_MUN")
          _cEstado      := Posicione("SM0",1,cEmpAnt+_cFilial,"M0_ESTENT")
          _nPos         := aScan(_aUF,{|x| x[1] == _cEstado})
-         IF _nPos # 0
+         If _nPos # 0
             _cCodMunOri := _aUF[_nPos][02] + _cCodMunOri
-         ENDIF
-      ENDIF
+         EndIf
+      EndIf
 
-      IF EMPTY(_cCpfMotorista) .OR. EMPTY(_cCnpjTransp) .OR. EMPTY(_cCodMunOri) .OR. EMPTY(_cEstado)
-         IF EMPTY(_cCpfMotorista)
+      If Empty(_cCpfMotorista) .Or. Empty(_cCnpjTransp) .Or. Empty(_cCodMunOri) .Or. Empty(_cEstado)
+         If Empty(_cCpfMotorista)
             _cRecusa += '[CPF do Motorista "'+_cMotorista+' '+_cFilial+'" não encontrado] '
-         ENDIF
-         IF EMPTY(_cCnpjTransp)
+         EndIf
+         If Empty(_cCnpjTransp)
             _cRecusa += '[CNPJ da Transportadora "'+_cCodtransp +' '+ _cLojtransp+'" não encontrado] '
-         ENDIF
-         IF EMPTY(_cCGC_Fil)
+         EndIf
+         If Empty(_cCGC_Fil)
             _cRecusa += '[CGC da filial "'+_cFilial+'" não encontrado] '
-         ENDIF
-         IF EMPTY(_cEstado)
+         EndIf
+         If Empty(_cEstado)
             _cRecusa += '[Estado da filial "'+_cFilial+'" não encontrado] '
-         ENDIF
-         IF EMPTY(_cCodMunOri)
+         EndIf
+         If Empty(_cCodMunOri)
             _cRecusa += '[Cod. do Municipio "'+_cCGC_Fil+'" não encontrado] '
-         ENDIF
+         EndIf
          _lPodeMarcar:=.F.
-      ENDIF
+      EndIf
 
-//    _lViagemAceita:=.F.
-
-      IF ZLJ->(FIELDPOS("ZLJ_VFILHA")) # 0
+      If ZLJ->(FIELDPOS("ZLJ_VFILHA")) # 0
          ZLJ->( DBSetOrder(6) )//ZLJ_FILIAL+ZLJ_VIAGEM+ZLJ_VFILHA
-      ELSE
+      Else
          ZLJ->( DBSetOrder(2) )
-      ENDIF
+      EndIf
                                                                                   //Tem que procurar a Mae com a filha em brnaco senão ele acha a as linhas da filhas já integradas
-      If ZLJ->( DBSeek( _cFilial + IF(!EMPTY(_cViagemMae), _cViagemMae+_cVIAGEM , _cVIAGEM+SPACE(LEN(ZLJ->ZLJ_VIAGEM)) ) ) )
+      If ZLJ->( DBSeek( _cFilial + If(!Empty(_cViagemMae), _cViagemMae+_cVIAGEM , _cVIAGEM+Space(Len(ZLJ->ZLJ_VIAGEM)) ) ) )
          _lPodeMarcar:=.F.
          _cRecusa := "[Viagem Integrada / Conferida (ZLJ)] "
-      ENDIF
+      EndIf
 
-      _cVIAGEM := "9"+SUBSTR(_cVIAGEM,2)
+      _cVIAGEM := "9"+SubStr(_cVIAGEM,2)
       ZG4->( DBSetOrder(3) )//ZG4_FILIAL+ZG4_NRORDE+ZG4_SITUAC
       If ZG4->( DBSeek( _cFilial + _cVIAGEM ) )
          _lPodeMarcar:=.F.
          _cRecusa := "[Viagem já enviada para o RDC (ZG4)] "
-      ENDIF
+      EndIf
 
-      If !EMPTY(_cViagemMae)
+      If !Empty(_cViagemMae)
          _lPodeMarcar:=.F.
          _cRecusa := "[Viagem é uma filha da: "+_cViagemMae+" ] "
-      ENDIF
+      EndIf
 
-      /////////////\/\/\/\/\/\/\/\/\//\/\/\ VALIDACAO DA VIAGEM /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\//////////////////////////////////////////////
+      //VALIDACAO DA VIAGEM
 
 	  If ValType( XmlChildEx( _aXml[_nI] , "_DATAHORAFIMDIA") ) <> 'U'
-		 _dDtFim := StoD( StrTran( SubStr( _aXml[_nI]:_DATAHORAFIMDIA:TEXT , 1 , 10 ) , '-' , '' ) )
+		 _dDtFim := SToD( StrTran( SubStr( _aXml[_nI]:_DATAHORAFIMDIA:TEXT , 1 , 10 ) , '-' , '' ) )
 		 _cHrFim := SubStr( _aXml[_nI]:_DATAHORAFIMDIA:TEXT , 12 , 08 )
 	  EndIf
 
-      //////////////////////////////////////////////////////////// INICIO DO FOR DA GRAVACAO NO TRB //////////////////////////////////////////////////////////////
+      // INICIO DO For DA GRAVACAO NO TRB
 
       //Grava tabela temporária  NÃO GRAVA AS FILHAS
       TRB_ZG4->(DBAPPEND())
@@ -714,47 +679,47 @@ FOR _nXml := 1 TO LEN(_aXmlDia)
       TRB_ZG4->ZG4_CDMUDE   := _cCodMunOri     // Codigo IBGE Municipio de Destino
       TRB_ZG4->ZG4_TPOPER	:= "11"            // C	4	Tipo de Operação		10=Operacao de Carregamento;11=Operacao de Descarregamento
       TRB_ZG4->ZG4_SITOPE	:= "2"             // C	1	Situação da Operação	2=Inclusao;5=Exclusao
-      TRB_ZG4->ZG4_USUARI	:= __CUSERID       // C	6	Codigo do Usuário
+      TRB_ZG4->ZG4_USUARI	:= __cUserId       // C	6	Codigo do Usuário
       TRB_ZG4->ZG4_SITUAC	:= "N" 	           // C	1	Situação do Registro	“N”
       TRB_ZG4->ZG4_CODEMP	:= _cCodEmpWS      // C	6	Codigo Empresa WebServer
       TRB_ZG4->WK_DTFINAL   := _dDtFim
       TRB_ZG4->WK_HRFINAL	:= _cHrFim
 
-      IF _lPodeMarcar
+      If _lPodeMarcar
          _cMotivo := "Atendimento OK"
-         IF !EMPTY(_cRecusa)
+         If !Empty(_cRecusa)
             _cMotivo += ": "+_cRecusa
-         ENDIF
-      ELSE
+         EndIf
+      Else
          _cMotivo := "Viagem Recusada"
-         IF !EMPTY(_cRecusa)
+         If !Empty(_cRecusa)
             _cMotivo += ": "+_cRecusa
-         ENDIF
-      ENDIF
+         EndIf
+      EndIf
 
      AOMS93LogGrv(_lPodeMarcar,_cMotivo,.F.)
 
-     ////////////////////////////// FIM DA GRAVACAO NO TRB /////////////////////////////////////////////////////
+     //FIM DA GRAVACAO NO TRB
   Next _nI
 
-NEXT _nXml//LEN(_aXmlDia)
+Next _nXml//Len(_aXmlDia)
 
-If _lScheduler .OR. Pergunte("AGLT021")
+If _lScheduler .Or. Pergunte("AGLT021")
 
    U_AOMS93NF( _oProcess, _lEnd )//Le os dados das notas
 
-ENDIF
+EndIf
 
-IF TRB_ZG4->(EOF()) .AND. TRB_ZG4->(BOF())
+If TRB_ZG4->(Eof()) .And. TRB_ZG4->(Bof())
 
-   IF !_lScheduler
+   If !_lScheduler
    	  MessageBox( 'Não foram encontrados registros para processar!' , 'Atenção!' , 48 )
-   ELSE
+   Else
       u_itconout('AOMS093 - Não foram encontrados registros no SQ para processar!')
-   ENDIF
+   EndIf
    _lRetorno:=.F.
 
-ENDIF
+EndIf
 
 Return _lRetorno
 
@@ -763,19 +728,16 @@ Return _lRetorno
 Função------------: AOMS93NF
 Autor-------------: Alex Wallauer
 Data da Criacao---: 16/02/2017
-===============================================================================================================================
 Descrição-------: Função para busca os dados do SQ
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum                  
 =============================================================================================================================== 
 */
 User Function AOMS93NF( _oProcess, _lEnd )
 
-Local _cCodEmpWS := U_ITGETMV( 'IT_EMPWEBSE' , '000001' )  
-LOCAL cAliasNF := GetNextAlias()
-LOCAL _nTot:=0
+Local _cCodEmpWS := SuperGetMV('IT_EMPWEBS',.F.,'000001')
+Local cAliasNF := GetNextAlias()
+Local _nTot:=0
 
 If !_lScheduler
 
@@ -789,11 +751,11 @@ If !_lScheduler
 
 Else
 
-   _cFiltroFilial:= U_ITGETMV( 'IT_FILINTWS' , '01' )
+   _cFiltroFilial:= SuperGetMV('IT_FILINTW',.F.,'')
 
-   cUSUARIO := SPACE(06)+"Administrador  "
-   cUsername:= "Schedure"
-   _dDtini  := (DATE()-2)
+   cUSUARIO := Space(06)+"Administrador  "
+   cUserName:= "Schedure"
+   _dDtini  := (Date()-2)
    _lEnd    := .F.
 
 EndIf
@@ -802,9 +764,9 @@ EndIf
 //====================================================================================================
 // Define filtros de data/hora de acordo com a parametrização do sistema
 //====================================================================================================
-_cFiltroFilial:=IF(RIGHT(ALLTRIM(_cFiltroFilial),1)=";", LEFT( ALLTRIM(_cFiltroFilial) , LEN(ALLTRIM(_cFiltroFilial))-1 ) ,ALLTRIM(_cFiltroFilial))
+_cFiltroFilial:=If(RIGHT(AllTrim(_cFiltroFilial),1)=";", LEFT( AllTrim(_cFiltroFilial) , Len(AllTrim(_cFiltroFilial))-1 ) ,AllTrim(_cFiltroFilial))
 _FiltFil:= FormatIn( _cFiltroFilial , ';' )
-_dDtini := DTOS(_dDtini)
+_dDtini := DToS(_dDtini)
 
 //SELECT NOTA
 //A query para alimentar a integração das transferências com o RDC deve ser alguma coisa próxima disto. A parte "chumbada" com filia "01' da ZZM tem que ser substituídas pelo parâmetro que foi criado.
@@ -866,46 +828,46 @@ EndIf
 DBUseArea( .T. , "TOPCONN" , TcGenQry(,,cQuery) , cAliasNF , .T. , .F. )
 
 If !_lScheduler
-   DBSELECTAREA(cAliasNF)
-   COUNT TO _nTot
+   DBSelectArea(cAliasNF)
+   COUNT To _nTot
    _oProcess:SetRegua1(_nTot)
    _oProcess:SetRegua2(_nTot)
-ENDIF
+EndIf
 
 _aUF := {} 
-aadd(_aUF,{"RO","11"});   aadd(_aUF,{"AC","12"});   aadd(_aUF,{"AM","13"});   aadd(_aUF,{"RR","14"});   aadd(_aUF,{"PA","15"});   aadd(_aUF,{"AP","16"})
-aadd(_aUF,{"TO","17"});   aadd(_aUF,{"MA","21"});   aadd(_aUF,{"PI","22"});   aadd(_aUF,{"CE","23"});   aadd(_aUF,{"RN","24"});   aadd(_aUF,{"PB","25"})
-aadd(_aUF,{"PE","26"});   aadd(_aUF,{"AL","27"});   aadd(_aUF,{"MG","31"});   aadd(_aUF,{"ES","32"});   aadd(_aUF,{"RJ","33"});   aadd(_aUF,{"SP","35"})
-aadd(_aUF,{"PR","41"});   aadd(_aUF,{"SC","42"});   aadd(_aUF,{"RS","43"});   aadd(_aUF,{"MS","50"});   aadd(_aUF,{"MT","51"});   aadd(_aUF,{"GO","52"})
-aadd(_aUF,{"DF","53"});   aadd(_aUF,{"SE","28"});   aadd(_aUF,{"BA","29"});   aadd(_aUF,{"EX","99"})
+aAdd(_aUF,{"RO","11"});   aAdd(_aUF,{"AC","12"});   aAdd(_aUF,{"AM","13"});   aAdd(_aUF,{"RR","14"});   aAdd(_aUF,{"PA","15"});   aAdd(_aUF,{"AP","16"})
+aAdd(_aUF,{"TO","17"});   aAdd(_aUF,{"MA","21"});   aAdd(_aUF,{"PI","22"});   aAdd(_aUF,{"CE","23"});   aAdd(_aUF,{"RN","24"});   aAdd(_aUF,{"PB","25"})
+aAdd(_aUF,{"PE","26"});   aAdd(_aUF,{"AL","27"});   aAdd(_aUF,{"MG","31"});   aAdd(_aUF,{"ES","32"});   aAdd(_aUF,{"RJ","33"});   aAdd(_aUF,{"SP","35"})
+aAdd(_aUF,{"PR","41"});   aAdd(_aUF,{"SC","42"});   aAdd(_aUF,{"RS","43"});   aAdd(_aUF,{"MS","50"});   aAdd(_aUF,{"MT","51"});   aAdd(_aUF,{"GO","52"})
+aAdd(_aUF,{"DF","53"});   aAdd(_aUF,{"SE","28"});   aAdd(_aUF,{"BA","29"});   aAdd(_aUF,{"EX","99"})
 
 SM0->(DBSetOrder(1))
-SA2->(DBSETORDER(1))
+SA2->(DBSetOrder(1))
 ZL0->(DBSetOrder(1))
 
-(cAliasNF)->(DBGOTOP())
+(cAliasNF)->(DBGoTop())
 
-DO WHILE (cAliasNF)->(!EOF())
+While (cAliasNF)->(!Eof())
 
    If _lEnd			//houve cancelamento do processo			
       MessageBox("Processamento Cancelado pelo usuario com Sucesso.","Atenção",16)
-      RETURN .F.	
+      Return .F.	
    EndIf 
    
-   SF2->(DBGOTO((cAliasNF)->SF2_REC ))
+   SF2->(DBGoTo((cAliasNF)->SF2_REC ))
 
    _cFilial   :=(cAliasNF)->FILIAL//Filial da portaria
    _cDataLendo:=SF2->F2_EMISSAO
-   _cHoraLeu  :=TIME()
+   _cHoraLeu  :=Time()
 
    If !_lScheduler
-      _oProcess:IncRegua1("Lendo Filial / Data: "+_cFilial+" / "+DTOC(_cDataLendo) )
+      _oProcess:IncRegua1("Lendo Filial / Data: "+_cFilial+" / "+DToC(_cDataLendo) )
       _oProcess:IncRegua2("Lendo Filial / Nota: "+SF2->F2_FILIAL+" / "+SF2->F2_DOC )
-   ENDIF
+   EndIf
 
-   /////////////\/\/\/\/\/\/\/\/\//\/\/ VALIDACAO \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\//////////////////////////////////////////////
-      IF !EMPTY(_cFiltroFilial) .AND. !(_cFilial $ _cFiltroFilial)
-          (cAliasNF)->(DBSKIP())
+   //VALIDACAO
+      If !Empty(_cFiltroFilial) .And. !(_cFilial $ _cFiltroFilial)
+          (cAliasNF)->(DBSkip())
           Loop
       EndIf
 
@@ -924,8 +886,8 @@ DO WHILE (cAliasNF)->(!EOF())
       _cPlacaC      := SubStr( _cPlaca, 1 , 3 ) +'-'+ SubStr( _cPlaca, 4 )
       _cPlacaVagao  := "9999999"
 
-      DA4->(DbSetOrder(1)) // DA4_FILIAL+DA4_COD
-      If DA4->(DbSeek(xFilial("DA4")+_cMotorista))
+      DA4->(DBSetOrder(1)) // DA4_FILIAL+DA4_COD
+      If DA4->(DBSeek(xFilial("DA4")+_cMotorista))
          _cCpfMotorista:= DA4->DA4_CGC     
          _lAchouMoto   := .T.
       EndIf              
@@ -936,14 +898,14 @@ DO WHILE (cAliasNF)->(!EOF())
          _lAchouMoto:=.F.
       EndIf
 
-      SA2->(DBSETORDER(1))
-      IF !SA2->(DBSEEK(xFilial("SA2")+_cCodtransp+_cLojtransp))
+      SA2->(DBSetOrder(1))
+      If !SA2->(DBSeek(xFilial("SA2")+_cCodtransp+_cLojtransp))
          _cRecusa += "[Transportador: "+_cCodtransp +' '+ _cLojtransp+" nao cadastrado (F2_I_CTRA)] "
          _lPodeMarcar:=.F.
-      ENDIF
+      EndIf
 		
       //Verifica se placa está no cadastro de motoristas
-      IF EMPTY(_cPlaca)
+      If Empty(_cPlaca)
          _cRecusa += '[Placa não preenchida (F2_I_PLACA)] '
          _lPodeMarcar:=.F.
       EndIf
@@ -959,43 +921,43 @@ DO WHILE (cAliasNF)->(!EOF())
          _cCodMunOri   := Posicione("SA2",3,xFilial("SA2")+_cCGC_Fil,"A2_COD_MUN")
          _cEstado      := Posicione("SM0",1,cEmpAnt+_cFilial,"M0_ESTENT")
          _nPos         := aScan(_aUF,{|x| x[1] == _cEstado})
-         IF _nPos # 0
+         If _nPos # 0
             _cCodMunOri := _aUF[_nPos][02] + _cCodMunOri
-         ENDIF
-      ENDIF
+         EndIf
+      EndIf
 
-      IF EMPTY(_cCpfMotorista) .OR. EMPTY(_cCnpjTransp) .OR. EMPTY(_cCodMunOri) .OR. EMPTY(_cEstado)
-         IF EMPTY(_cCpfMotorista)
+      If Empty(_cCpfMotorista) .Or. Empty(_cCnpjTransp) .Or. Empty(_cCodMunOri) .Or. Empty(_cEstado)
+         If Empty(_cCpfMotorista)
             _cRecusa += '[CPF do Motorista "'+_cMotorista+'" não encontrado] '
-         ENDIF
-         IF EMPTY(_cCnpjTransp)
+         EndIf
+         If Empty(_cCnpjTransp)
             _cRecusa += '[CNPJ da Transportadora "'+_cCodtransp +' '+ _cLojtransp+'" não encontrado] '
-         ENDIF
-         IF EMPTY(_cCGC_Fil)
+         EndIf
+         If Empty(_cCGC_Fil)
             _cRecusa += '[CGC da filial "'+_cFilial+'" não encontrado] '
-         ENDIF
-         IF EMPTY(_cEstado)
+         EndIf
+         If Empty(_cEstado)
             _cRecusa += '[Estado da filial "'+_cFilial+'" não encontrado] '
-         ENDIF
-         IF EMPTY(_cCodMunOri)
+         EndIf
+         If Empty(_cCodMunOri)
             _cRecusa += '[Cod. do Municipio "'+_cCGC_Fil+'" não encontrado] '
-         ENDIF
+         EndIf
          _lPodeMarcar:=.F.
-      ENDIF
+      EndIf
 
       ZG4->( DBSetOrder(3) )//ZG4_FILIAL+ZG4_NRORDE+ZG4_SITUAC
-      If ZG4->( DBSeek( (cAliasNF)->FILIAL + SF2->F2_FILIAL+ALLTRIM(SF2->F2_DOC) ) )
+      If ZG4->( DBSeek( (cAliasNF)->FILIAL + SF2->F2_FILIAL+AllTrim(SF2->F2_DOC) ) )
          _lPodeMarcar:=.F.
          _cRecusa += "[Nota já enviada para o RDC (ZG4)] "
-      ENDIF
+      EndIf
 
       If (cAliasNF)->FILIAL = SF2->F2_FILIAL
          _lPodeMarcar:=.F.
          _cRecusa += "[Filial da Nota é a mesma do Cliente: "+SF2->F2_FILIAL+"] "
-      ENDIF
-      /////////////\/\/\/\/\/\/\/\/\//\/\/\ VALIDACAO /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\//////////////////////////////////////////////
+      EndIf
+      // VALIDACAO
 
-      //////////////////////////////////////////////////////////// INICIO DO FOR DA GRAVACAO NO TRB //////////////////////////////////////////////////////////////
+      // INICIO DO For DA GRAVACAO NO TRB
 
       //Grava tabela temporária
       TRB_ZG4->(DBAPPEND())
@@ -1003,7 +965,7 @@ DO WHILE (cAliasNF)->(!EOF())
       TRB_ZG4->ZG4_DATA     := _cDataLendo
       TRB_ZG4->ZG4_HORA     := _cHoraLeu
       TRB_ZG4->ZG4_CNPJFA	:= _cCGC_Fil     // C	14	Fabrica
-      TRB_ZG4->ZG4_NRORDE	:= SF2->F2_FILIAL+ALLTRIM(SF2->F2_DOC)
+      TRB_ZG4->ZG4_NRORDE	:= SF2->F2_FILIAL+AllTrim(SF2->F2_DOC)
       TRB_ZG4->ZG4_CODCAV	:= _cPlaca 	       // DAK_CAMINH // C	7	Placa
       TRB_ZG4->ZG4_CODCAR	:= _cPlacaVagao    // DAK_CAMINH // C	7	Semi-Reboque	"9999999"
       TRB_ZG4->ZG4_CODMOT	:= _cCpfMotorista  // DAK_MOTORI // C	6	Motorista
@@ -1012,29 +974,29 @@ DO WHILE (cAliasNF)->(!EOF())
       TRB_ZG4->ZG4_CDMUDE   := _cCodMunOri     // Codigo IBGE Municipio de Destino
       TRB_ZG4->ZG4_TPOPER	:= "11"            // C	4	Tipo de Operação		10=Operacao de Carregamento;11=Operacao de Descarregamento
       TRB_ZG4->ZG4_SITOPE	:= "2"             // C	1	Situação da Operação	2=Inclusao;5=Exclusao
-      TRB_ZG4->ZG4_USUARI	:= __CUSERID       // C	6	Codigo do Usuário
+      TRB_ZG4->ZG4_USUARI	:= __cUserId       // C	6	Codigo do Usuário
       TRB_ZG4->ZG4_SITUAC	:= "N" 	           // C	1	Situação do Registro	“N”
       TRB_ZG4->ZG4_CODEMP	:= _cCodEmpWS      // C	6	Codigo Empresa WebServer
 
-      IF _lPodeMarcar
+      If _lPodeMarcar
          _cMotivo := "Atendimento OK"
-         IF !EMPTY(_cRecusa)
+         If !Empty(_cRecusa)
             _cMotivo += ": "+_cRecusa
-         ENDIF
-      ELSE
+         EndIf
+      Else
          _cMotivo := "Viagem Recusada"
-         IF !EMPTY(_cRecusa)
+         If !Empty(_cRecusa)
             _cMotivo += ": "+_cRecusa
-         ENDIF
-      ENDIF
+         EndIf
+      EndIf
 
       AOMS93LogGrv(_lPodeMarcar,_cMotivo,.F.)
 
-     (cAliasNF)->(DBSKIP())
+     (cAliasNF)->(DBSkip())
 
-     ////////////////////////////// FIM DA GRAVACAO NO TRB /////////////////////////////////////////////////////
+     // FIM DA GRAVACAO NO TRB
 
-ENDDO //(cAliasNF)->(!EOF())
+EndDo
 
 If Select(cAliasNF) > 0
 	(cAliasNF)->( DBCloseArea() )
@@ -1047,45 +1009,43 @@ Return .T.
 Programa--------: AOMS93BuscaSQ()
 Autor-----------: Alex Walaluer
 Data da Criacao-: 11/07/2016
-===============================================================================================================================
 Descrição-------: Busca os dados do SQ por hora 
-===============================================================================================================================
 Parametros------: _dDtini    : Data inicial da busca
                   _dDtfim    : Data final da busca
                   _cHrInicial: hora inicial da busca
                   _cHrFinal  : hora final da busca
-===============================================================================================================================
 Retorno---------: .T.
 ===============================================================================================================================
 */
-STATIC FUNCTION AOMS93BuscaSQ(_dDtini,_dDtfim,_cHrInicial,_cHrFinal)
+Static Function AOMS93BuscaSQ(_dDtini,_dDtfim,_cHrInicial,_cHrFinal)
 
 Local _cXmlRet:= ''
 Local _cErro  := ''
 Local _cXml   := _cXmlAux1
-_cDtIni:= substr(dtos(_dDtini),1,4) + "-" + substr(dtos(_dDtini),5,2) + "-" + substr(dtos(_dDtini),7,2) + _cHrInicial//"T00:00:00"
-_cDtFim:= substr(dtos(_dDtini),1,4) + "-" + substr(dtos(_dDtini),5,2) + "-" + substr(dtos(_dDtini),7,2) + _cHrFinal  //"T23:59:59"
+
+_cDtIni:= SubStr(DToS(_dDtini),1,4) + "-" + SubStr(DToS(_dDtini),5,2) + "-" + SubStr(DToS(_dDtini),7,2) + _cHrInicial//"T00:00:00"
+_cDtFim:= SubStr(DToS(_dDtini),1,4) + "-" + SubStr(DToS(_dDtini),5,2) + "-" + SubStr(DToS(_dDtini),7,2) + _cHrFinal  //"T23:59:59"
 _cXml  += '<dataInicio>'+_cDtIni +'</dataInicio>'+CRLF
 _cXml  += '<dataFim>'   +_cDtFim +'</dataFim>'   +CRLF
 _cXml  += _cXmlAux2
 _cXml  += U_GLTSQXML( 2 , _cMetodo )
 
-IF _lVersaoNew
-   _cXml:= STRTRAN(_cXml,"v9","v14")//Usa versão nova
-   _cXml:= STRTRAN(_cXml,"V9","V14")//Usa versão nova
-ENDIF
+If _lVersaoNew
+   _cXml:= StrTran(_cXml,"v9","v14")//Usa versão nova
+   _cXml:= StrTran(_cXml,"V9","V14")//Usa versão nova
+EndIf
 
 U_GLTSQENV( _cWS , _cXml , _aHdrOut , @_cErro , _cMetodo , @_cXmlRet )
    
 If Empty(_cErro)
-   AADD(_aXmlDia,{_dDtini,_cXmlRet,_cDtIni,_cDtFim, SUBSTR(_cHrInicial,2,9) })
-ELSE
-   IF !_lScheduler
+   aAdd(_aXmlDia,{_dDtini,_cXmlRet,_cDtIni,_cDtFim, SubStr(_cHrInicial,2,9) })
+Else
+   If !_lScheduler
 	  MessageBox('Erro ao ler o xml do dia: '+_cDtIni+" ate "+_cDtFim+" -> Erro: ["+_cErro+"]" , 'Atenção!' , 48 )
-   ELSE
+   Else
 	  u_itconout( 'AOMS093 - Erro ao ler o xml da data: '+_cdtini+" ate "+_cDtFim+" -> Erro: ["+_cErro+"]" )
-   Endif
-ENDIF
+   EndIf
+EndIf
 
 Return .T.
 
@@ -1094,53 +1054,47 @@ Return .T.
 Programa--------: AOMS93LogGrv()
 Autor-----------: Alex Walaluer
 Data da Criacao-: 04/07/2016
-===============================================================================================================================
 Descrição-------: Grava motivo TRB
-===============================================================================================================================
 Parametros------: _lPodeMarcar: .T. marca a linha 
                   _cMotivo    : observacao da linha , lAppend: .T. cria uma linha nova do TRB
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-STATIC FUNCTION AOMS93LogGrv(_lPodeMarcar,_cMotivo,lAppend)
+Static Function AOMS93LogGrv(_lPodeMarcar,_cMotivo,lAppend)
 
-IF lAppend
+If lAppend
    TRB_ZG4->(DBAPPEND())
    TRB_ZG4->ZG4_DATA  := _cDataLendo
    TRB_ZG4->ZG4_HORA  := _cHoraLeu
    TRB_ZG4->ZG4_FILIAL:= _cFilial
    TRB_ZG4->ZG4_NRORDE:= _cVIAGEM 
-ENDIF
+EndIf
 
-IF _lPodeMarcar
+If _lPodeMarcar
 	TRB_ZG4->WK_MARCA  := _cMarca
 	TRB_ZG4->WK_STATUS:= "P"
     _nConta++
-ELSE
+Else
 	TRB_ZG4->WK_MARCA  := ""
 	TRB_ZG4->WK_STATUS:= "R"
     _nRecusado++
-ENDIF
+EndIf
 
 TRB_ZG4->WK_MOTIVO := _cMotivo
 
-RETURN .T.
+Return .T.
 
 /*
 ===============================================================================================================================
 Programa----------: AjustaSX1
 Autor-------------: AOMS93Tela
 Data da Criacao---: 21/07/2015
-===============================================================================================================================
 Descrição---------: 
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC FUNCTION AOMS93Tela()
+Static Function AOMS93Tela()
 
 Local cAliasWK     :="TRB_ZG4"
 Local aBotoes      :={}
@@ -1152,69 +1106,69 @@ Local oDlg,cCampo,I
 Local _cTitAux:="Resultado da Integração do SmartQuestion (AOMS093)"
 Local aCab:={};_aCols:={}
 
-AADD(aBotoes,{"RESPONSA",bMarcaTodos,"Marca/Desmarca Todos","Marca/Des Todos"})
-AADD(aBotoes,{"Exp. Excel"	, {|| DlgToExcel( { { "ARRAY" , _cTitAux , aCab , _aCols } } ) }, "Exportação de Dados para Excel"		, "Exp. Excel"		} )
-AADD(aBotoes,{"Exp. Arquivo", {|| U_ITGERARQ( _cTitAux , aCab , _aCols ) }					, "Exportação de Dados para Arquivo"	, "Exp. Arquivo"	} )
+aAdd(aBotoes,{"RESPONSA",bMarcaTodos,"Marca/Desmarca Todos","Marca/Des Todos"})
+aAdd(aBotoes,{"Exp. Excel"	, {|| DlgToExcel( { { "ARRAY" , _cTitAux , aCab , _aCols } } ) }, "Exportação de Dados para Excel"		, "Exp. Excel"		} )
+aAdd(aBotoes,{"Exp. Arquivo", {|| U_ITGERARQ( _cTitAux , aCab , _aCols ) }					, "Exportação de Dados para Arquivo"	, "Exp. Arquivo"	} )
 
-DBSELECTAREA(cAliasWK)
+DBSelectArea(cAliasWK)
 
-AADD(aTB_Campos,{"WK_MARCA",,"",})
+aAdd(aTB_Campos,{"WK_MARCA",,"",})
 
-FOR I := 1 TO LEN(aCpoBrowse)
-    cCampo:=ALLTRIM(aCpoBrowse[I])
-    AADD(aTB_Campos,{cCampo,,AVSX3(cCampo,5),AVSX3(cCampo,6)})
-NEXT
+For I := 1 To Len(aCpoBrowse)
+    cCampo:=AllTrim(aCpoBrowse[I])
+    aAdd(aTB_Campos,{cCampo,,AVSX3(cCampo,5),AVSX3(cCampo,6)})
+Next
 
-Aadd(aTB_Campos, { "WK_MOTIVO",,"Observações",})
+aAdd(aTB_Campos, { "WK_MOTIVO",,"Observações",})
 
 TRB_ZG4->(DBAPPEND())
-TRB_ZG4->WK_MOTIVO:= ALLTRIM(STR(_nRecusado,10))+' Viagens Recusados'
+TRB_ZG4->WK_MOTIVO:= AllTrim(Str(_nRecusado,10))+' Viagens Recusados'
 TRB_ZG4->WK_STATUS:= "R"
 TRB_ZG4->(DBAPPEND())
-TRB_ZG4->WK_MOTIVO := ALLTRIM(STR(_nConta   ,10))+' Viagens Aceitos'
+TRB_ZG4->WK_MOTIVO := AllTrim(Str(_nConta   ,10))+' Viagens Aceitos'
 TRB_ZG4->WK_STATUS:= "R"
 TRB_ZG4->(DBAPPEND())
 TRB_ZG4->WK_MOTIVO := 'Hora Inicial: '+_cTimeInicial
 TRB_ZG4->WK_STATUS:= "R"
 TRB_ZG4->(DBAPPEND())
-TRB_ZG4->WK_MOTIVO := 'Hora Final: '+TIME()
+TRB_ZG4->WK_MOTIVO := 'Hora Final: '+Time()
 TRB_ZG4->WK_STATUS:= "R"
 
 //Botões de Exportar *****************************
-AADD(aCab,"Status" )
-FOR I := 2 TO LEN(aTB_Campos)
-    AADD(aCab,ALLTRIM(aTB_Campos[ I,3 ]) )
-NEXT
+aAdd(aCab,"Status" )
+For I := 2 To Len(aTB_Campos)
+    aAdd(aCab,AllTrim(aTB_Campos[ I,3 ]) )
+Next
 
-TRB_ZG4->(DBGOTOP())
-DO WHILE TRB_ZG4->(!EOF())
+TRB_ZG4->(DBGoTop())
+While TRB_ZG4->(!Eof())
 
    _aColuna:={}
-   AADD(_aColuna, TRB_ZG4->WK_STATUS )
-   FOR I := 2 TO LEN(aTB_Campos)
-       IF VALTYPE(aTB_Campos[ I,1 ]) = "C"
-          _xConteudo:="TRB_ZG4->"+ALLTRIM(aTB_Campos[ I,1 ])
+   aAdd(_aColuna, TRB_ZG4->WK_STATUS )
+   For I := 2 To Len(aTB_Campos)
+       If ValType(aTB_Campos[ I,1 ]) = "C"
+          _xConteudo:="TRB_ZG4->"+AllTrim(aTB_Campos[ I,1 ])
           _xConteudo:=&(_xConteudo)
-          AADD(_aColuna,_xConteudo )
-       ELSE
+          aAdd(_aColuna,_xConteudo )
+       Else
           _xConteudo:=EVAL(aTB_Campos[ I,1 ])
-          AADD(_aColuna,_xConteudo )
-       ENDIF   
-   NEXT
-   AADD(_aCols, _aColuna )
+          aAdd(_aColuna,_xConteudo )
+       EndIf   
+   Next
+   aAdd(_aCols, _aColuna )
 
-   TRB_ZG4->(DBSKIP())    
-ENDDO
+   TRB_ZG4->(DBSkip())    
+EndDo
 //Botões de Exportar *****************************
 
-DO WHILE .T.
+While .T.
    nOpca:=0
 
    oMainWnd:ReadClientCoords()//So precisa declarar uma fez para o Programa todo
-   DEFINE MSDIALOG oDlg TITLE "Seleção de NF/Viagens: Versão WebSQ "+IF(_lVersaoNew,"14","9") From aCoors[1],aCoors[2] TO aCoors[3],aCoors[4] OF oMainWnd PIXEL
-    (cAliasWK)->(DBSETORDER(1))
-    (cAliasWK)->(DBGOTOP())
-    oMark:=MSSELECT():New(cAliasWK,"WK_MARCA","WK_STATUS = 'R'",aTB_Campos,.F.,@_cMarca,{21,1,(oDlg:nClientHeight-6)/2,(oDlg:nClientWidth-4)/2})
+   DEFINE MSDIALOG oDlg TITLE "Seleção de NF/Viagens: Versão WebSQ "+If(_lVersaoNew,"14","9") From aCoors[1],aCoors[2] To aCoors[3],aCoors[4] OF oMainWnd PIXEL
+   (cAliasWK)->(DBSetOrder(1))
+   (cAliasWK)->(DBGoTop())
+   oMark:=MSSELECT():New(cAliasWK,"WK_MARCA","WK_STATUS = 'R'",aTB_Campos,.F.,@_cMarca,{21,1,(oDlg:nClientHeight-6)/2,(oDlg:nClientWidth-4)/2})
 
   	oMark:bAval               := {|| U_AOMS093M("P"),oMark:oBrowse:Refresh() }
   	oMark:oBrowse:bAllMark    := bMarcaTodos
@@ -1224,40 +1178,39 @@ DO WHILE .T.
    ACTIVATE MSDIALOG oDlg ON INIT ( EnchoiceBar(oDlg, {|| (nOpca:=1,oDlg:End()) } , {|| (nOpca:=0,oDlg:End()) },,aBotoes) ,;
                                     oMark:oBrowse:Align:=CONTROL_ALIGN_ALLCLIENT ,;
                                     oMark:oBrowse:Refresh() )
-   IF nOpca = 1
-      (cAliasWK)->(DBGOTOP()) 
+   If nOpca = 1
+      (cAliasWK)->(DBGoTop()) 
       nTotal:=0
-      (cAliasWK)->( DBEVAL( {|| nTotal++ }, {|| !EMPTY((cAliasWK)->WK_MARCA) } , {|| .T.} ) )
-      IF nTotal = 0
+      (cAliasWK)->( DBEval( {|| nTotal++ }, {|| !Empty((cAliasWK)->WK_MARCA) } , {|| .T.} ) )
+      If nTotal = 0
          MessageBox("Não existem registros marcados, marque pelo menos uma viagem válida para integrar!","Atenção",16)
-         LOOP
-      ENDIF
-      IF AVISO( "Confirma a INTEGRAÇÃO?" , "Serão integradas "+ALLTRIM(STR(nTotal,10))+" viagens", {"CONFIRMA","Voltar"} ,2 ) = 1
-         EXIT
-      ELSE
-         LOOP
-      ENDIF
-   ELSEIF nOpca = 0 
-      IF AVISO( "Confirma o CANCELAMENTO?" , "Todos os dados lidos e processados seram perdidos: ", {"Confirma","VOLTAR"} ,2 ) = 1
-         RETURN .F.
-      ELSE
-         LOOP
-      ENDIF
-   ENDIF
+         Loop
+      EndIf
+      If AVISO( "Confirma a INTEGRAÇÃO?" , "Serão integradas "+AllTrim(Str(nTotal,10))+" viagens", {"CONFIRMA","Voltar"} ,2 ) = 1
+         Exit
+      Else
+         Loop
+      EndIf
+   ElseIf nOpca = 0 
+      If AVISO( "Confirma o CANCELAMENTO?" , "Todos os dados lidos e processados seram perdidos: ", {"Confirma","VOLTAR"} ,2 ) = 1
+         Return .F.
+      Else
+         Loop
+      EndIf
+   EndIf
 
-   EXIT
+   Exit
 
-ENDDO
+EndDo
 
-RETURN .T.               
+Return .T.
+
 /*
 ===============================================================================================================================
 Função------------: AOMS093M
 Autor-------------: Alex Wallauer
 Data da Criacao---: 16/02/2017
-===============================================================================================================================
 Descrição-------: Função para marcar e desmarcar
-===============================================================================================================================
 Parametros------: _cTipoMarca = "T" = Marca e desmarca todos os registros.
                   _cTipoMarca = "P" = Marca e desmarca apena o registro posisionado.                                           
 ===============================================================================================================================
@@ -1278,166 +1231,161 @@ Begin Sequence
    If _cTipoMarca == "P"
       TRB_ZG4->(RecLock("TRB_ZG4",.F.))
       TRB_ZG4->WK_MARCA := _cSimboloMarca 
-      TRB_ZG4->(MsUnlock())
+      TRB_ZG4->(MSUnLock())
    Else
-      TRB_ZG4->(DbGoTop())
-      Do While ! TRB_ZG4->(Eof())
+      TRB_ZG4->(DBGoTop())
+      While ! TRB_ZG4->(Eof())
          TRB_ZG4->(RecLock("TRB_ZG4",.F.))
          TRB_ZG4->WK_MARCA := _cSimboloMarca 
-         TRB_ZG4->(MsUnlock()) 
+         TRB_ZG4->(MSUnLock()) 
          
-         TRB_ZG4->(DbSkip())
+         TRB_ZG4->(DBSkip())
       EndDo
    
    EndIf
            
 End Sequence
 
-TRB_ZG4->(DbGoTo(_nRegAtu)) 
+TRB_ZG4->(DBGoTo(_nRegAtu)) 
 oMark:oBrowse:Refresh()
 
-Return Nil
+Return
 /*
 ===============================================================================================================================
 Função------------: AOMS084D
 Autor-------------: Alex Wallauer
 Data da Criacao---: 16/02/2017
-===============================================================================================================================
 Descrição---------: Grava a tabela ZG4
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: .T.
 ===============================================================================================================================
 */
-User Function AOMS093G()
-LOCAL _nConta:=0
-LOCAL cObs:=""
+User Function AOMS093G
+
+Local _nConta:=0
+Local cObs:=""
 
 If !_lScheduler
    ProcRegua(TRB_ZG4->(LASTREC()))
-ENDIF
+EndIf
 
-TRB_ZG4->(DBGOTOP())
+TRB_ZG4->(DBGoTop())
 
 Begin Transaction
 
-   Do While ! TRB_ZG4->(Eof())
+   While ! TRB_ZG4->(Eof())
 
       If ! _lScheduler
          IncProc("Gravando registros...")
       EndIf
-      IF EMPTY(TRB_ZG4->WK_MARCA) .OR. TRB_ZG4->WK_STATUS = "R"
-         TRB_ZG4->(DbSkip())
-         LOOP
-      ENDIF
+      If Empty(TRB_ZG4->WK_MARCA) .Or. TRB_ZG4->WK_STATUS = "R"
+         TRB_ZG4->(DBSkip())
+         Loop
+      EndIf
       ZG4->(RecLock("ZG4",.T.))
       AVREPLACE("TRB_ZG4","ZG4")
       ZG4->ZG4_FILIAL:=TRB_ZG4->ZG4_FILIAL
-      ZG4->(MsUnlock())
+      ZG4->(MSUnLock())
 
       _nConta++
       
-      TRB_ZG4->(DbSkip())
+      TRB_ZG4->(DBSkip())
    EndDo
-   TRB_ZG4->(DbGoTop())
+   TRB_ZG4->(DBGoTop())
 
 End Transaction
 
 cObs+='Hora Inicial: '+_cTimeInicial+CHR(13)+CHR(10)
-cObs+=ALLTRIM(STR(_nConta,10))+' Registros Gravadas (ZG4)'+CHR(13)+CHR(10)
-cObs+=ALLTRIM(STR(_nRecusado,10))+' Registros Recusados (ZG4)'+CHR(13)+CHR(10)
-cObs+='Hora Final: '+TIME()
+cObs+=AllTrim(Str(_nConta,10))+' Registros Gravadas (ZG4)'+CHR(13)+CHR(10)
+cObs+=AllTrim(Str(_nRecusado,10))+' Registros Recusados (ZG4)'+CHR(13)+CHR(10)
+cObs+='Hora Final: '+Time()
 
 Return cObs
-
 
 /*
 ===============================================================================================================================
 Programa--------: ConverteXML()
 Autor-----------: Alex Walaluer
 Data da Criacao-: 13/04/2017
-===============================================================================================================================
 Descrição-------: Tira os caracteres "estranos"
-===============================================================================================================================
 Parametros------: cRetornoXML: String
-===============================================================================================================================
 Retorno---------: cRetornoXML: String
 ===============================================================================================================================
 */
 Static Function ConverteXML(cRetornoXML)//AWF - 13/04/2017 - Tira os caracteres "estranos"
 
-   cRetornoXML:=StrTran(cRetornoXML,"Ã?","E")
-   cRetornoXML:=StrTran(cRetornoXML,"Ã^","E")
-   cRetornoXML:=StrTran(cRetornoXML,"á","a")
-   cRetornoXML:=StrTran(cRetornoXML,"Á","A")
-   cRetornoXML:=StrTran(cRetornoXML,"à","a")
-   cRetornoXML:=StrTran(cRetornoXML,"À","A")
-   cRetornoXML:=StrTran(cRetornoXML,"ã","a")
-   cRetornoXML:=StrTran(cRetornoXML,"Ã","A")
-   cRetornoXML:=StrTran(cRetornoXML,"â","a")
-   cRetornoXML:=StrTran(cRetornoXML,"Â","A")
-   cRetornoXML:=StrTran(cRetornoXML,"ä","a")
-   cRetornoXML:=StrTran(cRetornoXML,"Ä","A")
-   cRetornoXML:=StrTran(cRetornoXML,"é","e")
-   cRetornoXML:=StrTran(cRetornoXML,"É","E")
-   cRetornoXML:=StrTran(cRetornoXML,"ë","e")
-   cRetornoXML:=StrTran(cRetornoXML,"Ë","E")
-   cRetornoXML:=StrTran(cRetornoXML,"ê","e")
-   cRetornoXML:=StrTran(cRetornoXML,"Ê","E")
-   cRetornoXML:=StrTran(cRetornoXML,"í","i")
-   cRetornoXML:=StrTran(cRetornoXML,"Í","I")
-   cRetornoXML:=StrTran(cRetornoXML,"ï","i")
-   cRetornoXML:=StrTran(cRetornoXML,"Ï","I")
-   cRetornoXML:=StrTran(cRetornoXML,"î","i")
-   cRetornoXML:=StrTran(cRetornoXML,"Î","I")
-   cRetornoXML:=StrTran(cRetornoXML,"ý","y")
-   cRetornoXML:=StrTran(cRetornoXML,"Ý","y")
-   cRetornoXML:=StrTran(cRetornoXML,"ÿ","y")
-   cRetornoXML:=StrTran(cRetornoXML,"ó","o")
-   cRetornoXML:=StrTran(cRetornoXML,"Ó","O")
-   cRetornoXML:=StrTran(cRetornoXML,"õ","o")
-   cRetornoXML:=StrTran(cRetornoXML,"Õ","O")
-   cRetornoXML:=StrTran(cRetornoXML,"ö","o")
-   cRetornoXML:=StrTran(cRetornoXML,"Ö","O")
-   cRetornoXML:=StrTran(cRetornoXML,"ô","o")
-   cRetornoXML:=StrTran(cRetornoXML,"Ô","O")
-   cRetornoXML:=StrTran(cRetornoXML,"ò","o")
-   cRetornoXML:=StrTran(cRetornoXML,"Ò","O")
-   cRetornoXML:=StrTran(cRetornoXML,"ú","u")
-   cRetornoXML:=StrTran(cRetornoXML,"Ú","U")
-   cRetornoXML:=StrTran(cRetornoXML,"ù","u")
-   cRetornoXML:=StrTran(cRetornoXML,"Ù","U")
-   cRetornoXML:=StrTran(cRetornoXML,"ü","u")
-   cRetornoXML:=StrTran(cRetornoXML,"Ü","U")
-   cRetornoXML:=StrTran(cRetornoXML,"ç","c")
-   cRetornoXML:=StrTran(cRetornoXML,"Ç","C")
-   cRetornoXML:=StrTran(cRetornoXML,"º","o")
-   cRetornoXML:=StrTran(cRetornoXML,"°","o")
-   cRetornoXML:=StrTran(cRetornoXML,"ª","a")
-   cRetornoXML:=StrTran(cRetornoXML,"ñ","n")
-   cRetornoXML:=StrTran(cRetornoXML,"Ñ","N")
-   cRetornoXML:=StrTran(cRetornoXML,"²","2")
-   cRetornoXML:=StrTran(cRetornoXML,"³","3")
-   cRetornoXML:=StrTran(cRetornoXML,"’","'")
-   cRetornoXML:=StrTran(cRetornoXML,"§","S")
-   cRetornoXML:=StrTran(cRetornoXML,"±","+")
-   cRetornoXML:=StrTran(cRetornoXML,"­","-")
-   cRetornoXML:=StrTran(cRetornoXML,"´","'")
-   cRetornoXML:=StrTran(cRetornoXML,"o","o")
-   cRetornoXML:=StrTran(cRetornoXML,"µ","u")
-   cRetornoXML:=StrTran(cRetornoXML,"¼","1/4")
-   cRetornoXML:=StrTran(cRetornoXML,"½","1/2")
-   cRetornoXML:=StrTran(cRetornoXML,"¾","3/4")
-   cRetornoXML:=StrTran(cRetornoXML,"&","e") 
-   cRetornoXML:=StrTran(cRetornoXML,";",",")
-   cRetornoXML:=StrTran(cRetornoXML,"¡","i")
-   cRetornoXML:=StrTran(cRetornoXML,"©","c.")
-   cRetornoXML:=StrTran(cRetornoXML,"®","r.")
-   cRetornoXML:=StrTran(cRetornoXML,"£","L")
-   cRetornoXML:=StrTran(cRetornoXML,"‡","t")
-   cRetornoXML:=StrTran(cRetornoXML,"ƒ","f")
-   cRetornoXML:=StrTran(cRetornoXML,"–","-")
-   cRetornoXML:=StrTran(cRetornoXML,"!"," ")
-   cRetornoXML:=StrTran(cRetornoXML,"×","x")
+cRetornoXML:=StrTran(cRetornoXML,"Ã?","E")
+cRetornoXML:=StrTran(cRetornoXML,"Ã^","E")
+cRetornoXML:=StrTran(cRetornoXML,"á","a")
+cRetornoXML:=StrTran(cRetornoXML,"Á","A")
+cRetornoXML:=StrTran(cRetornoXML,"à","a")
+cRetornoXML:=StrTran(cRetornoXML,"À","A")
+cRetornoXML:=StrTran(cRetornoXML,"ã","a")
+cRetornoXML:=StrTran(cRetornoXML,"Ã","A")
+cRetornoXML:=StrTran(cRetornoXML,"â","a")
+cRetornoXML:=StrTran(cRetornoXML,"Â","A")
+cRetornoXML:=StrTran(cRetornoXML,"ä","a")
+cRetornoXML:=StrTran(cRetornoXML,"Ä","A")
+cRetornoXML:=StrTran(cRetornoXML,"é","e")
+cRetornoXML:=StrTran(cRetornoXML,"É","E")
+cRetornoXML:=StrTran(cRetornoXML,"ë","e")
+cRetornoXML:=StrTran(cRetornoXML,"Ë","E")
+cRetornoXML:=StrTran(cRetornoXML,"ê","e")
+cRetornoXML:=StrTran(cRetornoXML,"Ê","E")
+cRetornoXML:=StrTran(cRetornoXML,"í","i")
+cRetornoXML:=StrTran(cRetornoXML,"Í","I")
+cRetornoXML:=StrTran(cRetornoXML,"ï","i")
+cRetornoXML:=StrTran(cRetornoXML,"Ï","I")
+cRetornoXML:=StrTran(cRetornoXML,"î","i")
+cRetornoXML:=StrTran(cRetornoXML,"Î","I")
+cRetornoXML:=StrTran(cRetornoXML,"ý","y")
+cRetornoXML:=StrTran(cRetornoXML,"Ý","y")
+cRetornoXML:=StrTran(cRetornoXML,"ÿ","y")
+cRetornoXML:=StrTran(cRetornoXML,"ó","o")
+cRetornoXML:=StrTran(cRetornoXML,"Ó","O")
+cRetornoXML:=StrTran(cRetornoXML,"õ","o")
+cRetornoXML:=StrTran(cRetornoXML,"Õ","O")
+cRetornoXML:=StrTran(cRetornoXML,"ö","o")
+cRetornoXML:=StrTran(cRetornoXML,"Ö","O")
+cRetornoXML:=StrTran(cRetornoXML,"ô","o")
+cRetornoXML:=StrTran(cRetornoXML,"Ô","O")
+cRetornoXML:=StrTran(cRetornoXML,"ò","o")
+cRetornoXML:=StrTran(cRetornoXML,"Ò","O")
+cRetornoXML:=StrTran(cRetornoXML,"ú","u")
+cRetornoXML:=StrTran(cRetornoXML,"Ú","U")
+cRetornoXML:=StrTran(cRetornoXML,"ù","u")
+cRetornoXML:=StrTran(cRetornoXML,"Ù","U")
+cRetornoXML:=StrTran(cRetornoXML,"ü","u")
+cRetornoXML:=StrTran(cRetornoXML,"Ü","U")
+cRetornoXML:=StrTran(cRetornoXML,"ç","c")
+cRetornoXML:=StrTran(cRetornoXML,"Ç","C")
+cRetornoXML:=StrTran(cRetornoXML,"º","o")
+cRetornoXML:=StrTran(cRetornoXML,"°","o")
+cRetornoXML:=StrTran(cRetornoXML,"ª","a")
+cRetornoXML:=StrTran(cRetornoXML,"ñ","n")
+cRetornoXML:=StrTran(cRetornoXML,"Ñ","N")
+cRetornoXML:=StrTran(cRetornoXML,"²","2")
+cRetornoXML:=StrTran(cRetornoXML,"³","3")
+cRetornoXML:=StrTran(cRetornoXML,"’","'")
+cRetornoXML:=StrTran(cRetornoXML,"§","S")
+cRetornoXML:=StrTran(cRetornoXML,"±","+")
+cRetornoXML:=StrTran(cRetornoXML,"­","-")
+cRetornoXML:=StrTran(cRetornoXML,"´","'")
+cRetornoXML:=StrTran(cRetornoXML,"o","o")
+cRetornoXML:=StrTran(cRetornoXML,"µ","u")
+cRetornoXML:=StrTran(cRetornoXML,"¼","1/4")
+cRetornoXML:=StrTran(cRetornoXML,"½","1/2")
+cRetornoXML:=StrTran(cRetornoXML,"¾","3/4")
+cRetornoXML:=StrTran(cRetornoXML,"&","e") 
+cRetornoXML:=StrTran(cRetornoXML,";",",")
+cRetornoXML:=StrTran(cRetornoXML,"¡","i")
+cRetornoXML:=StrTran(cRetornoXML,"©","c.")
+cRetornoXML:=StrTran(cRetornoXML,"®","r.")
+cRetornoXML:=StrTran(cRetornoXML,"£","L")
+cRetornoXML:=StrTran(cRetornoXML,"‡","t")
+cRetornoXML:=StrTran(cRetornoXML,"ƒ","f")
+cRetornoXML:=StrTran(cRetornoXML,"–","-")
+cRetornoXML:=StrTran(cRetornoXML,"!"," ")
+cRetornoXML:=StrTran(cRetornoXML,"×","x")
+
 Return cRetornoXML

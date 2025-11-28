@@ -2,15 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 30/07/2019 | Chamado 28346. Revisão de fontes
-Lucas Borges  | 09/02/2021 | Chamado 35569. Corrigido error.log quando não há registros a serem exibidos
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |30/07/2019| Chamado 28346. Revisão de fontes
+Lucas Borges  |09/02/2021| Chamado 35569. Corrigido error.log quando não há registros a serem exibidos
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -77,7 +77,7 @@ _oPrint:Line(_nLinha,0100,_nLinha,2380)
 _nLinha+=_nSalto - 30
 //DADOS DA EMPRESA
 _oPrint:Say (_nLinha,0100,SM0->M0_NOMECOM,_oFont11b)
-_oPrint:Say (_nLinha,1250,"C.N.P.J.: " + Transform(SM0->M0_CGC, IIF(Len(AllTrim(SM0->M0_CGC))>11,'@R! NN.NNN.NNN/NNNN-99','@R 999.999.999-99')) ,_oFont11b) // Picture "@R! NN.NNN.NNN/NNNN-99"
+_oPrint:Say (_nLinha,1250,"C.N.P.J.: " + Transform(SM0->M0_CGC, IIf(Len(AllTrim(SM0->M0_CGC))>11,'@R! NN.NNN.NNN/NNNN-99','@R 999.999.999-99')) ,_oFont11b) // Picture "@R! NN.NNN.NNN/NNNN-99"
 _nLinha+=_nSalto
 	
 _oPrint:Say (_nLinha,0100,AllTrim(SM0->M0_ENDCOB),_oFont11b)
@@ -107,7 +107,7 @@ _nColuna:=_nColIni + Int(((_nColFin-_nColIni) - (Len(_cTitulo)* 17.7))/2)
 _oPrint:Say (_nLinha,_nColuna,_cTitulo,_oFont11b)
 _nLinha+=_nSalto
 
-_cTitulo:="Período: " + DtoC(MV_PAR01) + " à " + DtoC(MV_PAR02)
+_cTitulo:="Período: " + DToC(MV_PAR01) + " à " + DToC(MV_PAR02)
 
 //====================================================================================================
 // Calculo para que o nome fica alinhado no centro coluna INSS   
@@ -221,7 +221,7 @@ While (_cAlias)->(!Eof())
 	aAdd(_aDadosProd,{(_cAlias)->ZLF_A2COD,(_cAlias)->ZLF_A2LOJA,(_cAlias)->zlf_dtini,(_cAlias)->zlf_evento,(_cAlias)->zlf_debcre,(_cAlias)->QTDBOM,(_cAlias)->TOTAL,(_cAlias)->VLRPAG})
 	EndIf
 		 
-	(_cAlias)->(dbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 If _nCountRec > 0
@@ -248,14 +248,14 @@ Retorno-----------: Nenhum
 */
 Static Function RGLT036PROD(_cCodProdut,_cCodLjProd)
 
-DbSelectArea("SA2")
-SA2->(DbSetOrder(1))
-SA2->(DbSeek(xFilial("SA2") + _cCodProdut + _cCodLjProd))
+DBSelectArea("SA2")
+SA2->(DBSetOrder(1))
+SA2->(DBSeek(xFilial("SA2") + _cCodProdut + _cCodLjProd))
 
 _oPrint:Say(_nLinha,0100,"PRODUTOR: " + SA2->A2_COD + " - " + SA2->A2_LOJA + "  " + SA2->A2_NOME,_oFont11b) 
 _nLinha+=_nSalto
 
-_oPrint:Say(_nLinha,0100,"CPF/CNPJ: "  + Transform(SA2->A2_CGC,IIF(Len(AllTrim(SA2->A2_CGC))>11,'@R! NN.NNN.NNN/NNNN-99','@R 999.999.999-99')),_oFont11b)
+_oPrint:Say(_nLinha,0100,"CPF/CNPJ: "  + Transform(SA2->A2_CGC,IIf(Len(AllTrim(SA2->A2_CGC))>11,'@R! NN.NNN.NNN/NNNN-99','@R 999.999.999-99')),_oFont11b)
 _oPrint:Say(_nLinha,1250,"INSCRIÇÃO: " + SA2->A2_INSCR ,_oFont11b)
 _nLinha+=_nSalto
 
@@ -315,7 +315,7 @@ While _nCont <= Len(aDadosRend)
 	_lInss := .F.
 
 	//Pega se o evento desconta INSS
-	If Posicione("ZL8",1,XFILIAL("ZL8") + aDadosRend[_nCont,4],"ZL8->ZL8_BASINS") == "S"
+	If Posicione("ZL8",1,xFilial("ZL8") + aDadosRend[_nCont,4],"ZL8->ZL8_BASINS") == "S"
 		_lInss:=.T.
 	EndIf
 
@@ -331,7 +331,7 @@ While _nCont <= Len(aDadosRend)
 				_aDadosMesR[_nPos,5]:= aDadosRend[_nCont,8] 
 		EndCase
 
-		If _lInss .And. aDadosRend[_nCont,5] == 'C'	//Rendimento tributaveis se no cadastro de eventos estiver como gera INSS e o evento for de credito
+		If _lInss .And. aDadosRend[_nCont,5] == 'C'	//Rendimento tributaveis se no cadastro de eventos estiver como gera INSS e o evento For de credito
 			_aDadosMesR[_nPos,3]+= aDadosRend[_nCont,7]//Rendimentos Tributaveis 	
 	EndIf
 

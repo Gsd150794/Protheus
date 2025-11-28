@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 25/02/2019 | Tratamento para recepções diferentes, porém com mesmo código de ticket. Chamado 28328 e 28329
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 26/07/2019 | Corrigida a barra de progresso. Help 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 12/03/2020 | Criado tratamento para data de movimentação de estoque. Chamado 32266
+Lucas Borges  |25/02/2019| Chamado 28328 e 28329. Tratamento para recepções diferentes, porém com mesmo código de ticket.
+Lucas Borges  |26/07/2019| Chamado 28346. Corrigida a barra de progresso.
+Lucas Borges  |12/03/2020| Chamado 32266. Criado tratamento para data de movimentação de estoque.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT022
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 29/01/2009
-===============================================================================================================================
 Descrição---------: Relatório de Falta de Leite
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Erich Buttner
 Data da Criacao---: 27/03/2013
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -94,11 +83,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Erich Buttner
 Data da Criacao---: 27/03/2013
-===============================================================================================================================
 Descrição---------: Relacao Rota/Linha
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -124,10 +110,10 @@ Local _nCountRec	:= 0
 If MV_PAR10 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,_cAux)
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -155,7 +141,7 @@ TRFunction():New(oReport:Section(1):Cell("DIFERENCA")/*oCell*/,/*cName*/,"SUM"/*
 //==========================================================================
 // Trata as células a serem exibidas de acordo com sessão e parâmetros
 //==========================================================================
-oReport:Section(1):Cell("ZLD_DTCOLE"):SetBlock({||STOD((_cAlias)->DTCOLETA) })
+oReport:Section(1):Cell("ZLD_DTCOLE"):SetBlock({||SToD((_cAlias)->DTCOLETA) })
 oReport:Section(1):Cell("ZLD_TICKET"):SetBlock({||(_cAlias)->TICKET })
 oReport:Section(1):Cell("DIFERENCA"):SetBlock({||(_cAlias)->(FISICO-COLETADO) })
 
@@ -171,7 +157,7 @@ _cTabela := "%" + RetSqlName(_cAux) +" E %"
 _cFiltro += " AND E."+ _cAux +"_SETOR = ZL2.ZL2_COD"
 _cFiltro += " AND E."+ _cAux +"_FILIAL = ZL2.ZL2_FILIAL"
 _cFiltro += " AND D3_L_ORIG (+)= E."+ _cAux +"_TICKET"
-_cFiltro += " AND E."+ _cAux +"_DTCOLE BETWEEN '"+ DTOS(MV_PAR01) +"' AND '"+ DTOS(MV_PAR02) +"' "
+_cFiltro += " AND E."+ _cAux +"_DTCOLE BETWEEN '"+ DToS(MV_PAR01) +"' AND '"+ DToS(MV_PAR02) +"' "
 _cFiltro += " AND E."+ _cAux +"_FILIAL "+ GetRngFil( _aSelFil, _cAux, .T.,)
 
 //Se preencheu os setores, já fiz a validação de acesso no SX1
@@ -191,8 +177,8 @@ _cFiltro += " AND EXISTS (SELECT 1 "
 _cFiltro += "FROM " + RetSqlName(_cAux) + " D "
 _cFiltro += "WHERE D.D_E_L_E_T_ = ' ' "
 _cFiltro += "AND D." + _cAux + "_FILIAL = ZL2_FILIAL "
-_cFiltro += "AND D."+ _cAux +"_DTCOLE BETWEEN '"+ DTOS(MV_PAR01) +"' AND '"+ DTOS(MV_PAR02) +"' "
-_cFiltro += "AND (CASE WHEN D3_EMISSAO IS NULL THEN D."+ _cAux +"_DTCOLE ELSE D3_EMISSAO END) BETWEEN '"+ DTOS(MV_PAR11) +"' AND '"+ DTOS(MV_PAR12) +"' "
+_cFiltro += "AND D."+ _cAux +"_DTCOLE BETWEEN '"+ DToS(MV_PAR01) +"' AND '"+ DToS(MV_PAR02) +"' "
+_cFiltro += "AND (Case WHEN D3_EMISSAO IS NULL THEN D."+ _cAux +"_DTCOLE Else D3_EMISSAO END) BETWEEN '"+ DToS(MV_PAR11) +"' AND '"+ DToS(MV_PAR12) +"' "
 _cFiltro += "AND D." + _cAux + "_SETOR = E." + _cAux + "_SETOR "
 _cFiltro += "AND D." + _cAux + "_TICKET = E." + _cAux + "_TICKET HAVING "
 _cFiltro += "E." + _cAux + "_CODREC = MIN(D." + _cAux + "_CODREC)) "
@@ -234,7 +220,7 @@ oReport:SetMeter(0)
 
 BeginSql alias _cAlias
 SELECT ZL2_FILIAL, A2_COD || ' - ' || A2_LOJA FRETISTA, A2_NOME, ZL2_COD, ZL2_DESCRI, D3_EMISSAO, %exp:_cCampo% 
-    FROM %table:SA2% SA2, %table:ZL2% ZL2, %exp:_cTabela%, %table:SD3% SD3
+    FROM %Table:SA2% SA2, %Table:ZL2% ZL2, %exp:_cTabela%, %Table:SD3% SD3
          WHERE ZL2.D_E_L_E_T_ = ' '
            AND SA2.D_E_L_E_T_ = ' '
            AND E.D_E_L_E_T_ = ' '
@@ -263,21 +249,21 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->ZL2_FILIAL
 	_cSetor	:= (_cAlias)->ZL2_COD + ' - ' + (_cAlias)->ZL2_DESCRI
 	_cFret	:= (_cAlias)->FRETISTA
 	_cNome:= (_cAlias)->A2_NOME
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

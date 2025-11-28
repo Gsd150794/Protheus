@@ -12,7 +12,7 @@ Lucas Borges  | 16/10/2019 | Removidos os Warning na compilação da release 12.1.
 // Definicoes de Includes e Defines da Rotina. 
 //====================================================================================================
 #Include 'FWMVCDEF.CH'
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -51,7 +51,7 @@ Private oMrkBrowse := nil
 //--------------------------------------------------------
 //Retorna as colunas para o preenchimento da FWMarkBrowse
 //--------------------------------------------------------
-fwmsgrun( ,{|| _aAlias := AOMS111QRY() } , 'Aguarde!' , 'Verificando os registros...' )
+FWMsgRun( ,{|| _aAlias := AOMS111QRY() } , 'Aguarde!' , 'Verificando os registros...' )
 	
 _cAliasMrk	:= _aAlias[1]
 _aColumns 	:= _aAlias[2]
@@ -64,7 +64,7 @@ If !(_cAliasMrk)->(Eof())
 	oMrkBrowse:SetDataTable(.T.)
 	oMrkBrowse:SetAlias(_cAliasMrk)
 	oMrkBrowse:SetFieldMark("SD2_OK")
-	oMrkBrowse:SetDescription("Produtos em trânsito para o documento de entrada " + SF2->F2_DOC + " do fornecedor " + POSICIONE("SA1",1,XFILIAL("SA1")+SF2->F2_CLIENTE+SF2->F2_LOJA,"A1_NREDUZ"))
+	oMrkBrowse:SetDescription("Produtos em trânsito para o documento de entrada " + SF2->F2_DOC + " do fornecedor " + Posicione("SA1",1,xFilial("SA1")+SF2->F2_CLIENTE+SF2->F2_LOJA,"A1_NREDUZ"))
 	oMrkBrowse:SetColumns(_aColumns)
 	oMrkBrowse:SetIniWindow({|| U_AOMS111I()})
 	
@@ -72,16 +72,16 @@ If !(_cAliasMrk)->(Eof())
 
 Else
 
-	u_itmsg("Não existem registros de acordo com os filtros selecionados!","Atenção","Modifique os filtros e tente novamente",1)
+	U_ITMsg("Não existem registros de acordo com os filtros selecionados!","Atenção","Modifique os filtros e tente novamente",1)
 	
 EndIf
 
 If !Empty (_cAliasMrk)
-	dbSelectArea(_cAliasMrk)
-	dbCloseArea()
+	DBSelectArea(_cAliasMrk)
+	DBCloseArea()
 	_cAliasMrk := ""
 				
-Endif
+EndIf
 
 Return 
 
@@ -148,16 +148,16 @@ _aStructt	:= SD2->(DBSTRUCT())
 _aStructSD2 := {}	
 
 
-AADD( _aStructSD2 , { "SD2_OK"		, 'C' , 04 , 0 } )
-AADD( _aStructSD2 , { "B1_DESC"	, 'C' , 20 , 0 } )
+aAdd( _aStructSD2 , { "SD2_OK"		, 'C' , 04 , 0 } )
+aAdd( _aStructSD2 , { "B1_DESC"	, 'C' , 20 , 0 } )
 	
 For _nX := 1 To Len(_aFields)
 	
 	_cSelect += _aFields[_nX] + ", "
-	_nn := ascan(_astructt,{|item| item[1] = _afields[_nx]})
+	_nn := aScan(_astructt,{|item| item[1] = _afields[_nx]})
 	If _nn > 0
-		aadd(_astructSD2,_astructt[_nn])
-	Endif
+		aAdd(_astructSD2,_astructt[_nn])
+	EndIf
 	
 Next _nX
 
@@ -168,12 +168,12 @@ _cWFilial += "%"
 
 If ( Select( _cAliasTrb ) > 0 )
 
-	DbSelectArea(_cAliasTrb)
-	DbCloseArea()
+	DBSelectArea(_cAliasTrb)
+	DBCloseArea()
 
 EndIf
 	
-BeginSQL alias _cAliasTrb
+BeginSql alias _cAliasTrb
 
 	SELECT 	D2_ITEM,
 			D2_COD, 
@@ -183,7 +183,7 @@ BeginSQL alias _cAliasTrb
 			D2_PRCVEN,
 			D2_I_TRANS
 	 		
-	FROM %table:SD2% SD2
+	FROM %Table:SD2% SD2
 		
 	WHERE
 	
@@ -202,34 +202,34 @@ _otemp := FWTemporaryTable():New( _ctempTab,  _aStructSD2 )
 
 If ( Select(  _ctempTab ) > 0 )
 
-	DbSelectArea( _ctempTab)
-	DbCloseArea()
+	DBSelectArea( _ctempTab)
+	DBCloseArea()
 
 EndIf
 
 _otemp:Create()
 
-Do While (_cAliasTrb)->(!Eof())
+While (_cAliasTrb)->(!Eof())
 
-	Reclock(_cTempTab,.T.)
+	RecLock(_cTempTab,.T.)
 	(_cTempTab)->D2_ITEM := (_cAliasTrb)->D2_ITEM
 	(_cTempTab)->D2_COD := (_cAliasTrb)->D2_COD
-	(_cTempTab)->B1_DESC := posicione("SB1",1,xfilial("SB1")+(_cAliasTrb)->D2_COD,"B1_DESC")
+	(_cTempTab)->B1_DESC := Posicione("SB1",1,xFilial("SB1")+(_cAliasTrb)->D2_COD,"B1_DESC")
 	(_cTempTab)->D2_QUANT := (_cAliasTrb)->D2_QUANT
 	(_cTempTab)->D2_UM := (_cAliasTrb)->D2_UM
 	(_cTempTab)->D2_TOTAL := (_cAliasTrb)->D2_TOTAL
 	(_cTempTab)->D2_PRCVEN := (_cAliasTrb)->D2_PRCVEN
 	(_cTempTab)->SD2_OK :=  (_cAliasTrb)->D2_I_TRANS
-	(_cTempTab)->(Msunlock())
+	(_cTempTab)->(MSUnLock())
 
-	(_cAliasTrb)->(Dbskip())
+	(_cAliasTrb)->(DBSkip())
 	
-Enddo
+EndDo
 
 If ( Select( _cAliasTrb ) > 0 )
 
-	DbSelectArea(_cAliasTrb)
-	DbCloseArea()
+	DBSelectArea(_cAliasTrb)
+	DBCloseArea()
 
 EndIf
 
@@ -249,14 +249,14 @@ For _nX := 1 To Len(_aFields)
 
 	If	!_aFields[_nX] == "SD2_OK" .And. _aFields[_nX] $ _cSelect
 
-		AAdd(_aColumns,FWBrwColumn():New())
+		aAdd(_aColumns,FWBrwColumn():New())
 			
 		_aColumns[Len(_aColumns)]:SetTitle(RetTitle(_aFields[_nX])) 
 		_aColumns[Len(_aColumns)]:SetSize(TamSX3(_aFields[_nX])[1]) 
 		_aColumns[Len(_aColumns)]:SetDecimal(TamSX3(_aFields[_nX])[2])
 			
 
-		If  _aFields[_nX] == "D2_QUANT" .OR. _aFields[_nX] == "D2_PRCVEN" .OR. _aFields[_nX] == "D2_TOTAL"
+		If  _aFields[_nX] == "D2_QUANT" .Or. _aFields[_nX] == "D2_PRCVEN" .Or. _aFields[_nX] == "D2_TOTAL"
 			
 				_aColumns[Len(_aColumns)]:SetData( &("{||" + _aFields[_nX] + "}") )
 				_aColumns[Len(_aColumns)]:NALIGN := 2
@@ -267,17 +267,17 @@ For _nX := 1 To Len(_aFields)
 				_aColumns[Len(_aColumns)]:SetData( &("{||" + _aFields[_nX] + "}") )
 				_aColumns[Len(_aColumns)]:SetSize(10) 
 			
-		Endif
+		EndIf
 		
-	Endif
+	EndIf
 		
 Next _nX
 
 (_cTempTab)->( DBGoTop() )
 
-_aret := { _cTempTab , _aColumns } 
+_aRet := { _cTempTab , _aColumns } 
 
-Return _aret
+Return _aRet
 
 /*
 ===============================================================================================================================
@@ -294,9 +294,9 @@ Retorno-----------: Nenhum
 */
 User Function AOMS111S()
 
-	If u_itmsg("Deseja sair sem gravar?","Atenção",,2,2,2)
+	If U_ITMsg("Deseja sair sem gravar?","Atenção",,2,2,2)
 		CloseBrowse()
-	Endif
+	EndIf
 	
 Return
 
@@ -317,16 +317,16 @@ User Function AOMS111G()
 
 Local _ccomp := "S"
 
-IF u_itmsg("Confirma gravação das marcações?","Atenção",,2,2,2)
+If U_ITMsg("Confirma gravação das marcações?","Atenção",,2,2,2)
 		
 	(_cAliasMrk)->( DBGoTop() )
 		
-	Do while !(_cAliasMrk)->( Eof() )
+	While !(_cAliasMrk)->( Eof() )
 		
-		SD2->(Dbsetorder(3))
-		If SD2->(Dbseek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE+SF2->F2_CLIENTE+SF2->F2_LOJA+(_cAliasMrk)->D2_COD+(_cAliasMrk)->D2_ITEM))
+		SD2->(DBSetOrder(3))
+		If SD2->(DBSeek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE+SF2->F2_CLIENTE+SF2->F2_LOJA+(_cAliasMrk)->D2_COD+(_cAliasMrk)->D2_ITEM))
 			
-			Reclock("SD2",.F.)
+			RecLock("SD2",.F.)
 			If omrkbrowse:ismark()
 				
 				SD2->D2_I_TRANS:= "S"
@@ -336,22 +336,22 @@ IF u_itmsg("Confirma gravação das marcações?","Atenção",,2,2,2)
 				SD2->D2_I_TRANS:= "N"
 				_ccomp := "N"
 				
-			Endif
-			SD2->(Msunlock())
+			EndIf
+			SD2->(MSUnLock())
 
-		Endif
+		EndIf
 		
-		(_cAliasMrk)->( Dbskip() )
+		(_cAliasMrk)->( DBSkip() )
 		
-	Enddo
+	EndDo
 	
-	Reclock("SF2",.F.)
+	RecLock("SF2",.F.)
 	SF2->F2_I_TRANS:= _ccomp
-	SF2->(Msunlock())
+	SF2->(MSUnLock())
 
 	CloseBrowse()
 		
-	Endif
+	EndIf
 	
 Return
 
@@ -370,17 +370,17 @@ Retorno-----------: Nenhum
 */
 User Function AOMS111I()
 
-(_cAliasMrk)->(Dbgotop())
+(_cAliasMrk)->(DBGoTop())
 
-Do While (_cAliasMrk)->(!Eof())
+While (_cAliasMrk)->(!Eof())
 
-	Reclock(_cAliasMrk,.F.)
-	(_cAliasMrk)->SD2_OK := iif( ALLTRIM((_cAliasMrk)->SD2_OK)=='S', omrkbrowse:cmark , '    ')
-	(_cAliasMrk)->(Msunlock())
+	RecLock(_cAliasMrk,.F.)
+	(_cAliasMrk)->SD2_OK := IIf( AllTrim((_cAliasMrk)->SD2_OK)=='S', omrkbrowse:cmark , '    ')
+	(_cAliasMrk)->(MSUnLock())
 
-	(_cAliasMrk)->(Dbskip())
+	(_cAliasMrk)->(DBSkip())
 	
-Enddo
+EndDo
 	
 omrkbrowse:refresh()
 omrkbrowse:gotop()
@@ -388,4 +388,4 @@ omrkbrowse:gobottom()
 omrkbrowse:gotop()
 omrkbrowse:refresh()
 
-RETURN
+Return

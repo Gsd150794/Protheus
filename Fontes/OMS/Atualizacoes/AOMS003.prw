@@ -2,81 +2,34 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-   Autor     |   Data   |                                             Motivo
-===============================================================================================================================
-Alex Wallauer| 02/03/23 | Chamado 43076. Busca da Assistente no Cadastro de Assistente Adm Comercial responsável.
-Julio Paz    | 11/04/23 | Chamado 43518. Alterar rotina para gravar a data da ocorrencia nos campos F2_I_DENCL e F2_I_DENOL.
-Alex Wallauer| 25/05/23 | Chamado 43840. Tratamento para replicar 22 campos do Trasit Time Logistico (ReplDatas TransTime()).
-Julio Paz    | 29/08/23 | Chamado 44817/33947/44516.Corrigir error log chave única duplicada na gravação ocorrências de frete
-Julio Paz    | 20/09/23 | Chamado 33947. Redefinir o envio de e-mails são enviados no cancelamento de cobrança de ocorrência.
-Igor Melgaço | 05/12/23 | Chamado 45463. Ajuste para chamada da Ocorrencias de frete pelo MOMS016 e SPEDNFE.
-Alex Wallauer| 13/12/23 | Chamado 45768. Andre. Criacao de E-mail para enviar ao COMERCIAL solitado pela torre de controle.
-Alex Wallauer| 21/12/23 | Chamado 45921. Andre. Correção para não enviar e-mail para os analistas no ambiente de produção.
-Alex Wallauer| 02/01/23 | Chamado 45921. Andre. Correção das colunas da tela encerramento múltiplos e criação do botão "Atualiza Telefones".
-Alex Wallauer| 09/01/23 | Chamado 45985. Jerry. Correção do error.log na exclusao da pendencia.
-Alex Wallauer| 01/02/24 | Chamado 46026. Jerry. Ajustes no calculo das datas Prev. Entrega Oper.Log e Prev. Entrega Cliente.
-Alex Wallauer| 08/02/24 | Chamado 44782. Ajustes para a nova opcao de tipo de entrega: O = Agendado pelo Op.Log.
-Antonio Neves| 21/03/24 | Chamado 46405. Dados do Operador Logístico e Dados da Carga.
-Julio Paz    | 28/03/24 | Chamado 46405. Antônio. Criação de tela para visualização dos dados das NF das Cargas.
-Igor Melgaço | 16/04/24 | Chamado 46405. Antônio. Mudança de local de acionamento da tela para visualização dos dados das NF das Cargas.
-Igor Melgaço | 08/04/24 | Chamado 46400. Criação de campos de Status para replicar na tabela ZF5.
-Igor Melgaço | 12/04/24 | Chamado 46822. Adição de dados do Cliente no envio do Email.
-Igor Melgaço | 16/04/24 | Chamado 46925. Ajuste para envio de e-mail depois de um Desarm Transaction.
-Alex Wallauer| 07/05/24 | Chamado 47107. Vanderlei. Gravacao do cpos F2_I_DCHOL/F2_I_DCHCL para os tipos novos  "Q" e "R".
-Alex Wallauer| 31/05/24 | Chamado 47403. Jerry. Ajustes no calculo do campo da Previsão de entrega no cliente F2_I_PENCL.
-Alex Wallauer| 22/07/24 | Chamado 47942. Vanderlei. Ajustes na gravacao das Previsões de entrega via ocorrencia. Parte 1.
-Alex Wallauer| 24/07/24 | Chamado 47681. Andre. Ajuste para não enviar e-mail do AOMS3Comercial mais de 1 vez p/ o mesmo Email.
-Igor Melgaço | 25/07/24 | Chamado 47833. Antonio. Ajustes para validação e inclusão de dados na ZM4 para aprovação de prorrogação de vecto
-Alex Wallauer| 07/08/24 | Chamado 48035. Andre. Gravação e tratamento do campo novo ZF5_CHVNDT da chave do Titulo NDT.
-Alex Wallauer| 13/08/24 | Chamado 48035. Andre. Correção de error.log variable does not exist _OMODELGRID on AOMS003 DT().
-Lucas Borges | 08/10/24 | Chamado 48465. Retirada manipulação do SX1 e mudanca para D_E_L_E_T_ = ' '
-Lucas Borges | 24/07/25 | Chamado 51340. Ajustar função para validação de ambiente de teste
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1 e mudanca para D_E_L_E_T_ = ' '
+Lucas Borges  |24/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
+Lucas Borges  |14/09/2025| Chamado 51799. Implementada função para validar ambiente de teste totvs.framework.environment.Type.get()
 ===========================================================================================================================================================================================================================================================
 Analista - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
 ===========================================================================================================================================================================================================================================================
-Vanderlei- Alex Wallauer - 29/09/24 - 29/09/24 -  47942  - Correção do error.log (cannot find fun ction ALTRIM) da Parte 1.
-Vanderlei- Alex Wallauer - 16/08/24 - 15/10/24 -  47942  - Ajustes na gravacao das Previsões de entrega via ocorrencia. Parte 2.
-Bremmer  - Alex Wallauer - 30/09/24 - 15/10/24 -  48653  - Criação do campo ZZL_EXOCRD de controle de delecao da linha de ocorrencia vinda do RDC.
-Jerry    - Alex Wallauer - 01/10/24 - 15/10/24 -  48636  - Criado o campo ZEL_DIAUTI para definir se conta o Sábado para entrega ou não.
-Vanderlei- Alex Wallauer - 01/10/24 - 15/10/24 -  48138  - Tratamento do Local de Embarque (ZG5_LOCEMB) no cadastro de Transit Time.
-Jerry    - Alex Wallauer - 17/10/24 - 17/10/24 -  48636  - Correção do error.log (variable is not an object  on U_AOMS3 DTSF2(AOMS003.PRW) line:5601).
-Jerry    - Alex Wallauer - 22/10/24 - 23/10/24 -  48636  - Correção da função AOMS3DTSF2 () para funcionar com a filial da ocorrencia quando via WS
-Bremmer  - Igor Melgaço  - 23/10/24 - 24/10/24 -  48911  - Ajuste antes de execauto para verficar se fornecedor esta bloqueado.
-Vanderlei- Alex Wallauer - 28/11/24 - 29/11/24 -  48126  - Ajuste das datas _dZF5DTOCOR >= _dF2EMISSAO e_dZF5DTOCOR >= _dF2EMISSAO, e correção de erro.log.
-Jerry    - Alex Wallauer - 22/01/25 - 05/02/25 -  49663  - Novo tratamento do campo ZF5_CHVNDT da chave do Titulo NDT para gravar a parcela.
-Jerry    - Alex Wallauer - 19/12/25 - 20/03/25 -  49126  - Novos ajustes na gravação das datas do SF2 na função U_AOMS3 DTSF2().
-Antonio  - Igor Melgaço  - 16/01/25 - 20/03/25 -  47833  - Ajustes para validação e inclusão de dados na ZM4 para aprovação de prorrogação de vecto
-Jerry    - Alex Wallauer - 10/02/25 - 20/03/25 -  49042  - Ajustes para trartar notas ficais de Transferencia de troca nota. 
-Jerry    - Alex Wallauer - 24/03/25 - 24/03/25 -  49126  - Novos ajustes na gravação das datas do SF2 na função U_AOMS3 DTSF2().
-Alex     - Alex Wallauer - 25/03/25 - 25/03/25 -  50297  - Correção do error.log: variable does not exist _OMODELGRID on U_AOMS00 3N()line:4350).
-Alex     - Alex Wallauer - 26/03/25 - 26/03/25 -  49966  - Correção do error.log: variable does not exist _DF2EMISSAO on U_AOMS3D TSF2()line:5557.
-Antonio  - Igor Melgaço  - 03/04/25 - 03/04/25 -  47833  - Ajustes para validação e inclusão de dados na ZM4 para aprovação de prorrogação de vecto
-Vanderlei- Alex Wallauer - 09/04/25 - 09/04/25 -  50428  - Liberacao do tipo = F para alteracao da data independe do  tipo de agendamento
-Antonio  - Igor Melgaço  - 03/04/25 - 14/04/25 -  47833  - Ajustes para inclusão de dados na ZM4 para aprovação de prorrogação de vecto
-Lucas    - Igor Melgaço  - 02/05/25 - 02/05/25 -  50525  - Ajuste para remoção de diretório local C:\SMARTCLIENT\.
-Vanderlei- Alex Wallauer - 07/05/25 - 08/05/25 -  50639  - Correção no calculo da data de previsão de entrega no cliente que era alterada indevidamente na ocorrência integrada do RDC.
-Antonio  - Igor Melgaço  - 17/07/25 - 18/07/25 -  51095  - Ajustes para nova tratativa para inclusão de Ocorrencias de Prorrogação de Vecto.
-Jerry    - Igor Melgaço  - 21/07/25 - 21/07/25 -  51475  - Ajustes para correção de envio de e-mail.
-Vanderlei- Alex Wallauer - 16/05/25 - 01/08/25 -  50687  - Ajuste no calculo das datas de previsão para usar o peso na definição de cargas Fechada ou Fracionada e novo parametro lTestarNF na ReplDatasTransTime ( _nRecnoSF2Atual , lTestarNF)
-Jerry    - Alex Wallauer - 16/05/25 - 01/08/25 -  50481  - Fazer a tratativa para quando ocorrência tem NDT vinculada, não permitir alterar os dados da ZF5 a não ser informar o código 000001 que é estorno do encerramento.
-Jerry    - Alex Wallauer - 16/05/25 - 01/08/25 -  49733  - Criação e tratamento do novo campo ZF5_CAUCUS para informar o Causador do Custo.
-Jerry    - Alex Wallauer - 07/08/25 -          -  49733  - Correção sa tratativa para quando ocorrência tem NDT vinculada e a gravação do Nome do Transportador 3t (ZF5_NOMTER).
+Vandelei - Alex Wallauer - 16/05/25 - 02/09/25 -  50481  - Controle de entregas redirecionadas para operador logístico. 
+Jerry    - Alex Wallauer - 15/08/25 - 02/09/25 -  51229  - Colocado o envio de email para o comercial por nota e por ocorrencias de uma carga.
+Jerry    - Alex Wallauer - 20/08/25 - 01/08/25 -  49733  - Colocado campos visuais na capa: F2_I_PENCL, C5_I_AGEND , F2_I_OPER, F2_I_OPLO, F2_I_REDP e F2_I_RELO.
+Jerry    - Jose Gavetti  - 08/10/25 - 10/10/25 -  52364  - Inserido campo C5_I_CDUSU para ser enviado no cabeçalho do Pedido.
+Vandelei - Alex Wallauer - 10/10/25 - 13/10/25 -  52438  - Colocado o botão de ""Monitor Integração" na rotina de ocorrências de frete.
+Jerry    - Julio Paz     - 30/10/25 - 05/11/25 -  52527  - Alterar a rotina para enviar e-mails também para o Supervisor do Vendedor.
 ===========================================================================================================================================================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "FwMVCDef.ch"
 #Include "RWMAKE.CH"
 #Include "TopConn.ch"
 #Include "ap5mail.ch"
 
-Static _aItOcorre := {}
-Static _lMOMS016  := .F.
+Static _aItOcorre := {}    As Array
+Static _lMOMS016  := .F.   As Logical
 Static _lEmail    := .F.
-Static _aDadosEmailCom:={}
+Static _lJob      := IsBlind()
+Static _aDadosEmailCom:={} As Array
 
 /*
 ===============================================================================================================================
@@ -89,34 +42,28 @@ Retorno---------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS003(cFilter As char)
- 
- Private _oBrowse := Nil
- Private _lUsaMVC := .T.
- Private _cNomeFonte := "AOMS003"
- Private _lEnviou := .F.
 
- Public _cRetorno := "   "
+ Private _oBrowse := Nil As Object
+ Private _lUsaMVC := .T. As Logical
+ Private _cNomeFonte := "AOMS003" As Char
+ Private _lEnviou := .F. As Logical
+ Public _cRetorno := "   " As Char
+ Default cFilter  := ""
 
- Default cFilter := ""
+ _lMOMS016 := FWIsInCallStack("U_MOMS016") .Or. FWIsInCallStack("SPEDNFE")
 
- _lMOMS016 := FWIsInCallStack("U_MOMS016") .OR. FWIsInCallStack("SPEDNFE")
-
- //====================================================================================================
  // Configura e inicializa a Classe do Browse
- //====================================================================================================
  _oBrowse := FWMBrowse():New()
 
  _oBrowse:SetAlias( "ZF5" )
  _oBrowse:SetMenuDef( 'AOMS003' )
  _oBrowse:SetDescription( "Ocorrências de frete" )
 
- //====================================================================================================
  // Montagem das legendas
- //====================================================================================================
- _oBrowse:AddLegend('POSICIONE("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS")=="P"',"GREEN", "Pendente" )
- _oBrowse:AddLegend('POSICIONE("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS")=="E"',"RED",   "Efetivado" )
- _oBrowse:AddLegend('POSICIONE("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS")=="N"',"GRAY",  "Não Procede" )
- _oBrowse:AddLegend('POSICIONE("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS")=="T"',"YELLOW","Em tratamento" )
+ _oBrowse:AddLegend('Posicione("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS")=="P"',"GREEN", "Pendente" )
+ _oBrowse:AddLegend('Posicione("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS")=="E"',"RED",   "Efetivado" )
+ _oBrowse:AddLegend('Posicione("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS")=="N"',"GRAY",  "Não Procede" )
+ _oBrowse:AddLegend('Posicione("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS")=="T"',"YELLOW","Em tratamento" )
 
  If !Empty(cFilter)
     _oBrowse:SetFilterDefault( cFilter )
@@ -124,7 +71,7 @@ User Function AOMS003(cFilter As char)
 
  _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -137,26 +84,27 @@ Retorno---------: aRotina - Definições do menu principal da Rotina.
 ===============================================================================================================================
 */
 Static Function MenuDef()
-
  Local _aRot := {}
 
  If !_lMOMS016
     //ADICIONANDO OPÇÕES
-    ADD OPTION _aRot TITLE 'Visualizar'      ACTION 'VIEWDEF.AOMS003' 	                            OPERATION MODEL_OPERATION_VIEW   ACCESS 0 //OPERATION 1
-    ADD OPTION _aRot TITLE 'Legenda'         ACTION 'U_AOMS003H' 		                            OPERATION 6                      ACCESS 0 //OPERATION 6
-    ADD OPTION _aRot TITLE 'Incluir'         ACTION 'VIEWDEF.AOMS003' 	                            OPERATION MODEL_OPERATION_INSERT ACCESS 0 //OPERATION 3
-    ADD OPTION _aRot TITLE 'Incl.por Carga'  ACTION 'U_AOMS072' 	                                OPERATION MODEL_OPERATION_UPDATE ACCESS 0 //OPERATION 4
-    ADD OPTION _aRot TITLE 'Alterar'         ACTION 'VIEWDEF.AOMS003' 	                            OPERATION MODEL_OPERATION_UPDATE ACCESS 0 //OPERATION 4
-    ADD OPTION _aRot TITLE 'Excluir'         ACTION 'VIEWDEF.AOMS003' 	                            OPERATION MODEL_OPERATION_DELETE ACCESS 0 //OPERATION 5
-    ADD OPTION _aRot TITLE 'Imprimir capa'   ACTION 'U_ROMS041' 		                            OPERATION MODEL_OPERATION_VIEW   ACCESS 0 //OPERATION 1
-    ADD OPTION _aRot TITLE 'Imprimir NDT'    ACTION 'U_ROMS055I' 	                                OPERATION MODEL_OPERATION_VIEW   ACCESS 0 //OPERATION 1
-    ADD OPTION _aRot TITLE 'Aviso Devolução' ACTION 'U_AOMS003J(ZF5->ZF5_DOCOC,ZF5->ZF5_SEROC)' 	OPERATION MODEL_OPERATION_VIEW   ACCESS 0 //OPERATION 1
-    ADD OPTION _aRot TITLE 'Canhoto'         ACTION 'U_VISCANHO( ZF5->ZF5_FILIAL, ZF5->ZF5_DOCOC )' OPERATION MODEL_OPERATION_VIEW   ACCESS 0 //OPERATION 1
-    ADD OPTION _aRot TITLE 'Encerra Multip'  ACTION 'U_AOMS03M(.F.)'                                OPERATION MODEL_OPERATION_UPDATE ACCESS 0 //OPERATION 4
-    ADD OPTION _aRot TITLE "Atualiza Telefones" ACTION 'U_AOMS03M(.T.)' 	                        OPERATION MODEL_OPERATION_UPDATE ACCESS 0 //OPERATION 4
+    ADD OPTION _aRot TITLE 'Visualizar'            ACTION 'VIEWDEF.AOMS003'                             OPERATION MODEL_OPERATION_VIEW   ACCESS 0 //OPERATION 2
+    ADD OPTION _aRot TITLE 'Legenda'               ACTION 'U_AOMS003H'                                  OPERATION 6                      ACCESS 0 //OPERATION 6
+    ADD OPTION _aRot TITLE 'Incluir'               ACTION 'VIEWDEF.AOMS003'                             OPERATION MODEL_OPERATION_INSERT ACCESS 0 //OPERATION 3
+    ADD OPTION _aRot TITLE 'Incl.por Carga'        ACTION 'U_AOMS072'                                   OPERATION MODEL_OPERATION_UPDATE ACCESS 0 //OPERATION 4
+    ADD OPTION _aRot TITLE 'Alterar'               ACTION 'VIEWDEF.AOMS003' 	                          OPERATION MODEL_OPERATION_UPDATE ACCESS 0 //OPERATION 4
+    // Solicitado para retirar o botão excluir por Vanderlei dia 22/08/2025 as 15:40 - chamado: 49733
+    // ADD OPTION _aRot TITLE 'Excluir'            ACTION 'VIEWDEF.AOMS003' 	                          OPERATION MODEL_OPERATION_DELETE ACCESS 0 //OPERATION 5 
+    ADD OPTION _aRot TITLE 'Imprimir capa'         ACTION 'U_ROMS041'                                   OPERATION MODEL_OPERATION_VIEW   ACCESS 0 //OPERATION 1
+    ADD OPTION _aRot TITLE 'Imprimir NDT'          ACTION 'U_ROMS055I'                                  OPERATION MODEL_OPERATION_VIEW   ACCESS 0 //OPERATION 1
+    ADD OPTION _aRot TITLE 'Aviso Devolução'       ACTION 'U_AOMS003J(ZF5->ZF5_DOCOC,ZF5->ZF5_SEROC)'   OPERATION MODEL_OPERATION_VIEW   ACCESS 0 //OPERATION 1
+    ADD OPTION _aRot TITLE 'Canhoto'               ACTION 'U_VISCANHO(ZF5->ZF5_FILIAL, ZF5->ZF5_DOCOC)' OPERATION MODEL_OPERATION_VIEW   ACCESS 0 //OPERATION 1
+    ADD OPTION _aRot TITLE 'Encerra Multip'        ACTION 'U_AOMS03M(.F.)'                              OPERATION MODEL_OPERATION_UPDATE ACCESS 0 //OPERATION 4
+    ADD OPTION _aRot TITLE "Atualiza Telefones"    ACTION 'U_AOMS03M(.T.)'                              OPERATION MODEL_OPERATION_UPDATE ACCESS 0 //OPERATION 4
+    ADD OPTION _aRot TITLE "Monitor Integração"    ACTION 'U_AOMS081(   )'                              OPERATION MODEL_OPERATION_VIEW   ACCESS 0 //OPERATION 2
  Else
-    ADD OPTION _aRot TITLE 'Visualizar'      ACTION 'VIEWDEF.AOMS003' 	                            OPERATION MODEL_OPERATION_VIEW   ACCESS 0 //OPERATION 1
-    ADD OPTION _aRot TITLE 'Legenda'         ACTION 'U_AOMS003H' 		                            OPERATION 6                      ACCESS 0 //OPERATION 6
+    ADD OPTION _aRot TITLE 'Visualizar'            ACTION 'VIEWDEF.AOMS003'                             OPERATION MODEL_OPERATION_VIEW   ACCESS 0 //OPERATION 2
+    ADD OPTION _aRot TITLE 'Legenda'               ACTION 'U_AOMS003H'                                  OPERATION 6                      ACCESS 0 //OPERATION 6
  EndIf
 
 Return _aRot
@@ -173,16 +121,96 @@ Retorno---------: oModel - Objeto do modelo de dados do MVC
 */
 Static Function ModelDef()
 
- //====================================================================================================
  // Inicializa a estrutura do modelo de dados
- //====================================================================================================
- Local _oStrCAB	:= FWFormStruct( 1 , "ZF5" , {|_cCampo| AOMS003CPO( _cCampo , 1 ) } )
- Local _oStrITN	:= FWFormStruct( 1 , "ZF5" , {|_cCampo| AOMS003CPO( _cCampo , 2 ) } )
- Local _oModel	  As object
- Local _bValid	  As block
- Local _bLinePre  As block
- Local _bLinePost As block
- Local _bCommit   As block
+ Local _oStrCAB	:= FWFormStruct( 1 , "ZF5" , {|_cCampo| AOMS003CPO( _cCampo , 1 ) } ) As Object
+ Local _oStrITN	:= FWFormStruct( 1 , "ZF5" , {|_cCampo| AOMS003CPO( _cCampo , 2 ) } ) As Object
+ Local _oModel	   As Object
+ Local _bValid	   As Block
+ Local _bLinePre  As Block
+ Local _bLinePost As Block
+ Local _bCommit   As Block
+
+ _oStrCAB:AddField( ;
+        '' , ;                      // [01] C Titulo do campo                                                 //cTitulo	 Caracteres	Titulo do campo	    X
+        "F2_I_PENCL",;              // [02] C ToolTip do campo                                                //cTooltip Caracteres	Tooltip do campo    X
+        "F2_I_PENCL",;              // [03] C identificador (ID) do Field                                     //cIdField Caracteres	Id do Field	        X
+        'D' , ;                     // [04] C Tipo do campo                                                   //cTipo	 Caracteres	Tipo do campo	    X
+        08  , ;                     // [05] N Tamanho do campo                                                //nTamanho Numérico	Tamanho do campo    X
+        0   , ;                     // [06] N Decimal do campo                                                //nDecimal Numérico	Decimal do campo    0
+        NIL , ;                     // [07] B Code-block de validação do campo                                //bValid	 CodeBlock  Bloco de código de validação do campo {|| .T.}
+        NIL , ;                     // [08] B Code-block de validação When do campo                           //bWhen    CodeBlock	Bloco de código de validação when do campo
+        NIL , ;                     // [09] A Lista de valores permitido do campo                             //aValues	 Array     Lista de valores permitido do campo	{}
+        NIL , ;                     // [10] L Indica se o campo tem preenchimento obrigatório                 //lObrigat Lógico    Indica se o campo tem preenchimento obrigatório	.F.
+        {||IIf(INCLUI,CTOD(""),Posicione("SF2",1,xFilial("SF2")+AllTrim(ZF5->ZF5_DOCOC+ZF5->ZF5_SEROC),"F2_I_PENCL")) } , ;// [11] B Code-block de inicializacao do campo//bInit	 CodeBlock	Bloco de código de inicialização do campo
+        NIL , ;                     // [12] L Indica se trata de um campo chave                               //lKey	    Lógico    Indica se trata-se de um campo chave X
+        .F. , ;                     // [13] L Indica se o campo pode receber valor em uma operação de update. //lNoUpd   Lógico    Indica se o campo não pode receber valor em uma operação de update	.F.
+        .T. )                       // [14] L Indica se o campo é virtual                                     //lVirtual Lógico    Indica se o campo é virtual	.F.
+ 
+ _aGatAux := FwStruTrigger( 'ZF5_DOCOC','F2_I_PENCL','SF2->F2_I_PENCL',.T.,'SF2',1,'xFilial("SF2")+AllTrim(M->ZF5_DOCOC+M->ZF5_SEROC)')
+ _oStrCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
+ 
+ _oStrCAB:AddField( ;
+        '' , ;                      // [01] C Titulo do campo                                                 //cTitulo	 Caracteres	Titulo do campo	    X
+        "C5_I_AGEND",;              // [02] C ToolTip do campo                                                //cTooltip Caracteres	Tooltip do campo    X
+        "C5_I_AGEND",;              // [03] C identificador (ID) do Field                                     //cIdField Caracteres	Id do Field	        X
+        'C' , ;                     // [04] C Tipo do campo                                                   //cTipo	 Caracteres	Tipo do campo	    X
+        030 , ;                     // [05] N Tamanho do campo                                                //nTamanho Numérico	Tamanho do campo    X
+        0   , ;                     // [06] N Decimal do campo                                                //nDecimal Numérico	Decimal do campo    0
+        NIL , ;                     // [07] B Code-block de validação do campo                                //bValid	 CodeBlock  Bloco de código de validação do campo {|| .T.}
+        NIL , ;                     // [08] B Code-block de validação When do campo                           //bWhen    CodeBlock	Bloco de código de validação when do campo
+        NIL , ;                     // [09] A Lista de valores permitido do campo                             //aValues	 Array     Lista de valores permitido do campo	{}
+        NIL , ;                     // [10] L Indica se o campo tem preenchimento obrigatório                 //lObrigat Lógico    Indica se o campo tem preenchimento obrigatório	.F.
+        {||If(INCLUI,"",Posicione("SC5",,xFilial("SC5")+ZF5->ZF5_DOCOC,"C5_I_AGEND","IT_NOTA")+" - "+U_TipoEntrega(SC5->C5_I_AGEND) ) },;// [11] B Code-block de inicializacao do campo//bInit	 CodeBlock	Bloco de código de inicialização do campo
+        NIL , ;                     // [12] L Indica se trata de um campo chave                               //lKey	    Lógico    Indica se trata-se de um campo chave X
+        .F. , ;                     // [13] L Indica se o campo pode receber valor em uma operação de update. //lNoUpd   Lógico    Indica se o campo não pode receber valor em uma operação de update	.F.
+        .T. )                       // [14] L Indica se o campo é virtual                                     //lVirtual Lógico    Indica se o campo é virtual	.F.
+
+ _aGatAux := FwStruTrigger( 'ZF5_DOCOC','C5_I_AGEND', 'Posicione("SC5",,xFilial("ZF5")+M->ZF5_DOCOC,"C5_I_AGEND","IT_NOTA")+" - "+U_TipoEntrega(SC5->C5_I_AGEND)', .F. )
+ _oStrCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
+ 
+ _bRelaca1:= {|| If(INCLUI," ", (Posicione("SF2",1,xFilial("SF2")+AllTrim(ZF5->ZF5_DOCOC+ZF5->ZF5_SEROC),"F2_I_OPER"))+" - "+SF2->F2_I_OPLO+" - "+AllTrim(Posicione("SA2",1,xFilial("SA2")+SF2->F2_I_OPER+SF2->F2_I_OPLO,"A2_NOME"))  )}
+ 
+ _oStrCAB:AddField( ;
+        '' , ;                      // [01] C Titulo do campo                                                 //cTitulo	 Caracteres	Titulo do campo	    X
+        "F2_I_OPER",;               // [02] C ToolTip do campo                                                //cTooltip Caracteres	Tooltip do campo    X
+        "F2_I_OPER",;               // [03] C identificador (ID) do Field                                     //cIdField Caracteres	Id do Field	        X
+        'C' , ;                     // [04] C Tipo do campo                                                   //cTipo	 Caracteres	Tipo do campo	    X
+        100 , ;                     // [05] N Tamanho do campo                                                //nTamanho Numérico	Tamanho do campo    X
+        0   , ;                     // [06] N Decimal do campo                                                //nDecimal Numérico	Decimal do campo    0
+        NIL , ;                     // [07] B Code-block de validação do campo                                //bValid	 CodeBlock  Bloco de código de validação do campo {|| .T.}
+        NIL , ;                     // [08] B Code-block de validação When do campo                           //bWhen    CodeBlock	Bloco de código de validação when do campo
+        NIL , ;                     // [09] A Lista de valores permitido do campo                             //aValues	 Array     Lista de valores permitido do campo	{}
+        NIL , ;                     // [10] L Indica se o campo tem preenchimento obrigatório                 //lObrigat Lógico    Indica se o campo tem preenchimento obrigatório	.F.
+        _bRelaca1,;                 // [11] B Code-block de inicializacao do campo                            //bInit CodeBlock Bloco de código de inicialização do campo
+        NIL , ;                     // [12] L Indica se trata de um campo chave                               //lKey	    Lógico    Indica se trata-se de um campo chave X
+        .F. , ;                     // [13] L Indica se o campo pode receber valor em uma operação de update. //lNoUpd   Lógico    Indica se o campo não pode receber valor em uma operação de update	.F.
+        .T. )                       // [14] L Indica se o campo é virtual                                     //lVirtual Lógico    Indica se o campo é virtual	.F.
+
+ _cGatilho1:='Posicione("SF2",1,xFilial("SF2")+M->ZF5_DOCOC+M->ZF5_SEROC,"F2_I_OPER")+" -  "+SF2->F2_I_OPLO+" - "+AllTrim(Posicione("SA2",1,xFilial("SA2")+SF2->F2_I_OPER+SF2->F2_I_OPLO,"A2_NOME"))'
+ _aGatAux := FwStruTrigger( 'ZF5_DOCOC','F2_I_OPER', _cGatilho1 , .F. )
+ _oStrCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
+  
+ _bRelacao2:={|| If(INCLUI," ", (Posicione("SF2",1,xFilial("SF2")+AllTrim(ZF5->ZF5_DOCOC+ZF5->ZF5_SEROC),"F2_I_REDP"))+" - "+SF2->F2_I_RELO+" - "+AllTrim(Posicione("SA2",1,xFilial("SA2")+SF2->F2_I_REDP+SF2->F2_I_RELO,"A2_NOME"))  )}
+ 
+ _oStrCAB:AddField( ;
+        '' , ;                      // [01] C Titulo do campo                                                 //cTitulo	 Caracteres	Titulo do campo	    X
+        "F2_I_REDP",;               // [02] C ToolTip do campo                                                //cTooltip Caracteres	Tooltip do campo    X
+        "F2_I_REDP",;               // [03] C identificador (ID) do Field                                     //cIdField Caracteres	Id do Field	        X
+        'C' , ;                     // [04] C Tipo do campo                                                   //cTipo	 Caracteres	Tipo do campo	    X
+        100 , ;                     // [05] N Tamanho do campo                                                //nTamanho Numérico	Tamanho do campo    X
+        0   , ;                     // [06] N Decimal do campo                                                //nDecimal Numérico	Decimal do campo    0
+        NIL , ;                     // [07] B Code-block de validação do campo                                //bValid	 CodeBlock  Bloco de código de validação do campo {|| .T.}
+        NIL , ;                     // [08] B Code-block de validação When do campo                           //bWhen    CodeBlock	Bloco de código de validação when do campo
+        NIL , ;                     // [09] A Lista de valores permitido do campo                             //aValues	 Array     Lista de valores permitido do campo	{}
+        NIL , ;                     // [10] L Indica se o campo tem preenchimento obrigatório                 //lObrigat Lógico    Indica se o campo tem preenchimento obrigatório	.F.
+        _bRelacao2,;                // [11] B Code-block de inicializacao do campo                            //bInit CodeBlock Bloco de código de inicialização do campo
+        NIL , ;                     // [12] L Indica se trata de um campo chave                               //lKey	    Lógico    Indica se trata-se de um campo chave X
+        .F. , ;                     // [13] L Indica se o campo pode receber valor em uma operação de update. //lNoUpd   Lógico    Indica se o campo não pode receber valor em uma operação de update	.F.
+        .T. )                       // [14] L Indica se o campo é virtual                                     //lVirtual Lógico    Indica se o campo é virtual	.F.
+
+ _cGatilho2:='(Posicione("SF2",1,xFilial("SF2")+M->ZF5_DOCOC+M->ZF5_SEROC,"F2_I_REDP"))+" - "+SF2->F2_I_RELO+" - "+AllTrim(Posicione("SA2",1,xFilial("SA2")+SF2->F2_I_REDP+SF2->F2_I_RELO,"A2_NOME"))'
+ _aGatAux := FwStruTrigger( 'ZF5_DOCOC','F2_I_REDP', _cGatilho2 , .F. )
+ _oStrCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
  _oStrITN:AddField( ;
         '' , ;                      // [01] C Titulo do campo                                                 //cTitulo	 Caracteres	Titulo do campo	    X
@@ -200,14 +228,10 @@ Static Function ModelDef()
         .F. , ;                     // [13] L Indica se o campo pode receber valor em uma operação de update. //lNoUpd	 Lógico	    Indica se o campo não pode receber valor em uma operação de update	.F.
         .T. )                       // [14] L Indica se o campo é virtual                                     //lVirtual Lógico	    Indica se o campo é virtual	.F.
                                                                                                               //cValid	 Caracteres	Valid do usuário em formato texto e sem alteração, usado para se criar o aHeader de compatibilidade	""
-
  _bValid := {|_oModel| U_AOMS003Q(_oModel)}// Validação do modelo de dados - OK FINAL
  _bCommit:= {|_oModel| U_AOMS003O(_oModel)}
 
- //====================================================================================================
  // Inicializa e configura o modelo de dados
- //====================================================================================================
- //oModel := MPFormModel():New('ASATF04M'  , /*bPreValidacao*/                                 , {|oModel| fValidGrid(oModel)}, /*bCommit*/, /*bCancel*/ )
  _oModel  := MPFormModel():New( 'AOMS003M' , /*{|_oModel| U_AOMS03MP(_oModel)}/*Pré-Validação*/, _bValid                      , _bCommit)
 
  _oModel:SetDescription( 'Ocorrências de Frete' )
@@ -249,6 +273,86 @@ Static Function ViewDef()
  Local _oModel	:= FWLoadModel( "AOMS003" )
  Local _oView	:= Nil
 
+ _oStrCAB:AddField( ;                           // Ord. Tipo Desc.
+        'F2_I_PENCL'                     , ;    // [01] C   Nome do Campo
+        "9L"                             , ;    // [02] C   Ordem
+        'Previsão de Entrega do Cliente' , ;    // [03] C   Titulo do campo
+        'Previsão de Entrega do Cliente' , ;    // [04] C   Descricao do campo
+        {"Previsão de Entrega do Cliente"},;    // [05] A   Array com Help
+        'C'                              , ;    // [06] C   Tipo do campo
+        '@D'                             , ;    // [07] C   Picture
+        NIL                              , ;    // [08] B   Bloco de Picture Var
+        ''                               , ;    // [09] C   Consulta F3
+        .F.                              , ;    // [10] L   Indica se o campo é alteravel
+        NIL                              , ;    // [11] C   Pasta do campo
+        NIL                              , ;    // [12] C   Agrupamento do campo
+        NIL                              , ;    // [13] A   Lista de valores permitido do campo (Combo)
+        NIL                              , ;    // [14] N   Tamanho maximo da maior opção do combo
+        NIL                              , ;    // [15] C   Inicializador de Browse
+        .T.                              , ;    // [16] L   Indica se o campo é virtual
+        NIL                              , ;    // [17] C   Picture Variavel
+        NIL                             )       // [18] L   Indica pulo de linha após o campo
+
+ _oStrCAB:AddField( ;                           // Ord. Tipo Desc.
+        'C5_I_AGEND'                    , ;     // [01] C   Nome do Campo
+        "9M"                            , ;     // [02] C   Ordem
+        'Tipo de Entrega'               , ;     // [03] C   Titulo do campo
+        'Tipo de Entrega'               , ;     // [04] C   Descricao do campo
+        {"Tipo de Entrega"}             , ;     // [05] A   Array com Help
+        'C'                             , ;     // [06] C   Tipo do campo
+        '@!'                            , ;     // [07] C   Picture
+        NIL                             , ;     // [08] B   Bloco de Picture Var
+        ''                              , ;     // [09] C   Consulta F3
+        .F.                             , ;     // [10] L   Indica se o campo é alteravel
+        NIL                             , ;     // [11] C   Pasta do campo
+        NIL                             , ;     // [12] C   Agrupamento do campo
+        NIL                             , ;     // [13] A   Lista de valores permitido do campo (Combo)
+        NIL                             , ;     // [14] N   Tamanho maximo da maior opção do combo
+        NIL                             , ;     // [15] C   Inicializador de Browse
+        .T.                             , ;     // [16] L   Indica se o campo é virtual
+        NIL                             , ;     // [17] C   Picture Variavel
+        NIL                             )       // [18] L   Indica pulo de linha após o campo
+
+_oStrCAB:AddField( ;                            // Ord. Tipo Desc.
+        'F2_I_OPER'                     , ;     // [01] C   Nome do Campo
+        "9N"                            , ;     // [02] C   Ordem
+        'Operador Logistico'            , ;     // [03] C   Titulo do campo
+        'Operador Logistico'            , ;     // [04] C   Descricao do campo
+        {"Operador Logistico"}          , ;     // [05] A   Array com Help
+        'C'                             , ;     // [06] C   Tipo do campo
+        '@!'                            , ;     // [07] C   Picture
+        NIL                             , ;     // [08] B   Bloco de Picture Var
+        ''                              , ;     // [09] C   Consulta F3
+        .F.                             , ;     // [10] L   Indica se o campo é alteravel
+        NIL                             , ;     // [11] C   Pasta do campo
+        NIL                             , ;     // [12] C   Agrupamento do campo
+        NIL                             , ;     // [13] A   Lista de valores permitido do campo (Combo)
+        NIL                             , ;     // [14] N   Tamanho maximo da maior opção do combo
+        NIL                             , ;     // [15] C   Inicializador de Browse
+        .T.                             , ;     // [16] L   Indica se o campo é virtual
+        NIL                             , ;     // [17] C   Picture Variavel
+        NIL                             )       // [18] L   Indica pulo de linha após o campo
+
+_oStrCAB:AddField( ;                            // Ord. Tipo Desc.
+        'F2_I_REDP'                     , ;     // [01] C   Nome do Campo
+        "9O"                            , ;     // [02] C   Ordem
+        'Redespacho'                    , ;     // [03] C   Titulo do campo
+        'Redespacho'                    , ;     // [04] C   Descricao do campo
+        {'Redespacho'        }          , ;     // [05] A   Array com Help
+        'C'                             , ;     // [06] C   Tipo do campo
+        '@!'                            , ;     // [07] C   Picture
+        NIL                             , ;     // [08] B   Bloco de Picture Var
+        ''                              , ;     // [09] C   Consulta F3
+        .F.                             , ;     // [10] L   Indica se o campo é alteravel
+        NIL                             , ;     // [11] C   Pasta do campo
+        NIL                             , ;     // [12] C   Agrupamento do campo
+        NIL                             , ;     // [13] A   Lista de valores permitido do campo (Combo)
+        NIL                             , ;     // [14] N   Tamanho maximo da maior opção do combo
+        NIL                             , ;     // [15] C   Inicializador de Browse
+        .T.                             , ;     // [16] L   Indica se o campo é virtual
+        NIL                             , ;     // [17] C   Picture Variavel
+        NIL                             )       // [18] L   Indica pulo de linha após o campo
+
  _oStrITN:AddField( ;                           // Ord. Tipo Desc.
         'LEGENDA'                       , ;     // [01] C   Nome do Campo
         "00"                            , ;     // [02] C   Ordem
@@ -269,9 +373,7 @@ Static Function ViewDef()
         NIL                             , ;     // [17] C   Picture Variavel
         NIL                             )       // [18] L   Indica pulo de linha após o campo
 
- //====================================================================================================
  // Inicializa o Objeto da View
- //====================================================================================================
  _oView := FWFormView():New()
 
  _oView:SetModel( _oModel )
@@ -300,6 +402,7 @@ Retorno---------: oView - Objeto de exibição do MVC
 ===============================================================================================================================
 */
 Static Function AOMS003CPO( _cCampo , _nOpc )
+
  Local _ccampos := ""
  Local _lRet := .F.
 
@@ -322,9 +425,6 @@ Static Function AOMS003CPO( _cCampo , _nOpc )
  _ccampos += 'ZF5_NCLIEN;'
  _ccampos += 'ZF5_UF;'
  _ccampos += 'ZF5_CIDADE;'
- //_ccampos += 'ZF5_TRANSP;' - Foi para os itens
- //_ccampos += 'ZF5_NTRANS;' - Foi para os itens
- //_ccampos += 'ZF5_LJTRAN;' - Foi para os itens
  _ccampos += 'ZF5_SEQCAR;'
  _ccampos += 'ZF5_CARGA;'
  _ccampos += 'ZF5_MOTORI;'
@@ -364,7 +464,7 @@ Static Function AOMS003CPO( _cCampo , _nOpc )
  _cCampos += "ZF5_DDDOPE;"
  _cCampos += "ZF5_TELOPE;"
 
- _lret := Alltrim(_cCampo) $ _ccampos
+ _lRet := AllTrim(_cCampo) $ _ccampos
 
  If _nOpc == 2
      _lRet := !_lRet
@@ -385,6 +485,7 @@ Retorno---------: _cret - valor do campo
 ===============================================================================================================================
 */
 User Function AOMS003Z(_ccampo,_nopc)
+
  Local _cret := ""
  Local _cret3 := ""
  Local _cret4 := ""
@@ -398,34 +499,34 @@ User Function AOMS003Z(_ccampo,_nopc)
 
  Default _nopc := 1
 
- If ! isincallstack("U_AOMS03M") .AND. !isincallstack("U_AOMS072I")
+ If ! isincallstack("U_AOMS03M") .And. !isincallstack("U_AOMS072I")
     _oModel       := FWModelActive()
-    _oModelMaster := _oModel:GetModel("ZF5MASTER")//Sempre teste se a variavel valtype(_oModelMaster) = "O" ao usar abaixo para previnir
-    _oModelGrid   := _oModel:GetModel("ZF5DETAIL")//Sempre teste se a variavel valtype(_oModelGrid)   = "O" ao usar abaixo para previnir
-    M->ZF5_SEROC  := ALLTRIM(_oModelMaster:GetValue('ZF5_SEROC'))
+    _oModelMaster := _oModel:GetModel("ZF5MASTER")//Sempre teste se a variavel ValType(_oModelMaster) = "O" ao usar abaixo para previnir
+    _oModelGrid   := _oModel:GetModel("ZF5DETAIL")//Sempre teste se a variavel ValType(_oModelGrid)   = "O" ao usar abaixo para previnir
+    M->ZF5_SEROC  := AllTrim(_oModelMaster:GetValue('ZF5_SEROC'))
  EndIf
 
- IF _NOPC == 1 .AND. !inclui//VISUAL
+ If _NOPC == 1 .And. !inclui//VISUAL
     _cSerie := ZF5->ZF5_SEROC
     _cdococ := ZF5->ZF5_DOCOC+_cSerie
     M->ZF5_DOCOC:=ZF5->ZF5_DOCOC
- ELSEIF _NOPC == 2 .OR. inclui//INCLUSAO E CHAMDO DO AOMS072.PRW TB
-    _cSerie := ALLTRIM(M->ZF5_SEROC)
+ ElseIf _NOPC == 2 .Or. inclui//INCLUSAO E CHAMDO DO AOMS072.PRW TB
+    _cSerie := AllTrim(M->ZF5_SEROC)
     _cdococ := M->ZF5_DOCOC+_cSerie
- ELSEIF _NOPC == 3//ALTERACAO
-    ZF5->(DBGOTO( (cAliasAux)->REC_ZF5 ))
+ ElseIf _NOPC == 3//ALTERACAO
+    ZF5->(DBGoTo( (cAliasAux)->REC_ZF5 ))
     _cSerie := ZF5->ZF5_SEROC
     _cdococ := ZF5->ZF5_DOCOC+_cSerie
     M->ZF5_DOCOC:=ZF5->ZF5_DOCOC
  EndIf
 
- SF2->(DbSetOrder(1))
- SF2->(DbSeek(xFilial("SF2")+ALLTRIM(_cdococ)))
+ SF2->(DBSetOrder(1))
+ SF2->(DBSeek(xFilial("SF2")+AllTrim(_cdococ)))
 
  If _ccampo == "ZF5_DATAE"
-    _cret := POSICIONE("SC5",,XFILIAL("SC5")+M->ZF5_DOCOC,"C5_I_DTENT","IT_NOTA")
- ELSEIf _ccampo == "ZF5_ASSNOM"
-    _cret := POSICIONE("SC5",,XFILIAL("SC5")+M->ZF5_DOCOC,"C5_ASSNOM","IT_NOTA")
+    _cret := Posicione("SC5",,xFilial("SC5")+M->ZF5_DOCOC,"C5_I_DTENT","IT_NOTA")
+ ElseIf _ccampo == "ZF5_ASSNOM"
+    _cret := Posicione("SC5",,xFilial("SC5")+M->ZF5_DOCOC,"C5_ASSNOM","IT_NOTA")
  EndIf
 
  If _ccampo == "ZF5_CARGA"
@@ -454,18 +555,18 @@ User Function AOMS003Z(_ccampo,_nopc)
 
  If _ccampo == "ZF5_DMOTOR"
     If !Empty(SF2->F2_CARGA)
-       _cret := Substr(alltrim(POSICIONE("DA4",1,XFILIAL("DA4")+POSICIONE("DAK",1,XFILIAL("ZF5")+ALLTRIM(SF2->F2_CARGA),"DAK_MOTORI") ,"DA4_NOME")),1,30)
-          _cret3 := STRTRAN(STRTRAN(ALLTRIM(POSICIONE("DA4",1,XFILIAL("DA4")+POSICIONE("DAK",1,XFILIAL("ZF5")+ALLTRIM(SF2->F2_CARGA),"DAK_MOTORI") ,"DA4_TEL")),"-","")," ","")
-          _cret3 := STRTRAN(_cret3,".","")
+       _cret := SubStr(AllTrim(Posicione("DA4",1,xFilial("DA4")+Posicione("DAK",1,xFilial("ZF5")+AllTrim(SF2->F2_CARGA),"DAK_MOTORI") ,"DA4_NOME")),1,30)
+          _cret3 := StrTran(StrTran(AllTrim(Posicione("DA4",1,xFilial("DA4")+Posicione("DAK",1,xFilial("ZF5")+AllTrim(SF2->F2_CARGA),"DAK_MOTORI") ,"DA4_TEL")),"-","")," ","")
+          _cret3 := StrTran(_cret3,".","")
        _cret4:=""
-       IF LEFT(_cret3,1) = "0"
-          _cret3 := SUBSTR(_cret3,2)//Tiro o zero
+       If LEFT(_cret3,1) = "0"
+          _cret3 := SubStr(_cret3,2)//Tiro o zero
           _cret4 := " - (" + LEFT(_cret3,2) + ") "
-          _cret  += _cret4 + SUBSTR(_cret3,3)
-       ELSEIF LEN(_cret3) > 9  .AND. LEN(_cret3) < 12
+          _cret  += _cret4 + SubStr(_cret3,3)
+       ElseIf Len(_cret3) > 9  .And. Len(_cret3) < 12
           _cret4 := " - (" + LEFT(_cret3,2) + ") "
-          _cret  += _cret4 + SUBSTR(_cret3,3)
-       ELSE
+          _cret  += _cret4 + SubStr(_cret3,3)
+       Else
           _cret  += " - " + _cret3
        EndIf
 
@@ -485,7 +586,7 @@ User Function AOMS003Z(_ccampo,_nopc)
  If _ccampo == "ZF5_DVEICU"
     If ! Empty(SF2->F2_CARGA)
        _cret3 := Posicione("DAK",1,xFilial("ZF5")+SF2->F2_CARGA,"DAK_CAMINH")
-       _cret := Posicione("DA3",1,xFilial("DA3")+alltrim(_cret3),"DA3_DESC")
+       _cret := Posicione("DA3",1,xFilial("DA3")+AllTrim(_cret3),"DA3_DESC")
     Else
        _cret := ""
     EndIf
@@ -526,9 +627,9 @@ User Function AOMS003Z(_ccampo,_nopc)
 
  If _ccampo == "ZF5_NREPRE"
     If !Empty(SF2->F2_VEND1)
-        _cret := Substr(alltrim(POSICIONE("SA3",1,XFILIAL("SA3")+SF2->F2_VEND1,"A3_NOME")),1,30)
-        _cret3 := ALLTRIM(POSICIONE("SA3",1,XFILIAL("SA3")+SF2->F2_VEND1,"A3_TEL"))
-        _cret4 := ALLTRIM(POSICIONE("SA3",1,XFILIAL("SA3")+SF2->F2_VEND1,"A3_DDDTEL"))
+        _cret := SubStr(AllTrim(Posicione("SA3",1,xFilial("SA3")+SF2->F2_VEND1,"A3_NOME")),1,30)
+        _cret3 := AllTrim(Posicione("SA3",1,xFilial("SA3")+SF2->F2_VEND1,"A3_TEL"))
+        _cret4 := AllTrim(Posicione("SA3",1,xFilial("SA3")+SF2->F2_VEND1,"A3_DDDTEL"))
 
       _cret += " - (" + _cret4 + ") " + _cret3
     Else
@@ -546,9 +647,9 @@ User Function AOMS003Z(_ccampo,_nopc)
 
  If _ccampo == "ZF5_NCOOR"
     If ! Empty(SF2->F2_VEND2)
-       _cret  := Substr(Alltrim(Posicione("SA3",1,xFilial("SA3")+SF2->F2_VEND2,"A3_NOME")),1,30)
-       _cret3 := Alltrim(Posicione("SA3",1,xFilial("SA3")+SF2->F2_VEND2,"A3_TEL"))
-       _cret4 := Alltrim(Posicione("SA3",1,xFilial("SA3")+SF2->F2_VEND2,"A3_DDDTEL"))
+       _cret  := SubStr(AllTrim(Posicione("SA3",1,xFilial("SA3")+SF2->F2_VEND2,"A3_NOME")),1,30)
+       _cret3 := AllTrim(Posicione("SA3",1,xFilial("SA3")+SF2->F2_VEND2,"A3_TEL"))
+       _cret4 := AllTrim(Posicione("SA3",1,xFilial("SA3")+SF2->F2_VEND2,"A3_DDDTEL"))
        _cret  += " - (" + _cret4 + ") " + _cret3
     Else
        _cret := ""
@@ -573,7 +674,7 @@ User Function AOMS003Z(_ccampo,_nopc)
 
  If _ccampo == "ZF5_NCLIEN"
     If !Empty(SF2->F2_CLIENTE)
-       _cret  := Substr(Alltrim(Posicione("SA1",1,xFilial("SA1")+SF2->F2_CLIENTE+SF2->F2_LOJA,"A1_NREDUZ")),1,30)
+       _cret  := SubStr(AllTrim(Posicione("SA1",1,xFilial("SA1")+SF2->F2_CLIENTE+SF2->F2_LOJA,"A1_NREDUZ")),1,30)
        _cret3 := AllTrim(Posicione("SA1",1,xFilial("SA1")+SF2->F2_CLIENTE+SF2->F2_LOJA,"A1_TEL"))
        _cret4 := AllTrim(Posicione("SA1",1,xFilial("SA1")+SF2->F2_CLIENTE+SF2->F2_LOJA,"A1_DDD"))
        _cret += " - (" + _cret4 + ") " + _cret3
@@ -626,7 +727,7 @@ User Function AOMS003Z(_ccampo,_nopc)
  If _ccampo == "ZF5_TIPOV"
     If ! Empty(SF2->F2_CARGA)
        _cret3 := Posicione("DAK",1,xFilial("ZF5")+SF2->F2_CARGA,"DAK_CAMINH")
-       _cret := Posicione("DA3",1,xFilial("DA3")+Alltrim(_cret3),"DA3_I_TPVC")
+       _cret := Posicione("DA3",1,xFilial("DA3")+AllTrim(_cret3),"DA3_I_TPVC")
     Else
        _cret := ""
     EndIf
@@ -658,9 +759,9 @@ User Function AOMS003Z(_ccampo,_nopc)
 
  If _ccampo == "ZF5_NGEREN"
     If ! Empty(SF2->F2_VEND3)
-        _cret  := Substr(alltrim(POSICIONE("SA3",1,XFILIAL("SA3")+SF2->F2_VEND3,"A3_NOME")),1,30)
-        _cret3 := ALLTRIM(POSICIONE("SA3",1,XFILIAL("SA3")+SF2->F2_VEND3,"A3_TEL"))
-        _cret4 := ALLTRIM(POSICIONE("SA3",1,XFILIAL("SA3")+SF2->F2_VEND3,"A3_DDDTEL"))
+        _cret  := SubStr(AllTrim(Posicione("SA3",1,xFilial("SA3")+SF2->F2_VEND3,"A3_NOME")),1,30)
+        _cret3 := AllTrim(Posicione("SA3",1,xFilial("SA3")+SF2->F2_VEND3,"A3_TEL"))
+        _cret4 := AllTrim(Posicione("SA3",1,xFilial("SA3")+SF2->F2_VEND3,"A3_DDDTEL"))
 
       _cret += " - (" + _cret4 + ") " + _cret3
     Else
@@ -683,13 +784,13 @@ User Function AOMS003Z(_ccampo,_nopc)
        _cFornece   := SF2->F2_I_CTRA
        _cLoja      := SF2->F2_I_LTRA
        _cNome      :=  Posicione("SA2",1,xFilial("SA2")+_cFornece+_cLoja, "A2_NREDUZ")
-    ELSE
+    Else
        _cMotorista := Posicione("DAK",1,xFilial("DAK")+_cCarga,"DAK_MOTORI")
        _cFornece   := Posicione("DA4",1,xFilial("DA4")+_cMotorista, "DA4_FORNEC")
        _cLoja      := DA4->DA4_LOJA
        _cNome      := Posicione("SA2",1,xFilial("SA2")+_cFornece+_cLoja, "A2_NREDUZ")
     EndIf
-    IF VALTYPE(_oModelGrid) = "O"
+    If ValType(_oModelGrid) = "O"
        _oModelGrid:LoadValue("ZF5_TRANSP",_cFornece)
        _oModelGrid:LoadValue("ZF5_LJTRAN",_cLoja)
        _oModelGrid:LoadValue("ZF5_NTRANS",_cNome)
@@ -702,8 +803,8 @@ User Function AOMS003Z(_ccampo,_nopc)
     _cret := ""
 
     If ! Empty(_cTipoOcorr)
-       ZFC->(DbSetOrder(1))
-       ZFC->(DbSeek(xFilial("ZFC")+_cTipoOcorr))
+       ZFC->(DBSetOrder(1))
+       ZFC->(DBSeek(xFilial("ZFC")+_cTipoOcorr))
        _cret := ZFC->ZFC_CUSTO
        RestOrd(_aOrd)
     EndIf
@@ -714,8 +815,8 @@ User Function AOMS003Z(_ccampo,_nopc)
     _cret := ""
 
     If ! Empty(_cTipoOcorr)
-       ZFC->(DbSetOrder(1))
-       ZFC->(DbSeek(xFilial("ZFC")+_cTipoOcorr))
+       ZFC->(DBSetOrder(1))
+       ZFC->(DBSeek(xFilial("ZFC")+_cTipoOcorr))
        _cret := ZFC->ZFC_DEVOL
        RestOrd(_aOrd)
     EndIf
@@ -726,15 +827,15 @@ User Function AOMS003Z(_ccampo,_nopc)
     _cret := ""
 
     If ! Empty(_cTipoOcorr)
-       ZFC->(DbSetOrder(1))
-       ZFC->(DbSeek(xFilial("ZFC")+_cTipoOcorr))
+       ZFC->(DBSetOrder(1))
+       ZFC->(DBSeek(xFilial("ZFC")+_cTipoOcorr))
        _cret := ZFC->ZFC_SERVI
        RestOrd(_aOrd)
     EndIf
  EndIf
 
-If _ccampo == 'ZF5_RPLOGI' .And. ! fwIsInCallStack("U_AOMS03M")
-    _cret := AllTrim(U_ITGETMV( 'IT_RESPLOG' , ''))
+If _ccampo == 'ZF5_RPLOGI' .And. ! FWIsInCallStack("U_AOMS03M")
+    _cret := AllTrim(SuperGetMV('IT_RESPLOG',.T.,''))
     _oModelMaster:SetValue('ZF5_NRPLO',UsrRetName(_cret))
  EndIf
 
@@ -751,12 +852,13 @@ Retorno---------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS003H()
+
  Local aLegenda := {}
  //Monta as cores
- AADD(aLegenda,{"BR_VERDE",   "Pendente"  })
- AADD(aLegenda,{"BR_VERMELHO","Encerrada"})
- AADD(aLegenda,{"BR_CINZA",   "Não Procede"})
- AADD(aLegenda,{"BR_AMARELO", "Em tratamento"})
+ aAdd(aLegenda,{"BR_VERDE",   "Pendente"  })
+ aAdd(aLegenda,{"BR_VERMELHO","Encerrada"})
+ aAdd(aLegenda,{"BR_CINZA",   "Não Procede"})
+ aAdd(aLegenda,{"BR_AMARELO", "Em tratamento"})
  BrwLegenda("Ocorrências de Frete", "Frete", aLegenda)
 
 Return
@@ -773,6 +875,7 @@ Retorno   ------: _cret - novo código de ocorrência
 ===============================================================================================================================
 */
 User Function AOMS003K(_lUsaMVC, _cNomeFonte)
+
  Local _cret := "000001"
  Local _oModel
  Local _oModelGrid
@@ -785,10 +888,10 @@ User Function AOMS003K(_lUsaMVC, _cNomeFonte)
       _oModelGrid  := _oModel:GetModel("ZF5DETAIL")
 
       _nUltReg:=_oModelGrid:Length()
-      IF _nUltReg > 0
+      If _nUltReg > 0
          _oModelGrid:GoLine(_nUltReg)
-         _nProx:=VAL(_oModelGrid:GetValue('ZF5_CODIGO'))+1
-      ELSE
+         _nProx:=Val(_oModelGrid:GetValue('ZF5_CODIGO'))+1
+      Else
          _nProx:=_oModelGrid:GetLine()+1
       EndIf
 
@@ -813,7 +916,8 @@ Retorno   ------: Lógico validando ou não o numero de nota
 ===============================================================================================================================
 */
 User Function AOMS003V()
- Local _lret := .T. As Logical
+
+ Local _lRet := .T. As Logical
  Local _cQuery := "" As Character
  Local cAlias:=GetNextAlias() As Character
 
@@ -827,44 +931,44 @@ User Function AOMS003V()
 
  _ctransp := ""
 
- Do while .not. (cAlias)->( Eof() )
+ While .not. (cAlias)->( Eof() )
 
-    IF !(cAlias)->ZF5_TRANSP + "/" + (cAlias)->ZF5_LJTRAN $ _ctransp
-        _ctransp += (cAlias)->ZF5_TRANSP + "/" + (cAlias)->ZF5_LJTRAN + " - " + ALLTRIM((cAlias)->ZF5_NTRANS) + CHR(10) +CHR(13)
+    If !(cAlias)->ZF5_TRANSP + "/" + (cAlias)->ZF5_LJTRAN $ _ctransp
+        _ctransp += (cAlias)->ZF5_TRANSP + "/" + (cAlias)->ZF5_LJTRAN + " - " + AllTrim((cAlias)->ZF5_NTRANS) + CHR(10) +CHR(13)
     EndIf
 
-     (cAlias)->(Dbskip())
+     (cAlias)->(DBSkip())
 
- Enddo
+ EndDo
 
- (cAlias)->( Dbclosearea() )
+ (cAlias)->( DBCloseArea() )
 
- If len(_ctransp) > 0
+ If Len(_ctransp) > 0
 
-    (U_ITMSG("Já existe ocorrência para nota!","Atenção",;
+    (U_ITMsg("Já existe ocorrência para nota!","Atenção",;
              "Ocorrência, já cadastrada para o(s) transportador(es) abaixo, " + ;
              ", para adicionar eventos nesse(s) transportador(s) ou outro use a opção alterar:" + chr(10) + chr(13) + _ctransp ,,,,.T.))
-    _lret := .F.
+    _lRet := .F.
 
  EndIf
 
- If _lret
+ If _lRet
  
-    _cSeek := M->ZF5_DOCOC+ALLTRIM(M->ZF5_SEROC)
-    SF2->(DbSetOrder(1))
-    IF SF2->(DbSeek(xFilial("SF2")+_cSeek)) .AND. SF2->F2_CLIENTE = "000001"
-       IF (Posicione("SC5",,xFilial("SC5")+M->ZF5_DOCOC,"C5_I_TRCNF","IT_NOTA") = "S") .AND. SC5->C5_I_OPER = "20"
+    _cSeek := M->ZF5_DOCOC+AllTrim(M->ZF5_SEROC)
+    SF2->(DBSetOrder(1))
+    If SF2->(DBSeek(xFilial("SF2")+_cSeek)) .And. SF2->F2_CLIENTE = "000001"
+       If (Posicione("SC5",,xFilial("SC5")+M->ZF5_DOCOC,"C5_I_TRCNF","IT_NOTA") = "S") .And. SC5->C5_I_OPER = "20"
           _cSeekPV:=SC5->C5_I_FILFT+SC5->C5_I_PDFT
-          cNotaFat:=POSICIONE("SC5",1,_cSeekPV,"C5_NOTA")
+          cNotaFat:=Posicione("SC5",1,_cSeekPV,"C5_NOTA")
           cNotaFat:=SC5->C5_FILIAL+" "+cNotaFat+" - "+SC5->C5_SERIE
-          U_ITMSG("Inclusão de Ocorrência de Nfe de Transferência, somente permitido para Nota de Venda vinculada a transferência","Atenção","NFe de Venda vinculada: "+cNotaFat,,,,.T.)
-          _lret := .F.
+          U_ITMsg("Inclusão de Ocorrência de Nfe de Transferência, somente permitido para Nota de Venda vinculada a transferência","Atenção","NFe de Venda vinculada: "+cNotaFat,,,,.T.)
+          _lRet := .F.
        EndIf
     EndIf
 
  EndIf
 
-Return _lret
+Return _lRet
 
 /*
 ===============================================================================================================================
@@ -878,6 +982,7 @@ Retorno   ------: True ou False,valores de inicalização de campos.
 ===============================================================================================================================
 */
 User Function AOMS003W(_cCampo,_lMVC,_cFonte)
+
  Local _lxRet := .T.
  Local _oModel           := FwModelActivete()
  Local _oModelGrid       := _oModel:GetModel("ZF5DETAIL")
@@ -885,150 +990,188 @@ User Function AOMS003W(_cCampo,_lMVC,_cFonte)
  Local _lCustoPreenchido := .T.
  Local _cCodFor, _cLojaFor, _cNomeFor, _nCustoTer
  Local _aOrd := SaveOrd({"SA2","SF2","SC5"})
- Local _cForPadrao := U_ITGETMV( 'IT_FORTERCE' , 'F046200020' ) // Como default deste parâmetro está o Fornecedor terceiro: Codigo: F04620 - Loja: 0020 - Nome: CASTROLANDA COOP AGROINDUSTRIA
+ Local _cForPadrao := SuperGetMV('IT_FORTERC',.T.,'F046200020') // Como default deste parâmetro está o Fornecedor terceiro: Codigo: F04620 - Loja: 0020 - Nome: CASTROLANDA COOP AGROINDUSTRIA
  Local _cNumNf, _cSerieNf
  Local _nVlCobradoTon, _nPeso, _cCarga, _nCusto
 
  Default _lMVC := .T., _cFonte := "AOMS003"
 
  Begin Sequence
+
    If ! _lMVC
       If _cFonte == "AOMS072"
          _lxRet := U_AOMS072E(_cCampo)
       EndIf
+      Break
+   EndIf
 
+   If _cCampo == 'ZF5_OLRCOD'
+      ZFC->(DBSetOrder(1))
+      ZFC->(DBSeek(xFilial("ZFC")+_oModelGrid:GetValue("ZF5_TIPOO")))
+      If !Empty(M->ZF5_OLRCOD)
+         If ZFC->ZFC_OLREDI  <> "S"
+            U_ITMsg('Tipo de ocorrecia não é de redirecionamento. (ZFC_OLREDI<>"S").','Atenção',;
+                    'O Codigo do operador logistico do redirecionamento não pode ser informado.',,,,.T.)
+            _lxRet := .F.
+            _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_OLRLOJ', Space(Len(ZF5->ZF5_OLRLOJ)))
+            _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_OLRNOM', Space(Len(ZF5->ZF5_OLRNOM)))
+
+         ElseIf SA2->(DBSeek(xFilial("SA2")+M->ZF5_OLRCOD)) 
+            _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_OLRLOJ', SA2->A2_LOJA)
+            _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_OLRNOM', LEFT(SA2->A2_NOME,Len(ZF5->ZF5_OLRNOM) ))
+         Else
+            U_ITMsg("Código de Transportadora não cadastrado  no cadastro de fornecedores.","Atenção",,,,,.T.)
+            _lxRet := .F.
+         EndIf
+      Else
+         If ZFC->ZFC_OLREDI == "S"
+            U_ITMsg('Tipo de ocorrecia é de redirecionamento. (ZFC_OLREDI="S").','Atenção',;
+                    "Informe o Codigo+loja do operador logistico do redirecionamento.",,,,.T.)
+            _lxRet := .F.
+         Else
+            _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_OLRLOJ', Space(Len(ZF5->ZF5_OLRLOJ)))
+            _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_OLRNOM', Space(Len(ZF5->ZF5_OLRNOM)))
+         EndIf
+      EndIf
+      Break
+   ElseIf _cCampo == 'ZF5_OLRLOJ'
+      If !Empty(_oModel:GetValue( 'ZF5DETAIL', 'ZF5_OLRCOD')) .Or. !Empty(M->ZF5_OLRLOJ)
+         If SA2->(DBSeek(xFilial("SA2")+_oModel:GetValue( 'ZF5DETAIL', 'ZF5_OLRCOD')+M->ZF5_OLRLOJ))
+            _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_OLRNOM', LEFT(SA2->A2_NOME,Len(ZF5->ZF5_OLRNOM) ))
+         Else
+            U_ITMsg("Código+loja de Transportadora não cadastrado no cadastro de fornecedores.","Atenção",,,,,.T.)
+            _lxRet := .F.
+         EndIf
+      Else//Se os 2 em branco, limpa
+         _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_OLRNOM', Space(Len(ZF5->ZF5_OLRNOM)))
+      EndIf
       Break
    EndIf
 
    _nCustoTer := _oModel:GetValue( 'ZF5DETAIL', 'ZF5_CUSTER' )
-
    If Empty(_nCustoTer)
       _lCustoPreenchido := .F.
    EndIf
 
    _cCodFor  := _oModel:GetValue( 'ZF5DETAIL', 'ZF5_FORTER' )
-
    _cLojaFor := _oModel:GetValue( 'ZF5DETAIL', 'ZF5_LOJTER' )
-
    _cNomeFor := _oModel:GetValue( 'ZF5DETAIL', 'ZF5_NOMTER' )
 
-   SA2->(DbSetOrder(1))
-   SF2->(DbSetOrder(1))
-   SC5->(DbSetOrder(1))
+   SA2->(DBSetOrder(1))
+   SF2->(DBSetOrder(1))
+   SC5->(DBSetOrder(1))
 
    If _cCampo == 'ZF5_CUSTER'
       If Empty(_nCustoTer)
          _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_FORTER', Space(6))
          _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_LOJTER', Space(4))
-         _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_NOMTER', Space(LEN(ZF5->ZF5_NOMTER)))
+         _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_NOMTER', Space(Len(ZF5->ZF5_NOMTER)))
       ElseIf Empty(_cCodFor)
-         SA2->(DbSeek(xFilial("SA2")+_cForPadrao))
+         SA2->(DBSeek(xFilial("SA2")+_cForPadrao))
          _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_FORTER', SA2->A2_COD)
          _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_LOJTER', SA2->A2_LOJA)
-         _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_NOMTER', LEFT(SA2->A2_NOME,LEN(ZF5->ZF5_NOMTER) ))
+         _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_NOMTER', LEFT(SA2->A2_NOME,Len(ZF5->ZF5_NOMTER) ))
       EndIf
 
    ElseIf _cCampo == 'ZF5_FORTER'
       If ! _lCustoPreenchido .And. ! Empty(_cCodFor)
-         U_ITMSG("O campo custo de terceiro precisa ser preenchido.","Atenção",,1)
+         U_ITMsg("O campo custo de terceiro precisa ser preenchido.","Atenção",,1)
          _lxRet := .F.
          Break
       EndIf
 
       If _lCustoPreenchido
-         If ! SA2->(DbSeek(xFilial("SA2")+_cCodFor))
-            U_ITMSG("Código de Terceiro não cadastrado no cadastro de fornecedores.","Atenção",,1)
+         If ! SA2->(DBSeek(xFilial("SA2")+_cCodFor))
+            U_ITMsg("Código de Terceiro não cadastrado no cadastro de fornecedores.","Atenção",,1)
             _lxRet := .F.
             Break
          Else
             _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_LOJTER', SA2->A2_LOJA)
-            _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_NOMTER', LEFT(SA2->A2_NOME,LEN(ZF5->ZF5_NOMTER)))
+            _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_NOMTER', LEFT(SA2->A2_NOME,Len(ZF5->ZF5_NOMTER)))
          EndIf
       EndIf
 
    ElseIf _cCampo == 'ZF5_LOJTER'
       If ! _lCustoPreenchido .And. ! Empty(_cLojaFor)
-         U_ITMSG("O campo custo de terceiro precisa ser preenchido.","Atenção",,1)
+         U_ITMsg("O campo custo de terceiro precisa ser preenchido.","Atenção",,1)
          _lxRet := .F.
          Break
       EndIf
 
       If _lCustoPreenchido
-         If ! SA2->(DbSeek(xFilial("SA2")+_cCodFor+_cLojaFor))
-            U_ITMSG("Código+Loja de Terceiro não cadastrado no cadastro de fornecedores.","Atenção",,1)
+         If ! SA2->(DBSeek(xFilial("SA2")+_cCodFor+_cLojaFor))
+            U_ITMsg("Código+Loja de Terceiro não cadastrado no cadastro de fornecedores.","Atenção",,1)
             _lxRet := .F.
             Break
          Else
-            _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_NOMTER', LEFT(SA2->A2_NOME,LEN(ZF5->ZF5_NOMTER)))
+            _oModel:LoadValue( 'ZF5DETAIL', 'ZF5_NOMTER', LEFT(SA2->A2_NOME,Len(ZF5->ZF5_NOMTER)))
          EndIf
       EndIf
 
    ElseIf _cCampo == 'ZF5_NOMTER'
       If ! _lCustoPreenchido .And. ! Empty(_cNomeFor)
-         U_ITMSG("O campo custo de terceiro precisa ser preenchido.","Atenção",,1)
+         U_ITMsg("O campo custo de terceiro precisa ser preenchido.","Atenção",,1)
          _lxRet := .F.
          Break
       EndIf
 
    ElseIf _cCampo == 'ZF5_AGENDA'
       _cNumNf   := _oModelMaster:GetValue('ZF5_DOCOC' )
-      _cSerieNf := ALLTRIM(_oModelMaster:GetValue('ZF5_SEROC' ))
-      SF2->(DbSeek(xFilial("SF2")+_cNumNf+_cSerieNf))
-      SC5->(DbSeek(SF2->(F2_FILIAL+F2_I_PEDIDO)))
+      _cSerieNf := AllTrim(_oModelMaster:GetValue('ZF5_SEROC' ))
+      SF2->(DBSeek(xFilial("SF2")+_cNumNf+_cSerieNf))
+      SC5->(DBSeek(SF2->(F2_FILIAL+F2_I_PEDIDO)))
       _oModelMaster:LoadValue('ZF5_AGENDA', AllTrim(SC5->C5_MENNOTA))
       _lxRet := AllTrim(SC5->C5_MENNOTA)
 
    ElseIf _cCampo == 'ZF5_VALTON'
       _nVlCobradoTon := 0
-      _cCarga := POSICIONE("SF2",1,XFILIAL("SF2")+ALLTRIM(ZF5->ZF5_DOCOC+ZF5->ZF5_SEROC),"F2_CARGA")
-      _nPeso  := POSICIONE("DAK",1,XFILIAL("ZF5")+ALLTRIM(_cCarga),"DAK_PESO")
+      _cCarga := Posicione("SF2",1,xFilial("SF2")+AllTrim(ZF5->ZF5_DOCOC+ZF5->ZF5_SEROC),"F2_CARGA")
+      _nPeso  := Posicione("DAK",1,xFilial("ZF5")+AllTrim(_cCarga),"DAK_PESO")
       _nCusto := _oModelGrid:GetValue('ZF5_CUSTO' )
 
       _nVlCobradoTon  += (_nCusto / (_nPeso / 1000))
       _lxRet := _nVlCobradoTon
-   Elseif _cCampo == 'ZF5_VALEMB'
+   ElseIf _cCampo == 'ZF5_VALEMB'
 
       _lxRet := _oModelGrid:GetValue('ZF5_CUSTO' ) - M->ZF5_VALEMB
 
-   Elseif _cCampo == 'ZF5_DVITEM'
+   ElseIf _cCampo == 'ZF5_DVITEM'
 
       _lxret := .T.
       _lnotadev := (_oModelGrid:GetValue('ZF5_DEVOL' ) == "S" )
       _ctipoc := _oModelGrid:GetValue('ZF5_TIPOC' )
 
-      //Se for vazio valida
+      //Se For vazio valida
       If Empty(M->ZF5_DVITEM)
-
          Break
-
       EndIf
 
       //Soma valores de itens selecionados para devolução
-      If _lnotadev .and. !empty(_ctipoc)
+      If _lnotadev .And. !Empty(_ctipoc)
 
-         _cforn := alltrim(_oModelMaster:GetValue('ZF5_CLIENT'))
-         _clojaf := alltrim(_oModelMaster:GetValue('ZF5_LOJA'))
+         _cforn := AllTrim(_oModelMaster:GetValue('ZF5_CLIENT'))
+         _clojaf := AllTrim(_oModelMaster:GetValue('ZF5_LOJA'))
 
       Else
 
-         U_ITMSG("Selecione tipo de custo e marque a ocorrência como devolução para indicar nota de devolução","Atenção",,1)
+         U_ITMsg("Selecione tipo de custo e marque a ocorrência como devolução para indicar nota de devolução","Atenção",,1)
          _lxret := .F.
          Break
 
       EndIf
 
       //Localiza nota de devolução
-      SF1->(Dbsetorder(1))
-      If SF1->(DbSeek(xfilial("SF1")+_oModelGrid:GetValue('ZF5_DOCDEV' )+_oModelGrid:GetValue('ZF5_SERDEV')+_cforn+_clojaf))
+      SF1->(DBSetOrder(1))
+      If SF1->(DBSeek(xFilial("SF1")+_oModelGrid:GetValue('ZF5_DOCDEV' )+_oModelGrid:GetValue('ZF5_SERDEV')+_cforn+_clojaf))
 
 
-         SD1->(Dbsetorder(1))
-         SD1->(DbSeek(SF1->F1_FILIAL+SF1->F1_DOC+SF1->F1_SERIE+SF1->F1_FORNECE+SF1->F1_LOJA))
+         SD1->(DBSetOrder(1))
+         SD1->(DBSeek(SF1->F1_FILIAL+SF1->F1_DOC+SF1->F1_SERIE+SF1->F1_FORNECE+SF1->F1_LOJA))
 
          _lxret := .T.
          _ntotal := 0
 
-         Do while SF1->F1_FILIAL+SF1->F1_DOC+SF1->F1_SERIE+SF1->F1_FORNECE+SF1->F1_LOJA == SD1->D1_FILIAL+SD1->D1_DOC+SD1->D1_SERIE+SD1->D1_FORNECE+SD1->D1_LOJA
+         While SF1->F1_FILIAL+SF1->F1_DOC+SF1->F1_SERIE+SF1->F1_FORNECE+SF1->F1_LOJA == SD1->D1_FILIAL+SD1->D1_DOC+SD1->D1_SERIE+SD1->D1_FORNECE+SD1->D1_LOJA
 
             If SD1->D1_ITEM $ M->ZF5_DVITEM
 
@@ -1036,11 +1179,11 @@ User Function AOMS003W(_cCampo,_lMVC,_cFonte)
 
             EndIf
 
-            SD1->(Dbskip())
+            SD1->(DBSkip())
 
-         Enddo
+         EndDo
 
-         If u_itgetmv("ITOCVALDEV",.F.)
+         If SuperGetMV("IT_OCVALDE",.T.,.F.)
 
             //Preenche campos de valores de acordo com a devolução
             _oModelGrid:SetValue('ZF5_CUSTO',_ntotal)
@@ -1069,7 +1212,7 @@ User Function AOMS003W(_cCampo,_lMVC,_cFonte)
 
       Else
 
-         U_ITMSG("Nota de devolução não foi localizada","Atenção",,1)
+         U_ITMsg("Nota de devolução não foi localizada","Atenção",,1)
          _lxret := .F.
          Break
 
@@ -1095,6 +1238,7 @@ Retorno   ------: True ou False.
 ===============================================================================================================================
 */
 User Function AOMS003Q(_oModel As Object) As Logical
+ 
  Local _lRet := .T. As Logical
  Local _aOrd := SaveOrd({"ZFC","ZF5"}) As Array
  Local _aArea := GetArea("ZF5") As Array
@@ -1128,11 +1272,13 @@ User Function AOMS003Q(_oModel As Object) As Logical
  Local _lBloq := .F. As Logical
  Local _cUsersHab := SuperGetMV("IT_USPROTI",.F.,"") As Character
  Local _aAreaM0:= SM0->(FwGetArea()) As Array
- PRIVATE _cFilOld   := cfilant As Character
- PRIVATE _cFilSalva := cfilant As Character
+ Local _cCodUsu := "" As Character
 
- _lEmail:= .F.//VARIAVEL STATIC
- _aDadosEmailCom:={}//VARIAVEL STATIC
+ Private _cFilOld   := cfilant As Character
+ Private _cFilSalva := cfilant As Character
+
+ _lEmail:= .F.//VARIAVEL Static
+ _aDadosEmailCom:={}//VARIAVEL Static
 
  Begin Transaction
 
@@ -1140,14 +1286,12 @@ User Function AOMS003Q(_oModel As Object) As Logical
 
    _lEnviou := .F.
 
-   //=============================================================================
    // Ajusta código da Ocorrência de Frete para evitar erro de chave duplicada.
-   //=============================================================================
-   If _lRet .AND. _nOperation == MODEL_OPERATION_INSERT .OR. _nOperation == MODEL_OPERATION_UPDATE
+   If _lRet .And. _nOperation == MODEL_OPERATION_INSERT .Or. _nOperation == MODEL_OPERATION_UPDATE
 
       U_AOMS03MP(_oModel)//Tirei da pre-validacao pq no OK final nem sempre a array _aItOcorre tava preenchida, com isso bagunçava a numeração
 
-      ZF5->(DbSetOrder(4)) // ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC+ZF5_CODIGO
+      ZF5->(DBSetOrder(4)) // ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC+ZF5_CODIGO
 
       If Empty(_aItOcorre)
          _nCodigo := 1
@@ -1168,7 +1312,7 @@ User Function AOMS003Q(_oModel As Object) As Logical
           If _nI <= _nTotOc
              _oModelGrid:LoadValue('ZF5_CODIGO', _aItOcorre[_nI,3] )
           Else
-             Do While .T.
+             While .T.
                 _nCodigo += 1
 
                 _cNrNota    := _oModelMaster:GetValue("ZF5_DOCOC")
@@ -1188,7 +1332,7 @@ User Function AOMS003Q(_oModel As Object) As Logical
 
       _aItOcorre := {}
 
-      ZF5->(DbSetOrder(1)) // ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC
+      ZF5->(DBSetOrder(1)) // ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC
 
    EndIf
 
@@ -1197,27 +1341,25 @@ User Function AOMS003Q(_oModel As Object) As Logical
       _cQuery	:= " SELECT count(ZF5_FILIAL) AS CONTA "
       _cQuery  	+= " FROM " + RetSqlName("ZF5") + " ZF5"
       _cQuery  	+= " WHERE ZF5.ZF5_FILIAL = '" + xFilial("ZF5") + "'"
-      _cQuery   += " AND ZF5.ZF5_DOCOC = '" + ALLTRIM(_oModelMaster:GetValue("ZF5_DOCOC")) + "'"
-      IF !EMPTY(ALLTRIM(_oModelMaster:GetValue("ZF5_SEROC")))
-           _cQuery  += " AND ZF5.ZF5_SEROC = '" + ALLTRIM(_oModelMaster:GetValue("ZF5_SEROC")) + "'"
+      _cQuery   += " AND ZF5.ZF5_DOCOC = '" + AllTrim(_oModelMaster:GetValue("ZF5_DOCOC")) + "'"
+      If !Empty(AllTrim(_oModelMaster:GetValue("ZF5_SEROC")))
+           _cQuery  += " AND ZF5.ZF5_SEROC = '" + AllTrim(_oModelMaster:GetValue("ZF5_SEROC")) + "'"
       EndIf
       _cQuery  	+= " AND ZF5.D_E_L_E_T_ = ' ' "
       cAlias:=GetNextAlias()
       MPSysOpenQuery( _cQuery , cAlias)
-      If .not. (cAlias)->( Eof() )  .AND.  (cAlias)->CONTA > 0
+      If .not. (cAlias)->( Eof() )  .And.  (cAlias)->CONTA > 0
          Help( ,, 'Atenção',, 'Já existe registro com mesmo número de nota fiscal e transportador!' , 1, 0, .F. )
-         (cAlias)->( Dbclosearea() )
+         (cAlias)->( DBCloseArea() )
          _lRet := .F.
          Break
       EndIf
-      (cAlias)->( Dbclosearea() )
+      (cAlias)->( DBCloseArea() )
    EndIf
 
-   If _nOperation == MODEL_OPERATION_INSERT .or. _nOperation == MODEL_OPERATION_UPDATE
+   If _nOperation == MODEL_OPERATION_INSERT .Or. _nOperation == MODEL_OPERATION_UPDATE
 
-      //======================================================================
       // Valida se a carga foi entregue e se foi entrega parcial ou integral.
-      //======================================================================
       If _oModelMaster:GetValue("ZF5_MERENT") == "S" .And. Empty(_oModelMaster:GetValue("ZF5_SITENT"))
          Help( ,, 'Atenção',, 'Para mercadorias assinaladas como Entregues, é obrigatório informar se a entrega foi Integral ou Parcial.' , 1, 0, .F. )
             _lRet := .F.
@@ -1226,23 +1368,21 @@ User Function AOMS003Q(_oModel As Object) As Logical
 
       If (_oModelMaster:GetValue("ZF5_MERENT") == "N" .Or. _oModelMaster:GetValue("ZF5_MERENT") == " ") .And. ! Empty(_oModelMaster:GetValue("ZF5_SITENT"))
          _oModelMaster:LoadValue("ZF5_SITENT"," ")
-         U_ITMSG("A mercadoria foi assinalada como não entregue. Sendo assim, o conteúdo do campo Situação de Entrega (Integral/Parcial) foi removido.","Atenção",,2)
+         U_ITMsg("A mercadoria foi assinalada como não entregue. Sendo assim, o conteúdo do campo Situação de Entrega (Integral/Parcial) foi removido.","Atenção",,2)
       EndIf
 
-      //======================================================================
       //Validação de total de custos
       //Validação de custo representante/italac vs tipo de representante
-      //======================================================================
       _cNotaFiscal:=_oModelMaster:GetValue("ZF5_DOCOC")
       _cSerie     :=_oModelMaster:GetValue("ZF5_SEROC")
-      SF2->(Dbsetorder(1))
+      SF2->(DBSetOrder(1))
 
       For _nI := 1 To _oModelGrid:Length()
 
          _oModelGrid:GoLine(_nI)
          _cEstonado:= _oModelGrid:GetValue("ZF5_ESTONO")
-         If _cEstonado = "S" .OR. _oModelGrid:IsDeleted() //SE ESTORNADO OU DELETADO NÃO LE
-            LOOP
+         If _cEstonado = "S" .Or. _oModelGrid:IsDeleted() //SE ESTORNADO OU DELETADO NÃO LE
+            Loop
          EndIf
 
          _dDataOcorr:= _oModelGrid:GetValue("ZF5_DTOCOR")
@@ -1254,73 +1394,93 @@ User Function AOMS003Q(_oModel As Object) As Logical
          _nValcli   := _oModelGrid:GetValue('ZF5_CUSTOC')
          _nValter   := _oModelGrid:GetValue('ZF5_CUSTER')
          _nValemb   := _oModelGrid:GetValue('ZF5_VALEMB')
-         _cCodigo   := ALLTRIM(STR(VAL(_oModelGrid:GetValue('ZF5_CODIGO',_nI))))  // Código da ocorrência por nota
+         _cCodigo   := AllTrim(Str(Val(_oModelGrid:GetValue('ZF5_CODIGO',_nI))))  // Código da ocorrência por nota
          _cTipoOcorr:= _oModelGrid:GetValue("ZF5_TIPOO")
          _cDtTran   :=  Posicione("ZFC",1,xFilial("ZFC")+_cTipoOcorr,"ZFC_DTTRAN") // 1 = ZFC_FILIAL+ZFC_CODIGO
 
-         If _dDataOcorr > DATE() .and. _cDtTran <> "F"
-            Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ', Data da ocorrencia '+DTOC(_dDataOcorr)+' não pode ser maior que Hoje.' , 1, 0 )
+         If _dDataOcorr > Date() .And. _cDtTran <> "F"
+            Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ', Data da ocorrencia '+DToC(_dDataOcorr)+' não pode ser maior que Hoje.' , 1, 0 )
             _lRet := .F.
             Break
          EndIf
 
-         SF2->(DbSeek(xfilial("SF2")+_cNotaFiscal+_cSerie))
+         SF2->(DBSeek(xFilial("SF2")+_cNotaFiscal+_cSerie))
          If _dDataOcorr < SF2->F2_EMISSAO
-            Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ', Data da ocorrencia '+DTOC(_dDataOcorr)+'não pode ser menor que emissao da NF: '+DTOC(SF2->F2_EMISSAO) , 1, 0 )
+            Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ', Data da ocorrencia '+DToC(_dDataOcorr)+'não pode ser menor que emissao da NF: '+DToC(SF2->F2_EMISSAO) , 1, 0 )
             _lRet := .F.
             Break
          EndIf
 
          If _nvaltot <> (_nvaltransp+_nvalita+_nvalrep+_nvalcli+_nvalter+_nvalemb)
-            Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Valor total da ocorrência deve ser igual à somatória dos custos Italac, ' + ;
+            Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Valor total da ocorrência deve ser igual à somatória dos custos Italac, ' + ;
                       ' cliente, representante, transportador, terceiros e embutido no frete ' , 1, 0, .F. )
             _lRet := .F.
             Break
          EndIf
 
          If _nvaloco <> (_nvaltransp+_nvalita+_nvalrep+_nvalcli+_nvalter)
-            Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Custo da ocorrência deve ser igual à somatória dos custos Italac, ' + ;
+            Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Custo da ocorrência deve ser igual à somatória dos custos Italac, ' + ;
                      ' cliente, representante, transportador, terceiros ' , 1, 0, .F. )
              _lRet := .F.
              Break
          EndIf
 
-         If (_oModelGrid:GetValue('ZF5_TIPOC') == "V")  .and. posicione("SA3",1,xfilial("SA3")+ALLTRIM(_oModelMaster:GetValue("ZF5_REPRES")),"A3_TIPO") <> "I"
-             Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Tipo de Custo Vendedor Interno só pode ser preenchido para Vendedor Interno. ', 1, 0 )
+         If (_oModelGrid:GetValue('ZF5_TIPOC') == "V")  .And. Posicione("SA3",1,xFilial("SA3")+AllTrim(_oModelMaster:GetValue("ZF5_REPRES")),"A3_TIPO") <> "I"
+             Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Tipo de Custo Vendedor Interno só pode ser preenchido para Vendedor Interno. ', 1, 0 )
              _lRet := .F.
              Break
          EndIf
 
-         If (_oModelGrid:GetValue('ZF5_TIPOC') == "R")  .and. posicione("SA3",1,xfilial("SA3")+ALLTRIM(_oModelMaster:GetValue("ZF5_REPRES")),"A3_TIPO") = "I"
-             Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Tipo de Custo Representante Externo só pode ser preenchido para Representante Externo. ', 1, 0 )
+         If (_oModelGrid:GetValue('ZF5_TIPOC') == "R")  .And. Posicione("SA3",1,xFilial("SA3")+AllTrim(_oModelMaster:GetValue("ZF5_REPRES")),"A3_TIPO") = "I"
+             Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Tipo de Custo Representante Externo só pode ser preenchido para Representante Externo. ', 1, 0 )
              _lRet := .F.
              Break 
          EndIf
 
-         If !_oModelGrid:IsDeleted() .and. (_oModelGrid:IsInserted(_nI) .or. _oModelGrid:IsUpdated(_nI))
-            ZF5->(Dbsetorder(4))
-            ZF5->(DbSeek(xfilial("ZF5")+_cNotaFiscal+_cSerie+_oModelGrid:GetValue('ZF5_CODIGO')))
+         If !_oModelGrid:IsDeleted() .And. (_oModelGrid:IsInserted(_nI) .Or. _oModelGrid:IsUpdated(_nI))
+            ZF5->(DBSetOrder(4))
+            ZF5->(DBSeek(xFilial("ZF5")+_cNotaFiscal+_cSerie+_oModelGrid:GetValue('ZF5_CODIGO')))
             _nValtotOld := ZF5->ZF5_CUSTO
-            lAlterou := (_oModelGrid:IsInserted(_nI) .or. (_oModelGrid:IsUpdated(_nI) .and. _nValtotOld <> _nValtot ))
-            If _nValtot > 0 .AND. lAlterou .AND. Empty(_oModelGrid:GetValue("ZF5_CAUCUS") )
-               Help( ,, 'Inclusao',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' -  Se tem Valor de custo o campo Causador do Custo deve ser informado.', 1, 0, .F. )
+            lAlterou := (_oModelGrid:IsInserted(_nI) .Or. (_oModelGrid:IsUpdated(_nI) .And. _nValtotOld <> _nValtot ))
+            If _nValtot > 0 .And. lAlterou .And. Empty(_oModelGrid:GetValue("ZF5_CAUCUS") )
+               Help( ,, 'Inclusao',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' -  Se tem Valor de custo o campo "Causador do Custo" deve ser informado.', 1, 0, .F. )
                _lRet := .F.
                Break
             EndIf
          EndIf
 
-         If !_oModelGrid:IsDeleted() .and. _oModelGrid:IsInserted(_nI)
-            ZFC->(DbSetOrder(1))
-            If ZFC->(DbSeek(xFilial("ZFC")+_oModelGrid:GetValue("ZF5_TIPOO")))
+         If !_oModelGrid:IsDeleted() .And. _oModelGrid:IsInserted(_nI)
+            ZFC->(DBSetOrder(1))
+            If ZFC->(DBSeek(xFilial("ZFC")+_oModelGrid:GetValue("ZF5_TIPOO")))
                If ZFC->ZFC_PROTIT == "S"
-                  If !(RetCodUsr() $ _cUsersHab) .AND. _oModelGrid:GetValue("ZF5_DPRORR") > 0
+                  If !(RetCodUsr() $ _cUsersHab) .And. _oModelGrid:GetValue("ZF5_DPRORR") > 0
                      _lRet := .F.
-                     Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Usuário não tem permissão para usar este tipo de Ocorrencia.', 1, 0, .F. )
+                     Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Usuário não tem permissão para usar este tipo de Ocorrencia.', 1, 0, .F. )
                      Break
                   EndIf
                EndIf
             EndIf
-         
+         EndIf
+
+         If !_oModelGrid:IsDeleted() 
+            ZFC->(DBSetOrder(1))
+            If ZFC->(DBSeek(xFilial("ZFC")+_oModelGrid:GetValue("ZF5_TIPOO")))
+               If ZFC->ZFC_OLREDI  == "S"
+                  If Empty(_oModelGrid:GetValue("ZF5_OLRCOD")) .Or. Empty(_oModelGrid:GetValue("ZF5_OLRLOJ"))
+                     U_ITMsg('Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Tipo de ocorrecia é de redirecionamento. (ZFC_OLREDI="S").','Atenção',;
+                             "Informe o Codigo do operador logistico do redirecionamento.",,,,.T.)
+                     _lRet := .F.
+                     Break
+                  EndIf
+               Else
+                  If !Empty(_oModelGrid:GetValue("ZF5_OLRCOD")) .Or. !Empty(_oModelGrid:GetValue("ZF5_OLRLOJ"))
+                     U_ITMsg('Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Tipo de ocorrecia não é de redirecionamento. (ZFC_OLREDI<>"S").','Atenção',;
+                             'O Codigo do operador logistico do redirecionamento não pode ser informado.',,,,.T.)
+                      _lRet := .F.
+                     Break
+                  EndIf
+               EndIf
+            EndIf
          EndIf
 
       Next _nI
@@ -1332,8 +1492,8 @@ User Function AOMS003Q(_oModel As Object) As Logical
 
          _oModelGrid:GoLine(_nI)
          _cEstonado:= _oModelGrid:GetValue("ZF5_ESTONO")
-         If _cEstonado = "S" .OR. _oModelGrid:IsDeleted() //SE ESTORNADO OU DELETADO NÃO LE
-            LOOP
+         If _cEstonado = "S" .Or. _oModelGrid:IsDeleted() //SE ESTORNADO OU DELETADO NÃO LE
+            Loop
          EndIf
 
          _lnotadev := (_oModelGrid:GetValue('ZF5_DEVOL'  ) == "S" )
@@ -1341,21 +1501,21 @@ User Function AOMS003Q(_oModel As Object) As Logical
          _cdvitens :=  _oModelGrid:GetValue('ZF5_DVITEM' )
 
          //Soma valores de itens selecionados para devolução
-         If _lnotadev .and. !empty(_ctipoc) .and. !empty(_cdvitens)
+         If _lnotadev .And. !Empty(_ctipoc) .And. !Empty(_cdvitens)
 
-            _cforn := alltrim(_oModelMaster:GetValue('ZF5_CLIENT'))
-            _clojaf := alltrim(_oModelMaster:GetValue('ZF5_LOJA'))
+            _cforn := AllTrim(_oModelMaster:GetValue('ZF5_CLIENT'))
+            _clojaf := AllTrim(_oModelMaster:GetValue('ZF5_LOJA'))
 
             //Localiza nota de devolução
-            SF1->(Dbsetorder(1))
-            If SF1->(DbSeek(xfilial("SF1")+_oModelGrid:GetValue('ZF5_DOCDEV' )+_oModelGrid:GetValue('ZF5_SERDEV')+_cforn+_clojaf))
+            SF1->(DBSetOrder(1))
+            If SF1->(DBSeek(xFilial("SF1")+_oModelGrid:GetValue('ZF5_DOCDEV' )+_oModelGrid:GetValue('ZF5_SERDEV')+_cforn+_clojaf))
 
-               SD1->(Dbsetorder(1))
-               SD1->(DbSeek(SF1->F1_FILIAL+SF1->F1_DOC+SF1->F1_SERIE+SF1->F1_FORNECE+SF1->F1_LOJA))
+               SD1->(DBSetOrder(1))
+               SD1->(DBSeek(SF1->F1_FILIAL+SF1->F1_DOC+SF1->F1_SERIE+SF1->F1_FORNECE+SF1->F1_LOJA))
 
                _ntotal := 0
 
-               Do while SF1->F1_FILIAL+SF1->F1_DOC+SF1->F1_SERIE+SF1->F1_FORNECE+SF1->F1_LOJA == SD1->D1_FILIAL+SD1->D1_DOC+SD1->D1_SERIE+SD1->D1_FORNECE+SD1->D1_LOJA
+               While SF1->F1_FILIAL+SF1->F1_DOC+SF1->F1_SERIE+SF1->F1_FORNECE+SF1->F1_LOJA == SD1->D1_FILIAL+SD1->D1_DOC+SD1->D1_SERIE+SD1->D1_FORNECE+SD1->D1_LOJA
 
                   If SD1->D1_ITEM $ _cdvitens
 
@@ -1363,32 +1523,32 @@ User Function AOMS003Q(_oModel As Object) As Logical
 
                   EndIf
 
-                  SD1->(Dbskip())
+                  SD1->(DBSkip())
 
-               Enddo
+               EndDo
 
             Else
 
-               Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + " - Não foi localizada nota de devolução - Verifique o item " + strzero(_ni,3), 1, 0 )
-               _lret := .F.
+               Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + " - Não foi localizada nota de devolução - Verifique o item " + StrZero(_nI,3), 1, 0 )
+               _lRet := .F.
                Break
 
             EndIf
 
-            If _ntotal != _oModelGrid:GetValue('ZF5_CUSTO' ) .and. u_itgetmv("ITOCVALDEV", .F.);
-                  .and.  POSICIONE("ZFD",1,xFilial("ZFD")+_oModelGrid:GetValue('ZF5_STATUS' ),"ZFD_STATUS") == "E"
+            If _ntotal != _oModelGrid:GetValue('ZF5_CUSTO' ) .And. SuperGetMV("IT_OCVALDE",.T.,.F.);
+                  .And.  Posicione("ZFD",1,xFilial("ZFD")+_oModelGrid:GetValue('ZF5_STATUS' ),"ZFD_STATUS") == "E"
 
-               Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + " - Custo da ocorrência diverge da nota de devolução! - Verifique o item " + strzero(_ni,3), 1, 0 )
+               Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + " - Custo da ocorrência diverge da nota de devolução! - Verifique o item " + StrZero(_nI,3), 1, 0 )
 
-               _lret := .F.
+               _lRet := .F.
                Break
 
             EndIf
 
 
-         Elseif !empty(_cdvitens)
+         ElseIf !Empty(_cdvitens)
 
-            Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + " - Selecione tipo de custo e marque a ocorrência como devolução para indicar nota de devolução  "  , 1, 0 )
+            Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + " - Selecione tipo de custo e marque a ocorrência como devolução para indicar nota de devolução  "  , 1, 0 )
             _lRet := .F.
             Break
 
@@ -1403,8 +1563,8 @@ User Function AOMS003Q(_oModel As Object) As Logical
 
           _oModelGrid:GoLine(_nI)
           _cEstonado:= _oModelGrid:GetValue("ZF5_ESTONO")
-          If _cEstonado = "S" .OR. _oModelGrid:IsDeleted() //SE ESTORNADO OU DELETADO NÃO LE
-             LOOP
+          If _cEstonado = "S" .Or. _oModelGrid:IsDeleted() //SE ESTORNADO OU DELETADO NÃO LE
+             Loop
           EndIf
           _nvaltransp  := _oModelGrid:GetValue('ZF5_CUSTOT',_nI)    //Custo transportador transportador
           _cndebit     := _oModelGrid:GetValue('ZF5_NDEBIT',_nI)   // Nota de debito
@@ -1415,7 +1575,7 @@ User Function AOMS003Q(_oModel As Object) As Logical
           _cdvitem     := _oModelGrid:GetValue('ZF5_DVITEM',_nI)   // Itens do documento de devolução
           _ctipocus    := _oModelGrid:GetValue('ZF5_TIPOC',_nI)   // Tipo de custo
           _cStatus     := _oModelGrid:GetValue('ZF5_STATUS',_nI)   // Status da ocorrência
-          _cCodigo     := ALLTRIM(STR(VAL(_oModelGrid:GetValue('ZF5_CODIGO',_nI))))  // Código da ocorrência por nota
+          _cCodigo     := AllTrim(Str(Val(_oModelGrid:GetValue('ZF5_CODIGO',_nI))))  // Código da ocorrência por nota
           _ccodter     := _oModelGrid:GetValue('ZF5_FORTER',_nI) //Fornecedor terceiro
           _clojter     := _oModelGrid:GetValue('ZF5_LOJTER',_nI) //Loja terceiro
           _nvalterc    := _oModelGrid:GetValue('ZF5_CUSTER',_nI) //Custo terceiro
@@ -1426,39 +1586,39 @@ User Function AOMS003Q(_oModel As Object) As Logical
           _ctransp     := _oModelGrid:GetValue("ZF5_TRANSP",_nI)
           _clojat      := _oModelGrid:GetValue("ZF5_LJTRAN",_nI)
 
-          If POSICIONE("ZFD",1,xFilial("ZFD")+_cStatus,"ZFD_STATUS") == "E"
+          If Posicione("ZFD",1,xFilial("ZFD")+_cStatus,"ZFD_STATUS") == "E"
              //Posiciona no registro gravado no banco para comparar
-             ZF5->(Dbsetorder(4))
-             If !(ZF5->(DbSeek(xfilial("ZF5")+_cNotaFiscal+_cserie+_oModelGrid:GetValue('ZF5_CODIGO',_nI)))) .and. _cndebit == "S"
-                Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Para nota de débito, inclua a ocorrência com status pendende e depois altere para status encerrado!' , 1, 0 )
+             ZF5->(DBSetOrder(4))
+             If !(ZF5->(DBSeek(xFilial("ZF5")+_cNotaFiscal+_cserie+_oModelGrid:GetValue('ZF5_CODIGO',_nI)))) .And. _cndebit == "S"
+                Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Para nota de débito, inclua a ocorrência com status pendende e depois altere para status encerrado!' , 1, 0 )
                 _lRet := .F.
                 Break
 
-             ElseIf !(ZF5->(DbSeek(xfilial("ZF5")+_cNotaFiscal+_cserie+_oModelGrid:GetValue('ZF5_CODIGO',_nI)))) .and. _cgerdev == "S"
-                Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Para pedido de descarte, inclua a ocorrência com status pendende e depois altere para status encerrado!' , 1, 0 )
+             ElseIf !(ZF5->(DBSeek(xFilial("ZF5")+_cNotaFiscal+_cserie+_oModelGrid:GetValue('ZF5_CODIGO',_nI)))) .And. _cgerdev == "S"
+                Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Para pedido de descarte, inclua a ocorrência com status pendende e depois altere para status encerrado!' , 1, 0 )
                 _lRet := .F.
                 Break
-             Elseif UPPER(ALLTRIM(ZF5->ZF5_MOTCUS)) != UPPER(ALLTRIM(_cmotcus))
+             ElseIf Upper(AllTrim(ZF5->ZF5_MOTCUS)) != Upper(AllTrim(_cmotcus))
                 //Help( ,, 'Atenção',, 'Ocorrência ' + _cCodigo + ' - Salve o motivo de custo antes de encerrar a ocorrência!' , 1, 0 )
                 //ITmsg(_cMens,_ctitu,_csolu,_ntipo,_nbotao,_nmenbot,_lHelpMvc,_cbt1,_cbt2,_bMaisDetalhes)
-                U_ITmsg('Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Salve o motivo de custo antes de encerrar a ocorrência!','Atenção',;
-                        "Texto: ["+ALLTRIM(ZF5->ZF5_MOTCUS)+"] gravado  diferente do digitado ["+ALLTRIM(_cmotcus)+"]",,,,.T.)
+                U_ITMsg('Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Salve o motivo de custo antes de encerrar a ocorrência!','Atenção',;
+                        "Texto: ["+AllTrim(ZF5->ZF5_MOTCUS)+"] gravado  diferente do digitado ["+AllTrim(_cmotcus)+"]",,,,.T.)
                 _lRet := .F.
                 Break
              EndIf
           EndIf
 
           //Valida relação entre campos gera devolução e gera pedido de descarte
-          If _oModelGrid:GetValue('ZF5_GERDEV',_nI ) == "S" .AND. _oModelGrid:GetValue('ZF5_DEVOL',_nI ) != "S"
-             Help( ,, "Atenção",, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + " - Para gerar pedido de descarte precisa ser ocorrência de devolução!" , 1, 0 )
+          If _oModelGrid:GetValue('ZF5_GERDEV',_nI ) == "S" .And. _oModelGrid:GetValue('ZF5_DEVOL',_nI ) != "S"
+             Help( ,, "Atenção",, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + " - Para gerar pedido de descarte precisa ser ocorrência de devolução!" , 1, 0 )
              _lRet := .F.
              Break
           EndIf
 
           //Valida se está incluindo nota com custo terceiro ou transportador sem nota de débito
-          If (_nvalterc > 0 .OR. _nvaltransp > 0) .AND. _cndebit != "S"
-              If POSICIONE("ZFD",1,xFilial("ZFD")+_cStatus,"ZFD_STATUS") == "E"  .and. _ddtfinal > stod("20190103")
-                 Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Ocorrência com custo de transportador/terceiro só pode ser encerrada com geração de nota de débito de transporte!' , 1, 0 )
+          If (_nvalterc > 0 .Or. _nvaltransp > 0) .And. _cndebit != "S"
+              If Posicione("ZFD",1,xFilial("ZFD")+_cStatus,"ZFD_STATUS") == "E"  .And. _ddtfinal > SToD("20190103")
+                 Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Ocorrência com custo de transportador/terceiro só pode ser encerrada com geração de nota de débito de transporte!' , 1, 0 )
                  _lRet := .F.
                  Break
                EndIf
@@ -1467,29 +1627,29 @@ User Function AOMS003Q(_oModel As Object) As Logical
           //Valida se itens de devolução não foram usados já
           If _nOperation == MODEL_OPERATION_UPDATE
              //Posiciona no registro gravado no banco para comparar
-             ZF5->(Dbsetorder(4))
-             ZF5->(DbSeek(xfilial("ZF5")+_cNotaFiscal+_cserie+_oModelGrid:GetValue('ZF5_CODIGO')))
+             ZF5->(DBSetOrder(4))
+             ZF5->(DBSeek(xFilial("ZF5")+_cNotaFiscal+_cserie+_oModelGrid:GetValue('ZF5_CODIGO')))
 
              //SÓ VALIDA SE ESTÁ ENCERRANDO
-             If POSICIONE("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS") != "E" .AND.;
-                POSICIONE("ZFD",1,xFilial("ZFD")+_oModelGrid:GetValue('ZF5_STATUS'),"ZFD_STATUS") == "E"
+             If Posicione("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS") != "E" .AND.;
+                Posicione("ZFD",1,xFilial("ZFD")+_oModelGrid:GetValue('ZF5_STATUS'),"ZFD_STATUS") == "E"
 
                //Só valida se tem conteúdo na ZF5_DVITEM
-               If !empty(_oModelGrid:GetValue('ZF5_DVITEM'))
+               If !Empty(_oModelGrid:GetValue('ZF5_DVITEM'))
 
                   //Valida se está em outra linha da ocorrência atual
-                  _aitens := Strtokarr2( _oModelGrid:GetValue('ZF5_DVITEM',_ni), '/')
+                  _aitens := Strtokarr2( _oModelGrid:GetValue('ZF5_DVITEM',_nI), '/')
 
                   For _nk := 1 to _oModelGrid:Length()
                       _oModelGrid:GoLine(_nk)
                       _cEstonado:= _oModelGrid:GetValue("ZF5_ESTONO",_nk)
-                      If _cEstonado = "S" .OR. _oModelGrid:IsDeleted() //SE ESTORNADO OU DELETADO NÃO LE
-                         LOOP
+                      If _cEstonado = "S" .Or. _oModelGrid:IsDeleted() //SE ESTORNADO OU DELETADO NÃO LE
+                         Loop
                       EndIf
-                      If _oModelGrid:GetValue('ZF5_DOCDEV',_nk) == _oModelGrid:GetValue('ZF5_DOCDEV',_ni)
-                         For _nj := 1 to len(_aitens)
-                            If _aitens[_nj] $ _oModelGrid:GetValue('ZF5_DVITEM',_nk) .and. _nk != _ni .and. !empty(_aitens[_nj])
-                               Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Item de devolução já utilizado na linha ' + strzero(_nk,3) + '!' , 1, 0 )
+                      If _oModelGrid:GetValue('ZF5_DOCDEV',_nk) == _oModelGrid:GetValue('ZF5_DOCDEV',_nI)
+                         For _nj := 1 to Len(_aitens)
+                            If _aitens[_nj] $ _oModelGrid:GetValue('ZF5_DVITEM',_nk) .And. _nk != _nI .And. !Empty(_aitens[_nj])
+                               Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Item de devolução já utilizado na linha ' + StrZero(_nk,3) + '!' , 1, 0 )
                                _lRet := .F.
                                Break
                             EndIf
@@ -1502,25 +1662,25 @@ User Function AOMS003Q(_oModel As Object) As Logical
                   //Valida se está em outra linha da base de dados
                   _cQry := " SELECT ZF5_DOCOC, ZF5_DVITEM FROM "+RetSqlName("ZF5")+" ZF5 "
                   _cQry += " WHERE ZF5.D_E_L_E_T_ = ' ' AND ZF5_FILIAL = '"+xFilial("ZF5")+"' "
-                  _cQry += " AND ZF5_DOCDEV = '" + ALLTRIM(_oModelGrid:GetValue('ZF5_DOCDEV',_ni)) + "' "
-                  _cQry += " AND ZF5_CLIENT = '" + ALLTRIM(_oModelMaster:GetValue('ZF5_CLIENT')) + "' "
-                  _cQry += " AND ZF5_LOJA = '" + ALLTRIM(_oModelMaster:GetValue('ZF5_LOJA')) + "' "
-                  _cQry += " AND ZF5_DOCOC <> '" + ALLTRIM(_oModelMaster:GetValue('ZF5_DOCOC')) + "' "
+                  _cQry += " AND ZF5_DOCDEV = '" + AllTrim(_oModelGrid:GetValue('ZF5_DOCDEV',_nI)) + "' "
+                  _cQry += " AND ZF5_CLIENT = '" + AllTrim(_oModelMaster:GetValue('ZF5_CLIENT')) + "' "
+                  _cQry += " AND ZF5_LOJA = '" + AllTrim(_oModelMaster:GetValue('ZF5_LOJA')) + "' "
+                  _cQry += " AND ZF5_DOCOC <> '" + AllTrim(_oModelMaster:GetValue('ZF5_DOCOC')) + "' "
                   _cQry := ChangeQuery(_cQry)
                   cAlias:=GetNextAlias()
                   MPSysOpenQuery( _cQry , cAlias )
 
-                  Do while (cAlias)->(!Eof())
-                     For _nj := 1 to len(_aitens)
-                        If _aitens[_nj] $ (cAlias)->ZF5_DVITEM .and. !empty(_aitens[_nj])
-                           Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Item de devolução já utilizado em ocorrência da nota  ' + (cAlias)->ZF5_DOCOC + '!' , 1, 0 )
+                  While (cAlias)->(!Eof())
+                     For _nj := 1 to Len(_aitens)
+                        If _aitens[_nj] $ (cAlias)->ZF5_DVITEM .And. !Empty(_aitens[_nj])
+                           Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Item de devolução já utilizado em ocorrência da nota  ' + (cAlias)->ZF5_DOCOC + '!' , 1, 0 )
                            _lRet := .F.
                            Break
                         EndIf
                      Next _nj
-                     (cAlias)->(Dbskip())
-                  Enddo
-                  (cAlias)->(DbCloseArea())
+                     (cAlias)->(DBSkip())
+                  EndDo
+                  (cAlias)->(DBCloseArea())
                EndIf
             EndIf
          EndIf
@@ -1529,48 +1689,48 @@ User Function AOMS003Q(_oModel As Object) As Logical
          If _nOperation == MODEL_OPERATION_UPDATE
 
             //Posiciona no registro gravado no banco para comparar
-            ZF5->(Dbsetorder(4))
-            ZF5->(DbSeek(xfilial("ZF5")+_cNotaFiscal+_cserie+_oModelGrid:GetValue('ZF5_CODIGO')))
-            If POSICIONE("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS") == "E"
+            ZF5->(DBSetOrder(4))
+            ZF5->(DBSeek(xFilial("ZF5")+_cNotaFiscal+_cserie+_oModelGrid:GetValue('ZF5_CODIGO')))
+            If Posicione("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS") == "E"
 
                If _oModelGrid:IsDeleted()
-                  Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + 'Para deletar a linha, reabra ocorrência primeiro!' , 1, 0 )
+                  Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + 'Para deletar a linha, reabra ocorrência primeiro!' , 1, 0 )
                   _lRet := .F.
                   Break
                EndIf
 
                If _cndebit != ZF5->ZF5_NDEBIT
-                  Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6)+ ' - Para alterar geração de nota de débito reabra ocorrência primeiro!' , 1, 0 )
+                  Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6)+ ' - Para alterar geração de nota de débito reabra ocorrência primeiro!' , 1, 0 )
                   _lRet := .F.
                   Break
                EndIf
 
-               If _cpeddev != ZF5->ZF5_PEDDEV .or. _cgerdev != ZF5->ZF5_GERDEV
-                  Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Para alterar pedido de descarte reabra ocorrência primeiro!' , 1, 0 )
+               If _cpeddev != ZF5->ZF5_PEDDEV .Or. _cgerdev != ZF5->ZF5_GERDEV
+                  Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Para alterar pedido de descarte reabra ocorrência primeiro!' , 1, 0 )
                   _lRet := .F.
                   Break
                EndIf
 
-               If _cgerdev == "S" .and. (_cdocdev != ZF5->ZF5_DOCDEV .or. _cserdev != ZF5->ZF5_SERDEV .or. _cdvitem != ZF5->ZF5_DVITEM)
-                  Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Para alterar dados de devolução reabra ocorrência primeiro!' , 1, 0 )
+               If _cgerdev == "S" .And. (_cdocdev != ZF5->ZF5_DOCDEV .Or. _cserdev != ZF5->ZF5_SERDEV .Or. _cdvitem != ZF5->ZF5_DVITEM)
+                  Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Para alterar dados de devolução reabra ocorrência primeiro!' , 1, 0 )
                   _lRet := .F.
                   Break
                EndIf
 
-               iF ZF5->ZF5_NDEBIT == "S" .AND. _ctipocus != ZF5->ZF5_TIPOC
-                  Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Para alterar tipo de custo com nota de débito reabra ocorrência primeiro!' , 1, 0 )
+               If ZF5->ZF5_NDEBIT == "S" .And. _ctipocus != ZF5->ZF5_TIPOC
+                  Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Para alterar tipo de custo com nota de débito reabra ocorrência primeiro!' , 1, 0 )
                   _lRet := .F.
                   Break
                EndIf
 
-               iF ZF5->ZF5_NDEBIT == "S" .AND. _ctipocus == "T" .and.  _nvaltransp != ZF5->ZF5_CUSTOT
-                   Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Para alterar valor de custo com nota de débito reabra ocorrência primeiro!' , 1, 0 )
+               If ZF5->ZF5_NDEBIT == "S" .And. _ctipocus == "T" .And.  _nvaltransp != ZF5->ZF5_CUSTOT
+                   Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Para alterar valor de custo com nota de débito reabra ocorrência primeiro!' , 1, 0 )
                    _lRet := .F.
                    Break
                EndIf
 
-               iF ZF5->ZF5_NDEBIT == "S" .AND. _ctipocus == "3" .and.  _nvalterc != ZF5->ZF5_CUSTER
-                   Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Para alterar valor de custo com nota de débito reabra ocorrência primeiro!' , 1, 0 )
+               If ZF5->ZF5_NDEBIT == "S" .And. _ctipocus == "3" .And.  _nvalterc != ZF5->ZF5_CUSTER
+                   Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Para alterar valor de custo com nota de débito reabra ocorrência primeiro!' , 1, 0 )
                    _lRet := .F.
                    Break
                EndIf
@@ -1580,22 +1740,22 @@ User Function AOMS003Q(_oModel As Object) As Logical
 
          //Valida se está tentando reabrir uma ocorrência com título de débito de transporte ou pedido de descarte
          //Exclui título se possível
-         If  _nOperation == MODEL_OPERATION_UPDATE .and. !_oModelGrid:IsDeleted()
+         If  _nOperation == MODEL_OPERATION_UPDATE .And. !_oModelGrid:IsDeleted()
 
              //Posiciona no registro gravado no banco para comparar
-             ZF5->(DBSETORDER(4))
-             ZF5->(DbSeek(xfilial("ZF5")+_cNotaFiscal+_cserie+_oModelGrid:GetValue('ZF5_CODIGO',_nI)))
+             ZF5->(DBSetOrder(4))
+             ZF5->(DBSeek(xFilial("ZF5")+_cNotaFiscal+_cserie+_oModelGrid:GetValue('ZF5_CODIGO',_nI)))
 
              //VALIDA SE JÁ EXISTE PEDIDO DE DESCARTE
-             If POSICIONE("ZFD",1,xFilial("ZFD")+_cStatus,"ZFD_STATUS") != "E" .and. POSICIONE("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS") == "E"
+             If Posicione("ZFD",1,xFilial("ZFD")+_cStatus,"ZFD_STATUS") != "E" .And. Posicione("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS") == "E"
 
-                SC5->(Dbsetorder(1))
-                If SC5->(DbSeek(xfilial("SC5")+_cpeddev))
-                   If u_itmsg("Existe pedido de descarte para essa ocorrência. Pedido será excluido com a reabertura da ocorrência. Deseja continuar?",;
-                              "Atenção","Pedido: "+xfilial("SC5")+" "+_cpeddev+' - Ocorrência: ' + STRZERO(VAL(_cCodigo),6),2,2,2)
+                SC5->(DBSetOrder(1))
+                If SC5->(DBSeek(xFilial("SC5")+_cpeddev))
+                   If U_ITMsg("Existe pedido de descarte para essa ocorrência. Pedido será excluido com a reabertura da ocorrência. Deseja continuar?",;
+                              "Atenção","Pedido: "+xFilial("SC5")+" "+_cpeddev+' - Ocorrência: ' + StrZero(Val(_cCodigo),6),2,2,2)
                       //Tenta fazer exclusão do pedido de descarte
-                      _lret := AOMS003DP()
-                      If !_lret
+                      _lRet := AOMS003DP()
+                      If !_lRet
                          Break
                       EndIf
                    Else
@@ -1609,51 +1769,51 @@ User Function AOMS003Q(_oModel As Object) As Logical
                 EndIf
              EndIf //VALIDA SE JÁ EXISTE PEDIDO DE DESCARTE
 
-             If POSICIONE("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS") == "E"  .and.  POSICIONE("ZFD",1,xFilial("ZFD")+_cStatus,"ZFD_STATUS") != "E"
+             If Posicione("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS") == "E"  .And.  Posicione("ZFD",1,xFilial("ZFD")+_cStatus,"ZFD_STATUS") != "E"
                 _cfilold := cfilant
-                //Se for nota de faturamento de um troca nota muda para a filial de carregamento para incluir a nota de débito
-                SF2->(Dbsetorder(1))
-                If SF2->(DbSeek(xfilial("SF2")+_cNotaFiscal+_cSerie))
-                   SC5->(Dbsetorder(1))
-                   If SC5->(DbSeek(xfilial("SC5")+SF2->F2_I_PEDID))
-                      If SC5->C5_I_TRCNF = "S" .AND. SC5->C5_I_FLFNC != SC5->C5_FILIAL
+                //Se For nota de faturamento de um troca nota muda para a filial de carregamento para incluir a nota de débito
+                SF2->(DBSetOrder(1))
+                If SF2->(DBSeek(xFilial("SF2")+_cNotaFiscal+_cSerie))
+                   SC5->(DBSetOrder(1))
+                   If SC5->(DBSeek(xFilial("SC5")+SF2->F2_I_PEDID))
+                      If SC5->C5_I_TRCNF = "S" .And. SC5->C5_I_FLFNC != SC5->C5_FILIAL
                          cfilant := SC5->C5_I_FLFNC
-                      Endif
-                   Endif
-                Endif
+                      EndIf
+                   EndIf
+                EndIf
 
                 _cFornece:=""
                 _cLoja:=""
                 If ZF5->ZF5_TIPOC == "T"
-                   _cFornece := ALLTRIM(ZF5->ZF5_TRANSP)
+                   _cFornece := AllTrim(ZF5->ZF5_TRANSP)
                    _cLoja    := ZF5->ZF5_LJTRAN
-                Elseif ZF5->ZF5_TIPOC == "3"
+                ElseIf ZF5->ZF5_TIPOC == "3"
                    _cFornece := ZF5->ZF5_FORTER
                    _cLoja    := ZF5->ZF5_LOJTER
-                Endif
+                EndIf
 
-               IF !EMPTY(ZF5->ZF5_CHVNDT)
-                  IF LEN(ALLTRIM(ZF5->ZF5_CHVNDT)) = LEN(SE2->E2_FILIAL+SE2->E2_PREFIXO+SE2->E2_NUM)//CHAVE SEM PARCELA
+               If !Empty(ZF5->ZF5_CHVNDT)
+                  If Len(AllTrim(ZF5->ZF5_CHVNDT)) = Len(SE2->E2_FILIAL+SE2->E2_PREFIXO+SE2->E2_NUM)//CHAVE SEM PARCELA
                      _cSeekSE2:=ZF5->ZF5_CHVNDT + "01" + "NDF"+_cFornece+_cLoja//A chave e o cfilant já estam com a filai certa
                   Else//CHAVE COM PARCELA - NOVA
                      _cSeekSE2:=ZF5->ZF5_CHVNDT + "NDF"+_cFornece+_cLoja//A chave e o cfilant já estam com a filai certa
-                  Endif
+                  EndIf
                   _cMostra:=_cSeekSE2
-               ELSE//CHAVE ANTIGA
-                  _cSeekSE2:=xfilial("SE2")+"NDT"+SUBSTR(_cNotaFiscal,2,8) + STRZERO(VAL(_cCodigo),6) + "01" + "NDF"//o cfilant já na filiaa certa
+               Else//CHAVE ANTIGA
+                  _cSeekSE2:=xFilial("SE2")+"NDT"+SubStr(_cNotaFiscal,2,8) + StrZero(Val(_cCodigo),6) + "01" + "NDF"//o cfilant já na filiaa certa
                EndIf
 
-               SE2->(Dbsetorder(1)) // E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
-               If SE2->(DbSeek(_cSeekSE2))
-                  IF EMPTY(ZF5->ZF5_CHVNDT)
+               SE2->(DBSetOrder(1)) // E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
+               If SE2->(DBSeek(_cSeekSE2))
+                  If Empty(ZF5->ZF5_CHVNDT)
                      _cMostra:=_cSeekSE2+SE2->E2_FORNECE+SE2->E2_LOJA
-                  ENDIF
-                  If u_itmsg("Existe título de débito de transporte para essa ocorrência. Título será excluido com a reabertura da ocorrência. Deseja continuar?",;
-                              "Atenção","Chave Titulo: "+_cMostra+' - Ocorrência: ' + STRZERO(VAL(_cCodigo),6),2,2,2)
+                  EndIf
+                  If U_ITMsg("Existe título de débito de transporte para essa ocorrência. Título será excluido com a reabertura da ocorrência. Deseja continuar?",;
+                              "Atenção","Chave Titulo: "+_cMostra+' - Ocorrência: ' + StrZero(Val(_cCodigo),6),2,2,2)
                      _lerro := !(AOMS003DT( ZF5->(RECNO()),_oModelGrid ))//EXCLUI TÍTULO DE DÉBITO
                      If _lerro
                         // JÁ DÁ MENSAGEM DE ERRO DENTRO DA FUNÇÃO AOMS003DT ()
-                        //Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Erro ao excluir título de nota de débito, ocorrência não será salva/apagada.' , 1, 0 )
+                        //Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Erro ao excluir título de nota de débito, ocorrência não será salva/apagada.' , 1, 0 )
                         _lRet := .F.
                         cfilant := _cfilold
                         Break
@@ -1674,66 +1834,66 @@ User Function AOMS003Q(_oModel As Object) As Logical
              If !(_oModelGrid:IsDeleted())
 
                //Só aceita nota de débito para custo de terceiro ou transportador
-               If _cndebit == "S" .and. _ctipocus != "T" .and. _ctipocus != "3"
-                   Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Somente gera nota de débito para custo transportador ou terceiro!' , 1, 0 )
+               If _cndebit == "S" .And. _ctipocus != "T" .And. _ctipocus != "3"
+                   Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Somente gera nota de débito para custo transportador ou terceiro!' , 1, 0 )
                    _lRet := .F.
                    Break
                EndIf
                //Valida consistência de campos valor transportador
-               If _cndebit == "S" .AND. _nvaltransp <= 0 .AND. _ctipocus == "T"
-                  Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Para ter nota de débito é preciso indicar custo para transportador!' , 1, 0 )
+               If _cndebit == "S" .And. _nvaltransp <= 0 .And. _ctipocus == "T"
+                  Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Para ter nota de débito é preciso indicar custo para transportador!' , 1, 0 )
                   _lRet := .F.
                   Break
                EndIf
                //Valida consistência de campos valor terceiro
-               If _cndebit == "S" .AND. _nvalterc <= 0 .AND. _ctipocus == "3"
-                  Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Para ter nota de débito é preciso indicar custo para terceiro!' , 1, 0 )
+               If _cndebit == "S" .And. _nvalterc <= 0 .And. _ctipocus == "3"
+                  Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Para ter nota de débito é preciso indicar custo para terceiro!' , 1, 0 )
                   _lRet := .F.
                   Break
                EndIf
 
                //Verifica se a ocorrencia de frete possui uma natureza específica para gerar o titulo no Financeiro
-               If !Empty(Alltrim(_cTipoO))
-                  _cNaturOF := POSICIONE("ZFC",1,xFilial("ZFC")+_cTipoO,"ZFC_NATUR")
+               If !Empty(AllTrim(_cTipoO))
+                  _cNaturOF := Posicione("ZFC",1,xFilial("ZFC")+_cTipoO,"ZFC_NATUR")
                Else
                   _cNaturOF := ""
                EndIf
 
-               If !Empty(Alltrim(_cNaturOF))
+               If !Empty(AllTrim(_cNaturOF))
                   _cnatureza := _cNaturOF
                Else
                   If _ctipocus == "T"  //Verificar aqui se é custo transportador ou custo terceiro
-                     _cnatureza := u_itgetmv("ITNDNATUR","112021    ")
-                  Elseif _ctipocus == "3"
-                     _cnatureza := u_itgetmv("ITNTNATUR","112022    ")
+                     _cnatureza := SuperGetMV("IT_NDNATUR",.T.,"112021    ")
+                  ElseIf _ctipocus == "3"
+                     _cnatureza := SuperGetMV("IT_NTNATUR",.T.,"112022    ")
                   EndIf
                EndIf
 
                //SE STATUS ESTÁ ENCERRADO, VALIDA SE JÁ EXISTE PEDIDO DE DESCARTE
-               If POSICIONE("ZFD",1,xFilial("ZFD")+_cStatus,"ZFD_STATUS") == "E" .and. _cgerdev == "S";
-                       .and. POSICIONE("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS")  != "E"
+               If Posicione("ZFD",1,xFilial("ZFD")+_cStatus,"ZFD_STATUS") == "E" .And. _cgerdev == "S";
+                       .And. Posicione("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS")  != "E"
 
                   //Posiciona no registro gravado no banco para comparar
-                  ZF5->(Dbsetorder(4))
-                  ZF5->(DbSeek(xfilial("ZF5")+_cNotaFiscal+_cserie+_oModelGrid:GetValue('ZF5_CODIGO')))
-                  SC5->(Dbsetorder(1))
+                  ZF5->(DBSetOrder(4))
+                  ZF5->(DBSeek(xFilial("ZF5")+_cNotaFiscal+_cserie+_oModelGrid:GetValue('ZF5_CODIGO')))
+                  SC5->(DBSetOrder(1))
 
-                  If !(SC5->(DbSeek(xfilial("SC5")+_cpeddev)))
+                  If !(SC5->(DBSeek(xFilial("SC5")+_cpeddev)))
 
-                     If !u_itmsg("Encerramento de ocorrência irá gerar pedido de descarte, confirma?","Atenção",'Ocorrência ' + STRZERO(VAL(_cCodigo),6),2,2,2)
+                     If !U_ITMsg("Encerramento de ocorrência irá gerar pedido de descarte, confirma?","Atenção",'Ocorrência ' + StrZero(Val(_cCodigo),6),2,2,2)
                         Help( ,, 'Atenção',, 'Processo cancelado pelo usuário.' , 1, 0 )
                         _lRet := .F.
                         Break
                      EndIf
 
                      //LOCALIZA DOCUMENTO DE DEVOLUÇÃO
-                     SF1->(Dbsetorder(1))
-                     If SF1->(DbSeek(xfilial("SF1")+_cdocdev+_cserdev+ZF5->ZF5_CLIENT+ZF5->ZF5_LOJA+"D"))
-                        SD1->(Dbsetorder(1))
-                        If SD1->(DbSeek(xfilial("SD1")+_cdocdev+_cserdev+ZF5->ZF5_CLIENT+ZF5->ZF5_LOJA))
+                     SF1->(DBSetOrder(1))
+                     If SF1->(DBSeek(xFilial("SF1")+_cdocdev+_cserdev+ZF5->ZF5_CLIENT+ZF5->ZF5_LOJA+"D"))
+                        SD1->(DBSetOrder(1))
+                        If SD1->(DBSeek(xFilial("SD1")+_cdocdev+_cserdev+ZF5->ZF5_CLIENT+ZF5->ZF5_LOJA))
                         _aItensPV := {}
                         _njk := 0
-                        Do while SF1->F1_FILIAL == SD1->D1_FILIAL .AND.;
+                        While SF1->F1_FILIAL == SD1->D1_FILIAL .AND.;
                                  SF1->F1_DOC == SD1->D1_DOC .AND.;
                                  SF1->F1_FORNECE == SD1->D1_FORNECE .AND.;
                                  SF1->F1_LOJA == SD1->D1_LOJA .AND.;
@@ -1743,12 +1903,12 @@ User Function AOMS003Q(_oModel As Object) As Logical
 
                               _njk++
                               aAdd( _aItensPV , { { "C6_FILIAL"  , cfilant	   				    ,Nil},;
-                                                  { "C6_ITEM"    , strzero(_njk,2)				,Nil},;
+                                                  { "C6_ITEM"    , StrZero(_njk,2)				,Nil},;
                                                   { "C6_PRODUTO" , SD1->D1_COD  				,Nil},;
                                                   { "C6_UM"    	 , SD1->D1_UM				    ,Nil},;
                                                   { "C6_QTDVEN"  , SD1->D1_QUANT   				,Nil},;
                                                   { "C6_UNSVEN"  , SD1->D1_QTSEGUM				,Nil},;
-                                                  { "C6_LOCAL"   , U_ITGETMV("LOCDESC","31")	,nil},;
+                                                  { "C6_LOCAL"   , SuperGetMV("IT_LOCDESC",.T.,"31")	,nil},;
                                                   { "C6_PRCVEN"  , SD1->D1_TOTAL/SD1->D1_QUANT	,Nil},;
                                                   { "C6_VALOR"   , SD1->D1_TOTAL              	,Nil},;
                                                   { "C6_I_DEVFN" , SD1->D1_FORNECE           	,Nil},;
@@ -1760,13 +1920,13 @@ User Function AOMS003Q(_oModel As Object) As Logical
 
                            EndIf
 
-                           SD1->(Dbskip())
+                           SD1->(DBSkip())
 
-                        Enddo
+                        EndDo
 
                      Else
 
-                        Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Não foi possível localizar nota de devolução da ocorrência' , 1, 0 )
+                        Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Não foi possível localizar nota de devolução da ocorrência' , 1, 0 )
                         _lRet := .F.
                         Break
 
@@ -1774,39 +1934,44 @@ User Function AOMS003Q(_oModel As Object) As Logical
 
                      Else
 
-                        Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Não foi possível localizar nota de devolução da ocorrência' , 1, 0 )
+                        Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Não foi possível localizar nota de devolução da ocorrência' , 1, 0 )
                         _lRet := .F.
                         Break
 
                      EndIf
 
-                     If len(_aItensPV) == 0
+                     If Len(_aItensPV) == 0
 
-                        Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Não foi possível localizar itens da nota de devolução da ocorrência' , 1, 0 )
+                        Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Não foi possível localizar itens da nota de devolução da ocorrência' , 1, 0 )
                         _lRet := .F.
                         Break
 
                      EndIf
 
                   //Carrega cliente e loja da filial atual
-                  ZZM->(Dbsetorder(1))
-                  If !(ZZM->(DbSeek(xfilial("ZZM")+cfilant)))
+                  ZZM->(DBSetOrder(1))
+                  If !(ZZM->(DBSeek(xFilial("ZZM")+cfilant)))
 
-                     Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Não foi possível localizar filial atual no cadastro de filiais (ZZM)' , 1, 0 )
+                     Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Não foi possível localizar filial atual no cadastro de filiais (ZZM)' , 1, 0 )
                      _lRet := .F.
                      Break
 
                   EndIf
 
-                  SA1->(Dbsetorder(3))
-                  If !(SA1->(DbSeek(xfilial("SA1")+ZZM->ZZM_CGC)))
+                  SA1->(DBSetOrder(3))
+                  If !(SA1->(DBSeek(xFilial("SA1")+ZZM->ZZM_CGC)))
 
-                     Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Não foi possível localizar filial atual no cadastro de clientes com cgc ' + ZZM->ZZM_CGC   , 1, 0 )
+                     Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Não foi possível localizar filial atual no cadastro de clientes com cgc ' + ZZM->ZZM_CGC   , 1, 0 )
                      _lRet := .F.
                      Break
 
                   EndIf
 
+                  If !_lJob
+                     _cCodUsu	:= FWSFAllUsers({__cUserID},{"USR_FILIAL"})[1][3]+FWSFAllUsers({__cUserID},{"USR_CODFUNC"})[1][3]
+                  Else
+                     _cCodUsu	:= "SISTEMA"
+                  EndIf
 
                   //Cria pedido de descarte
                   aCabec := { { "C5_FILIAL"     , cfilant	                                                , Nil },;
@@ -1818,32 +1983,33 @@ User Function AOMS003Q(_oModel As Object) As Logical
                               { "C5_VEND1"      , SA1->A1_VEND												            , Nil },;
                               { "C5_VEND2"      , Posicione('SA3',1,xFilial('SA3')+SA1->A1_VEND,'A3_SUPER')	, Nil },;
                               { "C5_VEND3"      , SA3->A3_GEREN											            , Nil },;
-                              { "C5_EMISSAO"	, DATE()	                                                   , Nil },;
+                              { "C5_EMISSAO"	, Date()	                                                   , Nil },;
                               { "C5_TABELA" 	, ''														               , Nil },;
                               { "C5_MENNOTA"	, 'Descarte de devolução'							               , Nil },;
                               { "C5_TPFRETE"	, 'C'														               , Nil },;
                               { "C5_I_OBPED"    , 'Descarte devolução - Oc frete NF Venda ' + ZF5->ZF5_DOCOC+"/"+ZF5->ZF5_SEROC, Nil },;
-                              { "C5_I_OPER"     , u_itgetmv("TPOPERDESC","22")			   			         , Nil },;
+                              { "C5_I_OPER"     , SuperGetMV("IT_TPOPDES",.T.,"22")			   			         , Nil },;
                               { "C5_TRANSP"     , ''														               , Nil },;
                               { "C5_I_DTENT"    ,  date()+100          										         , Nil },;
+                              { "C5_I_CDUSU"    ,  _cCodUsu          										         , Nil },;
                               { "C5_I_AGEND"    , "I"	                                                      , Nil }}
 
                   lMSErroAuto := .F.
 
-                  fwmsgrun(, { || MSExecAuto( {|x,y,z| Mata410(x,y,z) } , aCabec , _aItensPV , 3 )},"Aguarde...","Criando pedido de descarte...")
+                  FWMsgRun(, { || MSExecAuto( {|x,y,z| Mata410(x,y,z) } , aCabec , _aItensPV , 3 )},"Aguarde...","Criando pedido de descarte...")
 
                   If lMsErroAuto
 
                      MostraErro()
-                     Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Não foi possível gerar o pedido de descarte' , 1, 0 )
-                              _lret := .F.
+                     Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Não foi possível gerar o pedido de descarte' , 1, 0 )
+                              _lRet := .F.
                      Break
 
                   Else
 
                      _oModelGrid:LoadValue('ZF5_PEDDEV',SC5->C5_NUM)
                      _cpeddev := SC5->C5_NUM
-                     U_ITMSG("Criado pedido de descarte " + SC5->C5_NUM,"Atenção",'Ocorrência ' + STRZERO(VAL(_cCodigo),6),3)
+                     U_ITMsg("Criado pedido de descarte " + SC5->C5_NUM,"Atenção",'Ocorrência ' + StrZero(Val(_cCodigo),6),3)
 
                   EndIf
 
@@ -1851,120 +2017,115 @@ User Function AOMS003Q(_oModel As Object) As Logical
 
             EndIf
 
-            //********************************************************************************************************************************************************//
             //IDENTIFICA E VALDIA FORNECEDOR DO TÍTULO A PAGAR COMO TRANSPORTADOR OU TERCEIRO
             If _ctipocus == "T"
-               If empty(_ctransp)
-                  Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Não há transportador vinculado à nota, use custo de terceiros e indique o fornecedor' , 1, 0 )
+               If Empty(_ctransp)
+                  Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Não há transportador vinculado à nota, use custo de terceiros e indique o fornecedor' , 1, 0 )
                   _lRet := .F.
                   Break
-               Endif
-               _cFornece := ALLTRIM(_ctransp)
+               EndIf
+               _cFornece := AllTrim(_ctransp)
                _cLoja := _cLojat
-               _cindice := xfilial("SA2")+alltrim(_cFornece)+_cLojat
+               _cindice := xFilial("SA2")+AllTrim(_cFornece)+_cLojat
                _nvalortit := _nvaltransp
-            Elseif _ctipocus == "3"
+            ElseIf _ctipocus == "3"
                _cFornece := _ccodter
                _cLoja := _clojter
-               _cindice := xfilial("SA2")+alltrim(_cFornece)+alltrim(_cLoja)
+               _cindice := xFilial("SA2")+AllTrim(_cFornece)+AllTrim(_cLoja)
                _nvalortit := _nvalterc
-            Endif
+            EndIf
 
-            SA2->(Dbsetorder(1))
-            If _ctipocus == "T" .OR. _ctipocus == "3"
-               If !SA2->(Dbseek(_cindice))
-                  Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Fornecedor para geração de título de nota de débito não localizado.' , 1, 0 )
+            SA2->(DBSetOrder(1))
+            If _ctipocus == "T" .Or. _ctipocus == "3"
+               If !SA2->(DBSeek(_cindice))
+                  Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Fornecedor para geração de título de nota de débito não localizado.' , 1, 0 )
                   _lRet := .F.
                   Break
                Else
                        If SA2->A2_MSBLQL == '1'
-                          Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Erro ao gravar título de nota de débito, ocorrência não será salva. Fornecedor informado ' + Alltrim(_cFornece) + " - " + Alltrim(_cLoja) + ' encontra-se Bloqueado ou Inativo no cadastro de Fornecedores do Sistema!' , 1, 0 )
+                          Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Erro ao gravar título de nota de débito, ocorrência não será salva. Fornecedor informado ' + AllTrim(_cFornece) + " - " + AllTrim(_cLoja) + ' encontra-se Bloqueado ou Inativo no cadastro de Fornecedores do Sistema!' , 1, 0 )
                        _lBloq := .T.
                        _lRet := .F.
                        cfilant := _cfilold
                        Break
-                     Endif
+                     EndIf
                      _cLoja:=SA2->A2_LOJA
-               Endif
-             ENDIF
+               EndIf
+             EndIf
 
-             //********************************************************************************************************************************************************//
             //SE STATUS ESTÁ ENCERRADO, VALIDA SE JÁ EXISTE GERAÇÃO DE TÍTULO DE NOTA DE DÉBITO ************************************
-            If POSICIONE("ZFD",1,xFilial("ZFD")+_cStatus,"ZFD_STATUS") == "E" .and. _cndebit == "S";
-                     .and. POSICIONE("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS")  != "E"
+            If Posicione("ZFD",1,xFilial("ZFD")+_cStatus,"ZFD_STATUS") == "E" .And. _cndebit == "S";
+                     .And. Posicione("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS")  != "E"
 
-               IF !EMPTY(ZF5->ZF5_CHVNDT)
-                  IF LEN(ALLTRIM(ZF5->ZF5_CHVNDT)) = LEN(SE2->E2_FILIAL+SE2->E2_PREFIXO+SE2->E2_NUM)//CHAVE SEM PARCELA
+               If !Empty(ZF5->ZF5_CHVNDT)
+                  If Len(AllTrim(ZF5->ZF5_CHVNDT)) = Len(SE2->E2_FILIAL+SE2->E2_PREFIXO+SE2->E2_NUM)//CHAVE SEM PARCELA
                      _cSeekSE2:=ZF5->ZF5_CHVNDT + "01" + "NDF"+_cFornece+_cLoja//A chave e o cfilant já estam com a filai certa
                   Else//CHAVE COM PARCELA - NOVO
                      _cSeekSE2:=ZF5->ZF5_CHVNDT + "NDF"+_cFornece+_cLoja//A chave e o cfilant já estam com a filai certa
-                  Endif
+                  EndIf
                   _cMostra:=_cSeekSE2
-               ELSE
-                  _cSeekSE2:=xfilial("SE2")+"NDT"+SUBSTR(_cNotaFiscal,2,8) + _cCodigo + "01" + "NDF"
+               Else
+                  _cSeekSE2:=xFilial("SE2")+"NDT"+SubStr(_cNotaFiscal,2,8) + _cCodigo + "01" + "NDF"
                EndIf
-               SE2->(Dbsetorder(1))
-               If SE2->(DbSeek(_cSeekSE2))
-                  If (_ctipocus == "T" .AND. SE2->E2_VALOR != _nvaltransp) .OR. (_ctipocus == "3" .AND. SE2->E2_VALOR != _nvalterc)
-                     IF EMPTY(ZF5->ZF5_CHVNDT)
+               SE2->(DBSetOrder(1))
+               If SE2->(DBSeek(_cSeekSE2))
+                  If (_ctipocus == "T" .And. SE2->E2_VALOR != _nvaltransp) .Or. (_ctipocus == "3" .And. SE2->E2_VALOR != _nvalterc)
+                     If Empty(ZF5->ZF5_CHVNDT)
                         _cMostra:=_cSeekSE2+SE2->E2_FORNECE+SE2->E2_LOJA
-                     ENDIF
-                     //Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Já existe título com valor diferente: R$ '+ALLTRIM(TRANS(SE2->E2_VALOR,'@E 999,999,999,999.99'))+'. Reabra a ocorrência ou título e encerre novamente para alterar valor.' , 1, 0 )
-                     U_ITmsg("Chave Titulo: "+_cMostra+' - Ocorrência: ' + STRZERO(VAL(_cCodigo),6) + '. Já existe título com valor diferente: R$ '+ALLTRIM(TRANS(SE2->E2_VALOR,'@E 999,999,999,999.99')),'Atenção!',"Reabra a ocorrência ou título e encerre novamente para alterar valor.",,,,.T.)
+                     EndIf
+                     //Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Já existe título com valor diferente: R$ '+AllTrim(TRANS(SE2->E2_VALOR,'@E 999,999,999,999.99'))+'. Reabra a ocorrência ou título e encerre novamente para alterar valor.' , 1, 0 )
+                     U_ITMsg("Chave Titulo: "+_cMostra+' - Ocorrência: ' + StrZero(Val(_cCodigo),6) + '. Já existe título com valor diferente: R$ '+AllTrim(TRANS(SE2->E2_VALOR,'@E 999,999,999,999.99')),'Atenção!',"Reabra a ocorrência ou título e encerre novamente para alterar valor.",,,,.T.)
                      _lRet := .F.
                      Break
                   EndIf
                Else
                   lMsErroAuto := .F.
                   _cfilold := cfilant
-                  //Se for nota de faturamento de um troca nota muda para a filial de carregamento para incluir a nota de débito
-                  SF2->(Dbsetorder(1))
-                  If SF2->(DbSeek(xfilial("SF2")+_cNotaFiscal+_cSerie))
-                     SC5->(Dbsetorder(1))
-                     If SC5->(DbSeek(xfilial("SC5")+SF2->F2_I_PEDID))
-                        If SC5->C5_I_TRCNF = "S" .AND. SC5->C5_I_FLFNC != SC5->C5_FILIAL
+                  //Se For nota de faturamento de um troca nota muda para a filial de carregamento para incluir a nota de débito
+                  SF2->(DBSetOrder(1))
+                  If SF2->(DBSeek(xFilial("SF2")+_cNotaFiscal+_cSerie))
+                     SC5->(DBSetOrder(1))
+                     If SC5->(DBSeek(xFilial("SC5")+SF2->F2_I_PEDID))
+                        If SC5->C5_I_TRCNF = "S" .And. SC5->C5_I_FLFNC != SC5->C5_FILIAL
                            cfilant := SC5->C5_I_FLFNC
                         EndIf
                      EndIf
                   EndIf
 
-                  // *******************************************************************************************************//
-                  // ************************* GERAÇÃO DO NUMERO DO TITULO POR PARCELA *********************//
-                  // *************************************  ZF5_CHVNDT  ************************************//
+                   // GERAÇÃO DO NUMERO DO TITULO POR PARCELA 
+                  // ZF5_CHVNDT
                   _cNewParcela:="01"
-                  SE2->(Dbsetorder(1))
-                  _cSeekSE2:=xfilial("SE2")+"NDT"+SUBSTR(_cNotaFiscal,1,LEN(SE2->E2_NUM)) + _cNewParcela  + "NDF"+ALLTRIM(_cFornece)+_cLoja
-                  DO WHILE SE2->(DbSeek(_cSeekSE2))
-                     _cNewParcela:=SOMA1(_cNewParcela)
-                     _cSeekSE2:=xfilial("SE2")+"NDT"+SUBSTR(_cNotaFiscal,1,LEN(SE2->E2_NUM)) + _cNewParcela + "NDF"+ALLTRIM(_cFornece)+_cLoja
-                  ENDDO
-                  // *************************************  ZF5_CHVNDT  ************************************//
-                  // ************************* GERAÇÃO DO NUMERO DO TITULO POR PARCELA *********************//
-                  // *******************************************************************************************************//
-
+                  SE2->(DBSetOrder(1))
+                  _cSeekSE2:=xFilial("SE2")+"NDT"+SubStr(_cNotaFiscal,1,Len(SE2->E2_NUM)) + _cNewParcela  + "NDF"+AllTrim(_cFornece)+_cLoja
+                  While SE2->(DBSeek(_cSeekSE2))
+                     _cNewParcela:=Soma1(_cNewParcela)
+                     _cSeekSE2:=xFilial("SE2")+"NDT"+SubStr(_cNotaFiscal,1,Len(SE2->E2_NUM)) + _cNewParcela + "NDF"+AllTrim(_cFornece)+_cLoja
+                  EndDo
+                  // ZF5_CHVNDT
+                  // GERAÇÃO DO NUMERO DO TITULO POR PARCELA
                   //Definição de vencimento
                   If day(date()) < 8
-                      _dvencto := stod(alltrim(str(year(date())))+alltrim(strzero(month(date()),2))+"08")
-                  Elseif day(date()) > 7 .and.  day(date()) < 23
-                      _dvencto := stod(alltrim(str(year(date())))+alltrim(strzero(month(date()),2))+"23")
+                      _dvencto := SToD(AllTrim(Str(year(date())))+AllTrim(StrZero(month(date()),2))+"08")
+                  ElseIf day(date()) > 7 .And.  day(date()) < 23
+                      _dvencto := SToD(AllTrim(Str(year(date())))+AllTrim(StrZero(month(date()),2))+"23")
                   ElseIf day(date()) >= 23
-                     if month(date()) == 12
-                         _dvencto := stod(alltrim(str(year(date())+1))+"0108")
+                     If month(date()) == 12
+                         _dvencto := SToD(AllTrim(Str(year(date())+1))+"0108")
                       Else
-                          _dvencto := stod(alltrim(str(year(date())))+alltrim(strzero(month(date())+1,2))+"08")
+                          _dvencto := SToD(AllTrim(Str(year(date())))+AllTrim(StrZero(month(date())+1,2))+"08")
                       EndIf
                   EndIf
 
-                  _cmens := 'Ocorrência ' + STRZERO(VAL(_cCodigo),8) + " - "
-                  _cmens += "Título " + cfilant + "/" +  _cNotaFiscal +"-"+ _cNewParcela + " contra " + SA2->A2_COD+"/"+SA2->A2_LOJA+" - "+ alltrim(SA2->A2_NREDUZ) + "  "
-                  _cmens += "no valor de R$ " + transform(_nvalortit,"@E 999,999.99") + " com vencimento em " + dtoc(_dvencto) + "."
+                  _cmens := 'Ocorrência ' + StrZero(Val(_cCodigo),8) + " - "
+                  _cmens += "Título " + cfilant + "/" +  _cNotaFiscal +"-"+ _cNewParcela + " contra " + SA2->A2_COD+"/"+SA2->A2_LOJA+" - "+ AllTrim(SA2->A2_NREDUZ) + "  "
+                  _cmens += "no valor de R$ " + transform(_nvalortit,"@E 999,999.99") + " com vencimento em " + DToC(_dvencto) + "."
 
-                  If !u_itmsg("Encerramento de ocorrência irá gerar título de débito de transporte, confirma?","Atenção",_cmens,2,2,2)
+                  If !U_ITMsg("Encerramento de ocorrência irá gerar título de débito de transporte, confirma?","Atenção",_cmens,2,2,2)
                        Help( ,, 'Atenção',, 'Processo cancelado pelo usuário.' , 1, 0 )
                       _lRet := .F.
                       cfilant := _cfilold
                       Break
-                  Endif
+                  EndIf
 
                   If _lBloq
                      _lRet := .F.
@@ -1972,19 +2133,19 @@ User Function AOMS003Q(_oModel As Object) As Logical
                      Break
                   Else
                      _aAutoSE2 := {}
-                     AAdd( _aAutoSE2 , { "E2_PREFIXO"	, "NDT"								     , nil } )
-                     AAdd( _aAutoSE2 , { "E2_NUM"		, SUBSTR(_cNotaFiscal,1,LEN(SE2->E2_NUM)), nil } )
-                     AAdd( _aAutoSE2 , { "E2_PARCELA"	, _cNewParcela					         , nil } )
-                     AAdd( _aAutoSE2 , { "E2_TIPO"		, "NDF"								     , nil } )
-                     AAdd( _aAutoSE2 , { "E2_NATUREZ"	, _cnatureza			                 , nil } )
-                     AAdd( _aAutoSE2 , { "E2_FORNECE"	, ALLTRIM(_cfornece)	                 , nil } )
-                     AAdd( _aAutoSE2 , { "E2_LOJA"		, ALLTRIM(_cloja)	                     , nil } )
-                     AAdd( _aAutoSE2 , { "E2_EMISSAO"	, date()			                     , nil } )
-                     AAdd( _aAutoSE2 , { "E2_VENCTO"	, _dvencto	                             , nil } )
-                     AAdd( _aAutoSE2 , { "E2_VALOR"     , _nvalortit		                     , nil } )
-                     AAdd( _aAutoSE2 , { "E2_HIST"		, "Custo de ocorrência de frete " + _cCodigo + "-" + ALLTRIM(ZF5->ZF5_MOTCUS) , Nil } )
-                     AAdd( _aAutoSE2 , { "E2_DATALIB"	, date()			                     , nil } )
-                     AAdd( _aAutoSE2 , { "E2_USUALIB"	, cUserName			                     , nil } )
+                     aAdd( _aAutoSE2 , { "E2_PREFIXO"	, "NDT"								     , nil } )
+                     aAdd( _aAutoSE2 , { "E2_NUM"		, SubStr(_cNotaFiscal,1,Len(SE2->E2_NUM)), nil } )
+                     aAdd( _aAutoSE2 , { "E2_PARCELA"	, _cNewParcela					         , nil } )
+                     aAdd( _aAutoSE2 , { "E2_TIPO"		, "NDF"								     , nil } )
+                     aAdd( _aAutoSE2 , { "E2_NATUREZ"	, _cnatureza			                 , nil } )
+                     aAdd( _aAutoSE2 , { "E2_FORNECE"	, AllTrim(_cfornece)	                 , nil } )
+                     aAdd( _aAutoSE2 , { "E2_LOJA"		, AllTrim(_cloja)	                     , nil } )
+                     aAdd( _aAutoSE2 , { "E2_EMISSAO"	, Date()			                     , nil } )
+                     aAdd( _aAutoSE2 , { "E2_VENCTO"	, _dvencto	                             , nil } )
+                     aAdd( _aAutoSE2 , { "E2_VALOR"     , _nvalortit		                     , nil } )
+                     aAdd( _aAutoSE2 , { "E2_HIST"		, "Custo de ocorrência de frete " + _cCodigo + "-" + AllTrim(ZF5->ZF5_MOTCUS) , Nil } )
+                     aAdd( _aAutoSE2 , { "E2_DATALIB"	, Date()			                     , nil } )
+                     aAdd( _aAutoSE2 , { "E2_USUALIB"	, cUserName			                     , nil } )
 
                      _nModAux	:= nModulo
                      _cModAux	:= cModulo
@@ -1993,11 +2154,11 @@ User Function AOMS003Q(_oModel As Object) As Logical
                      _cAOMS074Vld:=""
                      _cAOMS074   :="AOMS103"
 
-                     fwmsgrun(,{ || MSExecAuto({|x,y| Fina050(x,y)},_aAutoSE2,3)},"Aguarde...", "Criando título de nota de débito...") //Inclusao
+                     FWMsgRun(,{ || MSExecAuto({|x,y| Fina050(x,y)},_aAutoSE2,3)},"Aguarde...", "Criando título de nota de débito...") //Inclusao
 
                       If lMsErroAuto
-                         //Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Erro ao gravar título de nota de débito, ocorrência não será salva.' , 1, 0 )
-                         U_ITmsg('Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Erro ao gravar título de nota de débito, ocorrência não será salva. Print essa e a proxima tela.','Atenção!',_cAOMS074Vld,,,,.T.)  //HELP PARA O MVC
+                         //Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Erro ao gravar título de nota de débito, ocorrência não será salva.' , 1, 0 )
+                         U_ITMsg('Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Erro ao gravar título de nota de débito, ocorrência não será salva. Print essa e a proxima tela.','Atenção!',_cAOMS074Vld,,,,.T.)  //HELP PARA O MVC
                          MostraErro()
                          _lRet := .F.
                          cfilant := _cfilold
@@ -2006,11 +2167,11 @@ User Function AOMS003Q(_oModel As Object) As Logical
                          Break
                       Else
                          //Posiciona no registro gravado no banco para comparar
-                         ZF5->(DBSETORDER(4))
-                         IF ZF5->(DbSeek(_cfilold+_cNotaFiscal+_cserie+_oModelGrid:GetValue('ZF5_CODIGO',_nI)))
+                         ZF5->(DBSetOrder(4))
+                         If ZF5->(DBSeek(_cfilold+_cNotaFiscal+_cserie+_oModelGrid:GetValue('ZF5_CODIGO',_nI)))
                             ZF5->(RecLock("ZF5",.F.))
                             ZF5->ZF5_CHVNDT:=(SE2->E2_FILIAL+SE2->E2_PREFIXO+SE2->E2_NUM+SE2->E2_PARCELA)
-                            ZF5->(MSUNLOCK())
+                            ZF5->(MSUnLock())
                            _oModelGrid:LoadValue('ZF5_CHVNDT',ZF5->ZF5_CHVNDT)
                          EndIf
                          //CRIA E APRESENTA PDF DE NOTA DE DÉBITO E ENVIA EMAIL
@@ -2030,28 +2191,28 @@ User Function AOMS003Q(_oModel As Object) As Logical
    EndIf
    cfilant := _cfilold
 
-   If _lRet .and. (_nOperation == MODEL_OPERATION_DELETE .or. _nOperation == MODEL_OPERATION_UPDATE)
+   If _lRet .And. (_nOperation == MODEL_OPERATION_DELETE .Or. _nOperation == MODEL_OPERATION_UPDATE)
 
       _cNotaFiscal := _oModelMaster:GetValue("ZF5_DOCOC")
       _cSerie      := _oModelMaster:GetValue("ZF5_SEROC")
-      _cfilial     := xfilial("ZF5")//ZF5->ZF5_FILIAL
+      _cfilial     := xFilial("ZF5")//ZF5->ZF5_FILIAL
       _cdococ      := _cNotaFiscal//ZF5->ZF5_DOCOC
-      ZF5->(Dbsetorder(4))
+      ZF5->(DBSetOrder(4))
 
-      For _nI := 1 To _oModelGrid:Length() //FOR 2
+      For _nI := 1 To _oModelGrid:Length() //For 2
 
          _oModelGrid:GoLine(_nI)
          _cEstonado:= _oModelGrid:GetValue("ZF5_ESTONO")
-         If _cEstonado = "S" .OR. _oModelGrid:IsDeleted() //SE ESTORNADO OU DELETADO NÃO LE
-            LOOP
+         If _cEstonado = "S" .Or. _oModelGrid:IsDeleted() //SE ESTORNADO OU DELETADO NÃO LE
+            Loop
          EndIf
 
-         IF !ZF5->(DbSeek(_cfilial+_cdococ+_cserie+_oModelGrid:GetValue('ZF5_CODIGO'))) // Se não achar não valida, pois é linha nova
-            LOOP
+         If !ZF5->(DBSeek(_cfilial+_cdococ+_cserie+_oModelGrid:GetValue('ZF5_CODIGO'))) // Se não achar não valida, pois é linha nova
+            Loop
          EndIf
          _dencerrra   := ZF5->ZF5_DTFIN
          _cStatusOcorr:= ZF5->ZF5_STATUS
-         _cCodigo     := ALLTRIM(STR(VAL(_oModelGrid:GetValue('ZF5_CODIGO'))))  // Código da ocorrência por nota
+         _cCodigo     := AllTrim(Str(Val(_oModelGrid:GetValue('ZF5_CODIGO'))))  // Código da ocorrência por nota
          _csit := ""
          _lValidaLinha := .F.
 
@@ -2064,9 +2225,9 @@ User Function AOMS003Q(_oModel As Object) As Logical
          EndIf
 
          //Valida se está excluindo linha com ocorrência encerrada
-         If _lValidalinha .and. _nOperation == MODEL_OPERATION_DELETE .and. POSICIONE("ZFD",1,xFilial("ZFD")+ _cStatusOcorr,"ZFD_STATUS") == "E"
+         If _lValidalinha .And. _nOperation == MODEL_OPERATION_DELETE .And. Posicione("ZFD",1,xFilial("ZFD")+ _cStatusOcorr,"ZFD_STATUS") == "E"
             _lRet := .F.
-            Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Para excluir ocorrências primeiro reabra o status de todas as linhas!' , 1, 0 )
+            Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Para excluir ocorrências primeiro reabra o status de todas as linhas!' , 1, 0 )
             Break
          EndIf
 
@@ -2074,17 +2235,17 @@ User Function AOMS003Q(_oModel As Object) As Logical
            If _lValidaLinha
             If DAY(_dencerrra) <= 25
                _cPeriodo := StrZero(MONTH( _dencerrra),2) + "/" + StrZero(YEAR(_dencerrra),4)
-               _csit := posicione("ZFZ",2,ZF5->ZF5_FILIAL + STRZERO(MONTH(_dencerrra),2) + "/" + STRZERO(YEAR(_dencerrra),4),"ZFZ_STATUS")
+               _csit := Posicione("ZFZ",2,ZF5->ZF5_FILIAL + StrZero(MONTH(_dencerrra),2) + "/" + StrZero(YEAR(_dencerrra),4),"ZFZ_STATUS")
 
             Else
 
                If MONTH(_dencerrra) < 12
                   _cPeriodo := StrZero(MONTH( _dencerrra) + 1 ,2) + "/" + StrZero(YEAR(_dencerrra),4)
-                  _csit := posicione("ZFZ",2,ZF5->ZF5_FILIAL + STRZERO(MONTH(_dencerrra)+1,2) + "/" + STRZERO(YEAR(_dencerrra),4),"ZFZ_STATUS")
+                  _csit := Posicione("ZFZ",2,ZF5->ZF5_FILIAL + StrZero(MONTH(_dencerrra)+1,2) + "/" + StrZero(YEAR(_dencerrra),4),"ZFZ_STATUS")
 
                Else
                   _cPeriodo :=  "01/" + StrZero(YEAR(_dencerrra)+1,4)
-                  _csit := posicione("ZFZ",2,ZF5->ZF5_FILIAL + "01/" + STRZERO(YEAR(_dencerrra)+1,4),"ZFZ_STATUS")
+                  _csit := Posicione("ZFZ",2,ZF5->ZF5_FILIAL + "01/" + StrZero(YEAR(_dencerrra)+1,4),"ZFZ_STATUS")
 
                EndIf
 
@@ -2092,53 +2253,50 @@ User Function AOMS003Q(_oModel As Object) As Logical
 
          EndIf
 
-         If _csit == '2' .and. _lret
+         If _csit == '2' .And. _lRet
             _lRet := .F.
-            Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Não é permitido alterar ocorrência encerrada em período ('+ _cPeriodo + ') já encerrado!' , 1, 0 )
+            Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Não é permitido alterar ocorrência encerrada em período ('+ _cPeriodo + ') já encerrado!' , 1, 0 )
             Break
          EndIf
 
-         If _csit == '1' .and. _lret .and. !(U_ITVACESS( 'ZZL' , 3 , 'ZZL_OCFRT' , 'C' ))
+         If _csit == '1' .And. _lRet .And. !(U_ITVACESS( 'ZZL' , 3 , 'ZZL_OCFRT' , 'C' ))
             _lRet := .F.
-            Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Não é permitido alterar ocorrência encerrada em período (' + _cPeriodo + ') com encerramento logístico!' , 1, 0 )
+            Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Não é permitido alterar ocorrência encerrada em período (' + _cPeriodo + ') com encerramento logístico!' , 1, 0 )
             Break
          EndIf
 
-         //=========================================================================
-         // Não Alterar/Excluir o Tipo de Ocorrência quando a integração for do RDC.
-         //=========================================================================
+         // Não Alterar/Excluir o Tipo de Ocorrência quando a integração For do RDC.
          If ! Empty(_oModelGrid:GetValue('ZF5_CODRDC'))
 
             _lTemPermicao:=U_ITACSUSR('ZZL_EXOCRD','S')
 
-            If (_nOperation == MODEL_OPERATION_DELETE .Or. _oModelGrid:IsDeleted()) .AND. !_lTemPermicao
+            If (_nOperation == MODEL_OPERATION_DELETE .Or. _oModelGrid:IsDeleted()) .And. !_lTemPermicao
                _lRet := .F.
-               Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Usuário sem acesso para excluir ocorrências vindas/integradas do sistema RDC!' , 1, 0 )
+               Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Usuário sem acesso para excluir ocorrências vindas/integradas do sistema RDC!' , 1, 0 )
                Break
             EndIf
 
             If _oModelGrid:IsUpdated() // _nOperation == MODEL_OPERATION_UPDATE .Or.
                If AllTrim(ZF5->ZF5_TIPOO) <> AllTrim(_oModelGrid:GetValue('ZF5_TIPOO'))
                   _lRet := .F.
-                  Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Não é permitido alterar o campo "tipo de ocorrência", das ocorrências vindas/integradas do sistema RDC!' , 1, 0 )
+                  Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Não é permitido alterar o campo "tipo de ocorrência", das ocorrências vindas/integradas do sistema RDC!' , 1, 0 )
                   Break
                EndIf
             EndIf
-         //-----------------------------------------------------------//
          EndIf
 
       Next _nI
 
    EndIf
 
-   ZF5->(Restarea(_aarea))
+   ZF5->(FWRestArea(_aarea))
 
    For _nI := 1 To _oModelGrid:Length()
 
        _oModelGrid:GoLine(_nI)
        _cEstonado    := _oModelGrid:GetValue("ZF5_ESTONO")
-       If _cEstonado = "S" .OR. _oModelGrid:IsDeleted() //SE ESTORNADO OU DELETADO NÃO LE PARA VALIDAR
-          LOOP
+       If _cEstonado = "S" .Or. _oModelGrid:IsDeleted() //SE ESTORNADO OU DELETADO NÃO LE PARA VALIDAR
+          Loop
        EndIf
 
        _cTipoOcorr   := _oModelGrid:GetValue('ZF5_TIPOO')
@@ -2156,61 +2314,61 @@ User Function AOMS003Q(_oModel As Object) As Logical
        _cndebit      := _oModelGrid:GetValue('ZF5_NDEBIT')   // Nota de debito
        _ctipocus     := _oModelGrid:GetValue('ZF5_TIPOC')   // Tipo de custo
        _cStatus      := _oModelGrid:GetValue('ZF5_STATUS')   // Status da ocorrência
-       _cCodigo      := ALLTRIM(STR(VAL(_oModelGrid:GetValue('ZF5_CODIGO'))))  // Código da ocorrência por nota
+       _cCodigo      := AllTrim(Str(Val(_oModelGrid:GetValue('ZF5_CODIGO'))))  // Código da ocorrência por nota
        _cpeddev      := _oModelGrid:GetValue('ZF5_PEDDEV')
 
-       ZFC->(DbSetOrder(1))
-       ZFC->(DbSeek(xFilial("ZFC")+_cTipoOcorr))
+       ZFC->(DBSetOrder(1))
+       ZFC->(DBSeek(xFilial("ZFC")+_cTipoOcorr))
 
        If !Empty(ZFC->ZFC_CUSTO) .And. ZFC->ZFC_CUSTO <>  _cTipoCusto
           _lRet := .F.
-          Help( ,, "Atenção",, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + " - O tipo de custo informado ("+_cTipoCusto+"), difere do tipo de custo do tipo de ocorrência: ("+ZFC->ZFC_CUSTO+")", 1, 0 )
+          Help( ,, "Atenção",, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + " - O tipo de custo informado ("+_cTipoCusto+"), difere do tipo de custo do tipo de ocorrência: ("+ZFC->ZFC_CUSTO+")", 1, 0 )
           Exit
        ElseIf _cTipoCusto == "I" // Italac
           If Empty(_nCustoIt)
              _lRet := .F.
-             Help( ,, "Atenção",, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + " - O campo custo italac deve ser preenchido.", 1, 0 )
+             Help( ,, "Atenção",, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + " - O campo custo italac deve ser preenchido.", 1, 0 )
              Exit
           ElseIf ! Empty(_nCustoRepr) .Or. ! Empty(_nCustoCli) .Or. ! Empty(_nCustoTerc)
              _lRet := .F.
-             Help( ,, "Atenção",, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + " - Por ter selecionado o tipo de custo Italac, você deve preencher apenas o campo de valor de custo Italac.", 1, 0 )
+             Help( ,, "Atenção",, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + " - Por ter selecionado o tipo de custo Italac, você deve preencher apenas o campo de valor de custo Italac.", 1, 0 )
              Exit
           EndIf
        ElseIf _cTipoCusto == "T" // Transportador
           If Empty(_nCustoTransp)
              _lRet := .F.
-             Help( ,, "Atenção",, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + " - O campo custo transportador deve ser preenchido.", 1, 0 )
+             Help( ,, "Atenção",, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + " - O campo custo transportador deve ser preenchido.", 1, 0 )
              Exit
           EndIf
        ElseIf _cTipoCusto $ "RV" // Representante Externo / Vendedor Interno
           If Empty(_nCustoRepr)
              _lRet := .F.
-             Help( ,, "Atenção",, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + " - O campo custo representante deve ser preenchido.", 1, 0 )
+             Help( ,, "Atenção",, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + " - O campo custo representante deve ser preenchido.", 1, 0 )
              Exit
           ElseIf ! Empty(_nCustoCli) .Or. ! Empty(_nCustoTerc) .Or. !Empty(_nCustoIt)
              _lRet := .F.
-             Help( ,, "Atenção",, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + " - Por ter selecionado o tipo de custo Representante, você deve preencher apenas o campo de valor de custo Representante.", 1, 0 )
+             Help( ,, "Atenção",, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + " - Por ter selecionado o tipo de custo Representante, você deve preencher apenas o campo de valor de custo Representante.", 1, 0 )
              Exit
           EndIf
        ElseIf _cTipoCusto == "C" // Cliente
           If Empty(_nCustoCli)
              _lRet := .F.
-             Help( ,, "Atenção",, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + " - O campo custo cliente precisa ser preenchido.", 1, 0 )
+             Help( ,, "Atenção",, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + " - O campo custo cliente precisa ser preenchido.", 1, 0 )
              Exit
           ElseIf ! Empty(_nCustoRepr) .Or. ! Empty(_nCustoTerc) .Or. !Empty(_nCustoIt)
              _lRet := .F.
-             Help( ,, "Atenção",, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + " - Por ter selecionado o tipo de custo Cliente, você deve preencher apenas o campo de valor de custo Cliente.", 1, 0 )
+             Help( ,, "Atenção",, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + " - Por ter selecionado o tipo de custo Cliente, você deve preencher apenas o campo de valor de custo Cliente.", 1, 0 )
              Exit
           EndIf
 
        ElseIf _cTipoCusto == "3" // Terceiros
           If Empty(_nCustoTerc)
              _lRet := .F.
-             Help( ,, "Atenção",, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + " - O campo custo de Terceiros precisa ser preenchido.", 1, 0 )
+             Help( ,, "Atenção",, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + " - O campo custo de Terceiros precisa ser preenchido.", 1, 0 )
              Exit
           ElseIf ! Empty(_nCustoRepr) .Or. !Empty(_nCustoIt) .Or. ! Empty(_nCustoCli)
              _lRet := .F.
-             Help( ,, "Atenção",, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + " - Por ter selecionado o tipo de custo Terceiro, você deve preencher apenas o campo de valor de custo Terceiro.", 1, 0 )
+             Help( ,, "Atenção",, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + " - Por ter selecionado o tipo de custo Terceiro, você deve preencher apenas o campo de valor de custo Terceiro.", 1, 0 )
              Exit
           EndIf
        EndIf
@@ -2218,34 +2376,34 @@ User Function AOMS003Q(_oModel As Object) As Logical
        If _cGerDevol == "S"
           If Empty(_cNfDev) .Or. Empty(_cSerDev)
              _lRet := .F.
-             Help( ,, "Atenção",, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + " - O numero e série da nota fiscal de devolução devem ser preenchidos, pois o tipo de custo informado gera devolução.", 1, 0 )
+             Help( ,, "Atenção",, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + " - O numero e série da nota fiscal de devolução devem ser preenchidos, pois o tipo de custo informado gera devolução.", 1, 0 )
              Exit
           EndIf
        EndIf
 
        If !Empty(ZFC->ZFC_SERVI) .And. _cServOcorr <> ZFC->ZFC_SERVI
           _lRet := .F.
-          Help( ,, "Atenção",, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + " - O tipo de serviço informado ( "+_cServOcorr+" ) difere de tipo de serviço do tipo de ocorrência: ( "+ZFC->ZFC_SERVI+" )", 1, 0 )
+          Help( ,, "Atenção",, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + " - O tipo de serviço informado ( "+_cServOcorr+" ) difere de tipo de serviço do tipo de ocorrência: ( "+ZFC->ZFC_SERVI+" )", 1, 0 )
           Exit
        EndIf
 
        //Se está validado e é exclusão ou alteração de encerrado para outro status
        // e tem nota de débito, tenta deletar o título vinculado
-       If _lRet .AND. ( _nOperation == MODEL_OPERATION_DELETE .OR.;
-          (_nOperation == MODEL_OPERATION_UPDATE .AND.  ( _oModelGrid:IsDeleted()  .OR.   _oModelGrid:IsUpdated() )) )
+       If _lRet .And. ( _nOperation == MODEL_OPERATION_DELETE .OR.;
+          (_nOperation == MODEL_OPERATION_UPDATE .And.  ( _oModelGrid:IsDeleted()  .Or.   _oModelGrid:IsUpdated() )) )
 
-          ZF5->(Dbsetorder(4))
-          If ZF5->(DbSeek(_cfilial+_cdococ+_cserie+_oModelGrid:GetValue('ZF5_CODIGO')))
+          ZF5->(DBSetOrder(4))
+          If ZF5->(DBSeek(_cfilial+_cdococ+_cserie+_oModelGrid:GetValue('ZF5_CODIGO')))
 
             //Exclui pedido de descarte se existir
-            If POSICIONE("ZFD",1,xFilial("ZFD")+_cStatus,"ZFD_STATUS") != "E" .and. POSICIONE("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS") == "E"
-               SC5->(Dbsetorder(1))
-               If SC5->(DbSeek(xfilial("SC5")+_cpeddev))
-                  If u_itmsg("Existe pedido de descarte para essa ocorrência. Pedido será excluido com a reabertura da ocorrência. Deseja continuar?",;
-                                     "Atenção","Pedido: "+xfilial("SC5")+" "+_cpeddev+' - Ocorrência: ' + STRZERO(VAL(_cCodigo),6),2,2,2)
+            If Posicione("ZFD",1,xFilial("ZFD")+_cStatus,"ZFD_STATUS") != "E" .And. Posicione("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS") == "E"
+               SC5->(DBSetOrder(1))
+               If SC5->(DBSeek(xFilial("SC5")+_cpeddev))
+                  If U_ITMsg("Existe pedido de descarte para essa ocorrência. Pedido será excluido com a reabertura da ocorrência. Deseja continuar?",;
+                                     "Atenção","Pedido: "+xFilial("SC5")+" "+_cpeddev+' - Ocorrência: ' + StrZero(Val(_cCodigo),6),2,2,2)
                      //Tenta fazer exclusão do pedido de descarte
-                     _lret := AOMS003DP()
-                     If !_lret
+                     _lRet := AOMS003DP()
+                     If !_lRet
                         Break
                      EndIf
                   Else
@@ -2258,18 +2416,16 @@ User Function AOMS003Q(_oModel As Object) As Logical
                   _cpeddev := ''
                EndIf
             EndIf
-            //***************************************************//
             //         EXCLUI TITULO DE DÉBITO SE EXISTIR
-            //***************************************************//
-            If POSICIONE("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS") == "E" .and. POSICIONE("ZFD",1,xFilial("ZFD")+_cStatus,"ZFD_STATUS") != "E"
+            If Posicione("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS") == "E" .And. Posicione("ZFD",1,xFilial("ZFD")+_cStatus,"ZFD_STATUS") != "E"
                If ZF5->ZF5_NDEBIT == "S"
                   _cfilold := cfilant
-                  //Se for nota de faturamento de um troca nota muda para a filial de carregamento para incluir a nota de débito
-                  SF2->(Dbsetorder(1))
-                  If SF2->(DbSeek(xfilial("SF2")+_cNotaFiscal+_cSerie))
-                     SC5->(Dbsetorder(1))
-                     If SC5->(DbSeek(xfilial("SC5")+SF2->F2_I_PEDID))
-                         If SC5->C5_I_TRCNF = "S" .AND. SC5->C5_I_FLFNC != SC5->C5_FILIAL
+                  //Se For nota de faturamento de um troca nota muda para a filial de carregamento para incluir a nota de débito
+                  SF2->(DBSetOrder(1))
+                  If SF2->(DBSeek(xFilial("SF2")+_cNotaFiscal+_cSerie))
+                     SC5->(DBSetOrder(1))
+                     If SC5->(DBSeek(xFilial("SC5")+SF2->F2_I_PEDID))
+                         If SC5->C5_I_TRCNF = "S" .And. SC5->C5_I_FLFNC != SC5->C5_FILIAL
                              cfilant := SC5->C5_I_FLFNC
                          EndIf
                      EndIf
@@ -2277,32 +2433,29 @@ User Function AOMS003Q(_oModel As Object) As Logical
                   _cFornece:=""
                   _cLoja:=""
                   If ZF5->ZF5_TIPOC == "T"
-                     _cFornece := ALLTRIM(ZF5->ZF5_TRANSP)
+                     _cFornece := AllTrim(ZF5->ZF5_TRANSP)
                      _cLoja    := ZF5->ZF5_LJTRAN
-                  Elseif ZF5->ZF5_TIPOC == "3"
+                  ElseIf ZF5->ZF5_TIPOC == "3"
                      _cFornece := ZF5->ZF5_FORTER
                      _cLoja    := ZF5->ZF5_LOJTER
-                  Endif
+                  EndIf
 
-                  IF !EMPTY(ZF5->ZF5_CHVNDT)
-                     IF LEN(ALLTRIM(ZF5->ZF5_CHVNDT)) = LEN(SE2->E2_FILIAL+SE2->E2_PREFIXO+SE2->E2_NUM)//CHAVE SEM PARCELA
+                  If !Empty(ZF5->ZF5_CHVNDT)
+                     If Len(AllTrim(ZF5->ZF5_CHVNDT)) = Len(SE2->E2_FILIAL+SE2->E2_PREFIXO+SE2->E2_NUM)//CHAVE SEM PARCELA
                         _cSeekSE2:=ZF5->ZF5_CHVNDT + "01" + "NDF"+_cFornece+_cLoja//A chave e o cfilant já estam com a filai certa
                      Else//CHAVE COM PARCELA - NOVO
                         _cSeekSE2:=ZF5->ZF5_CHVNDT + "NDF"+_cFornece+_cLoja//A chave e o cfilant já estam com a filai certa
-                     Endif
-                  ELSE
-                     _cSeekSE2:=xfilial("SE2")+"NDT"+SUBSTR(_cNotaFiscal,2,8) + _cCodigo + "01" + "NDF"//o cfilant já tá na filial certa
+                     EndIf
+                  Else
+                     _cSeekSE2:=xFilial("SE2")+"NDT"+SubStr(_cNotaFiscal,2,8) + _cCodigo + "01" + "NDF"//o cfilant já tá na filial certa
                   EndIf
-                  SE2->(Dbsetorder(1))
-                  If SE2->(DbSeek(_cSeekSE2))
-                     //***************************************************//
+                  SE2->(DBSetOrder(1))
+                  If SE2->(DBSeek(_cSeekSE2))
                      //              EXCLUI TÍTULO DE DÉBITO 
-                     //***************************************************//
                      _lerro := !(AOMS003DT( ZF5->(RECNO()),_oModelGrid ))
-                     //***************************************************//
                      If _lerro
                         // JÁ DÁ MENSAGEM DE ERRO DENTRO DA FUNÇÃO AOMS003DT ()
-                        //Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Erro ao excluir título de nota de débito, ocorrência não será salva/apagada.' , 1, 0 )
+                        //Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Erro ao excluir título de nota de débito, ocorrência não será salva/apagada.' , 1, 0 )
                         _lRet := .F.
                         cfilant := _cfilold
                         Break
@@ -2318,41 +2471,41 @@ User Function AOMS003Q(_oModel As Object) As Logical
 
    cfilant := _cfilold
 
-   IF _lret  .AND. (_nOperation == MODEL_OPERATION_INSERT .OR. _nOperation == MODEL_OPERATION_UPDATE)
+   If _lRet  .And. (_nOperation == MODEL_OPERATION_INSERT .Or. _nOperation == MODEL_OPERATION_UPDATE)
 
-      ZF5->(Dbsetorder(4))
+      ZF5->(DBSetOrder(4))
       _cNotaFiscal := _oModelMaster:GetValue("ZF5_DOCOC")
       _cSerie      := _oModelMaster:GetValue("ZF5_SEROC")
       For _nI := 1 To _oModelGrid:Length()
 
          _oModelGrid:GoLine(_nI)
          _cEstonado:= _oModelGrid:GetValue("ZF5_ESTONO",_nI)
-         If _cEstonado = "S" .OR. _oModelGrid:IsDeleted() //SE ESTORNADO OU DELETADO NÃO LE
-            LOOP
+         If _cEstonado = "S" .Or. _oModelGrid:IsDeleted() //SE ESTORNADO OU DELETADO NÃO LE
+            Loop
          EndIf
          _cCodigo  := _oModelGrid:GetValue('ZF5_CODIGO',_nI)  // Código da ocorrência por nota
          _cStatus  := _oModelGrid:GetValue('ZF5_STATUS',_nI)  // Status da ocorrência
          _cTipoO   := _oModelGrid:GetValue('ZF5_TIPOO' ,_nI)  // Tipo de ocorrência
 
          //Posiciona no registro gravado no banco para comparar
-         lAchou:=ZF5->(DbSeek(xfilial("ZF5")+_cNotaFiscal+_cserie+_cCodigo))
-         lEncerrou:= POSICIONE("ZFD",1,xFilial("ZFD")+_cStatus,"ZFD_STATUS") == "E" .AND.;
-                     (!lAchou .OR. POSICIONE("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS") != "E")//PARA NÃO ENVIAR DE NOVO O ="E" GRAVADO
+         lAchou:=ZF5->(DBSeek(xFilial("ZF5")+_cNotaFiscal+_cserie+_cCodigo))
+         lEncerrou:= Posicione("ZFD",1,xFilial("ZFD")+_cStatus,"ZFD_STATUS") == "E" .AND.;
+                     (!lAchou .Or. Posicione("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS") != "E")//PARA NÃO ENVIAR DE NOVO O ="E" GRAVADO
 
          //SE STATUS ESTÁ ENCERRANDO, ENVIA E-MAIL DE COBRANÇA
-         If lEncerrou .AND. !_lEnviou
+         If lEncerrou .And. !_lEnviou
             //SE GRAVAÇÃO É VÁLIDA SOLICITA ENVIO DE EMAIL DE COBRANÇA
-            //SE FOR DEVOLUÇÃO.
+            //SE For DEVOLUÇÃO.
             _cEnvCob := Posicione("ZFC",1,xFilial("ZFC")+_cTipoO,"ZFC_ENVCOB")
-            If _cEnvCob == "S" .And. U_ITMSG("Envia cancelamento de cobrança para nota " + _cNotaFiscal + " com ocorrência de devolução?","Atenção",'Cancelamento do Ocorrência ' + STRZERO(VAL(_cCodigo),6),2,2,2)
+            If _cEnvCob == "S" .And. U_ITMsg("Envia cancelamento de cobrança para nota " + _cNotaFiscal + " com ocorrência de devolução?","Atenção",'Cancelamento do Ocorrência ' + StrZero(Val(_cCodigo),6),2,2,2)
                _cMotivo:= _oModelGrid:GetValue('ZF5_MOTIVO',_nI)  // Motivo da ocorrência
                 _cMotcus:= _oModelGrid:GetValue('ZF5_MOTCUS',_nI)  // Motivo do Custo
                //ENVIA WF DE CANCELAMENTO DE COBRANÇA
-               U_AOMS003J(_cNotaFiscal,_cserie, .T.,.F. ,_cTipoO + "-" + ALLTRIM(_cMotivo),_cMotcus)
+               U_AOMS003J(_cNotaFiscal,_cserie, .T.,.F. ,_cTipoO + "-" + AllTrim(_cMotivo),_cMotcus)
             EndIf
          EndIf
 
-          _lPendente:= !lAchou .AND. (_cStatus == '000006'.AND. Posicione("ZFC",1,xFilial("ZFC")+_cTipoO,"ZFC_ENVREP") = "S")
+          _lPendente:= !lAchou .And. (_cStatus == '000006'.AND. Posicione("ZFC",1,xFilial("ZFC")+_cTipoO,"ZFC_ENVREP") = "S")
 
           If _lPendente//ENVIA WF AO COMERCIAL
              
@@ -2366,18 +2519,18 @@ User Function AOMS003Q(_oModel As Object) As Logical
              aAdd(_aOcorreIt,_oModelGrid:GetValue("ZF5_TRANSP"))//06
              aAdd(_aOcorreIt,_oModelGrid:GetValue("ZF5_LJTRAN"))//07
              aAdd(_aOcorreIt,_oModelGrid:GetValue("ZF5_NTRANS"))//08
-             AADD(_aDadosEmailCom,_aOcorreIt)
+             aAdd(_aDadosEmailCom,_aOcorreIt)
           EndIf
-      NEXT _nI
+      Next _nI
    EndIf
 
-   ZF5->(Restarea(_aarea))
+   ZF5->(FWRestArea(_aarea))
 
  End Sequence
 
  cfilant := _cFilSalva
 
- If !_lret
+ If !_lRet
      disarmtransaction()
     _lEmail := .F.
     _oModelGrid:GoLine(_nSlvaLin)
@@ -2401,6 +2554,7 @@ Retorno   ------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS003S(_cOpcao)
+
  Local _lInverte := .F.
  Local _lRet := .F.
  Local _aSizeAut  := MsAdvSize(.T.)
@@ -2416,8 +2570,8 @@ User Function AOMS003S(_cOpcao)
  Private _oMarkApr, _oDlgApr
  Private _cMarcaApr  := GetMark()
  Private _lMontaTela := .T.
- Private _cCodAprovar  := U_ITGETMV( 'IT_APROVAR' , '')
- Private _cCodRejeitar := U_ITGETMV( 'IT_REJEITAR' , '')
+ Private _cCodAprovar  := SuperGetMV('IT_APROVAR',.T.,'')
+ Private _cCodRejeitar := SuperGetMV('IT_REJEITA',.T.,'')
  Private aHeader := {}
 
  Begin Sequence
@@ -2425,14 +2579,12 @@ User Function AOMS003S(_cOpcao)
    FillGetDados(1,"ZF5",1,,,{||.T.},,,,,,.T.)
    nUsado := Len(aHeader)
 
-   //================================================================================
    // Define as cores dos itens de legenda.
-   //================================================================================
    _aCores := {}
-   aAdd(_aCores,{'POSICIONE("ZFD",1,xFilial("ZFD")+TRBZF5->ZF5_STATUS,"ZFD_STATUS")=="P"',"BR_VERDE"	})    // Pendente
-   aAdd(_aCores,{'POSICIONE("ZFD",1,xFilial("ZFD")+TRBZF5->ZF5_STATUS,"ZFD_STATUS")=="E"',"BR_VERMELHO"	})    // Efetivado
-   aAdd(_aCores,{'POSICIONE("ZFD",1,xFilial("ZFD")+TRBZF5->ZF5_STATUS,"ZFD_STATUS")=="N"',"BR_CINZA"	})    // Não Procede
-   aAdd(_aCores,{'POSICIONE("ZFD",1,xFilial("ZFD")+TRBZF5->ZF5_STATUS,"ZFD_STATUS")=="T"',"BR_AMARELO"	})    // Em tratamento
+   aAdd(_aCores,{'Posicione("ZFD",1,xFilial("ZFD")+TRBZF5->ZF5_STATUS,"ZFD_STATUS")=="P"',"BR_VERDE"	})    // Pendente
+   aAdd(_aCores,{'Posicione("ZFD",1,xFilial("ZFD")+TRBZF5->ZF5_STATUS,"ZFD_STATUS")=="E"',"BR_VERMELHO"	})    // Efetivado
+   aAdd(_aCores,{'Posicione("ZFD",1,xFilial("ZFD")+TRBZF5->ZF5_STATUS,"ZFD_STATUS")=="N"',"BR_CINZA"	})    // Não Procede
+   aAdd(_aCores,{'Posicione("ZFD",1,xFilial("ZFD")+TRBZF5->ZF5_STATUS,"ZFD_STATUS")=="T"',"BR_AMARELO"	})    // Em tratamento
 
    If _cOpcao == "REJEITAR"
       _cTitulo := "Gestão de Ocorrências de Frete - Rejeição de Ocorrências"
@@ -2442,59 +2594,50 @@ User Function AOMS003S(_cOpcao)
 
    // Cria tabela temporária.
    _aStructZF5 := ZF5->(DbStruct())
-   _nI := Ascan(_aStructZF5,{|x| x[1]="ZF5_STATC"})
+   _nI := aScan(_aStructZF5,{|x| x[1]="ZF5_STATC"})
    _aStructZF5[_nI,3] := 25 // Altera o tamanho do campo "ZF5_STATC" para 25 posições.
 
-   _nI := Ascan(_aStructZF5,{|x| x[1]="ZF5_STATUS"})
+   _nI := aScan(_aStructZF5,{|x| x[1]="ZF5_STATUS"})
    _aStructZF5[_nI,3] := 25 // Altera o tamanho do campo "ZF5_STATUS" para 25 posições.
 
-   Aadd(_aStructZF5,{"WK_OK"   ,"C",2	,0 })
-   Aadd(_aStructZF5,{"WKRECNO" ,"N",10  ,0 })
+   aAdd(_aStructZF5,{"WK_OK"   ,"C",2	,0 })
+   aAdd(_aStructZF5,{"WKRECNO" ,"N",10  ,0 })
 
    // Abre o arquivo TRBZF5 criado dentro do banco de dados protheus.
    _oTemp := FWTemporaryTable():New( "TRBZF5",  _aStructZF5 )
 
-   //================================================================================
    // Cria os indices para o arquivo.
-   //================================================================================
    _oTemp:AddIndex( "01", {"ZF5_DOCOC","ZF5_SEROC"} )
    _oTemp:Create()
 
-
-   //================================================================================
    // Carrega dados na tabela temporária.
-   //================================================================================
    Processa( {||U_AOMS003D(  ) } , 'Aguarde!' , 'Filtrando dados...' )
 
-   //================================================================================
    // Monta colunas do MsSelect
-   //================================================================================
                     //Campo         , "" , Titulo                          , Picture
-   Aadd( _aCampos , { "WK_OK"		,    , "Marca"                         ,"@!"})
-   Aadd( _aCampos , { "ZF5_CODIGO"  , "" , "Codigo Ocorr"                  ,"@!"})
+   aAdd( _aCampos , { "WK_OK"		,    , "Marca"                         ,"@!"})
+   aAdd( _aCampos , { "ZF5_CODIGO"  , "" , "Codigo Ocorr"                  ,"@!"})
 
    For _nI := 1 To Len(aHeader)
        If X3Uso(aHeader[_nI,7]) .And. AllTrim(aHeader[_nI,2]) <> "ZF5_CODIGO"
-          Aadd( _aCampos , { aHeader[_nI,2]		, "" , Alltrim(aHeader[_nI,1]) , aHeader[_nI,3]})
+          aAdd( _aCampos , { aHeader[_nI,2]		, "" , AllTrim(aHeader[_nI,1]) , aHeader[_nI,3]})
        EndIf
    Next _nI
 
    _bOk := {|| If(U_AOMS003L(_cOpcao),(_lRet := .T., _oDlgApr:End()),)}
    _bCancel := {|| _lRet := .F., _oDlgApr:End()}
 
-   TRBZF5->(DbGotop())
+   TRBZF5->(DBGoTop())
 
-   //================================================================================
    // Monta a tela de dados com MSSELECT.
-   //================================================================================
    _nLin1 := 9
    _nCol1 := 0
    _nLin2 := _aSizeAut[6] * 0.079023  // 55
    _nCol2 := _aSizeAut[5] * 0.126138  // 194
 
    _aButtons:={}
-   AADD(_aButtons,{"",{|| U_AOMS003F("T") },"Marc/Des","Marca/Desmarca Todos"})
-   AADD(_aButtons,{"",{|| U_AOMS003G()    },"Legenda" ,"Legenda"})
+   aAdd(_aButtons,{"",{|| U_AOMS003F("T") },"Marc/Des","Marca/Desmarca Todos"})
+   aAdd(_aButtons,{"",{|| U_AOMS003G()    },"Legenda" ,"Legenda"})
 
    Define MsDialog _oDlgApr Title _cTitulo From _nLin1,_nCol1 To _nLin2,_nCol2 Of oMainWnd
 
@@ -2512,48 +2655,48 @@ User Function AOMS003S(_cOpcao)
          _cMsg := "Confirma a aprovação da(s) ocorrência(s) de frete selecionada(s) e a alteração de seu Status?"
       EndIf
 
-      If !U_ITMSG(_cMsg,'Atenção!',,2,2,2)
+      If !U_ITMsg(_cMsg,'Atenção!',,2,2,2)
          Break
       EndIf
 
       If _cOpcao == "APROVAR"
          If Empty(_cCodAprovar)
-            U_ITMSG("Código de 'Status' da aprovação da ocorrência não preenchido no parâmetro IT_APROVAR. Não é possível aprovar a ocorrência.","Atenção",,1)
+            U_ITMsg("Código de 'Status' da aprovação da ocorrência não preenchido no parâmetro IT_APROVAR. Não é possível aprovar a ocorrência.","Atenção",,1)
             Break
          EndIf
 
-         ZFD->(DbSetOrder(1)) // ZFD_FILIAL+ZFD_CODIGO
-         If ! ZFD->(DbSeek(xFilial("ZFD")+_cCodAprovar))
-            U_ITMSG("Código de 'Status' da aprovação da ocorrência não cadastrado no cadastro de Status de Ocorrências. Não é possível aprovar a ocorrência.","Atenção",,1)
+         ZFD->(DBSetOrder(1)) // ZFD_FILIAL+ZFD_CODIGO
+         If ! ZFD->(DBSeek(xFilial("ZFD")+_cCodAprovar))
+            U_ITMsg("Código de 'Status' da aprovação da ocorrência não cadastrado no cadastro de Status de Ocorrências. Não é possível aprovar a ocorrência.","Atenção",,1)
             Break
          EndIf
       Else
          If Empty(_cCodRejeitar)
-            U_ITMSG("Código de 'Status' de rejeição da ocorrência não preenchido no parâmetro IT_REJEITAR. Não é possível rejeitar a ocorrência.","Atenção",,1)
+            U_ITMsg("Código de 'Status' de rejeição da ocorrência não preenchido no parâmetro IT_REJEITAR. Não é possível rejeitar a ocorrência.","Atenção",,1)
             Break
          EndIf
 
-         ZFD->(DbSetOrder(1)) // ZFD_FILIAL+ZFD_CODIGO
-         If ! ZFD->(DbSeek(xFilial("ZFD")+_cCodRejeitar))
-            U_ITMSG("Código de 'Status' da rejeição da ocorrência não cadastrado no cadastro de Status de Ocorrências. Não é possível rejeitar a ocorrência.","Atenção",,1)
+         ZFD->(DBSetOrder(1)) // ZFD_FILIAL+ZFD_CODIGO
+         If ! ZFD->(DBSeek(xFilial("ZFD")+_cCodRejeitar))
+            U_ITMsg("Código de 'Status' da rejeição da ocorrência não cadastrado no cadastro de Status de Ocorrências. Não é possível rejeitar a ocorrência.","Atenção",,1)
             Break
          EndIf
       EndIf
 
       _lAtualizou := .F.
 
-      TRBZF5->(DbGoTop())
-      Do While ! TRBZF5->(Eof())
+      TRBZF5->(DBGoTop())
+      While ! TRBZF5->(Eof())
          If ! Empty(TRBZF5->WK_OK)
-            ZF5->(DbGoTo(TRBZF5->WKRECNO))
+            ZF5->(DBGoTo(TRBZF5->WKRECNO))
             If _cOpcao == "REJEITAR"
                ZF5->(RecLock("ZF5",.F.))
                ZF5->ZF5_STATUS := _cCodRejeitar
                ZF5->ZF5_APRREJ := "R" // Rejeitado
                ZF5->ZF5_USRAPR := SubStr(cUsuario, 7,15)
                ZF5->ZF5_DTAPRR := Date()
-               ZF5->ZF5_HRAPRR := Substr(Time(),1,5)
-               ZF5->(MsUnLock())
+               ZF5->ZF5_HRAPRR := SubStr(Time(),1,5)
+               ZF5->(MSUnLock())
                _lAtualizou := .T.
             Else  // "APROVAR"
                _lAtualizou := .T.
@@ -2562,36 +2705,36 @@ User Function AOMS003S(_cOpcao)
                ZF5->ZF5_APRREJ := "A" // Aprovado
                ZF5->ZF5_USRAPR := SubStr(cUsuario, 7,15)
                ZF5->ZF5_DTAPRR := Date()
-               ZF5->ZF5_HRAPRR := Substr(Time(),1,5)
-               ZF5->(MsUnLock())
+               ZF5->ZF5_HRAPRR := SubStr(Time(),1,5)
+               ZF5->(MSUnLock())
             EndIf
          EndIf
 
-         TRBZF5->(DbSkip())
+         TRBZF5->(DBSkip())
       EndDo
 
       If _cOpcao == "APROVAR"
          If _lAtualizou
-            U_ITMSG("Aprovação realizada com sucesso.","Atenção",,1)
+            U_ITMsg("Aprovação realizada com sucesso.","Atenção",,1)
          Else
-            U_ITMSG("Não foi possível realizar a aprovação.","Atenção",,1)
+            U_ITMsg("Não foi possível realizar a aprovação.","Atenção",,1)
          EndIf
       Else
          If _lAtualizou
-            U_ITMSG("Rejeição realizada com sucesso.","Atenção",,1)
+            U_ITMsg("Rejeição realizada com sucesso.","Atenção",,1)
          Else
-            U_ITMSG("Não foi possível realizar a rejeição.","Atenção",,1)
+            U_ITMsg("Não foi possível realizar a rejeição.","Atenção",,1)
          EndIf
       EndIf
    EndIf
 
  End Sequence
 
- TRBZF5->(DbCloseArea())
+ TRBZF5->(DBCloseArea())
 
  RestOrd(_aOrd)
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -2604,6 +2747,7 @@ Retorno   ------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS003D()
+
  Local _cQry, _nTotreg
  Local _nRegAtu := ZF5->(Recno())
  Local _nI, _nJ
@@ -2619,21 +2763,21 @@ User Function AOMS003D()
 
     MPSysOpenQuery( _cQry , cAlias )
 
-    DbSelectArea(cAlias)
+    DBSelectArea(cAlias)
     COUNT TO _nTotreg
 
     If _nTotreg = 0
-       U_ITMSG("Não existem ocorrências de frete a serem exibidas.","Atenção",,1)
+       U_ITMsg("Não existem ocorrências de frete a serem exibidas.","Atenção",,1)
        Break
     EndIf
 
     ProcRegua(_nTotreg)
 
-    (cAlias)->(DbGoTop())
-    Do While ! (cAlias)->(Eof())
+    (cAlias)->(DBGoTop())
+    While ! (cAlias)->(Eof())
        IncProc("Filtrando dados de Ocorrências de Frete...")
 
-       ZF5->(DbGoTo((cAlias)->NRRECNO))
+       ZF5->(DBGoTo((cAlias)->NRRECNO))
 
        TRBZF5->(DbAppend())
        For _nI := 1 To TRBZF5->(FCount())
@@ -2644,21 +2788,21 @@ User Function AOMS003D()
        Next _nI
 
        TRBZF5->ZF5_STATUS := Posicione("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_DESCRI")
-       _nJ := Ascan(_aStatusC,{|x| x[1]=ZF5->ZF5_STATC})
+       _nJ := aScan(_aStatusC,{|x| x[1]=ZF5->ZF5_STATC})
        TRBZF5->ZF5_STATC :=  If(_nJ > 0,_aStatusC[_nJ,2],"")
        TRBZF5->WKRECNO := (cAlias)->NRRECNO
 
-       (cAlias)->(DbSkip())
+       (cAlias)->(DBSkip())
     EndDo
-    TRBZF5->(DbGoTop())
+    TRBZF5->(DBGoTop())
 
  End Sequence
 
- (cAlias)->(DbCloseArea())
+ (cAlias)->(DBCloseArea())
 
- ZF5->(DbGoTo(_nRegAtu))
+ ZF5->(DBGoTo(_nRegAtu))
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -2672,6 +2816,7 @@ Retorno   ------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS003L(_cOpcao)
+
    Local _lRet := .F.
    Local _cMsg, _lTemMarca
    Local _nRegAtu := TRBZF5->(Recno())
@@ -2684,22 +2829,22 @@ User Function AOMS003L(_cOpcao)
 
    _lTemMarca := .F.
 
-   TRBZF5->(DbGoTop())
-   Do While ! TRBZF5->(Eof())
+   TRBZF5->(DBGoTop())
+   While ! TRBZF5->(Eof())
       If ! Empty(TRBZF5->WK_OK)
          _lTemMarca := .T.
          _lRet := .T.
          Exit
       EndIf
 
-      TRBZF5->(DbSkip())
+      TRBZF5->(DBSkip())
    EndDo
 
    If ! _lTemMarca
-      U_ITMSG(_cMsg,"Atenção",,1)
+      U_ITMsg(_cMsg,"Atenção",,1)
    EndIf
 
-   TRBZF5->(DbGoTo(_nRegAtu))
+   TRBZF5->(DBGoTo(_nRegAtu))
 
 Return _lRet
 
@@ -2715,6 +2860,7 @@ Retorno---------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS003F(_cTipoMarca)
+
     Local _cSimboloMarca := Space(2)
     Local _nRegAtu := TRBZF5->(Recno())
 
@@ -2727,18 +2873,18 @@ User Function AOMS003F(_cTipoMarca)
     If _cTipoMarca == "P"
        TRBZF5->WK_OK := _cSimboloMarca
     Else
-       TRBZF5->(DbGoTop())
-       Do While ! TRBZF5->(Eof())
+       TRBZF5->(DBGoTop())
+       While ! TRBZF5->(Eof())
           TRBZF5->WK_OK := _cSimboloMarca
-          TRBZF5->(DbSkip())
+          TRBZF5->(DBSkip())
        EndDo
 
     EndIf
 
-    TRBZF5->(DbGoTo(_nRegAtu))
+    TRBZF5->(DBGoTo(_nRegAtu))
     _oMarkApr:oBrowse:Refresh()
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -2751,17 +2897,17 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS003G()
+
    Local _aLegenda := {}
 
-   Aadd(_aLegenda,{"BR_VERDE"    ,"Pendente"})
-   Aadd(_aLegenda,{"BR_VERMELHO" ,"Efetivado"})
-   Aadd(_aLegenda,{"BR_CINZA"    ,"Não Procede"})
-   Aadd(_aLegenda,{"BR_AMARELO"  ,"Em tratamento"})
+   aAdd(_aLegenda,{"BR_VERDE"    ,"Pendente"})
+   aAdd(_aLegenda,{"BR_VERMELHO" ,"Efetivado"})
+   aAdd(_aLegenda,{"BR_CINZA"    ,"Não Procede"})
+   aAdd(_aLegenda,{"BR_AMARELO"  ,"Em tratamento"})
 
    BrwLegenda("Gestão de Ocorrências de Frete", "Legenda", _aLegenda)
 
-
-Return Nil
+Return
 /*
 ===============================================================================================================================
 Programa----------: AOMS003P
@@ -2797,10 +2943,10 @@ User Function AOMS003P(_oModelGrid, _nLine, _cAction, _cField, _cValue, _cOldVal
 
  Begin Sequence
 
-    IF _cField == "LEGENDA" .AND. _cAction == 'CANSETVALUE'
+    If _cField == "LEGENDA" .And. _cAction == 'CANSETVALUE'
        _lRet:=.F.
        AOMS03Leg(.F.)
-       BREAK //********* SAIR SEMPRE POIS É UM CAMPO ESPECIFICO **********
+       BREAK //SAIR SEMPRE POIS É UM CAMPO ESPECIFICO
     EndIf
 
     _nOperation:= _oModelGrid:GetOperation()
@@ -2810,83 +2956,80 @@ User Function AOMS003P(_oModelGrid, _nLine, _cAction, _cField, _cValue, _cOldVal
     lTemObjeto := .F.
 
     If _cAction == 'CANSETVALUE' .And. (_cField = "ZF5_TIPOO" .Or. _cField = "ZF5_DTOCOR")//WHEN DOS CAMPOS
-       If _nOperation == MODEL_OPERATION_UPDATE .AND. !_oModelGrid:IsInserted()// ALTERANDO OCORENCIA JÁ GRAVADA
+       If _nOperation == MODEL_OPERATION_UPDATE .And. !_oModelGrid:IsInserted()// ALTERANDO OCORENCIA JÁ GRAVADA
           _cTipoOcorr := _oModelGrid:GetValue("ZF5_TIPOO")
           _cDtTran    :=  Posicione("ZFC",1,xFilial("ZFC")+_cTipoOcorr,"ZFC_DTTRAN") // 1 = ZFC_FILIAL+ZFC_CODIGO
-          If !EMPTY(_cTipoOcorr) .AND. _cDtTran $ "A,B,C,D,E,F"
-             //Help( ,, 'Atenção',, 'Não é permitido alterar ocorrências de frete com o tipo: '+_cDtTran , 1, 0 )
-             //ITmsg(_cMens,_ctitu,_csolu,_ntipo,_nbotao,_nmenbot,_lHelpMvc,_cbt1,_cbt2,_bMaisDetalhes)
-             IF _oModelGrid:GetValue("ZF5_ESTONO") = "S"
-                U_ITmsg( 'Não é permitido alterar Tipo/Data da ocorrências de frete estornadas.' ,'Atenção',;
+          If !Empty(_cTipoOcorr) .And. _cDtTran $ "A,B,C,D,E,F"
+             If _oModelGrid:GetValue("ZF5_ESTONO") = "S"
+                U_ITMsg( 'Não é permitido alterar Tipo/Data da ocorrências de frete estornadas.' ,'Atenção',;
                          "Aperte o DEL nessa ocorrência para cancelar o estorno caso necessaro alterar outros campos.",1,,,.F.)
              Else
-                U_ITmsg( 'Não é permitido alterar Tipo/Data da ocorrências de frete com o tipo igual a '+_cDtTran ,'Atenção',;
+                U_ITMsg( 'Não é permitido alterar Tipo/Data da ocorrências de frete com o tipo igual a '+_cDtTran ,'Atenção',;
                          "Aperte o DEL nessa ocorrência para estornar-lá, e insira uma nova ocorrencia com as alterações necessarias",1,,,.F.)
              EndIf
              _lRet := .F.
           EndIf
        EndIf
-       IF !_lRet
-          BREAK //********* SAIR QUANDO .F. **********
-       Endif
+       If !_lRet
+          BREAK
+       EndIf
     EndIf
     
     If _cAction == 'SETVALUE' .And. _cField = "ZF5_STATUS" //ALTERANDO O STATUS PARA "00001-ENCERRADO"
-       lEncerrou:= POSICIONE("ZFD",1,xFilial("ZFD")+_cValue   ,"ZFD_STATUS") == "E" .AND.; //Alterando Para STATUS "00001-ENCERRADO"
-                  (POSICIONE("ZFD",1,xFilial("ZFD")+_cOldValue,"ZFD_STATUS") != "E")//UM STATUS diferente de encerrado
+       lEncerrou:= Posicione("ZFD",1,xFilial("ZFD")+_cValue   ,"ZFD_STATUS") == "E" .AND.; //Alterando Para STATUS "00001-ENCERRADO"
+                  (Posicione("ZFD",1,xFilial("ZFD")+_cOldValue,"ZFD_STATUS") != "E")//UM STATUS diferente de encerrado
        _nOpcaoAtual:=MODEL_OPERATION_UPDATE
-       If lEncerrou .And. (_nOperation == _nOpcaoAtual .OR. _oModelGrid:IsInserted())// ALTERANDO OCORENCIA JÁ GRAVADA OU INCLUINDO
+       If lEncerrou .And. (_nOperation == _nOpcaoAtual .Or. _oModelGrid:IsInserted())// ALTERANDO OCORENCIA JÁ GRAVADA OU INCLUINDO
           _nValtot:=_oModelGrid:GetValue('ZF5_CUSTOI')+;
                     _oModelGrid:GetValue('ZF5_CUSTOC')+;
                     _oModelGrid:GetValue('ZF5_CUSTOR')+;
                     _oModelGrid:GetValue('ZF5_CUSTOT')+;
                     _oModelGrid:GetValue('ZF5_CUSTO' ) 
-          If _nValtot > 0 .AND. Empty(_oModelGrid:GetValue("ZF5_CAUCUS") )
-             Help( ,, 'Encerramento',,'Se tem Valor de custo o campo Causador do Custo deve ser informado.', 1, 0, .F. )
+          If _nValtot > 0 .And. Empty(_oModelGrid:GetValue("ZF5_CAUCUS") )
+             Help( ,, 'Encerramento',,'Se tem Valor de custo o campo "Causador do Custo" deve ser informado.', 1, 0, .F. )
              _lRet := .F.
           EndIf
        EndIf
-       IF !_lRet
-          BREAK //********* SAIR QUANDO .F. **********
-       Endif
+       If !_lRet
+          BREAK
+       EndIf
     EndIf
 
-    _oModel:=FwModelActivete()//FWLoadModel( "AOMS003" )//oModelGrid:GetModel()
-    IF VALTYPE(_oModel) = "O"
+    _oModel:=FwModelActivete()
+    If ValType(_oModel) = "O"
        _oModelMaster := _oModel:GetModel("ZF5MASTER")
-       IF VALTYPE(_oModelMaster) = "O"
+       If ValType(_oModelMaster) = "O"
           lTemObjeto:=.T.
        EndIf
     EndIf
       
     //Chamado 50481 - Vanderlei / Jerry - fazer a tratativa para quando ocorrência tem NDT vinculada, não permitir alterar os dados da ZF5 a não ser informar o código 000001 que é estorno do encerramento.
-    If _cAction == 'DELETE' .OR. (_cAction == 'CANSETVALUE' .And. _cField <> "ZF5_STATUS") //WHEN DE TODOS DOS CAMPOS
-       If _nOperation == MODEL_OPERATION_UPDATE .AND. !_oModelGrid:IsInserted()// ALTERANDO OCORENCIA JÁ GRAVADA
-          IF lTemObjeto
+    If _cAction == 'DELETE' .Or. (_cAction == 'CANSETVALUE' .And. _cField <> "ZF5_STATUS") //WHEN DE TODOS DOS CAMPOS
+       If _nOperation == MODEL_OPERATION_UPDATE .And. !_oModelGrid:IsInserted()// ALTERANDO OCORENCIA JÁ GRAVADA
+          If lTemObjeto
              _cDoc   := _oModelMaster:GetValue("ZF5_DOCOC")
              _cSerie := _oModelMaster:GetValue("ZF5_SEROC")
           EndIf
-          ZF5->(Dbsetorder(4))
-          IF lTemObjeto .AND. ZF5->(DbSeek(xfilial("ZF5")+_cDoc+_cSerie+_oModelGrid:GetValue('ZF5_CODIGO'))) .AND.;
-             POSICIONE("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS") == "E"  //Para STATUS "00001-ENCERRADO"
+          ZF5->(DBSetOrder(4))
+          If lTemObjeto .And. ZF5->(DBSeek(xFilial("ZF5")+_cDoc+_cSerie+_oModelGrid:GetValue('ZF5_CODIGO'))) .AND.;
+             Posicione("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS") == "E"  //Para STATUS "00001-ENCERRADO"
              If ZF5->ZF5_NDEBIT == "S"
-                //_cMens,_ctitu,_csolu,_ntipo,_nbotao,_nmenbot,_lHelpMvc,_cbt1,_cbt2,_bMaisDetalhes,_cMaisDetalhes,_lRetXNil
-                U_ITmsg('Não é permitido alterar os campos ou deletar as ocorrências com nota de débito.' ,'Atenção',;                                      //,_ntipo,_nbotao,_nmenbot,_lHelpMvc,_cbt1,_cbt2,_bMaisDetalhes,_cMaisDetalhes,_lRetXNil
+                U_ITMsg('Não é permitido alterar os campos ou deletar as ocorrências com nota de débito.' ,'Atenção',;                                      //,_ntipo,_nbotao,_nmenbot,_lHelpMvc,_cbt1,_cbt2,_bMaisDetalhes,_cMaisDetalhes,_lRetXNil
                            "Altere o Status para reabrir a ocorrencia , grave para estornar a nota de débito, e entre novamente nas ocorrencias para alterar.",1     ,       ,        ,.F.)
                 _lRet := .F.
              ElseIf  ZF5->ZF5_GERDEV == "S"
-                U_ITmsg('Não é permitido alterar os campos ou deletar as ocorrências com pedido de descarte.' ,'Atenção',;
+                U_ITMsg('Não é permitido alterar os campos ou deletar as ocorrências com pedido de descarte.' ,'Atenção',;
                           "Altere o Status para reabrir a ocorrencia , grave para estornar pedido de descarte, e entre novamente nas ocorrencias para alterar.",1    ,       ,        ,.F.)
                 _lRet := .F.
              EndIf
           EndIf
        EndIf
-       IF !_lRet
-          BREAK //********* SAIR QUANDO .F. **********
-       Endif
+       If !_lRet
+          BREAK
+       EndIf
     EndIf
 
-    If _cAction == 'DELETE' .AND. _nOperation == MODEL_OPERATION_UPDATE
+    If _cAction == 'DELETE' .And. _nOperation == MODEL_OPERATION_UPDATE
        _cSituacao := _oModelGrid:GetValue('ZF5_APRREJ')
        If ! Empty(_cSituacao)
           _lRet := .F.
@@ -2895,22 +3038,22 @@ User Function AOMS003P(_oModelGrid, _nLine, _cAction, _cField, _cValue, _cOldVal
     EndIf
 
     If _lRet
-       IF lTemObjeto
+       If lTemObjeto
           _cDoc   := _oModelMaster:GetValue("ZF5_DOCOC")
           _cSerie := _oModelMaster:GetValue("ZF5_SEROC")
        EndIf
        _cTipo     := "NF "
        _cCodigo   := _oModelGrid:GetValue("ZF5_CODIGO")
        
-       If _cAction == 'DELETE' .AND. _nOperation == MODEL_OPERATION_UPDATE
+       If _cAction == 'DELETE' .And. _nOperation == MODEL_OPERATION_UPDATE
 
           _cFilial   := xFilial("ZM4")
-          ZFC->(DbSetOrder(1))
-          If ZFC->(DbSeek(xFilial("ZFC")+_oModelGrid:GetValue("ZF5_TIPOO")))
+          ZFC->(DBSetOrder(1))
+          If ZFC->(DBSeek(xFilial("ZFC")+_oModelGrid:GetValue("ZF5_TIPOO")))
              If ZFC->ZFC_PROTIT == "S"
-                If __cUserId $ _cUsersHab .AND. _oModelGrid:GetValue("ZF5_DPRORR") > 0
-                   ZM4->(dbSetOrder(1))
-                   If lTemObjeto .AND. ZM4->(DbSeek(_cFilial+_cDoc+_cSerie+_cTipo+_cCodigo))
+                If __cUserId $ _cUsersHab .And. _oModelGrid:GetValue("ZF5_DPRORR") > 0
+                   ZM4->(DBSetOrder(1))
+                   If lTemObjeto .And. ZM4->(DBSeek(_cFilial+_cDoc+_cSerie+_cTipo+_cCodigo))
                       If ZM4->ZM4_STATUS == "A"
                          _lRet := .F.
                          Help( ,, 'Atenção',, 'Não é permitido deletar ocorrências de frete com prorrogação de vencimento aprovada.' , 1, 0  )
@@ -2923,15 +3066,15 @@ User Function AOMS003P(_oModelGrid, _nLine, _cAction, _cField, _cValue, _cOldVal
              EndIf
           EndIf
 
-       ElseIf _cField == "ZF5_TIPOO" .AND. _cAction == "SETVALUE" .AND. ( _nOperation == MODEL_OPERATION_UPDATE .OR. _nOperation == MODEL_OPERATION_INSERT)
+       ElseIf _cField == "ZF5_TIPOO" .And. _cAction == "SETVALUE" .And. ( _nOperation == MODEL_OPERATION_UPDATE .Or. _nOperation == MODEL_OPERATION_INSERT)
 
-          //Se registro já gravado não deixa aterar ocorrencia qdo for Prorogação de Vencto
+          //Se registro já gravado não deixa aterar ocorrencia qdo For Prorogação de Vencto
           If _nOperation == MODEL_OPERATION_UPDATE
-             ZF5->(DbSetOrder(4)) // ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC+ZF5_CODIGO
-             If lTemObjeto .AND. ZF5->(DbSeek(xFilial("ZF5")+_cDoc+_cSerie+_cCodigo))
+             ZF5->(DBSetOrder(4)) // ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC+ZF5_CODIGO
+             If lTemObjeto .And. ZF5->(DBSeek(xFilial("ZF5")+_cDoc+_cSerie+_cCodigo))
                 If ZF5->ZF5_TIPOO <> M->ZF5_TIPOO
-                   ZFC->(DbSetOrder(1))
-                   If ZFC->(DbSeek(xFilial("ZFC")+ZF5->ZF5_TIPOO))
+                   ZFC->(DBSetOrder(1))
+                   If ZFC->(DBSeek(xFilial("ZFC")+ZF5->ZF5_TIPOO))
                       If ZFC->ZFC_PROTIT == "S"
                           _lRet := .F.
                           Help( ,, 'Atenção',, 'Não é permitido trocar este Tipo de ocorrência de frete.' , 1, 0, .F.,,,,,{"Delete a ocorrencia e inclua uma nova."})
@@ -2941,26 +3084,26 @@ User Function AOMS003P(_oModelGrid, _nLine, _cAction, _cField, _cValue, _cOldVal
              EndIf
           EndIf
 
-          //Verifica se há saldo nos Titulos qdo for Prorogação de Vencto
-          ZFC->(DbSetOrder(1))
-          If ZFC->(DbSeek(xFilial("ZFC")+M->ZF5_TIPOO))
+          //Verifica se há saldo nos Titulos qdo For Prorogação de Vencto
+          ZFC->(DBSetOrder(1))
+          If ZFC->(DBSeek(xFilial("ZFC")+M->ZF5_TIPOO))
              If ZFC->ZFC_PROTIT == "S"
-                If lTemObjeto .AND. __cUserId $ _cUsersHab .AND. _oModelGrid:GetValue("ZF5_DPRORR") > 0
+                If lTemObjeto .And. __cUserId $ _cUsersHab .And. _oModelGrid:GetValue("ZF5_DPRORR") > 0
                    _lTemSaldo := .F.
                    _lAchou := .F.
-                   SE1->(DbSetOrder(1))
-                   If SE1->(DbSeek(xFilial("SE1")+_cSerie+_cDoc+Space(Len(SE1->E1_PARCELA))+_cTipo))
+                   SE1->(DBSetOrder(1))
+                   If SE1->(DBSeek(xFilial("SE1")+_cSerie+_cDoc+Space(Len(SE1->E1_PARCELA))+_cTipo))
                       _lAchou := .T.
-                   ElseIf SE1->(DbSeek(xFilial("SE1")+_cSerie+_cDoc+StrZero(1,Len(SE1->E1_PARCELA))+_cTipo))
+                   ElseIf SE1->(DBSeek(xFilial("SE1")+_cSerie+_cDoc+StrZero(1,Len(SE1->E1_PARCELA))+_cTipo))
                       _lAchou := .T.
                    EndIf
 
                    If _lAchou
-                      Do While SE1->(xFilial("SE1")+_cDoc+_cSerie+_cTipo == E1_FILIAL+E1_NUM+E1_PREFIXO+E1_TIPO) .AND. SE1->(!EOF())
+                      While SE1->(xFilial("SE1")+_cDoc+_cSerie+_cTipo == E1_FILIAL+E1_NUM+E1_PREFIXO+E1_TIPO) .And. SE1->(!Eof())
                          If SE1->E1_SALDO > 0
                             _lTemSaldo := .T.
                          EndIf
-                         SE1->(DbSkip())
+                         SE1->(DBSkip())
                       EndDo
                       If !_lTemSaldo
                           _lRet := .F.
@@ -2970,7 +3113,7 @@ User Function AOMS003P(_oModelGrid, _nLine, _cAction, _cField, _cValue, _cOldVal
                       _lRet := .F.
                       Help( ,, 'Atenção',, 'Não é permitido este Tipo de ocorrência de frete pois não há titulos para prorrogação.' , 1, 0 , .F.,,,,,{"Selecione outro tipo de ocorrencia."})
                    EndIf
-                ElseIF !__cUserId $ _cUsersHab .AND. _oModelGrid:GetValue("ZF5_DPRORR") > 0
+                ElseIf !__cUserId $ _cUsersHab .And. _oModelGrid:GetValue("ZF5_DPRORR") > 0
                    _lRet := .F.
                    Help( ,, 'Atenção',, 'Usuário sem permissão para utilizar este tipo de ocorrencia.' , 1, 0 , .F.,,,,,{"Para habilitar a utilização comunique o administrador do sistema."})
                 EndIf
@@ -2979,32 +3122,28 @@ User Function AOMS003P(_oModelGrid, _nLine, _cAction, _cField, _cValue, _cOldVal
        EndIf
     EndIf
     
-    //************************************************************************************************************************************************//
-    // *******************  COLOQUE VALIDAÇOES NOVAS ANTES DESSE IF POIS ELE ALTERA O CAMPO ZF5_ESTONO, ZF5_MOTCUS E LEGENDA ************************ //
-    //************************************************************************************************************************************************//
-    If _lRet .AND. _cAction == 'DELETE'  .AND. _nOperation == MODEL_OPERATION_UPDATE .AND. !_oModelGrid:IsInserted()
+    //COLOQUE VALIDAÇOES NOVAS ANTES DESSE If POIS ELE ALTERA O CAMPO ZF5_ESTONO, ZF5_MOTCUS E LEGENDA
+    If _lRet .And. _cAction == 'DELETE'  .And. _nOperation == MODEL_OPERATION_UPDATE .And. !_oModelGrid:IsInserted()
        _cTipoOcorr := _oModelGrid:GetValue("ZF5_TIPOO")
        _cDtTran    :=  Posicione("ZFC",1,xFilial("ZFC")+_cTipoOcorr,"ZFC_DTTRAN") // 1 = ZFC_FILIAL+ZFC_CODIGO
        If _cDtTran $ "A,B,C,D,E,F"
-          IF _oModelGrid:GetValue("ZF5_ESTONO") = "S"
+          If _oModelGrid:GetValue("ZF5_ESTONO") = "S"
              _oModelGrid:SetValue("ZF5_ESTONO","N")
-             _oModelGrid:SetValue("ZF5_MOTCUS","Estorno Cancelado em "+Dtoc(Date())+" "+Substr(Time(),1,5)+" por "+Capital( AllTrim( UsrFullName( __cUserId ) ) ) )
-             U_ITmsg( 'Cancelamento do estorno da Ocorrencia feito com sucesso.' ,'Atenção',;
+             _oModelGrid:SetValue("ZF5_MOTCUS","Estorno Cancelado em "+DToC(Date())+" "+SubStr(Time(),1,5)+" por "+Capital( AllTrim( UsrFullName( __cUserId ) ) ) )
+             U_ITMsg( 'Cancelamento do estorno da Ocorrencia feito com sucesso.' ,'Atenção',;
                       "caso necessario, aperte o DEL nessa ocorrência novamente para estornar-lá.",2,,,.T.)
           Else
              _oModelGrid:SetValue("ZF5_ESTONO","S")
-             _oModelGrid:SetValue("ZF5_MOTCUS","Estornado em "+Dtoc(Date())+" "+Substr(Time(),1,5)+" por "+Capital( AllTrim( UsrFullName( __cUserId ) ) ) )
-             U_ITmsg( 'Ocorrencia estornada com sucesso.' ,'Atenção',;
+             _oModelGrid:SetValue("ZF5_MOTCUS","Estornado em "+DToC(Date())+" "+SubStr(Time(),1,5)+" por "+Capital( AllTrim( UsrFullName( __cUserId ) ) ) )
+             U_ITMsg( 'Ocorrencia estornada com sucesso.' ,'Atenção',;
                       "caso necessario, aperte o DEL nessa ocorrência novamente para cancelar o estorno.",2,,,.T.)
           EndIf
           _oModelGrid:SetValue("LEGENDA",AOMS03Leg(.T.))// REGRAVA A LEGENDA
           _lRet:= .F.
        EndIf
     EndIf
-    //************************************************************************************************************************************************//
-    // *******************  COLOQUE VALIDAÇOES NOVAS ANTES DESSE IF ACIMA POIS ELE ALTERA O CAMPO ZF5_ESTONO E LEGENDA ****************************** //
-    //************************************************************************************************************************************************//
-
+    //COLOQUE VALIDAÇOES NOVAS ANTES DESSE If ACIMA POIS ELE ALTERA O CAMPO ZF5_ESTONO E LEGENDA
+    
  End Sequence
 
 Return _lRet
@@ -3031,7 +3170,7 @@ User Function AOMS003E(_oModel)
            _oModelGrid:GoLine(_nI)
            _cEstonado:= _oModelGrid:GetValue("ZF5_ESTONO",_nI)
            If _cEstonado = "S" //SE ESTORNADO NÃO LE
-              LOOP
+              Loop
            EndIf
            _cSituacao := _oModelGrid:GetValue('ZF5_APRREJ')
 
@@ -3060,6 +3199,7 @@ Retorno   ------: True ou False.
 ===============================================================================================================================
 */
 User Function AOMS003R( _oModel, _nLinha)
+
  Local _lRet := .F.
  Local _aOrd := SaveOrd({"ZF5"})
  Local _nRegAtu := ZF5->(Recno())
@@ -3071,12 +3211,12 @@ User Function AOMS003R( _oModel, _nLinha)
  Local _cNotaFiscal, _cSerie, _cCodigo
 
  Begin Sequence
-    ZF5->(DbSetOrder(4)) // ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC+ZF5_CODIGO
+    ZF5->(DBSetOrder(4)) // ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC+ZF5_CODIGO
     _nTotCampos := ZF5->(FCount())
 
     For _nI := 1 To _nTotCampos
         If AOMS003CPO(AllTrim(ZF5->(FieldName(_nI))) , 2 )
-            Aadd(_aCpoDetail, AllTrim(ZF5->(FieldName(_nI))))
+            aAdd(_aCpoDetail, AllTrim(ZF5->(FieldName(_nI))))
         EndIf
     Next _nI
 
@@ -3084,12 +3224,10 @@ User Function AOMS003R( _oModel, _nLinha)
    _cSerie      := _oModelMaster:GetValue("ZF5_SEROC")
    _cCodigo     := _oModelGrid:GetValue("ZF5_CODIGO")
 
-   If ZF5->(DbSeek(xFilial("ZF5")+_cNotaFiscal+_cSerie+_cCodigo))
+   If ZF5->(DBSeek(xFilial("ZF5")+_cNotaFiscal+_cSerie+_cCodigo))
       For _nI := 1 To Len(_aCpoDetail)
-          //====================================================================================
           // Compara o conteúdo dos campos da base de dados com o conteúdo dos campos de grid,
           // e informa se houve alteração.
-          //====================================================================================
           If ZF5->&(_aCpoDetail[_nI]) <> _oModelGrid:GetValue(_aCpoDetail[_nI])
              _lRet := .T.
              Break
@@ -3100,7 +3238,7 @@ User Function AOMS003R( _oModel, _nLinha)
  End Sequence
 
  RestOrd(_aOrd)
- ZF5->(DbGoTo(_nRegAtu))
+ ZF5->(DBGoTo(_nRegAtu))
 
 Return _lRet
 
@@ -3115,6 +3253,7 @@ Retorno   ------: _vret - Dados para campo gatilhado
 ===============================================================================================================================
 */
 User Function AOMS003I()
+
  Local _vret
  Local _oModel
  Local _oModelMaster
@@ -3127,7 +3266,7 @@ User Function AOMS003I()
  If  !isincallstack("U_AOMS072")
 
 
-   IF POSICIONE("ZFD",1,xFilial("ZFD")+M->ZF5_STATUS,"ZFD_STATUS") == "E" .AND. EMPTY(_oModelGrid:GetValue("ZF5_USRFIN"))
+   If Posicione("ZFD",1,xFilial("ZFD")+M->ZF5_STATUS,"ZFD_STATUS") == "E" .And. Empty(_oModelGrid:GetValue("ZF5_USRFIN"))
 
          _vret := __cUserId
          _oModelGrid:SetValue('ZF5_HRFIN',time())
@@ -3135,11 +3274,11 @@ User Function AOMS003I()
            _oModelGrid:SetValue('ZF5_USRFIN', _vret)
          _oModelGrid:SetValue('ZF5_USNFIN', UsrFullName(_vret))
 
-   Elseif POSICIONE("ZFD",1,xFilial("ZFD")+M->ZF5_STATUS,"ZFD_STATUS") == "E"
+   ElseIf Posicione("ZFD",1,xFilial("ZFD")+M->ZF5_STATUS,"ZFD_STATUS") == "E"
 
          _vret := _oModelGrid:GetValue("ZF5_USRFIN")
 
-   Elseif POSICIONE("ZFD",1,xFilial("ZFD")+M->ZF5_STATUS,"ZFD_STATUS") != "E"
+   ElseIf Posicione("ZFD",1,xFilial("ZFD")+M->ZF5_STATUS,"ZFD_STATUS") != "E"
 
          _vret := "    "
          _oModelGrid:SetValue('ZF5_HRFIN',"   ")
@@ -3150,30 +3289,28 @@ User Function AOMS003I()
    EndIf
 
  Else
-
-
      nPosusrf := aScan(aHeader,{|x| AllTrim(x[2]) == "ZF5_USRFIN"})
      nPosdtf := aScan(aHeader,{|x| AllTrim(x[2]) == "ZF5_DTFIN"})
      nPoshrf := aScan(aHeader,{|x| AllTrim(x[2]) == "ZF5_HRFIN"})
      nPosusnf := aScan(aHeader,{|x| AllTrim(x[2]) == "ZF5_USNFIN"})
 
-     IF POSICIONE("ZFD",1,xFilial("ZFD")+M->ZF5_STATUS,"ZFD_STATUS") == "E" .AND. EMPTY(acols[n][nposusrf])
+     If Posicione("ZFD",1,xFilial("ZFD")+M->ZF5_STATUS,"ZFD_STATUS") == "E" .And. Empty(acols[n][nposusrf])
 
          _vret := __cUserId
-         acols[n][nPoshrf] := time()
-         acols[n][nPosdtf] := date()
+         acols[n][nPoshrf] := Time()
+         acols[n][nPosdtf] := Date()
            acols[n][nPosusrf] :=  _vret
          acols[n][nPosusnf] := UsrFullName(_vret)
 
-   Elseif POSICIONE("ZFD",1,xFilial("ZFD")+M->ZF5_STATUS,"ZFD_STATUS") == "E"
+   ElseIf Posicione("ZFD",1,xFilial("ZFD")+M->ZF5_STATUS,"ZFD_STATUS") == "E"
 
          _vret := acols[n][nPosusrf]
 
-   Elseif POSICIONE("ZFD",1,xFilial("ZFD")+M->ZF5_STATUS,"ZFD_STATUS") != "E"
+   ElseIf Posicione("ZFD",1,xFilial("ZFD")+M->ZF5_STATUS,"ZFD_STATUS") != "E"
 
          _vret := "    "
          acols[n][nPoshrf] := " "
-         acols[n][nPosdtf] := stod(" ")
+         acols[n][nPosdtf] := SToD(" ")
            acols[n][nPosusrf] :=  "  "
          acols[n][nPosusnf] := "  "
 
@@ -3204,7 +3341,7 @@ User Function AOMS003X(_cDados)
        Break
     EndIf
 
-    _cDados := Alltrim(_cDados)
+    _cDados := AllTrim(_cDados)
     _cListaChar := "0123456789 ABCDEFGHIJKLMNOPQRSTUVXYWZ"
 
     For _nI := 1 To Len(_cDados)
@@ -3234,7 +3371,8 @@ Retorno---------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS03M(_lAtuTel)
- LOCAL C
+
+ Local C
  Local _nI, _cExpr
 
  Private cAliasAux	:= GetNextAlias(),_cArqTrab
@@ -3243,40 +3381,37 @@ User Function AOMS03M(_lAtuTel)
  Private _lUsaMVC    := .F.
  Private _cNomeFonte := "AOMS003"
 
- IF _lAtuTel
+ If _lAtuTel
     aCampos:={"ZF5_STATUS","ZF5_STATUD","ZF5_DOCOC" ,"ZF5_SEROC" ,"ZF5_DMOTOR","ZF5_NREPRE","ZF5_NCOOR","ZF5_NCLIEN","ZF5_DATAE",;
               "ZF5_USNINI","ZF5_PEDIDO","ZF5_CLIENT","ZF5_LOJA"  ,"ZF5_MOTCUS","ZF5_ASSNOM","ZF5_CARGA","ZF5_DTINI" ,"ZF5_HRINI",;
               "ZF5_CODIGO","ZF5_TIPOO" ,"ZF5_MOTIVO","ZF5_AGENDA","ZF5_NTRANS","ZF5_TIPOC"}
- ELSE
+ Else
     aCampos:={"ZF5_STATUS","ZF5_STATUD","ZF5_DOCOC" ,"ZF5_SEROC" ,"ZF5_DATAE" ,"ZF5_ASSNOM","ZF5_CARGA","ZF5_DTINI" ,"ZF5_HRINI" ,;
               "ZF5_USNINI","ZF5_PEDIDO","ZF5_CLIENT","ZF5_LOJA"  ,"ZF5_NCLIEN","ZF5_NREPRE","ZF5_NCOOR","ZF5_DMOTOR","ZF5_MOTCUS",;
               "ZF5_CODIGO","ZF5_TIPOO" ,"ZF5_MOTIVO","ZF5_AGENDA","ZF5_NTRANS","ZF5_TIPOC"}
  EndIf
  Private _cPerg := "AOMS003"
 
- //AjustaSX1()
- //================================================================================
  // Valida a parametrização inicial e chama função para montagem da tela para
  // seleção das NF que terão os recebimentos de canhoto informados.
- //================================================================================
  If Pergunte(_cPerg,.T.)
     lRet:=.T.
     Processa( {|| lRet:=AOMS03P(.F.,_lAtuTel) } )
-    IF !lRet
-       U_ITMSG("Sem registros para essa seleção de dados","Atenção",,3)
-       RETURN
+    If !lRet
+       U_ITMsg("Sem registros para essa seleção de dados","Atenção",,3)
+       Return
     EndIf
- ELSE
-   RETURN
+ Else
+   Return
  EndIf
 
  FillGetDados(1,"ZF5",1,,,{||.T.},,,,,,.T.)
 
  _aFields:={}
- FOR C :=  1 TO LEN(aCampos)
+ For C :=  1 TO Len(aCampos)
      _cCampo := PadR(aCampos[C],10)
 
-     _nI := AsCan(aHeader,{|x| AllTrim(x[2]) == AllTrim(_cCampo)})
+     _nI := aScan(aHeader,{|x| AllTrim(x[2]) == AllTrim(_cCampo)})
 
      If _nI > 0
 
@@ -3285,11 +3420,11 @@ User Function AOMS03M(_lAtuTel)
         If _lAtuTel
            If AllTrim(_cCampo) $ "ZF5_DMOTOR/ZF5_NREPRE/ZF5_NCOOR/ZF5_NCLIEN"
               aAdd(_aFields,{ AllTrim( aHeader[_nI,1] )+" ( Tel. Atual )"      , aHeader[_nI,2], aHeader[_nI,8] , aHeader[_nI,4],aHeader[_nI,5],aHeader[_nI,3]})//+" Atual"
-              IF !Empty(_cExpr)
+              If !Empty(_cExpr)
                  _cBox:="{||" + _cExpr + "}"                                                                 //  Picture 0,Tamanho Decimal
                  aAdd(_aFields,{AllTrim(aHeader[_nI,1] )+" ( Tel. Atualizado )", &(_cBox)      , aHeader[_nI,8] ,"@!"   ,0,50     ,0      })
               EndIf
-              LOOP//////////////////// LOOP
+              Loop
            EndIf
         EndIf
 
@@ -3303,12 +3438,12 @@ User Function AOMS03M(_lAtuTel)
 
 
      EndIf
- NEXT C
+ Next C
 
  aHeader := {}
  aCols   := {}
 
- (cAliasAux)->( DBGOTOP() )
+ (cAliasAux)->( DBGoTop() )
  oMarkBRW:=FWMarkBrowse():New()		   											// Inicializa o Browse
  oMarkBRW:SetAlias( cAliasAux )			   										// Define Alias que será a Base do Browse
  oMarkBRW:SetDescription( "Ocorrencias de frete para ATUALIZAR TELEFONES" )	// Define o titulo do browse de marcacao
@@ -3316,18 +3451,18 @@ User Function AOMS03M(_lAtuTel)
  oMarkBRW:SetMenuDef( 'XXXXXX' )													// Força a utilização do menu da rotina atual
  oMarkBRW:SetAllMark( {|| oMarkBRW:AllMark()} )									// Ação do Clique no Header da Coluna de Marcação
 
- IF _lAtuTel
+ If _lAtuTel
     oMarkBRW:SetValid( {|| ((cAliasAux)->STATUS2="S") } )
     oMarkBRW:AddLegend('(cAliasAux)->STATUS2="S"',"RED"  , "DIFERENTE")// Permite adicionar legendas no Browse
     oMarkBRW:AddLegend('(cAliasAux)->STATUS2="N"',"GREEN", "IGUAL"    )// Permite adicionar legendas no Browse
- ELSE
-    oMarkBRW:AddLegend('POSICIONE("ZFD",1,xFilial("ZFD")+(cAliasAux)->ZF5_STATUS,"ZFD_STATUS")=="P"',"GREEN", "Pendente"     )// Permite adicionar legendas no Browse
-    oMarkBRW:AddLegend('POSICIONE("ZFD",1,xFilial("ZFD")+(cAliasAux)->ZF5_STATUS,"ZFD_STATUS")=="E"',"RED",   "Efetivado"    )// Permite adicionar legendas no Browse
-    oMarkBRW:AddLegend('POSICIONE("ZFD",1,xFilial("ZFD")+(cAliasAux)->ZF5_STATUS,"ZFD_STATUS")=="N"',"GRAY",  "Não Procede"  )// Permite adicionar legendas no Browse
-    oMarkBRW:AddLegend('POSICIONE("ZFD",1,xFilial("ZFD")+(cAliasAux)->ZF5_STATUS,"ZFD_STATUS")=="T"',"YELLOW","Em tratamento")// Permite adicionar legendas no Browse
+ Else
+    oMarkBRW:AddLegend('Posicione("ZFD",1,xFilial("ZFD")+(cAliasAux)->ZF5_STATUS,"ZFD_STATUS")=="P"',"GREEN", "Pendente"     )// Permite adicionar legendas no Browse
+    oMarkBRW:AddLegend('Posicione("ZFD",1,xFilial("ZFD")+(cAliasAux)->ZF5_STATUS,"ZFD_STATUS")=="E"',"RED",   "Efetivado"    )// Permite adicionar legendas no Browse
+    oMarkBRW:AddLegend('Posicione("ZFD",1,xFilial("ZFD")+(cAliasAux)->ZF5_STATUS,"ZFD_STATUS")=="N"',"GRAY",  "Não Procede"  )// Permite adicionar legendas no Browse
+    oMarkBRW:AddLegend('Posicione("ZFD",1,xFilial("ZFD")+(cAliasAux)->ZF5_STATUS,"ZFD_STATUS")=="T"',"YELLOW","Em tratamento")// Permite adicionar legendas no Browse
  EndIf
  oMarkBRW:SetFields( _aFields )													 		// Campos para exibição
- oMarkBRW:AddButton( "Confirmar"         , {|| Processa( {|| lRet:=AOMS03P(.T.,_lAtuTel) } )  } ,, 4 )// Adiciona um botão na área lateral do Browse //, IF(lRet,oMarkBRW:DeActivate(),)
+ oMarkBRW:AddButton( "Confirmar"         , {|| Processa( {|| lRet:=AOMS03P(.T.,_lAtuTel) } )  } ,, 4 )// Adiciona um botão na área lateral do Browse //, If(lRet,oMarkBRW:DeActivate(),)
  oMarkBRW:DisableConfig()                                                                // Desabilita a utilização das configurações do Browse
  oMarkBRW:Activate()																		// Ativacao da classe
 
@@ -3347,6 +3482,7 @@ Retorno---------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS03P(_lGravar,_lAtuTel)
+ 
  Local _aCpos := {}
  Local _cQuery:= "",_nTot:=0
  Local _cNomeArq, _cCodFilial
@@ -3355,71 +3491,71 @@ Static Function AOMS03P(_lGravar,_lAtuTel)
 
  ProcRegua(4)
 
- IF _lGravar
+ If _lGravar
 
-    IF (_lAtuTel .AND. U_ITMSG("Confirma o ATUALIZACAO dos registros Marcados?",'Atenção!',,2,2,2)) .OR.;
-       (!_lAtuTel .AND. U_ITMSG("Confirma o ENCERRAMENTO dos registros Marcados?",'Atenção!',,2,2,2))
+    If (_lAtuTel .And. U_ITMsg("Confirma o ATUALIZACAO dos registros Marcados?",'Atenção!',,2,2,2)) .OR.;
+       (!_lAtuTel .And. U_ITMsg("Confirma o ENCERRAMENTO dos registros Marcados?",'Atenção!',,2,2,2))
 
        IncProc("Gravando dados ...")
        _nTot:=0
        IncProc("Gravando dados ...")
        ProcRegua((cAliasAux)->(LASTREC()))
-       (cAliasAux)->(DBGOTOP())
-       nRecAux:=(cAliasAux)->( RECNO() )
+       (cAliasAux)->(DBGoTop())
+       nRecAux:=(cAliasAux)->( Recno() )
 
        _vret := __cUserId
        _cNomeUsr := UsrFullName(_vret)
 
-       DO WHILE (cAliasAux)->(!EOF())
+       While (cAliasAux)->(!Eof())
 
           IncProc("Gravando dados ...")
 
-           oMarkBRW:GoTo( (cAliasAux)->( RECNO() ) , .F. )
+           oMarkBRW:GoTo( (cAliasAux)->( Recno() ) , .F. )
 
              If oMarkBRW:IsMark()
 
-             nRecAux:=(cAliasAux)->( RECNO() )
-             IF _lAtuTel
-                oMarkBRW:GoTo( (cAliasAux)->( RECNO() ) , .T. )
-                ZF5->(DBGOTO( (cAliasAux)->REC_ZF5 ))
-                ZF5->(RECLOCK("ZF5",.F.))
+             nRecAux:=(cAliasAux)->( Recno() )
+             If _lAtuTel
+                oMarkBRW:GoTo( (cAliasAux)->( Recno() ) , .T. )
+                ZF5->(DBGoTo( (cAliasAux)->REC_ZF5 ))
+                ZF5->(RecLock("ZF5",.F.))
                 U_AOMS3Atu(.T.)
-             ELSE
-                ZF5->(DBGOTO( (cAliasAux)->REC_ZF5 ))
-                ZF5->(RECLOCK("ZF5",.F.))
+             Else
+                ZF5->(DBGoTo( (cAliasAux)->REC_ZF5 ))
+                ZF5->(RecLock("ZF5",.F.))
                 ZF5->ZF5_STATUS:="000001"
-                ZF5->ZF5_HRFIN := time()
-                ZF5->ZF5_DTFIN := date()
+                ZF5->ZF5_HRFIN := Time()
+                ZF5->ZF5_DTFIN := Date()
                 ZF5->ZF5_USRFIN:= _vret
                 ZF5->ZF5_USNFIN:= _cNomeUsr
              EndIf
-             ZF5->(MSUNLOCK())
+             ZF5->(MSUnLock())
              _nTot++
-             IF !_lAtuTel
+             If !_lAtuTel
                 (cAliasAux)->(DBDELETE())
              EndIf
 
           EndIf
-          (cAliasAux)->(DBSKIP())
+          (cAliasAux)->(DBSkip())
 
-       ENDDO
+       EndDo
 
     EndIf
 
-    (cAliasAux)->(DBGOTOP())
-     oMarkBRW:GoTo( nRecAux , .T. ) //(cAliasAux)->( RECNO() )
+    (cAliasAux)->(DBGoTop())
+     oMarkBRW:GoTo( nRecAux , .T. )
 
-    IF _nTot > 0
-       IF _lAtuTel
-          U_ITMSG("Registros atualizados: "+AlLTRIM(STR(_nTot)),"Atenção",,2)
-       ELSE
-          U_ITMSG("Registros encerrados: "+AlLTRIM(STR(_nTot)),"Atenção",,2)
+    If _nTot > 0
+       If _lAtuTel
+          U_ITMsg("Registros atualizados: "+AllTrim(Str(_nTot)),"Atenção",,2)
+       Else
+          U_ITMsg("Registros encerrados: "+AllTrim(Str(_nTot)),"Atenção",,2)
        EndIf
-    ELSE
-       U_ITMSG("Não foram marcados registros","Atenção",,1)
+    Else
+       U_ITMsg("Não foram marcados registros","Atenção",,1)
     EndIf
 
-    RETURN _nTot > 0
+    Return _nTot > 0
 
  EndIf
 
@@ -3440,16 +3576,16 @@ Static Function AOMS03P(_lGravar,_lAtuTel)
  _cQuery  	+= " WHERE ZF5.ZF5_FILIAL = '" + _cCodFilial + "'"
  _cQuery   	+= " AND ZF5.ZF5_DTFIN = '  ' AND ZF5.ZF5_NDEBIT <> 'S' "
 
- IF !EMPTY(MV_PAR03)
+ If !Empty(MV_PAR03)
     _cQuery += " AND ZF5.ZF5_CLIENT = '" + MV_PAR03 + "'
  EndIf
 
- IF !EMPTY(MV_PAR03) .AND. !EMPTY(MV_PAR04)
+ If !Empty(MV_PAR03) .And. !Empty(MV_PAR04)
     _cQuery  += " AND ZF5.ZF5_LOJA = '" + MV_PAR04 + "'
  EndIf
 
- IF !EMPTY(MV_PAR05) .AND. !EMPTY(MV_PAR06)
-    _cQuery  += " AND ZF5.ZF5_DTINI BETWEEN '" + DtoS(MV_PAR05) + "' AND '" + DtoS(MV_PAR06) + "' "
+ If !Empty(MV_PAR05) .And. !Empty(MV_PAR06)
+    _cQuery  += " AND ZF5.ZF5_DTINI BETWEEN '" + DToS(MV_PAR05) + "' AND '" + DToS(MV_PAR06) + "' "
  EndIf
 
  _cQuery  	+= " AND ZF5.D_E_L_E_T_ = ' ' AND ZF5.ZF5_STATUS IN ("
@@ -3461,14 +3597,14 @@ Static Function AOMS03P(_lGravar,_lAtuTel)
  _cQuery   	+= " AND ZFD.ZFD_STATUS <> 'E' "
  _cQuery  	+= " AND ZFD.D_E_L_E_T_ = ' ' )"
 
- IF !EMPTY(MV_PAR02)
+ If !Empty(MV_PAR02)
     _cQuery  	+= " AND ZF5.ZF5_DOCOC IN ("
     _cQuery	    += " SELECT SF2.F2_DOC "
     _cNomeArq   := RetSqlName("SF2")
     _cQuery  	+= " FROM " + _cNomeArq + " SF2"
     _cCodFilial := xFilial("SF2")
     _cQuery  	+= " WHERE SF2.F2_FILIAL = '" + _cCodFilial + "'"
-    _cQuery  	+= " AND SF2.F2_EMISSAO BETWEEN '" + DtoS(MV_PAR01) + "' AND '" + DtoS(MV_PAR02) + "' "
+    _cQuery  	+= " AND SF2.F2_EMISSAO BETWEEN '" + DToS(MV_PAR01) + "' AND '" + DToS(MV_PAR02) + "' "
     _cQuery  	+= " AND SF2.D_E_L_E_T_ = ' ' )"
  EndIf
  _cQuery += " ORDER BY ZF5.ZF5_DTINI,ZF5.ZF5_DOCOC "
@@ -3485,12 +3621,12 @@ Static Function AOMS03P(_lGravar,_lAtuTel)
 
  ProcRegua(_nTot)
 
- (cAlias)->(DbGoTop())
+ (cAlias)->(DBGoTop())
 
- Do While (cAlias)->(!Eof())
+ While (cAlias)->(!Eof())
 
     IncProc("4-Lendo dados ...")
-    ZF5->(DBGOTO( (cAlias)->REC_ZF5 ))
+    ZF5->(DBGoTo( (cAlias)->REC_ZF5 ))
 
     (cAliasAux)->( DBAPPEND() )
 
@@ -3502,61 +3638,25 @@ Static Function AOMS03P(_lGravar,_lAtuTel)
            &(_cCampoWork) := &(_cCampoZF5)
         EndIf
     Next _nI
-    IF _lAtuTel
+    If _lAtuTel
        (cAliasAux)->STATUS2:="N"//Algum Diferente? NÃO
-       IF ALLTRIM((cAliasAux)->ZF5_DMOTOR) <> ALLTRIM(U_AOMS003Z("ZF5_DMOTOR")) .OR.;
-          ALLTRIM((cAliasAux)->ZF5_NREPRE) <> ALLTRIM(U_AOMS003Z("ZF5_NREPRE")) .OR.;
-          ALLTRIM((cAliasAux)->ZF5_NCOOR ) <> ALLTRIM(U_AOMS003Z("ZF5_NCOOR" )) .OR.;
-          ALLTRIM((cAliasAux)->ZF5_NCLIEN) <> ALLTRIM(U_AOMS003Z("ZF5_NCLIEN"))
+       If AllTrim((cAliasAux)->ZF5_DMOTOR) <> AllTrim(U_AOMS003Z("ZF5_DMOTOR")) .OR.;
+          AllTrim((cAliasAux)->ZF5_NREPRE) <> AllTrim(U_AOMS003Z("ZF5_NREPRE")) .OR.;
+          AllTrim((cAliasAux)->ZF5_NCOOR ) <> AllTrim(U_AOMS003Z("ZF5_NCOOR" )) .OR.;
+          AllTrim((cAliasAux)->ZF5_NCLIEN) <> AllTrim(U_AOMS003Z("ZF5_NCLIEN"))
           (cAliasAux)->STATUS2:="S"//Algum Diferente? SIM
        EndIf
     EndIf
 
     (cAliasAux)->REC_ZF5:=(cAlias)->REC_ZF5
 
-    (cAlias)->(DBSKIP())
+    (cAlias)->(DBSkip())
 
  EndDo
 
  (cAlias)->(DBCloseArea() )
 
 Return _nTot > 0
-
-/*
-===============================================================================================================================
-Programa----------: AjustaSX1
-Autor-------------: Fabiano Dias
-Data da Criacao---: 04/07/2011
-Descrição---------: Funcao responsavel por verificar o cadastro das perguntas no SX1
-Parametros--------: Nenhum
-Retorno-----------: Nenhum
-===============================================================================================================================
-*/
-
-//Static Fun ction AjustaSX1()
-  /*
- Local _aHlpPor := {}
-  QAUNDO PRECISAR REABILITE A CHAMADA TB
- _aHlpPor := {{ 'Informe a data inicial de Emissao NFE' }}
- u_itputx1(_cPerg,"01","Dt Emissao NFE De?"," "," ","mv_ch1","D",8,0,0,"G","","","","","mv_par01","","","","","","","","","","","","","","","","",_aHlpPor,_aHlpPor,_aHlpPor)
-
- _aHlpPor :={ { 'Informe a data final de Emissao NFE' }}
- u_itputx1(_cPerg,"02","Dt Emissao NFE Ate?"," "," ","mv_ch2","D",8,0,0,"G","","","","","mv_par02","","","","","","","","","","","","","","","","",_aHlpPor,_aHlpPor,_aHlpPor)
-
- //Cliente
- aHelpPor := {{ 'Informe o cliente'}}
- u_itputx1(_cPerg,"03","Cliente"," "," ","mv_ch3","C",6,0,0,"G","","SA1","","","mv_par03","","","","","","","","","","","","","","","","",aHelpPor,aHelpPor,aHelpPor)
- //Loja
- aHelpPor := {{ 'Informe a loja do cliente'}   }
- u_itputx1(_cPerg,"04","Loja "," "," ","mv_ch4","C",4,0,0,"G","","","","","mv_par04","","","","","","","","","","","","","","","","",aHelpPor,aHelpPor,aHelpPor)
-
- _aHlpPor := {{ 'Informe a data inicial da Inclusao' }}
- u_itputx1(_cPerg,"05","Dt Inc Ocor De?"," "," ","mv_ch5","D",8,0,0,"G","","","","","mv_par05","","","","","","","","","","","","","","","","",_aHlpPor,_aHlpPor,_aHlpPor)
-
- _aHlpPor := {{ 'Informe a data final da Inclusao' }}
- u_itputx1(_cPerg,"06","Dt Inc Ocor Ate?"," "," ","mv_ch6","D",8,0,0,"G","","","","","mv_par06","","","","","","","","","","","","","","","","",_aHlpPor,_aHlpPor,_aHlpPor)
- */
-//Return()
 
 /*
 ===============================================================================================================================
@@ -3581,7 +3681,7 @@ User Function AOMS03T(_cNomeCampo)
    ElseIf AllTrim(_cNomeCampo) == "ZF5_DTCAR"
       //_cRet := 'U_AOMS003Z("ZF5_DTCAR")'
    ElseIf AllTrim(_cNomeCampo) == "ZF5_STATUD"
-      _cRet := 'POSICIONE("ZFD",1,XFILIAL("ZFD")+ZF5->ZF5_STATUS,"ZFD_DESCRI")'
+      _cRet := 'Posicione("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_DESCRI")'
    ElseIf AllTrim(_cNomeCampo) == "ZF5_CLIENT"
       //_cRet := 'U_AOMS003Z("ZF5_CLIENT")'
    ElseIf AllTrim(_cNomeCampo) == "ZF5_LOJA"
@@ -3650,7 +3750,7 @@ Retorno---------: _cRet = String com a função que deve ser retornada.
 */
 User Function AOMS003U(_cNomeCampo)
     Local _cRet := ""
-    ZF5->(DBGOTO( (cAliasAux)->REC_ZF5 ))
+    ZF5->(DBGoTo( (cAliasAux)->REC_ZF5 ))
 
     If AllTrim(_cNomeCampo) == "ZF5_STATE"
        If ZF5->ZF5_STATE == "V"
@@ -3702,7 +3802,6 @@ User Function AOMS003U(_cNomeCampo)
     EndIf
 Return _cRet
 
-
 /*
 ===============================================================================================================================
 Programa--------: AOMS003DT
@@ -3715,25 +3814,26 @@ Retorno---------: _lretorno - Se excluiu com sucesso
 ===============================================================================================================================
 */
 Static Function AOMS003DT(nRecZF5,_oModelGrid)
+
  Local _lretorno := .F.
  Local _aAutoSE2 := {}
  Local _aAreaSA2 := {}
  Local _lBloq := .F.
 
- AAdd( _aAutoSE2 , { "E2_FILIAL"    , SE2->E2_FILIAL     , nil } )
- AAdd( _aAutoSE2 , { "E2_PREFIXO"   , SE2->E2_PREFIXO , nil } )
- AAdd( _aAutoSE2 , { "E2_NUM"       , SE2->E2_NUM	     , nil } )
- AAdd( _aAutoSE2 , { "E2_PARCELA"	, SE2->E2_PARCELA    , nil } )
- AAdd( _aAutoSE2 , { "E2_TIPO"		, SE2->E2_TIPO	     , nil } )
- AAdd( _aAutoSE2 , { "E2_NATUREZ"	, SE2->E2_NATUREZ    , nil } )
- AAdd( _aAutoSE2 , { "E2_FORNECE"	, SE2->E2_FORNECE    , nil } )
- AAdd( _aAutoSE2 , { "E2_LOJA"		, SE2->E2_LOJA	     , nil } )
- AAdd( _aAutoSE2 , { "E2_EMISSAO"	, SE2->E2_EMISSAO    , nil } )
- AAdd( _aAutoSE2 , { "E2_VENCTO"    , SE2->E2_VENCTO     , nil } )
- AAdd( _aAutoSE2 , { "E2_VALOR"     , SE2->E2_VALOR      , nil } )
- AAdd( _aAutoSE2 , { "E2_HIST"		, SE2->E2_HIST       , Nil } )
- AAdd( _aAutoSE2 , { "E2_DATALIB"	, SE2->E2_DATALIB    , nil } )
- AAdd( _aAutoSE2 , { "E2_USUALIB"	, SE2->E2_USUALIB    , nil } )
+ aAdd( _aAutoSE2 , { "E2_FILIAL"    , SE2->E2_FILIAL     , nil } )
+ aAdd( _aAutoSE2 , { "E2_PREFIXO"   , SE2->E2_PREFIXO , nil } )
+ aAdd( _aAutoSE2 , { "E2_NUM"       , SE2->E2_NUM	     , nil } )
+ aAdd( _aAutoSE2 , { "E2_PARCELA"	, SE2->E2_PARCELA    , nil } )
+ aAdd( _aAutoSE2 , { "E2_TIPO"		, SE2->E2_TIPO	     , nil } )
+ aAdd( _aAutoSE2 , { "E2_NATUREZ"	, SE2->E2_NATUREZ    , nil } )
+ aAdd( _aAutoSE2 , { "E2_FORNECE"	, SE2->E2_FORNECE    , nil } )
+ aAdd( _aAutoSE2 , { "E2_LOJA"		, SE2->E2_LOJA	     , nil } )
+ aAdd( _aAutoSE2 , { "E2_EMISSAO"	, SE2->E2_EMISSAO    , nil } )
+ aAdd( _aAutoSE2 , { "E2_VENCTO"    , SE2->E2_VENCTO     , nil } )
+ aAdd( _aAutoSE2 , { "E2_VALOR"     , SE2->E2_VALOR      , nil } )
+ aAdd( _aAutoSE2 , { "E2_HIST"		, SE2->E2_HIST       , Nil } )
+ aAdd( _aAutoSE2 , { "E2_DATALIB"	, SE2->E2_DATALIB    , nil } )
+ aAdd( _aAutoSE2 , { "E2_USUALIB"	, SE2->E2_USUALIB    , nil } )
 
  lMsErroAuto := .F.
  _cAOMS074Vld:= ""
@@ -3743,23 +3843,23 @@ Static Function AOMS003DT(nRecZF5,_oModelGrid)
  _cLoja    := SE2->E2_LOJA
  _cSeekSE2 := SE2->E2_FILIAL+SE2->E2_PREFIXO+SE2->E2_NUM+SE2->E2_PARCELA+SE2->E2_TIPO+SE2->E2_FORNECE+SE2->E2_LOJA
 
- IF nRecZF5 > 0
-    ZF5->(DBGOTO(nRecZF5))
- ENDIF
+ If nRecZF5 > 0
+    ZF5->(DBGoTo(nRecZF5))
+ EndIf
  _cCodigo  := ZF5->ZF5_CODIGO
  _aAreaSA2 := GetArea("SA2")
 
  SA2->( DBSetOrder(1) )
- If SA2->(DbSeek( xFilial('SA2') + Alltrim(_cfornece) + Alltrim(_cloja) ))
+ If SA2->(DBSeek( xFilial('SA2') + AllTrim(_cfornece) + AllTrim(_cloja) ))
      If SA2->A2_MSBLQL == '1'
-         Help( ,, 'Atenção',, 'Erro ao excluir título: ' + SE2->E2_NUM + ' Parc.:' + SE2->E2_PARCELA + ' de nota de débito. Fornecedor informado ' + Alltrim(_cfornece) + " - " + Alltrim(_cloja) + ' encontra-se Bloqueado ou Inativo no cadastro de Fornecedores do Sistema!' , 1, 0, .F. )
+         Help( ,, 'Atenção',, 'Erro ao excluir título: ' + SE2->E2_NUM + ' Parc.:' + SE2->E2_PARCELA + ' de nota de débito. Fornecedor informado ' + AllTrim(_cfornece) + " - " + AllTrim(_cloja) + ' encontra-se Bloqueado ou Inativo no cadastro de Fornecedores do Sistema!' , 1, 0, .F. )
        _lBloq := .T.
      Else
        _lBloq := .F.
     EndIf
  EndIf
 
- RestArea(_aAreaSA2)
+ FWRestArea(_aAreaSA2)
 
  If _lBloq
     _lretorno := .F.
@@ -3769,30 +3869,30 @@ Static Function AOMS003DT(nRecZF5,_oModelGrid)
     nModulo   := 6
     cModulo   := "FIN"
 
-    fwmsgrun(,{ || MSExecAuto({|v,h,k,l,m,n,o| Fina050(v,h,k,l,m,n,o)},_aAutoSE2,,5,,,.F.,.T.)},"Aguarde...", "Excluindo título de nota de débito da Ocorrência " + STRZERO(VAL(_cCodigo),6)) //Exclusão
+    FWMsgRun(,{ || MSExecAuto({|v,h,k,l,m,n,o| Fina050(v,h,k,l,m,n,o)},_aAutoSE2,,5,,,.F.,.T.)},"Aguarde...", "Excluindo título de nota de débito da Ocorrência " + StrZero(Val(_cCodigo),6)) //Exclusão
 
-    If lMsErroAuto .OR. !EMPTY(_cAOMS074Vld)
-       U_ITmsg('Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Erro ao exclui título de nota de débito, ocorrência não será salva. Print essa e a proxima tela.','Atenção!',_cAOMS074Vld,,,,.T.)  //HELP PARA O MVC
+    If lMsErroAuto .Or. !Empty(_cAOMS074Vld)
+       U_ITMsg('Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Erro ao exclui título de nota de débito, ocorrência não será salva. Print essa e a proxima tela.','Atenção!',_cAOMS074Vld,,,,.T.)  //HELP PARA O MVC
        MostraErro()
     Else
 
-       SE2->(Dbsetorder(1))
-       If !(SE2->(DbSeek(_cSeekSE2)))
+       SE2->(DBSetOrder(1))
+       If !(SE2->(DBSeek(_cSeekSE2)))
 
            //Posiciona no registro gravado no banco para comparar
-           IF nRecZF5 > 0
-              ZF5->(DBGOTO(nRecZF5))
+           If nRecZF5 > 0
+              ZF5->(DBGoTo(nRecZF5))
               ZF5->(RecLock("ZF5",.F.))
               ZF5->ZF5_CHVNDT:=""
-              ZF5->(MSUNLOCK())
-             _oModelGrid:LoadValue('ZF5_CHVNDT',SPACE(LEN(ZF5->ZF5_CHVNDT)))
+              ZF5->(MSUnLock())
+             _oModelGrid:LoadValue('ZF5_CHVNDT',Space(Len(ZF5->ZF5_CHVNDT)))
           EndIf
 
            _lretorno := .T.
        Else
-          //Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Erro ao excluir título de nota de débito, ocorrência não será salva/apagada.' , 1, 0 )
+          //Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Erro ao excluir título de nota de débito, ocorrência não será salva/apagada.' , 1, 0 )
           //Não pode ser help senão sobrepõe a mensagem de help do erro do MSExecAuto/Fina050
-          U_ITMSG('Ocorrência ' + STRZERO(VAL(_cCodigo),6)  + ' - Erro ao excluir título de nota de débito, ocorrência não será salva/apagada.','Atenção!',,1)
+          U_ITMsg('Ocorrência ' + StrZero(Val(_cCodigo),6)  + ' - Erro ao excluir título de nota de débito, ocorrência não será salva/apagada.','Atenção!',,1)
        EndIf
 
     EndIf
@@ -3814,8 +3914,8 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-
 User Function AOMS003Y()
+
  Local i            := 0
  Local _cAlias      := GetNextAlias()
  Local _oModel      := FwModelActivete()
@@ -3825,7 +3925,7 @@ User Function AOMS003Y()
  Private nTam      := 0
  Private nMaxSelect:= 0
  Private aCat      := {}
- Private MvRet     := Alltrim(_oModelGrid:GetValue('ZF5_DVITEM'))
+ Private MvRet     := AllTrim(_oModelGrid:GetValue('ZF5_DVITEM'))
  Private MvPar     := ""
  Private cTitulo   := ""
  Private MvParDef  := ""
@@ -3833,26 +3933,26 @@ User Function AOMS003Y()
  M->ZF5_DVITEM := _oModelGrid:GetValue("ZF5_DVITEM")
  MvRet         := "M->ZF5_DVITEM"
 
- BEGIN SEQUENCE
+ Begin Sequence
 
  //Identifica fornecedor de nota de devolução
  If _oModelGrid:GetValue('ZF5_ORIDEV') != "I"
 
-    _cforn := alltrim(_oModelMaster:GetValue('ZF5_CLIENT'))
-    _clojaf := alltrim(_oModelMaster:GetValue('ZF5_LOJA'))
+    _cforn := AllTrim(_oModelMaster:GetValue('ZF5_CLIENT'))
+    _clojaf := AllTrim(_oModelMaster:GetValue('ZF5_LOJA'))
 
  Else
 
     _lachou := .F.
-    ZZM->(Dbsetorder(1))
-    If ZZM->(DbSeek(xfilial("ZZM")+cfilant))
+    ZZM->(DBSetOrder(1))
+    If ZZM->(DBSeek(xFilial("ZZM")+cfilant))
 
-       SA1->(Dbsetorder(3))
-       If SA1->(DbSeek(xfilial("SA1")+alltrim(ZZM->ZZM_CGC)))
+       SA1->(DBSetOrder(3))
+       If SA1->(DBSeek(xFilial("SA1")+AllTrim(ZZM->ZZM_CGC)))
 
           _lachou := .T.
-          _cforn := alltrim(SA1->A1_COD)
-          _clojaf := alltrim(SA1->A1_LOJA)
+          _cforn := AllTrim(SA1->A1_COD)
+          _clojaf := AllTrim(SA1->A1_LOJA)
 
        EndIf
 
@@ -3860,7 +3960,7 @@ User Function AOMS003Y()
 
     If !_lachou
 
-       u_itmsg("Devolução de origem Italac para filial não localizada em cadastro de clientes.","Atenção",,1)
+       U_ITMsg("Devolução de origem Italac para filial não localizada em cadastro de clientes.","Atenção",,1)
        Break
 
     EndIf
@@ -3876,19 +3976,19 @@ User Function AOMS003Y()
  _cQuery := 	" SELECT	D1_ITEM,D1_COD"
  _cQuery +=	" FROM  " + retsqlname("SD1")
  _cQuery +=  " WHERE	D_E_L_E_T_ = ' ' "
- _cQuery +=  " AND	D1_FILIAL = '" + cfilant + "' AND D1_DOC = '" + alltrim(_oModelGrid:GetValue('ZF5_DOCDEV')) + "' "
- _cQuery +=  " AND	D1_SERIE = '" +  alltrim(_oModelGrid:GetValue('ZF5_SERDEV')) + "' "
+ _cQuery +=  " AND	D1_FILIAL = '" + cfilant + "' AND D1_DOC = '" + AllTrim(_oModelGrid:GetValue('ZF5_DOCDEV')) + "' "
+ _cQuery +=  " AND	D1_SERIE = '" +  AllTrim(_oModelGrid:GetValue('ZF5_SERDEV')) + "' "
  _cQuery +=  " AND	D1_FORNECE = '" + _cforn + "' AND D1_LOJA = '" + _clojaf + "' "
  _cQuery +=  " ORDER BY D1_ITEM "
 
  _cAlias:=GetNextAlias()
  MPSysOpenQuery( _cQuery , _cAlias )
 
- (_cAlias)->(DBGotop())
+ (_cAlias)->(DBGoTop())
 
  If (_cAlias)->(Eof())
 
-    u_itmsg("Documento de devolução não localizado.","Atenção","Verifique se o documento de devolução já foi classificado",1)
+    U_ITMsg("Documento de devolução não localizado.","Atenção","Verifique se o documento de devolução já foi classificado",1)
     Break
 
  EndIf
@@ -3896,12 +3996,12 @@ User Function AOMS003Y()
  While !(_cAlias)->(Eof())
 
      MvParDef += (_cAlias)->D1_ITEM
-     aAdd(aCat,AllTrim((_cAlias)->D1_COD) + " - " +  posicione("SB1",1,xfilial("SB1")+AllTrim((_cAlias)->D1_COD),"B1_DESC"))
+     aAdd(aCat,AllTrim((_cAlias)->D1_COD) + " - " +  Posicione("SB1",1,xFilial("SB1")+AllTrim((_cAlias)->D1_COD),"B1_DESC"))
 
-    (_cAlias)->(dbSkip())
+    (_cAlias)->(DBSkip())
  EndDo
 
- (_cAlias)->(dbCloseArea())
+ (_cAlias)->(DBCloseArea())
 
  If Len(AllTrim(&MvRet)) == 0
      MvPar:= PadR(AllTrim(StrTran(&MvRet,"/","")),Len(aCat))
@@ -3915,17 +4015,17 @@ User Function AOMS003Y()
 
      //Tratamento para separar retorno com barra "/"
      &MvRet := ""
-     for i:=1 to Len(MvPar) step nTam
-         if !(SubStr(MvPar,i,1) $ " |*")
+     For i:=1 to Len(MvPar) step nTam
+         If !(SubStr(MvPar,i,1) $ " |*")
              &MvRet  += SubStr(MvPar,i,nTam) + "/"
          EndIf
-     next i
+     Next i
 
     _oModelGrid:LoadValue('ZF5_DVITEM',&MvRet)
 
  EndIf
 
- END SEQUENCE
+ End Sequence
 
 Return .T.
 
@@ -3940,6 +4040,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS003A()
+
  Local _cAlias      := GetNextAlias()
  Local _oModel      := FwModelActivete()
  Local _oModelGrid  := _oModel:GetModel("ZF5DETAIL")
@@ -3948,12 +4049,12 @@ User Function AOMS003A()
  Private nTam      := 0
  Private nMaxSelect:= 0
  Private aCat      := {}
- Private MvRet     := Alltrim(_oModelGrid:GetValue('ZF5_DOCDEV')) + "/" + Alltrim(_oModelGrid:GetValue('ZF5_SERDEV'))
+ Private MvRet     := AllTrim(_oModelGrid:GetValue('ZF5_DOCDEV')) + "/" + AllTrim(_oModelGrid:GetValue('ZF5_SERDEV'))
  Private MvPar     := ""
  Private cTitulo   := ""
  Private MvParDef  := ""
 
- _cRetorno := Alltrim(_oModelGrid:GetValue('ZF5_DOCDEV')) + Alltrim(_oModelGrid:GetValue('ZF5_SERDEV'))
+ _cRetorno := AllTrim(_oModelGrid:GetValue('ZF5_DOCDEV')) + AllTrim(_oModelGrid:GetValue('ZF5_SERDEV'))
 
  M->ZF5_DOCDEV := _oModelGrid:GetValue("ZF5_DOCDEV")
 
@@ -3961,21 +4062,21 @@ User Function AOMS003A()
  //Identifica fornecedor de nota de devolução
  If _oModelGrid:GetValue('ZF5_ORIDEV') != "I"
 
-   _cforn := alltrim(_oModelMaster:GetValue('ZF5_CLIENT'))
-   _clojaf := alltrim(_oModelMaster:GetValue('ZF5_LOJA'))
+   _cforn := AllTrim(_oModelMaster:GetValue('ZF5_CLIENT'))
+   _clojaf := AllTrim(_oModelMaster:GetValue('ZF5_LOJA'))
 
  Else
 
    _lachou := .F.
-   ZZM->(Dbsetorder(1))
-   If ZZM->(DbSeek(xfilial("ZZM")+cfilant))
+   ZZM->(DBSetOrder(1))
+   If ZZM->(DBSeek(xFilial("ZZM")+cfilant))
 
-      SA1->(Dbsetorder(3))
-      If SA1->(DbSeek(xfilial("SA1")+alltrim(ZZM->ZZM_CGC)))
+      SA1->(DBSetOrder(3))
+      If SA1->(DBSeek(xFilial("SA1")+AllTrim(ZZM->ZZM_CGC)))
 
          _lachou := .T.
-         _cforn := alltrim(SA1->A1_COD)
-         _clojaf := alltrim(SA1->A1_LOJA)
+         _cforn := AllTrim(SA1->A1_COD)
+         _clojaf := AllTrim(SA1->A1_LOJA)
 
       EndIf
 
@@ -3983,7 +4084,7 @@ User Function AOMS003A()
 
    If !_lachou
 
-      u_itmsg("Devolução de origem Italac para filial não localizada em cadastro de clientes.","Atenção",,1)
+      U_ITMsg("Devolução de origem Italac para filial não localizada em cadastro de clientes.","Atenção",,1)
       Break
 
    EndIf
@@ -3995,39 +4096,39 @@ User Function AOMS003A()
  nTam       := 13
  nMaxSelect := 1
  cTitulo    := "DOCUMENTOS DE DEVOLUÇÃO"
- _dlimit := date() - 180
+ _dlimit := Date() - 180
 
  _cQuery := 	" SELECT	F1_DOC,F1_SERIE,F1_EMISSAO"
  _cQuery +=	" FROM  " + retsqlname("SF1")
  _cQuery +=  " WHERE	D_E_L_E_T_ = ' ' "
- _cQuery +=  " AND	F1_FILIAL = '" + cfilant + "' AND F1_EMISSAO >= '" + dtos(_dlimit) + "' "
+ _cQuery +=  " AND	F1_FILIAL = '" + cfilant + "' AND F1_EMISSAO >= '" + DToS(_dlimit) + "' "
  _cQuery +=  " AND	F1_FORNECE = '" + _cforn + "' AND F1_LOJA = '" + _clojaf + "' "
  _cQuery +=  " ORDER BY F1_EMISSAO DEsC"
 
  MPSysOpenQuery( _cQuery , _cAlias )
 
- (_cAlias)->(DBGotop())
+ (_cAlias)->(DBGoTop())
 
  If (_cAlias)->(Eof())
 
-    u_itmsg("Documento de devolução não localizado.","Atenção","Verifique se o documento de devolução já foi classificado",1)
+    U_ITMsg("Documento de devolução não localizado.","Atenção","Verifique se o documento de devolução já foi classificado",1)
     Break
 
  EndIf
 
  While !(_cAlias)->(Eof())
      MvParDef += (_cAlias)->F1_DOC+"/"+(_cAlias)->F1_SERIE
-     aAdd(aCat,AllTrim((_cAlias)->F1_DOC) + " - " + AllTrim((_cAlias)->F1_SERIE) + " - " + dtoc(STOD(AllTrim((_cAlias)->F1_EMISSAO))) )
-     (_cAlias)->(dbSkip())
+     aAdd(aCat,AllTrim((_cAlias)->F1_DOC) + " - " + AllTrim((_cAlias)->F1_SERIE) + " - " + DToC(SToD(AllTrim((_cAlias)->F1_EMISSAO))) )
+     (_cAlias)->(DBSkip())
  EndDo
 
- (_cAlias)->(dbCloseArea())
+ (_cAlias)->(DBCloseArea())
 
  //Executa funcao que monta tela de opcoes
  If f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,.F.,nTam,nMaxSelect)
 
-    mvpar := strtran(mvpar,'*')
-    _cRetorno := SUBSTR(MVPAR,1,9) + SUBSTR(MVPAR,11,3)
+    mvpar := StrTran(mvpar,'*')
+    _cRetorno := SubStr(MVPAR,1,9) + SubStr(MVPAR,11,3)
 
  EndIf
 
@@ -4044,12 +4145,13 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS003B()
+
  Local _oModel:=FwModelActivete()
  Local _oModelGrid:=_oModel:GetModel("ZF5DETAIL")
  Local _cret:=_oModelGrid:GetValue('ZF5_SERDEV')
 
- If valtype(_cRetorno) == "C"
-    _cret := substr(_cRetorno,10,3)
+ If ValType(_cRetorno) == "C"
+    _cret := SubStr(_cRetorno,10,3)
  EndIf
 
 Return _cret
@@ -4061,7 +4163,7 @@ Autor-------------: Josué Danich Prestes
 Data da Criacao---: 02/04/2019
 Descrição---------: Exclui pedido de descarte posicionado
 Parametros--------: Nenhum (SC5 precisa estar posicionado)
-Retorno-----------: _lret - sucesso da operação
+Retorno-----------: _lRet - sucesso da operação
 ===============================================================================================================================
 */
 Static Function AOMS003DP()
@@ -4070,10 +4172,17 @@ Static Function AOMS003DP()
  Local _aItenPVEx := {}
  Local _oModel           := FwModelActivete()
  Local _oModelGrid       := _oModel:GetModel("ZF5DETAIL")
- Local _lret := .F.
+ Local _lRet := .F.
+ Local _cCodUsu := "" As Character
 
- _aCabcPVEx := {		   { "C5_FILIAL"  , SC5->C5_FILIAL           ,Nil},;
-                                { "C5_NUM"     , SC5->C5_NUM         	   ,Nil},;
+ If !_lJob
+    _cCodUsu	:= FWSFAllUsers({__cUserID},{"USR_FILIAL"})[1][3]+FWSFAllUsers({__cUserID},{"USR_CODFUNC"})[1][3]
+ Else
+    _cCodUsu	:= "SISTEMA"
+ EndIf
+
+ _aCabcPVEx := {		   { "C5_FILIAL"  , SC5->C5_FILIAL                 ,Nil},;
+                                { "C5_NUM"     , SC5->C5_NUM         	,Nil},;
                                 { "C5_TIPO"    , SC5->C5_TIPO    			,Nil},;
                                 { "C5_CLIENTE" , SC5->C5_CLIENTE 			,Nil},;
                                 { "C5_LOJACLI" , SC5->C5_LOJACLI 			,Nil},;
@@ -4082,20 +4191,21 @@ Static Function AOMS003DP()
                                 { "C5_TIPOCLI" , SC5->C5_TIPOCLI 			,Nil},;
                                 { "C5_CONDPAG" , SC5->C5_CONDPAG 			,Nil},;
                                 { "C5_VEND1"   , SC5->C5_VEND1   			,Nil},;
-                                { "C5_EMISSAO" , SC5->C5_EMISSAO        	,Nil},;
+                                { "C5_EMISSAO" , SC5->C5_EMISSAO        ,Nil},;
                                 { "C5_TPFRETE" , SC5->C5_TPFRETE 			,Nil},;
                                 { "C5_VOLUME1" , SC5->C5_VOLUME1 			,Nil},;
                                 { "C5_ESPECI1" , SC5->C5_ESPECI1 			,Nil},;
                                 { "C5_TPCARGA" , SC5->C5_TPCARGA 			,Nil},;
                                 { "C5_I_AGEND" , SC5->C5_I_AGEND 			,Nil},;
                                 { "C5_I_ENVRD" , "N"                		,Nil},;
-                                  { "C5_I_IDPED" , SC5->C5_I_IDPED			   ,Nil} }
+                                { "C5_I_IDPED" , SC5->C5_I_IDPED			,Nil},;
+                                { "C5_I_CDUSU" 	, _cCodUsu	            ,Nil }} // Codigo Usuario
 
 
- SC6->(Dbsetorder(1))
- If SC6->(DbSeek(SC5->C5_FILIAL+SC5->C5_NUM))
+ SC6->(DBSetOrder(1))
+ If SC6->(DBSeek(SC5->C5_FILIAL+SC5->C5_NUM))
 
-    Do while SC5->C5_NUM == SC6->C6_NUM .AND. SC5->C5_FILIAL == SC6->C6_FILIAL
+    While SC5->C5_NUM == SC6->C6_NUM .And. SC5->C5_FILIAL == SC6->C6_FILIAL
 
        aAdd( _aItenPVEx , {	{ "C6_FILIAL"  , SC6->C6_FILIAL	,Nil},;
                                                           { "C6_ITEM"    , SC6->C6_ITEM		,Nil},;
@@ -4109,15 +4219,15 @@ Static Function AOMS003DP()
                                                           { "C6_LOCAL"   , SC6->C6_LOCAL	,Nil},;
                                                           { "C6_NUM"     , SC6->C6_NUM		,Nil}})
 
-       SC6->(Dbskip())
+       SC6->(DBSkip())
 
-    Enddo
+    EndDo
 
  EndIf
 
  lMsErroAuto := .F.
 
- fwmsgrun(,{ || MSExecAuto( {|x,y,z| Mata410(x,y,z) } , _aCabcPVEx , _aItenPVEx , 5 )},"Aguarde","Excluindo pedido de descarte...")
+ FWMsgRun(,{ || MSExecAuto( {|x,y,z| Mata410(x,y,z) } , _aCabcPVEx , _aItenPVEx , 5 )},"Aguarde","Excluindo pedido de descarte...")
 
  If lMsErroAuto
 
@@ -4128,23 +4238,23 @@ Static Function AOMS003DP()
  Else
 
     //Valida se o pedido ainda existe
-    SC5->(Dbsetorder(1))
-    If SC5->(DbSeek(_aCabcPVEx[1][2]+_aCabcPVEx[2][2]))
+    SC5->(DBSetOrder(1))
+    If SC5->(DBSeek(_aCabcPVEx[1][2]+_aCabcPVEx[2][2]))
 
        Help( ,, 'Atenção',, 'Não foi possível excluir pedido de descarte, ocorrência não será excluída!' , 1, 0, .F. )
        _lRet := .F.
 
     Else
 
-       _oModelGrid:LoadValue('ZF5_PEDDEV',space(6))
-       _cpeddev := SPACE(6)
-       _lret := .T.
+       _oModelGrid:LoadValue('ZF5_PEDDEV',Space(6))
+       _cpeddev := Space(6)
+       _lRet := .T.
 
     EndIf
 
  EndIf
 
-Return _lret
+Return _lRet
 
 /*
 ===============================================================================================================================
@@ -4161,7 +4271,8 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS003J(_cNotaFiscal,_cserie, _lvalidado,_lAuto, _cMotiCanc ,_cMotcus )
- Local _cEmail := u_itgetmv("IT_OCORAV1", "" )
+
+ Local _cEmail := SuperGetMV("IT_OCORAV1",.T.,"")
  Local _cAnexo := " "
  Local oAssunto
  Local _cAssunto := "Solicitação de cancelamento de cobrança da nota fiscal " + _cNotaFiscal + "/" + _cSerie + " da filial " + cfilant
@@ -4186,7 +4297,11 @@ User Function AOMS003J(_cNotaFiscal,_cserie, _lvalidado,_lAuto, _cMotiCanc ,_cMo
  Local cGetMens	:= ""
  Local cGetPara	:= _cEmail + Space(150)
  Local _aAreSM0:= SM0->(FwGetArea()) As Array
-
+ Local _cSuperv
+ Local _cEmailsup
+ Local _oModel       := FwModelActivete()
+ Local _oModelMaster := _oModel:GetModel("ZF5MASTER") 
+ Local _cNrPedV      := AllTrim(_oModelMaster:GetValue("ZF5_PEDIDO"))
 
  Default _lvalidado := .F.
  Default _lAuto     := .F.
@@ -4195,45 +4310,55 @@ User Function AOMS003J(_cNotaFiscal,_cserie, _lvalidado,_lAuto, _cMotiCanc ,_cMo
 
  Private oDlgMail
 
-  If SuperGetMV("IT_AMBTEST",.F.,.T.)
+  If !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
      cGetPara:= AllTrim(UsrRetMail(__cUserId))+Space(99)
  EndIf
 
-
  //Valida se ocorrência pode emitir aviso de devolução
  //Se status está encerrando, valida se já existe nota de débito
-
-
  If !_lAuto
    If ! _lvalidado
 
-      If ! POSICIONE("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS") == "E"
-         U_Itmsg("Ocorrência não está encerrada!","Atenção",,1)
+      If ! Posicione("ZFD",1,xFilial("ZFD")+ZF5->ZF5_STATUS,"ZFD_STATUS") == "E"
+         U_ITMsg("Ocorrência não está encerrada!","Atenção",,1)
          Return
       EndIf
 
-      If ! U_Itmsg("Envia e-mail de cancelamento de cobrança para nota " + _cNotaFiscal + " com ocorrência de devolução?","Atenção",'Item ' + ALLTRIM(ZF5->ZF5_CODIGO),2,2,2)
-         U_Itmsg("Envio de e-mail cancelado.","Atenção",,1)
+      If ! U_ITMsg("Envia e-mail de cancelamento de cobrança para nota " + _cNotaFiscal + " com ocorrência de devolução?","Atenção",'Item ' + AllTrim(ZF5->ZF5_CODIGO),2,2,2)
+         U_ITMsg("Envio de e-mail cancelado.","Atenção",,1)
          Return
       EndIf
 
-      _cMotiCanc := ZF5->ZF5_TIPOO + "-" + ALLTRIM(ZF5->ZF5_MOTIVO)
-      _cMotcus   := ALLTRIM(ZF5->ZF5_MOTCUS)
+      _cMotiCanc := ZF5->ZF5_TIPOO + "-" + AllTrim(ZF5->ZF5_MOTIVO)
+      _cMotcus   := AllTrim(ZF5->ZF5_MOTCUS)
 
    EndIf
  EndIf
 
+//==========================================  
+// Obtem E-mail do supervisor
+//==========================================
+_cSuperv   := Posicione('SC5',1,xFilial("SC5")+_cNrPedV,'C5_VEND4')
+_cEmailsup := ""
+
+If ! Empty(_cSuperv)
+   _cEmailsup := AllTrim(Posicione("SA3",1,xfilial("SA3")+_cSuperv,"A3_EMAIL") )
+   If ! Empty(_cEmailsup)
+      cGetPara := AllTrim(cGetPara) + ";" + _cEmailsup
+   EndIf 
+EndIf 
+
  _cTel  :=""
  PswOrder(1)
  PSWSEEK(__cUserId , .T. )
- If (Len(PswRet()) # 0) // Quando nao for rotina automatica do configurador
+ If (Len(PswRet()) # 0) // Quando nao For rotina automatica do configurador
      _cSetor:= AllTrim(PswRet()[1][12])		// Pega departamento do usuario
  EndIf
 
- If EMPTY(_cSetor)
+ If Empty(_cSetor)
       _cSetor := "Logistica"
  EndIf
- If EMPTY(_cTel)
+ If Empty(_cTel)
     _cTel:=AllTrim( Posicione('SM0',1,"01"+cFilant,'M0_TEL') )
  EndIf
 
@@ -4243,7 +4368,7 @@ User Function AOMS003J(_cNotaFiscal,_cserie, _lvalidado,_lAuto, _cMotiCanc ,_cMo
  cHtml += '&nbsp;&nbsp;&nbsp;Favor confirmar o recebimento, retornando com o seu CIENTE!'
  cHtml += '<br><br>'
  cHtml += 'Ocorrência: ' + AllTrim(_cMotiCanc)
- IF !EMPTY(M->ZF5_MOTCUS)
+ If !Empty(M->ZF5_MOTCUS)
     cHtml += '<br>'
     cHtml += 'Motivo do Custo: ' + AllTrim(M->ZF5_MOTCUS)
  EndIf
@@ -4299,8 +4424,8 @@ User Function AOMS003J(_cNotaFiscal,_cserie, _lvalidado,_lAuto, _cMotiCanc ,_cMo
  cHtml +=             '<span style="font-size:12.0pt;font-family:'+"'"+'Times New Roman'+"'"+','+"'"+'serif'+"'"+';mso-fareast-language:PT-BR"></span></p>
  cHtml +=             '<p class=MsoNormal style="mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;text-align:justify">'
  cHtml +=             '<span style="font-size:7.5pt;font-family:'+"'"+'Times New Roman'+"'"+','+"'"+'serif'+"'"+';color:#1D2668;mso-fareast-language:PT-BR">
- cHtml +=                 'Esta mensagem é destinada exclusivamente para fins profissionais, para a(s) pessoa(s) a quem for dirigida, podendo conter informação confidencial e legalmente privilegiada. '
- cHtml +=                 'Ao recebê-la, se você não for destinatário desta mensagem, fica automaticamente notificado de abster-se a divulgar, copiar, distribuir, examinar ou, de qualquer forma, utilizar '
+ cHtml +=                 'Esta mensagem é destinada exclusivamente para fins profissionais, para a(s) pessoa(s) a quem For dirigida, podendo conter informação confidencial e legalmente privilegiada. '
+ cHtml +=                 'Ao recebê-la, se você não For destinatário desta mensagem, fica automaticamente notificado de abster-se a divulgar, copiar, distribuir, examinar ou, de qualquer forma, utilizar '
  cHtml +=                 'sua informação, por configurar ato ilegal. Caso você tenha recebido esta mensagem indevidamente, solicitamos que nos retorne este e-mail, promovendo, concomitantemente sua '
  cHtml +=                 'eliminação de sua base de dados, registros ou qualquer outro sistema de controle. Fica desprovida de eficácia e validade a mensagem que contiver vínculos obrigacionais, expedida '
  cHtml +=                 'por quem não detenha poderes de representação, bem como não esteja legalmente habilitado para utilizar o referido endereço eletrônico, configurando falta grave conforme nossa '
@@ -4313,36 +4438,21 @@ User Function AOMS003J(_cNotaFiscal,_cserie, _lvalidado,_lAuto, _cMotiCanc ,_cMo
  cHtml += '</table>'
 
  If !_lAuto
-   DEFINE MSDIALOG oDlgMail TITLE "E-Mail" FROM 000, 000  TO 415, 584 COLORS 0, 16777215 PIXEL
+   DEFINE MSDIALOG oDlgMail TITLE "E-Mail" FROM 000, 000  TO 415, 584  PIXEL
 
-      //======
-      // Para:
-      //======
-      @ 005, 006 SAY oPara PROMPT "Para:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
-      @ 005, 030 MSGET oGetPara VAR cGetPara SIZE 256, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 PIXEL
-
-      //===========
-      // Com cópia:
-      //===========
-      @ 021, 006 SAY oCc PROMPT "Cc:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
-      @ 021, 030 MSGET oGetCc VAR cGetCc SIZE 256, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 PIXEL
-
-      //=========
-      // Assunto:
-      //=========
-      @ 037, 006 SAY oAssunto PROMPT "Assunto:" SIZE 022, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
-      @ 037, 030 MSGET oGetAssun VAR cGetAssun SIZE 256, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 PIXEL
-
-      //==========
-      // Mensagem:
-      //==========
-      @ 069, 006 SAY oMens PROMPT "Mensagem:" SIZE 030, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+      @ 005, 006 Say oPara PROMPT "Para:" SIZE 015, 007 OF oDlgMail  PIXEL
+      @ 005, 030 MSGET oGetPara VAR cGetPara SIZE 256, 010 OF oDlgMail PICTURE "@x"  PIXEL
+      @ 021, 006 Say oCc PROMPT "Cc:" SIZE 015, 007 OF oDlgMail  PIXEL
+      @ 021, 030 MSGET oGetCc VAR cGetCc SIZE 256, 010 OF oDlgMail PICTURE "@x"  PIXEL
+      @ 037, 006 Say oAssunto PROMPT "Assunto:" SIZE 022, 007 OF oDlgMail  PIXEL
+      @ 037, 030 MSGET oGetAssun VAR cGetAssun SIZE 256, 010 OF oDlgMail PICTURE "@x"  PIXEL
+      @ 069, 006 Say oMens PROMPT "Mensagem:" SIZE 030, 007 OF oDlgMail  PIXEL
       _oFont		:= TFont():New( 'Courier new' ,, 12 , .F. )
       _oScrAux	:= TSimpleEditor():New( 080 , 006 , oDlgMail , 285 , 105 ,,,,, .T. )
 
       _oScrAux:Load( cHtml )
 
-      @ 189, 201 BUTTON oButEnv PROMPT "&Enviar"		SIZE 037, 012 OF oDlgMail ACTION ( nOpcA := 1 , cHtml := _oScrAux:RetText() , oDlgMail:End() ) PIXEL
+      @ 189, 201 BUTTON oButEnv PROMPT "&Enviar"	SIZE 037, 012 OF oDlgMail ACTION ( nOpcA := 1 , cHtml := _oScrAux:RetText() , oDlgMail:End() ) PIXEL
       @ 189, 245 BUTTON oButCan PROMPT "&Cancelar"	SIZE 037, 012 OF oDlgMail ACTION ( nOpcA := 2 , oDlgMail:End() ) PIXEL
 
    ACTIVATE MSDIALOG oDlgMail CENTERED
@@ -4354,22 +4464,21 @@ User Function AOMS003J(_cNotaFiscal,_cserie, _lvalidado,_lAuto, _cMotiCanc ,_cMo
 
      cGetMens := AOMS003TT(cGetMens)
 
-     //====================================
      // Chama a função para envio do e-mail
-     //====================================
-     U_ITENVMAIL( Lower(AllTrim(UsrRetMail(__cUserId))), cGetPara, cGetCc, cMailCom, cGetAssun, cHtml, cGetAnx, _aConfig[01], _aConfig[02], _aConfig[03], _aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog )
+     U_ITENVMAIL( Lower(AllTrim(UsrRetMail(__cUserId))), cGetPara, cGetCc, cMailCom, cGetAssun, cHtml, cGetAnx, _aConfig[01], _aConfig[02], _aConfig[03], _aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog ) 
 
-     U_ITMSG( _cEmlLog+CHR(10) +CHR(13)+"PARA: "+ALLTRIM(cGetPara)+CHR(10) +CHR(13)+"CC: "+ALLTRIM(cGetCc) , 'Término do processamento!' , ,3 )
+     U_ITMsg( _cEmlLog+CHR(10) +CHR(13)+"PARA: "+AllTrim(cGetPara)+CHR(10) +CHR(13)+"CC: "+AllTrim(cGetCc) , 'Término do processamento!' , ,3 )
 
     _lEnviou := .T.
 
  Else
-     u_itmsg( 'Envio de e-mail cancelado pelo usuário.' , 'Atenção!' , ,1 )
+     U_ITMsg( 'Envio de e-mail cancelado pelo usuário.' , 'Atenção!' , ,1 )
 
     _lEnviou := .F.
 
  EndIf
 FwRestArea(_aAreSM0)
+
 Return
 
 /*
@@ -4383,6 +4492,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS003TT(cGetMens)
+
  Local aTexto	:= StrTokArr( cGetMens, chr(10)+chr(13) )
  Local cRet		:= ""
  Local nI		:= 0
@@ -4405,6 +4515,7 @@ Retorno-----------: _lRet = .T. ou .F.
 ===============================================================================================================================
 */
 User Function AOMS003N(_oModel, _nLinha, _cAcao, _cCampo)
+
  Local _lRet := .T.
  Local _cNotaFiscal
  Local _cSerie
@@ -4412,28 +4523,28 @@ User Function AOMS003N(_oModel, _nLinha, _cAcao, _cCampo)
  Local _cCodigo
  Local _oModelMaster  := _oModel:GetModel("ZF5MASTER")
  Local _nI, _nLinAtu
- Local _cCodSinist := AllTrim(U_ITGETMV( 'IT_CODSINIS' , '000026'))
+ Local _cCodSinist := AllTrim(SuperGetMV( 'IT_CODSINI',.T.,'000026'))
  Local _cUsersHab := SuperGetMV("IT_USPROTI",.F.,"") As Character
 
  Begin Sequence
 
     _cNotaFiscal:= _oModelMaster:GetValue("ZF5MASTER","ZF5_DOCOC")
     _cSerie     := _oModelMaster:GetValue("ZF5MASTER","ZF5_SEROC")
-    _cLojat     := Posicione("SF2",1,xfilial("SF2")+_cNotaFiscal+_cSerie,"F2_I_LTRA")
+    _cLojat     := Posicione("SF2",1,xFilial("SF2")+_cNotaFiscal+_cSerie,"F2_I_LTRA")
     _nLinAtu    := _oModel:GetLine()
-    _cCodigo    := Alltrim(str(val(_oModel:GetValue('ZF5_CODIGO'))))  // Código da ocorrência por nota
+    _cCodigo    := AllTrim(Str(Val(_oModel:GetValue('ZF5_CODIGO'))))  // Código da ocorrência por nota
 
     If _oModel:IsInserted(_nLinAtu) .Or. _oModel:IsUpdated(_nLinAtu)
-         ZFC->(DbSetOrder(1))
-         If ZFC->(DbSeek(xFilial("ZFC")+_oModel:GetValue("ZF5_TIPOO")))
+         ZFC->(DBSetOrder(1))
+         If ZFC->(DBSeek(xFilial("ZFC")+_oModel:GetValue("ZF5_TIPOO")))
             If ZFC->ZFC_PROTIT == "S"
-               If !(RetCodUsr() $ _cUsersHab) .AND. _oModel:GetValue("ZF5_DPRORR") > 0
+               If !(RetCodUsr() $ _cUsersHab) .And. _oModel:GetValue("ZF5_DPRORR") > 0
                   _lRet := .F.
-                  Help( ,, 'Atenção',, 'Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Usuário não tem permissão para usar este tipo de Ocorrencia.', 1, 0, .F. )
+                  Help( ,, 'Atenção',, 'Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Usuário não tem permissão para usar este tipo de Ocorrencia.', 1, 0, .F. )
                   Break
                Else
                   If _oModel:GetValue("ZF5_DPRORR") == 0
-                      U_ITMSG('Ocorrência ' + STRZERO(VAL(_cCodigo),6) + ' - Atenção pois esta ocorrencia esta sendo incluída ou atualizada com dias de prorrogação igual a 0.',"Atenção",,3)
+                      U_ITMsg('Ocorrência ' + StrZero(Val(_cCodigo),6) + ' - Atenção pois esta ocorrencia esta sendo incluída ou atualizada com dias de prorrogação igual a 0.',"Atenção",,3)
                   EndIf
                EndIf
             EndIf
@@ -4444,40 +4555,40 @@ User Function AOMS003N(_oModel, _nLinha, _cAcao, _cCampo)
        Break
     EndIf
 
-    SE2->(Dbsetorder(1)) // E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
+    SE2->(DBSetOrder(1)) // E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
 
     If _oModel:IsInserted(_nLinAtu) .Or. _oModel:IsUpdated(_nLinAtu)
 
        For _nI := 1 To _oModel:Length()
            _oModel:GoLine( _nI )
-           _cCodigo := Alltrim(str(val(_oModel:GetValue('ZF5_CODIGO',_nI))))  // Código da ocorrência por nota
+           _cCodigo := AllTrim(Str(Val(_oModel:GetValue('ZF5_CODIGO',_nI))))  // Código da ocorrência por nota
            _cChave  := _oModel:GetValue('ZF5_CHVNDT',_nI)  // Chave: SE2->E2_FILIAL+SE2->E2_PREFIXO+SE2->E2_NUM+SE2->E2_PARCELA
            _cFornece:= ""
            _cLoja   := ""
            If _oModel:GetValue('ZF5_TIPOC')  == "T"
-              _cFornece := ALLTRIM(_oModel:GetValue("ZF5_TRANSP"))
+              _cFornece := AllTrim(_oModel:GetValue("ZF5_TRANSP"))
               _cLoja    := _oModel:GetValue("ZF5_LJTRAN")
-           Elseif _oModel:GetValue('ZF5_TIPOC')  == "3"
+           ElseIf _oModel:GetValue('ZF5_TIPOC')  == "3"
               _cFornece := _oModel:GetValue("ZF5_FORTER")
               _cLoja    := _oModel:GetValue("ZF5_LOJTER")
-           Endif
+           EndIf
 
-           IF !EMPTY(_cChave)
-              IF LEN(ALLTRIM(_cChave)) = LEN(SE2->E2_FILIAL+SE2->E2_PREFIXO+SE2->E2_NUM)//CHAVE SEM PARCELA
+           If !Empty(_cChave)
+              If Len(AllTrim(_cChave)) = Len(SE2->E2_FILIAL+SE2->E2_PREFIXO+SE2->E2_NUM)//CHAVE SEM PARCELA
                  _cSeekSE2:=_cChave + "01" + "NDF"+_cFornece+_cLoja//A chave e o cfilant já estam com a filai certa
               Else//CHAVE COM PARCELA - NOVO
                  _cSeekSE2:=_cChave + "NDF"+_cFornece+_cLoja//A chave e o cfilant já estam com a filai certa
-              Endif
+              EndIf
               _cMostra:=_cSeekSE2
-           ELSE//CHAVE ANTIGA
-              _cSeekSE2:=xfilial("SE2")+"NDT"+SUBSTR(_cNotaFiscal,2,8) + _cCodigo + "01" + "NDF"
+           Else//CHAVE ANTIGA
+              _cSeekSE2:=xFilial("SE2")+"NDT"+SubStr(_cNotaFiscal,2,8) + _cCodigo + "01" + "NDF"
            EndIf
 
-           If SE2->(DbSeek(_cSeekSE2))
-              IF EMPTY(_cChave)
+           If SE2->(DBSeek(_cSeekSE2))
+              If Empty(_cChave)
                  _cMostra:=_cSeekSE2+SE2->E2_FORNECE+SE2->E2_LOJA
-              ENDIF
-              U_ITMSG("Já existe uma nota de débito com a Chave: " + _cMostra + ", lançada para este mesmo tipo de ocorrencia.","Atenção",,1)
+              EndIf
+              U_ITMsg("Já existe uma nota de débito com a Chave: " + _cMostra + ", lançada para este mesmo tipo de ocorrencia.","Atenção",,1)
               Break
            EndIf
 
@@ -4500,6 +4611,7 @@ Retorno-----------: _lRet = .T.
 ===============================================================================================================================
 */
 User Function AOMS003O(_oModel)
+
  Local _oModelMaster := _oModel:GetModel("ZF5MASTER") As Object
  Local _oModelGrid   := _oModel:GetModel("ZF5DETAIL") As Object
  Local _nOperation   := _oModel:GetOperation() As Numeric
@@ -4524,17 +4636,17 @@ User Function AOMS003O(_oModel)
        _cMercEntreg := _oModelMaster:GetValue("ZF5_MERENT")
        _cSitEntreg  := _oModelMaster:GetValue("ZF5_SITENT")
 
-       ZF5->(DbSetOrder(1)) // 1 => ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC
+       ZF5->(DBSetOrder(1)) // 1 => ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC
        ZF5->(MsSeek(xFilial("ZF5")+_cNotaFiscal+_cSerie))
-       Do While ! ZF5->(Eof()) .And. ZF5->(ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC) == xFilial("ZF5")+_cNotaFiscal+_cSerie
+       While ! ZF5->(Eof()) .And. ZF5->(ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC) == xFilial("ZF5")+_cNotaFiscal+_cSerie
           ZF5->(RecLock("ZF5",.F.))
           ZF5->ZF5_MERENT := _cMercEntreg
           ZF5->ZF5_SITENT := _cSitEntreg
-          ZF5->(MsUnLock())
-          ZF5->(DbSkip())
+          ZF5->(MSUnLock())
+          ZF5->(DBSkip())
        EndDo
 
-       ZF5->(DbGoTo(_nRegAtu))
+       ZF5->(DBGoTo(_nRegAtu))
 
     EndIf
 
@@ -4543,15 +4655,15 @@ User Function AOMS003O(_oModel)
         For _nI := 1 to _nLinhas
           _oModel:GetModel('ZF5DETAIL'):GoLine( _nI )
 
-            ZFC->(DbSetOrder(1))
-            If ZFC->(DbSeek(xFilial("ZFC")+_oModelGrid:GetValue("ZF5_TIPOO")))
+            ZFC->(DBSetOrder(1))
+            If ZFC->(DBSeek(xFilial("ZFC")+_oModelGrid:GetValue("ZF5_TIPOO")))
                 If _oModelGrid:GetValue("ZF5_DPRORR") > 0
-                    ZFC->(DbSetOrder(1))
-                    If ZFC->(DbSeek(xFilial("ZFC")+_oModelGrid:GetValue("ZF5_TIPOO")))
+                    ZFC->(DBSetOrder(1))
+                    If ZFC->(DBSeek(xFilial("ZFC")+_oModelGrid:GetValue("ZF5_TIPOO")))
                         If ZFC->ZFC_PROTIT == "S" 
-                            ZM4->(dbSetOrder(1))
-                            If !(ZM4->(DbSeek(xFilial("ZM4")+_cNotaFiscal+_cSerie+"NF "+_oModelGrid:GetValue("ZF5_CODIGO"))))
-                                If !_oModelGrid:IsDeleted() .AND. _oModelGrid:IsUpdated()
+                            ZM4->(DBSetOrder(1))
+                            If !(ZM4->(DBSeek(xFilial("ZM4")+_cNotaFiscal+_cSerie+"NF "+_oModelGrid:GetValue("ZF5_CODIGO"))))
+                                If !_oModelGrid:IsDeleted() .And. _oModelGrid:IsUpdated()
                                     ZM4->(RecLock("ZM4",.T.))
                                     ZM4->ZM4_FILIAL := xFilial("ZM4")
                                     ZM4->ZM4_DOC    := _cNotaFiscal
@@ -4559,15 +4671,15 @@ User Function AOMS003O(_oModel)
                                     ZM4->ZM4_TIPO   := "NF"
                                     ZM4->ZM4_CODIGO := _oModelGrid:GetValue("ZF5_CODIGO")
                                     ZM4->ZM4_DTSOL  := Date()
-                                    ZM4->ZM4_SOLICI := __cUserID
+                                    ZM4->ZM4_SOLICI := __cUserId
                                     ZM4->ZM4_STATUS := "N"
-                                    ZM4->(MsUnLock())
+                                    ZM4->(MSUnLock())
                                 EndIf
                             Else
                                 If _oModelGrid:IsDeleted()
                                     ZM4->(RecLock("ZM4",.F.))
                                     ZM4->(DbDelete())
-                                    ZM4->(MsUnLock())
+                                    ZM4->(MSUnLock())
                                 EndIf
                             EndIf
                         EndIf
@@ -4576,14 +4688,14 @@ User Function AOMS003O(_oModel)
             EndIf
         Next _nI
         _aREcZF5:={}
-        ZF5->(dbSetOrder(1))
-        If ZF5->(dbSeek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE))
-            DO WHILE ZF5->(!EOF()) .AND. SF2->F2_FILIAL == ZF5->ZF5_FILIAL;
-                                   .AND. SF2->F2_DOC    == ZF5->ZF5_DOCOC;
-                                   .AND. SF2->F2_SERIE  == ZF5->ZF5_SEROC
-                AADD(_aREcZF5,ZF5->(RECNO()) )
-                ZF5->(DBSKIP())
-            ENDDO
+        ZF5->(DBSetOrder(1))
+        If ZF5->(DBSeek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE))
+            While ZF5->(!Eof()) .And. SF2->F2_FILIAL == ZF5->ZF5_FILIAL;
+                                   .And. SF2->F2_DOC    == ZF5->ZF5_DOCOC;
+                                   .And. SF2->F2_SERIE  == ZF5->ZF5_SEROC
+                aAdd(_aREcZF5,ZF5->(RECNO()) )
+                ZF5->(DBSkip())
+            EndDo
         EndIf
         U_AOMS3DTSF2("AOMS003",_aREcZF5,_oModel)//FUNÇÃO CHAMADA NO AOMS072 e AOMS074 e M460FIM
     EndIf
@@ -4591,14 +4703,16 @@ User Function AOMS003O(_oModel)
  End Transaction
 
  If _lEmail
-    FOR _nI := 1 TO LEN(_aDadosEmailCom)
-        AOMS3Comercial(_aDadosEmailCom[_nI])
+    _cMensagem:=""
+    _nTipo:=2
+    For _nI := 1 TO Len(_aDadosEmailCom)
+        U_AOMS3Comercial(_aDadosEmailCom[_nI])
     Next _nI
+    U_ITMsg(_cMensagem,"Envio do E-MAIL",,_nTipo)
     _lEmail := .F.
  EndIf
 
 Return .T.
-
 
 /*
 ===============================================================================================================================
@@ -4612,57 +4726,61 @@ Retorno-----------: .F. ou .T.
 ===============================================================================================================================
 */
 User Function ReplDatasTransTime( _nRecnoSF2Atual , lTestarNF)//CHAMADA DA AOMS074.PRW TAMBEM
- LOCAL _lRet:=.F. , T
- LOCAL _aOrd:= SaveOrd({"SC5","SF2"}) // Salva a ordem dos indices.
 
- Local _cOperTriangular:= ALLTRIM(U_ITGETMV( "IT_OPERTRI","05,42"))// Tipos de operações da operação trigular
+ Local _lRet:=.F. , T
+ Local _aOrd:= SaveOrd({"SC5","SF2"}) // Salva a ordem dos indices.
+
+ Local _cOperTriangular:= AllTrim(SuperGetMV("IT_OPERTRI",.T.,"05,42"))// Tipos de operações da operação trigular
  Local _cOperRemessa   := RIGHT(_cOperTriangular,2)//42
 
- LOCAL _xF2_DTRC := SF2->F2_I_DTRC  // Entrega no Cliente (Dt.Canhoto)
- LOCAL _xF2_PENOL:= SF2->F2_I_PENOL // Previsão de entrega no operador logístico
- LOCAL _xF2_PENCL:= SF2->F2_I_PENCL // Previsão de entrega no cliente
- LOCAL _xF2_DCHOL:= SF2->F2_I_DCHOL // Data de chegada no operador logístico
- LOCAL _xF2_DCHCL:= SF2->F2_I_DCHCL // Data de chegada no cliente
- LOCAL _xF2_DENCL:= SF2->F2_I_DENCL // Data de entrega no cliente **
- LOCAL _xF2_DENOL:= SF2->F2_I_DENOL // Data de entrega no operador logístico  EDI  **
- LOCAL _xF2_PENCO:= SF2->F2_I_PENCO // Previsão de entrega no cliente (original)
- LOCAL _xF2_OUSER:= SF2->F2_I_OUSER // Usuario Informou o Op.Log
- LOCAL _xF2_ODATA:= SF2->F2_I_ODATA // Data inf.
- LOCAL _xF2_OHORA:= SF2->F2_I_OHORA // Hora Inf.
- LOCAL _xF2_CUSER:= SF2->F2_I_CUSER // Usuário de aprovação do canhoto.
- LOCAL _xF2_CDATA:= SF2->F2_I_CDATA // Data de digitação do Canhoto.
- LOCAL _xF2_CHORA:= SF2->F2_I_CHORA // hora de digitação do Canhoto.
- LOCAL _xF2_CORIG:= SF2->F2_I_CORIG // Origem
- LOCAL _xF2_TT1TR:= SF2->F2_I_TT1TR // Transit Time 1o Trecho
- LOCAL _xF2_TT2TR:= SF2->F2_I_TT2TR // Transit Time 2o Trecho
- LOCAL _xF2_REDP := SF2->F2_I_REDP  // Transportadora de redespacho
- LOCAL _xF2_RELO := SF2->F2_I_RELO  // Loja Transportadora de redespacho
- LOCAL _xF2_OPER := SF2->F2_I_OPER  // Operador Logistico
- LOCAL _xF2_OPLO := SF2->F2_I_OPLO  // Loja do Operador Logistico
- LOCAL _cOBSC    := ""
+ Local _xF2_DTRC := SF2->F2_I_DTRC  // Entrega no Cliente (Dt.Canhoto)
+ Local _xF2_PENOL:= SF2->F2_I_PENOL // Previsão de entrega no operador logístico
+ Local _xF2_PENCL:= SF2->F2_I_PENCL // Previsão de entrega no cliente
+ Local _xF2_DCHOL:= SF2->F2_I_DCHOL // Data de chegada no operador logístico
+ Local _xF2_DCHCL:= SF2->F2_I_DCHCL // Data de chegada no cliente
+ Local _xF2_DENCL:= SF2->F2_I_DENCL // Data de entrega no cliente **
+ Local _xF2_DENOL:= SF2->F2_I_DENOL // Data de entrega no operador logístico  EDI  **
+ Local _xF2_PENCO:= SF2->F2_I_PENCO // Previsão de entrega no cliente (original)
+ Local _xF2_OUSER:= SF2->F2_I_OUSER // Usuario Informou o Op.Log
+ Local _xF2_ODATA:= SF2->F2_I_ODATA // Data inf.
+ Local _xF2_OHORA:= SF2->F2_I_OHORA // Hora Inf.
+ Local _xF2_CUSER:= SF2->F2_I_CUSER // Usuário de aprovação do canhoto.
+ Local _xF2_CDATA:= SF2->F2_I_CDATA // Data de digitação do Canhoto.
+ Local _xF2_CHORA:= SF2->F2_I_CHORA // hora de digitação do Canhoto.
+ Local _xF2_CORIG:= SF2->F2_I_CORIG // Origem
+ Local _xF2_TT1TR:= SF2->F2_I_TT1TR // Transit Time 1o Trecho
+ Local _xF2_TT2TR:= SF2->F2_I_TT2TR // Transit Time 2o Trecho
+ Local _xF2_REDP := SF2->F2_I_REDP  // Transportadora de redespacho
+ Local _xF2_RELO := SF2->F2_I_RELO  // Loja Transportadora de redespacho
+ Local _xF2_OPER := SF2->F2_I_OPER  // Operador Logistico
+ Local _xF2_OPLO := SF2->F2_I_OPLO  // Loja do Operador Logistico
+ Local _xF2_OLRDT:= SF2->F2_I_OLRDT // Data do redirecionamento para operador logístico
+ Local _xF2_OLRCD:= SF2->F2_I_OLRCD // Código do operador logístico do redirecionamento
+ Local _xF2_OLRLJ:= SF2->F2_I_OLRLJ // Loja do operador logístico do redirecionamento
+ Local _cOBSC    := ""
 
- LOCAL aRecsSF2    := {}
- LOCAL _nRegrTriFat:= 0
- LOCAL _nRegrTransf:= 0
- LOCAL _nRegSF2    := 0
- LOCAL _nRegCopia  := 0
+ Local aRecsSF2    := {}
+ Local _nRegrTriFat:= 0
+ Local _nRegrTransf:= 0
+ Local _nRegSF2    := 0
+ Local _nRegCopia  := 0
 
- SC5->(Dbsetorder(1))
- If SC5->(DbSeek(SF2->F2_FILIAL+ALLTRIM(SF2->F2_I_PEDID)))
-    SF2->(Dbsetorder(1)) //F2_FILIAL+F2_DOC+F2_SERIE
+ SC5->(DBSetOrder(1))
+ If SC5->(DBSeek(SF2->F2_FILIAL+AllTrim(SF2->F2_I_PEDID)))
+    SF2->(DBSetOrder(1)) //F2_FILIAL+F2_DOC+F2_SERIE
     
-    // ------------------ CONTROLE DA TRIANGULAR ------------------ //
-    IF SC5->C5_I_OPER = _cOperRemessa//42 ***** REMESSA ******
-       If SC5->(DbSeek(SC5->C5_FILIAL+SC5->C5_I_PVFAT))// POSICIONA NO PV DE FATURAMENTO (05)
+    //CONTROLE DA TRIANGULAR
+    If SC5->C5_I_OPER = _cOperRemessa//42 ***** REMESSA ******
+       If SC5->(DBSeek(SC5->C5_FILIAL+SC5->C5_I_PVFAT))// POSICIONA NO PV DE FATURAMENTO (05)
           _cOBSC:= "CANHOTO CONF NA NOTA DE REMESSA "+SF2->F2_FILIAL + "/" + SF2->F2_DOC//Pega o numero da nota antes de desposicionar
-          IF SF2->(DbSeek(SC5->C5_FILIAL+SC5->C5_NOTA+SC5->C5_SERIE))
+          If SF2->(DBSeek(SC5->C5_FILIAL+SC5->C5_NOTA+SC5->C5_SERIE))
              _nRegrTriFat:= SF2->(RECNO()) //GUARDA A POSIÇÃO DA SF2 NA NOTA NO PV DE FATURAMENTO (05)
              _nRegCopia  := _nRegrTriFat
           EndIf
        EndIf
-    ElseIF lTestarNF // 05 ***** FATURAMENTO *****
-       If SC5->(DbSeek(SC5->C5_FILIAL+SC5->C5_I_PVREM))// POSICIONA NO PV DE REMESSA (42)
-          IF SF2->(DbSeek(SC5->C5_FILIAL+SC5->C5_NOTA+SC5->C5_SERIE))
+    ElseIf lTestarNF // 05 ***** FATURAMENTO *****
+       If SC5->(DBSeek(SC5->C5_FILIAL+SC5->C5_I_PVREM))// POSICIONA NO PV DE REMESSA (42)
+          If SF2->(DBSeek(SC5->C5_FILIAL+SC5->C5_NOTA+SC5->C5_SERIE))
              _cOBSC:= "CANHOTO CONF NA NOTA DE REMESSA "+SF2->F2_FILIAL + "/" + SF2->F2_DOC//Pega o numero da nota depois de posicionar
              _nRegrTriFat:= SF2->(RECNO()) //GUARDA A POSIÇÃO DA SF2 NA NOTA NO PV DE REMESSA (42)
              _nRegCopia  := _nRegrTriFat
@@ -4670,17 +4788,17 @@ User Function ReplDatasTransTime( _nRecnoSF2Atual , lTestarNF)//CHAMADA DA AOMS0
        EndIf
     EndIf
 
-    // ------------------ CONTROLE DA TROCA NOTA ------------------ //
-    IF SC5->C5_I_TRCNF == "S" .AND. SC5->C5_NUM == SC5->C5_I_PDFT .AND. SC5->C5_I_OPER <> "20"// É PEDIDO DE FATURAMENTO (# 20), ATUALIZA O CARREGAMENTO (20)
-       If SC5->(DbSeek(SC5->C5_I_FLFNC+SC5->C5_I_PDPR))
+    // CONTROLE DA TROCA NOTA
+    If SC5->C5_I_TRCNF == "S" .And. SC5->C5_NUM == SC5->C5_I_PDFT .And. SC5->C5_I_OPER <> "20"// É PEDIDO DE FATURAMENTO (# 20), ATUALIZA O CARREGAMENTO (20)
+       If SC5->(DBSeek(SC5->C5_I_FLFNC+SC5->C5_I_PDPR))
           _cOBSC:= "CANHOTO CONF NA NOTA DE FATURAMENTO "+SF2->F2_FILIAL + "/" + SF2->F2_DOC  // Pega o numero da nota antes de desposicionar
-          IF SF2->(DbSeek(SC5->C5_I_FLFNC+SC5->C5_NOTA+SC5->C5_SERIE))
+          If SF2->(DBSeek(SC5->C5_I_FLFNC+SC5->C5_NOTA+SC5->C5_SERIE))
             _nRegrTransf:= SF2->(RECNO()) // GUARDA A POSIÇÃO DA SF2 DA NOTA DE PV DE CARREGAMENTO
           EndIf
        EndIf
-    ElseIF lTestarNF .AND. SC5->C5_I_TRCNF == "S" .AND. SC5->C5_NUM == SC5->C5_I_PDPR // É PEDIDO DE CARREGAMENTO (20) , ATUALIZA O FATURAMENTO (# 20)
-       If SC5->(DbSeek(SC5->C5_I_FLFNC+SC5->C5_I_PDFT))
-          IF SF2->(DbSeek(SC5->C5_I_FLFNC+SC5->C5_NOTA+SC5->C5_SERIE))
+    ElseIf lTestarNF .And. SC5->C5_I_TRCNF == "S" .And. SC5->C5_NUM == SC5->C5_I_PDPR // É PEDIDO DE CARREGAMENTO (20) , ATUALIZA O FATURAMENTO (# 20)
+       If SC5->(DBSeek(SC5->C5_I_FLFNC+SC5->C5_I_PDFT))
+          If SF2->(DBSeek(SC5->C5_I_FLFNC+SC5->C5_NOTA+SC5->C5_SERIE))
              _cOBSC:= "CANHOTO CONF NA NOTA DE FATURAMENTO "+SF2->F2_FILIAL + "/" + SF2->F2_DOC//Pega o numero da nota depois de posicionar
              _nRegrTransf:= SF2->(RECNO()) //  GUARDA A POSIÇÃO DA SF2 DA NOTA DE PV DE FATURAMENTO
           EndIf
@@ -4689,13 +4807,13 @@ User Function ReplDatasTransTime( _nRecnoSF2Atual , lTestarNF)//CHAMADA DA AOMS0
     aRecsSF2:={_nRegrTriFat,_nRegrTransf}
  EndIf
 
- FOR T := 1 TO LEN(aRecsSF2)
+ For T := 1 TO Len(aRecsSF2)
      _nRegSF2:=aRecsSF2[T]
 
-     IF _nRegSF2 > 0
+     If _nRegSF2 > 0
 
-        SF2->(Dbgoto(_nRegSF2))
-        SF2->(Reclock("SF2",.F.))
+        SF2->(DBGoTo(_nRegSF2))
+        SF2->(RecLock("SF2",.F.))
 
         SF2->F2_I_DTRC  := _xF2_DTRC  // Entrega no Cliente (Dt.Canhoto)
         SF2->F2_I_PENOL := _xF2_PENOL // Previsão de entrega no operador logístico
@@ -4715,21 +4833,24 @@ User Function ReplDatasTransTime( _nRecnoSF2Atual , lTestarNF)//CHAMADA DA AOMS0
         SF2->F2_I_TT1TR := _xF2_TT1TR // Transit Time 1o Trecho
         SF2->F2_I_TT2TR := _xF2_TT2TR // Transit Time 2o Trecho
         SF2->F2_I_OBRC  := _cOBSC     // Observacao
-        IF _nRegCopia = _nRegSF2
+        SF2->F2_I_OLRDT := _xF2_OLRDT // Data do redirecionamento para operador logístico
+        SF2->F2_I_OLRCD := _xF2_OLRCD // Código do operador logístico do redirecionamento
+        SF2->F2_I_OLRLJ := _xF2_OLRLJ // Loja do operador logístico do redirecionamento
+        If _nRegCopia = _nRegSF2
            SF2->F2_I_REDP  := _xF2_REDP  // Transportadora de redespacho
            SF2->F2_I_RELO  := _xF2_RELO  // Loja Transportadora de redespacho
            SF2->F2_I_OPER  := _xF2_OPER  // Operador Logistico
            SF2->F2_I_OPLO  := _xF2_OPLO  // Loja do Operador Logistico
         EndIf
-        SF2->(Msunlock())
+        SF2->(MSUnLock())
         _lRet:=.T.
      EndIf
- NEXT T
+ Next T
 
  RestOrd(_aOrd)
- SF2->(DBGOTO(_nRecnoSF2Atual))
+ SF2->(DBGoTo(_nRecnoSF2Atual))
 
-RETURN _lRet
+Return _lRet
 
 /*
 ===============================================================================================================================
@@ -4742,6 +4863,7 @@ Retorno-----------: _lRet = .T.
 ===============================================================================================================================
 */
 User Function AOMS03MP(_oModel)
+ 
  Local _lRet := .T.
  Local _nI
  Local _nOperation   := _oModel:GetOperation()
@@ -4761,7 +4883,7 @@ User Function AOMS03MP(_oModel)
               _oModelGrid:GoLine(_nI)
               _cCodigo := _oModelGrid:GetValue('ZF5_CODIGO')
 
-              Aadd(_aItOcorre,{_cNrNf,_cSerieNf,_cCodigo, xFilial("ZF5"),_nI})
+              aAdd(_aItOcorre,{_cNrNf,_cSerieNf,_cCodigo, xFilial("ZF5"),_nI})
           Next _nI
        EndIf
     EndIf
@@ -4781,7 +4903,8 @@ Parametros--------: _aDadosOcorrencia = _aDadosEmailCom[E] as Static
 Retorno-----------: .T.
 ===============================================================================================================================
 */
-Static Function AOMS3Comercial(_aDadosOcorrencia As Array) As Logical
+User Function AOMS3Comercial(_aDadosOcorrencia As Array) As Logical
+ 
  Local _aConfig       := U_ITCFGEML('') , E  As Numeric, _nI As Numeric
  Local _cEmlLog       := "" As Character
  Local _cMsgEml       := "" As Character
@@ -4790,13 +4913,13 @@ Static Function AOMS3Comercial(_aDadosOcorrencia As Array) As Logical
  Local _cNomeFil      := cFilant+" - "+AllTrim( Posicione('SM0',1,"01"+cFilant,'M0_FILIAL') ) As Character
  Local cTit           := "" As Character
  Local cGetAssun      := "" As Character
- Local _cOperTria     := ALLTRIM(U_ITGETMV( "IT_OPERTRI","05,42")) As Character
+ Local _cOperTria     := AllTrim(SuperGetMV("IT_OPERTRI",.T.,"05,42")) As Character
  Local _cOperFat      := LEFT(_cOperTriangular,2) As Character //05
  Local _cOperRemessa  := RIGHT(_cOperTriangular,2) As Character //42
  Local _cZPG_EMAIL    := "" As Character
  Local _cRepresentante:= "" As Character
  Local _cCoordenador  := "" As Character
- Local _cFilsEnviaEm  := ALLTRIM(U_ITGETMV( "IT_OCOPMAIL","")) As Character
+ Local _cFilsEnviaEm  := AllTrim(SuperGetMV( "IT_OCOPMAI",.T.,"")) As Character
  Local _cNomeSA2      := "" As Character
  Local _cOpCod        := "" As Character
  Local _cOPLoja       := "" As Character
@@ -4807,81 +4930,95 @@ Static Function AOMS3Comercial(_aDadosOcorrencia As Array) As Logical
  Local _cCNPJCarre    := "" As Character
  Local _cEndCarre     := "" As Character
  Local _cBairroCarre  := "" As Character
+ Local _cEmailsup     := "" As Character 
 
- IF !EMPTY(_cFilsEnviaEm) .AND. !cFilAnt $ _cFilsEnviaEm
-    RETURN .F.
+ If !Empty(_cFilsEnviaEm) .And. !cFilAnt $ _cFilsEnviaEm
+    Return .F.
  EndIf
 
  M->ZF5_DTOCOR := _aDadosOcorrencia[01]
- M->ZF5_CODIGO := ALLTRIM(_aDadosOcorrencia[02])
- M->ZF5_MOTIVO := ALLTRIM(_aDadosOcorrencia[03])
- M->ZF5_MOTCUS := ALLTRIM(_aDadosOcorrencia[04])
- M->ZF5_TIPOO  := ALLTRIM(_aDadosOcorrencia[05])
- M->ZF5_TRANSP := ALLTRIM(_aDadosOcorrencia[06])
- M->ZF5_LJTRAN := ALLTRIM(_aDadosOcorrencia[07])
- M->ZF5_NTRANS := ALLTRIM(_aDadosOcorrencia[08])
+ M->ZF5_CODIGO := AllTrim(_aDadosOcorrencia[02])
+ M->ZF5_MOTIVO := AllTrim(_aDadosOcorrencia[03])
+ M->ZF5_MOTCUS := AllTrim(_aDadosOcorrencia[04])
+ M->ZF5_TIPOO  := AllTrim(_aDadosOcorrencia[05])
+ M->ZF5_TRANSP := AllTrim(_aDadosOcorrencia[06])
+ M->ZF5_LJTRAN := AllTrim(_aDadosOcorrencia[07])
+ M->ZF5_NTRANS := AllTrim(_aDadosOcorrencia[08])
  cTit          := "OCORRENCIA "+M->ZF5_MOTIVO
- cGetAssun     := cTit+" - Filial: "+_cNomeFil+" - Nfe: "+M->ZF5_DOCOC+" - Data Ocorrência: "+DTOC(M->ZF5_DTOCOR)+ " - Sequencia "+M->ZF5_CODIGO
+ cGetAssun     := cTit+" - Filial: "+_cNomeFil+" - Nfe: "+M->ZF5_DOCOC+" - Data Ocorrência: "+DToC(M->ZF5_DTOCOR)+ " - Sequencia "+M->ZF5_CODIGO
 
- SF2->(DBSETORDER(1))
- SF2->(DbSeek(xFilial("SF2")+M->ZF5_DOCOC+ALLTRIM(M->ZF5_SEROC)))
- SC5->(DBSETORDER(1))
- SC5->(DbSeek(SF2->(F2_FILIAL+F2_I_PEDIDO)))
+ SF2->(DBSetOrder(1))
+ SF2->(DBSeek(xFilial("SF2")+M->ZF5_DOCOC+AllTrim(M->ZF5_SEROC)))
+ SC5->(DBSetOrder(1))
+ SC5->(DBSeek(SF2->(F2_FILIAL+F2_I_PEDIDO)))
 
- IF !EMPTY(SC5->C5_VEND1)
-    _cRepresentante:=AllTrim(Posicione("SA3",1,xfilial("SA3")+SC5->C5_VEND1,"A3_EMAIL") )
+ If !Empty(SC5->C5_VEND1)
+    _cRepresentante:=AllTrim(Posicione("SA3",1,xFilial("SA3")+SC5->C5_VEND1,"A3_EMAIL") )
  EndIf
- IF !EMPTY(SC5->C5_VEND2)
+ If !Empty(SC5->C5_VEND2)
     _cCoordenador:=AllTrim(Posicione("SA3",1,xFilial("SA3")+SC5->C5_VEND2,"A3_EMAIL"))
  EndIf
- IF !EMPTY(SC5->C5_ASSCOD)
-    _cZPG_EMAIL:=ALLTRIM(POSICIONE("ZPG",1,xFilial("ZPG")+SC5->C5_ASSCOD,"ZPG_EMAIL"))
+ If !Empty(SC5->C5_ASSCOD)
+    _cZPG_EMAIL:=AllTrim(Posicione("ZPG",1,xFilial("ZPG")+SC5->C5_ASSCOD,"ZPG_EMAIL"))
  EndIf
 
  _acTo:={}
- IF !EMPTY(_cZPG_EMAIL)
-    AADD(_acTo,Lower(_cZPG_EMAIL))
+ If !Empty(_cZPG_EMAIL)
+    aAdd(_acTo,Lower(_cZPG_EMAIL))
  EndIf
- IF !EMPTY(_cCoordenador)
-    AADD(_acTo,Lower(_cCoordenador))
+ If !Empty(_cCoordenador)
+    aAdd(_acTo,Lower(_cCoordenador))
  EndIf
- IF !EMPTY(_cRepresentante) .AND. ASCAN(_acTo,Lower(_cRepresentante)) = 0
-    AADD(_acTo,Lower(_cRepresentante))
+ If !Empty(_cRepresentante) .And. aScan(_acTo,Lower(_cRepresentante)) = 0
+    aAdd(_acTo,Lower(_cRepresentante))
  EndIf
- If SuperGetMV("IT_AMBTEST",.F.,.T.)
+ If !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
      _acTo:={}
  EndIf
- If !EMPTY(__cUserID)
-    cGetCc  := LOWER(Alltrim(UsrRetMail(__cUserID))) // Pega e-mail do usuario
-    AADD(_acTo,cGetCc)
+ If !Empty(__cUserId)
+    cGetCc  := LOWER(AllTrim(UsrRetMail(__cUserId))) // Pega e-mail do usuario
+    aAdd(_acTo,cGetCc)
  EndIf
 
- IF LEN(_acTo) = 0
-    RETURN .F.
+ //==========================================  
+ // Obtem E-mail do supervisor para envio.
+ //==========================================
+ _cEmailsup := ""
+
+ If ! Empty(SC5->C5_VEND4)
+    _cEmailsup := AllTrim(Posicione("SA3",1,xfilial("SA3")+SC5->C5_VEND4,"A3_EMAIL") )
+    If ! Empty(_cEmailsup)
+       _cEmailsup := Lower(_cEmailsup)
+       aAdd(_acTo,_cEmailsup)
+    EndIf 
+ EndIf 
+  
+ If Len(_acTo) = 0
+    Return .F.
  EndIf
 
  _cTipoEntrega:=U_TipoEntrega(SC5->C5_I_AGEND)
 
  _aTLinhas:={}
- AADD(_aTLinhas,{"Motivo Ocorrência  ",M->ZF5_TIPOO+" - "+M->ZF5_MOTIVO })
- AADD(_aTLinhas,{"Data Ocorrência    ",DTOC(M->ZF5_DTOCOR) }) //M->ZF5_DTOCOR
- AADD(_aTLinhas,{"Nota fiscal        ",M->ZF5_DOCOC   }) //M->ZF5_DOCOC
- AADD(_aTLinhas,{"Serie NF           ",M->ZF5_SEROC   }) //M->ZF5_SEROC
- AADD(_aTLinhas,{"Data Emissao NF    ",DTOC(SF2->F2_EMISSAO)}) //SF2->F2_EMISSAO
- AADD(_aTLinhas,{"Natureza operação  ",POSICIONE("ZB4",1,xFilial("ZB4")+SC5->C5_I_OPER, "ZB4_DESCRI")}) //POSICIONE("ZB4",1,xFilial("ZB4")+SC5->C5_I_OPER, "ZB4_DESCRI"))
- AADD(_aTLinhas,{"Ordem de carga     ",M->ZF5_CARGA   }) //M->ZF5_CARGA
- AADD(_aTLinhas,{"Cliente            ",M->ZF5_NCLIEN  }) //M->ZF5_NCLIEN;
- AADD(_aTLinhas,{"Representante      ",ALLTRIM(M->ZF5_NREPRE)}) //M->ZF5_NREPRE
- AADD(_aTLinhas,{"Coordenador        ",M->ZF5_NCOOR   }) //M->ZF5_NCOOR
- AADD(_aTLinhas,{"Assistente         ",SC5->C5_ASSNOM  })// 
- AADD(_aTLinhas,{"Pedido             ",ALLTRIM(M->ZF5_PEDIDO)}) //M->ZF5_PEDIDO
- AADD(_aTLinhas,{"Volume NF          ",ALLTRIM(M->ZF5_VOLUM)}) //M->ZF5_VOLUM
- AADD(_aTLinhas,{"Peso NF            ",TRANS(M->ZF5_PESON,'@E 9,999,999,999,999.9999')   }) //M->ZF5_PESON
- AADD(_aTLinhas,{"Tipo carregamento  ",IF(SC5->C5_I_TPVEN="F","Carga Fechada","Carga Fracionada")}) //SC5->C5_I_TPVEN // NOME;
- AADD(_aTLinhas,{"Tipo de Entrega    ",_cTipoEntrega  }) //SC5->C5_I_AGEND // MOSTRAR NOME;
- AADD(_aTLinhas,{"Tipo da carga      ",Iif(SC5->C5_I_TIPCA="1","Paletizada",If(SC5->C5_I_TIPCA="2","Batida",""))}) //SC5->C5_I_TIPCA // MOSTRAR NOME;
- AADD(_aTLinhas,{"Data de agendamento",DTOC(SC5->C5_I_DTENT)  }) //SC5->C5_I_DTENT //
- AADD(_aTLinhas,{"Transportadora     ",ALLTRIM(M->ZF5_TRANSP)+" "+ALLTRIM(M->ZF5_LJTRAN)+" - "+ALLTRIM(M->ZF5_NTRANS) })//TRANSPORTADOR E LOJA FORAM PARA AS OCORRENCIAS (GRID)
+ aAdd(_aTLinhas,{"Motivo Ocorrência  ",M->ZF5_TIPOO+" - "+M->ZF5_MOTIVO })
+ aAdd(_aTLinhas,{"Data Ocorrência    ",DToC(M->ZF5_DTOCOR) }) //M->ZF5_DTOCOR
+ aAdd(_aTLinhas,{"Nota fiscal        ",M->ZF5_DOCOC   }) //M->ZF5_DOCOC
+ aAdd(_aTLinhas,{"Serie NF           ",M->ZF5_SEROC   }) //M->ZF5_SEROC
+ aAdd(_aTLinhas,{"Data Emissao NF    ",DToC(SF2->F2_EMISSAO)}) //SF2->F2_EMISSAO
+ aAdd(_aTLinhas,{"Natureza operação  ",Posicione("ZB4",1,xFilial("ZB4")+SC5->C5_I_OPER, "ZB4_DESCRI")}) //Posicione("ZB4",1,xFilial("ZB4")+SC5->C5_I_OPER, "ZB4_DESCRI"))
+ aAdd(_aTLinhas,{"Ordem de carga     ",M->ZF5_CARGA   }) //M->ZF5_CARGA
+ aAdd(_aTLinhas,{"Cliente            ",M->ZF5_NCLIEN  }) //M->ZF5_NCLIEN;
+ aAdd(_aTLinhas,{"Representante      ",AllTrim(M->ZF5_NREPRE)}) //M->ZF5_NREPRE
+ aAdd(_aTLinhas,{"Coordenador        ",M->ZF5_NCOOR   }) //M->ZF5_NCOOR
+ aAdd(_aTLinhas,{"Assistente         ",SC5->C5_ASSNOM  })// 
+ aAdd(_aTLinhas,{"Pedido             ",AllTrim(M->ZF5_PEDIDO)}) //M->ZF5_PEDIDO
+ aAdd(_aTLinhas,{"Volume NF          ",AllTrim(M->ZF5_VOLUM)}) //M->ZF5_VOLUM
+ aAdd(_aTLinhas,{"Peso NF            ",TRANS(M->ZF5_PESON,'@E 9,999,999,999,999.9999')   }) //M->ZF5_PESON
+ aAdd(_aTLinhas,{"Tipo carregamento  ",If(SC5->C5_I_TPVEN="F","Carga Fechada","Carga Fracionada")}) //SC5->C5_I_TPVEN // NOME;
+ aAdd(_aTLinhas,{"Tipo de Entrega    ",_cTipoEntrega  }) //SC5->C5_I_AGEND // MOSTRAR NOME;
+ aAdd(_aTLinhas,{"Tipo da carga      ",IIf(SC5->C5_I_TIPCA="1","Paletizada",If(SC5->C5_I_TIPCA="2","Batida",""))}) //SC5->C5_I_TIPCA // MOSTRAR NOME;
+ aAdd(_aTLinhas,{"Data de agendamento",DToC(SC5->C5_I_DTENT)  }) //SC5->C5_I_DTENT //
+ aAdd(_aTLinhas,{"Transportadora     ",AllTrim(M->ZF5_TRANSP)+" "+AllTrim(M->ZF5_LJTRAN)+" - "+AllTrim(M->ZF5_NTRANS) })//TRANSPORTADOR E LOJA FORAM PARA AS OCORRENCIAS (GRID)
  If !Empty(SF2->F2_I_REDP)
     _cOpCod  := SF2->F2_I_REDP
     _cOPLoja := SF2->F2_I_RELO
@@ -4889,20 +5026,20 @@ Static Function AOMS3Comercial(_aDadosOcorrencia As Array) As Logical
     _cOpCod  := SF2->F2_I_OPER
     _cOpLoja := SF2->F2_I_OPLO
  EndIf
- IF !EMPTY(_cOpCod) .AND. !Empty(_cOPLoja) .AND. SA2->(MSSEEK(xFilial("SA2")+_cOpCod+_cOPLoja))
-    _cNomeSA2:=LEFT(SA2->A2_NOME,LEN(ZF5->ZF5_NOMTER))
+ If !Empty(_cOpCod) .And. !Empty(_cOPLoja) .And. SA2->(MSSEEK(xFilial("SA2")+_cOpCod+_cOPLoja))
+    _cNomeSA2:=LEFT(SA2->A2_NOME,Len(ZF5->ZF5_NOMTER))
  EndIf
- AADD(_aTLinhas,{"Operador Logistico "  ,_cNomeSA2})
- AADD(_aTLinhas,{"Código da ocorrencia ",ALLTRIM(M->ZF5_CODIGO) })
- AADD(_aTLinhas,{"Motivo custo       "  ,ALLTRIM(M->ZF5_MOTCUS) })
+ aAdd(_aTLinhas,{"Operador Logistico "  ,_cNomeSA2})
+ aAdd(_aTLinhas,{"Código da ocorrencia ",AllTrim(M->ZF5_CODIGO) })
+ aAdd(_aTLinhas,{"Motivo custo       "  ,AllTrim(M->ZF5_MOTCUS) })
 
  _cProdutos:=""
- SC6->(Dbsetorder(1))
- If SC6->(DbSeek(SC5->C5_FILIAL+SC5->C5_NUM))
-    Do while SC5->C5_NUM == SC6->C6_NUM .AND. SC5->C5_FILIAL == SC6->C6_FILIAL .AND. SC5->(!EOF())
-       _cProdutos+=ALLTRIM(POSICIONE("SB1",1,xfilial("SB1")+SC6->C6_PRODUTO,"B1_DESC"))+'<br>'
-       SC6->(Dbskip())
-    Enddo
+ SC6->(DBSetOrder(1))
+ If SC6->(DBSeek(SC5->C5_FILIAL+SC5->C5_NUM))
+    While SC5->C5_NUM == SC6->C6_NUM .And. SC5->C5_FILIAL == SC6->C6_FILIAL .And. SC5->(!Eof())
+       _cProdutos+=AllTrim(Posicione("SB1",1,xFilial("SB1")+SC6->C6_PRODUTO,"B1_DESC"))+'<br>'
+       SC6->(DBSkip())
+    EndDo
  EndIf
 
  _cCliCarre     := SC5->C5_CLIENT
@@ -4943,19 +5080,19 @@ Static Function AOMS3Comercial(_aDadosOcorrencia As Array) As Logical
  _cEndCarre    := Posicione("SA1",1,xFilial("SA1")+_cCliCarre+_cLojCarre,"A1_END")
  _cBairroCarre := Posicione("SA1",1,xFilial("SA1")+_cCliCarre+_cLojCarre,"A1_BAIRRO")
 
- AADD(_aTLinhas,{"NF Vinculada     ",_NfCarre })//Usar mesma logica existente no programa ROMS067, variável _NfCarre;
- AADD(_aTLinhas,{"Cliente vinculado",_cCliCarre + "-" + _cLojCarre + " " + _cNomCarre })//Usar mesma logica existente no programa ROMS067, variável _cCliCarre;
- AADD(_aTLinhas,{"CNPJ             ",_cCNPJCarre })
- AADD(_aTLinhas,{"Endereço         ",_cEndCarre })
- AADD(_aTLinhas,{"Bairro           ",_cBairroCarre })
- AADD(_aTLinhas,{"Município          ",M->ZF5_CIDADE  }) //M->ZF5_CIDADE
- AADD(_aTLinhas,{"Estado             ",M->ZF5_UF      }) //M->ZF5_UF
- AADD(_aTLinhas,{"Produtos"         ,_cProdutos })//Buscar todos os produto do pedido (ZF5_PEDIDO) buscando na tabela SC6,trazer nome do produto;
+ aAdd(_aTLinhas,{"NF Vinculada     ",_NfCarre })//Usar mesma logica existente no programa ROMS067, variável _NfCarre;
+ aAdd(_aTLinhas,{"Cliente vinculado",_cCliCarre + "-" + _cLojCarre + " " + _cNomCarre })//Usar mesma logica existente no programa ROMS067, variável _cCliCarre;
+ aAdd(_aTLinhas,{"CNPJ             ",_cCNPJCarre })
+ aAdd(_aTLinhas,{"Endereço         ",_cEndCarre })
+ aAdd(_aTLinhas,{"Bairro           ",_cBairroCarre })
+ aAdd(_aTLinhas,{"Município          ",M->ZF5_CIDADE  }) //M->ZF5_CIDADE
+ aAdd(_aTLinhas,{"Estado             ",M->ZF5_UF      }) //M->ZF5_UF
+ aAdd(_aTLinhas,{"Produtos"         ,_cProdutos })//Buscar todos os produto do pedido (ZF5_PEDIDO) buscando na tabela SC6,trazer nome do produto;
 
  _cMsgEml := '<html>'
  _cMsgEml += '<head><title>'+cTit+'</title></head>'
  _cMsgEml += '<body>'
- _cMsgEml += '<style type="text/css"><!--'
+ _cMsgEml += '<style Type="text/css"><!--'
  _cMsgEml += 'table.bordasimples { border-collapse: collapse; }'
  _cMsgEml += 'table.bordasimples tr td { border:1px solid #777777; }'
  _cMsgEml += 'td.titulos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #C6E2FF; }'
@@ -4976,13 +5113,13 @@ Static Function AOMS3Comercial(_aDadosOcorrencia As Array) As Logical
  _cMsgEml += '    </tr>'
  _cMsgEml += '    <tr>'
  _cMsgEml += '      <td class="itens" align="center" width="30%"><b>Incluida por: </b></td>'
- _cMsgEml += '      <td class="itens" >'+ UsrFullName(__cUserID) +'</td>'
+ _cMsgEml += '      <td class="itens" >'+ UsrFullName(__cUserId) +'</td>'
  _cMsgEml += '    </tr>'
  _cMsgEml += '    <tr>'
  _cMsgEml += '      <td class="itens" align="center" width="30%"><b>Filial:</b></td>'
  _cMsgEml += '      <td class="itens" >'+ _cNomeFil +'</td>'
  _cMsgEml += '    </tr>'
- If SuperGetMV("IT_AMBTEST",.F.,.T.)
+ If !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
     _cMsgEml += ' <tr>'
     _cMsgEml += '   <td class="itens" align="center" width="30%"><b>Emails Oficial</b></td>'
     _cMsgEml += '   <td class="itens" >'+ _cZPG_EMAIL+"<br>"+_cCoordenador+"<br>"+_cRepresentante +'</td>'
@@ -4996,35 +5133,35 @@ Static Function AOMS3Comercial(_aDadosOcorrencia As Array) As Logical
  _cMsgEml += '<br>'
  _cMsgEml += '<table class="bordasimples" width="1300">'
  _cMsgEml += '    <tr>'
- _cMsgEml += '      <td align="center" colspan="'+ALLTRIM(STR(LEN(_aSizeOK)))+'" class="grupos"><b>DADOS DA OCORENCIA</b></td>'
+ _cMsgEml += '      <td align="center" colspan="'+AllTrim(Str(Len(_aSizeOK)))+'" class="grupos"><b>DADOS DA OCORENCIA</b></td>'
  _cMsgEml += '    </tr>'
  _cMsgEml += '    #LISTAOK#'
  _cMsgEml += '</table>'
  _cMsgEml += '<br>'
 
  _cOKLista:=""
- FOR _nI := 1 TO LEN(_aTLinhas)
+ For _nI := 1 TO Len(_aTLinhas)
      _cOKLista += '    <tr>'
      _cOKLista += "      <td width='"+_aSizeOK[01]+"' BGCOLOR=#E5E5E5 ><font color= #000000 style='font-size: 15px; font-weight: bold;'>"+_aTLinhas[_nI][01]+"</font></td>
      _cOKLista += '      <td class="itens" align="left" width="'+_aSizeOK[02]+'%">'+ _aTLinhas[_nI][02]+'</td>'
      _cOKLista += '    </tr>'
- NEXT _nI
+ Next _nI
 
- _cMsgEml:=STRTRAN(_cMsgEml,"#LISTAOK#",_cOKLista)
+ _cMsgEml:=StrTran(_cMsgEml,"#LISTAOK#",_cOKLista)
 
  _cMsgEml += '</center>'
  _cMsgEml += '</body>'
  _cMsgEml += '</html>'
 
- ///////////////////////////////// RODAPE FIXO ///////////////////////////////
+ //RODAPE FIXO
  _cTel:=""
- If (Len(PswRet()) # 0) // Quando nao for rotina automatica do configurador
+ If (Len(PswRet()) # 0) // Quando nao For rotina automatica do configurador
      _cSetor:= AllTrim(PswRet()[1][12])		// Pega departamento do usuario
  EndIf
- If EMPTY(_cSetor)
+ If Empty(_cSetor)
       _cSetor := "Logistica"
  EndIf
- If EMPTY(_cTel)
+ If Empty(_cTel)
     _cTel:=AllTrim( Posicione('SM0',1,"01"+cFilant,'M0_TEL') )
  EndIf
 
@@ -5080,8 +5217,8 @@ Static Function AOMS3Comercial(_aDadosOcorrencia As Array) As Logical
  _cMsgEml +=             '<span style="font-size:12.0pt;font-family:'+"'"+'Times New Roman'+"'"+','+"'"+'serif'+"'"+';mso-fareast-language:PT-BR"></span></p>
  _cMsgEml +=             '<p class=MsoNormal style="mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;text-align:justify">'
  _cMsgEml +=             '<span style="font-size:7.5pt;font-family:'+"'"+'Times New Roman'+"'"+','+"'"+'serif'+"'"+';color:#1D2668;mso-fareast-language:PT-BR">
- _cMsgEml +=                 'Esta mensagem é destinada exclusivamente para fins profissionais, para a(s) pessoa(s) a quem for dirigida, podendo conter informação confidencial e legalmente privilegiada. '
- _cMsgEml +=                 'Ao recebê-la, se você não for destinatário desta mensagem, fica automaticamente notificado de abster-se a divulgar, copiar, distribuir, examinar ou, de qualquer forma, utilizar '
+ _cMsgEml +=                 'Esta mensagem é destinada exclusivamente para fins profissionais, para a(s) pessoa(s) a quem For dirigida, podendo conter informação confidencial e legalmente privilegiada. '
+ _cMsgEml +=                 'Ao recebê-la, se você não For destinatário desta mensagem, fica automaticamente notificado de abster-se a divulgar, copiar, distribuir, examinar ou, de qualquer forma, utilizar '
  _cMsgEml +=                 'sua informação, por configurar ato ilegal. Caso você tenha recebido esta mensagem indevidamente, solicitamos que nos retorne este e-mail, promovendo, concomitantemente sua '
  _cMsgEml +=                 'eliminação de sua base de dados, registros ou qualquer outro sistema de controle. Fica desprovida de eficácia e validade a mensagem que contiver vínculos obrigacionais, expedida '
  _cMsgEml +=                 'por quem não detenha poderes de representação, bem como não esteja legalmente habilitado para utilizar o referido endereço eletrônico, configurando falta grave conforme nossa '
@@ -5093,33 +5230,28 @@ Static Function AOMS3Comercial(_aDadosOcorrencia As Array) As Logical
  _cMsgEml +=     '</tr>
  _cMsgEml += '</table>'
 
- _cMensagem:=""
- _lOK:=.F.
+  _lOK:=.F.
  _lErro:=.F.
- FOR E := 1 TO LEN(_acTo)
+ For E := 1 TO Len(_acTo)
 
      cGetPara:=_acTo[E]
- //    ITEnvMail(cFrom        ,cEmailTo,_cEmailCo,cEmailBcc,cAssunto ,cMensagem,cAttach   ,cAccount    ,cPassword   ,cServer     ,cPortCon    ,lRelauth     ,cUserAut     ,cPassAut     ,cLogErro)
-     U_ITENVMAIL(_aConfig[01], cGetPara,         ,         ,cGetAssun,_cMsgEml ,          ,_aConfig[01],_aConfig[02],_aConfig[03],_aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog )
+     U_ITENVMAIL(_aConfig[01], cGetPara,         ,         ,cGetAssun,_cMsgEml ,          ,_aConfig[01],_aConfig[02],_aConfig[03],_aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog ) 
 
-     _cMensagem+="Para: "+cGetPara+" : "+_cEmlLog+CRLF
-     IF "SUCESSO" $ UPPER(_cEmlLog)
+     _cMensagem+="Ocor.: "+AllTrim(M->ZF5_CODIGO)+"-"+_cEmlLog+" Para: "+cGetPara + CRLF
+     If "SUCESSO" $ Upper(_cEmlLog)
         _lOK:=.T.
-     ELSE
+     Else
         _lErro:=.T.
      EndIf
- NEXT E
+ Next E
  _nTipo:=2 // V
- IF _lOK .AND. _lErro
+ If _lOK .And. _lErro
     _nTipo:=3 // !
- ELSEIF !_lOK .AND. _lErro
+ ElseIf !_lOK .And. _lErro
     _nTipo:=1 // X
  EndIf
- U_ITMSG(_cMensagem,"Envio do E-MAIL",,_nTipo)
-
+ 
 Return .T.
-
-
 
 /*
 ===============================================================================================================================
@@ -5131,8 +5263,9 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-USER FUNCTION AOMS003M()
- Local aParam := PARAMIXB
+User Function AOMS003M()
+ 
+ Local aParam := ParamIXB
 
  If aParam <> NIL
     //oObj    := aParam[1]
@@ -5153,12 +5286,12 @@ USER FUNCTION AOMS003M()
             aRet := {}
             aAdd( aRet ,{"Atualizar Telefones" , 'Atualiza Tels.' , {|| U_AOMS3Atu(.F.) } , "Atualizar Telefones" } )
            aAdd( aRet ,{"Verifica Carga" , 'Verifica Carga' , {|| U_VISCARGA( ZF5->ZF5_FILIAL, ZF5->ZF5_CARGA ) } , "Atualizar Telefones" } )
-           RETURN aRet
+           Return aRet
     EndIf
 
  EndIf
 
-RETURN .T.
+Return .T.
 
 /*
 ===============================================================================================================================
@@ -5170,17 +5303,18 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-USER FUNCTION AOMS3Atu(_lGravar)
+User Function AOMS3Atu(_lGravar)
+ 
  Local _oModel := FWModelActive()
  Local _oModelMaster
 
- IF _lGravar .OR. _oModel:GetOperation() = 4
+ If _lGravar .Or. _oModel:GetOperation() = 4
 
     M->ZF5_DMOTOR:=U_AOMS003Z("ZF5_DMOTOR")
     M->ZF5_NREPRE:=U_AOMS003Z("ZF5_NREPRE")
     M->ZF5_NCOOR :=U_AOMS003Z("ZF5_NCOOR" )
     M->ZF5_NCLIEN:=U_AOMS003Z("ZF5_NCLIEN")
-    IF _lGravar
+    If _lGravar
        ZF5->ZF5_DMOTOR        :=M->ZF5_DMOTOR
        ZF5->ZF5_NREPRE        :=M->ZF5_NREPRE
        ZF5->ZF5_NCOOR         :=M->ZF5_NCOOR
@@ -5191,7 +5325,7 @@ USER FUNCTION AOMS3Atu(_lGravar)
        (cAliasAux)->ZF5_NREPRE:=M->ZF5_NREPRE
        (cAliasAux)->ZF5_NCOOR :=M->ZF5_NCOOR
        (cAliasAux)->ZF5_NCLIEN:=M->ZF5_NCLIEN
-    ELSE
+    Else
        _oModelMaster:=_oModel:GetModel("ZF5MASTER")
        _oModelMaster:LoadValue("ZF5_DMOTOR",M->ZF5_DMOTOR)
        _oModelMaster:LoadValue("ZF5_NREPRE",M->ZF5_NREPRE)
@@ -5201,7 +5335,7 @@ USER FUNCTION AOMS3Atu(_lGravar)
 
  EndIf
 
-RETURN .T.
+Return .T.
 
 /*
 ===============================================================================================================================
@@ -5218,7 +5352,8 @@ Retorno-----------: {DIAS Transit time da Unidade de Carregamento até o Operador
                      Dias do TRECHO 2}
 ===============================================================================================================================
 */
-USER Function CalcTransiTime(_dDataMRef,_dDtnoOL)
+User Function CalcTransiTime(_dDataMRef,_dDtnoOL)
+ 
  Local lBuscaItalacCliente:=.F.// DESTINO DA ITALAC PARA O CLIENTE
  Local cCodOL      := ""
  Local cLojaOP     := ""
@@ -5232,19 +5367,19 @@ USER Function CalcTransiTime(_dDataMRef,_dDtnoOL)
  DEFAULT _dDataMRef:= _dDtnoOL
  SF2->(DBSetOrder(1))
  SC5->(DBSetOrder(1))
- SC5->(DbSeek(SF2->F2_FILIAL+SF2->F2_I_PEDID))
+ SC5->(DBSeek(SF2->F2_FILIAL+SF2->F2_I_PEDID))
 
  cCodCli    := SF2->F2_CLIENTE
  cLojaCli   := SF2->F2_LOJA
  _cFilCarreg:= SC5->C5_FILIAL
 
- IF SC5->C5_I_TRCNF == "S"
+ If SC5->C5_I_TRCNF == "S"
     If !Empty(SC5->C5_I_FLFNC) //SE PEDIDO DE FATURAMENTO
         _cFilCarreg := SC5->C5_I_FLFNC
     EndIf
 
     If SC5->C5_I_FLFNC == SC5->C5_FILIAL //SE PEDIDO DE CARREGAMENTO
-       IF  SC5->(DbSeek(SC5->C5_I_FILFT+SC5->C5_I_PDFT))// SEEK no PEDIDO de FATURAMENTO
+       If  SC5->(DBSeek(SC5->C5_I_FILFT+SC5->C5_I_PDFT))// SEEK no PEDIDO de FATURAMENTO
            cCodCli := SC5->C5_CLIENTE
            cLojaCli:= SC5->C5_LOJACLI
        EndIf
@@ -5252,48 +5387,46 @@ USER Function CalcTransiTime(_dDataMRef,_dDtnoOL)
  EndIf
 
  SA1->(DBSetOrder(1))
- SA1->(DbSeek(xFilial("SA1") + cCodCli + cLojaCli))
+ SA1->(DBSeek(xFilial("SA1") + cCodCli + cLojaCli))
  _cEstado    := SA1->A1_EST
  _cCodMunic  := SA1->A1_COD_MUN
  _nDiasZ31   := 0//TRECHO 1 - Preenche na função BuscaZ31() - M460FIM.PRW
  _nDiasZG5   := 0//TRECHO 2 - Preenche na função BuscaZG5() - M460FIM.PRW
 lBuscaItalacCliente:=.F.// DESTINO DA ITALAC PARA O CLIENTE
  
- DAI->(Dbsetorder(3))
- If DAI->(DbSeek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE))//SE TEM CARGA
+ DAI->(DBSetOrder(3))
+ If DAI->(DBSeek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE))//SE TEM CARGA
 
-     IF !EMPTY(DAI->DAI_I_OPLO)
+     If !Empty(DAI->DAI_I_OPLO)
         cCodOL :=DAI->DAI_I_OPLO
         cLojaOP:=DAI->DAI_I_LOPL
-     ELSE
+     Else
         cCodOL :=DAI->DAI_I_TRED
         cLojaOP:=DAI->DAI_I_LTRE
      EndIf
 
      If !Empty(cCodOL)
 
-        IF EMPTY(_dDtnoOL)
-           //***********************************************************************************
+        If Empty(_dDtnoOL)
            //SE ALTERAR A LOGICA AQUI ALTERAR Na #GrvTransiTime() no M460FIM.PRW  TAMBEM
-           //***********************************************************************************
  
-           //************************* DESTINO: DA ITALAC PARA OPERADOR LOGISTICO *************************
+           // DESTINO: DA ITALAC PARA OPERADOR LOGISTICO
            SA2->(DBSetOrder(1))
-           SA2->(DbSeek(xFilial("SA2") + cCodOL + cLojaOP))
+           SA2->(DBSeek(xFilial("SA2") + cCodOL + cLojaOP))
            _cEstadoOP := SA2->A2_EST
            _cCodMunOP := SA2->A2_COD_MUN
                     //_cFilCarreg,_cCod ,_cLoja ,_cOperPedV    ,_cTipoVenda    ,_cEstado,_cCodMunic,@_dDataRef,@_nDiasZG5,_cLocalEmb
            U_BuscaZG5(_cFilCarreg,cCodOL,cLojaOP,SC5->C5_I_OPER,SC5->C5_I_TPVEN,_cEstadoOP,_cCodMunOP,@_dDataMRef,@_nDiasZG5,SC5->C5_I_LOCEM)// DESTINO: DA ITALAC PARA OPERADOR LOGISTICO
-           IF EMPTY(_dDataMRef)
+           If Empty(_dDataMRef)
               _dDataMRef:=SF2->F2_EMISSAO
            EndIf
            _dDataPENOL:= U_IT_DTVALIDA(_dDataMRef,,.T.)//Se a data calculada da entrega cair em um domingo ou em um feriado nacional, a data deve ser o próximo dia útil.
            _dDataMRef := _dDataPENOL
-        ELSE
+        Else
            _dDataPENOL:= _dDtnoOL
         EndIf
-        //************************* DESTINO: DO OPERADOR LOGISTICO PARA O CLIENTE *************************
-        IF !EMPTY(_dDataPENOL)
+        // DESTINO: DO OPERADOR LOGISTICO PARA O CLIENTE
+        If !Empty(_dDataPENOL)
            _dDataMRef := _dDataPENOL
                     //cCodOL,cLojaOP,cCodCli,cLojaCli,_dDataRef//A data não via como referencia (@) pq vai ser calculada depois apenas com dias Uteis
            U_BuscaZ31(cCodOL,cLojaOP,cCodCli,cLojaCli,_dDataMRef,@_nDiasZ31)//DESTINO: DO OPERADOR LOGISTICO PARA O CLIENTE
@@ -5308,58 +5441,56 @@ lBuscaItalacCliente:=.F.// DESTINO DA ITALAC PARA O CLIENTE
      lBuscaItalacCliente:=.T.// DESTINO DA ITALAC PARA O CLIENTE
  EndIf
 
- //***********************************************************************************
  //SE ALTERAR A LOGICA AQUI ALTERAR Na #GrvTransiTime() no M460FIM.PRW  TAMBEM
- //***********************************************************************************
- //************************* DESTINO: DA ITALAC PARA O CLIENTE *************************
- _nPesoTot:= SF2->F2_PBRUTO//FORA DO if PQ PRECISO dessa variavel fora do IF tambem
- IF lBuscaItalacCliente
+ // DESTINO: DA ITALAC PARA O CLIENTE
+ _nPesoTot:= SF2->F2_PBRUTO//FORA DO If PQ PRECISO dessa variavel fora do If tambem
+ If lBuscaItalacCliente
 
-    IF !EMPTY(SC5->C5_I_AGRUP)
+    If !Empty(SC5->C5_I_AGRUP)
        _cQuery:=" SELECT SUM(C5_I_PESBR) C5_I_PESBR FROM "+ RETSQLNAME("SC5") + " WHERE C5_FILIAL = '"+ xFilial('SC5')+"' AND D_E_L_E_T_ = ' ' "
        _cQuery+=" AND C5_I_AGRUP = '"+SC5->C5_I_AGRUP+"' "
        _cAliasGru:= GetNextAlias()
        MPSysOpenQuery( _cQuery , _cAliasGru)
-       IF (_cAliasGru)->C5_I_PESBR > 0
+       If (_cAliasGru)->C5_I_PESBR > 0
           _nPesoTot:= (_cAliasGru)->C5_I_PESBR //Soma o peso dos pedidos agrupado
-       EndIF
+       EndIf
        (_cAliasGru)->(DBCloseArea())
     
-    ElseIF !EMPTY(SC5->C5_I_PEVIN)
+    ElseIf !Empty(SC5->C5_I_PEVIN)
        _aSalvaAreaSC5:=SC5->(FwGetArea())//Salva recno e ordem
        _cPedVinc:=SC5->C5_I_PEVIN
-       SC5->(Dbsetorder(14))      // C5_NUM+C5_TIPO+C5_I_BLCRE
-       IF SC5->(DbSeek(_cPedVinc))// POSICIONA NO PEDIDO VINCULADO sem a filail pq pode estar em outra filial quando pediodos de troca NF
+       SC5->(DBSetOrder(14))      // C5_NUM+C5_TIPO+C5_I_BLCRE
+       If SC5->(DBSeek(_cPedVinc))// POSICIONA NO PEDIDO VINCULADO sem a filail pq pode estar em outra filial quando pediodos de troca NF
           _nPesoTot+=SC5->C5_I_PESBR//Soma o peso do pedido vinculado
-       EndIF
+       EndIf
        SC5->(FwRestArea(_aSalvaAreaSC5))
-    EndIF
+    EndIf
 
     _nDiasZG5 := 0
     _dDtMRefSalva:=_dDataMRef
     _nPesCarg := SuperGetMV("IT_PESFOUV",.F.,4000)
     
-    IF _nPesoTot < _nPesCarg // **** FRACIONADA **** Calcular * apenas dias úteis *
+    If _nPesoTot < _nPesCarg // **** FRACIONADA **** Calcular * apenas dias úteis *
                 //_cFilCarreg,_cCod  ,_cLoja  ,_cOperPedV   ,_cTipoVenda     ,_cEstado,_cCodMunic,_dDataRef //A data não via como referencia pq vai ser calculada depois
        U_BuscaZG5(_cFilCarreg,cCodCli,cLojaCli,SC5->C5_I_OPER,SC5->C5_I_TPVEN,_cEstado,_cCodMunic,_dDataMRef,@_nDiasZG5,SC5->C5_I_LOCEM)// DESTINO: DA ITALAC PARA O CLIENTE
        _dDiasCorridos:=_dDtMRefSalva+_nDiasZG5 //#DIAS CORRIDOS
-       IF EMPTY(_dDataMRef)
+       If Empty(_dDataMRef)
           _dDataMRef:=SF2->F2_EMISSAO
        EndIf
        _dDataPENCO:= U_IT_DTVALIDA(_dDataMRef,_nDiasZG5)//Data calculada da entrega deve contar só dia util: não conta sabado, domingo e feriado nacional
     
-    ELSE// **** FECHADA **** Calcular * dias corridos *
+    Else// **** FECHADA **** Calcular * dias corridos *
                 //_cFilCarreg,_cCod  ,_cLoja  ,_cOperPedV    ,_cTipoVenda    ,_cEstado,_cCodMunic,@_dDataRef
        U_BuscaZG5(_cFilCarreg,cCodCli,cLojaCli,SC5->C5_I_OPER,SC5->C5_I_TPVEN,_cEstado,_cCodMunic,@_dDataMRef,@_nDiasZG5,SC5->C5_I_LOCEM)// DESTINO: DA ITALAC PARA O CLIENTE
        _dDiasCorridos:=_dDtMRefSalva+_nDiasZG5 //#DIAS CORRIDOS
-       IF EMPTY(_dDataMRef)
+       If Empty(_dDataMRef)
           _dDataMRef:=SF2->F2_EMISSAO
        EndIf
        _dDataPENCO:= U_IT_DTVALIDA(_dDataMRef)//Se a data calculada da entrega cair em um sabado, domingo e feriado nacional, a data deve ser o próximo dia útil.       
     EndIf
 
  EndIf
- IF SC5->C5_I_DTENT >= _dDiasCorridos .AND. (SC5->C5_I_AGEND == "M" .or. SC5->C5_I_AGEND == "A")
+ If SC5->C5_I_DTENT >= _dDiasCorridos .And. (SC5->C5_I_AGEND == "M" .Or. SC5->C5_I_AGEND == "A")
     _dDataPENCO := SC5->C5_I_DTENT // Previsão de entrega no cliente
  EndIf
 
@@ -5368,8 +5499,7 @@ lBuscaItalacCliente:=.F.// DESTINO DA ITALAC PARA O CLIENTE
         _nDiasZG5  ,;// SF2->F2_I_TT1TR - Dias do TRECHO 1
         _nDiasZ31   }// SF2->F2_I_TT2TR - Dias do TRECHO 2
 
-RETURN aRet
-
+Return aRet
 
 /*
 ===============================================================================================================================
@@ -5388,38 +5518,37 @@ User Function AOMS03OPR(__nOpc, __cFilial, __cDocOc, __cSerOc)
     Local _cLojOper   := ""
 
     If __nOpc == 1
-        _cInfOper   := POSICIONE("SF2",1,__cFilial+__cDocOc+__cSerOc,"F2_I_OPER")
+        _cInfOper   := Posicione("SF2",1,__cFilial+__cDocOc+__cSerOc,"F2_I_OPER")
     ElseIf __nOpc == 2
-        _cInfOper   := POSICIONE("SF2",1,__cFilial+__cDocOc+__cSerOc,"F2_I_OPLO")
+        _cInfOper   := Posicione("SF2",1,__cFilial+__cDocOc+__cSerOc,"F2_I_OPLO")
     ElseIf __nOpc == 3
-        _cCodOper   := POSICIONE("SF2",1,__cFilial+__cDocOc+__cSerOc,"F2_I_OPER")
+        _cCodOper   := Posicione("SF2",1,__cFilial+__cDocOc+__cSerOc,"F2_I_OPER")
         _cLojOper   := SF2->F2_I_OPLO
-        _cInfOper   := POSICIONE("SA2",1,xFilial("SA4")+_cCodOper+_cLojOper,"A2_CGC")
+        _cInfOper   := Posicione("SA2",1,xFilial("SA4")+_cCodOper+_cLojOper,"A2_CGC")
     ElseIf __nOpc == 4
-        _cCodOper   := POSICIONE("SF2",1,__cFilial+__cDocOc+__cSerOc,"F2_I_OPER")
+        _cCodOper   := Posicione("SF2",1,__cFilial+__cDocOc+__cSerOc,"F2_I_OPER")
         _cLojOper   := SF2->F2_I_OPLO
-        _cInfOper   := POSICIONE("SA2",1,xFilial("SA2")+_cCodOper+_cLojOper,"A2_NOME")
+        _cInfOper   := Posicione("SA2",1,xFilial("SA2")+_cCodOper+_cLojOper,"A2_NOME")
     ElseIf __nOpc == 5
-        _cCodOper   := POSICIONE("SF2",1,__cFilial+__cDocOc+__cSerOc,"F2_I_OPER")
+        _cCodOper   := Posicione("SF2",1,__cFilial+__cDocOc+__cSerOc,"F2_I_OPER")
         _cLojOper   := SF2->F2_I_OPLO
-        _cInfOper   := POSICIONE("SA2",1,xFilial("SA2")+_cCodOper+_cLojOper,"A2_EST")
+        _cInfOper   := Posicione("SA2",1,xFilial("SA2")+_cCodOper+_cLojOper,"A2_EST")
     ElseIf __nOpc == 6
-        _cCodOper   := POSICIONE("SF2",1,__cFilial+__cDocOc+__cSerOc,"F2_I_OPER")
+        _cCodOper   := Posicione("SF2",1,__cFilial+__cDocOc+__cSerOc,"F2_I_OPER")
         _cLojOper   := SF2->F2_I_OPLO
-        _cInfOper   := POSICIONE("SA2",1,xFilial("SA2")+_cCodOper+_cLojOper,"A2_MUN")
+        _cInfOper   := Posicione("SA2",1,xFilial("SA2")+_cCodOper+_cLojOper,"A2_MUN")
     ElseIf __nOpc == 7
-        _cCodOper   := POSICIONE("SF2",1,__cFilial+__cDocOc+__cSerOc,"F2_I_OPER")
+        _cCodOper   := Posicione("SF2",1,__cFilial+__cDocOc+__cSerOc,"F2_I_OPER")
         _cLojOper   := SF2->F2_I_OPLO
-        _cInfOper   := POSICIONE("SA2",1,xFilial("SA2")+_cCodOper+_cLojOper,"A2_DDD")
+        _cInfOper   := Posicione("SA2",1,xFilial("SA2")+_cCodOper+_cLojOper,"A2_DDD")
     ElseIf __nOpc == 8
-        _cCodOper   := POSICIONE("SF2",1,__cFilial+__cDocOc+__cSerOc,"F2_I_OPER")
+        _cCodOper   := Posicione("SF2",1,__cFilial+__cDocOc+__cSerOc,"F2_I_OPER")
         _cLojOper   := SF2->F2_I_OPLO
-        _cInfOper   := POSICIONE("SA2",1,xFilial("SA2")+_cCodOper+_cLojOper,"A2_TEL")
+        _cInfOper   := Posicione("SA2",1,xFilial("SA2")+_cCodOper+_cLojOper,"A2_TEL")
     EndIf
 
 
 Return _cInfOper
-
 
 /*
 ===============================================================================================================================
@@ -5433,6 +5562,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function VISCARGA(_cFilial, _cCarga)
+
   Local _aItCarga  := {}
   Local _cNomeCli  := {}
   Local _aItens    := {}
@@ -5440,11 +5570,11 @@ User Function VISCARGA(_cFilial, _cCarga)
 
   Begin Sequence
 
-   SA1->(DbSetOrder(1))
-   DAI->(DbSetOrder(1))
+   SA1->(DBSetOrder(1))
+   DAI->(DBSetOrder(1))
 
    If DAI->(MsSeek(_cFilial+U_ItKey(_cCarga,"DAI_COD")))
-      Do While !DAI->(Eof()) .And. DAI->DAI_FILIAL == _cFilial .And. DAI->DAI_COD == U_ItKey(_cCarga,"DAI_COD")
+      While !DAI->(Eof()) .And. DAI->DAI_FILIAL == _cFilial .And. DAI->DAI_COD == U_ItKey(_cCarga,"DAI_COD")
 
          _cNomeCli := ""
          If SA1->(MsSeek(xFilial("SA1")+DAI->DAI_CLIENT+DAI->DAI_LOJA))
@@ -5452,23 +5582,23 @@ User Function VISCARGA(_cFilial, _cCarga)
          EndIf
 
          _aItCarga := {}
-         AADD(_aItCarga, DAI->DAI_NFISCA)
-         AADD(_aItCarga, DAI->DAI_SERIE)
-         AADD(_aItCarga, DAI->DAI_CLIENT)
-         AADD(_aItCarga, DAI->DAI_LOJA)
-         AADD(_aItCarga, _cNomeCli)
-         AADD(_aItCarga, Transform(DAI->DAI_PESO,"@E 999,999,999.9999"))
-         AADD(_aItens, _aItCarga)
+         aAdd(_aItCarga, DAI->DAI_NFISCA)
+         aAdd(_aItCarga, DAI->DAI_SERIE)
+         aAdd(_aItCarga, DAI->DAI_CLIENT)
+         aAdd(_aItCarga, DAI->DAI_LOJA)
+         aAdd(_aItCarga, _cNomeCli)
+         aAdd(_aItCarga, Transform(DAI->DAI_PESO,"@E 999,999,999.9999"))
+         aAdd(_aItens, _aItCarga)
 
          _nPestot += DAI->DAI_PESO
 
-         DAI->(dbSKip())
+         DAI->(DBSkip())
       EndDo
    EndIf
 
-   IF LEN(_aItens) = 0
-      U_ITMSG("Não existe Carga "+_cFilial+_cCarga,"Atenção",,1)
-      RETURN .F.
+   If Len(_aItens) = 0
+      U_ITMsg("Não existe Carga "+_cFilial+_cCarga,"Atenção",,1)
+      Return .F.
    EndIf
 
    _cTitulo:= "Relação de Carga: " + AllTrim(_cCarga) + "  - Peso Total: " + Transform(_nPestot,"@E 999,999,999.9999")
@@ -5478,8 +5608,7 @@ User Function VISCARGA(_cFilial, _cCarga)
 
  End Sequence
 
-Return Nil
-
+Return
 
 /*
 ===============================================================================================================================
@@ -5494,7 +5623,8 @@ Parametros--------: _cOrigem : programa AOMS003 / AOMS072 / AOMS074 / M460FIM /
 Retorno-----------: .T. ou .F.
 ===============================================================================================================================*/
 User Function AOMS3DTSF2(_cOrigem As Character,_aRecZF5 As Array,_oModel As Object, _lTesteNF As Logical ) As Logical
- LOCAL _nI           As Numeric
+
+ Local _nI           As Numeric
  Local _oModelMaster As Object
  Local _oModelGrid   As Object
  Local _dDtTipoA     As Date
@@ -5525,6 +5655,7 @@ User Function AOMS3DTSF2(_cOrigem As Character,_aRecZF5 As Array,_oModel As Obje
  _dDtTipoD   := CTOD("")
  _dDtTipoE   := CTOD("")
  _dDtTipoF   := CTOD("")
+ _dDtREOPL_S := CTOD("")
  _cDtTran    := ""
  _cAliasZDS  := ""
  _cQuery     := ""
@@ -5532,12 +5663,12 @@ User Function AOMS3DTSF2(_cOrigem As Character,_aRecZF5 As Array,_oModel As Obje
  _cStatusSit := ""
  _cStatusEmi := ""
  _cListaSF2  :="TIPO(ZFC_DTTRAN);CAMPO;ANTES;DEPOIS"+CRLF
- _cAmbiente  := ALLTRIM(UPPER(GETENVSERVER()))
+ _cAmbiente  := AllTrim(Upper(GETENVSERVER()))
  _lGravaSF2  := .T.
- _lOriGravado:= (_cOrigem = "AOMS003" .OR. _cOrigem = "AOMS072" .OR. _cOrigem = "AOMS074" .OR. _cOrigem = "M460FIM_GRAVA" .OR. _cOrigem = "M460FIM_LER")
+ _lOriGravado:= (_cOrigem = "AOMS003" .Or. _cOrigem = "AOMS072" .Or. _cOrigem = "AOMS074" .Or. _cOrigem = "M460FIM_GRAVA" .Or. _cOrigem = "M460FIM_LER")
  _aRec_TA_TF := {}
 
- IF _cOrigem = "TELA"//NÃO ESTMAOS USANDO POR ENQUANTO
+ If _cOrigem = "TELA"//NÃO ESTMAOS USANDO POR ENQUANTO
 
     _oModelMaster:= _oModel:GetModel("ZF5MASTER")
     _oModelGrid  := _oModel:GetModel("ZF5DETAIL")
@@ -5550,43 +5681,43 @@ User Function AOMS3DTSF2(_cOrigem As Character,_aRecZF5 As Array,_oModel As Obje
     _cSerie      := _oModelMaster:GetValue("ZF5_SEROC")
     _cZF5Filial  := xFilial("ZF5")
 
- ELSEIF _lOriGravado
+ ElseIf _lOriGravado
 
-    _nLinhas    := LEN(_aRecZF5)
+    _nLinhas    := Len(_aRecZF5)
     _aRecZF5    := aSort(_aRecZF5)//ORDENA POR RECNO
     
-     ZF5->(DBGOTO(_aRecZF5[_nLinhas]))
+     ZF5->(DBGoTo(_aRecZF5[_nLinhas]))
     _cStatusSit := ZF5->ZF5_STUSIT
     _cStatusEmi := ZF5->ZF5_STUEMI
     _cObsCom    := ZF5->ZF5_OBSCOM
     _cNotaFiscal:= ZF5->ZF5_DOCOC
-     _cPedido   := ALLTRIM(ZF5->ZF5_PEDIDO)
+     _cPedido   := AllTrim(ZF5->ZF5_PEDIDO)
     _cSerie     := ZF5->ZF5_SEROC
     _cZF5Filial := ZF5->ZF5_FILIAL
     
-    IF _cOrigem = "M460FIM_LER"
+    If _cOrigem = "M460FIM_LER"
        _lGravaSF2:= .F.
-    ENDIF
- ELSE
-    RETURN .F.
+    EndIf
+ Else
+    Return .F.
  EndIf
 
  If _lGravaSF2
-    SF2->(DbSeek(_cZF5Filial+_cNotaFiscal+_cSerie))
-    SC5->(DbSeek(_cZF5Filial+_cPedido))
+    SF2->(DBSeek(_cZF5Filial+_cNotaFiscal+_cSerie))
+    SC5->(DBSeek(_cZF5Filial+_cPedido))
     For _nI := 1 to _nLinhas
-        ZF5->(DBGOTO(_aRecZF5[_nI]))
+        ZF5->(DBGoTo(_aRecZF5[_nI]))
         ZF5->(RecLock("ZF5",.F.))
         ZF5->ZF5_DTATUA := "N"
-        ZF5->(MsUnlock())
+        ZF5->(MSUnLock())
     Next _nI
     
     _aRecZF5:= BuscaRecZF5(_cZF5Filial,_cNotaFiscal,_cSerie)//Busca só so recnos do ZF5 validos
-    _nLinhas:= LEN(_aRecZF5)
+    _nLinhas:= Len(_aRecZF5)
     
     _aDatas:= U_CalcTransiTime(SF2->F2_EMISSAO)
     
-    SF2->(Reclock("SF2",.F.))
+    SF2->(RecLock("SF2",.F.))
     SF2->F2_I_PENOL := _aDatas[1]// Previsão de entrega no operador logístico
     SF2->F2_I_PENCL := _aDatas[2]// Previsão de entrega no cliente
     SF2->F2_I_PENCO := _aDatas[2]// Previsão de entrega no cliente (original)
@@ -5596,120 +5727,131 @@ User Function AOMS3DTSF2(_cOrigem As Character,_aRecZF5 As Array,_oModel As Obje
     SF2->F2_I_DENOL := CTOD("")  // Data de entrega no operador logístico  EDI // pode ser editado.
     SF2->F2_I_DCHCL := CTOD("")  // Data de chegada no cliente
     SF2->F2_I_DENCL := CTOD("")  // Data de entrega no cliente
-    SF2->(Msunlock())
+    SF2->F2_I_OLRDT := CTOD("")  // Data do redirecionamento para operador logístico
+    SF2->F2_I_OLRCD := " "       // Código do operador logístico do redirecionamento
+    SF2->F2_I_OLRLJ := " "       // Loja do operador logístico do redirecionamento
+
+    SF2->(MSUnLock())
  
- Endif
+ EndIf
 
  _cListaOco:="ZF5_TIPOO;ZFC_DTTRAN;ZF5_DTOCOR;ZF5_CODIGO"+CRLF
 
- SF2->(DBSETORDER(1))
- SC5->(DBSETORDER(1))
+ SF2->(DBSetOrder(1))
+ SC5->(DBSetOrder(1))
 
  For _nI := 1 to _nLinhas
 
-     IF _cOrigem = "TELA"//não usa por enquanto
+     If _cOrigem = "TELA"//não usa por enquanto
 
         _oModelGrid:GoLine( _nI )
         _cTipoOcorr :=_oModelGrid:GetValue("ZF5_TIPOO")
         _dZF5DTOCOR :=_oModelGrid:GetValue("ZF5_DTOCOR")
         _cZF5CODIGO :=_oModelGrid:GetValue("ZF5_CODIGO")
-        _cPedido    :=ALLTRIM(_oModelMaster:GetValue('ZF5_PEDIDO'))
+        _cPedido    :=AllTrim(_oModelMaster:GetValue('ZF5_PEDIDO'))
         _cEstonado  :=_oModelGrid:GetValue("ZF5_ESTONO")
 
-     ELSEIF _lOriGravado
+     ElseIf _lOriGravado
 
-        ZF5->(DBGOTO(_aRecZF5[_nI]))
+        ZF5->(DBGoTo(_aRecZF5[_nI]))
         _cTipoOcorr :=ZF5->ZF5_TIPOO
         _dZF5DTOCOR :=ZF5->ZF5_DTOCOR
         _cZF5CODIGO :=ZF5->ZF5_CODIGO
-        _cPedido    :=ALLTRIM(ZF5->ZF5_PEDIDO)
+        _cPedido    :=AllTrim(ZF5->ZF5_PEDIDO)
         _cEstonado  :=ZF5->ZF5_ESTONO
      EndIf
 
-     SF2->(DbSeek(_cZF5Filial+_cNotaFiscal+_cSerie))
-     SC5->(DbSeek(_cZF5Filial+_cPedido))
+     SF2->(DBSeek(_cZF5Filial+_cNotaFiscal+_cSerie))
+     SC5->(DBSeek(_cZF5Filial+_cPedido))
 
      _dF2EMISSAO  := SF2->F2_EMISSAO
-     _lTemOperador:= (!EMPTY(SF2->F2_I_REDP) .OR. !EMPTY(SF2->F2_I_OPER))
-     _lPVAgendado := .T.// Retirado dia 09/04/25 - Alex / Vanderlei solicitou - (SC5->C5_I_AGEND == "M" .or. SC5->C5_I_AGEND == "A")
+     _lTemOperador:= (!Empty(SF2->F2_I_REDP) .Or. !Empty(SF2->F2_I_OPER))
+     //_lPVAgendado := .T.// Retirado dia 09/04/25 - Alex / Vanderlei solicitou - (SC5->C5_I_AGEND == "M" .Or. SC5->C5_I_AGEND == "A")
      _cDtTran     := Posicione("ZFC",1,xFilial("ZFC")+_cTipoOcorr,"ZFC_DTTRAN") // 1 = ZFC_FILIAL+ZFC_CODIGO
+     _cZFC_OLREDI  := ZFC->ZFC_OLREDI// "S" ou "N" - Redirecionamento de operador logístico
      _lTemData    := .F.
      _aRec_TA_TF  := {0,0}
 
-     If _cEstonado = "S"//SE ESTORNADO NÃO LE PARA O SF2
-        LOOP
+     If _cEstonado = "S"//SE ESTORNADO NÃO LE O ZF5
+        Loop
      EndIf
 
-     If _cDtTran == "A"  .AND. (_dZF5DTOCOR >= _dF2EMISSAO .AND. _dZF5DTOCOR <= DATE())
+     If _cZFC_OLREDI = "S" .And. _dZF5DTOCOR >= _dF2EMISSAO .And. _dZF5DTOCOR <= Date() //Redirecionamento de operador logístico
+        _dDtREOPL_S :=  _dZF5DTOCOR     // ZF5_DOCOR  - Data do redirecionamento para operador logístico
+        _cZF5_OLRCOD:=  ZF5->ZF5_OLRCOD // ZF5_OLRCOD - Código do operador logístico do redirecionamento
+        _cZF5_OLRLOJ:=  ZF5->ZF5_OLRLOJ // ZF5_OLRLOJ - Loja do operador logístico do redirecionamento
+     EndIf
+
+     If _cDtTran == "A"  .And. (_dZF5DTOCOR >= _dF2EMISSAO .And. _dZF5DTOCOR <= DATE())
         _dDtTipoA := _dZF5DTOCOR
-        _cListaOco+= "'"+_cTipoOcorr+";["+_cDtTran+"];"+DTOC(_dZF5DTOCOR)+";'"+_cZF5CODIGO+CRLF
-        _lTemData:=.F.//Para por ZF5_DTATUA="N" em todos os Tipos "A" e por "S" só no FOR apos o final
-        IF _cOrigem = "TELA"//não usa por enquanto
+        _cListaOco+= "'"+_cTipoOcorr+";["+_cDtTran+"];"+DToC(_dZF5DTOCOR)+";'"+_cZF5CODIGO+CRLF
+        _lTemData:=.F.//Para por ZF5_DTATUA="N" em todos os Tipos "A" e por "S" só no For apos o final
+        If _cOrigem = "TELA"//não usa por enquanto
            _aRec_TA_TF[1]:=_oModelGrid:GetLine()
         Else
            _aRec_TA_TF[1]:=ZF5->(RECNO())
-        ENDIF
+        EndIf
 
-     ElseIf _cDtTran == "B"  .AND. (EMPTY(_dDtTipoB) .AND. _dZF5DTOCOR >= _dF2EMISSAO .AND. _dZF5DTOCOR <= DATE() ) .AND. _lTemOperador
+     ElseIf _cDtTran == "B"  .And. (Empty(_dDtTipoB) .And. _dZF5DTOCOR >= _dF2EMISSAO .And. _dZF5DTOCOR <= Date() ) .And. _lTemOperador
         _dDtTipoB := _dZF5DTOCOR
-        _cListaOco+= "'"+_cTipoOcorr+";["+_cDtTran+"];"+DTOC(_dZF5DTOCOR)+";'"+_cZF5CODIGO+CRLF
+        _cListaOco+= "'"+_cTipoOcorr+";["+_cDtTran+"];"+DToC(_dZF5DTOCOR)+";'"+_cZF5CODIGO+CRLF
         _lTemData:=.T.
 
-     ElseIf _cDtTran == "C"  .AND. (EMPTY(_dDtTipoC) .AND. _dZF5DTOCOR >= _dF2EMISSAO .AND. _dZF5DTOCOR <= DATE() ) .AND. _lTemOperador
+     ElseIf _cDtTran == "C"  .And. (Empty(_dDtTipoC) .And. _dZF5DTOCOR >= _dF2EMISSAO .And. _dZF5DTOCOR <= Date() ) .And. _lTemOperador
         _dDtTipoC := _dZF5DTOCOR
-        _cListaOco+= "'"+_cTipoOcorr+";["+_cDtTran+"];"+DTOC(_dZF5DTOCOR)+";'"+_cZF5CODIGO+CRLF
+        _cListaOco+= "'"+_cTipoOcorr+";["+_cDtTran+"];"+DToC(_dZF5DTOCOR)+";'"+_cZF5CODIGO+CRLF
         _lTemData:=.T.
 
-     ElseIf _cDtTran = "D"  .AND. (EMPTY(_dDtTipoD) .AND. _dZF5DTOCOR >= _dF2EMISSAO .AND. _dZF5DTOCOR <= DATE() )
+     ElseIf _cDtTran = "D"  .And. (Empty(_dDtTipoD) .And. _dZF5DTOCOR >= _dF2EMISSAO .And. _dZF5DTOCOR <= Date() )
         _dDtTipoD := _dZF5DTOCOR
-        _cListaOco+= "'"+_cTipoOcorr+";["+_cDtTran+"];"+DTOC(_dZF5DTOCOR)+";'"+_cZF5CODIGO+CRLF
+        _cListaOco+= "'"+_cTipoOcorr+";["+_cDtTran+"];"+DToC(_dZF5DTOCOR)+";'"+_cZF5CODIGO+CRLF
         _lTemData:=.T.
 
-     ElseIf _cDtTran = "E"  .AND. (EMPTY(_dDtTipoE) .AND. _dZF5DTOCOR >= _dF2EMISSAO .AND. _dZF5DTOCOR <= DATE() )
+     ElseIf _cDtTran = "E"  .And. (Empty(_dDtTipoE) .And. _dZF5DTOCOR >= _dF2EMISSAO .And. _dZF5DTOCOR <= Date() )
         _dDtTipoE   := _dZF5DTOCOR
-        _cListaOco+= "'"+_cTipoOcorr+";["+_cDtTran+"];"+DTOC(_dZF5DTOCOR)+";'"+_cZF5CODIGO+CRLF
+        _cListaOco+= "'"+_cTipoOcorr+";["+_cDtTran+"];"+DToC(_dZF5DTOCOR)+";'"+_cZF5CODIGO+CRLF
         _lTemData:=.T.
 
-     ElseIf _cDtTran == "F"  .AND. _dZF5DTOCOR >= _dF2EMISSAO .AND. _lPVAgendado//Tipo F pode aceitar data maior que DATE()
+     ElseIf _cDtTran == "F"  .And. _dZF5DTOCOR >= _dF2EMISSAO //.AND. _lPVAgendado//Tipo F pode aceitar data maior que Date()
         _dDtTipoF := _dZF5DTOCOR
-        _cListaOco+= _cTipoOcorr+";["+_cDtTran+"];"+DTOC(_dZF5DTOCOR)+";'"+_cZF5CODIGO+CRLF
-        _lTemData :=.F.//Para por ZF5_DTATUA="N" em todos os Tipos "F" e por "S" só no FOR apos o final
-        IF _cOrigem = "TELA"//não usa por enquanto
+        _cListaOco+= _cTipoOcorr+";["+_cDtTran+"];"+DToC(_dZF5DTOCOR)+";'"+_cZF5CODIGO+CRLF
+        _lTemData :=.F.//Para por ZF5_DTATUA="N" em todos os Tipos "F" e por "S" só no For apos o final
+        If _cOrigem = "TELA"//não usa por enquanto
            _aRec_TA_TF[2]:=_oModelGrid:GetLine()
         Else
            _aRec_TA_TF[2]:=ZF5->(RECNO())
-        ENDIF
+        EndIf
      EndIf
 
-      If _lGravaSF2 .AND. _cDtTran $ "A,B,C,D,E,F" 
-        IF _cOrigem = "TELA"//não usa por enquanto
+      If _lGravaSF2 .And. _cDtTran $ "A,B,C,D,E,F" 
+        If _cOrigem = "TELA"//não usa por enquanto
            _oModelGrid:SetValue("ZF5_DTATUA", If(_lTemData,"S","N") )
         Else
            ZF5->(RecLock("ZF5",.F.))
            ZF5->ZF5_DTATUA := If(_lTemData,"S","N")
-           ZF5->(MsUnlock())
+           ZF5->(MSUnLock())
         EndIf
       EndIf
 
  Next _nI
 
- IF _lGravaSF2 
-    For _nI := 1 to LEN(_aRec_TA_TF)
+ If _lGravaSF2 
+    For _nI := 1 to Len(_aRec_TA_TF)
         If _aRec_TA_TF[_nI] > 0
-          IF _cOrigem = "TELA"//não usa por enquanto
+          If _cOrigem = "TELA"//não usa por enquanto
              _oModelGrid:GoLine(_aRec_TA_TF[_nI])
              _oModelGrid:SetValue("ZF5_DTATUA", "S" )
           Else
              ZF5->(DBGoTo(_aRec_TA_TF[_nI]))
              ZF5->(RecLock("ZF5",.F.))
              ZF5->ZF5_DTATUA := "S"
-             ZF5->(MsUnlock())
+             ZF5->(MSUnLock())
           EndIf
         EndIf
     Next _nI
  EndIf
 
- If _lGravaSF2 .AND. _cOrigem = "AOMS003" .AND. (!Empty(Alltrim(_cStatusSit)) .OR.  !Empty(Alltrim(_cStatusEmi)) )
+ If _lGravaSF2 .And. _cOrigem = "AOMS003" .And. (!Empty(AllTrim(_cStatusSit)) .Or.  !Empty(AllTrim(_cStatusEmi)) )
 
     _cQuery := "SELECT ZDS.R_E_C_N_O_ RECZDS "
     _cQuery += "FROM "+RetSqlName("ZDS") + " ZDS "
@@ -5721,132 +5863,131 @@ User Function AOMS3DTSF2(_cOrigem As Character,_aRecZF5 As Array,_oModel As Obje
 
     MPSysOpenQuery( _cQuery , _cAliasZDS )
 
-    (_cAliasZDS)->(DbGoTop())
+    (_cAliasZDS)->(DBGoTop())
 
-    Do While  (_cAliasZDS)->(!EOF())
-       ZDS->(Dbgoto((_cAliasZDS)->RECZDS))
+    While  (_cAliasZDS)->(!Eof())
+       ZDS->(DBGoTo((_cAliasZDS)->RECZDS))
        ZDS->(RecLock("ZDS",.F.))
-       If !Empty(Alltrim(_cStatusSit))
+       If !Empty(AllTrim(_cStatusSit))
           ZDS->ZDS_STUSIT := _cStatusSit
        EndIf
-       If !Empty(Alltrim(_cStatusEmi))
+       If !Empty(AllTrim(_cStatusEmi))
           ZDS->ZDS_STUEMI := _cStatusEmi
        EndIf
-       If !Empty(Alltrim(_cObsCom))
+       If !Empty(AllTrim(_cObsCom))
           ZDS->ZDS_OBSCOM := ZDS->ZDS_OBSCOM + CRLF + _cObsCom
        EndIf
-       ZDS->(MsUnLock())
-       (_cAliasZDS)->(Dbskip())
+       ZDS->(MSUnLock())
+       (_cAliasZDS)->(DBSkip())
     EndDo
-    (_cAliasZDS)->(DbCloseArea())
+    (_cAliasZDS)->(DBCloseArea())
  EndIf
 
- IF EMPTY(_dDtTipoA) .And. _nLinhas > 0
+ If Empty(_dDtTipoA) .And. _nLinhas > 0
     _dDtTipoA:= _dF2EMISSAO
  EndIf
 
- If !EMPTY(_dDtTipoA) .Or.;
-    !EMPTY(_dDtTipoB) .OR.;
-    !EMPTY(_dDtTipoC) .OR.;
-    !EMPTY(_dDtTipoD) .OR.;
-    !EMPTY(_dDtTipoE) .OR.;
-    !EMPTY(_dDtTipoF) .And. _nLinhas > 0
+ If (!Empty(_dDtTipoA) .OR.;
+     !Empty(_dDtTipoB) .OR.;
+     !Empty(_dDtTipoC) .OR.;
+     !Empty(_dDtTipoD) .OR.;
+     !Empty(_dDtTipoE) .OR.;
+     !Empty(_dDtTipoF) .OR.;
+     !Empty(_dDtREOPL_S)) .And. _nLinhas > 0
 
-    IF _cOrigem = "TELA"//não usa por enquanto
+    If _cOrigem = "TELA"//não usa por enquanto
        _cZF5DOCOC  := _oModelMaster:GetValue("ZF5_DOCOC")
        _cZF5SEROC  := _oModelMaster:GetValue("ZF5_SEROC")
        _cZF5CLIENT := _oModelMaster:GetValue("ZF5_CLIENT")
        _cZF5LOJA   := _oModelMaster:GetValue("ZF5_LOJA")
-       _cPedido    := ALLTRIM(_oModelMaster:GetValue('ZF5_PEDIDO'))
-    ELSEIF _lOriGravado
-       ZF5->(DBGOTO(_aRecZF5[_nLinhas]))
+       _cPedido    := AllTrim(_oModelMaster:GetValue('ZF5_PEDIDO'))
+    ElseIf _lOriGravado
+       ZF5->(DBGoTo(_aRecZF5[_nLinhas]))
        _cZF5DOCOC  := ZF5->ZF5_DOCOC
        _cZF5SEROC  := ZF5->ZF5_SEROC
        _cZF5CLIENT := ZF5->ZF5_CLIENT
        _cZF5LOJA   := ZF5->ZF5_LOJA
-       _cPedido    := ALLTRIM(ZF5->ZF5_PEDIDO)
+       _cPedido    := AllTrim(ZF5->ZF5_PEDIDO)
     EndIf
-    IF _cOrigem = "M460FIM_LER"
+    If _cOrigem = "M460FIM_LER"
        _dDtLTipoA:=_dDtTipoA
        _dDtLTipoB:=_dDtTipoB
        _dDtLTipoC:=_dDtTipoC
        _dDtLTipoD:=_dDtTipoD
        _dDtLTipoE:=_dDtTipoE
        _dDtLTipoF:=_dDtTipoF
-    ENDIF
-    SF2->(DbSetOrder(1)) // F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA+F2_FORMUL+F2_TIPO
+    EndIf
+    SF2->(DBSetOrder(1)) // F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA+F2_FORMUL+F2_TIPO
     If SF2->(MsSeek(_cZF5Filial +  _cZF5DOCOC +  _cZF5SEROC + _cZF5CLIENT + _cZF5LOJA))
 
-       SC5->(Dbsetorder(1))
-       SC5->(DbSeek(_cZF5Filial+_cPedido))
+       SC5->(DBSetOrder(1))
+       SC5->(DBSeek(_cZF5Filial+_cPedido))
        _cLOG:="F2_FILIAL          ;F2_DOC          ;F2_I_PEDID         ;C5_FILIAL          ;C5_NUM         ;C5_I_AGEND         ;C5_I_DTENT               ;F2_I_PENOL - A           ;F2_I_PENCL - A - C - F   ;F2_I_DCHOL - B           ;F2_I_DENOL - C           ;F2_I_DCHCL - D           ;F2_I_DENCL - E           ;F2_I_TT1TR                     ;F2_I_TT2TR                     ;C5_I_OPER          ;C5_TIPO         ;F2_I_REDP          ;F2_I_OPER"+CRLF
-       _cLOG+="'"+SF2->F2_FILIAL+";'"+SF2->F2_DOC+";"+SF2->F2_I_PEDID+";'"+SC5->C5_FILIAL+";"+SC5->C5_NUM+";"+SC5->C5_I_AGEND+";"+DTOC(SC5->C5_I_DTENT)+";"+DTOC(SF2->F2_I_PENOL)+";"+DTOC(SF2->F2_I_PENCL)+";"+DTOC(SF2->F2_I_DCHOL)+";"+DTOC(SF2->F2_I_DENOL)+";"+DTOC(SF2->F2_I_DCHCL)+";"+DTOC(SF2->F2_I_DENCL)+";"+cValToChar(SF2->F2_I_TT1TR)+";"+cValToChar(SF2->F2_I_TT2TR)+";'"+SC5->C5_I_OPER+";"+SC5->C5_TIPO+";'"+SF2->F2_I_REDP+";'"+SF2->F2_I_OPER+CRLF
+       _cLOG+="'"+SF2->F2_FILIAL+";'"+SF2->F2_DOC+";"+SF2->F2_I_PEDID+";'"+SC5->C5_FILIAL+";"+SC5->C5_NUM+";"+SC5->C5_I_AGEND+";"+DToC(SC5->C5_I_DTENT)+";"+DToC(SF2->F2_I_PENOL)+";"+DToC(SF2->F2_I_PENCL)+";"+DToC(SF2->F2_I_DCHOL)+";"+DToC(SF2->F2_I_DENOL)+";"+DToC(SF2->F2_I_DCHCL)+";"+DToC(SF2->F2_I_DENCL)+";"+cValToChar(SF2->F2_I_TT1TR)+";"+cValToChar(SF2->F2_I_TT2TR)+";'"+SC5->C5_I_OPER+";"+SC5->C5_TIPO+";'"+SF2->F2_I_REDP+";'"+SF2->F2_I_OPER+CRLF
 
        SF2->(RecLock("SF2",.F.))
 
-       //TIPO A ******************************************************************************************************************************************
-       IF !EMPTY(_dDtTipoA)// PREVISÃO DE ENTREGA no operador logístico
+       //TIPO A
+       If !Empty(_dDtTipoA)// PREVISÃO DE ENTREGA no operador logístico
           _aDatas:=U_CalcTransiTime(_dDtTipoA)
           _dDataTTUCOP:=_aDatas[1]      // Data com Transit-time da Unidade de Carregamento até o Operador Logístico
           _dDataTTEOPC:=_aDatas[2]      // Data com Transit Time do Endereço (do Operador Logístico ou da Italac) até o Cliente
-          IF _lGravaSF2
+          If _lGravaSF2
           
-             _cListaSF2+="A;SF2->F2_I_PENOL;"+DTOC(SF2->F2_I_PENOL)+";"
-             IF !EMPTY(SF2->F2_I_REDP) .OR. !EMPTY(SF2->F2_I_OPER)
+             _cListaSF2+="A;SF2->F2_I_PENOL;"+DToC(SF2->F2_I_PENOL)+";"
+             If !Empty(SF2->F2_I_REDP) .Or. !Empty(SF2->F2_I_OPER)
                 SF2->F2_I_PENOL :=_dDataTTUCOP// PREVISÃO DE ENTREGA NO OPERADOR LOGÍSTICO ** SF2 **
              EndIf
-             _cListaSF2+=DTOC(SF2->F2_I_PENOL)+";Data com TT da Unid. de Carreg. ate o Oper.:;"+DTOC(_dDataTTUCOP)+CRLF
+             _cListaSF2+=DToC(SF2->F2_I_PENOL)+";Data com TT da Unid. de Carreg. ate o Oper.:;"+DToC(_dDataTTUCOP)+CRLF
           
-             _cListaSF2+="A;SF2->F2_I_PENCL;"+DTOC(SF2->F2_I_PENCL)+";"
+             _cListaSF2+="A;SF2->F2_I_PENCL;"+DToC(SF2->F2_I_PENCL)+";"
              SF2->F2_I_PENCL := _dDataTTEOPC // PREVISÃO DE ENTREGA NO CLIENTE ** SF2 **
-             _cListaSF2+=DTOC(SF2->F2_I_PENCL)+";Data com TT do Oper. ate o Cliente:;"+DTOC(_dDataTTEOPC)+CRLF
+             _cListaSF2+=DToC(SF2->F2_I_PENCL)+";Data com TT do Oper. ate o Cliente:;"+DToC(_dDataTTEOPC)+CRLF
              
-             _cListaSF2+="A;SF2->F2_I_PENCO;"+DTOC(SF2->F2_I_PENCO)+";"
-             IF !(SC5->C5_I_AGEND == "M" .OR. SC5->C5_I_AGEND == "A")
+             _cListaSF2+="A;SF2->F2_I_PENCO;"+DToC(SF2->F2_I_PENCO)+";"
+             If !(SC5->C5_I_AGEND == "M" .Or. SC5->C5_I_AGEND == "A")
                 SF2->F2_I_PENCO := SF2->F2_I_PENCL
              EndIf
-             _cListaSF2+=DTOC(SF2->F2_I_PENCO)+";Data Previsão de entrega no cliente (original):;"+DTOC(SF2->F2_I_PENCL)+CRLF
+             _cListaSF2+=DToC(SF2->F2_I_PENCO)+";Data Previsão de entrega no cliente (original):;"+DToC(SF2->F2_I_PENCL)+CRLF
           
-          ELSE// _cOrigem = "M460FIM_LER"
+          Else// _cOrigem = "M460FIM_LER"
              _dTADtTTUCOP:=_dDataTTUCOP
              _dTADtTTEOPC:= _dDataTTEOPC    // PREVISÃO DE ENTREGA NO CLIENTE
-             IF !(SC5->C5_I_AGEND == "M" .OR. SC5->C5_I_AGEND == "A")
+             If !(SC5->C5_I_AGEND == "M" .Or. SC5->C5_I_AGEND == "A")
                 _dTADtPENCO := _dTADtTTEOPC
              EndIf
              
-          ENDIF
+          EndIf
        EndIf
 
-       IF (!EMPTY(SF2->F2_I_REDP) .OR. !EMPTY(SF2->F2_I_OPER))
-          //TIPO B ******************************************************************************************************************************************
+       If (!Empty(SF2->F2_I_REDP) .Or. !Empty(SF2->F2_I_OPER))
+          //TIPO B
           // Data de CHEGADA no operador logístico
 
-          IF _lGravaSF2
-             //If !Empty(_dDtTipoB) //.AND. EMPTY(SF2->F2_I_DCHOL) // retirado pq a Ocorrencia anterior pode ser deletada
-             _cListaSF2+="B;SF2->F2_I_DCHOL;"+DTOC(SF2->F2_I_DCHOL)+";"
+          If _lGravaSF2
+             _cListaSF2+="B;SF2->F2_I_DCHOL;"+DToC(SF2->F2_I_DCHOL)+";"
              SF2->F2_I_DCHOL := _dDtTipoB // DATA DE CHEGADA NO OPERADOR LOGÍSTICO ** SF2 **
-             _cListaSF2+=DTOC(SF2->F2_I_DCHOL)+CRLF
+             _cListaSF2+=DToC(SF2->F2_I_DCHOL)+CRLF
 
-             //TIPO C ******************************************************************************************************************************************
+             //TIPO C
              //DATA DE ENTREGA NO OPERADOR LOGÍSTICO  EDI
-             //If .T. //!Empty(_dDtTipoC) //.AND. EMPTY(SF2->F2_I_DENOL)  // retirado pq a Ocorrencia anterior pode ser deletada
-             _cListaSF2+="C;SF2->F2_I_DENOL;"+DTOC(SF2->F2_I_DENOL)+";"
+             _cListaSF2+="C;SF2->F2_I_DENOL;"+DToC(SF2->F2_I_DENOL)+";"
              SF2->F2_I_DENOL := _dDtTipoC   // DATA DE ENTREGA NO OPERADOR LOGÍSTICO  EDI ** SF2 **
-             _cListaSF2+=DTOC(SF2->F2_I_DENOL)+CRLF
-          EndIF
+             _cListaSF2+=DToC(SF2->F2_I_DENOL)+CRLF
+          EndIf
 
            // PREVISÃO de entrega no cliente em cima do TIPO B e TIPO C se tiver preenchido 1 das 2
            _dDataTTEOPC:=_dDtTipoB
-           IF _dDtTipoC > _dDtTipoB
+           If _dDtTipoC > _dDtTipoB
               _dDataTTEOPC:=_dDtTipoC
            EndIf
            If !Empty(_dDataTTEOPC)
               _aDatas     :=U_CalcTransiTime(,_dDataTTEOPC)
               _dDataTTEOPC:=_aDatas[2]   // Data com Transit Time do Endereço do Operador Logístico até o Cliente
-              IF _lGravaSF2
-                 _cListaSF2+="C;SF2->F2_I_PENCL;"+DTOC(SF2->F2_I_PENCL)+";"
+              If _lGravaSF2
+                 _cListaSF2+="C;SF2->F2_I_PENCL;"+DToC(SF2->F2_I_PENCL)+";"
                  SF2->F2_I_PENCL := _dDataTTEOPC // PREVISÃO DE ENTREGA NO CLIENTE ** SF2 **
-                 _cListaSF2+=DTOC(SF2->F2_I_PENCL)+";Data com TT do Oper. ate o Cliente:;"+DTOC(_dDataTTEOPC)+CRLF
+                 _cListaSF2+=DToC(SF2->F2_I_PENCL)+";Data com TT do Oper. ate o Cliente:;"+DToC(_dDataTTEOPC)+CRLF
               Else// _cOrigem = "M460FIM_LER"
                  _dTCDtTTEOPC:=_dTBDtTTEOPC:=_dDataTTEOPC
                  _dTCDtTTEOPC:=_dTBDtTTEOPC:=SC5->C5_I_DTENT
@@ -5855,49 +5996,55 @@ User Function AOMS3DTSF2(_cOrigem As Character,_aRecZF5 As Array,_oModel As Obje
 
        EndIf
 
-       //TIPO D ******************************************************************************************************************************************
-       If _lGravaSF2//!Empty(_dDtTipoD) //.AND. EMPTY(SF2->F2_I_DCHCL) // retirado pq a Ocorrencia anterior pode ser deletada
-          _cListaSF2+="D;SF2->F2_I_DCHCL;"+DTOC(SF2->F2_I_DCHCL)+";"
+       //TIPO D
+       If _lGravaSF2//!Empty(_dDtTipoD) //.AND. Empty(SF2->F2_I_DCHCL) // retirado pq a Ocorrencia anterior pode ser deletada
+          _cListaSF2+="D;SF2->F2_I_DCHCL;"+DToC(SF2->F2_I_DCHCL)+";"
           SF2->F2_I_DCHCL := _dDtTipoD // Data de CHEGADA no cliente ** SF2 **
-          _cListaSF2+=DTOC(SF2->F2_I_DCHCL)+CRLF
+          _cListaSF2+=DToC(SF2->F2_I_DCHCL)+CRLF
        EndIf
 
-       //TIPO "E" ******************************************************************************************************************************************
+       //TIPO "E"
        If _lGravaSF2//!Empty(_dDtTipoE) //.And. Empty(SF2->F2_I_DENCL)// retirado pq a Ocorrencia anterior pode ser deletada
-          _cListaSF2+="E;SF2->F2_I_DENCL;"+DTOC(SF2->F2_I_DENCL)+";"
+          _cListaSF2+="E;SF2->F2_I_DENCL;"+DToC(SF2->F2_I_DENCL)+";"
            SF2->F2_I_DENCL := _dDtTipoE // Data de ENTREGA no cliente ** SF2 **
-          _cListaSF2+=DTOC(SF2->F2_I_DENCL)+CRLF
+          _cListaSF2+=DToC(SF2->F2_I_DENCL)+CRLF
        EndIf
 
-       //TIPO "F" ******************************************************************************************************************************************
-       If !Empty(_dDtTipoF) .AND. _lGravaSF2// REAGENDAMENTRO DE ENTREGA
-          _cListaSF2+="F;SF2->F2_I_PENCL;"+DTOC(SF2->F2_I_PENCL)+";"
+       //TIPO "F"
+       If !Empty(_dDtTipoF) .And. _lGravaSF2// REAGENDAMENTRO DE ENTREGA
+          _cListaSF2+="F;SF2->F2_I_PENCL;"+DToC(SF2->F2_I_PENCL)+";"
           SF2->F2_I_PENCL := _dDtTipoF // PREVISÃO de entrega no cliente ** SF2 **
-          _cListaSF2+=DTOC(SF2->F2_I_PENCL)+CRLF
+          _cListaSF2+=DToC(SF2->F2_I_PENCL)+CRLF
        EndIf
 
-       SF2->(MsUnLock())
+       // ZFC_OLREDI = "S"
+       If !Empty(_dDtREOPL_S) .And. _lGravaSF2//Redirecionamento de operador logístico
+          SF2->F2_I_OLRDT := _dDtREOPL_S  // ZF5_DTOCOR  - Data do redirecionamento para operador logístico
+          SF2->F2_I_OLRCD := _cZF5_OLRCOD // ZF5_OLRCOD - Código do operador logístico do redirecionamento
+          SF2->F2_I_OLRLJ := _cZF5_OLRLOJ // ZF5_OLRLOJ - Loja do operador logístico do redirecionamento
+       EndIf
 
-       IF U_ITGETMV("IT_GLOGDTOC",.F.) .OR. LEFT(_cAmbiente,6) $ "HOMOLO/DESENV"
-          _cLOG     := "AMBIENTE:;"+ALLTRIM(GETENVSERVER())+";Origem:;"+_cOrigem+CRLF+_cLOG
+       SF2->(MSUnLock())
+
+       If SuperGetMV("IT_GLOGDTO",.T.,.F.) .Or. !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
+          _cLOG     := "AMBIENTE:;"+AllTrim(GETENVSERVER())+";Origem:;"+_cOrigem+CRLF+_cLOG
           _cLOG     += CRLF
           _cLOG     += _cListaOco+CRLF
           _cLOG     += _cListaSF2+CRLF
-          _cFileNome:= "/data/logs_generico/aoms003_"+SF2->F2_FILIAL+"_"+ALLTRIM(SF2->F2_DOC)+"_"+DTOS(DATE())+"_"+STRTRAN(TIME(),":","_")+".csv"
+          _cFileNome:= "/data/logs_generico/aoms003_"+SF2->F2_FILIAL+"_"+AllTrim(SF2->F2_DOC)+"_"+DToS(DATE())+"_"+StrTran(TIME(),":","_")+".csv"
 
           MemoWrite(LOWER(_cFileNome),_cLOG)
 
        EndIf
 
-       IF _lGravaSF2
+       If _lGravaSF2
           U_ReplDatasTransTime( SF2->(RECNO()) , _lTesteNF )
-       EndIF
+       EndIf
 
     EndIf
  EndIf
 
-RETURN .T.
-
+Return .T.
 
 /*
 ===============================================================================================================================
@@ -5909,6 +6056,7 @@ Parametros--------: Se _lLegenda = .T. devolve a cor da legenda, senão exibe a l
 Retorno-----------: Cor da Legenda ou .T.
 ===============================================================================================================================*/
 Static Function AOMS03Leg(_lLegenda)
+ 
  Local _cRetorno As Char
  Local _aLegenda As Array
  Local _oModel  As Object
@@ -5917,18 +6065,18 @@ Static Function AOMS03Leg(_lLegenda)
  Local _cEstonado := "N" As Char
  Local _cStatus   As Char
 
- IF _lLegenda//GRAVAÇÃO DO CAMPO LEGENDA
+ If _lLegenda//GRAVAÇÃO DO CAMPO LEGENDA
     _oModel    := FWModelActive()
     _oModelGrid:= _oModel:GetModel("ZF5DETAIL")
     _nLine     := _oModelGrid:GetLine()
     _cRetorno  := "BR_AMARELO"
-    IF _nLine > 0 //VIA TELA
+    If _nLine > 0 //VIA TELA
        _cEstonado :=_oModelGrid:GetValue("ZF5_ESTONO")
        _cStatus   :=_oModelGrid:GetValue("ZF5_APRREJ")
     Else// CARGA INICAL NA ALTERAÇÃO
        _cEstonado := ZF5->ZF5_ESTONO
        _cStatus   := ZF5->ZF5_APRREJ
-    ENDIF
+    EndIf
     Do Case
        Case _cEstonado ='S'
            _cRetorno := "BR_PRETO"
@@ -5945,10 +6093,9 @@ Static Function AOMS03Leg(_lLegenda)
     aAdd( _aLegenda, { "BR_PRETO"    ,      "Estornada" })
     aAdd( _aLegenda, { "BR_AMARELO"  ,      "Pendente"  })
     BrwLegenda( "Status das ocorrencias", "Legenda", _aLegenda )
- Endif
+ EndIf
+
 Return .T.
-
-
 
 /*
 ===============================================================================================================================
@@ -5960,6 +6107,7 @@ Parametros--------: _cNotaFiscal as char, _cSerie as char
 Retorno-----------: _aRecZF5
 ===============================================================================================================================*/
 Static Function BuscaRecZF5(_cFilail as char, _cNotaFiscal as char, _cSerie as char)
+
 Local _cQuery  := "" As Char
 Local _aRecZF5 :={} As Array
 Local _cAlias  := GetNextAlias()
@@ -5987,7 +6135,7 @@ _cQuery += "          AND C5_FILIAL = F2_FILIAL "
 _cQuery += "          AND C5_NUM = F2_I_PEDID "
 _cQuery += "          AND SC5.D_E_L_E_T_ = ' ' "
 _cQuery += "          AND ZF5A.R_E_C_N_O_ = "
-_cQuery += "              CASE "
+_cQuery += "              Case "
 _cQuery += "                  WHEN ZFCA.ZFC_DTTRAN IN ('B', "
 _cQuery += "                                           'C', "
 _cQuery += "                                           'D', "
@@ -6005,7 +6153,7 @@ _cQuery += "                              AND ZFCB.ZFC_FILIAL = ' ' "
 _cQuery += "                              AND ZFCB.ZFC_CODIGO = ZF5B.ZF5_TIPOO "
 _cQuery += "                              AND ZFCB.ZFC_DTTRAN = ZFCA.ZFC_DTTRAN "
 _cQuery += "                              AND ZFCB.D_E_L_E_T_ = ' ') "
-_cQuery += "                  ELSE "
+_cQuery += "                  Else "
 _cQuery += "                      (SELECT MAX (ZF5B.R_E_C_N_O_) "
 _cQuery += "                         FROM ZF5010 ZF5B, ZFC010 ZFCB "
 _cQuery += "                        WHERE     ZF5B.ZF5_FILIAL = ZF5A.ZF5_FILIAL "
@@ -6022,10 +6170,10 @@ _cQuery += "              END "
 _cQuery += " ORDER BY ZF5A.R_E_C_N_O_ "
  
  MPSysOpenQuery( _cQuery , _cAlias )
- Do While (_cAlias)->(!EOF())
+ While (_cAlias)->(!Eof())
     aAdd( _aRecZF5, (_cAlias)->RECZF5 )
-    (_cAlias)->(DbSkip())  
+    (_cAlias)->(DBSkip())  
  EndDo
- (_cAlias)->(DbCloseArea())
+ (_cAlias)->(DBCloseArea())
 
 Return _aRecZF5

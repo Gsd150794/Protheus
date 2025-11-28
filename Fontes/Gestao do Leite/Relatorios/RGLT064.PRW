@@ -2,32 +2,24 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges | 13/12/2017 | Correção na regra do Incentivo à Produção. Chamado 22718
--------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges | 30/08/2019 | Correção da barra de progresso. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges | 27/09/2019 | Revisão de fontes. Chamado 28346
+Lucas Borges  |13/12/2017| Chamado 22718. Correção na regra do Incentivo à Produção.
+Lucas Borges  |30/08/2019| Chamado 28346. Correção da barra de progresso.
+Lucas Borges  |27/09/2019| Chamado 28346. Revisão de fontes.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
+#Include "TOTVS.ch"
 
-#Include "Protheus.ch"
 /*
 ===============================================================================================================================
 Programa----------: RGLT064
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 04/12/2017
-===============================================================================================================================
 Descrição---------: Mapa Analítico Anual - Relatório de volume anual de produtores, mês a mês para avaliação do limite atingido,
 					que interfere no cálculo de impostos
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -46,11 +38,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 04/12/2017
-===============================================================================================================================
 Descrição---------: Processa a montagem do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -117,11 +106,8 @@ Return( oReport )
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 29/11/2017
-===============================================================================================================================
 Descrição---------: Processa a impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -138,7 +124,7 @@ Local _cGroup		:= "%"
 Local _nCountRec	:= 0
 Local _cQuery		:= " "
 Local _dDataFim		:= Posicione("ZLE",1,xFilial("ZLE")+MV_PAR01,"ZLE_DTFIM")
-Local _dDataIni		:= StoD( cValToChar( Year( _dDataFim ) ) + '0101' )
+Local _dDataIni		:= SToD( cValToChar( Year( _dDataFim ) ) + '0101' )
 Local _cAux			:= "ZLD"
 Local n01			:= 0
 Local n02			:= 0
@@ -162,9 +148,9 @@ EndIf
 If MV_PAR07 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,_cAux)
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
+	aAdd(_aSelFil,cFilAnt)
 EndIf
 
 //=====================================================
@@ -245,7 +231,7 @@ oReport:Section(1):Section(2):EndQuery(/*Array com os parametros do tipo Range*/
 //Impressao do Relatorio
 //=======================================================================
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
@@ -261,7 +247,7 @@ While !oReport:Cancel() .And. (_cAlias)->( !Eof() )
 	oReport:IncMeter()	
 	_cAlias2	:= GetNextAlias()
 
-	_cQuery := " SELECT SUBSTR("+_cAux+"_DTCOLE, 5, 2) MES,"
+	_cQuery := " SELECT SubStr("+_cAux+"_DTCOLE, 5, 2) MES,"
 	_cQuery += "        SUM("+_cAux+"_QTDBOM) TOTAL_MES"
 	_cQuery += "  FROM "+ RetSqlName(_cAux) +" , "+ RetSqlName('SA2') +" SA2"
 	_cQuery += " WHERE "+RetSqlName(_cAux)+".D_E_L_E_T_ = ' '"
@@ -272,18 +258,18 @@ While !oReport:Cancel() .And. (_cAlias)->( !Eof() )
 	_cQuery += "   AND "+_cAux+"_FILIAL = '"+(_cAlias)->FILIAL+"'"
 	_cQuery += "   AND "+_cAux+"_DTCOLE BETWEEN '"+ DToS(_dDataIni) +"' AND '"+ DToS(_dDataFim) + "'"
 	_cQuery += "   AND "+_cAux+"_RETIRO = '"+(_cAlias)->RETIRO+"'"
-	_cQuery += " GROUP BY SUBSTR("+_cAux+"_DTCOLE, 5, 2)"
+	_cQuery += " GROUP BY SubStr("+_cAux+"_DTCOLE, 5, 2)"
 
 	DBUseArea( .T. , "TOPCONN" , TCGenQry(,,_cQuery) , _cAlias2 , .F. , .T. )
 	
 	nVol:= (_cAlias)->VOLUME
-	While (_cAlias2)->( !EoF() )
+	While (_cAlias2)->( !Eof() )
 	
 		&("n"+(_cAlias2)->MES) := (_cAlias2)->TOTAL_MES
 	(_cAlias2)->( DBSkip() )
 	EndDo
 	
-	(_cAlias2)->(DbCloseArea())
+	(_cAlias2)->(DBCloseArea())
 	
 	oReport:Section(1):Section(2):PrintLine()
 	oReport:Section(1):Section(3):PrintLine()

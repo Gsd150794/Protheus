@@ -1,49 +1,33 @@
 /*
 ===============================================================================================================================
-                          ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                          
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges     | 14/10/2019 | Chamado 30866 e 30872. Error.log no cancelamento de documentos. 
--------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer    | 01/02/2021 | Chamado 34262. Remoção de bugs apontados pelo Totvs CodeAnalysis. 
--------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges     | 07/05/2021 | Chamado 36469. Corrigida chamada de parâmetro. 
------------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer    | 08/12/2022 | Chamado 41604. Novo tratamento para Pedidos de Operacao Triangular. 
------------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer    | 09/01/2023 | Chamado 41604. Correcao de erro de digitacao em mensagem na tela. 
+Alex Wallauer |08/12/2022| Chamado 41604. Novo tratamento para Pedidos de Operacao Triangular. 
+Alex Wallauer |09/01/2023| Chamado 41604. Correcao de erro de digitacao em mensagem na tela. 
+Lucas Borges  |17/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
 -==============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Rwmake.ch"
-#Include "Protheus.ch"
-#Include "TopConn.ch"
-
-#Define CRLF	Chr(13)+Chr(10)
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MS520VLD
 Autor-------------: Tiago Correa Castro
 Data da Criacao---: 15/12/2008
-===============================================================================================================================
 Descrição---------: Ponto de Entrada no momento da exclusao da Nota Fiscal de Saida (SF2)
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T. - Permite o estorno
 ------------------: .F. - Impede o estorno
 ===============================================================================================================================
 */
 User Function MS520VLD(_lSair)
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _lRet		:= .T. 
-DEFAULT _lSair  := .F.
+Default _lSair  := .F.
 _lUsuConfirmou  := .T.//Se passou por aqui é que o Usario Confirmou o Estorno variavel usada no rdmake M520BROW.PRW nao retirar
 //==============================================================================//
 // AWF-Alex Wallauer - 28/09/2016 - Chamado 16548
@@ -53,15 +37,15 @@ _lUsuConfirmou  := .T.//Se passou por aqui é que o Usario Confirmou o Estorno va
 //==============================================================================//
 If _lRet
    _lRet := IT_Ver_TN()
-   IF _lSair
-      RETURN _lRet
-   ENDIF
+   If _lSair
+      Return _lRet
+   EndIf
 EndIf
 
 //==============================================================================//
 // AWF-Alex Wallauer - 17/06/2016 - Chamado 14489                                   
 // Funcao para verificar: 
-//  Se a nota for uma nota de transferência e já foi incluída como documento 
+//  Se a nota For uma nota de transferência e já foi incluída como documento 
 //  de entrada na filial de destino.
 //==============================================================================//
 If _lRet
@@ -72,16 +56,16 @@ EndIf
 // AWF-Alex Wallauer - 17/06/2016 - Chamado 14489                                   
 // Funcao para verificar: 
 //  Se o tempo decorrido desde o envio da NFe para o 
-//  Sefaz for maior que a quantidade de horas indicada no parâmetro MV_SPEDEXC
+//  Sefaz For maior que a quantidade de horas indicada no parâmetro MV_SPEDEXC
 //==============================================================================//
 If _lRet
    _lRet := IT_Ver_Prazo()
-ENDIF
+EndIf
 
 //================================================================================
 //| Funcao para verificar se existem titulos ST e se nao houveram baixas         |
 //================================================================================
-If _lRet .AND. SF2->F2_TIPO = "N"
+If _lRet .And. SF2->F2_TIPO = "N"
 	_lRet := IT_Ver_ST()
 EndIf
 
@@ -99,23 +83,14 @@ If _lRet
 	_lRet := IT_Ver_IMP()
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 //================================================================================
-//Verifica uso de armazéns restritos para usuárioxfilial
+//Verifica uso de armazéns restritos para usuárioxFilial
 //================================================================================
 If _lRet
 	_lRet := IT_Ver_ARM()
 EndIf
-
-
-//================================================================================
-//COLOQUE AQUI NOVA VALIDACOES
-//================================================================================
-//If _lRet
-//	_lRet := IT_Ver_XXX()
-//EndIf
-
 
 //================================================================================
 //Verifica o Pedido de Faturamento de Operacao Triangular // DEIXE ESSE SEMPRE POR ULTIMO PQ ELE EXECUTA UMA EXCLUSAO 
@@ -125,7 +100,7 @@ If _lRet
 EndIf
 
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _lRet )
 
@@ -134,30 +109,24 @@ Return( _lRet )
 Programa----------: IT_Ver_ST
 Autor-------------: Guilherme Gesualdo
 Data da Criacao---: 10/09/2012
-===============================================================================================================================
 Descrição---------: Funcao usada para verificar se existe titulos ST para a nota, e se houver verifica se houve baixas.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T. - Permite o estorno
 ------------------: .F. - Impede o estorno
 ===============================================================================================================================
 */
 Static Function IT_Ver_ST()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 
 Local _cFilial	:= SF2->F2_FILIAL
 Local _cSerie	:= SF2->F2_SERIE
 Local _cDoc		:= SF2->F2_DOC
 Local _cCodCli	:= SF2->F2_CLIENTE
 Local _cLojCli	:= SF2->F2_LOJA
-
 Local _cFORST	:= AllTrim(SuperGetMV("IT_STFORN",.F.,""))
-
 Local _nE1IcmV	:= 0
 Local _nE1IcmS	:= 0
-
 Local _nE2IcmV	:= 0
 Local _nE2IcmS	:= 0
 Local lRet		:= .T.
@@ -165,7 +134,7 @@ Local lRet		:= .T.
 DBSelectArea("SE1")
 SE1->( DBSetOrder(2) ) //E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO
 
-If SE1->( DbSeek( _cFilial + _cCodCli + _cLojCli + _cSerie + _cDoc + SPACE(2) + 'ICM' ) )
+If SE1->( DBSeek( _cFilial + _cCodCli + _cLojCli + _cSerie + _cDoc + Space(2) + 'ICM' ) )
 
 	_nE1IcmV := SE1->E1_VALOR
     _nE1IcmS := SE1->E1_SALDO
@@ -176,29 +145,29 @@ EndIf
 DBSelectArea("SE2")
 SE2->( DBSetOrder(1) ) //E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
 
-If DbSeek(xFilial("SE2")+_cSerie+_cDoc+SPACE(2)+'ICM'+SUBSTR(_cFORST,1,6)+SUBSTR(_cFORST,7,4))
+If DBSeek(xFilial("SE2")+_cSerie+_cDoc+Space(2)+'ICM'+SubStr(_cFORST,1,6)+SubStr(_cFORST,7,4))
 
 	_nE2IcmV := SE2->E2_VALOR
 	_nE2IcmS := SE2->E2_SALDO 
 	
 EndIf 
 
-If _nE1IcmV == _nE1IcmS .and. _nE2IcmV == _nE2IcmS  
+If _nE1IcmV == _nE1IcmS .And. _nE2IcmV == _nE2IcmS  
 
 	lRet     := .T.
 	
 Else
 
-	xmaghelpfis(	"TITULO(S) COM BAIXA(S) (MS520VLD)"																								,;
+	xMagHelpFis(	"TITULO(S) COM BAIXA(S) (MS520VLD)"																								,;
 					"Não será possível realizar a exclusão do documento pois o mesmo tem título(s) de ST Antecipado com baixa(s)."			,;
 		            "Favor exclua a(s) baixa(s) do(s) título(s) e tente novamente a exclusão do documento. Dados do(s) título(s):"+ CRLF	+;
-		            "PREFIXO: "+ALLTRIM(_cSerie)+", TIPO: ICM, NUMERO: " + _cDoc															 )
+		            "PREFIXO: "+AllTrim(_cSerie)+", TIPO: ICM, NUMERO: " + _cDoc															 )
 	
    	lRet := .F.
    	
 EndIf
 	
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return(lRet)
 
@@ -207,35 +176,29 @@ Return(lRet)
 Programa----------: IT_Ver_NCC
 Autor-------------: Talita
 Data da Criacao---: 06/06/2013
-===============================================================================================================================
 Descrição---------: Funcao usada para verificar se existe titulos NCC para a nota, e se houver verifica se houve baixas.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T. - Permite o estorno
 ------------------: .F. - Impede o estorno
 ===============================================================================================================================
 */
 Static Function IT_Ver_NCC()
 
-Local _aArea	:= GetArea()
-
+Local _aArea	:= FWGetArea()
 Local _cFilial	:= SF2->F2_FILIAL
 Local _cSerie	:= "DCT"
 Local _cDoc		:= SF2->F2_DOC
 Local _cCodCli	:= SF2->F2_CLIENTE
 Local _cLojCli	:= SF2->F2_LOJA
-
 Local _nE1NccV	:= 0
 Local _nE1NccS	:= 0
-                 
 Local _lRet		:= .T.
 
 DBSelectArea("SE1")
 SE1->( DBSetOrder(2) ) //E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO
-IF SE1->( DbSeek( _cFilial + _cCodCli + _cLojCli + _cSerie + _cDoc ) )
+If SE1->( DBSeek( _cFilial + _cCodCli + _cLojCli + _cSerie + _cDoc ) )
 
-	While SE1->( !EOF() ) .AND. SE1->E1_NUM = _cDoc .AND. _nE1NccV = _nE1NccS
+	While SE1->( !Eof() ) .And. SE1->E1_NUM = _cDoc .And. _nE1NccV = _nE1NccS
 	
 		If SE1->E1_TIPO = "NCC"
 		
@@ -255,15 +218,15 @@ IF SE1->( DbSeek( _cFilial + _cCodCli + _cLojCli + _cSerie + _cDoc ) )
 	
 		_lRet := .F.
 		
-		xmaghelpfis(	"TITULO(S) COM BAIXA(S) (MS520VLD)"																								,;
+		xMagHelpFis(	"TITULO(S) COM BAIXA(S) (MS520VLD)"																								,;
 						"Não será possível realizar a exclusão do documento pois o mesmo tem título(s) de NCC com baixa(s)."					,;
 		                "Favor exclua a(s) baixa(s) do(s) título(s) e tente novamente a exclusão do documento. Dados do(s) título(s):"+ CRLF	+;
-		                "PREFIXO: "+ALLTRIM(_cSerie)+", TIPO: NCC, NUMERO: "+ _cDoc																 )
+		                "PREFIXO: "+AllTrim(_cSerie)+", TIPO: NCC, NUMERO: "+ _cDoc																 )
 	EndIf
 
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return( _lRet )
 
@@ -272,11 +235,8 @@ Return( _lRet )
 Programa----------: IT_Ver_IMP
 Autor-------------: Alexandre Villar
 Data da Criacao---: 15/12/2008
-===============================================================================================================================
 Descrição---------: Valida se houveram faturamentos posteriores com retenção de impostos
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T. - Permite o estorno
 ------------------: .F. - Impede o estorno
 ===============================================================================================================================
@@ -295,7 +255,6 @@ Local _cRegZZ2	:= ""
 Local _cRegSF2	:= ""
 Local _cQuery	:= ""
 
-
 If !Empty( SF2->F2_CARGA )
 
 	DBSelectArea('ZZ2')
@@ -308,7 +267,7 @@ If !Empty( SF2->F2_CARGA )
 		_cRegZZ2	:= cValToChar( ZZ2->( Recno() ) )
 		_cRegSF2	:= U_ITSF2REG()//cValToChar( SF2->( Recno() ) )
 		_cRegSE2	:= U_ITSE2REG()
-		_cDtRef		:= SubStr( DtoS( SF2->F2_EMISSAO ) , 1 , 6 )
+		_cDtRef		:= SubStr( DToS( SF2->F2_EMISSAO ) , 1 , 6 )
 		
 		If ZZ2->ZZ2_INSS > 0 .Or. ZZ2->ZZ2_IRRF > 0
 			
@@ -326,12 +285,12 @@ If !Empty( SF2->F2_CARGA )
 			_cQuery += " AND	SE2.E2_NUM					<> '"+ _cNumRPA +"' "
 			_cQuery += " AND	SE2.E2_PREFIXO				= 'AUT' "
 			_cQuery += " AND	SE2.E2_ORIGEM				IN ( 'AOMS042' , 'MGLT011' , 'GERAZZ3' ) "
-			_cQuery += " AND	SUBSTR(SE2.E2_EMISSAO,1,6)	= '"+ _cDtRef	+"' "
+			_cQuery += " AND	SubStr(SE2.E2_EMISSAO,1,6)	= '"+ _cDtRef	+"' "
 			_cQuery += " AND	SE2.R_E_C_N_O_				> '"+ _cRegSE2 +"' "
 			_cQuery += " AND	SE2.D_E_L_E_T_				= ' ' "
 			_cQuery += " WHERE "
 			_cQuery += " 		ZZ2.ZZ2_AUTONO				= '"+ _cCodAut	+"' "
-			_cQuery += " AND	SUBSTR(ZZ2.ZZ2_DATA,1,6)	= '"+ _cDtRef	+"' "
+			_cQuery += " AND	SubStr(ZZ2.ZZ2_DATA,1,6)	= '"+ _cDtRef	+"' "
 			_cQuery += " AND	ZZ2.ZZ2_CARGA				= ' ' "
 			_cQuery += " AND	ZZ2.D_E_L_E_T_				= ' ' "
 			
@@ -346,18 +305,15 @@ If !Empty( SF2->F2_CARGA )
 			_cQuery += " 		SF2.F2_FILIAL				= ZZ2.ZZ2_FILIAL "
 			_cQuery += " AND	SF2.F2_CARGA				= ZZ2.ZZ2_CARGA "
 			_cQuery += " AND	SF2.F2_CARGA				<> '"+ _cNumCar +"' "
-			_cQuery += " AND	SUBSTR(SF2.F2_EMISSAO,1,6)	= '"+ _cDtRef +"' "
+			_cQuery += " AND	SubStr(SF2.F2_EMISSAO,1,6)	= '"+ _cDtRef +"' "
 			_cQuery += " AND	SF2.R_E_C_N_O_				> '"+ _cRegSF2 +"' "
 			_cQuery += " AND	SF2.D_E_L_E_T_				= ' ' "
 			_cQuery += " WHERE "
 			_cQuery += " 		ZZ2.ZZ2_AUTONO	= '"+ _cCodAut	+"' "
-			_cQuery += " AND	SUBSTR(ZZ2.ZZ2_DATA,1,6)	= '"+ _cDtRef	+"' "
+			_cQuery += " AND	SubStr(ZZ2.ZZ2_DATA,1,6)	= '"+ _cDtRef	+"' "
 			_cQuery += " AND	ZZ2.ZZ2_CARGA	<> ' ' "
 			_cQuery += " AND	ZZ2.D_E_L_E_T_	= ' ' "
-			
-			
 		Else
-		
 			//================================================================================
 			//| Verifica RPA com impostos no mesmo período após o atual sem impostos         |
 			//================================================================================
@@ -372,12 +328,12 @@ If !Empty( SF2->F2_CARGA )
 			_cQuery += " AND	SE2.E2_NUM					<> '"+ _cNumRPA +"' "
 			_cQuery += " AND	SE2.E2_PREFIXO				= 'AUT' "
 			_cQuery += " AND	SE2.E2_ORIGEM				IN ( 'AOMS042' , 'MGLT011' , 'GERAZZ3' ) "
-			_cQuery += " AND	SUBSTR(SE2.E2_EMISSAO,1,6)	= '"+ _cDtRef	+"' "
+			_cQuery += " AND	SubStr(SE2.E2_EMISSAO,1,6)	= '"+ _cDtRef	+"' "
 			_cQuery += " AND	SE2.R_E_C_N_O_				> '"+ _cRegSE2 +"' "
 			_cQuery += " AND	SE2.D_E_L_E_T_				= ' ' "
 			_cQuery += " WHERE "
 			_cQuery += " 		ZZ2.ZZ2_AUTONO				= '"+ _cCodAut	+"' "
-			_cQuery += " AND	SUBSTR(ZZ2.ZZ2_DATA,1,6)	= '"+ _cDtRef	+"' "
+			_cQuery += " AND	SubStr(ZZ2.ZZ2_DATA,1,6)	= '"+ _cDtRef	+"' "
 			_cQuery += " AND	ZZ2.ZZ2_CARGA				= ' ' "
 			_cQuery += " AND (	ZZ2.ZZ2_INSS				> 0 "
 			_cQuery += "     OR	ZZ2.ZZ2_IRRF				> 0 ) "
@@ -394,7 +350,7 @@ If !Empty( SF2->F2_CARGA )
 			_cQuery += " 		SF2.F2_FILIAL				= ZZ2.ZZ2_FILIAL "
 			_cQuery += " AND	SF2.F2_CARGA				= ZZ2.ZZ2_CARGA "
 			_cQuery += " AND	SF2.F2_CARGA				<> '"+ _cNumCar +"' "
-			_cQuery += " AND	SUBSTR(SF2.F2_EMISSAO,1,6)	= '"+ _cDtRef +"' "
+			_cQuery += " AND	SubStr(SF2.F2_EMISSAO,1,6)	= '"+ _cDtRef +"' "
 			_cQuery += " AND	SF2.R_E_C_N_O_				> '"+ _cRegSF2 +"' "
 			_cQuery += " AND	SF2.D_E_L_E_T_				= ' ' "
 			_cQuery += " WHERE "
@@ -480,24 +436,19 @@ If !Empty( SF2->F2_CARGA )
 			//================================================================================
 			//| Verifica se o usuario tem permissao para executar o Estorno sem validar      | - 31/07/14 - Alexandre Villar
 			//================================================================================
-			DbSelectArea("ZZL")
-			ZZL->( DbSetOrder(3) )
-			If ZZL->( DbSeek( xFILIAL("ZZL") + RetCodUsr() ) )
+			DBSelectArea("ZZL")
+			ZZL->( DBSetOrder(3) )
+			If ZZL->( DBSeek( xFilial("ZZL") + RetCodUsr() ) )
 			
 				If ZZL->ZZL_ECARGA == "S"
 				
 					If Aviso( 'Atenção!' , 'O estorno do documento atual não passou pela validação de impostos, deseja prosseguir com o estorno mesmo assim?' , {'Estornar','Cancelar'} ) == 1
 						_lRet := .T.
 					EndIf
-					
 				EndIf
-				
 			EndIf
-			
 		EndIf
-		
 	EndIf
-	
 EndIf
 
 Return( _lRet )
@@ -507,11 +458,8 @@ Return( _lRet )
 Programa----------: ITSE2REG
 Autor-------------: Alexandre Villar
 Data da Criacao---: 29/07/2014
-===============================================================================================================================
 Descrição---------: Retorna o Recno do SE2 de acordo com o posicionamento no SF2
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T. - Permite o estorno
 ------------------: .F. - Impede o estorno
 ===============================================================================================================================
@@ -550,11 +498,8 @@ Return( _cRet )
 Programa----------: ITSF2REG
 Autor-------------: Alexandre Villar
 Data da Criacao---: 29/07/2014
-===============================================================================================================================
 Descrição---------: Retorna o Recno do SE2 de acordo com o posicionamento no SF2
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T. - Permite o estorno
 ------------------: .F. - Impede o estorno
 ===============================================================================================================================
@@ -591,17 +536,14 @@ Return( _cRet )
 Programa----------: MS520VLDORD
 Autor-------------: Alexandre Villar
 Data da Criacao---: 07/08/2014
-===============================================================================================================================
 Descrição---------: Ordena os registros de acordo com o Recno da SE2 gerados para o RPA
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function MS520VLDORD( _aRegPos )
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _aAux		:= {}
 Local _aRet		:= {}
 Local _cAlias	:= GetNextAlias()
@@ -636,7 +578,7 @@ For _nI := 1 To Len( _aRegPos )
 	_cQuery += " AND	SE2.E2_NUM					= '"+ ZZ2->ZZ2_RECIBO +"' "
 	_cQuery += " AND	SE2.E2_PREFIXO				= 'AUT' "
 	_cQuery += " AND	SE2.E2_ORIGEM				IN ( 'AOMS042' , 'MGLT011' , 'GERAZZ3' ) "
-	_cQuery += " AND	SUBSTR(SE2.E2_EMISSAO,1,6)	= '"+ SubStr( DtoS(ZZ2->ZZ2_DATA) , 1 , 6 ) +"' "
+	_cQuery += " AND	SubStr(SE2.E2_EMISSAO,1,6)	= '"+ SubStr( DToS(ZZ2->ZZ2_DATA) , 1 , 6 ) +"' "
 	_cQuery += " AND	SE2.D_E_L_E_T_				= ' ' "
 	
 	If Select(_cAlias) > 0
@@ -678,7 +620,7 @@ If !Empty(_aAux)
 	
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _aRet )
 
@@ -687,18 +629,15 @@ Return( _aRet )
 Programa----------: IT_Ver_Arm
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 05/10/2015
-===============================================================================================================================
-Descrição---------: Valida se nota excluida não usa armazens restritos para o usuarioxfilial
-===============================================================================================================================
+Descrição---------: Valida se nota excluida não usa armazens restritos para o usuarioxFilial
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T. - Permite o estorno
 ------------------: .F. - Impede o estorno
 ===============================================================================================================================
 */
 Static Function IT_Ver_arm()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 
 Local _cFilial	:= SF2->F2_FILIAL
 Local _cDoc		:= SF2->F2_DOC
@@ -707,51 +646,51 @@ Local _cLojCli	:= SF2->F2_LOJA
 Local _cSerie		:= SF2->F2_SERIE
 Local _cmens		:= ""
 Local _aRet		:= {}
-Local _cCodUsr	:= ALLTRIM(RetCodUsr())
+Local _cCodUsr	:= AllTrim(RetCodUsr())
 Local _lRet		:= .T.
 
 DBSelectArea("SD2")
 SD2->( DBSetOrder(3) ) //D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA
 
-IF SD2->( DbSeek( _cFilial + _cDoc +  _cSerie + _cCodCli + _cLojCli ) )
+If SD2->( DBSeek( _cFilial + _cDoc +  _cSerie + _cCodCli + _cLojCli ) )
 
-	While SD2->( !EOF() ) .AND. SD2->D2_FILIAL == _cFilial .AND. SD2->D2_DOC == _cDoc .AND. SD2->D2_SERIE == _cSerie .AND. SD2->D2_CLIENTE == _cCodCli;
-								.AND. SD2->D2_LOJA == _cLojCli 
+	While SD2->( !Eof() ) .And. SD2->D2_FILIAL == _cFilial .And. SD2->D2_DOC == _cDoc .And. SD2->D2_SERIE == _cSerie .And. SD2->D2_CLIENTE == _cCodCli;
+								.And. SD2->D2_LOJA == _cLojCli 
 	
-		_aRet:= U_ACFG004E(_cCodUsr, alltrim(xFilial("SD2")), alltrim(SD2->D2_LOCAL),alltrim(SD2->D2_COD),.F.)
+		_aRet:= U_ACFG004E(_cCodUsr, AllTrim(xFilial("SD2")), AllTrim(SD2->D2_LOCAL),AllTrim(SD2->D2_COD),.F.)
 		
 		//se ainda está valido verifica se não teve erro
 		If _lRet
 		
 		  	_lRet:= _aRet[1]
 		
-		Endif
+		EndIf
 		
 		// adiciona armazens com problema se ainda não estiver na mensagem
-		if empty(_cmens)
+		If Empty(_cmens)
 		
-			_cmens += "Nota: " + alltrim(SD2->D2_DOC) + "/" + alltrim(SD2->D2_SERIE) + " e armazém: " + _aRet[2]
+			_cmens += "Nota: " + AllTrim(SD2->D2_DOC) + "/" + AllTrim(SD2->D2_SERIE) + " e armazém: " + _aRet[2]
 			
-		elseif !(_aRet[2]$_cmens) .and. !(Empty(_aRet[2])) 
+		ElseIf !(_aRet[2]$_cmens) .And. !(Empty(_aRet[2])) 
 		
-			_cmens += ",  " + CRLF + "Nota: " + alltrim(SD2->D2_DOC) + "/" + alltrim(SD2->D2_SERIE) + " e armazém: " + _aRet[2]
+			_cmens += ",  " + CRLF + "Nota: " + AllTrim(SD2->D2_DOC) + "/" + AllTrim(SD2->D2_SERIE) + " e armazém: " + _aRet[2]
 			
-		Endif
+		EndIf
 		
 		SD2->( DBSkip() )
 	
 	EndDo
 	
-	if .not. _lRet .and. .not. empty(_cmens)
+	If .not. _lRet .And. .not. Empty(_cmens)
 	
-		xmaghelpfis(	"Armazéns restritos (MS520VLD)"																								,;
+		xMagHelpFis(	"Armazéns restritos (MS520VLD)"																								,;
 						"Não será possível realizar a exclusão do documento pois o mesmo usa os armazéns abaixo restritos ao usuário e filial atual:"	 + CRLF;
 						+CRLF + _cmens, "Caso necessário solicite a manutenção à um usuário com acesso ou, se necessário, solicite o acesso à área de TI/ERP.")															 
 	EndIf
 
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return( _lRet )
 
@@ -760,10 +699,8 @@ Return( _lRet )
 Programa----------: IT_Ver_Prazo
 Autor-------------: Alex Wallauer
 Data da Criacao---: 17/06/2016
-===============================================================================================================================
-Descrição---------: Funcao para verificar: 
-//Se o tempo decorrido desde o envio da NFe para o Sefaz for maior que a quantidade de horas indicada no parâmetro MV_SPEDEXC
-===============================================================================================================================
+Descrição---------: Funcao para verificar se o tempo decorrido desde o envio da NFe para o Sefaz For maior que a quantidade de
+					 horas indicada no parâmetro MV_SPEDEXC
 Parametros--------: Nenhum
 ===============================================================================================================================
 Retorno-----------: .T. - Permite o estorno
@@ -772,20 +709,20 @@ Retorno-----------: .T. - Permite o estorno
 */
 Static Function IT_Ver_Prazo()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local cAlias    := GetNextAlias()  
 Local _ChaveID	:= SF2->F2_CHVNFE
 Local _nPrazo 	:= GETMV("MV_SPEDEXC")
 Local _lRet		:= .T.
 Local cDataA    :=""
 Local cTimeA    :=""
-Local nHorasDif :=0
+Local nHorasDIf :=0
 Local cDataS    :=""
 Local cTimeS    :=""
 
-IF EMPTY(_ChaveID)
-   RETURN .T.
-ENDIF
+If Empty(_ChaveID)
+   Return .T.
+EndIf
 
 BeginSql Alias cAlias  
 			
@@ -793,40 +730,40 @@ BeginSql Alias cAlias
 
 EndSql    	 	
 
-IF EMPTY( (cAlias)->DATE_NFE ) .OR. EMPTY( (cAlias)->TIME_NFE )
+If Empty( (cAlias)->DATE_NFE ) .Or. Empty( (cAlias)->TIME_NFE )
    (cAlias)->(DBCloseArea())
-   RETURN .T.
-ENDIF
+   Return .T.
+EndIf
 
-cDataA:=DATE()
+cDataA:=Date()
 cTimeA:=LEFT(Time(),5)
-cDataS:=STOD((cAlias)->DATE_NFE)
+cDataS:=SToD((cAlias)->DATE_NFE)
 cTimeS:=LEFT((cAlias)->TIME_NFE,5)
 
-nHorasDif := SubtHoras( cDataS, cTimeS, cDataA, cTimeA )
+nHorasDIf := SubtHoras( cDataS, cTimeS, cDataA, cTimeA )
 
-cDataA:=DTOC(DATE())
-cTimeA:=TIME()
-cDataS:=DTOC(STOD((cAlias)->DATE_NFE))
+cDataA:=DToC(Date())
+cTimeA:=Time()
+cDataS:=DToC(SToD((cAlias)->DATE_NFE))
 cTimeS:=(cAlias)->TIME_NFE
 
-If nHorasDif > _nPrazo
+If nHorasDIf > _nPrazo
 	
    _lRet := .F.
 		
-   xmaghelpfis("PRAZO DE CANCELAMENTO DA SEFAZ (MS520VLD)",;
+   xMagHelpFis("PRAZO DE CANCELAMENTO DA SEFAZ (MS520VLD)",;
 			   "Não será possível realizar a exclusão do documento pois o prazo para cancelamento da NFE no Sefaz expirou.",;
                "Nota / Serie: "+SF2->F2_DOC+" / "+SF2->F2_SERIE + CRLF+;
-               "Prazo de cancelamento da SEFAZ: "+ALLTRIM(STR(_nPrazo,10))+" horas"+CRLF+;
+               "Prazo de cancelamento da SEFAZ: "+AllTrim(Str(_nPrazo,10))+" horas"+CRLF+;
                "Data / Hora da Geracao da SEFAZ: "+cDataS+" - "+cTimeS+ CRLF+;
                "Data / Hora Atual: "+cDataA+" - "+cTimeA+ CRLF+;
-               "Diferenca de horas: "+ALLTRIM(TRANS(nHorasDif,"@E 999,999,999.99"))+" horas"+ CRLF	+;
+               "Diferenca de horas: "+AllTrim(TRANS(nHorasDif,"@E 999,999,999.99"))+" horas"+ CRLF	+;
                "")
 EndIf
 
 (cAlias)->(DBCloseArea())
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return( _lRet )
 
@@ -835,9 +772,8 @@ Return( _lRet )
 Programa----------: IT_Ver_NFT
 Autor-------------: Alex Wallauer
 Data da Criacao---: 17/06/2016
-===============================================================================================================================
 Descrição---------: Funcao para verificar: 
-//Se a nota for uma nota de transferência e já foi incluída como documento de entrada na filial de destino
+//Se a nota For uma nota de transferência e já foi incluída como documento de entrada na filial de destino
 ===============================================================================================================================
 Parametros--------: Nenhum
 ===============================================================================================================================
@@ -848,8 +784,8 @@ Retorno-----------: .T. - Permite o estorno
 Static Function IT_Ver_NFT()
 
 Local cAlias    := GetNextAlias()  
-Local _aArea	:= GetArea()
-Local _cFilNT   := ""
+Local _aArea	:= FWGetArea()
+Local _cFilNT   := ""
 Local _cCGC     := ""
 Local _cNotaT   := SF2->F2_DOC
 Local _cSerieT  := SF2->F2_SERIE
@@ -857,14 +793,14 @@ Local _cFornT   := ""
 Local _cLojaT   := ""
 Local _lRet		:= .T.
 
-SA1->(DBSETORDER(1))
-If SA1->(DBSEEK(xFilial()+SF2->F2_CLIENTE+SF2->F2_LOJA))
+SA1->(DBSetOrder(1))
+If SA1->(DBSeek(xFilial()+SF2->F2_CLIENTE+SF2->F2_LOJA))
    _cCGC:=SA1->A1_CGC
-ENDIF
+EndIf
 
-IF EMPTY(_cCGC)
-   RETURN .T.
-ENDIF
+If Empty(_cCGC)
+   Return .T.
+EndIf
 
 BeginSql Alias cAlias  
 			
@@ -874,36 +810,36 @@ EndSql
 
 _cFilNT := (cAlias)->ZZM_CODIGO
 
-IF EMPTY(_cFilNT)
-   RETURN .T.
-ENDIF
+If Empty(_cFilNT)
+   Return .T.
+EndIf
 
-ZZM->(DBSETORDER(1))
-If ZZM->(DBSEEK(xFilial()+SF2->F2_FILIAL))
+ZZM->(DBSetOrder(1))
+If ZZM->(DBSeek(xFilial()+SF2->F2_FILIAL))
    _cCGC:=ZZM->ZZM_CGC
-ENDIF
+EndIf
 
-IF EMPTY(_cCGC)
-   RETURN .T.
-ENDIF
+If Empty(_cCGC)
+   Return .T.
+EndIf
 
-SA2->(DBSETORDER(3))
-If SA2->(DBSEEK(xFilial()+_cCGC))
+SA2->(DBSetOrder(3))
+If SA2->(DBSeek(xFilial()+_cCGC))
    _cFornT := SA2->A2_COD
    _cLojaT := SA2->A2_LOJA
-ENDIF
-SA2->(DBSETORDER(1))
+EndIf
+SA2->(DBSetOrder(1))
 
-IF EMPTY(_cFornT)
-   RETURN .T.
-ENDIF
+If Empty(_cFornT)
+   Return .T.
+EndIf
 
-SF1->(DBSETORDER(1))
-If SF1->(DBSEEK(_cFilNT+_cNotaT+_cSerieT+_cFornT+_cLojaT ))
+SF1->(DBSetOrder(1))
+If SF1->(DBSeek(_cFilNT+_cNotaT+_cSerieT+_cFornT+_cLojaT ))
 	
    _lRet := .F.
 		
-   xmaghelpfis("NOTA DE TRANSFERENCIA (MS520VLD)",;
+   xMagHelpFis("NOTA DE TRANSFERENCIA (MS520VLD)",;
 			   "Nota de transferência já foi recepcionada no destino.",;
                "Filial que recepcionou a N.T.: "+_cFilNT+CRLF+;
                "Nota / Serie: "+_cNotaT+" / "+ _cSerieT+CRLF+;
@@ -911,7 +847,7 @@ If SF1->(DBSEEK(_cFilNT+_cNotaT+_cSerieT+_cFornT+_cLojaT ))
                "Entre em contato com departamento fiscal.")
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return( _lRet )
 
@@ -920,19 +856,16 @@ Return( _lRet )
 Programa----------: IT_Ver_TN 
 Autor-------------: Alex Wallauer
 Data da Criacao---: 28/09/2016
-===============================================================================================================================
 Descrição---------: Projeto de unificação de pedidos de troca nota - Chamado 16548
-Para verificar----: Se a nota for uma nota de transferência e já foi incluída como documento de entrada na filial de destino
-===============================================================================================================================
+Para verificar----: Se a nota For uma nota de transferência e já foi incluída como documento de entrada na filial de destino
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T. - Permite o estorno
 ------------------: .F. - Impede o estorno
 ===============================================================================================================================
 */
 Static Function IT_Ver_TN()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cCGC     := ""
 Local _cNotaT   := SF2->F2_DOC
 Local _cSerieT  := SF2->F2_SERIE
@@ -943,43 +876,43 @@ Local _lPed_Troca_NF  :=.F.
 Local _cFilFaturamento:= ""
 Local _lEstou_na_Fil_Faturamento:= .F.
 
-SC5->( DbSetOrder(1) )
-IF SC5->(DBSEEK(xFilial()+SF2->F2_I_PEDID))
+SC5->( DBSetOrder(1) )
+If SC5->(DBSeek(xFilial()+SF2->F2_I_PEDID))
    _lPed_Troca_NF  :=(SC5->C5_I_TRCNF = "S")
    _cFilFaturamento:= SC5->C5_I_FILFT
    _lEstou_na_Fil_Faturamento:= (SC5->C5_I_FILFT = SC5->C5_FILIAL)
-ENDIF
+EndIf
 
-IF !_lPed_Troca_NF .OR. _lEstou_na_Fil_Faturamento .OR. EMPTY(_cFilFaturamento)
-   RETURN .T.
-ENDIF  
+If !_lPed_Troca_NF .Or. _lEstou_na_Fil_Faturamento .Or. Empty(_cFilFaturamento)
+   Return .T.
+EndIf  
 
-ZZM->(DBSETORDER(1))
-If ZZM->(DBSEEK(xFilial()+SF2->F2_FILIAL))//Filial de carregamento
+ZZM->(DBSetOrder(1))
+If ZZM->(DBSeek(xFilial()+SF2->F2_FILIAL))//Filial de carregamento
    _cCGC:=ZZM->ZZM_CGC
-ENDIF
+EndIf
 
-IF EMPTY(_cCGC)
-   RETURN .T.
-ENDIF
+If Empty(_cCGC)
+   Return .T.
+EndIf
 
-SA2->(DBSETORDER(3))
-If SA2->(DBSEEK(xFilial()+_cCGC))
+SA2->(DBSetOrder(3))
+If SA2->(DBSeek(xFilial()+_cCGC))
    _cFornT := SA2->A2_COD
    _cLojaT := SA2->A2_LOJA
-ENDIF
-SA2->(DBSETORDER(1))
+EndIf
+SA2->(DBSetOrder(1))
 
-IF EMPTY(_cFornT)
-   RETURN .T.
-ENDIF
+If Empty(_cFornT)
+   Return .T.
+EndIf
 
-SF1->(DBSETORDER(1))
-If SF1->(DBSEEK(_cFilFaturamento+_cNotaT+_cSerieT+_cFornT+_cLojaT ))
+SF1->(DBSetOrder(1))
+If SF1->(DBSeek(_cFilFaturamento+_cNotaT+_cSerieT+_cFornT+_cLojaT ))
 	
    _lRet := .F.
 		
-   xmaghelpfis("PEDIDO DE TROCA NOTA (MS520VLD)",;
+   xMagHelpFis("PEDIDO DE TROCA NOTA (MS520VLD)",;
 			   "Nota de transferência já foi recepcionada no destino.",;
                "Filial que recepcionou a N.T.: "+_cFilFaturamento+CRLF+;
                "Nota / Serie: "+_cNotaT+" / "+ _cSerieT+CRLF+;
@@ -987,7 +920,7 @@ If SF1->(DBSEEK(_cFilFaturamento+_cNotaT+_cSerieT+_cFornT+_cLojaT ))
                "Entre em contato com departamento fiscal.")
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return( _lRet )
 
@@ -996,53 +929,51 @@ Return( _lRet )
 Programa----------: IT_Ver_OT
 Autor-------------: Alex Wallauer
 Data da Criacao---: 16/12/2022
-===============================================================================================================================
 Descrição---------: Projeto Novo tratamento para Pedidos de Operacao Triangular - Chamado 41604
 Para verificar----: Se o pedido de faturamento da Operacao Triangular (operacao: 05) já gerou nota 
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T. - Permite o estorno
 ------------------: .F. - Impede o estorno
 ===============================================================================================================================
 */
 Static Function IT_Ver_OT()
+
 Local _lRet		:= .T. , nInc
-Local _cOperTriangular:=ALLTRIM(U_ITGETMV( "IT_OPERTRI","05,42"))// Tipos de operações da operação trigular
+Local _cOperTriangular:=AllTrim(SuperGetMV("IT_OPERTRI",.F.,"05,42"))// Tipos de operações da operação trigular
 Local _cOperRemessa:=RIGHT(_cOperTriangular,2)
 
-IF TYPE("_lNotaCarga") = "L" .AND. !_lNotaCarga//EXCLUI QUANDO NÃO É POR CARGA
+If Type("_lNotaCarga") = "L" .And. !_lNotaCarga//EXCLUI QUANDO NÃO É POR CARGA
 
    If SC5->C5_I_OPER = _cOperRemessa 
-      DbSelectArea("SC5") 
+      DBSelectArea("SC5") 
       For nInc := 1 To SC5->(FCount())
       	  M->&(SC5->(FieldName(nInc))) := SC5->(FieldGet(nInc))
-      NEXT
+      Next
 	  _lDeuErro:=.F.
       Processa( {|| _lDeuErro:=U_IT_OperTriangular(SC5->C5_NUM,.T.) } ,, "Excluindo Pedido de Operação Triangular..." )
 	  _lRet:=!_lDeuErro
-   ENDIF
+   EndIf
 
-ELSEIF TYPE("_lNotaCarga") = "L" .AND. _lNotaCarga//VALIDA QUANDO É POR CARGA
+ElseIf Type("_lNotaCarga") = "L" .And. _lNotaCarga//VALIDA QUANDO É POR CARGA
    
    If SC5->C5_I_OPER = _cOperRemessa 
       M->C5_I_PVFAT:=SC5->C5_I_PVFAT
-	  IF SC5->(DBSEEK(xFilial()+M->C5_I_PVFAT))
-	     If !EMPTY(SC5->C5_NOTA)
+	  If SC5->(DBSeek(xFilial()+M->C5_I_PVFAT))
+	     If !Empty(SC5->C5_NOTA)
 
             _lRet := .F.
          		
-            xmaghelpfis("PEDIDO FATURAMENTO TRIANGULAR (MS520VLD)",;
+            xMagHelpFis("PEDIDO FATURAMENTO TRIANGULAR (MS520VLD)",;
          			   "Pedido de Faturamento da Operacao Triangular já FATURADO",;
                         "Filial Pedido de Faturamento: "+xFilial("SC5")+CRLF+;
                         "Pedido de Faturamento: "+M->C5_I_PVFAT+CRLF+;
                         "Nota Fiscal: "+SC5->C5_NOTA+CRLF+;
                         "Entre em contato com departamento fiscal.")
 
-		 ENDIF
-	  ENDIF
+		 EndIf
+	  EndIf
    
-   ENDIF
-ENDIF
+   EndIf
+EndIf
 	
 Return( _lRet )

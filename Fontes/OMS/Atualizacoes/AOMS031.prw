@@ -8,9 +8,9 @@ Alex Wallauer| 14/09/2023 | Chamado 44503. Tratamento do Subsegmento.
 ========================================================================================================================================================
 */
 //===========================================================================
-//| Definições de Includes                                                  |
+//| DefiniçõesIncludeludes                                                  |
 //===========================================================================
-#include "protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -27,8 +27,8 @@ Retorno-----------: Nenhum
 */
 User Function AOMS031()
 
-DBSELECTAREA("ZZ6")
-ZZ6->(DBSETORDER(1))
+DBSelectArea("ZZ6")
+ZZ6->(DBSetOrder(1))
 
 Private cCadastro	:= "Cadastro de segmentos de Clientes"
 Private aRotina	:= MenuDef()
@@ -55,10 +55,10 @@ Local cAuxCadastro:= cCadastro
 Local aAuxRotina  := ACLONE( aRotina )
 
 //Local aBotoes:={}
-//AADD(aBotoes,{"segmentos","U_AOMS031B" ,0,2})
+//aAdd(aBotoes,{"segmentos","U_AOMS031B" ,0,2})
 
-DBSELECTAREA("ZS6")
-ZS6->(DBSETORDER(1))
+DBSelectArea("ZS6")
+ZS6->(DBSetOrder(1))
 
 //AxCadastro("ZS6","Cadastro de Grupo de Clientes","U_DelOk()",'U_AOMS31Val("OK")', aRotAdic, bPre, bOK, bTTS, bNoTTS,aAuto,nOpcAuto,aButtons,aACS,cTela,lMenudef)
 //AxCadastro(  "ZS6","Cadastro de Grupo de Clientes",           ,'U_AOMS31Val("OK")', aBotoes ,     ,    ,     ,       ,     ,        , )
@@ -76,7 +76,7 @@ mBrowse(,,,,"ZS6" ,,,,,, U_AOMS031L(-2) )
 
 cCadastro:= cAuxCadastro
 aRotina  := aAuxRotina
-DBSELECTAREA("ZZ6")
+DBSelectArea("ZZ6")
 
 Return
 /*
@@ -93,7 +93,7 @@ Retorno-----------: .T.
 ===============================================================================================================================*/
 User Function AOMS31Inclui(cAlias,nReg,nOpc)
 
-IF nOpc = 3
+If nOpc = 3
    Return AxInclui(cAlias,nReg,nOpc,;
        /*aAcho>     */ ,;
        /*cFunc>     */ ,;
@@ -106,9 +106,9 @@ IF nOpc = 3
        /*aAuto>     */ ,;
        /*lVirtual>  */ ,;
        /*lMaximized>*/ )
-ENDIF
+EndIf
 
-Return .t.
+Return .T.
 
 /*
 ===============================================================================================================================
@@ -125,54 +125,54 @@ Retorno-----------: .T. ou .F.
 */  
 User Function AOMS31Val(_cCampo)
 Local _lRet := .T.  
-DEFAULT _cCampo:=SUBSTR(READVAR(),4)
-DbSelectArea("ZS6")
+DEFAULT _cCampo:=SubStr(ReadVar(),4)
+DBSelectArea("ZS6")
 
-IF _cCampo == "ZS6_CODSEG"
-   IF !EMPTY(M->ZS6_CODSEG) 
+If _cCampo == "ZS6_CODSEG"
+   If !Empty(M->ZS6_CODSEG) 
       _lRet:=ExistCpo("ZZ6",M->ZS6_CODSEG)
-      IF _lRet
+      If _lRet
          M->ZS6_DESEUG:=Posicione("ZZ6",1,xFilial("ZZ6") + M->ZS6_CODSEG, "ZZ6_DESCRO")
          M->ZS6_CODSUB:=M->ZS6_CODSEG+"001"
          nConta:=1
-         DO WHILE ZS6->(DBSEEK(xfilial()+M->ZS6_CODSEG+M->ZS6_CODSUB))
+         While ZS6->(DBSeek(xFilial()+M->ZS6_CODSEG+M->ZS6_CODSUB))
             nConta++
-            M->ZS6_CODSUB:=M->ZS6_CODSEG+STRZERO(nConta,3)
-         ENDDO
-      ENDIF
-   ELSE
-      M->ZS6_DESEUG:=SPACE(LEN(ZS6->ZS6_DESEUG))
-   ENDIF
+            M->ZS6_CODSUB:=M->ZS6_CODSEG+StrZero(nConta,3)
+         EndDo
+      EndIf
+   Else
+      M->ZS6_DESEUG:=Space(Len(ZS6->ZS6_DESEUG))
+   EndIf
 
 ElseIf _cCampo == "OK"
    If !Obrigatorio(aGets,aTela)
-      RETURN .F.
-   ENDIF
-   IF Inclui            
+      Return .F.
+   EndIf
+   If Inclui            
       _lRet :=ExistChav("ZS6",M->ZS6_CODSEG+M->ZS6_CODSUB)
-   ENDIF
+   EndIf
 
 ElseIf _cCampo == "ZX_SUB_COD"//CHAMADO DO X3_VALID DO ZX_SUB_COD
 
-   IF !EMPTY(M->ZX_SUB_COD) 
+   If !Empty(M->ZX_SUB_COD) 
       _lRet:=ExistCpo("ZS6",M->ZX_GRCLI+M->ZX_SUB_COD)
-      IF _lRet
-         M->ZX_SUB_DES:=POSICIONE("ZS6",1,XFILIAL()+M->ZX_GRCLI+M->ZX_SUB_COD,"ZS6_DESCRI")
-      ENDIF
-   ELSE
-      M->ZX_SUB_DES:=SPACE(LEN(ZS6->ZS6_DESCRI))
-   ENDIF
+      If _lRet
+         M->ZX_SUB_DES:=Posicione("ZS6",1,xFilial()+M->ZX_GRCLI+M->ZX_SUB_COD,"ZS6_DESCRI")
+      EndIf
+   Else
+      M->ZX_SUB_DES:=Space(Len(ZS6->ZS6_DESCRI))
+   EndIf
 
 ElseIf _cCampo == "A1_I_SUBCO"//CHAMADO DO X3_VALID DO A1_I_SUBCO
 
-   IF !EMPTY(M->A1_I_SUBCO) 
+   If !Empty(M->A1_I_SUBCO) 
       _lRet:=ExistCpo("ZS6",M->A1_I_GRCLI+M->A1_I_SUBCO)
-      IF _lRet
-         M->A1_I_SUBDE:=POSICIONE("ZS6",1,XFILIAL()+M->A1_I_GRCLI+M->A1_I_SUBCO,"ZS6_DESCRI")
-      ENDIF
-   ELSE
-      M->A1_I_SUBDE:=SPACE(LEN(ZS6->ZS6_DESCRI))
-   ENDIF
+      If _lRet
+         M->A1_I_SUBDE:=Posicione("ZS6",1,xFilial()+M->A1_I_GRCLI+M->A1_I_SUBCO,"ZS6_DESCRI")
+      EndIf
+   Else
+      M->A1_I_SUBDE:=Space(Len(ZS6->ZS6_DESCRI))
+   EndIf
 
 EndIf
    
@@ -238,15 +238,15 @@ If	nReg = -1
 
 	uRetorno := {}
 	
-	Aadd( uRetorno , { 'ZZ6->ZZ6_MSBLQL <> "1" '	, aLegenda[1][1] } )//BR_VERDE
-	Aadd( uRetorno , { 'ZZ6->ZZ6_MSBLQL == "1" '	, aLegenda[2][1] } )//BR_VERMELHO
+	aAdd( uRetorno , { 'ZZ6->ZZ6_MSBLQL <> "1" '	, aLegenda[1][1] } )//BR_VERDE
+	aAdd( uRetorno , { 'ZZ6->ZZ6_MSBLQL == "1" '	, aLegenda[2][1] } )//BR_VERMELHO
 
-ELSEIF nReg = -2
+ElseIf nReg = -2
 
 	uRetorno := {}
 	
-	Aadd( uRetorno , { 'ZS6->ZS6_MSBLQL <> "1" '	, aLegenda[1][1] } )//BR_VERDE
-	Aadd( uRetorno , { 'ZS6->ZS6_MSBLQL == "1" '	, aLegenda[2][1] } )//BR_VERMELHO
+	aAdd( uRetorno , { 'ZS6->ZS6_MSBLQL <> "1" '	, aLegenda[1][1] } )//BR_VERDE
+	aAdd( uRetorno , { 'ZS6->ZS6_MSBLQL == "1" '	, aLegenda[2][1] } )//BR_VERMELHO
 
 Else
 	BrwLegenda(cCadastro, "Legenda",aLegenda)
@@ -268,35 +268,35 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS031B(cAlias,nReg,nOpc)
-LOCAL _cCodsegmento:=""
-LOCAL _cDescsegmento:=""
-LOCAL _aSubs:={} , _aSubsAux:={}
+Local _cCodsegmento:=""
+Local _cDescsegmento:=""
+Local _aSubs:={} , _aSubsAux:={}
 
-IF cAlias = "ZZ6"
+If cAlias = "ZZ6"
    _cCodsegmento:=ZZ6->ZZ6_CODIGO
-   _cDescsegmento:=ALLTRIM(ZZ6->ZZ6_DESCRO)
-ELSEIF cAlias = "ZS6"
+   _cDescsegmento:=AllTrim(ZZ6->ZZ6_DESCRO)
+ElseIf cAlias = "ZS6"
    _cCodsegmento:=ZS6->ZS6_CODSEG
-   _cDescsegmento:=ALLTRIM(Posicione("ZZ6",1,xFilial("ZZ6")+ZS6->ZS6_CODSEG,"ZZ6_DESCRO"))
-ENDIF
+   _cDescsegmento:=AllTrim(Posicione("ZZ6",1,xFilial("ZZ6")+ZS6->ZS6_CODSEG,"ZZ6_DESCRO"))
+EndIf
 
-ZS6->(DBSEEK(xfilial()+_cCodsegmento))
+ZS6->(DBSeek(xFilial()+_cCodsegmento))
 
-DO WHILE !ZS6->(EOF()) .AND. _cCodsegmento == ZS6->ZS6_CODSEG
+While !ZS6->(Eof()) .And. _cCodsegmento == ZS6->ZS6_CODSEG
    
    _aSubsAux:={}
-   AADD(_aSubsAux,ZS6->ZS6_CODSUB)
-   AADD(_aSubsAux,ZS6->ZS6_DESCRI)
-   AADD(_aSubs,_aSubsAux)
-   ZS6->(Dbskip())
+   aAdd(_aSubsAux,ZS6->ZS6_CODSUB)
+   aAdd(_aSubsAux,ZS6->ZS6_DESCRI)
+   aAdd(_aSubs,_aSubsAux)
+   ZS6->(DBSkip())
    	
-Enddo
+EndDo
 
-IF LEN(_aSubs) > 0
+If Len(_aSubs) > 0
    
    aTitCol:={}
-   AADD(aTitCol,"Codigo")
-   AADD(aTitCol,"Descricao do Subsegmento")
+   aAdd(aTitCol,"Codigo")
+   aAdd(aTitCol,"Descricao do Subsegmento")
   
    aSize:=NIL
    cTit1:="LISTA DOS SUBSEGMENTOS DO SEGMENTO: "+_cCodsegmento+" - "+_cDescsegmento
@@ -304,11 +304,11 @@ IF LEN(_aSubs) > 0
    //ITListBox(_cTitAux,_aHeader,_aCols,_lMaxSiz,_nTipo,_cMsgTop , _lSelUnc , _aSizes              , _nCampo ) 
    U_ITListBox(cTit1   ,aTitCol ,_aSubs  ,.F.    ,1      ,cTit2    ,          ,)
 
-ELSE
+Else
 
-   U_ITMSG("Esse segmento "+_cCodsegmento+" - "+_cDescsegmento+" não tem Subsegmentos","Atencao!",,1)
+   U_ITMsg("Esse segmento "+_cCodsegmento+" - "+_cDescsegmento+" não tem Subsegmentos","Atencao!",,1)
 
-ENDIF
+EndIf
 
 Return
 
@@ -326,10 +326,10 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS31Filtro()
-IF FUNNAME() = "MATA030"
-   RETURN ZS6->ZS6_MSBLQL <> "1" .AND. ZS6->ZS6_CODSEG = M->A1_I_GRCLI
-ELSEIF FUNNAME() = "AOMS014"
-   RETURN ZS6->ZS6_MSBLQL <> "1" .AND. ZS6->ZS6_CODSEG = M->ZX_GRCLI
-ENDIF
+If FUNNAME() = "MATA030"
+   Return ZS6->ZS6_MSBLQL <> "1" .And. ZS6->ZS6_CODSEG = M->A1_I_GRCLI
+ElseIf FUNNAME() = "AOMS014"
+   Return ZS6->ZS6_MSBLQL <> "1" .And. ZS6->ZS6_CODSEG = M->ZX_GRCLI
+EndIf
 
-RETURN  .T.
+Return  .T.

@@ -2,43 +2,35 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alexandre V.  |   02/2015  | Atualização dos P.E. que interferem na rotina de Fechamento do Leite
--------------------------------------------------------------------------------------------------------------------------------
-Alexandre V.  | 28/08/2015 | Ajuste para não bloquear o estorno da classificação de documentos. Chamados 11497/11578
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 03/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Alexandre V.  |   02/2015| Atualização dos P.E. que interferem na rotina de Fechamento do Leite
+Alexandre V.  |28/08/2015| Chamados 11497/11578. Ajuste para não bloquear o estorno da classificação de documentos
+Lucas Borges  |03/10/2019| Removidos os Warning na compilação da release 12.1.25. Chamado 28346
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: A100DEL
 Autor-------------: Wesley M Martins
 Data da Criacao---: 09/01/2009
-===============================================================================================================================
 Descrição---------: Ponto de entrada chamado antes da exclusão da nota fiscal
 					Em que ponto: Chamado antes de qualquer atualização na exclusão e deve ser utilizado para validar se a 
 					exclusão deve ser efetuada ou não.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
-Retorno-----------: _lRet -> L -> .T. - prossegue com exclusao /.F. - abandona exclusão
+Retorno-----------: _lRet -> L -> .T. - prossegue com exclusao /.F. - abandona exclusão
 ===============================================================================================================================
 */
 User Function A100DEL
 
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local _cAlias		:= ""
 Local _lRet			:= .T.
 
-IF FunName() == "MATA103" .Or. ( FunName() == "MATA140" .And. SF1->F1_STATUS <> 'A' )
+If FunName() == "MATA103" .Or. ( FunName() == "MATA140" .And. SF1->F1_STATUS <> 'A' )
 
 	DBSelectArea('ZLX')
 	ZLX->( DBSetOrder(2) )
@@ -50,9 +42,9 @@ IF FunName() == "MATA103" .Or. ( FunName() == "MATA140" .And. SF1->F1_STATUS <> 
 	EndIf
 	
 	//====================================================================================================
-	// Para a exclusao das notas fiscais do tipo devolucao sera averiguado se ja existe comissao com o 
+	// Para a exclusao das notas fiscais do tipo devolucao sera averiguado se ja existe comissao com o 
 	// status fechada, pois diante disso nao sera possivel realizar a exclusao.
-	//====================================================================================================
+	//====================================================================================================
 	If _lRet .And. SF1->F1_TIPO == 'D'
 	
 		_cAlias := GetNextAlias()
@@ -84,6 +76,6 @@ IF FunName() == "MATA103" .Or. ( FunName() == "MATA140" .And. SF1->F1_STATUS <> 
 
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _lRet )

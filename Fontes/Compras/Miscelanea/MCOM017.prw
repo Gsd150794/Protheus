@@ -2,23 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 22/06/2022 | Chamado 40525. Correcoes de erro quando executado por schedule.
-Lucas Borges  | 24/09/2024 | Chamado 48465. Sanado problemas apresentados no Code Analysis
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
-=====================================================================================================================================================================================================================
-Analista       - Programador     - Inicio     - Envio    - Chamado - Motivo de Alteração
-=====================================================================================================================================================================================================================
-Lucas          - Alex Wallauer   - 02/05/2025 - 06/05/25 - 50525   - Ajuste para remoção de diretório local C:\SMARTCLIENT\.
-Andre          - Alex Wallauer   - 23/05/2025 - 23/05/25 - 50793   - CORREÇÃO DE ERROR.LOG: Invalid GetTempPath() client call in JOB. Tratamento para não chamar a função GetTempPath() quando for shedule
-Andre          - Alex Wallauer   - 26/05/2025 - 26/05/25 - 50793   - CORREÇÃO DE ERROR.LOG:variable does not exist LTELA on MCOM017EM(MCOM017.PRW) 25/05/2025 10:28:49 line : 334
-=====================================================================================================================================================================================================================
+Alex Wallauer |23/05/2025| Chamado 50793. Invalid GetTempPath() client call in JOB. Tratamento para não chamar a função GetTempPath() quando For shedule
+Alex Wallauer |26/05/2025| Chamado 50793. variable does not exist LTELA on MCOM017EM(MCOM017.PRW) 25/05/2025 10:28:49 Line : 334
+Lucas Borges  |19/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
+===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "TBICONN.CH"
-#INCLUDE 'TOPCONN.CH'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -30,18 +22,17 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function MCOM017()///U_MCOM017
+User Function MCOM017
+
 Local nI         := 0
 Local _aParRet   := {}
 Local _aParAux   := {}
 Local _bOK       := {|| .T. }
 Local _lRet      := .F.
-PRIVATE _lTela   := .T.
+Private _lTela   := .T.
 
 //Testa se esta sendo rodado do menu
 If Select('SX3') == 0
-
-
    RPCSetType( 3 )					//Não consome licensa de uso
 
    RpcSetEnv('01','01',,,,GetEnvServer(),{ "SDS","SDT","SF1" })
@@ -49,40 +40,39 @@ If Select('SX3') == 0
 
    _lTela := .F.
 
-	MV_PAR01 := U_ItGetMV( 'IT_DIASAEP' , 0 )
-	MV_PAR02 := U_ItGetMV( 'IT_DTINIMO' , StoD('20200101') )
+	MV_PAR01 := SuperGetMV('IT_DIASAEP',.F.,0)
+	MV_PAR02 := SuperGetMV('IT_DTINIMO',.F.,SToD('20200101'))
     MV_PAR03 := ""
 	MV_PAR04 := "1"
     MV_PAR05 := ""
-ELSE
-
-	MV_PAR01 := U_ItGetMV( 'IT_DIASAEP' , 0 )
-	MV_PAR02 := U_ItGetMV( 'IT_DTINIMO' , StoD('20210101') )
-	MV_PAR03 := AllTrim(UsrRetMail(__cUserId))+SPACE(200)
+Else
+	MV_PAR01 := SuperGetMV('IT_DIASAEP',.F.,0)
+	MV_PAR02 := SuperGetMV('IT_DTINIMO',.F.,SToD('20200101'))
+	MV_PAR03 := AllTrim(UsrRetMail(__cUserId))+Space(200)
     MV_PAR04 := "2-Nao"
-    MV_PAR05 := SPACE(100)
+    MV_PAR05 := Space(100)
 
-   AADD( _aParAux , { 1 , "Dias após a emissão Pre-NF", MV_PAR01, "999"	, ""	, ""	, "" , 060 , .F. } )
-   AADD( _aParAux , { 1 , "Emissão a partir de"	      , MV_PAR02, "@D"	, ""	, ""	, "" , 060 , .T. } )
-   AADD( _aParAux , { 1 , "E-mail Destino"	          , MV_PAR03, "@E"	, ""	, ""	, "" , 100 , .F. } )
-   AADD( _aParAux , { 2 , "Efetivar Alterações"       , MV_PAR04, {"1-Sim","2-Nao"}          , 060 ,".T.",.T.,".T."})
-   AADD( _aParAux , { 1 , "Pedido"                    , MV_PAR05, "!@"	, ""	, ""	, "" , 060 , .F. } )
+   aAdd( _aParAux , { 1 , "Dias após a emissão Pre-NF", MV_PAR01, "999"	, ""	, ""	, "" , 060 , .F. } )
+   aAdd( _aParAux , { 1 , "Emissão a partir de"	      , MV_PAR02, "@D"	, ""	, ""	, "" , 060 , .T. } )
+   aAdd( _aParAux , { 1 , "E-mail Destino"	          , MV_PAR03, "@E"	, ""	, ""	, "" , 100 , .F. } )
+   aAdd( _aParAux , { 2 , "Efetivar Alterações"       , MV_PAR04, {"1-Sim","2-Nao"}          , 060 ,".T.",.T.,".T."})
+   aAdd( _aParAux , { 1 , "Pedido"                    , MV_PAR05, "!@"	, ""	, ""	, "" , 060 , .F. } )
 
    For nI := 1 To Len( _aParAux )
 	    aAdd( _aParRet , _aParAux[nI][03] )
    Next nI
                          //aParametros, cTitle                                , @aRet    ,[bOk], [ aButtons ] [ lCentered ] [ nPosX ] [ nPosy ] [ oDlgWizard ] [ cLoad ] [ lCanSave ] [ lUserSave ]
    If !ParamBox( _aParAux , "WK que monitora os PC que já tem o xml e Pré-NF" , @_aParRet, _bOK, /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
-	   RETURN .F.
+	   Return .F.
    EndIf
 
 EndIf
 
-_cTimeIni  := TIME()
+_cTimeIni  := Time()
 
 If _lTela
 
-	FWMSGRUN( ,{|oProc|  _lRet := MCOM017EM(oProc) } , "Hora Inicial: "+_cTimeIni+" Lendo PCs a partir de: "+DTOC(MV_PAR02))
+	FWMsgRun( ,{|oProc|  _lRet := MCOM017EM(oProc) } , "Hora Inicial: "+_cTimeIni+" Lendo PCs a partir de: "+DToC(MV_PAR02))
 
 Else
 	//Atualização tabela SM2
@@ -90,14 +80,13 @@ Else
 
 	_lRet := MCOM017EM()
 
-   FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MCOM017"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM01702"/*cMsgId*/, "MCOM017 - FIM DO PROCESSAMENTO - Hora Final: "+TIME() /*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+   FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MCOM017"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM01702"/*cMsgId*/, "MCOM017 - FIM DO PROCESSAMENTO - Hora Final: "+Time() /*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
    RpcClearEnv() //Libera o Ambiente
 
 EndIf
 
 Return _lRet
-
 
 /*
 ===============================================================================================================================
@@ -110,6 +99,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function MCOM017EM(oProc)
+
 Local _aConfig	  := {}
 Local _cEmlLog	  := ""
 Local _cMsgEml	  := ""
@@ -147,35 +137,33 @@ _nTotal    := Len(_aDados) + Len(_aNFSemPed)
 
 If _nTotal > 0
 	If _lTela// **************** TELA **********************************
-	   //AADD(_aCab,"Chave ZZH")
-       _cMsgTop:="Par. 1: "+ALLTRIM(AllToChar(MV_PAR02))+"; Par. 2: "+ALLTRIM(AllToChar(MV_PAR04))+" -  H.I.: "+_cTimeIni+" H.F.: "+TIME()
+	   //aAdd(_aCab,"Chave ZZH")
+       _cMsgTop:="Par. 1: "+AllTrim(AllToChar(MV_PAR02))+"; Par. 2: "+AllTrim(AllToChar(MV_PAR04))+" -  H.I.: "+_cTimeIni+" H.F.: "+Time()
        //QUADRO 01
-       If Len(_aDados) > 0 .AND. !U_ITListBox( cGetAssun  , _aCab   , _aDados    , .T. , 1 , _cMsgTop)
-	      RETURN .F.
-	   ENDIF
+       If Len(_aDados) > 0 .And. !U_ITListBox( cGetAssun  , _aCab   , _aDados    , .T. , 1 , _cMsgTop)
+	      Return .F.
+	   EndIf
        //QUADRO 02
-       If Len(_aNFSemPed) > 0 .AND. !U_ITListBox( cGetAssun2 , _aCabSP , _aNFSemPed , .T. , 1 , _cMsgTop)
-	      RETURN .F.
-	   ENDIF
-	ENDIF
-ELSE
+       If Len(_aNFSemPed) > 0 .And. !U_ITListBox( cGetAssun2 , _aCabSP , _aNFSemPed , .T. , 1 , _cMsgTop)
+	      Return .F.
+	   EndIf
+	EndIf
+Else
    If _lTela
-      U_ITMSG("Não há dados para listar.","Envio do E-MAIL",,3)
-	  RETURN .F.
-   ENDIF
+      U_ITMsg("Não há dados para listar.","Envio do E-MAIL",,3)
+	  Return .F.
+   EndIf
 EndIf
 
 //Logo Italac
 _cMsgEml := '<html>'
 _cMsgEml += '<head><title>'+_cTit+'</title></head>'
 _cMsgEml += '<body>'
-_cMsgEml += '<style type="text/css"><!--'
+_cMsgEml += '<style Type="text/css"><!--'
 _cMsgEml += 'table.bordasimples { border-collapse: collapse; }'
 _cMsgEml += 'table.bordasimples tr td { border:1px solid #777777; }'
 _cMsgEml += 'td.titulos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #C6E2FF; }'
-//_cMsgEml += 'td.grupos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #E5E5E5; }'
 _cMsgEml += 'td.grupos	{ font-family:VERDANA; font-size:10px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #E5E5E5; }'
-//_cMsgEml += 'td.itens	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #FFFFFF; }'
 _cMsgEml += 'td.itens	{ font-family:VERDANA; font-size:10px; V-align:middle; margin-right: 13px; margin-left: 15px; background-color: #FFFFFF; }'
 _cMsgEml += '--></style>'
 _cMsgEml += '<center>'
@@ -198,7 +186,7 @@ _cMsgEml += '<br>'
 _cMsgEml += '<br>'
 _cMsgEml += '<table class="bordasimples" width="3100">'
 _cMsgEml += '    <tr>'
-_cMsgEml += '		<td align="left" colspan="'+ALLTRIM(STR(LEN(_aSizes)))+'" class="grupos"><b>'+cGetAssun+'</b></td>'
+_cMsgEml += '		<td align="left" colspan="'+AllTrim(Str(Len(_aSizes)))+'" class="grupos"><b>'+cGetAssun+'</b></td>'
 _cMsgEml += '    </tr>'
 _cMsgEml += '    <tr>'
 _cMsgEml += '      <td class="itens" align="center" width="'+_aSizes[01]+'%"><b>'+_aCab[01]+'</b></td>'
@@ -220,14 +208,14 @@ _cMsgEml += '</table>'
 
 _cGetLista := ""
 _nTot:=nConta:=0
-_nTot:=LEN(_aDados)
-_cTot:=ALLTRIM(STR(_nTot))
+_nTot:=Len(_aDados)
+_cTot:=AllTrim(Str(_nTot))
 
 For _nCont := 1 To Len(_aDados)
 
 	If oProc <> Nil
        nConta++
-	   oProc:cCaption := ('1/2-Enviando Q1: '+ALLTRIM(STR(nConta))+" de "+_cTot )
+	   oProc:cCaption := ('1/2-Enviando Q1: '+AllTrim(Str(nConta))+" de "+_cTot )
 	   ProcessMessages()
 	EndIf
 
@@ -248,7 +236,7 @@ For _nCont := 1 To Len(_aDados)
 	_cGetLista += '    </tr>'
 Next
 
-_cMsgEml := STRTRAN(_cMsgEml,"#LISTA#",_cGetLista)
+_cMsgEml := StrTran(_cMsgEml,"#LISTA#",_cGetLista)
 
 //********************************  QUADRO 2 *************************************************************************
 _cMsgEml += '<br>'
@@ -256,7 +244,7 @@ _cMsgEml += '<br>'
 _cMsgEml += '<br>'
 _cMsgEml += '<table class="bordasimples" width="3100">'
 _cMsgEml += '    <tr>'
-_cMsgEml += '		<td align="left" colspan="'+ALLTRIM(STR(LEN(_aSizeSP)))+'" class="grupos"><b>'+cGetAssun2+'</b></td>'
+_cMsgEml += '		<td align="left" colspan="'+AllTrim(Str(Len(_aSizeSP)))+'" class="grupos"><b>'+cGetAssun2+'</b></td>'
 _cMsgEml += '    </tr>'
 _cMsgEml += '    <tr>'
 
@@ -281,12 +269,12 @@ _cMsgEml += '</table>'
 
 _cGetLista := ""
 _nTot:=nConta:=0
-_nTot:=LEN(_aNFSemPed)
-_cTot:=ALLTRIM(STR(_nTot))
+_nTot:=Len(_aNFSemPed)
+_cTot:=AllTrim(Str(_nTot))
 For _nCont := 1 To  Len(_aNFSemPed)
 	If oProc <> Nil
        nConta++
-	   oProc:cCaption := ('2/2-Enviando Q2: '+ALLTRIM(STR(nConta))+" de "+_cTot )
+	   oProc:cCaption := ('2/2-Enviando Q2: '+AllTrim(Str(nConta))+" de "+_cTot )
 	   ProcessMessages()
 	EndIf
 	_cGetLista += '    <tr>'
@@ -304,7 +292,7 @@ For _nCont := 1 To  Len(_aNFSemPed)
 	_cGetLista += '    </tr>'
 Next
 
-_cMsgEml := STRTRAN(_cMsgEml,"#LISTA2#",_cGetLista)
+_cMsgEml := StrTran(_cMsgEml,"#LISTA2#",_cGetLista)
 
 
 _cMsgEml += '</center>'
@@ -317,13 +305,13 @@ _cMsgEml += '    </tr>'
 _cMsgEml += '</body>'
 _cMsgEml += '</html>'
 
-IF LEN(_aNFSemPed) = 0 .AND. LEN(_aDados) = 0
+If Len(_aNFSemPed) = 0 .And. Len(_aDados) = 0
    lEnviaPlan:=.F.
-ELSE
+Else
    lEnviaPlan:=.T.
-ENDIF
+EndIf
 
-IF lEnviaPlan
+If lEnviaPlan
 
 	If oProc <> Nil
        nConta++
@@ -332,49 +320,49 @@ IF lEnviaPlan
 	EndIf
 
    _cPathSrv :="\data\Italac\WS\"
-   IF _lTela
+   If _lTela
       _cPathLoc := GetTempPath()//só tela
-   ELSE
+   Else
       _cPathLoc := ""
-   ENDIF
-   _cArquivo :="XML_X_PCS_"+Dtos(Date())+"_"+StrTran(Time(),":","")+".xml"
+   EndIf
+   _cArquivo :="XML_X_PCS_"+DToS(Date())+"_"+StrTran(Time(),":","")+".xml"
    _cFileName:=_cPathSrv+_cArquivo
 
     _aCab1:={}
-    For _nCont := 1 to len(_aCab)
+    For _nCont := 1 to Len(_aCab)
     	// Alinhamento: 1-Left   ,2-Center,3-Right
     	// Formatação.: 1-General,2-Number,3-Monetário,4-DateTime
     	//          Titulo das Colunas ,Alinhamento ,Formatação, Totaliza?
-    	IF _nCont = 5 .OR. _nCont = 6 .OR. _nCont = 7
-      	   Aadd(_aCab1,{_aCab[_nCont]     ,2           ,4         ,.F.})
-        ELSE
-    	   Aadd(_aCab1,{_aCab[_nCont]     ,1           ,1         ,.F.})
-    	ENDIF
+    	If _nCont = 5 .Or. _nCont = 6 .Or. _nCont = 7
+      	   aAdd(_aCab1,{_aCab[_nCont]     ,2           ,4         ,.F.})
+        Else
+    	   aAdd(_aCab1,{_aCab[_nCont]     ,1           ,1         ,.F.})
+    	EndIf
     Next
 
 ////           01       02     03           04       05           06          07        08        09          10     11
 //_aCabSP := {"Filial","N.F.","Fornecedor","CNPJ"  ,"Dt.Emis.NF","Dt.Pre-NF","Item NF","Produto","Chave NFE","CFOP","Observação"}
 	_aCab2:={}
-    For _nCont := 1 to len(_aCabSP)
+    For _nCont := 1 to Len(_aCabSP)
     	// Alinhamento: 1-Left   ,2-Center,3-Right
     	// Formatação.: 1-General,2-Number,3-Monetário,4-DateTime
     	//          Titulo das Colunas ,Alinhamento ,Formatação, Totaliza?
-    	IF _nCont = 5 .OR. _nCont = 6
-      	   Aadd(_aCab2,{_aCabSP[_nCont]     ,2           ,4         ,.F.})
-        ELSE
-    	   Aadd(_aCab2,{_aCabSP[_nCont]     ,1           ,1         ,.F.})
-    	ENDIF
+    	If _nCont = 5 .Or. _nCont = 6
+      	   aAdd(_aCab2,{_aCabSP[_nCont]     ,2           ,4         ,.F.})
+        Else
+    	   aAdd(_aCab2,{_aCabSP[_nCont]     ,1           ,1         ,.F.})
+    	EndIf
     Next
     _aCabs:={}
 	_aGerExel:={}
 
-	AADD(_aCabs,{"XML Com Pedidos",_aCab1})
-	AADD(_aGerExel,_aDados)
+	aAdd(_aCabs,{"XML Com Pedidos",_aCab1})
+	aAdd(_aGerExel,_aDados)
 
-	IF LEN(_aNFSemPed) > 0
-	   AADD(_aCabs,{"XML Sem Pedidos",_aCab2})
-	   AADD(_aGerExel,_aNFSemPed)
-	ENDIF
+	If Len(_aNFSemPed) > 0
+	   aAdd(_aCabs,{"XML Sem Pedidos",_aCab2})
+	   aAdd(_aGerExel,_aNFSemPed)
+	EndIf
     SET DATE FORMAT TO "DD/MM/YYYY"
     //ITGEREXCEL(_cNomeArq,_cDiretorio,_cTitulo,_cNomePlan,_aCabecalho,_aDetalhe,_lLeTabTemp,_cAliasTab,_aCampos,_lScheduller,_lCriaPastas,_aPergunte,_lEnviaEmail)
     U_ITGEREXCEL(_cArquivo,_cPathSrv  ,_cTit   ,          ,_aCabs     ,_aGerExel,           ,          ,        , .T.        , .T.        ,          , .F.)
@@ -383,31 +371,31 @@ IF lEnviaPlan
    cAttach:=_cFileName
    If _lTela
       If !__CopyFile( _cFileName , _cPathLoc+_cArquivo)
-         U_ITMSG("Nao conseguiu copiar o arquivo DE "+_cFileName+" PARA "+_cPathLoc+_cArquivo,;
+         U_ITMsg("Nao conseguiu copiar o arquivo DE "+_cFileName+" PARA "+_cPathLoc+_cArquivo,;
                 'COPIA DE ARQUIVO',;
                 "Email será enviado mesmo assim",3)
-      ENDIF
-   ENDIF
-ELSE
+      EndIf
+   EndIf
+Else
    cAttach:=NIL
-ENDIF
+EndIf
 
 _cEmail:=""
-IF !EMPTY(MV_PAR03)
+If !Empty(MV_PAR03)
    _cEmail:=AllTrim(MV_PAR03)+";"
-ENDIF
+EndIf
 
 DBSelectArea('ZZL')
-IF ZZL->(FIELDPOS("ZZL_EMLWFM")) > 0
+If ZZL->(FIELDPOS("ZZL_EMLWFM")) > 0
     ZZL->( Dbsetfilter({ | | ZZL->ZZL_EMLWFM="S" }, 'ZZL->ZZL_EMLWFM="S"') )
-    ZZL->( Dbgotop() )
-    DO WHILE .NOT. ZZL->( EOF() )
-    	_cEmail += ALLTRIM( ZZL->ZZL_EMAIL ) + ";"
-    	ZZL->( Dbskip() )
-    ENDDO
+    ZZL->( DBGoTop() )
+    While .NOT. ZZL->( Eof() )
+    	_cEmail += AllTrim( ZZL->ZZL_EMAIL ) + ";"
+    	ZZL->( DBSkip() )
+    EndDo
     ZZL->(DBCLEARFILTER())
-ENDIF
-_cEmail:=substr(_cEmail,1,len(_cEmail)-1)
+EndIf
+_cEmail:=SubStr(_cEmail,1,Len(_cEmail)-1)
 _aEmail:=StrTokArr(_cEmail,";")
 For _nCont := 1 to Len(_aEmail)
 
@@ -426,30 +414,29 @@ For _nCont := 1 to Len(_aEmail)
 
     _lEnviouEmail := .F.
 
-    IF _lTela
+    If _lTela
         bBloco:=NIL
     	_cBotao:=""
-        IF FILE(_cPathLoc+_cArquivo)
+        If FILE(_cPathLoc+_cArquivo)
            bBloco:={|| ShellExecute("open", _cArquivo, "", _cPathLoc , 1) }
-   		   _cBotao:="Com anexo " + LOWER(ALLTRIM(_cfileName))+CHR(13)+CHR(10)+"Clique em detalhes para ver o anexo"
-        ENDIF
-        U_ITMSG(_cEmlLog+CHR(13)+CHR(10)+'Envio de E-mail P/ '+_aEmail[_nCont],;
+   		   _cBotao:="Com anexo " + LOWER(AllTrim(_cfileName))+CHR(13)+CHR(10)+"Clique em detalhes para ver o anexo"
+        EndIf
+        U_ITMsg(_cEmlLog+CHR(13)+CHR(10)+'Envio de E-mail P/ '+_aEmail[_nCont],;
                 'Resultdo do Envio de E-mail ',;
                 _cBotao,3,,,,,,bBloco)
-    ENDIF
+    EndIf
 
 Next
 
-If _lTela .AND. File(_cPathLoc+_cArquivo)
+If _lTela .And. File(_cPathLoc+_cArquivo)
    Ferase(_cPathLoc+_cArquivo)
-ENDIF
+EndIf
 
-IF cAttach <> NIL .AND. File(cAttach)
+If cAttach <> NIL .And. File(cAttach)
    Ferase(cAttach)
-Endif
+EndIf
 
 Return .T.
-
 
 /*
 ===============================================================================================================================
@@ -462,6 +449,7 @@ Retorno-----------: _cGetLista = Lista dos dados
 ===============================================================================================================================
 */
 Static Function MCOM017QRY(oProc)
+
 Local _cAlias   := '' , P
 Local _aNFComPed:= {}
 Local _aDados   := {}
@@ -477,17 +465,17 @@ _cQuery+="   WHERE SDS.D_E_L_E_T_  = ' ' AND SDT.D_E_L_E_T_  = ' ' AND SF1.D_E_L
 _cQuery+="     AND SDS.DS_TIPO     = 'N' "
 _cQuery+="     AND SDS.DS_STATUS   = 'P' "
 _cQuery+="     AND SDS.DS_DATAPRE <> ' ' "
-_cQuery+="     AND SDS.DS_DATAPRE <= '"+DTOS(DATE()-MV_PAR01)+"'"
-_cQuery+="     AND SDS.DS_DATAPRE >= '"+DTOS(MV_PAR02)+"'"
+_cQuery+="     AND SDS.DS_DATAPRE <= '"+DToS(DATE()-MV_PAR01)+"'"
+_cQuery+="     AND SDS.DS_DATAPRE >= '"+DToS(MV_PAR02)+"'"
 _cQuery+="     AND SDT.DT_FILIAL  = SDS.DS_FILIAL "
 _cQuery+="     AND SDT.DT_FORNEC  = SDS.DS_FORNEC "
 _cQuery+="     AND SDT.DT_LOJA    = SDS.DS_LOJA "
 _cQuery+="     AND SDT.DT_DOC     = SDS.DS_DOC "
 _cQuery+="     AND SDT.DT_SERIE   = SDS.DS_SERIE "
 _cQuery+="     AND SDT.DT_CNPJ    = SDS.DS_CNPJ "
-IF !EMPTY(MV_PAR05)
-   _cQuery+="     AND SDT.DT_PEDIDO  IN "+FormatIn(ALLTRIM(MV_PAR05),";")
-ENDIF
+If !Empty(MV_PAR05)
+   _cQuery+="     AND SDT.DT_PEDIDO  IN "+FormatIn(AllTrim(MV_PAR05),";")
+EndIf
 _cQuery+="     AND SF1.F1_FILIAL  = SDS.DS_FILIAL "
 _cQuery+="     AND SF1.F1_FORNECE = SDS.DS_FORNEC "
 _cQuery+="     AND SF1.F1_LOJA    = SDS.DS_LOJA "
@@ -498,131 +486,126 @@ _cQuery+="   ORDER BY SDT.DT_FILIAL, SDS.DS_DOC, SDS.DS_SERIE,  SDT.DT_PEDIDO, S
 
 MPSysOpenQuery( _cQuery,_cAlias )
 
-DbSelectArea(_cAlias)
+DBSelectArea(_cAlias)
 _nTot:=nConta:=0
 COUNT TO _nTot
-_cTot:=ALLTRIM(STR(_nTot))
+_cTot:=AllTrim(Str(_nTot))
 
-SC7->(DbSetOrder(1))
+SC7->(DBSetOrder(1))
 (_cAlias)->(DBGoTop())
-If !(_cAlias)->(EOF())
-	Do While !(_cAlias)->(EOF())
+If !(_cAlias)->(Eof())
+	While !(_cAlias)->(Eof())
 
 	If oProc <> Nil
        nConta++
-	   oProc:cCaption := ('1/3-Gravando SC7: '+ALLTRIM(STR(nConta))+" de "+_cTot )
+	   oProc:cCaption := ('1/3-Gravando SC7: '+AllTrim(Str(nConta))+" de "+_cTot )
 	   ProcessMessages()
 	EndIf
 
-    SDS->(DBGOTO((_cAlias)->NRRECDS))
-    SDT->(DBGOTO((_cAlias)->NRRECDT))
-    SF1->(DBGOTO((_cAlias)->NRRECF1))
-	IF !EMPTY(SDT->DT_PEDIDO)
-	    IF SC7->(DbSeek(SDT->(DT_FILIAL+DT_PEDIDO+DT_ITEMPC)))
-		   IF SC7->C7_ENCER = 'E' .OR. SC7->C7_RESIDUO = 'S'
+    SDS->(DBGoTo((_cAlias)->NRRECDS))
+    SDT->(DBGoTo((_cAlias)->NRRECDT))
+    SF1->(DBGoTo((_cAlias)->NRRECF1))
+	If !Empty(SDT->DT_PEDIDO)
+	    If SC7->(DBSeek(SDT->(DT_FILIAL+DT_PEDIDO+DT_ITEMPC)))
+		   If SC7->C7_ENCER = 'E' .Or. SC7->C7_RESIDUO = 'S'
 		      (_cAlias)->(DBSkip())
-			  LOOP
-		   ENDIF
-	       IF SC7->C7_I_DTFAT <> SF1->F1_EMISSAO
-	          _cMen:="DT faturamento do PC alterado de "+DTOC(SC7->C7_I_DTFAT)+" para "+DTOC(SF1->F1_EMISSAO)+" / NF disponivel para classificar desde "+DTOC(SDS->DS_DATAPRE)
+			  Loop
+		   EndIf
+	       If SC7->C7_I_DTFAT <> SF1->F1_EMISSAO
+	          _cMen:="DT faturamento do PC alterado de "+DToC(SC7->C7_I_DTFAT)+" para "+DToC(SF1->F1_EMISSAO)+" / NF disponivel para classificar desde "+DToC(SDS->DS_DATAPRE)
 
-	          IF MV_PAR04 = "1"
-			     SC7->(RECLOCK("SC7",.F.))
+	          If MV_PAR04 = "1"
+			     SC7->(RecLock("SC7",.F.))
 		         SC7->C7_I_DTFAT:=SF1->F1_EMISSAO
-		         SC7->(MSUNLOCK())
-			  ENDIF
+		         SC7->(MSUnLock())
+			  EndIf
 
-	       ELSE
-	          _cMen:="NF disponivel p/ classificar desde "+DTOC(SDS->DS_DATAPRE)+" / Dt.fat.: "+DTOC(SC7->C7_I_DTFAT)
-	       ENDIF
-	       IF ASCAN(_aPedidos,{|P|P[1]=SDT->(DT_FILIAL+DT_PEDIDO)}) = 0
-	          AADD(_aPedidos,{SDT->(DT_FILIAL+DT_PEDIDO),""})
-	       ENDIF
-	    ENDIF
+	       Else
+	          _cMen:="NF disponivel p/ classificar desde "+DToC(SDS->DS_DATAPRE)+" / Dt.fat.: "+DToC(SC7->C7_I_DTFAT)
+	       EndIf
+	       If aScan(_aPedidos,{|P|P[1]=SDT->(DT_FILIAL+DT_PEDIDO)}) = 0
+	          aAdd(_aPedidos,{SDT->(DT_FILIAL+DT_PEDIDO),""})
+	       EndIf
+	    EndIf
 
 //_aCab   := {"Filial","N.F.","Fornecedor","CNPJ"  ,"Dt.Emis.NF","Dt.Pre-NF","Dt.Vencto","Pedido" ,"Item","Produto","Chave NFE","Observação"}
-		AADD(_aNFComPed,{SDT->DT_FILIAL,;                 //01
+		aAdd(_aNFComPed,{SDT->DT_FILIAL,;                 //01
 					SDT->DT_DOC+"/"+SDT->DT_SERIE,;  //02
-					SDT->DT_FORNEC+"/"+SDT->DT_LOJA+"-"+Alltrim(POSICIONE("SA2",1,xFilial("SA2")+SDT->DT_FORNEC+SDT->DT_LOJA,"A2_NREDUZ")),;//03
+					SDT->DT_FORNEC+"/"+SDT->DT_LOJA+"-"+AllTrim(Posicione("SA2",1,xFilial("SA2")+SDT->DT_FORNEC+SDT->DT_LOJA,"A2_NREDUZ")),;//03
 					TRANSF(SDT->DT_CNPJ,"@R! NN.NNN.NNN/NNNN-99") ,;//04
-					DTOC((SDS->DS_EMISSA)) ,;        //05
-					DTOC((SDS->DS_DATAPRE)),;        //06
+					DToC((SDS->DS_EMISSA)) ,;        //05
+					DToC((SDS->DS_DATAPRE)),;        //06
 					"",;                             //07
-					Alltrim(SDT->DT_PEDIDO),;        //08
-					Alltrim(SDT->DT_ITEMPC),;        //09
-					Alltrim(SDT->DT_COD)+"-"+Alltrim(Posicione("SB1",1,Xfilial("SB1")+SDT->DT_COD,"B1_DESC")),;//10
+					AllTrim(SDT->DT_PEDIDO),;        //08
+					AllTrim(SDT->DT_ITEMPC),;        //09
+					AllTrim(SDT->DT_COD)+"-"+AllTrim(Posicione("SB1",1,xFilial("SB1")+SDT->DT_COD,"B1_DESC")),;//10
 					SF1->F1_CHVNFE,;//11
 					SDT->DT_CODCFOP+"-"-fDesc("SX5","13"+SDT->DT_CODCFOP,"X5_DESCRI"),;
 					_cMen,SDT->(DT_FILIAL+AVKEY(SDT->DT_PEDIDO,"ZZH_PEDIDO")+DT_ITEMPC)})//12,13
 
-	ELSE
-      _cMen:="NF sem pedido de compra vinculado / Dt.NF.Emis.: "+DTOC(SF1->F1_EMISSAO)
+	Else
+      _cMen:="NF sem pedido de compra vinculado / Dt.NF.Emis.: "+DToC(SF1->F1_EMISSAO)
 
 //_aCab   := {"Filial","N.F.","Fornecedor","CNPJ"  ,"Dt.Emis.NF","Dt.Pre-NF","Item","Produto","Chave NFE","Observação"}
-		AADD(_aNFSemPed,;
+		aAdd(_aNFSemPed,;
 		           {SDT->DT_FILIAL,;                 //01
 					SDT->DT_DOC+"/"+SDT->DT_SERIE,;  //02
-					SDT->DT_FORNEC+"/"+SDT->DT_LOJA+"-"+Alltrim(POSICIONE("SA2",1,xFilial("SA2")+SDT->DT_FORNEC+SDT->DT_LOJA,"A2_NREDUZ")),;//03
+					SDT->DT_FORNEC+"/"+SDT->DT_LOJA+"-"+AllTrim(Posicione("SA2",1,xFilial("SA2")+SDT->DT_FORNEC+SDT->DT_LOJA,"A2_NREDUZ")),;//03
 					TRANSF(SDT->DT_CNPJ,"@R! NN.NNN.NNN/NNNN-99") ,;//04
-					DTOC((SDS->DS_EMISSA)) ,;        //05
-					DTOC((SDS->DS_DATAPRE)),;        //06
-					Alltrim(SDT->DT_ITEM),;          //07
-					Alltrim(SDT->DT_COD)+"-"+Alltrim(Posicione("SB1",1,Xfilial("SB1")+SDT->DT_COD,"B1_DESC")),;//08
+					DToC((SDS->DS_EMISSA)) ,;        //05
+					DToC((SDS->DS_DATAPRE)),;        //06
+					AllTrim(SDT->DT_ITEM),;          //07
+					AllTrim(SDT->DT_COD)+"-"+AllTrim(Posicione("SB1",1,xFilial("SB1")+SDT->DT_COD,"B1_DESC")),;//08
 					SF1->F1_CHVNFE,;//09
 					SDT->DT_CODCFOP+"-"-fDesc("SX5","13"+SDT->DT_CODCFOP,"X5_DESCRI"),;
 					_cMen})//10
-
-	ENDIF
-
+	EndIf
 	(_cAlias)->(DBSkip())
 
 	EndDo
-
-
 EndIf
 
 
 _nTot:=nConta:=0
-_nTot:=LEN(_aPedidos)
-_cTot:=ALLTRIM(STR(_nTot))
+_nTot:=Len(_aPedidos)
+_cTot:=AllTrim(Str(_nTot))
 
-SC7->(DbSetOrder(1))
-FOR P := 1 TO LEN(_aPedidos)
+SC7->(DBSetOrder(1))
+For P := 1 TO Len(_aPedidos)
 	If oProc <> Nil
        nConta++
-	   oProc:cCaption := ("2/3-Atualizando ZZH: "+_aPedidos[P,1]+" / "+ALLTRIM(STR(nConta))+" de "+_cTot )
+	   oProc:cCaption := ("2/3-Atualizando ZZH: "+_aPedidos[P,1]+" / "+AllTrim(Str(nConta))+" de "+_cTot )
 	   ProcessMessages()
-	ENDIF
-    IF MV_PAR04 = "1" .AND. SC7->(DbSeek(_aPedidos[P,1]))
-	   U_ACOM008ZZH(ALLTRIM(SC7->C7_FILIAL), ALLTRIM(SC7->C7_NUM))
-	ENDIF
-NEXT
-//********************************************************************
+	EndIf
+    If MV_PAR04 = "1" .And. SC7->(DBSeek(_aPedidos[P,1]))
+	   U_ACOM008ZZH(AllTrim(SC7->C7_FILIAL), AllTrim(SC7->C7_NUM))
+	EndIf
+Next
 
-DbSelectArea(_cAlias)
+DBSelectArea(_cAlias)
 _nTot:=nConta:=0
-_nTot:=LEN(_aNFComPed)
-_cTot:=ALLTRIM(STR(_nTot))
+_nTot:=Len(_aNFComPed)
+_cTot:=AllTrim(Str(_nTot))
 _aDados:={}
-FOR P := 1 TO LEN(_aNFComPed)
+For P := 1 TO Len(_aNFComPed)
 
 	If oProc <> Nil
        nConta++
-	   oProc:cCaption := ('3/3-Lendo ZZH: '+ALLTRIM(STR(nConta))+" de "+_cTot )
+	   oProc:cCaption := ('3/3-Lendo ZZH: '+AllTrim(Str(nConta))+" de "+_cTot )
 	   ProcessMessages()
 	EndIf
 
-    IF ZZH->( Dbseek(_aNFComPed[P,LEN(_aNFComPed[P])]) )
-	   Do While ZZH-> (!EOF()) .AND. ZZH->ZZH_FILIAL+ZZH->ZZH_PEDIDO+ZZH->ZZH_ITEMPC == _aNFComPed[P,LEN(_aNFComPed[P])]
-	      AADD(_aDados,ACLONE(_aNFComPed[P]))
-		  _aDados[LEN(_aDados),7]:=DTOC(ZZH->ZZH_DATA)
-		  ZZH->(DBSKIP())
-	   ENDDO
-	ELSE
-       AADD(_aDados,_aNFComPed[P])
-	ENDIF
+    If ZZH->( DBSeek(_aNFComPed[P,Len(_aNFComPed[P])]) )
+	   While ZZH-> (!Eof()) .And. ZZH->ZZH_FILIAL+ZZH->ZZH_PEDIDO+ZZH->ZZH_ITEMPC == _aNFComPed[P,Len(_aNFComPed[P])]
+	      aAdd(_aDados,ACLONE(_aNFComPed[P]))
+		  _aDados[Len(_aDados),7]:=DToC(ZZH->ZZH_DATA)
+		  ZZH->(DBSkip())
+	   EndDo
+	Else
+       aAdd(_aDados,_aNFComPed[P])
+	EndIf
 
-NEXT
+Next
 
 (_cAlias)->( DBCloseArea() )
 

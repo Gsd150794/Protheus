@@ -6,20 +6,16 @@
 -------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges  |07/05/2025| Chamado 50617. Corrigir chamada estática no nome das tabelas do sistema
 Lucas Borges  |24/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
+Lucas Borges  |14/09/2025| Chamado 51799. Implementada função para validar ambiente de teste totvs.framework.environment.Type.get()
 ===============================================================================================================================
- Analista     - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
-======================================================================================================================================================================================================
- Andre        - Alex Wallauer - 16/04/25 - 23/04/25 - 50140   - Validacao de uma viagem filha esta em uma viagem de outra mãe. Esta em 2 mãe (julieta).
- Lucas        - Alex Wallauer - 02/05/25 - 06/05/25 - 50525   - Ajuste para remoção de diretório local C:\SMARTCLIENT\.
-=====================================================================================================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include 'FWMVCDef.ch'
 #Include 'XMLXFUN.ch'
 #Include 'FileIO.ch'
-#include "APWEBSRV.CH"  
-#include "TBICODE.CH"
+#Include "APWEBSRV.CH"  
+#Include "TBICODE.CH"
 
 /*
 ===============================================================================================================================
@@ -77,11 +73,11 @@ If !_lShedule
    _oProcess:SetRegua1(0)
    _oProcess:IncRegua1("Baixando dados do smartquestion...")
    _lValData:=.F.
-   _cZLJ_UINTSQ := ALLTRIM(UsrFullName(__cUserID))
+   _cZLJ_UINTSQ := AllTrim(UsrFullName(__cUserId))
 
 Else
 
-    _cTimeInicial :=TIME()
+    _cTimeInicial :=Time()
     _cFiltroFilial:=""
     
     U_ITConOut("Iniciando ambiente do SCHEDULE_WF_SMARTQUESTION...")
@@ -90,15 +86,15 @@ Else
 	RpcSetEnv( "01" , "01" ,,,"ESP2", "SCHEDULE_WF_SMARTQUESTION" , {'ZLJ','SA2','ZL2','ZLT','ZLS'} )
 	Sleep( 5000 ) //Aguarda 5 segundos para subam as configurações do ambiente.
 
-    _cTransI := _cTransF := Space(LEN(ZLJ->ZLJ_CODPAT))
-    _cTraLoI := _cTraLoF := Space(LEN(ZLJ->ZLJ_LOJPAT))
-    _cSetorI := _cSetorF := Space(LEN(ZLJ->ZLJ_SETOR ))
-    _cLinhaI := _cLinhaF := Space(LEN(ZLJ->ZLJ_LINROT))
-    cUsuario := SPACE(06)+"Administrador  "
-    cUsername:= "Schedule"
+    _cTransI := _cTransF := Space(Len(ZLJ->ZLJ_CODPAT))
+    _cTraLoI := _cTraLoF := Space(Len(ZLJ->ZLJ_LOJPAT))
+    _cSetorI := _cSetorF := Space(Len(ZLJ->ZLJ_SETOR ))
+    _cLinhaI := _cLinhaF := Space(Len(ZLJ->ZLJ_LINROT))
+    cUsuario := Space(06)+"Administrador  "
+    cUserName:= "Schedule"
     _cZLJ_UINTSQ := "SCHEDULE"//"AGENDADO / AUTOMATICO"
-    _dDtini  := DATE()
-    _dDtfim  := DATE()
+    _dDtini  := Date()
+    _dDtfim  := Date()
     _lEnd    := .F.
     _cHoraI  := ""
     _cHoraF  := ""
@@ -108,73 +104,73 @@ EndIf
 Private _aLog  := {}
 Private cMarca :=GetMark()
 Private aCampos:=ARRAY( ZLJ->(Fcount()) )
-Private _lIDESENV:=SuperGetMV("IT_AMBTEST",.F.,.T.)
+Private _lIDESENV:=!totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
 
-AADD(aSemSX3,{"WK_DATA"   ,"D",08,0})
-AADD(aSemSX3,{"WK_HORA"   ,"C",08,0})
-AADD(aSemSX3,{"ZLJ_FILIAL","C",02,0})
-AADD(aSemSX3,{"WKREC_ZLJ" ,"N",10,0})
-AADD(aSemSX3,{"WK_MARCA"  ,"C",02,0})
+aAdd(aSemSX3,{"WK_DATA"   ,"D",08,0})
+aAdd(aSemSX3,{"WK_HORA"   ,"C",08,0})
+aAdd(aSemSX3,{"ZLJ_FILIAL","C",02,0})
+aAdd(aSemSX3,{"WKREC_ZLJ" ,"N",10,0})
+aAdd(aSemSX3,{"WK_MARCA"  ,"C",02,0})
 
-AADD(aSemSX3,{"ZLJ_TIPPRO","C",1,0})
-AADD(aSemSX3,{"ZLJ_SETOR","C",6,0})
-AADD(aSemSX3,{"ZLJ_LINROT","C",6,0})
-AADD(aSemSX3,{"ZLJ_LINHSQ","C",6,0})
-AADD(aSemSX3,{"ZLJ_VIAGEM","C",10,0})
-AADD(aSemSX3,{"ZLJ_NUMERO","C",10,0})
-AADD(aSemSX3,{"ZLJ_NSETOR","C",10,0})
-AADD(aSemSX3,{"ZLJ_NLINRO","C",10,0})
-AADD(aSemSX3,{"ZLJ_CODPAT","C",6,0})
-AADD(aSemSX3,{"ZLJ_LOJPAT","C",4,0})
-AADD(aSemSX3,{"ZLJ_NOMPAT","C",15,0})
-AADD(aSemSX3,{"ZLJ_TIPVIS","C",1,0})
-AADD(aSemSX3,{"ZLJ_DTIVIA","D",8,0})
-AADD(aSemSX3,{"ZLJ_DTFVIA","D",8,0})
-AADD(aSemSX3,{"ZLJ_DTCRIA","D",8,0})
-AADD(aSemSX3,{"ZLJ_STATUS","C",1,0})
-AADD(aSemSX3,{"ZLJ_DESCAR","L",1,0})
-AADD(aSemSX3,{"ZLJ_VOLUME","N",9,2})
-AADD(aSemSX3,{"ZLJ_CODTRN","C",6,0})
-AADD(aSemSX3,{"ZLJ_LOJTRN","C",4,0})
-AADD(aSemSX3,{"ZLJ_DTRAN","C",100,0})
-AADD(aSemSX3,{"ZLJ_KMDVIA","N",18,0})
-AADD(aSemSX3,{"ZLJ_TEMPER","N",18,8})
-AADD(aSemSX3,{"ZLJ_PLACA","C",7,0})
-AADD(aSemSX3,{"ZLJ_VOLREA","N",18,0})
-AADD(aSemSX3,{"ZLJ_VOLCOL","N",18,0})
-AADD(aSemSX3,{"ZLJ_HRIVIA","C",8,0})
-AADD(aSemSX3,{"ZLJ_HRFVIA","C",8,0})
-AADD(aSemSX3,{"ZLJ_MOTIVO","C",250,0})
-AADD(aSemSX3,{"ZLJ_LITRAG","N",18,0})
-AADD(aSemSX3,{"ZLJ_DMOTOR","C",100,0})
-AADD(aSemSX3,{"ZLJ_PSIVIA","N",18,0})
-AADD(aSemSX3,{"ZLJ_PSFVIA","N",18,0})
-AADD(aSemSX3,{"ZLJ_VEICUL","C",6,0})
-AADD(aSemSX3,{"ZLJ_MOTORI","C",6,0})
-AADD(aSemSX3,{"ZLJ_AMOSTR","C",9,0})
-AADD(aSemSX3,{"ZLJ_ALIZAR","C",1,0})
-AADD(aSemSX3,{"ZLJ_BOCA","C",3,0})
-AADD(aSemSX3,{"ZLJ_REGZLX","N",9,0})
-AADD(aSemSX3,{"ZLJ_HRCRIA","C",8,0})
-AADD(aSemSX3,{"ZLJ_DTINI","D",8,0})
-AADD(aSemSX3,{"ZLJ_HRINI","C",8,0})
-AADD(aSemSX3,{"ZLJ_REGUA","N",9,2})
-AADD(aSemSX3,{"ZLJ_DTFIM","D",8,0})
-AADD(aSemSX3,{"ZLJ_HRFIM","C",8,0})
-AADD(aSemSX3,{"ZLJ_UEFET","C",50,0})
-AADD(aSemSX3,{"ZLJ_DIFER","N",18,0})
-AADD(aSemSX3,{"ZLJ_DEFET","D",8,0})
-AADD(aSemSX3,{"ZLJ_HREFET","C",20,0})
-AADD(aSemSX3,{"ZLJ_USRSMQ","C",6,0})
-AADD(aSemSX3,{"ZLJ_LOGINS","C",40,0})
-AADD(aSemSX3,{"ZLJ_DIFER2","N",9,0})
-AADD(aSemSX3,{"ZLJ_VOLCOO","N",18,0})
-AADD(aSemSX3,{"ZLJ_UINTSQ","C",50,0})
-AADD(aSemSX3,{"ZLJ_DINTSQ","D",8,0})
-AADD(aSemSX3,{"ZLJ_HINTSQ","C",8,0})
-AADD(aSemSX3,{"ZLJ_VFILHA","C",10,0})
-AADD(aSemSX3,{"ZLJ_VFILHS","C",250,0})
-AADD(aSemSX3,{"ZLJ_KM_SQO","C",20,0})
+aAdd(aSemSX3,{"ZLJ_TIPPRO","C",1,0})
+aAdd(aSemSX3,{"ZLJ_SETOR","C",6,0})
+aAdd(aSemSX3,{"ZLJ_LINROT","C",6,0})
+aAdd(aSemSX3,{"ZLJ_LINHSQ","C",6,0})
+aAdd(aSemSX3,{"ZLJ_VIAGEM","C",10,0})
+aAdd(aSemSX3,{"ZLJ_NUMERO","C",10,0})
+aAdd(aSemSX3,{"ZLJ_NSETOR","C",10,0})
+aAdd(aSemSX3,{"ZLJ_NLINRO","C",10,0})
+aAdd(aSemSX3,{"ZLJ_CODPAT","C",6,0})
+aAdd(aSemSX3,{"ZLJ_LOJPAT","C",4,0})
+aAdd(aSemSX3,{"ZLJ_NOMPAT","C",15,0})
+aAdd(aSemSX3,{"ZLJ_TIPVIS","C",1,0})
+aAdd(aSemSX3,{"ZLJ_DTIVIA","D",8,0})
+aAdd(aSemSX3,{"ZLJ_DTFVIA","D",8,0})
+aAdd(aSemSX3,{"ZLJ_DTCRIA","D",8,0})
+aAdd(aSemSX3,{"ZLJ_STATUS","C",1,0})
+aAdd(aSemSX3,{"ZLJ_DESCAR","L",1,0})
+aAdd(aSemSX3,{"ZLJ_VOLUME","N",9,2})
+aAdd(aSemSX3,{"ZLJ_CODTRN","C",6,0})
+aAdd(aSemSX3,{"ZLJ_LOJTRN","C",4,0})
+aAdd(aSemSX3,{"ZLJ_DTRAN","C",100,0})
+aAdd(aSemSX3,{"ZLJ_KMDVIA","N",18,0})
+aAdd(aSemSX3,{"ZLJ_TEMPER","N",18,8})
+aAdd(aSemSX3,{"ZLJ_PLACA","C",7,0})
+aAdd(aSemSX3,{"ZLJ_VOLREA","N",18,0})
+aAdd(aSemSX3,{"ZLJ_VOLCOL","N",18,0})
+aAdd(aSemSX3,{"ZLJ_HRIVIA","C",8,0})
+aAdd(aSemSX3,{"ZLJ_HRFVIA","C",8,0})
+aAdd(aSemSX3,{"ZLJ_MOTIVO","C",250,0})
+aAdd(aSemSX3,{"ZLJ_LITRAG","N",18,0})
+aAdd(aSemSX3,{"ZLJ_DMOTOR","C",100,0})
+aAdd(aSemSX3,{"ZLJ_PSIVIA","N",18,0})
+aAdd(aSemSX3,{"ZLJ_PSFVIA","N",18,0})
+aAdd(aSemSX3,{"ZLJ_VEICUL","C",6,0})
+aAdd(aSemSX3,{"ZLJ_MOTORI","C",6,0})
+aAdd(aSemSX3,{"ZLJ_AMOSTR","C",9,0})
+aAdd(aSemSX3,{"ZLJ_ALIZAR","C",1,0})
+aAdd(aSemSX3,{"ZLJ_BOCA","C",3,0})
+aAdd(aSemSX3,{"ZLJ_REGZLX","N",9,0})
+aAdd(aSemSX3,{"ZLJ_HRCRIA","C",8,0})
+aAdd(aSemSX3,{"ZLJ_DTINI","D",8,0})
+aAdd(aSemSX3,{"ZLJ_HRINI","C",8,0})
+aAdd(aSemSX3,{"ZLJ_REGUA","N",9,2})
+aAdd(aSemSX3,{"ZLJ_DTFIM","D",8,0})
+aAdd(aSemSX3,{"ZLJ_HRFIM","C",8,0})
+aAdd(aSemSX3,{"ZLJ_UEFET","C",50,0})
+aAdd(aSemSX3,{"ZLJ_DIFER","N",18,0})
+aAdd(aSemSX3,{"ZLJ_DEFET","D",8,0})
+aAdd(aSemSX3,{"ZLJ_HREFET","C",20,0})
+aAdd(aSemSX3,{"ZLJ_USRSMQ","C",6,0})
+aAdd(aSemSX3,{"ZLJ_LOGINS","C",40,0})
+aAdd(aSemSX3,{"ZLJ_DIFER2","N",9,0})
+aAdd(aSemSX3,{"ZLJ_VOLCOO","N",18,0})
+aAdd(aSemSX3,{"ZLJ_UINTSQ","C",50,0})
+aAdd(aSemSX3,{"ZLJ_DINTSQ","D",8,0})
+aAdd(aSemSX3,{"ZLJ_HINTSQ","C",8,0})
+aAdd(aSemSX3,{"ZLJ_VFILHA","C",10,0})
+aAdd(aSemSX3,{"ZLJ_VFILHS","C",250,0})
+aAdd(aSemSX3,{"ZLJ_KM_SQO","C",20,0})
 
 
 _otemp := FWTemporaryTable():New( cAliasWK, aSemSX3 )
@@ -183,19 +179,14 @@ _otemp:AddIndex( "02", {"ZLJ_FILIAL","ZLJ_VIAGEM","ZLJ_NUMERO","ZLJ_SETOR","ZLJ_
 
 _otemp:Create()
 
-
-//====================================================================================================
 // Leitura inicial dos parâmetros
-//====================================================================================================
 _cURL		:= SuperGetMV("LT_WSS_URL",.F.,"italac.smartquestion.com.br")//italac.smartquestion.com.br/ws/WsSmartQuestionV9?wsdl
 _cWS		:= SuperGetMV("LT_WSS_END",.F.,"italac.smartquestion.com.br/ws/WsSmartQuestionV14NoMtom?wsdl")//http://italac.smartquestion.com.br/ws/WsSmartQuestionV13?wsdl
 _lExecInt	:= SuperGetMV("LT_INT_SMQ",.F.,.T.)//http://italac.smartquestion.com.br/ws/WsSmartQuestionV14?wsdl
 _cMetodo	:= 'GET_ATENDIM'
 _lVersaoNew := "14" $ _cWS
 
-//====================================================================================================
 // Monta a estrutura de dados do arquivo
-//====================================================================================================
 _cXmlAux1 := U_GLTSQXML( 1 , _cMetodo )//AQUI ABRE AS TAGs DO XML
 _cXmlAux2 := '<carregarAtendimentos>true</carregarAtendimentos>'	+CRLF
 _cXmlAux2 += '<apenasConcluidos>false</apenasConcluidos>'			+CRLF
@@ -203,9 +194,7 @@ _cXmlAux2 += '<listaStatus>CONFERIDO</listaStatus>'					+CRLF
 _cXmlAux2 += '<listaCodigoTipoVisita>COLETA</listaCodigoTipoVisita>'+CRLF
 _cXmlAux2 += '<listaCodigoTipoVisita>REC</listaCodigoTipoVisita>'   +CRLF
 
-//====================================================================================================
 // Define filtros de data/hora de acordo com a parametrização do sistema
-//====================================================================================================
 _cHoraLeu:=""
 _nDias  := 0
 _aXmlDia:= {} 
@@ -213,37 +202,37 @@ _cDiasT := _dDtfim-_dDtini+1
 If !_lShedule
    _oProcess:SetRegua1(_cDiasT)
 EndIf
-_cDiasT := ALLTRIM(STR(_cDiasT,10))
+_cDiasT := AllTrim(Str(_cDiasT,10))
 
 aHoras:={}
-_nHoraIni:=VAL(TIME())//Pega ate os : (2 pontos)
+_nHoraIni:=Val(TIME())//Pega ate os : (2 pontos)
 _nHoraIni:=If(_nHoraIni>2,_nHoraIni-1,0)
-_nHorafim:=VAL(TIME())//Pega ate os : (2 pontos)
+_nHorafim:=Val(TIME())//Pega ate os : (2 pontos)
 If !Empty(_cHoraI) 
-   _nHoraIni:=VAL(_cHoraI)
+   _nHoraIni:=Val(_cHoraI)
 EndIf
 If !Empty(_cHoraF) 
-   _nHorafim:=VAL(_cHoraF)
+   _nHorafim:=Val(_cHoraF)
 EndIf
 
 For _nHr := _nHoraIni to _nHorafim
 
-    _cHr := STRZERO(_nHr,2)
+    _cHr := StrZero(_nHr,2)
 
     For _nMi := 0 to 5
 
-       _cMi := STRZERO(_nMi,1)
+       _cMi := StrZero(_nMi,1)
 
-       AADD(aHoras,{"T"+_cHr+":"+_cMi+"0:00","T"+_cHr+":"+_cMi+"1:00"})// EM 01 E 01 MINUTOS
-       AADD(aHoras,{"T"+_cHr+":"+_cMi+"1:00","T"+_cHr+":"+_cMi+"2:00"})// EM 01 E 01 MINUTOS
-       AADD(aHoras,{"T"+_cHr+":"+_cMi+"2:00","T"+_cHr+":"+_cMi+"3:00"})// EM 01 E 01 MINUTOS
-       AADD(aHoras,{"T"+_cHr+":"+_cMi+"3:00","T"+_cHr+":"+_cMi+"4:00"})// EM 01 E 01 MINUTOS
-       AADD(aHoras,{"T"+_cHr+":"+_cMi+"4:00","T"+_cHr+":"+_cMi+"5:00"})// EM 01 E 01 MINUTOS
-       AADD(aHoras,{"T"+_cHr+":"+_cMi+"5:00","T"+_cHr+":"+_cMi+"6:00"})// EM 01 E 01 MINUTOS
-       AADD(aHoras,{"T"+_cHr+":"+_cMi+"6:00","T"+_cHr+":"+_cMi+"7:00"})// EM 01 E 01 MINUTOS
-       AADD(aHoras,{"T"+_cHr+":"+_cMi+"7:00","T"+_cHr+":"+_cMi+"8:00"})// EM 01 E 01 MINUTOS
-       AADD(aHoras,{"T"+_cHr+":"+_cMi+"8:00","T"+_cHr+":"+_cMi+"9:00"})// EM 01 E 01 MINUTOS
-       AADD(aHoras,{"T"+_cHr+":"+_cMi+"9:00","T"+_cHr+":"+_cMi+"9:59"})// EM 01 E 01 MINUTOS
+       aAdd(aHoras,{"T"+_cHr+":"+_cMi+"0:00","T"+_cHr+":"+_cMi+"1:00"})// EM 01 E 01 MINUTOS
+       aAdd(aHoras,{"T"+_cHr+":"+_cMi+"1:00","T"+_cHr+":"+_cMi+"2:00"})// EM 01 E 01 MINUTOS
+       aAdd(aHoras,{"T"+_cHr+":"+_cMi+"2:00","T"+_cHr+":"+_cMi+"3:00"})// EM 01 E 01 MINUTOS
+       aAdd(aHoras,{"T"+_cHr+":"+_cMi+"3:00","T"+_cHr+":"+_cMi+"4:00"})// EM 01 E 01 MINUTOS
+       aAdd(aHoras,{"T"+_cHr+":"+_cMi+"4:00","T"+_cHr+":"+_cMi+"5:00"})// EM 01 E 01 MINUTOS
+       aAdd(aHoras,{"T"+_cHr+":"+_cMi+"5:00","T"+_cHr+":"+_cMi+"6:00"})// EM 01 E 01 MINUTOS
+       aAdd(aHoras,{"T"+_cHr+":"+_cMi+"6:00","T"+_cHr+":"+_cMi+"7:00"})// EM 01 E 01 MINUTOS
+       aAdd(aHoras,{"T"+_cHr+":"+_cMi+"7:00","T"+_cHr+":"+_cMi+"8:00"})// EM 01 E 01 MINUTOS
+       aAdd(aHoras,{"T"+_cHr+":"+_cMi+"8:00","T"+_cHr+":"+_cMi+"9:00"})// EM 01 E 01 MINUTOS
+       aAdd(aHoras,{"T"+_cHr+":"+_cMi+"9:00","T"+_cHr+":"+_cMi+"9:59"})// EM 01 E 01 MINUTOS
        
     Next   
 
@@ -251,19 +240,19 @@ Next
 _cViagIgoradas:=""
 //_bSetor := { || .T. }
 _cFilter:="Todos"
-U_ITConOut("1-Lendo de "+DTOC(_dDtini)+" ate "+DTOC(_dDtfim)+" das "+STR(_nHoraIni,2)+" ate "+STR(_nHorafim,2))
+U_ITConOut("1-Lendo de "+DToC(_dDtini)+" ate "+DToC(_dDtfim)+" das "+Str(_nHoraIni,2)+" ate "+Str(_nHorafim,2))
 
-DO While _dDtini <=  _dDtfim
+While _dDtini <=  _dDtfim
 
    If !_lShedule
       _nDias++
-      _oProcess:IncRegua1("1-SQ V"+If(_lVersaoNew,"14","9")+" Lendo dia: "+DTOC(_dDtini)+" - "+ALLTRIM(STR(_nDias,10))+" de "+_cDiasT+" dias..." )
-      _oProcess:SetRegua2(LEN(aHoras))
+      _oProcess:IncRegua1("1-SQ V"+If(_lVersaoNew,"14","9")+" Lendo dia: "+DToC(_dDtini)+" - "+AllTrim(Str(_nDias,10))+" de "+_cDiasT+" dias..." )
+      _oProcess:SetRegua2(Len(aHoras))
    EndIf
   
-   For nHr:= 1 TO LEN(aHoras)
+   For nHr:= 1 TO Len(aHoras)
        If !_lShedule
-          _cMenaux:=STRTRAN("Lendo Hora "+aHoras[nHr,1]+" de "+aHoras[nHr,2]+", Dados Lidos: "+AllTrim(STR(Len(_aXmlDia))),"T","" )
+          _cMenaux:=StrTran("Lendo Hora "+aHoras[nHr,1]+" de "+aHoras[nHr,2]+", Dados Lidos: "+AllTrim(Str(Len(_aXmlDia))),"T","" )
           _oProcess:IncRegua2(_cMenaux)
        EndIf
 
@@ -296,30 +285,29 @@ _nXml := 1
 _aXmlReboque := {}
 _aTemRecepcao:= {}
 _aTaNoMixAtual:={}
-IF !_lIDESENV
-   _cNomeLog:="\data\tmp\mglt002_"+DTOS(DATE())+"_"+STRTRAN(TIME(),":","_")+"_erro.xml"
+If !_lIDESENV
+   _cNomeLog:="\data\tmp\mglt002_"+DToS(DATE())+"_"+StrTran(TIME(),":","_")+"_erro.xml"
 Else
-   _cNomeLog:=ALLTRIM(GetTempPath())+"mglt002_"+DTOS(DATE())+"_"+STRTRAN(TIME(),":","_")+"_erro.xml"
-Endif
+   _cNomeLog:=AllTrim(GetTempPath())+"mglt002_"+DToS(DATE())+"_"+StrTran(TIME(),":","_")+"_erro.xml"
+EndIf
 If !_lShedule
     _oProcess:SetRegua1(Len(_aXmlDia))
 EndIf
-U_ITConOut("2-Lendo "+ALLTRIM(STR(LEN(_aXmlDia)))+" registros... ")
+U_ITConOut("2-Lendo "+AllTrim(Str(Len(_aXmlDia)))+" registros... ")
 
-For _nXml := 1 TO LEN(_aXmlDia)
+For _nXml := 1 TO Len(_aXmlDia)
 
     If _lEnd			//houve cancelamento do processo			
        MsgInfo("Processamento Cancelado pelo usuario com Sucesso.","MGLT00202")
        If(SELECT(cAliasWK) # 0,_otemp:delete(),)
-       // ------------------------------------------------------------------------------------------ //
+
        // Limpa o Objeto: _oXML Conforme orientado pelo Framework
-       // ------------------------------------------------------------------------------------------ //
        _oXML:=Nil
        DelClassIntf()
        Return .F.	
     EndIf	      	
 
-    _cDataLendo:=DTOC(_aXmlDia[_nXml,1])
+    _cDataLendo:=DToC(_aXmlDia[_nXml,1])
 
     If !_lShedule
        _oProcess:IncRegua1("2-Lendo Dia - Hora: "+_cDataLendo+" - "+_aXmlDia[_nXml,5] )
@@ -339,36 +327,35 @@ For _nXml := 1 TO LEN(_aXmlDia)
     // Antes de executar o comando: DesClassIntf, coloque o objeto como NIL                       //
     // ------------------------------------------------------------------------------------------ //
     _oXML:=Nil
-    If LEN(_aXmlReboque) = 0
+    If Len(_aXmlReboque) = 0
        DelClassIntf()
     EndIf   
-// ------------------------------------------------------------------------------------------ //
 
    _oXml := MGLT2XmlParser(_aXmlDia[_nXml,2] , "_" , @_cErro , @_cWarning , '1/3-Erro ao ler o XML do PERIODO: '+_aXmlDia[_nXml,3]+" ate "+_aXmlDia[_nXml,4] )
 
-   If !_lErroXmlParser .AND. (!Empty(_cErro) .OR. ValType(_oXml) = 'U')//Tratamento de caracter extendido
+   If !_lErroXmlParser .And. (!Empty(_cErro) .Or. ValType(_oXml) = 'U')//Tratamento de caracter extendido
 
       _aXmlDia[_nXml,2] := MGLT002C(_aXmlDia[_nXml,2])//Tira caracter extendido que dá erro de UTF
       _oXml := MGLT2XmlParser(_aXmlDia[_nXml,2] , "_" , @_cErro , @_cWarning , '2/3-Erro ao ler o XML do PERIODO: '+_aXmlDia[_nXml,3]+" ate "+_aXmlDia[_nXml,4])
 
    EndIf
 
-    If !_lErroXmlParser .AND. (!Empty(_cErro) .OR. ValType(_oXml) = 'U')//Tira a observaçõe pq elas são abertas para digitar qq coisa
+    If !_lErroXmlParser .And. (!Empty(_cErro) .Or. ValType(_oXml) = 'U')//Tira a observaçõe pq elas são abertas para digitar qq coisa
  
        _nAscI:=1
        nConta:=0
-       DO While _nAscI > 0
+       While _nAscI > 0
           
           _nAscI:=AT("<observacao>" , _aXmlDia[_nXml,2] ) 
           If _nAscI > 0
              _nAscF:=AT("</observacao>", _aXmlDia[_nXml,2] ) 
              If _nAscF > 0
-                _nDel:=(_nAscF-_nAscI)+LEN("</observacao>")//Tamanho do conteudo mais "<observacao></observacao>"
-                _aXmlDia[_nXml,2] := STUFF(_aXmlDia[_nXml,2],_nAscI, _nDel ,"" )
+                _nDel:=(_nAscF-_nAscI)+Len("</observacao>")//Tamanho do conteudo mais "<observacao></observacao>"
+                _aXmlDia[_nXml,2] := Stuff(_aXmlDia[_nXml,2],_nAscI, _nDel ,"" )
              EndIf
           EndIf
           nConta++
-          If nConta > 1000//Para previnir loop infinito
+          If nConta > 1000//Para previnir Loop infinito
              Exit
           EndIf
 
@@ -378,19 +365,19 @@ For _nXml := 1 TO LEN(_aXmlDia)
 
     EndIf   
 
-    If !Empty(_cErro) .OR. ValType(_oXml) = 'U'//Se mesmo com os tramentos acima não dá certo dá mensagem
+    If !Empty(_cErro) .Or. ValType(_oXml) = 'U'//Se mesmo com os tramentos acima não dá certo dá mensagem
 
         If ValType(_oXml) = 'U'
-          _cErro:=ALLTRIM(_cErro)+" ] [ Sem retorno (NIL)"
+          _cErro:=AllTrim(_cErro)+" ] [ Sem retorno (NIL)"
        EndIf
        
        _cPosAsc:=""       
        _cLetAsc:=""       
-       For _nAsc := 1 TO LEN(_aXmlDia[_nXml,2])
-           _cLetra:=ALLTRIM(SUBSTR(_aXmlDia[_nXml,2] ,_nAsc , 1))
-           If !Empty(_cLetra) .AND. ASC(_cLetra) < 34 .OR. ASC(_cLetra) > 125
+       For _nAsc := 1 TO Len(_aXmlDia[_nXml,2])
+           _cLetra:=AllTrim(SubStr(_aXmlDia[_nXml,2] ,_nAsc , 1))
+           If !Empty(_cLetra) .And. ASC(_cLetra) < 34 .Or. ASC(_cLetra) > 125
               If Empty(_cLetAsc)//Para pegar só a primeira posição
-                 _cPosAsc:=ALLTRIM(STR(_nAsc))
+                 _cPosAsc:=AllTrim(Str(_nAsc))
               EndIf
               _cLetAsc+=_cLetra
            EndIf
@@ -398,30 +385,30 @@ For _nXml := 1 TO LEN(_aXmlDia)
 
        MemoWrite(_cNomeLog,_aXmlDia[_nXml,2])
 
-       PRIVATE _cProcura:=_aXmlDia[_nXml,2]
+       Private _cProcura:=_aXmlDia[_nXml,2]
        _cConteudo:=""
        _nAscI:=1
        nConta:=0
-       DO While _nAscI > 0
+       While _nAscI > 0
           _nAscI:=AT("<numero>" , _cProcura ) 
           If _nAscI > 0
              _nAscF:=AT("</numero>", _cProcura ) 
              If _nAscF > 0
-                _nDel:=(_nAscF-_nAscI)+LEN("</numero>")//Tamanho do conteudo mais "<numero></numero>"
-                _cConteudo+=SUBSTR(_cProcura,(_nAscI+LEN("<numero>")),(_nDel-LEN("<numero></numero>")))+" / "
-                _cProcura := STUFF(_cProcura,_nAscI, _nDel ,"" )
+                _nDel:=(_nAscF-_nAscI)+Len("</numero>")//Tamanho do conteudo mais "<numero></numero>"
+                _cConteudo+=SubStr(_cProcura,(_nAscI+Len("<numero>")),(_nDel-Len("<numero></numero>")))+" / "
+                _cProcura := Stuff(_cProcura,_nAscI, _nDel ,"" )
              EndIf
           EndIf
           nConta++
-          If nConta > 1000//Para previnir loop infinito
+          If nConta > 1000//Para previnir Loop infinito
              Exit
           EndIf
        EndDo
-       _cConteudo:="Viagen(s): "+SUBSTR(_cConteudo,1,LEN(_cConteudo)-3)
+       _cConteudo:="Viagen(s): "+SubStr(_cConteudo,1,Len(_cConteudo)-3)
 
-       _cErro:='Erro ao ler o XML do PERIODO: '+_aXmlDia[_nXml,3]+" ate "+_aXmlDia[_nXml,4]+" - "+_cConteudo+" - Erro: [ "+ALLTRIM(_cErro)+" ]. "
+       _cErro:='Erro ao ler o XML do PERIODO: '+_aXmlDia[_nXml,3]+" ate "+_aXmlDia[_nXml,4]+" - "+_cConteudo+" - Erro: [ "+AllTrim(_cErro)+" ]. "
        _cSolucao:="POR FAVOR ENTRE EM CONTATO COM A  AREA DE TI COM O PRINT DESSA MESAGEM. "
-       _cSolucao+=" Procure a posição "+ALLTRIM(_cPosAsc)+" no arq. "+_cNomeLog+" gravado para ver os caracteres especiais: ("+_cLetAsc+")"
+       _cSolucao+=" Procure a posição "+AllTrim(_cPosAsc)+" no arq. "+_cNomeLog+" gravado para ver os caracteres especiais: ("+_cLetAsc+")"
        
        If !_lShedule
 		  
@@ -429,9 +416,8 @@ For _nXml := 1 TO LEN(_aXmlDia)
           
           If !MsgYesNo('Somente o Periodo: '+_aXmlDia[_nXml,3]+" até "+_aXmlDia[_nXml,4]+" não será processado. "+CRLF+"Deseja continuar processamento os outros periodos?","MGLT00204")
              If(SELECT(cAliasWK) # 0,_otemp:delete(),)
-       // ------------------------------------------------------------------------------------------ //
        // Limpa o Objeto: _oXML Conforme orientado pelo Framework
-       // ------------------------------------------------------------------------------------------ //
+
              _oXML:=Nil
              DelClassIntf()
              Return .F.	
@@ -482,7 +468,7 @@ For _nXml := 1 TO LEN(_aXmlDia)
         _cVIAGEM := Space(Len(ZLJ->ZLJ_VIAGEM))
         If ValType( XmlChildEX(_aXml[_nI] , "_NUMERO" ) ) = 'O'
            _cVIAGEM := StrZero( Val( _aXml[_nI]:_NUMERO:TEXT ) , Len(ZLJ->ZLJ_VIAGEM) )
-           _cVIAGEM := "S"+SUBSTR(_cVIAGEM,2)
+           _cVIAGEM := "S"+SubStr(_cVIAGEM,2)
         EndIf
 
         _cHoraLeu:=_aXmlDia[_nXml,5]
@@ -513,25 +499,23 @@ For _nXml := 1 TO LEN(_aXmlDia)
 			
 		EndIf
 
-        If !Empty(_cFiltroFilial) .AND. !(_cFilial $ _cFiltroFilial)
+        If !Empty(_cFiltroFilial) .And. !(_cFilial $ _cFiltroFilial)
 		   Loop//Na Viagem
 		EndIf
         
-		//====================================================================================================
-		// Verifica tabela temporária dos dados de recepções
-		//====================================================================================================
+   		// Verifica tabela temporária dos dados de recepções
 		    _aDadAtd:= {}
 		    _nKm	:= 0
           _cKmOri:=""
 			_nPesIni:= 0
 			_nPesFim:= 0
 			_nMedVaz:= 0
-			_dDtIni	:= StoD('')
-			_dDtFim	:= StoD('')
+			_dDtIni	:= SToD('')
+			_dDtFim	:= SToD('')
 			_cHrIni	:= ''
 			_cHrFim	:= ''
 			_lDescarte := .F.
-			_dDtEstoque:= StoD('')
+			_dDtEstoque:= SToD('')
 			_cHrEstoque:= ''
 			
 			If ValType( XmlChildEx( _aXml[_nI] , "_LISTAATENDIMENTO" ) ) == 'A' //listaAtendimento
@@ -548,24 +532,24 @@ For _nXml := 1 TO LEN(_aXmlDia)
 				
 ////////////////////////// FILTRO DOS ATENDIMENTOS ////////////////////////////////////////////////////////////////////////////// 
   		      _lAchouMoto:=.F.
-		      _cMotorista:=SPACE(Len(ZLJ->ZLJ_MOTORI))
+		      _cMotorista:=Space(Len(ZLJ->ZLJ_MOTORI))
 		      _cMotFilial:="  "
 				_cCodtransp:=""
 				_cLojtransp:=""
 		      If ValType( XmlChildEx( _aDadAtd[1]:_USUARIO , "_CODIGO") ) <> 'U'//Só tem um motorista para todos os atendimentos
 				
 		         _cMotorista:= AllTrim( _aDadAtd[1]:_USUARIO:_CODIGO:TEXT) 
-               _cMotFilial:= Substr(Alltrim(_cMotorista),LEN(alltrim(_cMotorista))-1,2) 
-		         _cMotorista:= Substr(Alltrim(_cMotorista),1,LEN(alltrim(_cMotorista))-2)
+               _cMotFilial:= SubStr(AllTrim(_cMotorista),Len(AllTrim(_cMotorista))-1,2) 
+		         _cMotorista:= SubStr(AllTrim(_cMotorista),1,Len(AllTrim(_cMotorista))-2)
 		         If ZL0->( DBSeek( _cFilial + _cMotorista ) )
 				      _cCodtransp:= ZL0->ZL0_FRETIS
 				      _cLojtransp:= ZL0->ZL0_FRETLJ
   		            _lAchouMoto:= .T.
-                  If !Empty(_cTransI+_cTraLoI) .AND. _cCodtransp+_cLojtransp < _cTransI+_cTraLoI 
-                     LOOP//Na Viagem
+                  If !Empty(_cTransI+_cTraLoI) .And. _cCodtransp+_cLojtransp < _cTransI+_cTraLoI 
+                     Loop//Na Viagem
 			         EndIf
-                  If !Empty(_cTransF+_cTraLoF) .AND. _cCodtransp+_cLojtransp > _cTransF+_cTraLoF
-                     LOOP//Na Viagem
+                  If !Empty(_cTransF+_cTraLoF) .And. _cCodtransp+_cLojtransp > _cTransF+_cTraLoF
+                     Loop//Na Viagem
 			         EndIf
 						
 		         EndIf
@@ -580,11 +564,11 @@ For _nXml := 1 TO LEN(_aXmlDia)
             _nTotLeite:=0
             _lLoopViagem:=.F.
 			   _lPodeMarcar:=.T.
-            _dDtMV_ULMES:= STOD( POSICIONE("SX6",1,_cFilial+"MV_ULMES","X6_CONTEUD") )//Atencao usa a variavel _cFilial por isso executa aqui
+            _dDtMV_ULMES:= SToD( Posicione("SX6",1,_cFilial+"MV_ULMES","X6_CONTEUD") )//Atencao usa a variavel _cFilial por isso executa aqui
             _cListaLinRotas:=""//acumula -> _cLINROT
 
 				If ValType( XmlChildEx( _aXml[_nI] , "_DATAHORAINICIODIA"	) ) <> 'U'
-					_dDtIni:= StoD( StrTran( SubStr( _aXml[_nI]:_DATAHORAINICIODIA:TEXT , 1 , 10 ) , '-' , '' ) )//data de coleta do ZLD: ZLJ_DTIVIA --> ZLD->ZLD_DTCOLE / ZLW->ZLW_DTCOLE
+					_dDtIni:= SToD( StrTran( SubStr( _aXml[_nI]:_DATAHORAINICIODIA:TEXT , 1 , 10 ) , '-' , '' ) )//data de coleta do ZLD: ZLJ_DTIVIA --> ZLD->ZLD_DTCOLE / ZLW->ZLW_DTCOLE
 				EndIf
 
 				For _nX := 1 To Len( _aDadAtd )//*********************************** VALIDACAO E FILTRO DOS ATENDIMENTOS
@@ -602,13 +586,13 @@ For _nXml := 1 TO LEN(_aXmlDia)
 					   _cLINROT:=_cRotaMae
 					Else
                   // SO IGNORA QUANDO NÃO É REBOQUE 
-                  lVolumeZeroLOOP:=.T.
+                  lVolumeZeroLoop:=.T.
                   MGLT2ListaResposta(.F.,_aDadAtd,_nX)
-                  If lVolumeZeroLOOP//Volume do produtor zerado ignora linha
-                     LOOP
+                  If lVolumeZeroLoop//Volume do produtor zerado ignora linha
+                     Loop
                   EndIf
 
-					   If Empty(_cCODPAT) .OR. !SA2->(DBSEEK(Xfilial("SA2")+_cCODPAT+_cLOJPAT)) .OR. (SA2->A2_MSBLQL == '1' .Or. SA2->A2_L_ATIVO == 'N')
+					   If Empty(_cCODPAT) .Or. !SA2->(DBSeek(xFilial("SA2")+_cCODPAT+_cLOJPAT)) .Or. (SA2->A2_MSBLQL == '1' .Or. SA2->A2_L_ATIVO == 'N')
 					      _cRecusa += "[1 ou mais Produtores irregular] "
 			            _lPodeMarcar:=.F.
    					   Exit					
@@ -616,26 +600,26 @@ For _nXml := 1 TO LEN(_aXmlDia)
                   _cTipoLeite:=SA2->A2_L_TIPPR
 					   _cLINROT   :=SA2->A2_L_LI_RO// LINHA / ROTA
 					EndIf
-					_cSetor	:=POSICIONE("ZL3",1,_cFilial + _cLINROT ,"ZL3_SETOR")
-					_cSetorKM:=POSICIONE("ZL3",1,_cFilial + _cRotaMae,"ZL3_SETOR")					
+					_cSetor	:=Posicione("ZL3",1,_cFilial + _cLINROT ,"ZL3_SETOR")
+					_cSetorKM:=Posicione("ZL3",1,_cFilial + _cRotaMae,"ZL3_SETOR")					
 
 					If !Empty(_cSetor)//Tem que trazer os setores em branco senao ele traz só os setores preenchidos de uma viagem e aceita 
-					   If !Empty(_cSetorI) .AND. _cSetor < _cSetorI  
+					   If !Empty(_cSetorI) .And. _cSetor < _cSetorI  
 			              _lLoopViagem:=.T.
 					      Exit
 					   EndIf
-					   If !Empty(_cSetorF) .AND. _cSetor > _cSetorF
+					   If !Empty(_cSetorF) .And. _cSetor > _cSetorF
 			              _lLoopViagem:=.T.
 					      Exit
 					   EndIf
 					EndIf
 
 					If !Empty(_cLINROT)//Tem que trazer as linhas em branco senao ele traz só as linhas preenchidas de uma viagem e aceita 
-					   If !Empty(_cLinhaI) .AND. _cLINROT < _cLinhaI 
+					   If !Empty(_cLinhaI) .And. _cLINROT < _cLinhaI 
 			            _lLoopViagem:=.T.
 					      Exit
 					   EndIf
-					   If !Empty(_cLinhaF) .AND. _cLINROT > _cLinhaF
+					   If !Empty(_cLinhaF) .And. _cLINROT > _cLinhaF
 			            _lLoopViagem:=.T.
 					      Exit
 					   EndIf
@@ -643,29 +627,29 @@ For _nXml := 1 TO LEN(_aXmlDia)
 
                //Data de entrada no estoque: ZLJ_DTCRIA --> D3_EMISSAO / ZLW_DTLANC
                If Empty(_dDtEstoque)//Pega a primeira data de estoque e replica para todas as linhas
-                  _dDtEstoque:= STOD( StrTran( SubStr( _aDadAtd[_nX]:_DATACRIACAO:TEXT , 1 , 10 ) , '-' , '' ) )
-                  _cHrEstoque:= SUBSTR( _aDadAtd[_nX]:_DATACRIACAO:TEXT , 12 , 8 )
+                  _dDtEstoque:= SToD( StrTran( SubStr( _aDadAtd[_nX]:_DATACRIACAO:TEXT , 1 , 10 ) , '-' , '' ) )
+                  _cHrEstoque:= SubStr( _aDadAtd[_nX]:_DATACRIACAO:TEXT , 12 , 8 )
                EndIf 
 				   
-               IF LEN(ALLTRIM(_aDadAtd[_nX]:_NUMEROATENDIMENTO:TEXT)) > LEN(ZLJ->ZLJ_NUMERO)
+               If Len(AllTrim(_aDadAtd[_nX]:_NUMEROATENDIMENTO:TEXT)) > Len(ZLJ->ZLJ_NUMERO)
 				      _cRecusa += "[Codigo de atendimento invalido: "+_aDadAtd[_nX]:_NUMEROATENDIMENTO:TEXT+"] "
                   _lPodeMarcar:=.F.
 				      Exit
-               ENDIF
+               EndIf
 
-				   If _cTipoLeite <> "C" .AND. _dDtEstoque <= _dDtMV_ULMES //Se a data da coleta For antes da data do fechemento do estoque recusa
-				      _cRecusa += "[Data de entrada de estoque menor/igual que a data do fechamento do estoque: "+DTOC(_dDtMV_ULMES)+"] "
+				   If _cTipoLeite <> "C" .And. _dDtEstoque <= _dDtMV_ULMES //Se a data da coleta For antes da data do fechemento do estoque recusa
+				      _cRecusa += "[Data de entrada de estoque menor/igual que a data do fechamento do estoque: "+DToC(_dDtMV_ULMES)+"] "
 			         _lPodeMarcar:=.F.
 				      Exit
                EndIf 
 
                //Data de coleta do ZLD: ZLJ_DTIVIA --> ZLD->ZLD_DTCOLE / ZLW->ZLW_DTCOLE
-					If Empty(_dDtIni) .OR. _dDtIni > DATE()
-					   _cRecusa += "[Data da coleta maior que a de hoje: "+DTOC(_dDtIni)+"] "
+					If Empty(_dDtIni) .Or. _dDtIni > Date()
+					   _cRecusa += "[Data da coleta maior que a de hoje: "+DToC(_dDtIni)+"] "
 			         _lPodeMarcar:=.F.
 					   Exit
-  					ElseIf _cTipoLeite <> "C" .AND. .NOT. MGLT002I( _dDtIni )
-					   _cRecusa += "[Data da coleta fora de um periodo de MIX aberto: "+DTOC(_dDtIni)+"] "
+  					ElseIf _cTipoLeite <> "C" .And. .NOT. MGLT002I( _dDtIni )
+					   _cRecusa += "[Data da coleta fora de um periodo de MIX aberto: "+DToC(_dDtIni)+"] "
 			         _lPodeMarcar:=.F.
  					   Exit					
                EndIf 
@@ -680,7 +664,7 @@ For _nXml := 1 TO LEN(_aXmlDia)
 					   _cRecusa += "[1 ou mais atendimentos sem Setor] "
 			         _lPodeMarcar:=.F.
 					   Exit
-					ElseIf _cTipoLeite <> "C" .AND. MGLT002R( _dDtIni , _cSETOR )
+					ElseIf _cTipoLeite <> "C" .And. MGLT002R( _dDtIni , _cSETOR )
 					   _cRecusa += "[1 ou mais Setores irregular] "
 			         _lPodeMarcar:=.F.
  					   Exit					
@@ -706,14 +690,14 @@ For _nXml := 1 TO LEN(_aXmlDia)
                //NOVA VALIDAÇÕES DOS ATENDIMENTOS INSIRA AQUI
                //******************************************************
 
-               IF !_cLINROT $ _cListaLinRotas
+               If !_cLINROT $ _cListaLinRotas
                   _cListaLinRotas+=_cLINROT+"/"//acumula -> _cLINROT
-               ENDIF
+               EndIf
 
 				Next _nX//*********************************** For _nX := 1 To Len( _aDadAtd ) // VALIDACAO E FILTRO DOS ATENDIMENTOS
 				
 				If _lLoopViagem
-				   LOOP //Na Viagem
+				   Loop //Na Viagem
 				EndIf
 ///////////\\\\\\\\\\\\\\\ VALIDACAO E FILTRO DOS ATENDIMENTOS /////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
                 
@@ -757,7 +741,7 @@ For _nXml := 1 TO LEN(_aXmlDia)
 						
 							If _aXml[_nI]:_CUSTOMFIELD[_nX]:_CODIGO:TEXT == "DESCARTE"
 									
-								_lDescarte :=  IIF(_aXml[_nI]:_CUSTOMFIELD[_nX]:_VALORBOLEANO:TEXT == 'false', .F., .T.) 
+								_lDescarte :=  IIf(_aXml[_nI]:_CUSTOMFIELD[_nX]:_VALORBOLEANO:TEXT == 'false', .F., .T.) 
 								
 							EndIf
 							
@@ -766,10 +750,10 @@ For _nXml := 1 TO LEN(_aXmlDia)
 						If ValType( XmlChildEx( _aXml[_nI]:_CUSTOMFIELD[_nX] , "_CODIGO" ) ) <> 'U'  
 						
 							If _aXml[_nI]:_CUSTOMFIELD[_nX]:_CODIGO:TEXT == "CODIGO_MATRIZ"
-								IF Val(_aXml[_nI]:_CUSTOMFIELD[_nX]:_VALORTEXTO:TEXT  ) <> 0
+								If Val(_aXml[_nI]:_CUSTOMFIELD[_nX]:_VALORTEXTO:TEXT  ) <> 0
 						       _cViagemMae := StrZero( Val(_aXml[_nI]:_CUSTOMFIELD[_nX]:_VALORTEXTO:TEXT  ), Len(ZLJ->ZLJ_VIAGEM) )
-                         _cViagemMae := "S"+SUBSTR(_cViagemMae,2)
-								ENDIF
+                         _cViagemMae := "S"+SubStr(_cViagemMae,2)
+								EndIf
 							EndIf
 							
 						EndIf			
@@ -782,10 +766,10 @@ For _nXml := 1 TO LEN(_aXmlDia)
 					If ValType( XmlChildEx( _aXml[_nI]:_CUSTOMFIELD , "_CODIGO" ) ) <> 'U'  
 						
 						If _aXml[_nI]:_CUSTOMFIELD:_CODIGO:TEXT == "CODIGO_MATRIZ"
-							IF Val(_aXml[_nI]:_CUSTOMFIELD:_VALORTEXTO:TEXT ) <> 0
+							If Val(_aXml[_nI]:_CUSTOMFIELD:_VALORTEXTO:TEXT ) <> 0
 						       _cViagemMae := StrZero( Val(_aXml[_nI]:_CUSTOMFIELD:_VALORTEXTO:TEXT ), Len(ZLJ->ZLJ_VIAGEM) )
-                         _cViagemMae := "S"+SUBSTR(_cViagemMae,2)
-							ENDIF	
+                         _cViagemMae := "S"+SubStr(_cViagemMae,2)
+							EndIf	
 						EndIf
 							
 					EndIf			
@@ -797,12 +781,12 @@ For _nXml := 1 TO LEN(_aXmlDia)
 				EndIf
 				
 				If ValType( XmlChildEx( _aXml[_nI] , "_DATAHORAINICIODIA"	) ) <> 'U'
-					_dDtIni := StoD( StrTran( SubStr( _aXml[_nI]:_DATAHORAINICIODIA:TEXT , 1 , 10 ) , '-' , '' ) )
+					_dDtIni := SToD( StrTran( SubStr( _aXml[_nI]:_DATAHORAINICIODIA:TEXT , 1 , 10 ) , '-' , '' ) )
 					_cHrIni := SubStr( _aXml[_nI]:_DATAHORAINICIODIA:TEXT , 12 , 08 )
 				EndIf
 				
 				If ValType( XmlChildEx( _aXml[_nI] , "_DATAHORAFIMDIA"		) ) <> 'U'
-					_dDtFim := StoD( StrTran( SubStr( _aXml[_nI]:_DATAHORAFIMDIA:TEXT , 1 , 10 ) , '-' , '' ) )
+					_dDtFim := SToD( StrTran( SubStr( _aXml[_nI]:_DATAHORAFIMDIA:TEXT , 1 , 10 ) , '-' , '' ) )
 					_cHrFim := SubStr( _aXml[_nI]:_DATAHORAFIMDIA:TEXT , 12 , 08 )
 				EndIf
 				
@@ -820,11 +804,11 @@ For _nXml := 1 TO LEN(_aXmlDia)
 					If Upper( AllTrim( _aDadAtd[_nX]:_TIPOVISITA:_CODIGO:TEXT ) ) == "REC"
 					
 			           If ValType( XmlChildEx( _aDadAtd[_nX]:_LISTARESPOSTA , "_LISTACAMPORESPOSTA" ) ) == 'A'
-                        For _nF := 1 TO LEN(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA)
+                        For _nF := 1 TO Len(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA)
 							      If Upper( AllTrim( _aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nF]:_CAMPOFORMULARIO:_CODIGO:TEXT ) ) == 'REC1'
                               If ValType( XmlChildEx( _aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nF] , "_VALORRESPOSTATEXTO" ) ) # 'U'
                                  _cVFilha := StrZero( Val( _aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nF]:_VALORRESPOSTATEXTO:TEXT ) , Len(ZLJ->ZLJ_VIAGEM) )
-                                 _cVFilha := "S"+SUBSTR(_cVFilha,2)							  
+                                 _cVFilha := "S"+SubStr(_cVFilha,2)							  
                                  _cViaFilhas+=_cVFilha+"-"
                               EndIf
                            EndIf
@@ -833,7 +817,7 @@ For _nXml := 1 TO LEN(_aXmlDia)
 						      If Upper( AllTrim( _aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA:_CAMPOFORMULARIO:_CODIGO:TEXT ) ) == 'REC1'
                            If ValType( XmlChildEx( _aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA , "_VALORRESPOSTATEXTO" ) ) # 'U'
                               _cVFilha := StrZero( Val( _aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA:_VALORRESPOSTATEXTO:TEXT ) , Len(ZLJ->ZLJ_VIAGEM) )
-                              _cVFilha := "S"+SUBSTR(_cVFilha,2)
+                              _cVFilha := "S"+SubStr(_cVFilha,2)
                               _cViaFilhas+=_cVFilha+"-"
                             EndIf
                         EndIf
@@ -843,22 +827,22 @@ For _nXml := 1 TO LEN(_aXmlDia)
 
             Next //Len( _aDadAtd )//*********************** PRE-PROCESSAMWTO PARA JULIETAS
 
-            _cViaFilhas:=LEFT(_cViaFilhas, LEN(_cViaFilhas)-1 )//Se tiver Filhas indica que é a Viagem Mãe
+            _cViaFilhas:=LEFT(_cViaFilhas, Len(_cViaFilhas)-1 )//Se tiver Filhas indica que é a Viagem Mãe
 
 /////////////////////\/\/\/\/\/ VALIDACAO DA VIAGEM \/\/\/\/\/\/\/\/////////////////////////////////////////////////////////////////////// 
 
-            If Empty(_cViaFilhas) .AND. _lPodeMarcar .AND. _nTotLeite = 0//Só verifica o leite = zero se deu tudo OK na VALIDACAO DOS ATENDIMENTOS pq só assim leu todos os atendimentos
+            If Empty(_cViaFilhas) .And. _lPodeMarcar .And. _nTotLeite = 0//Só verifica o leite = zero se deu tudo OK na VALIDACAO DOS ATENDIMENTOS pq só assim leu todos os atendimentos
 				   _cRecusa += "[Volume do leite dos atendimentos zerado] "
 		         _lPodeMarcar:=.F.
             EndIf
 
-				If Empty(_cViagemMae) .AND. _nPesIni < _nPesFim//Quando é Julieta vale os valores da Mãe //Peso Cheio For menos que peso vazio pois devem ter didigtado ao contrario
-				   _cRecusa += "[Volume Negativo: P.Cheio: "+ALLTRIM(TRANSF(_nPesIni,"@E 999,999,999"))+" - P.Vazio: "+ALLTRIM(TRANSF(_nPesFim,"@E 999,999,999"))+"] "
+				If Empty(_cViagemMae) .And. _nPesIni < _nPesFim//Quando é Julieta vale os valores da Mãe //Peso Cheio For menos que peso vazio pois devem ter didigtado ao contrario
+				   _cRecusa += "[Volume Negativo: P.Cheio: "+AllTrim(TRANSF(_nPesIni,"@E 999,999,999"))+" - P.Vazio: "+AllTrim(TRANSF(_nPesFim,"@E 999,999,999"))+"] "
 		         _lPodeMarcar:=.F.
-            ElseIf Empty(_cViagemMae) .AND. (_nPesIni -_nPesFim) = 0 .AND. _nMedVaz = 0 //Quando é Julieta vale os valores da Mãe //Se esse valores vierem zerados não tem como dar entrada no estoque                                                                                            
+            ElseIf Empty(_cViagemMae) .And. (_nPesIni -_nPesFim) = 0 .And. _nMedVaz = 0 //Quando é Julieta vale os valores da Mãe //Se esse valores vierem zerados não tem como dar entrada no estoque                                                                                            
 				   _cRecusa += "[Peso Cheio - Peso Vazio e Medidor de Vazão zerados] "
 		         _lPodeMarcar:=.F.
-            ElseIf Empty(_cViagemMae) .AND. (_nPesIni -_nPesFim) # 0 .AND. _nMedVaz # 0 //Quando é Julieta vale os valores da Mãe //Se esse valores vierem zerados não tem como dar entrada no estoque                                                                                            
+            ElseIf Empty(_cViagemMae) .And. (_nPesIni -_nPesFim) # 0 .And. _nMedVaz # 0 //Quando é Julieta vale os valores da Mãe //Se esse valores vierem zerados não tem como dar entrada no estoque                                                                                            
 				   _cRecusa += "[Peso Cheio - Peso Vazio e Medidor de Vazão: todos preenchidos]"
 		          _lPodeMarcar:=.F.
             EndIf
@@ -866,7 +850,7 @@ For _nXml := 1 TO LEN(_aXmlDia)
 				If !_lAchouMoto 
 				   _cRecusa += '[Codigo "'+_cFilial+' '+_cMotorista+' '+_cMotFilial+'" não existe no cadastro de motoristas (ZL0)] '
 		         _lPodeMarcar:=.F.
-            ELSEIf !ZL0->( DBSeek( _cFilial + _cMotorista ) ) .OR. ZL0->ZL0_ATIVO == 'N' 
+            ElseIf !ZL0->( DBSeek( _cFilial + _cMotorista ) ) .Or. ZL0->ZL0_ATIVO == 'N' 
 				    _cRecusa += "[Motorista : "+_cMotorista +' '+ _cFilial+" nao cadastrado ou inativo (Ativo = "+ZL0->ZL0_ATIVO+") (ZL0)] "
 			       _lPodeMarcar:=.F.
 				ElseIf !(_cMotFilial == _cFilial)
@@ -874,14 +858,14 @@ For _nXml := 1 TO LEN(_aXmlDia)
 		         _lPodeMarcar:=.F.
 				EndIf			
 
-				If Empty(_cCodtransp) .OR. !SA2->(DBSEEK(Xfilial("SA2")+_cCodtransp+_cLojtransp)) .OR. (SA2->A2_MSBLQL == '1' .Or. SA2->A2_L_ATIVO == 'N')
+				If Empty(_cCodtransp) .Or. !SA2->(DBSeek(xFilial("SA2")+_cCodtransp+_cLojtransp)) .Or. (SA2->A2_MSBLQL == '1' .Or. SA2->A2_L_ATIVO == 'N')
 				   _cRecusa += "[Transportador: "+_cCodtransp +' '+ _cLojtransp+" nao cadastrado, bloqueado ("+SA2->A2_MSBLQL+") ou inativo (Ativo = "+SA2->A2_L_ATIVO+") (SA2)] "
 			      _lPodeMarcar:=.F.
             EndIf
 
             //Verifica se placa está no cadastro de motoristas 
             _cPlacaS   :=""
-            _cPlacaC   :=SPACE(Len(ZLJ->ZLJ_PLACA))
+            _cPlacaC   :=Space(Len(ZLJ->ZLJ_PLACA))
   				If ValType( XmlChildEx( _aXml[_nI] , "_VEICULOPRIMARIO"	) ) <> 'U'
         		   If ValType( XmlChildEx( _aXml[_nI]:_VEICULOPRIMARIO , "_PLACA" ) ) <> 'U'
 		            _cPlacaS:= LEFT(StrTran( AllTrim( _aXml[_nI]:_VEICULOPRIMARIO:_PLACA:TEXT ) , '-' , '' ),7)//Peguei o 7 primeiro pq estava vindo com caracter especial no final
@@ -889,8 +873,8 @@ For _nXml := 1 TO LEN(_aXmlDia)
         	      EndIf
         	   EndIf
 
-            _cPlacaRS   :=SPACE(Len(ZL1->ZL1_PLCREB))//PLACA REBOQUE
-            _cPlacaRC   :=SPACE(Len(ZL1->ZL1_PLCREB))//PLACA REBOQUE
+            _cPlacaRS   :=Space(Len(ZL1->ZL1_PLCREB))//PLACA REBOQUE
+            _cPlacaRC   :=Space(Len(ZL1->ZL1_PLCREB))//PLACA REBOQUE
   				If ValType( XmlChildEx( _aXml[_nI] , "_VEICULOREBOQUE"	) ) <> 'U'
         		   If ValType( XmlChildEx( _aXml[_nI]:_VEICULOREBOQUE , "_PLACA" ) ) <> 'U'
 		            _cPlacaRS:= LEFT(StrTran( AllTrim( _aXml[_nI]:_VEICULOREBOQUE:_PLACA:TEXT ) , '-' , '' ),7)//Peguei o 7 primeiro pq estava vindo com caracter especial no final
@@ -901,25 +885,25 @@ For _nXml := 1 TO LEN(_aXmlDia)
              _cVeiculo:=""
   		        _lAchouPlaca:=.F.
   		        ZL1->( DBSetOrder(2))
-				If _lAchouMoto .AND. ZL1->( DBSeek( _cFilial + _cPlacaS ) )
-			       DO While ZL1->(!EOF()) .AND. _cFilial + _cPlacaS == ZL1->ZL1_FILIAL + ZL1->ZL1_PLACA
-				      If ZL1->ZL1_MOTORI == _cMotorista .AND. _cPlacaRS == ZL1->ZL1_PLCREB  
+				If _lAchouMoto .And. ZL1->( DBSeek( _cFilial + _cPlacaS ) )
+			       While ZL1->(!Eof()) .And. _cFilial + _cPlacaS == ZL1->ZL1_FILIAL + ZL1->ZL1_PLACA
+				      If ZL1->ZL1_MOTORI == _cMotorista .And. _cPlacaRS == ZL1->ZL1_PLCREB  
                      _cVeiculo   :=ZL1->ZL1_COD
 				         _lAchouPlaca:=.T.
 				         Exit
 				      EndIf
-				      ZL1->(DBSKIP())
+				      ZL1->(DBSkip())
 				   EndDo
 				EndIf   
 				
 				If !_lAchouPlaca   
 				   _cRecusa += '[Placas "' +_cFilial+' '+ _cPlacaC + " / "+_cPlacaRS + '" + Motorista "'+_cMotorista+' '+_cMotFilial+'" não encontrado (ZL1) ] '
 		         _lPodeMarcar:=.F.				
-            ELSE
-               If !Empty(_cVeiculo)  .AND. ZL1->ZL1_MSBLQL == '1' 
+            Else
+               If !Empty(_cVeiculo)  .And. ZL1->ZL1_MSBLQL == '1' 
 				      _cRecusa += '[Placas "' +_cFilial+' '+ _cPlacaC + " / "+_cPlacaRS + '" + Motorista "'+_cMotorista+' '+_cMotFilial+'"  bloqueado ('+ZL1->ZL1_MSBLQL+") (ZL1) ] "
 			         _lPodeMarcar:=.F.
-               ENDIF
+               EndIf
 				EndIf			
 
 				If Empty(_dDtFim) 
@@ -930,9 +914,9 @@ For _nXml := 1 TO LEN(_aXmlDia)
 				      _cAviso += '[Viagem sem Data Final de Fechamento] '
 		         EndIf
 				EndIf
-            IF !_cRotaMae $ _cListaLinRotas
+            If !_cRotaMae $ _cListaLinRotas
 		          _cAviso += '[Linha Rota do SQ ('+_cRotaMae+') não esta em nenhum atendimento dessa viagem ('+_cListaLinRotas+')] '
-            ENDIF
+            EndIf
             //******************************************************
             //NOVA VALIDAÇÕES / AVISOS DA VIAGEM INSERIRA AQUI
             //******************************************************
@@ -940,40 +924,40 @@ For _nXml := 1 TO LEN(_aXmlDia)
             _lViagemAceita:=.F.
 		      _cFilhaMae:=""
   		      ZLJ->( DBSetOrder(6) )//ZLJ_FILIAL+ZLJ_VIAGEM+ZLJ_VFILHA
-  		      _cFilhaMae:=If(!Empty(_cViaFilhas),"Julieta",SPACE(LEN(ZLJ->ZLJ_VFILHA)))
+  		      _cFilhaMae:=If(!Empty(_cViaFilhas),"Julieta",Space(Len(ZLJ->ZLJ_VFILHA)))
   		       
   		      _lconcorr := .F.
   		      _ctread := ""
   		       
   		      ZLK->(DBSetOrder(1))//Vamos controlar por filial agora 
-  		      If ZLK->(Dbseek(_cFilial ))//+ If(!Empty(_cViagemMae), _cViagemMae+_cVIAGEM , _cVIAGEM+_cFilhaMae )
+  		      If ZLK->(DBSeek(_cFilial ))//+ If(!Empty(_cViagemMae), _cViagemMae+_cVIAGEM , _cVIAGEM+_cFilhaMae )
   		        
   		        	If !ZLK->(MsRLock(ZLK->(RECNO())))
   		        	
   		        		_lconcorr := .T.
   		        		_ctread := ZLK->ZLK_THREAD
-  		        		_cuser  := ALLTRIM(ZLK->ZLK_USUSAR)
+  		        		_cuser  := AllTrim(ZLK->ZLK_USUSAR)
   		        		
   		        	Else
   		        	
-  		        		ZLK->(Reclock("ZLK",.F.))
-       	         ZLK->ZLK_VIAGEM := _cFilial+"-"+DTOC(DATE())+"-"+TIME()// + If(!Empty(_cViagemMae), _cViagemMae+_cVIAGEM , _cVIAGEM+SPACE(LEN(ZLJ->ZLJ_VFILHA))) 
-  		        		ZLK->ZLK_THREAD := strzero(ThreadID(),6)
+  		        		ZLK->(RecLock("ZLK",.F.))
+       	         ZLK->ZLK_VIAGEM := _cFilial+"-"+DToC(DATE())+"-"+TIME()// + If(!Empty(_cViagemMae), _cViagemMae+_cVIAGEM , _cVIAGEM+Space(Len(ZLJ->ZLJ_VFILHA))) 
+  		        		ZLK->ZLK_THREAD := StrZero(ThreadID(),6)
   		        		ZLK->ZLK_USUSAR := _cZLJ_UINTSQ
-  		        		ZLK->(Msunlock())
-  		        		ZLK->(Reclock("ZLK",.F.))
+  		        		ZLK->(MSUnLock())
+  		        		ZLK->(RecLock("ZLK",.F.))
   		        		
   		        	EndIf
   		        	
   		      Else
   		        
-  		        	 ZLK->(Reclock("ZLK",.T.))
+  		        	 ZLK->(RecLock("ZLK",.T.))
                 ZLK->ZLK_FILIAL := _cFilial    
-  		        	 ZLK->ZLK_VIAGEM := _cFilial+"-"+DTOC(DATE())+"-"+TIME()//+ If(!Empty(_cViagemMae), _cViagemMae+_cVIAGEM , _cVIAGEM+_cFilhaMae )
-  		        	 ZLK->ZLK_THREAD := strzero(ThreadID(),6)
+  		        	 ZLK->ZLK_VIAGEM := _cFilial+"-"+DToC(DATE())+"-"+TIME()//+ If(!Empty(_cViagemMae), _cViagemMae+_cVIAGEM , _cVIAGEM+_cFilhaMae )
+  		        	 ZLK->ZLK_THREAD := StrZero(ThreadID(),6)
   		        	 ZLK->ZLK_USUSAR := _cZLJ_UINTSQ
-  		        	 ZLK->(Msunlock())
-  		        	 ZLK->(Reclock("ZLK",.F.))
+  		        	 ZLK->(MSUnLock())
+  		        	 ZLK->(RecLock("ZLK",.F.))
   		        	
   		      EndIf
   		        
@@ -989,17 +973,17 @@ For _nXml := 1 TO LEN(_aXmlDia)
    
 				      If _nKm = ZLJ->ZLJ_KMDVIA
 			             _lPodeMarcar:=.F.
-                      _cAviso += "Viagem Integrada Anteriormente: [KM = Protheus: "+ALLTRIM(TRANSF(ZLJ->ZLJ_KMDVIA,"@E 999,999,999"))+"] "
+                      _cAviso += "Viagem Integrada Anteriormente: [KM = Protheus: "+AllTrim(TRANSF(ZLJ->ZLJ_KMDVIA,"@E 999,999,999"))+"] "
 			         ElseIf !ZLJ->ZLJ_STATUS $ "R,E"//Codigo de segurança para não integrar nada das recusadas e efetivadas
 		                _lPodeMarcar:=.T.//Se PENDENTE pode aceitar a viagem já integrada
 		                _lViagemAceita:=.T.//Variavel para as validações dos atendimentos não barrar a viagem
-                      _cAviso += "Viagem Integrada Anteriormente: [KM # Protheus: "+ALLTRIM(TRANSF(ZLJ->ZLJ_KMDVIA,"@E 999,999,999"))+"] "			       
+                      _cAviso += "Viagem Integrada Anteriormente: [KM # Protheus: "+AllTrim(TRANSF(ZLJ->ZLJ_KMDVIA,"@E 999,999,999"))+"] "			       
                   EndIf
                   If ZLJ->ZLJ_STATUS == "R"
 			            _lPodeMarcar:=.F.
 		               _lViagemAceita:=.F.
                      _cAviso += "[Viagem Recusada no Protheus]
-                  ELSEIf ZLJ->ZLJ_STATUS == "E"
+                  ElseIf ZLJ->ZLJ_STATUS == "E"
 			            _lPodeMarcar:=.F.
 		               _lViagemAceita:=.F.
                      _cAviso += "[Viagem Eftivada no Protheus]
@@ -1007,7 +991,7 @@ For _nXml := 1 TO LEN(_aXmlDia)
 			    Else
 			    
 				   If _nKm < 0
-				      _cAviso += "KM Negativa: [Km Rastreado: "+ALLTRIM(TRANSF(_nKm,"@E 999,999,999"))+"] "
+				      _cAviso += "KM Negativa: [Km Rastreado: "+AllTrim(TRANSF(_nKm,"@E 999,999,999"))+"] "
                EndIf
                    
 			    EndIf
@@ -1023,10 +1007,10 @@ For _nXml := 1 TO LEN(_aXmlDia)
 
                If !Upper( AllTrim( _aDadAtd[_nX]:_TIPOVISITA:_CODIGO:TEXT ) ) == "REC"  
                   // SÓ IGNORA QUANDO NÃO É REBOQUE 
-                  lVolumeZeroLOOP:=.T.
+                  lVolumeZeroLoop:=.T.
                   MGLT2ListaResposta(.F.,_aDadAtd,_nX)
-                  If lVolumeZeroLOOP//Volume do produtor zerado ignora linha
-                     LOOP//_cAviso += "[Atendimento com Volume zerado]"
+                  If lVolumeZeroLoop//Volume do produtor zerado ignora linha
+                     Loop//_cAviso += "[Atendimento com Volume zerado]"
                   EndIf
                EndIf
 				
@@ -1036,7 +1020,7 @@ For _nXml := 1 TO LEN(_aXmlDia)
 					TRB_ZLJ->WK_HORA    := SubStr( _aXml[_nI]:_DATAHORAULTIMAMODIFICACAO:TEXT , 12 , 8 )
 					TRB_ZLJ->ZLJ_FILIAL	:= _cFilial
 					If !Empty(_cViagemMae) 
- 					   If alltrim(_cViagemMae) == "S000000000"
+ 					   If AllTrim(_cViagemMae) == "S000000000"
  					   
  			   			TRB_ZLJ->ZLJ_VIAGEM := _cVIAGEM
  					   Else
@@ -1048,16 +1032,16 @@ For _nXml := 1 TO LEN(_aXmlDia)
  				    Else
  					   TRB_ZLJ->ZLJ_VIAGEM := _cVIAGEM
  				    EndIf
-					TRB_ZLJ->ZLJ_NUMERO	:= StrZero( Val( _aDadAtd[_nX]:_NUMEROATENDIMENTO:TEXT ) , LEN(TRB_ZLJ->ZLJ_NUMERO) )//Atendimento
-					TRB_ZLJ->ZLJ_DTCRIA	:= _dDtEstoque//StoD( StrTran( SubStr( _aDadAtd[_nX]:_DATACRIACAO:TEXT , 1 , 10 ) , '-' , '' ) )//onde grava a data entrada no estoque: ZLJ_DTCRIA --> D3_EMISSAO / ZLW_DTLANC
+					TRB_ZLJ->ZLJ_NUMERO	:= StrZero( Val( _aDadAtd[_nX]:_NUMEROATENDIMENTO:TEXT ) , Len(TRB_ZLJ->ZLJ_NUMERO) )//Atendimento
+					TRB_ZLJ->ZLJ_DTCRIA	:= _dDtEstoque//SToD( StrTran( SubStr( _aDadAtd[_nX]:_DATACRIACAO:TEXT , 1 , 10 ) , '-' , '' ) )//onde grava a data entrada no estoque: ZLJ_DTCRIA --> D3_EMISSAO / ZLW_DTLANC
 					TRB_ZLJ->ZLJ_HRCRIA	:= _cHrEstoque//SubStr( _aDadAtd[_nX]:_DATACRIACAO:TEXT , 12 , 8 )
-					TRB_ZLJ->ZLJ_DTINI	:= StoD( StrTran( SubStr( _aDadAtd[_nX]:_DATAINICIO:TEXT , 1 , 10 ) , '-' , '' ) )
+					TRB_ZLJ->ZLJ_DTINI	:= SToD( StrTran( SubStr( _aDadAtd[_nX]:_DATAINICIO:TEXT , 1 , 10 ) , '-' , '' ) )
 					TRB_ZLJ->ZLJ_HRINI	:= SubStr( _aDadAtd[_nX]:_DATAINICIO:TEXT , 12 , 8 )
-					TRB_ZLJ->ZLJ_DTFIM	:= StoD( StrTran( SubStr( _aDadAtd[_nX]:_DATAFIM:TEXT , 1 , 10 ) , '-' , '' ) )
+					TRB_ZLJ->ZLJ_DTFIM	:= SToD( StrTran( SubStr( _aDadAtd[_nX]:_DATAFIM:TEXT , 1 , 10 ) , '-' , '' ) )
 					TRB_ZLJ->ZLJ_HRFIM	:= SubStr( _aDadAtd[_nX]:_DATAFIM:TEXT , 12 , 8 )
-					TRB_ZLJ->ZLJ_TIPVIS	:= IIF( Upper( AllTrim( _aDadAtd[_nX]:_TIPOVISITA:_CODIGO:TEXT ) ) == 'COLETA' , 'C' , 'N' )
-					TRB_ZLJ->ZLJ_USRSMQ	:= IIF( ValType( XmlChildEx( _aDadAtd[_nX]:_USUARIO , "_CODIGO") ) <> 'U', AllTrim( _aDadAtd[_nX]:_USUARIO:_CODIGO:TEXT), '' )
-					TRB_ZLJ->ZLJ_LOGINS	:= IIF( ValType( XmlChildEx( _aDadAtd[_nX]:_USUARIO , "_LOGIN" ) ) <> 'U', AllTrim( _aDadAtd[_nX]:_USUARIO:_LOGIN:TEXT ), '' )
+					TRB_ZLJ->ZLJ_TIPVIS	:= IIf( Upper( AllTrim( _aDadAtd[_nX]:_TIPOVISITA:_CODIGO:TEXT ) ) == 'COLETA' , 'C' , 'N' )
+					TRB_ZLJ->ZLJ_USRSMQ	:= IIf( ValType( XmlChildEx( _aDadAtd[_nX]:_USUARIO , "_CODIGO") ) <> 'U', AllTrim( _aDadAtd[_nX]:_USUARIO:_CODIGO:TEXT), '' )
+					TRB_ZLJ->ZLJ_LOGINS	:= IIf( ValType( XmlChildEx( _aDadAtd[_nX]:_USUARIO , "_LOGIN" ) ) <> 'U', AllTrim( _aDadAtd[_nX]:_USUARIO:_LOGIN:TEXT ), '' )
 					TRB_ZLJ->ZLJ_STATUS	:= "P"
 					TRB_ZLJ->ZLJ_DTIVIA	:= _dDtIni//data de coleta do ZLD: ZLJ_DTIVIA --> ZLD->ZLD_DTCOLE / ZLW->ZLW_DTCOLE
 					TRB_ZLJ->ZLJ_HRIVIA	:= _cHrIni
@@ -1087,7 +1071,7 @@ For _nXml := 1 TO LEN(_aXmlDia)
 					   
 					   TRB_ZLJ->ZLJ_CODPAT := _cCodPat
 					   TRB_ZLJ->ZLJ_LOJPAT := _cLojPat
-					   If Empty(_cCODPAT) .OR. !SA2->(DBSEEK(Xfilial("SA2")+_cCodPat+_cLojPat)) .OR. (SA2->A2_MSBLQL == '1' .Or. SA2->A2_L_ATIVO == 'N')
+					   If Empty(_cCODPAT) .Or. !SA2->(DBSeek(xFilial("SA2")+_cCodPat+_cLojPat)) .Or. (SA2->A2_MSBLQL == '1' .Or. SA2->A2_L_ATIVO == 'N')
 					      _cMemAux:=" [Produtor: "+_cCodPat+' '+_cLojPat+" nao cadastrado, bloqueado ("+SA2->A2_MSBLQL+") ou inativo (Ativo = "+SA2->A2_L_ATIVO+")] "
 			            _lPodeMarcar:=_lViagemAceita
 					   EndIf
@@ -1096,13 +1080,13 @@ For _nXml := 1 TO LEN(_aXmlDia)
 				       TRB_ZLJ->ZLJ_TIPPRO := SA2->A2_L_TIPPR
 					   _cLinhaRota:=SA2->A2_L_LI_RO
 
-					   If Empty(TRB_ZLJ->ZLJ_TIPPRO) .OR. TRB_ZLJ->ZLJ_TIPPRO = "A"//No ZLJ o atravessador tem que ficar com tipo "P" por causa da quebra na efetivacao
+					   If Empty(TRB_ZLJ->ZLJ_TIPPRO) .Or. TRB_ZLJ->ZLJ_TIPPRO = "A"//No ZLJ o atravessador tem que ficar com tipo "P" por causa da quebra na efetivacao
 					      TRB_ZLJ->ZLJ_TIPPRO:= "P"
 					   EndIf	
 
 					EndIf
 					
-					_cSetor:=POSICIONE("ZL3",1,_cFilial+_cLinhaRota,"ZL3_SETOR")
+					_cSetor:=Posicione("ZL3",1,_cFilial+_cLinhaRota,"ZL3_SETOR")
 					
 			      TRB_ZLJ->ZLJ_KMDVIA:= _nKm
                TRB_ZLJ->ZLJ_KM_SQO:= _cKmOri  
@@ -1116,30 +1100,30 @@ For _nXml := 1 TO LEN(_aXmlDia)
 					   _lPodeMarcar:=_lViagemAceita
                EndIf 
 
-					_cSetorKM:=POSICIONE("ZL3",1,_cFilial + _cRotaMae,"ZL3_SETOR")					
-					If !Empty(TRB_ZLJ->ZLJ_LINHSQ) .AND. Empty(_cSetorKM)
+					_cSetorKM:=Posicione("ZL3",1,_cFilial + _cRotaMae,"ZL3_SETOR")					
+					If !Empty(TRB_ZLJ->ZLJ_LINHSQ) .And. Empty(_cSetorKM)
 					   _cMemAux+=" [Setor do KM nao encontrado Chave: "+_cFilial+" "+_cLinhaRota+"] "
 					   _lPodeMarcar:=_lViagemAceita
                EndIf 
 
 					TRB_ZLJ->ZLJ_SETOR :=_cSetor
-					If !Empty(TRB_ZLJ->ZLJ_LINROT) .AND. Empty(TRB_ZLJ->ZLJ_SETOR)
+					If !Empty(TRB_ZLJ->ZLJ_LINROT) .And. Empty(TRB_ZLJ->ZLJ_SETOR)
 					   _cMemAux+=" [Setor nao encontrado Chave: "+_cFilial+" "+_cLinhaRota+"] "
 					   _lPodeMarcar:=_lViagemAceita
-     	 			ElseIf TRB_ZLJ->ZLJ_TIPPRO <> "C" .AND. MGLT002R( _dDtIni , _cSETOR )
-					   _cMemAux += "[Setor: "+_cSETOR+" possui lançamento de algum evento na data ["+DTOC(_dDtIni)+"] "
+     	 			ElseIf TRB_ZLJ->ZLJ_TIPPRO <> "C" .And. MGLT002R( _dDtIni , _cSETOR )
+					   _cMemAux += "[Setor: "+_cSETOR+" possui lançamento de algum evento na data ["+DToC(_dDtIni)+"] "
 					   _lPodeMarcar:=_lViagemAceita
 					EndIf
 
 					TRB_ZLJ->ZLJ_DESCAR:= _lDescarte                                                  
 				    TRB_ZLJ->ZLJ_PLACA:= _cPlacaS//Grava placa aqui pq tem uma coluna na tela para mostrar
 
-					If _lAchouPlaca .AND. _lAchouMoto
+					If _lAchouPlaca .And. _lAchouMoto
 					   TRB_ZLJ->ZLJ_MOTORI:= _cMotorista//Esse campo virou real pois vem do SQ
 					   TRB_ZLJ->ZLJ_VEICUL:= _cVeiculo
 					   TRB_ZLJ->ZLJ_CODTRN:= _cCodtransp
 					   TRB_ZLJ->ZLJ_LOJTRN:= _cLojtransp
-					   TRB_ZLJ->ZLJ_DTRAN := POSICIONE("SA2",1,XFILIAL("SA2")+_cCodtransp+_cLojtransp,"A2_NOME")
+					   TRB_ZLJ->ZLJ_DTRAN := Posicione("SA2",1,xFilial("SA2")+_cCodtransp+_cLojtransp,"A2_NOME")
 					EndIf
 
                     _cMemAux += MGLT2ListaResposta(.T.,_aDadAtd,_nX)
@@ -1164,13 +1148,13 @@ For _nXml := 1 TO LEN(_aXmlDia)
 
 			Else//Empty( _aDadAtd )//Lista de Atendimentos
 
-	            AADD(_aXmlReboque, _aXml[_nI] )//Tratamento de Reboque
+	            aAdd(_aXmlReboque, _aXml[_nI] )//Tratamento de Reboque
 	            
 			EndIf//If !Empty( _aDadAtd )//Lista de Atendimentos
 			
 	Next _nI
 	
-Next _nXml//LEN(_aXmlDia)
+Next _nXml//Len(_aXmlDia)
 
 //*\\//*\\//*\\//***********************************************************************************\\//*\\//*\\//
 ///*********************************////  TRATAMENTO DO REBOQUE ///**********************************////
@@ -1179,14 +1163,14 @@ _aXml:=ACLONE(_aXmlReboque)
 If !_lShedule
    _oProcess:SetRegua2(Len(_aXml))
 EndIf
-U_ITConOut("2-Lendo Reboques "+ALLTRIM(STR(LEN(_aXml)))+" registros... ")
+U_ITConOut("2-Lendo Reboques "+AllTrim(Str(Len(_aXml)))+" registros... ")
 
-For _nI := 1 TO LEN(_aXml)
+For _nI := 1 TO Len(_aXml)
 
    _cFilial :="  "
    _cRotaReb:="  "
    If _aXml[_nI] = NIL
-      LOOP
+      Loop
    EndIf
    If ValType( XmlChildEX(_aXml[_nI] , "_CICLOVISITA" ) ) = 'O'
       _cFilial := SubStr( AllTrim( _aXml[_nI]:_CICLOVISITA:_CODIGO:TEXT ) , 1 , 2 )
@@ -1196,7 +1180,7 @@ For _nI := 1 TO LEN(_aXml)
    _cVIAGEM := Space(Len(ZLJ->ZLJ_VIAGEM))
    If ValType( XmlChildEX(_aXml[_nI] , "_NUMERO" ) ) = 'O'
       _cVIAGEM := StrZero( Val( _aXml[_nI]:_NUMERO:TEXT ) , Len(ZLJ->ZLJ_VIAGEM) )
-      _cVIAGEM := "S"+SUBSTR(_cVIAGEM,2)
+      _cVIAGEM := "S"+SubStr(_cVIAGEM,2)
    EndIf
    
    _cHoraLeu:=""
@@ -1222,26 +1206,26 @@ For _nI := 1 TO LEN(_aXml)
    EndIf
 
    _lAchouMoto:=.F.
-   _cMotorista:=SPACE(Len(ZLJ->ZLJ_MOTORI))
+   _cMotorista:=Space(Len(ZLJ->ZLJ_MOTORI))
    _cMotFilial:="  "
    _cCodtransp:=""
    _cLojtransp:=""
    If ValType( XmlChildEx( _aXml[_nI]:_USUARIO , "_CODIGO") ) <> 'U'//Só tem um motorista para todos os atendimentos
       _cMotorista:= AllTrim( _aXml[_nI]:_USUARIO:_CODIGO:TEXT)
-      _cMotFilial:= Substr(Alltrim(_cMotorista),LEN(alltrim(_cMotorista))-1,2)
-      _cMotorista:= Substr(Alltrim(_cMotorista),1,LEN(alltrim(_cMotorista))-2)
+      _cMotFilial:= SubStr(AllTrim(_cMotorista),Len(AllTrim(_cMotorista))-1,2)
+      _cMotorista:= SubStr(AllTrim(_cMotorista),1,Len(AllTrim(_cMotorista))-2)
 
       If ZL0->( DBSeek( _cFilial + _cMotorista ) )
         _cCodtransp:= ZL0->ZL0_FRETIS
         _cLojtransp:= ZL0->ZL0_FRETLJ
         _lAchouMoto:= .T.
 
-        If !Empty(_cTransI+_cTraLoI) .AND. _cCodtransp+_cLojtransp < _cTransI+_cTraLoI
-            LOOP//Na Viagem
+        If !Empty(_cTransI+_cTraLoI) .And. _cCodtransp+_cLojtransp < _cTransI+_cTraLoI
+            Loop//Na Viagem
         EndIf
 
-        If !Empty(_cTransF+_cTraLoF) .AND. _cCodtransp+_cLojtransp > _cTransF+_cTraLoF
-            LOOP//Na Viagem
+        If !Empty(_cTransF+_cTraLoF) .And. _cCodtransp+_cLojtransp > _cTransF+_cTraLoF
+            Loop//Na Viagem
         EndIf
 
         EndIf
@@ -1257,27 +1241,27 @@ For _nI := 1 TO LEN(_aXml)
    _lPodeMarcar:=.T.
 
    _cLINROT:=_cRotaReb
-   _cSetor	:=POSICIONE("ZL3",1,_cFilial + _cLINROT,"ZL3_SETOR")
+   _cSetor	:=Posicione("ZL3",1,_cFilial + _cLINROT,"ZL3_SETOR")
 
    If !Empty(_cSetor)//Tem que trazer os setores em branco senao ele traz só os setores preenchidos de uma viagem e aceita
-      If !Empty(_cSetorI) .AND. _cSetor < _cSetorI
+      If !Empty(_cSetorI) .And. _cSetor < _cSetorI
          _lLoopViagem:=.T.
-         LOOP
+         Loop
       EndIf
-      If !Empty(_cSetorF) .AND. _cSetor > _cSetorF
+      If !Empty(_cSetorF) .And. _cSetor > _cSetorF
          _lLoopViagem:=.T.
-         LOOP
+         Loop
       EndIf
    EndIf
 
    If !Empty(_cLINROT)//Tem que trazer as linhas em branco senao ele traz só as linhas preenchidas de uma viagem e aceita
-      If !Empty(_cLinhaI) .AND. _cLINROT < _cLinhaI
+      If !Empty(_cLinhaI) .And. _cLINROT < _cLinhaI
          _lLoopViagem:=.T.
-         LOOP
+         Loop
       EndIf
-      If !Empty(_cLinhaF) .AND. _cLINROT > _cLinhaF
+      If !Empty(_cLinhaF) .And. _cLINROT > _cLinhaF
          _lLoopViagem:=.T.
-         LOOP
+         Loop
       EndIf
    EndIf
 
@@ -1286,7 +1270,7 @@ For _nI := 1 TO LEN(_aXml)
    EndIf
 
    If _lLoopViagem
-      LOOP //Na Viagem
+      Loop //Na Viagem
    EndIf
    ////////////////////////// VALIDACAO E FILTRO //////////////////////////////////////////////////////////////////////////////
 
@@ -1330,7 +1314,7 @@ For _nI := 1 TO LEN(_aXml)
 
           	  If _aXml[_nI]:_CUSTOMFIELD[_nX]:_CODIGO:TEXT == "DESCARTE"
 
-                 _lDescarte :=  IIF(_aXml[_nI]:_CUSTOMFIELD[_nX]:_VALORBOLEANO:TEXT == 'false', .F., .T.)
+                 _lDescarte :=  IIf(_aXml[_nI]:_CUSTOMFIELD[_nX]:_VALORBOLEANO:TEXT == 'false', .F., .T.)
 
              EndIf
 
@@ -1339,10 +1323,10 @@ For _nI := 1 TO LEN(_aXml)
           If ValType( XmlChildEx( _aXml[_nI]:_CUSTOMFIELD[_nX] , "_CODIGO" ) ) <> 'U'
 
              If _aXml[_nI]:_CUSTOMFIELD[_nX]:_CODIGO:TEXT == "CODIGO_MATRIZ"
-                IF Val(_aXml[_nI]:_CUSTOMFIELD[_nX]:_VALORTEXTO:TEXT  ) <> 0
+                If Val(_aXml[_nI]:_CUSTOMFIELD[_nX]:_VALORTEXTO:TEXT  ) <> 0
                    _cViagemMae := StrZero( Val(_aXml[_nI]:_CUSTOMFIELD[_nX]:_VALORTEXTO:TEXT  ), Len(ZLJ->ZLJ_VIAGEM) )
-                   _cViagemMae := "S"+SUBSTR(_cViagemMae,2)
-                ENDIF
+                   _cViagemMae := "S"+SubStr(_cViagemMae,2)
+                EndIf
              EndIf
 
           EndIf
@@ -1354,10 +1338,10 @@ For _nI := 1 TO LEN(_aXml)
        If ValType( XmlChildEx( _aXml[_nI]:_CUSTOMFIELD , "_CODIGO" ) ) <> 'U'
 
           If _aXml[_nI]:_CUSTOMFIELD:_CODIGO:TEXT == "CODIGO_MATRIZ"
-             IF Val(_aXml[_nI]:_CUSTOMFIELD:_VALORTEXTO:TEXT ) <> 0
+             If Val(_aXml[_nI]:_CUSTOMFIELD:_VALORTEXTO:TEXT ) <> 0
                 _cViagemMae := StrZero( Val(_aXml[_nI]:_CUSTOMFIELD:_VALORTEXTO:TEXT ), Len(ZLJ->ZLJ_VIAGEM) )
-                _cViagemMae := "S"+SUBSTR(_cViagemMae,2)
-             ENDIF
+                _cViagemMae := "S"+SubStr(_cViagemMae,2)
+             EndIf
           EndIf
 
        EndIf
@@ -1366,16 +1350,16 @@ For _nI := 1 TO LEN(_aXml)
 
    If Empty(_cViagemMae)
       MGLT002LogGrv(.F.,'Viagem recusada: [ Viagem Sem Atendimentos cadastrados] ',.T.)
-      LOOP
+      Loop
    EndIf
 
    If ValType( XmlChildEx( _aXml[_nI] , "_DATAHORAINICIODIA"	) ) <> 'U'
-      _dDtIni := StoD( StrTran( SubStr( _aXml[_nI]:_DATAHORAINICIODIA:TEXT , 1 , 10 ) , '-' , '' ) )
+      _dDtIni := SToD( StrTran( SubStr( _aXml[_nI]:_DATAHORAINICIODIA:TEXT , 1 , 10 ) , '-' , '' ) )
       _cHrIni := SubStr( _aXml[_nI]:_DATAHORAINICIODIA:TEXT , 12 , 08 )
    EndIf
 
    If ValType( XmlChildEx( _aXml[_nI] , "_DATAHORAFIMDIA"		) ) <> 'U'
-      _dDtFim := StoD( StrTran( SubStr( _aXml[_nI]:_DATAHORAFIMDIA:TEXT , 1 , 10 ) , '-' , '' ) )
+      _dDtFim := SToD( StrTran( SubStr( _aXml[_nI]:_DATAHORAFIMDIA:TEXT , 1 , 10 ) , '-' , '' ) )
       _cHrFim := SubStr( _aXml[_nI]:_DATAHORAFIMDIA:TEXT , 12 , 08 )
    EndIf
 
@@ -1385,13 +1369,13 @@ For _nI := 1 TO LEN(_aXml)
    EndIf
 
    /////////////////////\/\/\/\/\/ VALIDACAO DA VIAGEM \/\/\/\/\/\/\/\///////////////////////////////////////////////////////////////////////
-   If Empty(_cViagemMae) .AND. _nPesIni < _nPesFim//Quando é Julieta vale os valores da Mãe //Peso Cheio For menos que peso vazio pois devem ter didigtado ao contrario
-	  _cRecusa += "[Volume Negativo: P.Cheio: "+ALLTRIM(TRANSF(_nPesIni,"@E 999,999,999"))+" - P.Vazio: "+ALLTRIM(TRANSF(_nPesFim,"@E 999,999,999"))+"] "
+   If Empty(_cViagemMae) .And. _nPesIni < _nPesFim//Quando é Julieta vale os valores da Mãe //Peso Cheio For menos que peso vazio pois devem ter didigtado ao contrario
+	  _cRecusa += "[Volume Negativo: P.Cheio: "+AllTrim(TRANSF(_nPesIni,"@E 999,999,999"))+" - P.Vazio: "+AllTrim(TRANSF(_nPesFim,"@E 999,999,999"))+"] "
 	  _lPodeMarcar:=.F.
-   ElseIf Empty(_cViagemMae) .AND. (_nPesIni -_nPesFim) = 0 .AND. _nMedVaz = 0 //Quando é Julieta vale os valores da Mãe //Se esse valores vierem zerados não tem como dar entrada no estoque                                                                                            
+   ElseIf Empty(_cViagemMae) .And. (_nPesIni -_nPesFim) = 0 .And. _nMedVaz = 0 //Quando é Julieta vale os valores da Mãe //Se esse valores vierem zerados não tem como dar entrada no estoque                                                                                            
       _cRecusa += "[Peso Cheio - Peso Vazio e Medidor de Vazão zerados] "
 	  _lPodeMarcar:=.F.
-   ElseIf Empty(_cViagemMae) .AND. (_nPesIni -_nPesFim) # 0 .AND. _nMedVaz # 0 //Quando é Julieta vale os valores da Mãe //Se esse valores vierem zerados não tem como dar entrada no estoque                                                                                            
+   ElseIf Empty(_cViagemMae) .And. (_nPesIni -_nPesFim) # 0 .And. _nMedVaz # 0 //Quando é Julieta vale os valores da Mãe //Se esse valores vierem zerados não tem como dar entrada no estoque                                                                                            
       _cRecusa += "[Peso Cheio - Peso Vazio e Medidor de Vazão: todos preenchidos]"
 	  _lPodeMarcar:=.F.
    EndIf
@@ -1406,14 +1390,14 @@ For _nI := 1 TO LEN(_aXml)
       _lAchouMoto:=.F.//Já que vai rejeitar nao precisa fazer o While do ZL1
    EndIf
 
-   If Empty(_cCodtransp) .OR. !SA2->(DBSEEK(Xfilial("SA2")+_cCodtransp+_cLojtransp)) .OR. (SA2->A2_MSBLQL == '1' .Or. SA2->A2_L_ATIVO == 'N')
+   If Empty(_cCodtransp) .Or. !SA2->(DBSeek(xFilial("SA2")+_cCodtransp+_cLojtransp)) .Or. (SA2->A2_MSBLQL == '1' .Or. SA2->A2_L_ATIVO == 'N')
       _cRecusa += "[Transportador: "+_cCodtransp +' '+ _cLojtransp+" nao cadastrado, bloqueado ("+SA2->A2_MSBLQL+") ou inativo (Ativo = "+SA2->A2_L_ATIVO+")] "
       _lPodeMarcar:=.F.
    EndIf
 
    //Verifica se placa está no cadastro de motoristas
    _cPlacaS:=""
-   _cPlacaC:=SPACE(Len(ZLJ->ZLJ_PLACA))
+   _cPlacaC:=Space(Len(ZLJ->ZLJ_PLACA))
 	If ValType( XmlChildEx( _aXml[_nI] , "_VEICULOPRIMARIO"	) ) <> 'U'
       If ValType( XmlChildEx( _aXml[_nI]:_VEICULOPRIMARIO , "_PLACA" ) ) <> 'U'
          _cPlacaS:= LEFT(StrTran( AllTrim( _aXml[_nI]:_VEICULOPRIMARIO:_PLACA:TEXT ) , '-' , '' ),7)//Peguei o 7 primeiro pq estava vindo com caracter especial no final
@@ -1421,8 +1405,8 @@ For _nI := 1 TO LEN(_aXml)
       EndIf
    EndIf
 
-   _cPlacaRS   :=SPACE(Len(ZL1->ZL1_PLCREB))//PLACA REBOQUE
-   _cPlacaRC   :=SPACE(Len(ZL1->ZL1_PLCREB))//PLACA REBOQUE
+   _cPlacaRS   :=Space(Len(ZL1->ZL1_PLCREB))//PLACA REBOQUE
+   _cPlacaRC   :=Space(Len(ZL1->ZL1_PLCREB))//PLACA REBOQUE
 	If ValType( XmlChildEx( _aXml[_nI] , "_VEICULOREBOQUE"	) ) <> 'U'
       If ValType( XmlChildEx( _aXml[_nI]:_VEICULOPRIMARIO , "_PLACA" ) ) <> 'U'
 	      _cPlacaRS:= LEFT(StrTran( AllTrim( _aXml[_nI]:_VEICULOPRIMARIO:_PLACA:TEXT ) , '-' , '' ),7)//Peguei o 7 primeiro pq estava vindo com caracter especial no final
@@ -1434,14 +1418,14 @@ For _nI := 1 TO LEN(_aXml)
    _cVeiculo:=""
    _lAchouPlaca:=.F.
    ZL1->( DBSetOrder(2))
-   If _lAchouMoto .AND. ZL1->( DBSeek( _cFilial + _cPlacaS ) )
-      DO While ZL1->(!EOF()) .AND. _cFilial + _cPlacaS == ZL1->ZL1_FILIAL + ZL1->ZL1_PLACA
-         If ZL1->ZL1_MOTORI == _cMotorista .AND. _cPlacaRS == ZL1->ZL1_PLCREB 
+   If _lAchouMoto .And. ZL1->( DBSeek( _cFilial + _cPlacaS ) )
+      While ZL1->(!Eof()) .And. _cFilial + _cPlacaS == ZL1->ZL1_FILIAL + ZL1->ZL1_PLACA
+         If ZL1->ZL1_MOTORI == _cMotorista .And. _cPlacaRS == ZL1->ZL1_PLCREB 
             _cVeiculo   :=ZL1->ZL1_COD
             _lAchouPlaca:=.T.
             Exit
          EndIf
-         ZL1->(DBSKIP())
+         ZL1->(DBSkip())
       EndDo
    EndIf
 
@@ -1462,34 +1446,34 @@ For _nI := 1 TO LEN(_aXml)
    _ctread := ""
   		        
    ZLK->(DBSetOrder(1))
-   If ZLK->(Dbseek(_cFilial)) //+ If(!Empty(_cViagemMae), _cViagemMae+_cVIAGEM , _cVIAGEM+SPACE(LEN(ZLJ->ZLJ_VFILHA)))
+   If ZLK->(DBSeek(_cFilial)) //+ If(!Empty(_cViagemMae), _cViagemMae+_cVIAGEM , _cVIAGEM+Space(Len(ZLJ->ZLJ_VFILHA)))
   		        
        	If !ZLK->(MsRLock(ZLK->(RECNO())))
   		        	
        		_lconcorr := .T.
       		_ctread := ZLK->ZLK_THREAD
-            _cuser  := ALLTRIM(ZLK->ZLK_USUSAR)
+            _cuser  := AllTrim(ZLK->ZLK_USUSAR)
   		        		
        	Else
   		        	
-       		ZLK->(Reclock("ZLK",.F.))
-       	   ZLK->ZLK_VIAGEM := _cFilial+"-"+DTOC(DATE())+"-"+TIME()// + If(!Empty(_cViagemMae), _cViagemMae+_cVIAGEM , _cVIAGEM+SPACE(LEN(ZLJ->ZLJ_VFILHA))) 
-       		ZLK->ZLK_THREAD := strzero(ThreadID(),6)
+       		ZLK->(RecLock("ZLK",.F.))
+       	   ZLK->ZLK_VIAGEM := _cFilial+"-"+DToC(DATE())+"-"+TIME()// + If(!Empty(_cViagemMae), _cViagemMae+_cVIAGEM , _cVIAGEM+Space(Len(ZLJ->ZLJ_VFILHA))) 
+       		ZLK->ZLK_THREAD := StrZero(ThreadID(),6)
        		ZLK->ZLK_USUSAR := _cZLJ_UINTSQ
-  		   	ZLK->(Msunlock())
-  		   	ZLK->(Reclock("ZLK",.F.))
+  		   	ZLK->(MSUnLock())
+  		   	ZLK->(RecLock("ZLK",.F.))
   		        		
        	EndIf
   		        	
    Else
   		        
-       	ZLK->(Reclock("ZLK",.T.))
+       	ZLK->(RecLock("ZLK",.T.))
          ZLK->ZLK_FILIAL := _cFilial
-       	ZLK->ZLK_VIAGEM := _cFilial+"-"+DTOC(DATE())+"-"+TIME()// + If(!Empty(_cViagemMae), _cViagemMae+_cVIAGEM , _cVIAGEM+SPACE(LEN(ZLJ->ZLJ_VFILHA))) 
-       	ZLK->ZLK_THREAD := strzero(ThreadID(),6)
+       	ZLK->ZLK_VIAGEM := _cFilial+"-"+DToC(DATE())+"-"+TIME()// + If(!Empty(_cViagemMae), _cViagemMae+_cVIAGEM , _cVIAGEM+Space(Len(ZLJ->ZLJ_VFILHA))) 
+       	ZLK->ZLK_THREAD := StrZero(ThreadID(),6)
        	ZLK->ZLK_USUSAR := _cZLJ_UINTSQ
-       	ZLK->(ZLK->(Msunlock()))
-       	ZLK->(Reclock("ZLK",.F.))
+       	ZLK->(ZLK->(MSUnLock()))
+       	ZLK->(RecLock("ZLK",.F.))
   		        	
    EndIf
   		        
@@ -1498,23 +1482,23 @@ For _nI := 1 TO LEN(_aXml)
        _lPodeMarcar:=.F.
        _cAviso += "Viagem sendo integrada pela thread [" + _ctread + "] do usuário [" + _cuser + "]"
                                                                              //Tem que procurar a Mae com a filha em brnaco senão ele acha a as linhas da filhas já integradas
-   ElseIf ZLJ->( DBSeek( _cFilial + If(!Empty(_cViagemMae), _cViagemMae+_cVIAGEM , _cVIAGEM+SPACE(LEN(ZLJ->ZLJ_VFILHA)) ) ) )               
+   ElseIf ZLJ->( DBSeek( _cFilial + If(!Empty(_cViagemMae), _cViagemMae+_cVIAGEM , _cVIAGEM+Space(Len(ZLJ->ZLJ_VFILHA)) ) ) )               
 
       If(_nKm < 0,_nKm := 0,)//Zerei antes por que se tiver zerado tb no protheus, nao precisa atualizar
 
       If _nKm = ZLJ->ZLJ_KMDVIA
          _lPodeMarcar:=.F.
-         _cAviso += "Viagem Integrada Anteriormente: [KM = Protheus: "+ALLTRIM(TRANSF(ZLJ->ZLJ_KMDVIA,"@E 999,999,999"))+"] "
+         _cAviso += "Viagem Integrada Anteriormente: [KM = Protheus: "+AllTrim(TRANSF(ZLJ->ZLJ_KMDVIA,"@E 999,999,999"))+"] "
       Else
          _lPodeMarcar:=.T.//Se já tiver recusas pode aceitar a viagem já integrada
          _lViagemAceita:=.T.//Variavel para a validacao do setor nao rejeitar essa viagem
-         _cAviso += "Viagem Integrada Anteriormente: [KM # Protheus: "+ALLTRIM(TRANSF(ZLJ->ZLJ_KMDVIA,"@E 999,999,999"))+"] "
+         _cAviso += "Viagem Integrada Anteriormente: [KM # Protheus: "+AllTrim(TRANSF(ZLJ->ZLJ_KMDVIA,"@E 999,999,999"))+"] "
       EndIf
 
    Else
 
       If _nKm < 0
-         _cAviso += "KM Negativa: [Km Rastreado: "+ALLTRIM(TRANSF(_nKm,"@E 999,999,999"))+" ] "
+         _cAviso += "KM Negativa: [Km Rastreado: "+AllTrim(TRANSF(_nKm,"@E 999,999,999"))+" ] "
       EndIf
 
    EndIf
@@ -1531,7 +1515,7 @@ For _nI := 1 TO LEN(_aXml)
    TRB_ZLJ->WK_DATA   := CTOD(_cDataLendo)
    TRB_ZLJ->WK_HORA   := SubStr( _aXml[_nI]:_DATAHORAULTIMAMODIFICACAO:TEXT , 12 , 8 )
    TRB_ZLJ->ZLJ_FILIAL:= _cFilial
-   If !Empty(_cViagemMae) .AND. ZLJ->(FIELDPOS("ZLJ_VFILHA")) # 0
+   If !Empty(_cViagemMae) .And. ZLJ->(FIELDPOS("ZLJ_VFILHA")) # 0
       TRB_ZLJ->ZLJ_VIAGEM := _cViagemMae
       TRB_ZLJ->ZLJ_VFILHA := _cVIAGEM
    Else
@@ -1545,8 +1529,8 @@ For _nI := 1 TO LEN(_aXml)
    TRB_ZLJ->ZLJ_DTFIM	:= _dDtFim
    TRB_ZLJ->ZLJ_HRFIM	:= _cHrFim
    TRB_ZLJ->ZLJ_TIPVIS	:= 'C'
-   TRB_ZLJ->ZLJ_USRSMQ	:= IIF( ValType( XmlChildEx( _aXml[_nI]:_USUARIO , "_CODIGO") ) <> 'U', AllTrim( _aXml[_nI]:_USUARIO:_CODIGO:TEXT), '' )
-   TRB_ZLJ->ZLJ_LOGINS	:= IIF( ValType( XmlChildEx( _aXml[_nI]:_USUARIO , "_LOGIN" ) ) <> 'U', AllTrim( _aXml[_nI]:_USUARIO:_LOGIN:TEXT ), '' )
+   TRB_ZLJ->ZLJ_USRSMQ	:= IIf( ValType( XmlChildEx( _aXml[_nI]:_USUARIO , "_CODIGO") ) <> 'U', AllTrim( _aXml[_nI]:_USUARIO:_CODIGO:TEXT), '' )
+   TRB_ZLJ->ZLJ_LOGINS	:= IIf( ValType( XmlChildEx( _aXml[_nI]:_USUARIO , "_LOGIN" ) ) <> 'U', AllTrim( _aXml[_nI]:_USUARIO:_LOGIN:TEXT ), '' )
    TRB_ZLJ->ZLJ_STATUS	:= "P"
    TRB_ZLJ->ZLJ_DTIVIA	:= _dDtIni//data de coleta do ZLD: ZLJ_DTIVIA --> ZLD->ZLD_DTCOLE / ZLW->ZLW_DTCOLE
    TRB_ZLJ->ZLJ_HRIVIA	:= _cHrIni
@@ -1562,7 +1546,7 @@ For _nI := 1 TO LEN(_aXml)
 
    TRB_ZLJ->ZLJ_TIPPRO := "R"
 
-   _cSetor:=POSICIONE("ZL3",1,_cFilial+_cLinhaRota,"ZL3_SETOR")
+   _cSetor:=Posicione("ZL3",1,_cFilial+_cLinhaRota,"ZL3_SETOR")
 
    TRB_ZLJ->ZLJ_KMDVIA:= _nKm
    TRB_ZLJ->ZLJ_LINROT:=_cLinhaRota
@@ -1572,23 +1556,23 @@ For _nI := 1 TO LEN(_aXml)
    EndIf
 
    TRB_ZLJ->ZLJ_SETOR :=_cSetor
-   If !Empty(TRB_ZLJ->ZLJ_LINROT) .AND. Empty(TRB_ZLJ->ZLJ_SETOR)
+   If !Empty(TRB_ZLJ->ZLJ_LINROT) .And. Empty(TRB_ZLJ->ZLJ_SETOR)
       _cMemAux+=" [Setor nao encontrado Chave: "+_cFilial+' '+_cLinhaRota+"] "
       _lPodeMarcar:=_lViagemAceita
    ElseIf MGLT002R( _dDtIni , _cSETOR )
-      _cMemAux += "[Setor: "+_cSETOR+" possui lançamento de algum evento na data ["+DTOC(_dDtIni)+"] "
+      _cMemAux += "[Setor: "+_cSETOR+" possui lançamento de algum evento na data ["+DToC(_dDtIni)+"] "
       _lPodeMarcar:=_lViagemAceita
    EndIf
 
    TRB_ZLJ->ZLJ_DESCAR:= _lDescarte
    TRB_ZLJ->ZLJ_PLACA := _cPlacaS//Grava placa aqui pq tem uma coluna na tela para mostrar
 
-   If _lAchouPlaca .AND. _lAchouMoto
+   If _lAchouPlaca .And. _lAchouMoto
       TRB_ZLJ->ZLJ_MOTORI:= _cMotorista//Esse campo virou real pois vem do SQ
       TRB_ZLJ->ZLJ_VEICUL:= _cVeiculo
       TRB_ZLJ->ZLJ_CODTRN:= _cCodtransp
       TRB_ZLJ->ZLJ_LOJTRN:= _cLojtransp
-      TRB_ZLJ->ZLJ_DTRAN := POSICIONE("SA2",1,XFILIAL("SA2")+_cCodtransp+_cLojtransp,"A2_NOME")
+      TRB_ZLJ->ZLJ_DTRAN := Posicione("SA2",1,xFilial("SA2")+_cCodtransp+_cLojtransp,"A2_NOME")
    EndIf
    If _lPodeMarcar
       _cMotivo := "Atendimento OK"
@@ -1615,13 +1599,13 @@ If !_lShedule
    _oProcess:SetRegua1(TRB_ZLJ->(Lastrec()))
    _oProcess:SetRegua2(TRB_ZLJ->(Lastrec()))
 EndIf
-U_ITConOut("3-Lendo Julietas e Estoque: "+ALLTRIM(STR(TRB_ZLJ->(Lastrec())))+" Registros... ")
+U_ITConOut("3-Lendo Julietas e Estoque: "+AllTrim(Str(TRB_ZLJ->(Lastrec())))+" Registros... ")
 
 _aMaes_e_Filhas := {}
 _aViagens := {}
 _aRecViagens := {}
-TRB_ZLJ->(DBGOTOP())
-DO While TRB_ZLJ->(!EOF())
+TRB_ZLJ->(DBGoTop())
+While TRB_ZLJ->(!Eof())
 	
    If !_lShedule
 	  _oProcess:IncRegua1("3-Lendo Estoque Viagem: "+TRB_ZLJ->ZLJ_VIAGEM)
@@ -1630,23 +1614,23 @@ DO While TRB_ZLJ->(!EOF())
    	  U_ITConOut("3-Lendo Julietas Viagem: "+TRB_ZLJ->ZLJ_VIAGEM)
    EndIf
 
-   If Empty(TRB_ZLJ->WK_MARCA) .OR. TRB_ZLJ->ZLJ_STATUS # 'P'//Só faz em cima dos que estao OK
-      TRB_ZLJ->(DBSKIP())
-      LOOP
+   If Empty(TRB_ZLJ->WK_MARCA) .Or. TRB_ZLJ->ZLJ_STATUS # 'P'//Só faz em cima dos que estao OK
+      TRB_ZLJ->(DBSkip())
+      Loop
    EndIf
 
    If !Empty(TRB_ZLJ->ZLJ_VFILHS)//é Mãe
 
-      If (nMae:=ASCAN(_aMaes_e_Filhas,{|M| M[1] == TRB_ZLJ->ZLJ_VIAGEM .AND.  M[4] == TRB_ZLJ->ZLJ_FILIAL })) = 0
-         AADD(_aMaes_e_Filhas, { TRB_ZLJ->ZLJ_VIAGEM , ALLTRIM(TRB_ZLJ->ZLJ_VFILHS) , "" , TRB_ZLJ->ZLJ_FILIAL } )//Filhas que esta na lista da Mae
+      If (nMae:=aScan(_aMaes_e_Filhas,{|M| M[1] == TRB_ZLJ->ZLJ_VIAGEM .And.  M[4] == TRB_ZLJ->ZLJ_FILIAL })) = 0
+         aAdd(_aMaes_e_Filhas, { TRB_ZLJ->ZLJ_VIAGEM , AllTrim(TRB_ZLJ->ZLJ_VFILHS) , "" , TRB_ZLJ->ZLJ_FILIAL } )//Filhas que esta na lista da Mae
       Else
-         _aMaes_e_Filhas[nMae,2]:=ALLTRIM(TRB_ZLJ->ZLJ_VFILHS)//Atualiza pq a Mãe pode esta depois da filha na ordem de leitura
+         _aMaes_e_Filhas[nMae,2]:=AllTrim(TRB_ZLJ->ZLJ_VFILHS)//Atualiza pq a Mãe pode esta depois da filha na ordem de leitura
       EndIf
 
    ElseIf !Empty(TRB_ZLJ->ZLJ_VFILHA)//É Filha
 
-      If (nMae:=ASCAN(_aMaes_e_Filhas,{|M| M[1] == TRB_ZLJ->ZLJ_VIAGEM  .AND.  M[4] == TRB_ZLJ->ZLJ_FILIAL })) = 0
-         AADD(_aMaes_e_Filhas, { TRB_ZLJ->ZLJ_VIAGEM , "" , TRB_ZLJ->ZLJ_VFILHA+"-" , TRB_ZLJ->ZLJ_FILIAL } )//pode encontrar uma filha antes da mãe na ordem de leitura
+      If (nMae:=aScan(_aMaes_e_Filhas,{|M| M[1] == TRB_ZLJ->ZLJ_VIAGEM  .And.  M[4] == TRB_ZLJ->ZLJ_FILIAL })) = 0
+         aAdd(_aMaes_e_Filhas, { TRB_ZLJ->ZLJ_VIAGEM , "" , TRB_ZLJ->ZLJ_VFILHA+"-" , TRB_ZLJ->ZLJ_FILIAL } )//pode encontrar uma filha antes da mãe na ordem de leitura
       ElseIf !TRB_ZLJ->ZLJ_VFILHA $ _aMaes_e_Filhas[nMae,3]//Para não repetir para cada atendimento
          _aMaes_e_Filhas[nMae,3]+=TRB_ZLJ->ZLJ_VFILHA+"-"//Lista das Filhas encontradas
       EndIf
@@ -1655,49 +1639,49 @@ DO While TRB_ZLJ->(!EOF())
 		
    MGLT2AcumulaEstoque("TRB_ZLJ")
 		
-   TRB_ZLJ->(DBSKIP())
+   TRB_ZLJ->(DBSkip())
 	
 EndDo
 If !_lShedule
-   _oProcess:SetRegua1( LEN(_aViagens) )
-   _oProcess:SetRegua2( LEN(_aMaes_e_Filhas) )
+   _oProcess:SetRegua1( Len(_aViagens) )
+   _oProcess:SetRegua2( Len(_aMaes_e_Filhas) )
 EndIf
-U_ITConOut("4-Validando Estoque Viagem "+ALLTRIM(STR(LEN(_aViagens)))+" Registros... ")
+U_ITConOut("4-Validando Estoque Viagem "+AllTrim(Str(Len(_aViagens)))+" Registros... ")
 
-For _nI := 1 to len(_aViagens)
+For _nI := 1 to Len(_aViagens)
 	
 	If !_lShedule
-		_oProcess:IncRegua1("4-Validando Estoque Viagem: "+_aViagens[_ni][1])
+		_oProcess:IncRegua1("4-Validando Estoque Viagem: "+_aViagens[_nI][1])
 	ElseIf _lIDESENV
-		U_ITConOut("4-Validando Estoque Viagem: "+_aViagens[_ni][1])
+		U_ITConOut("4-Validando Estoque Viagem: "+_aViagens[_nI][1])
 	EndIf
 	
-	If _aViagens[_ni][08]//Se For descarte
-		LOOP
+	If _aViagens[_nI][08]//Se For descarte
+		Loop
 	EndIf
 
-    If !_aViagens[_ni][10]//Se nao Tem Leite Proprio
-       LOOP
+    If !_aViagens[_nI][10]//Se nao Tem Leite Proprio
+       Loop
     EndIf
 	
 	// Volume do veiculo - o total da cooperativa  = Volume do leite proprio com a diferença
-	nTotBom := _aViagens[_ni][9] - _aViagens[_ni][3]
+	nTotBom := _aViagens[_nI][9] - _aViagens[_nI][3]
 	
 	If nTotBom <= 0
 		
-       If POSICIONE("ZA7",1,_aViagens[_ni][07]+"001","ZA7_DENPAD") <= 0
-          _cMotivo:="Viagem Recusada: [Densidade cadastrada na filial "+_aViagens[_ni][07]+" Inválida, volume: "+ALLTRIM(TRANSF(nTotBom,"@E 999,999,999"))+" L]"
+       If Posicione("ZA7",1,_aViagens[_nI][07]+"001","ZA7_DENPAD") <= 0
+          _cMotivo:="Viagem Recusada: [Densidade cadastrada na filial "+_aViagens[_nI][07]+" Inválida, volume: "+AllTrim(TRANSF(nTotBom,"@E 999,999,999"))+" L]"
        Else
-          _cMotivo:="Viagem Recusada: [Volume de Entrada de Estoque Inválido: "+ALLTRIM(TRANSF(nTotBom,"@E 999,999,999"))+" L]"
+          _cMotivo:="Viagem Recusada: [Volume de Entrada de Estoque Inválido: "+AllTrim(TRANSF(nTotBom,"@E 999,999,999"))+" L]"
        EndIf
 
-       If (_nPos:=Ascan(_aRecViagens,{|aVal| aVal[1] == _aViagens[_ni][1] .AND. aVal[2] == _aViagens[_ni][7] })) # 0
+       If (_nPos:=aScan(_aRecViagens,{|aVal| aVal[1] == _aViagens[_nI][1] .And. aVal[2] == _aViagens[_nI][7] })) # 0
 
            _aRecTRB:=_aRecViagens[_nPos,3]
 
-           For T := 1 TO LEN(_aRecTRB)
+           For T := 1 TO Len(_aRecTRB)
 
-               TRB_ZLJ->(DBGOTO(_aRecTRB[T]))
+               TRB_ZLJ->(DBGoTo(_aRecTRB[T]))
                
                MGLT002LogGrv(.F.,_cMotivo,.F.)
                _nConta--//Desconta pq já foi aceito no primeiro For
@@ -1706,7 +1690,7 @@ For _nI := 1 to len(_aViagens)
        
        Else//Previnir Algum erro lógico
 
-           TRB_ZLJ->(DBGOTO(_aViagens[_ni][14]))
+           TRB_ZLJ->(DBGoTo(_aViagens[_nI][14]))
            MGLT002LogGrv(.F.,_cMotivo,.F.)
            _nConta--//Desconta pq já foi aceito no primeiro For
        
@@ -1716,59 +1700,59 @@ For _nI := 1 to len(_aViagens)
 	
 Next _nI
 
-U_ITConOut("4-Validando Julietas Viagem: "+ALLTRIM(STR(LEN(_aMaes_e_Filhas)))+" Registros... ")
+U_ITConOut("4-Validando Julietas Viagem: "+AllTrim(Str(Len(_aMaes_e_Filhas)))+" Registros... ")
 
-For _nI := 1 to len(_aMaes_e_Filhas)
+For _nI := 1 to Len(_aMaes_e_Filhas)
 	
 	If !_lShedule
-		_oProcess:IncRegua2("4-Validando Julietas Viagem: "+_aViagens[_ni][1])
+		_oProcess:IncRegua2("4-Validando Julietas Viagem: "+_aViagens[_nI][1])
 	ElseIf _lIDESENV
-		U_ITConOut("4-Validando Julietas Viagem: "+_aViagens[_ni][1])
+		U_ITConOut("4-Validando Julietas Viagem: "+_aViagens[_nI][1])
 	EndIf
     
     _lJulietaOK:=.T.
          //Se tem filhas                e    não tem a lista da mãe
-    If !Empty(_aMaes_e_Filhas[_nI,3]) .AND. Empty(_aMaes_e_Filhas[_nI,2])
+    If !Empty(_aMaes_e_Filhas[_nI,3]) .And. Empty(_aMaes_e_Filhas[_nI,2])
        _cMotivo:="Viagem Recusada: [Viagem Mãe não Integrada/Aceita no mesmo periodo]"
        _lJulietaOK:=.F.
     EndIf
 
-    _aFilhasMae := STRTOKARR(_aMaes_e_Filhas[_nI,2],"-")//Lista das filhas da mãe ATUAL
+    _aFilhasMae := StrTokArr(_aMaes_e_Filhas[_nI,2],"-")//Lista das filhas da mãe ATUAL
     _cFilhasNaoIntegradas:=""
     _cFilhasdeOutraMae:=""
     ZLJ->( DbOrderNickName("FILHADAMAE") )// 7 - ZLJ_FILIAL+ZLJ_VFILHA+ZLJ_VIAGEM
-    For F := 1 TO LEN(_aFilhasMae)//LENDO CADA FILHA
+    For F := 1 TO Len(_aFilhasMae)//LENDO CADA FILHA
         
         //********* Verifica Filha da mae não encontrada na integração atual ********* 
         If !_aFilhasMae[F] $ _aMaes_e_Filhas[_nI,3]
            _cFilhasNaoIntegradas+=_aFilhasMae[F]+", "
-        ENDIF
+        EndIf
         
         //********* Verifica Filha da mãe já cadastrada para outra mãe ********* 
-        For _nFoM := 1 to len(_aMaes_e_Filhas)//Ver se cada filha não está em outra viagem mãe na integração atual
+        For _nFoM := 1 to Len(_aMaes_e_Filhas)//Ver se cada filha não está em outra viagem mãe na integração atual
             If !(_aMaes_e_Filhas[_nI,1] == _aMaes_e_Filhas[_nFoM,1])//Igora a mãe atual e ve as outraS mães
                If _aFilhasMae[F] $ _aMaes_e_Filhas[_nFoM,3]//Filha em outra mãe
                   _cFilhasdeOutraMae+="F: "+_aFilhasMae[F]+"/M: "+_aMaes_e_Filhas[_nFoM,1]+", "
-               Endif
-            Endif
+               EndIf
+            EndIf
         Next _nFoM
         
         ///*********  Ver se cada filha não está em outra viagem mãe já integrada /********* 
                                    //ZLJ_FILIAL + ZLJ_VFILHA      
-        IF ZLJ->(DBSEEK( _aMaes_e_Filhas[_nI,4] + _aFilhasMae[F] ))//ZLJ_FILIAL+ZLJ_VFILHA+ZLJ_VIAGEM
-           DO WHILE ZLJ->(!EOF()) .AND.  _aMaes_e_Filhas[_nI,4] + _aFilhasMae[F] == ZLJ->ZLJ_FILIAL+ZLJ->ZLJ_VFILHA
-              IF _aMaes_e_Filhas[_nI,1] <> ZLJ->ZLJ_VIAGEM .AND. !ZLJ->ZLJ_VIAGEM $ _cFilhasdeOutraMae// Ve se a mae da filha atual é diferente de uma já cadastrada e se ela já não tá na lista atual (_cFilhasdeOutraMae)
+        If ZLJ->(DBSeek( _aMaes_e_Filhas[_nI,4] + _aFilhasMae[F] ))//ZLJ_FILIAL+ZLJ_VFILHA+ZLJ_VIAGEM
+           While ZLJ->(!Eof()) .And.  _aMaes_e_Filhas[_nI,4] + _aFilhasMae[F] == ZLJ->ZLJ_FILIAL+ZLJ->ZLJ_VFILHA
+              If _aMaes_e_Filhas[_nI,1] <> ZLJ->ZLJ_VIAGEM .And. !ZLJ->ZLJ_VIAGEM $ _cFilhasdeOutraMae// Ve se a mae da filha atual é diferente de uma já cadastrada e se ela já não tá na lista atual (_cFilhasdeOutraMae)
                  _cFilhasdeOutraMae+="*F: "+_aFilhasMae[F]+"/*M: "+ZLJ->ZLJ_VIAGEM+", "
-              ENDIF
-              ZLJ->(DBSKIP())
-           ENDDO
-        Endif
+              EndIf
+              ZLJ->(DBSkip())
+           EndDo
+        EndIf
 
     Next F
-    _cFilhasNaoIntegradas:=LEFT(_cFilhasNaoIntegradas,LEN(_cFilhasNaoIntegradas)-2)
-    _cFilhasdeOutraMae   :=LEFT(_cFilhasdeOutraMae   ,LEN(_cFilhasdeOutraMae   )-2)
+    _cFilhasNaoIntegradas:=LEFT(_cFilhasNaoIntegradas,Len(_cFilhasNaoIntegradas)-2)
+    _cFilhasdeOutraMae   :=LEFT(_cFilhasdeOutraMae   ,Len(_cFilhasdeOutraMae   )-2)
 
-    If !Empty(_cFilhasdeOutraMae) .AND. !Empty(_cFilhasNaoIntegradas)
+    If !Empty(_cFilhasdeOutraMae) .And. !Empty(_cFilhasNaoIntegradas)
        _cMotivo:="Viagem Recusada: [Viagen(s) Filha(s) em outra Mae: "+_cFilhasdeOutraMae+"] [Viagen(s) Filha(s) não Integradas/Aceitas: "+_cFilhasNaoIntegradas+" no mesmo periodo]"
        _lJulietaOK:=.F.
     ElseIf !Empty(_cFilhasdeOutraMae)
@@ -1781,13 +1765,13 @@ For _nI := 1 to len(_aMaes_e_Filhas)
 
     If !_lJulietaOK
     
-       If (_nPos:=Ascan(_aRecViagens,{|aVal| aVal[1] == _aMaes_e_Filhas[_ni][1] .AND. aVal[2] == _aMaes_e_Filhas[_ni][4] })) # 0
+       If (_nPos:=aScan(_aRecViagens,{|aVal| aVal[1] == _aMaes_e_Filhas[_nI][1] .And. aVal[2] == _aMaes_e_Filhas[_nI][4] })) # 0
 
            _aRecTRB:=_aRecViagens[_nPos,3]
 
-           For T := 1 TO LEN(_aRecTRB)
+           For T := 1 TO Len(_aRecTRB)
 
-               TRB_ZLJ->(DBGOTO(_aRecTRB[T]))
+               TRB_ZLJ->(DBGoTo(_aRecTRB[T]))
                
                MGLT002LogGrv(.F.,_cMotivo,.F.)
                _nConta--//Desconta pq já foi aceito no primeiro For
@@ -1796,7 +1780,7 @@ For _nI := 1 to len(_aMaes_e_Filhas)
        
        Else//Previnir Algum erro lógico
 
-           TRB_ZLJ->(DBGOTO(_aViagens[_ni][14]))
+           TRB_ZLJ->(DBGoTo(_aViagens[_nI][14]))
            MGLT002LogGrv(.F.,_cMotivo,.F.)
            _nConta--//Desconta pq já foi aceito no primeiro For
        
@@ -1815,11 +1799,11 @@ EndIf
 _nTimeOutSQ:=SuperGetMV("LT_WEBSQTO",.F.,90)
 
 _lRetorno:=.T.
-BEGIN SEQUENCE
+Begin Sequence
 
-   If TRB_ZLJ->(EOF()) .AND. TRB_ZLJ->(BOF())
-      ZLK->(Msunlock())
-      ZLK->(MsunlockAll())//Destrava todas as filiais travadas
+   If TRB_ZLJ->(Eof()) .And. TRB_ZLJ->(Bof())
+      ZLK->(MSUnLock())
+      ZLK->(MSUnLockAll())//Destrava todas as filiais travadas
       If !_lShedule
       	 MsgAlert("Não foram encontrados registros para processar! Selecione outros filtros","MGLT00205")
       Else
@@ -1831,13 +1815,13 @@ BEGIN SEQUENCE
    EndIf
 
    If !Empty(_cViagIgoradas)
-      _cViagIgoradas :="Viagens Ignoradas por Setor: "+LEFT(_cViagIgoradas,LEN(_cViagIgoradas)-1)
+      _cViagIgoradas :="Viagens Ignoradas por Setor: "+LEFT(_cViagIgoradas,Len(_cViagIgoradas)-1)
    EndIf
-   _cFilSetor     :="Setores Lidos: "+STRTRAN( STRTRAN(_cFilter,"_cSetor == ","") ," .OR. ",",")
+   _cFilSetor     :="Setores Lidos: "+StrTran( StrTran(_cFilter,"_cSetor == ","") ," .Or. ",",")
    _cSQTimeInicial:=_cTimeInicial
-   _cSQTimeFinal  :=TIME()
+   _cSQTimeFinal  :=Time()
 
-   If !_lShedule .AND. !MGLT002Tela()
+   If !_lShedule .And. !MGLT002Tela()
       _lRetorno:=.F.
       BREAK
    EndIf
@@ -1847,9 +1831,9 @@ BEGIN SEQUENCE
     If !_lShedule
        _oProcess:SetRegua1(TRB_ZLJ->(Lastrec()))
        _oProcess:SetRegua2(TRB_ZLJ->(Lastrec()))
-       _cTimeInicial:=TIME()
+       _cTimeInicial:=Time()
     EndIf
-    U_ITConOut("5-Calculando Estoque Viagem: "+ALLTRIM(STR(TRB_ZLJ->(Lastrec())))+" Registros... ")
+    U_ITConOut("5-Calculando Estoque Viagem: "+AllTrim(Str(TRB_ZLJ->(Lastrec())))+" Registros... ")
 
     _nRecusado:=0
     _nConta   :=0
@@ -1857,21 +1841,21 @@ BEGIN SEQUENCE
     _aViagens := {}
 
     ZLJ->( DBSetOrder(1))//ZLJ_FILIAL+ZLJ_NUMERO
-    TRB_ZLJ->(DBGOTOP())
-    DO While TRB_ZLJ->(!EOF())
+    TRB_ZLJ->(DBGoTop())
+    While TRB_ZLJ->(!Eof())
        
        If !_lShedule
           _oProcess:IncRegua1("5-Calculando Estoque Viagem: "+TRB_ZLJ->ZLJ_VIAGEM)
-          _oProcess:IncRegua2(STR(_nConta,6)+" Atendimentos Lidos...")
+          _oProcess:IncRegua2(Str(_nConta,6)+" Atendimentos Lidos...")
        EndIf
        
-       If !Empty(TRB_ZLJ->WK_MARCA) .AND. TRB_ZLJ->ZLJ_STATUS = 'P' 
+       If !Empty(TRB_ZLJ->WK_MARCA) .And. TRB_ZLJ->ZLJ_STATUS = 'P' 
           
           //Codigo de segurança para não integrar nada das reusadas e Efetivadas
           ZLJ->( DBSetOrder(5))//ZLJ_FILIAL+ZLJ_VIAGEM+ZLJ_TIPPRO+ZLJ_VFILHA+ZLJ_SETOR+ZLJ_LINROT
-          If ZLJ->( DBSeek( TRB_ZLJ->ZLJ_FILIAL + TRB_ZLJ->ZLJ_VIAGEM )) .AND. ZLJ->ZLJ_STATUS $ "R,E"
-             TRB_ZLJ->(DBSKIP())
-             LOOP
+          If ZLJ->( DBSeek( TRB_ZLJ->ZLJ_FILIAL + TRB_ZLJ->ZLJ_VIAGEM )) .And. ZLJ->ZLJ_STATUS $ "R,E"
+             TRB_ZLJ->(DBSkip())
+             Loop
           EndIf
           //Codigo de segurança para não integrar nada das reusadas
 
@@ -1891,21 +1875,21 @@ BEGIN SEQUENCE
              _nRecusado++
           EndIf
           If _lShedule
-             aAdd( _aLog , {DTOC(TRB_ZLJ->WK_DATA)+" "+ALLTRIM(TRB_ZLJ->WK_HORA),TRB_ZLJ->ZLJ_FILIAL,TRB_ZLJ->ZLJ_VIAGEM,TRB_ZLJ->ZLJ_NUMERO,TRB_ZLJ->ZLJ_SETOR,TRB_ZLJ->ZLJ_LINROT+"/"+TRB_ZLJ->ZLJ_LINHSQ,ALLTRIM(TRANSF(TRB_ZLJ->ZLJ_KMDVIA,"@E 999,999,999")), TRB_ZLJ->ZLJ_MOTIVO,"X",DTOC(TRB_ZLJ->ZLJ_DTCRIA)} )
+             aAdd( _aLog , {DToC(TRB_ZLJ->WK_DATA)+" "+AllTrim(TRB_ZLJ->WK_HORA),TRB_ZLJ->ZLJ_FILIAL,TRB_ZLJ->ZLJ_VIAGEM,TRB_ZLJ->ZLJ_NUMERO,TRB_ZLJ->ZLJ_SETOR,TRB_ZLJ->ZLJ_LINROT+"/"+TRB_ZLJ->ZLJ_LINHSQ,AllTrim(TRANSF(TRB_ZLJ->ZLJ_KMDVIA,"@E 999,999,999")), TRB_ZLJ->ZLJ_MOTIVO,"X",DToC(TRB_ZLJ->ZLJ_DTCRIA)} )
           EndIf
 
        EndIf
        
-       TRB_ZLJ->(DBSKIP())
+       TRB_ZLJ->(DBSkip())
     
     EndDo
 
     If !_lShedule
-       _oProcess:SetRegua1( (TRB_ZLJ->(Lastrec()) + LEN(_aViagens)) )
-       _oProcess:SetRegua2( (TRB_ZLJ->(Lastrec()) + LEN(_aViagens)) )
-       _cTimeInicial:=TIME()
+       _oProcess:SetRegua1( (TRB_ZLJ->(Lastrec()) + Len(_aViagens)) )
+       _oProcess:SetRegua2( (TRB_ZLJ->(Lastrec()) + Len(_aViagens)) )
+       _cTimeInicial:=Time()
     EndIf
-    U_ITConOut("6-Gravando Entrada no Estoque..."+ALLTRIM(STR(LEN(_aViagens)))+" Registros... ")
+    U_ITConOut("6-Gravando Entrada no Estoque..."+AllTrim(Str(Len(_aViagens)))+" Registros... ")
     _nConta   :=0
     ZLJ->( DBSetOrder(1))//ZLJ_FILIAL+ZLJ_NUMERO
     TRB_ZLJ->( DBSetOrder(2))//ZLJ_FILIAL+ZLJ_VIAGEM
@@ -1914,92 +1898,92 @@ BEGIN SEQUENCE
 	_nEstoque:= 0
     ZLK->(DBSetOrder(1))
 
-	For _nI := 1 to len(_aViagens)
+	For _nI := 1 to Len(_aViagens)
 
      // Codigo de segurança para não duplicar
-  		If ZLK->(Dbseek(_aViagens[_ni][7] ))
+  		If ZLK->(DBSeek(_aViagens[_nI][7] ))
   		
   			If !ZLK->(MsRLock(ZLK->(RECNO())))
-            LOOP  		        		
+            Loop  		        		
   			Else
   			
- 			   ZLK->(Reclock("ZLK",.F.))
-            ZLK->ZLK_VIAGEM := _aViagens[_ni][7]+"-"+DTOC(DATE())+"-"+TIME()
-  			   ZLK->ZLK_THREAD := strzero(ThreadID(),6)
+ 			   ZLK->(RecLock("ZLK",.F.))
+            ZLK->ZLK_VIAGEM := _aViagens[_nI][7]+"-"+DToC(DATE())+"-"+Time()
+  			   ZLK->ZLK_THREAD := StrZero(ThreadID(),6)
   			   ZLK->ZLK_USUSAR := _cZLJ_UINTSQ
-  			   ZLK->(Msunlock())
-  			   ZLK->(Reclock("ZLK",.F.))
+  			   ZLK->(MSUnLock())
+  			   ZLK->(RecLock("ZLK",.F.))
   				
   			EndIf
   			
   		Else
   		
-  			ZLK->(Reclock("ZLK",.T.))
-         ZLK->ZLK_FILIAL := _aViagens[_ni][7]
-  			ZLK->ZLK_VIAGEM := _aViagens[_ni][7]+"-"+DTOC(DATE())+"-"+TIME()
-  			ZLK->ZLK_THREAD := strzero(ThreadID(),6)
+  			ZLK->(RecLock("ZLK",.T.))
+         ZLK->ZLK_FILIAL := _aViagens[_nI][7]
+  			ZLK->ZLK_VIAGEM := _aViagens[_nI][7]+"-"+DToC(DATE())+"-"+Time()
+  			ZLK->ZLK_THREAD := StrZero(ThreadID(),6)
   			ZLK->ZLK_USUSAR := _cZLJ_UINTSQ
-  			ZLK->(Msunlock())
-  			ZLK->(Reclock("ZLK",.F.))
+  			ZLK->(MSUnLock())
+  			ZLK->(RecLock("ZLK",.F.))
   			
   		EndIf
      // Codigo de segurança para não duplicar
 
      BEGIN TRANSACTION
-     BEGIN SEQUENCE
+     Begin Sequence
 
-        _cChave:=_aViagens[_ni][7]+_aViagens[_ni][1]
+        _cChave:=_aViagens[_nI][7]+_aViagens[_nI][1]
 
         If !MGLT2GrvZLJ(_oProcess,_cChave,_lShedule)
            BREAK
         EndIf
 
-        If _aViagens[_ni][08]//Se For descarte
+        If _aViagens[_nI][08]//Se For descarte
            U_ITConOut("1-Não precisou gravar o estoque dessa Viagem: "+_cChave)
            BREAK
         EndIf
 
-        If !_aViagens[_ni][10]//Se nao Tem Leite Proprio
-           aAdd( _aLog , {DTOC(_aViagens[_ni][6]), _aViagens[_ni][7], _aViagens[_ni][1] ,"Entrada do Estoque","","","", 'Não foi gravado o estoque dessa viagem por nao ter leite proprio',"X",DTOC(_aViagens[_ni][13]) } )
+        If !_aViagens[_nI][10]//Se nao Tem Leite Proprio
+           aAdd( _aLog , {DToC(_aViagens[_nI][6]), _aViagens[_nI][7], _aViagens[_nI][1] ,"Entrada do Estoque","","","", 'Não foi gravado o estoque dessa viagem por nao ter leite proprio',"X",DToC(_aViagens[_nI][13]) } )
            U_ITConOut("2-Não precisou gravar o estoque dessa Viagem: "+_cChave)
            BREAK
         EndIf
 
         If !_lShedule
            _oProcess:IncRegua1("6-Gravando Entrada no Estoque...")
-           _oProcess:IncRegua2("...Viagem: "+_aViagens[_ni][1])
+           _oProcess:IncRegua2("...Viagem: "+_aViagens[_nI][1])
         EndIf
 
         // Volume do veiculo - o total da cooperativa  = Volume do leite proprio com a diferença
-		nTotBom:=_aViagens[_ni][9]-_aViagens[_ni][3] 
+		nTotBom:=_aViagens[_nI][9]-_aViagens[_nI][3] 
 
 		If nTotBom > 0//Variaval USADA DENTRO DA FUNCAO U_AGLT003G
 			    
-         _aSetores :=_aViagens[_ni][11]
+         _aSetores :=_aViagens[_nI][11]
          _nCustoEst:=0
-         If LEN(_aSetores) > 1
-            For S := 1 to LEN(_aSetores)                       
+         If Len(_aSetores) > 1
+            For S := 1 to Len(_aSetores)                       
 			   // Total do setor dividido pelo total dos setores multiplicado pela diferenca = Total do setor com a diferenca
-               _aSetores[S,2]:= _aSetores[S][3] / _aViagens[_ni][12] * nTotBom
-               _nVlrMix      := POSICIONE("ZL2",1,XFILIAL("ZL2")+_aSetores[S,1],"ZL2_ULTMIX")
+               _aSetores[S,2]:= _aSetores[S][3] / _aViagens[_nI][12] * nTotBom
+               _nVlrMix      := Posicione("ZL2",1,xFilial("ZL2")+_aSetores[S,1],"ZL2_ULTMIX")
                _nCustoEst    += (_nVlrMix * _aSetores[S,2])                          
 	        Next                    
          EndIf			
 			
 			 _cErroSche := ""               //Variavel preenchida na funcao U_AGLT003G com o mensagem de erro
-			 _cErro2Sche:= "Inicio da Entrada: "+DTOC(DATE())+"-"+TIME()
-			 cFilAnt    := _aViagens[_ni][7]//Filial da Viagem para dar entrada de estoque na filial certa
-		    cSetor     := _aViagens[_ni][2]//Variavel usada dentro da funcao U_AGLT003G()  // ZLJ_SETOR onde grava D3_L_SETOR
-		    dDtColeta  := _aViagens[_ni][4]//Variavel usada dentro da funcao U_AGLT003G()  // onde grava a data entrada no estoque: ZLJ_DTCRIA --> D3_EMISSAO / ZLW_DTLANC
+			 _cErro2Sche:= "Inicio da Entrada: "+DToC(DATE())+"-"+Time()
+			 cFilAnt    := _aViagens[_nI][7]//Filial da Viagem para dar entrada de estoque na filial certa
+		    cSetor     := _aViagens[_nI][2]//Variavel usada dentro da funcao U_AGLT003G()  // ZLJ_SETOR onde grava D3_L_SETOR
+		    dDtColeta  := _aViagens[_nI][4]//Variavel usada dentro da funcao U_AGLT003G()  // onde grava a data entrada no estoque: ZLJ_DTCRIA --> D3_EMISSAO / ZLW_DTLANC
 
  ////////////////////////////////////////////// GRAVANDO ENTRADA NO ESTOQUE ////////////////////////////////////////////////////////////////////////////////////////
           _lVerificado:=.F.
-          If _nTimeOutSQ <> 0 .AND. !_lShedule// VIA JOB
+          If _nTimeOutSQ <> 0 .And. !_lShedule// VIA JOB
              U_ITConOut("Gravando Entrada no Estoque Via JOB Viagem: "+_cChave)
-             _lRet := MGLT2GerEstoque(_nTimeOutSQ,_cChave,_aViagens[_ni][1],_nCustoEst,_oProcess,_aViagens[_ni])//Inicializa controle de timeout do execauto em paralelo
+             _lRet := MGLT2GerEstoque(_nTimeOutSQ,_cChave,_aViagens[_nI][1],_nCustoEst,_oProcess,_aViagens[_nI])//Inicializa controle de timeout do execauto em paralelo
           Else// VIA NORMAL
              U_ITConOut("Gravando Entrada no Estoque Via U_AGLT003G() direto Viagem: "+_cChave)
-             _lRet := U_AGLT003G( _aViagens[_ni][1] , 3 , .T. , _nCustoEst ) //Grava movimento de estoque igual a rotina da recepção manual            
+             _lRet := U_AGLT003G( _aViagens[_nI][1] , 3 , .T. , _nCustoEst ) //Grava movimento de estoque igual a rotina da recepção manual            
           EndIf
  ////////////////////////////////////////////// GRAVANDO ENTRADA NO ESTOQUE ////////////////////////////////////////////////////////////////////////////////////////
             
@@ -2007,15 +1991,15 @@ BEGIN SEQUENCE
 			
   				Disarmtransaction()
                 
-			   _cErro2Sche+= " / Final da Entrada: "+DTOC(DATE())+"-"+TIME()
-				aAdd( _aLog , {DTOC(_aViagens[_ni][6]), _aViagens[_ni][7], _aViagens[_ni][1] ,"MensagemA Estoque:","","","", 'NAO FOI POSSIVEL GRAVAR O ESTOQUE DESSA VIAGEM ERRO ABAIXO',"EX",DTOC(_aViagens[_ni][13]) } )
-				aAdd( _aLog , {DTOC(_aViagens[_ni][6]), _aViagens[_ni][7], _aViagens[_ni][1] ,"MensagemB Estoque:","","","", 'Erro: ['+_cErroSche+']'                                    ,"EX",DTOC(_aViagens[_ni][13]) } )
-            IF _lVerificado
-				   aAdd( _aLog , {DTOC(_aViagens[_ni][6]), _aViagens[_ni][7], _aViagens[_ni][1] ,"Nao Gravou Estoque:","" ,"",""              ,"Confirmado apos verificacao via consulta","EX",DTOC(_aViagens[_ni][13]) } )
-            ENDIF
-				aAdd( _aLog , {DTOC(_aViagens[_ni][6]), _aViagens[_ni][7], _aViagens[_ni][1] ,"Tempo Entrada:"    ,"","","", _cErro2Sche                                                 ,"EX",DTOC(_aViagens[_ni][13]) } )
+			   _cErro2Sche+= " / Final da Entrada: "+DToC(DATE())+"-"+Time()
+				aAdd( _aLog , {DToC(_aViagens[_nI][6]), _aViagens[_nI][7], _aViagens[_nI][1] ,"MensagemA Estoque:","","","", 'NAO FOI POSSIVEL GRAVAR O ESTOQUE DESSA VIAGEM ERRO ABAIXO',"EX",DToC(_aViagens[_nI][13]) } )
+				aAdd( _aLog , {DToC(_aViagens[_nI][6]), _aViagens[_nI][7], _aViagens[_nI][1] ,"MensagemB Estoque:","","","", 'Erro: ['+_cErroSche+']'                                    ,"EX",DToC(_aViagens[_nI][13]) } )
+            If _lVerificado
+				   aAdd( _aLog , {DToC(_aViagens[_nI][6]), _aViagens[_nI][7], _aViagens[_nI][1] ,"Nao Gravou Estoque:","" ,"",""              ,"Confirmado apos verificacao via consulta","EX",DToC(_aViagens[_nI][13]) } )
+            EndIf
+				aAdd( _aLog , {DToC(_aViagens[_nI][6]), _aViagens[_nI][7], _aViagens[_nI][1] ,"Tempo Entrada:"    ,"","","", _cErro2Sche                                                 ,"EX",DToC(_aViagens[_nI][13]) } )
 
-                _cErroSche:="Não foi possível gravar a entrada de estoque da Viagem: "+_aViagens[_ni][1]+CRLF+;
+                _cErroSche:="Não foi possível gravar a entrada de estoque da Viagem: "+_aViagens[_nI][1]+CRLF+;
 	                        'Erro: ['+_cErroSche+']'
 	                        //'Todas as gravacoes de todas as viagens foram canceladas'
              If _lShedule
@@ -2027,12 +2011,12 @@ BEGIN SEQUENCE
                     
  			   _nEstoque++
             cMOTIVO:='Entrada de estoque registrada com SUCESSO por '+_cZLJ_UINTSQ
-			   _cErro2Sche+= " / Final da Entrada: "+DTOC(DATE())+"-"+TIME()
-				aAdd( _aLog , {DTOC(_aViagens[_ni][6]), _aViagens[_ni][7], _aViagens[_ni][1] ,"Entrada Estoque:",ALLTRIM(TRANSF(nTotBom,"@E 999,999,999"))+" L","","", cMOTIVO    ,"EOK",DTOC(_aViagens[_ni][13]) } )
-            IF _lVerificado
-				   aAdd( _aLog , {DTOC(_aViagens[_ni][6]), _aViagens[_ni][7], _aViagens[_ni][1] ,"Entrada Estoque:","" ,"",""         , "Confirmada apos verificacao via consulta","_OK",DTOC(_aViagens[_ni][13]) } )
-            ENDIF
-				aAdd( _aLog , {DTOC(_aViagens[_ni][6]), _aViagens[_ni][7], _aViagens[_ni][1] ,"Tempo Entrada:"  ,""                                            ,"","", _cErro2Sche,"_OK",DTOC(_aViagens[_ni][13]) } )
+			   _cErro2Sche+= " / Final da Entrada: "+DToC(DATE())+"-"+Time()
+				aAdd( _aLog , {DToC(_aViagens[_nI][6]), _aViagens[_nI][7], _aViagens[_nI][1] ,"Entrada Estoque:",AllTrim(TRANSF(nTotBom,"@E 999,999,999"))+" L","","", cMOTIVO    ,"EOK",DToC(_aViagens[_nI][13]) } )
+            If _lVerificado
+				   aAdd( _aLog , {DToC(_aViagens[_nI][6]), _aViagens[_nI][7], _aViagens[_nI][1] ,"Entrada Estoque:","" ,"",""         , "Confirmada apos verificacao via consulta","_OK",DToC(_aViagens[_nI][13]) } )
+            EndIf
+				aAdd( _aLog , {DToC(_aViagens[_nI][6]), _aViagens[_nI][7], _aViagens[_nI][1] ,"Tempo Entrada:"  ,""                                            ,"","", _cErro2Sche,"_OK",DToC(_aViagens[_nI][13]) } )
 
 
 			EndIf		
@@ -2041,14 +2025,14 @@ BEGIN SEQUENCE
 
   			Disarmtransaction()
 
-         _cErroSche :='Volume de Entrada Inválido: '+ALLTRIM(TRANSF(nTotBom,"@E 999,999,999"))+" L"
-		   _cErro2Sche+= " / Final da Entrada: "+DTOC(DATE())+"-"+TIME()
+         _cErroSche :='Volume de Entrada Inválido: '+AllTrim(TRANSF(nTotBom,"@E 999,999,999"))+" L"
+		   _cErro2Sche+= " / Final da Entrada: "+DToC(DATE())+"-"+Time()
 				
-			aAdd( _aLog , {DTOC(_aViagens[_ni][6]), _aViagens[_ni][7], _aViagens[_ni][1] ,"Mensagem1 Estoque:","","","",'Não foi possível gravar o estoque dessa viagem erro abaixo',"EX",DTOC(_aViagens[_ni][13]) } )
-			aAdd( _aLog , {DTOC(_aViagens[_ni][6]), _aViagens[_ni][7], _aViagens[_ni][1] ,"Mensagem2 Estoque:","","","",'Erro: ['+_cErroSche+']'                                    ,"EX",DTOC(_aViagens[_ni][13]) } )
-			aAdd( _aLog , {DTOC(_aViagens[_ni][6]), _aViagens[_ni][7], _aViagens[_ni][1] ,"Tempo Entrada:"    ,"","","",_cErro2Sche                                                 ,"EX",DTOC(_aViagens[_ni][13]) } )
+			aAdd( _aLog , {DToC(_aViagens[_nI][6]), _aViagens[_nI][7], _aViagens[_nI][1] ,"Mensagem1 Estoque:","","","",'Não foi possível gravar o estoque dessa viagem erro abaixo',"EX",DToC(_aViagens[_nI][13]) } )
+			aAdd( _aLog , {DToC(_aViagens[_nI][6]), _aViagens[_nI][7], _aViagens[_nI][1] ,"Mensagem2 Estoque:","","","",'Erro: ['+_cErroSche+']'                                    ,"EX",DToC(_aViagens[_nI][13]) } )
+			aAdd( _aLog , {DToC(_aViagens[_nI][6]), _aViagens[_nI][7], _aViagens[_nI][1] ,"Tempo Entrada:"    ,"","","",_cErro2Sche                                                 ,"EX",DToC(_aViagens[_nI][13]) } )
 
-         _cErroSche:="Não foi possível gravar a entrada de estoque da Viagem: "+_aViagens[_ni][1]+CRLF+;
+         _cErroSche:="Não foi possível gravar a entrada de estoque da Viagem: "+_aViagens[_nI][1]+CRLF+;
 	                  'Erro: ['+_cErroSche+']'
          If _lShedule
             MGLT002EML(_cErroSche)
@@ -2057,7 +2041,7 @@ BEGIN SEQUENCE
 
 		EndIf
     
-      END SEQUENCE
+      End Sequence
       END TRANSACTION
 		
 	Next _nI
@@ -2065,8 +2049,8 @@ BEGIN SEQUENCE
 	cFilAnt:=_cFilold//Volta a filial atual
     TRB_ZLJ->( DBSetOrder(1))
 
-    ZLK->(Msunlock())
-    ZLK->(MsunlockAll())//Destrava todas as filiais travadas
+    ZLK->(MSUnLock())
+    ZLK->(MSUnLockAll())//Destrava todas as filiais travadas
 
   If Empty( _aLog )
      If !_lShedule
@@ -2078,34 +2062,34 @@ BEGIN SEQUENCE
      _lRetorno:=.F.
   Else
 
-     _aLog := aSort(_aLog,,,{|x,y| DTOS(CTOD(x[1]))+x[2]+x[3]+x[4]+x[5] < DTOS(CTOD(y[1]))+y[2]+y[3]+y[4]+y[5] })//Ordena por Data + Filial + Viagem + Atendimento + Setor 
+     _aLog := aSort(_aLog,,,{|x,y| DToS(CTOD(x[1]))+x[2]+x[3]+x[4]+x[5] < DToS(CTOD(y[1]))+y[2]+y[3]+y[4]+y[5] })//Ordena por Data + Filial + Viagem + Atendimento + Setor 
 
      If !_lShedule
 
-		aAdd( _aLog , {DTOC(DATE()), "" , "Obs. 01" , "" , "" , "" , ALLTRIM(STR(_nRecusado,10)), 'Atendimentos Recusados/não selecionados',"OK","" } )
-		aAdd( _aLog , {DTOC(DATE()), "" , "Obs. 02" , "" , "" , "" , ALLTRIM(STR(_nConta   ,10)), 'Atendimentos Gravados',"OK"                  ,"" } )
-		aAdd( _aLog , {DTOC(DATE()), "" , "Obs. 03" , "" , "" , "" , ALLTRIM(STR(_nEstoque ,10)), 'Entradas em Estoque'  ,"OK"                  ,"" } )
-		aAdd( _aLog , {DTOC(DATE()), "" , "Obs. 04" , "" , "" , "" , ""                         , 'SQ Hora Inicial: '+_cSQTimeInicial,"OK"      ,"" } )
-		aAdd( _aLog , {DTOC(DATE()), "" , "Obs. 05" , "" , "" , "" , ""                         , 'SQ Hora Final: '+_cSQTimeFinal    ,"OK"      ,"" } )
-		aAdd( _aLog , {DTOC(DATE()), "" , "Obs. 06" , "" , "" , "" , ""                         , 'Hora Inicial: '+_cTimeInicial     ,"OK"      ,"" } )
-		aAdd( _aLog , {DTOC(DATE()), "" , "Obs. 07" , "" , "" , "" , ""                         , 'Hora Final: '+TIME(),"OK"                    ,"" } )
-		aAdd( _aLog , {DTOC(DATE()), "" , "Obs. 08" , "" , "" , "" , ""                         , _cFilSetor           ,"OK"                    ,"" } )
+		aAdd( _aLog , {DToC(DATE()), "" , "Obs. 01" , "" , "" , "" , AllTrim(Str(_nRecusado,10)), 'Atendimentos Recusados/não selecionados',"OK","" } )
+		aAdd( _aLog , {DToC(DATE()), "" , "Obs. 02" , "" , "" , "" , AllTrim(Str(_nConta   ,10)), 'Atendimentos Gravados',"OK"                  ,"" } )
+		aAdd( _aLog , {DToC(DATE()), "" , "Obs. 03" , "" , "" , "" , AllTrim(Str(_nEstoque ,10)), 'Entradas em Estoque'  ,"OK"                  ,"" } )
+		aAdd( _aLog , {DToC(DATE()), "" , "Obs. 04" , "" , "" , "" , ""                         , 'SQ Hora Inicial: '+_cSQTimeInicial,"OK"      ,"" } )
+		aAdd( _aLog , {DToC(DATE()), "" , "Obs. 05" , "" , "" , "" , ""                         , 'SQ Hora Final: '+_cSQTimeFinal    ,"OK"      ,"" } )
+		aAdd( _aLog , {DToC(DATE()), "" , "Obs. 06" , "" , "" , "" , ""                         , 'Hora Inicial: '+_cTimeInicial     ,"OK"      ,"" } )
+		aAdd( _aLog , {DToC(DATE()), "" , "Obs. 07" , "" , "" , "" , ""                         , 'Hora Final: '+TIME(),"OK"                    ,"" } )
+		aAdd( _aLog , {DToC(DATE()), "" , "Obs. 08" , "" , "" , "" , ""                         , _cFilSetor           ,"OK"                    ,"" } )
 
 		//Carrega novo array de log sem o campo de ok
-		_ni := 1
+		_nI := 1
 		_atlog := {}
 		
-		For _ni := 1 to len(_alog)
+		For _nI := 1 to Len(_alog)
 
-			aadd(_atlog,{_alog[_ni][01],;//'Data Lib'
-			             _alog[_ni][10],;//'Data Estoque'//onde grava a data entrada no estoque: ZLJ_DTCRIA --> D3_EMISSAO / ZLW_DTLANC
-			             _alog[_ni][02],;//'Filial'
-			             _alog[_ni][03],;//'Viagem'
-			             _alog[_ni][04],;//'Atendimento'
-			             _alog[_ni][05],;//'Setor'
-			             _alog[_ni][06],;//'Linha'
-			             _alog[_ni][07],;//'Km SQ'
-			             _alog[_ni][08]})//'Observação'
+			aAdd(_atlog,{_alog[_nI][01],;//'Data Lib'
+			             _alog[_nI][10],;//'Data Estoque'//onde grava a data entrada no estoque: ZLJ_DTCRIA --> D3_EMISSAO / ZLW_DTLANC
+			             _alog[_nI][02],;//'Filial'
+			             _alog[_nI][03],;//'Viagem'
+			             _alog[_nI][04],;//'Atendimento'
+			             _alog[_nI][05],;//'Setor'
+			             _alog[_nI][06],;//'Linha'
+			             _alog[_nI][07],;//'Km SQ'
+			             _alog[_nI][08]})//'Observação'
 		Next
 
       _cObs:="Filiais lidas: "+_cFiltroFilial+CRLF+;
@@ -2114,7 +2098,7 @@ BEGIN SEQUENCE
              'Hora Final: '+TIME()+CRLF      
       aButtons:={}//                              _cObs,_aLog,_lProcessa,_lFiltra , _cEmail , _lTela  
       bWorkflow    :={|| Processa( {|| MGLT002EML(_cObs,_aLog,.T.       ,.F.      ,         , .T.)}) }
-      AADD(aButtons,{"BUDGET"  ,bWorkflow  ,"E-mail Workflow TI"     ,"E-mail Workflow TI"})
+      aAdd(aButtons,{"BUDGET"  ,bWorkflow  ,"E-mail Workflow TI"     ,"E-mail Workflow TI"})
 
 
         //ITListBox(                 _cTitAux                                                                      , _aHeader                                                             
@@ -2124,15 +2108,15 @@ BEGIN SEQUENCE
 
      Else//Schedule 
 
-        U_ITConOut("Log de Processamento - Integração SmartQuestion  - "+DTOC(DATE())+" - "+TIME()+" - [ "+ALLTRIM(STR(_nConta,10))+" Atendimentos Gravados ]")
+        U_ITConOut("Log de Processamento - Integração SmartQuestion  - "+DToC(DATE())+" - "+TIME()+" - [ "+AllTrim(Str(_nConta,10))+" Atendimentos Gravados ]")
         
         _aFilLog:={}
-        For _nLog := 1 TO LEN(_aLog)
-            If ASCAN(_aFilLog,_aLog[_nLog,2])=0
-               AADD(_aFilLog,_aLog[_nLog,2])
+        For _nLog := 1 TO Len(_aLog)
+            If aScan(_aFilLog,_aLog[_nLog,2])=0
+               aAdd(_aFilLog,_aLog[_nLog,2])
             EndIf
         Next
-        For _nLog := 1 TO LEN(_aFilLog)//Tem que fazer um array de filial pq o _aLog nao esta por ordem de filial, esta por data
+        For _nLog := 1 TO Len(_aFilLog)//Tem que fazer um array de filial pq o _aLog nao esta por ordem de filial, esta por data
 
             cFilAnt  :=_aFilLog[_nLog]
 
@@ -2142,13 +2126,13 @@ BEGIN SEQUENCE
                        'Hora Final: '+TIME()+CRLF,_aLog, .F. , .T. )
         Next
         
-        U_ITConOut("Log de Processamento - Integração SmartQuestion  - "+DTOC(DATE())+" - "+TIME()+" - [ Envio de E-mail's finalizados ]")
+        U_ITConOut("Log de Processamento - Integração SmartQuestion  - "+DToC(DATE())+" - "+TIME()+" - [ Envio de E-mail's finalizados ]")
          
      EndIf
 
   EndIf
 
-END SEQUENCE
+End Sequence
 
 If(SELECT(cAliasWK) # 0,_otemp:delete(),)
 
@@ -2191,24 +2175,24 @@ Local oDlg,oMark,cCampo,I
 Local _cTitAux:="Resultado da Integração do SmartQuestion (MGLT002)"
 Local aCab:={} ; _aCols:={}
 
-PRIVATE _aCabXML:={}
-PRIVATE _aColsXML:={}
+Private _aCabXML:={}
+Private _aColsXML:={}
 
-AADD(aBotoes,{"RESPONSA",bMarcaTodos,"Marca/Desmarca Todos","Marca/Des Todos"})
-AADD(aBotoes,{"BUDGET"  ,bWorkflow  ,"E-mail Workflow TI"     ,"E-mail Workflow TI"})
-AADD(aBotoes,{"Exp. Excel"	 ,{|| DlgToExcel( { { "ARRAY" , _cTitAux , aCab , _aCols } } ) }, "Exportação de Dados para Excel"		, "Exp. Excel"		} )
-AADD(aBotoes,{"Exp. Arquivo",{|| U_ITGERARQ( _cTitAux , aCab , _aCols ) }					, "Exportação de Dados para Arquivo"	, "Exp. Arquivo"	} )
-AADD(aBotoes,{"Exp. XML"	 ,{|| FWMSGRUN( ,{|| U_ITGEREXCEL(,,_cTitAux,,_aCabXML,_aColsXML)} , "Aguarde!" , "Gerando XML..." ) }, "", "Exportação para XML"  	   } )
+aAdd(aBotoes,{"RESPONSA",bMarcaTodos,"Marca/Desmarca Todos","Marca/Des Todos"})
+aAdd(aBotoes,{"BUDGET"  ,bWorkflow  ,"E-mail Workflow TI"     ,"E-mail Workflow TI"})
+aAdd(aBotoes,{"Exp. Excel"	 ,{|| DlgToExcel( { { "ARRAY" , _cTitAux , aCab , _aCols } } ) }, "Exportação de Dados para Excel"		, "Exp. Excel"		} )
+aAdd(aBotoes,{"Exp. Arquivo",{|| U_ITGERARQ( _cTitAux , aCab , _aCols ) }					, "Exportação de Dados para Arquivo"	, "Exp. Arquivo"	} )
+aAdd(aBotoes,{"Exp. XML"	 ,{|| FWMsgRun( ,{|| U_ITGEREXCEL(,,_cTitAux,,_aCabXML,_aColsXML)} , "Aguarde!" , "Gerando XML..." ) }, "", "Exportação para XML"  	   } )
 
-DBSELECTAREA(cAliasWK)
+DBSelectArea(cAliasWK)
 
-AADD(aTB_Campos,{"WK_MARCA",,"",})
-AADD(aTB_Campos,{"WK_DATA" ,,"Data Lib",})
-AADD(aTB_Campos,{"WK_HORA" ,,"Hora Lib",})
+aAdd(aTB_Campos,{"WK_MARCA",,"",})
+aAdd(aTB_Campos,{"WK_DATA" ,,"Data Lib",})
+aAdd(aTB_Campos,{"WK_HORA" ,,"Hora Lib",})
 
-For I := 1 TO LEN(aCpoBrowse)
-    cCampo:=ALLTRIM(aCpoBrowse[I])
-    AADD(aTB_Campos,{cCampo,,AVSX3(cCampo,5),AVSX3(cCampo,6)})
+For I := 1 TO Len(aCpoBrowse)
+    cCampo:=AllTrim(aCpoBrowse[I])
+    aAdd(aTB_Campos,{cCampo,,AVSX3(cCampo,5),AVSX3(cCampo,6)})
     If cCampo = "ZLJ_KMDVIA"
        aTB_Campos[Len(aTB_Campos),3]:="Km SmartQuestion "
        aTB_Campos[Len(aTB_Campos),4]:="@E 999,999,999,999"
@@ -2219,8 +2203,8 @@ For I := 1 TO LEN(aCpoBrowse)
     If cCampo = "ZLJ_DTIVIA"//data de coleta do ZLD: ZLJ_DTIVIA --> ZLD->ZLD_DTCOLE / ZLW->ZLW_DTCOLE
        aTB_Campos[Len(aTB_Campos),3]:="Dt Coleta"
     EndIf
-    If cCampo = "ZLJ_VIAGEM" .AND. ZLJ->(FIELDPOS("ZLJ_VFILHA")) # 0
-       AADD(aTB_Campos,{"ZLJ_VFILHA",,"Viagem Filha",})
+    If cCampo = "ZLJ_VIAGEM" .And. ZLJ->(FIELDPOS("ZLJ_VFILHA")) # 0
+       aAdd(aTB_Campos,{"ZLJ_VFILHA",,"Viagem Filha",})
     EndIf
     If cCampo = "ZLJ_MOTIVO"
        aTB_Campos[Len(aTB_Campos),3]:="Observações"
@@ -2230,84 +2214,84 @@ For I := 1 TO LEN(aCpoBrowse)
     EndIf
 Next
 If ZLJ->(FIELDPOS("ZLJ_VFILHS")) # 0
-   AADD(aTB_Campos,{"ZLJ_VFILHS",,"Viagem Filhas da Julieta",})
+   aAdd(aTB_Campos,{"ZLJ_VFILHS",,"Viagem Filhas da Julieta",})
 EndIf
-AADD(aTB_Campos,{"ZLJ_KM_SQO",,"KM SQ Original",})
+aAdd(aTB_Campos,{"ZLJ_KM_SQO",,"KM SQ Original",})
 
 TRB_ZLJ->(DBAPPEND())
-TRB_ZLJ->ZLJ_MOTIVO:= ALLTRIM(STR(_nRecusado,10))+' Atendimentos Recusados'
-TRB_ZLJ->ZLJ_DTCRIA:= DATE()
+TRB_ZLJ->ZLJ_MOTIVO:= AllTrim(Str(_nRecusado,10))+' Atendimentos Recusados'
+TRB_ZLJ->ZLJ_DTCRIA:= Date()
 TRB_ZLJ->ZLJ_STATUS:= "R"
 TRB_ZLJ->(DBAPPEND())
-TRB_ZLJ->ZLJ_MOTIVO := ALLTRIM(STR(_nConta   ,10))+' Atendimentos Aceitos'
-TRB_ZLJ->ZLJ_DTCRIA:= DATE()
+TRB_ZLJ->ZLJ_MOTIVO := AllTrim(Str(_nConta   ,10))+' Atendimentos Aceitos'
+TRB_ZLJ->ZLJ_DTCRIA:= Date()
 TRB_ZLJ->ZLJ_STATUS:= "R"
 TRB_ZLJ->(DBAPPEND())
 TRB_ZLJ->ZLJ_MOTIVO := 'Hora Inicial: '+_cTimeInicial
-TRB_ZLJ->ZLJ_DTCRIA:= DATE()
+TRB_ZLJ->ZLJ_DTCRIA:= Date()
 TRB_ZLJ->ZLJ_STATUS:= "R"
 TRB_ZLJ->(DBAPPEND())
-TRB_ZLJ->ZLJ_MOTIVO := 'Hora Final: '+TIME()
-TRB_ZLJ->ZLJ_DTCRIA:= DATE()
+TRB_ZLJ->ZLJ_MOTIVO := 'Hora Final: '+Time()
+TRB_ZLJ->ZLJ_DTCRIA:= Date()
 TRB_ZLJ->ZLJ_STATUS:= "R"
 TRB_ZLJ->(DBAPPEND())
 TRB_ZLJ->ZLJ_MOTIVO:= _cFilSetor
-TRB_ZLJ->ZLJ_DTCRIA:= DATE()
+TRB_ZLJ->ZLJ_DTCRIA:= Date()
 TRB_ZLJ->ZLJ_STATUS:= "R"
 If !Empty(_cViagIgoradas)
    TRB_ZLJ->(DBAPPEND())
    TRB_ZLJ->ZLJ_MOTIVO:= _cViagIgoradas
-   TRB_ZLJ->ZLJ_DTCRIA:= DATE()
+   TRB_ZLJ->ZLJ_DTCRIA:= Date()
    TRB_ZLJ->ZLJ_STATUS:= "R"
 EndIf
 
-cObs:=ALLTRIM(STR(_nConta   ,10))+' Atendimentos Aceitos "OK" (verde)'+CRLF
-cObs+=ALLTRIM(STR(_nRecusado,10))+' Atendimentos Recusados "X" (vermelho)'+CRLF
+cObs:=AllTrim(Str(_nConta   ,10))+' Atendimentos Aceitos "OK" (verde)'+CRLF
+cObs+=AllTrim(Str(_nRecusado,10))+' Atendimentos Recusados "X" (vermelho)'+CRLF
 cObs+=_cFilSetor+CRLF
 cObs+='SQ Hora Inicial: '+_cTimeInicial+CRLF
-cObs+='SQ Hora Final: '+TIME()
+cObs+='SQ Hora Final: '+Time()
 //Botões de Exportar
-AADD(aCab,"Status" )
-For I := 2 TO LEN(aTB_Campos)
-    AADD(aCab,ALLTRIM(aTB_Campos[ I,3 ]) )
+aAdd(aCab,"Status" )
+For I := 2 TO Len(aTB_Campos)
+    aAdd(aCab,AllTrim(aTB_Campos[ I,3 ]) )
 Next
-For i := 1 to LEN(aCab)
+For i := 1 to Len(aCab)
 	// Alinhamento: 1-Left   ,2-Center,3-Right
 	// Formatação.: 1-General,2-Number,3-Monetário,4-DateTime
 	//          Titulo das Colunas ,Alinhamento ,Formatação, Totaliza?
-	Aadd(_aCabXML,{aCab[i]     ,1           ,1         ,.F.})
+	aAdd(_aCabXML,{aCab[i]     ,1           ,1         ,.F.})
 Next
 
-TRB_ZLJ->(DBGOTOP())
-DO While TRB_ZLJ->(!EOF())
+TRB_ZLJ->(DBGoTop())
+While TRB_ZLJ->(!Eof())
 
    _aColuna:={}
-   AADD(_aColuna, TRB_ZLJ->ZLJ_STATUS )
-   For I := 2 TO LEN(aTB_Campos)
-       If VALTYPE(aTB_Campos[ I,1 ]) = "C"
-          _xConteudo:="TRB_ZLJ->"+ALLTRIM(aTB_Campos[ I,1 ])
+   aAdd(_aColuna, TRB_ZLJ->ZLJ_STATUS )
+   For I := 2 TO Len(aTB_Campos)
+       If ValType(aTB_Campos[ I,1 ]) = "C"
+          _xConteudo:="TRB_ZLJ->"+AllTrim(aTB_Campos[ I,1 ])
           _xConteudo:=&(_xConteudo)
-          AADD(_aColuna,_xConteudo )
+          aAdd(_aColuna,_xConteudo )
        Else
           _xConteudo:=EVAL(aTB_Campos[ I,1 ])
-          AADD(_aColuna,_xConteudo )
+          aAdd(_aColuna,_xConteudo )
        EndIf   
    Next
-   AADD(_aCols, _aColuna )
+   aAdd(_aCols, _aColuna )
 
-   TRB_ZLJ->(DBSKIP())    
+   TRB_ZLJ->(DBSkip())    
 EndDo
 
 _aColsXML:=ACLONE( _aCols )
 
 //Botões de Exportar
-DO While .T.
+While .T.
    nOpca:=0
 
    oMainWnd:ReadClientCoords()//So precisa declarar uma fez para o Programa todo
    DEFINE MSDIALOG oDlg TITLE "Seleção de Viagens: Versão WebSQ "+If(_lVersaoNew,"14","9") From aCoors[1],aCoors[2] TO aCoors[3],aCoors[4] OF oMainWnd PIXEL
 
-    (cAliasWK)->(DBGOTOP())
+    (cAliasWK)->(DBGoTop())
     oMark:=MSSELECT():New(cAliasWK,"WK_MARCA","ZLJ_STATUS = 'R'",aTB_Campos,.F.,@cMarca,{21,1,(oDlg:nClientHeight-6)/2,(oDlg:nClientWidth-4)/2})
 
   	oMark:bAval               := {|| MGLT002Marca(cMarca,.F.),oMark:oBrowse:Refresh() }
@@ -2319,23 +2303,23 @@ DO While .T.
                                     oMark:oBrowse:Align:=CONTROL_ALIGN_ALLCLIENT ,;
                                     oMark:oBrowse:Refresh() )
    If nOpca = 1
-      (cAliasWK)->(DBGOTOP()) 
+      (cAliasWK)->(DBGoTop()) 
       nTotal:=0
-      (cAliasWK)->( DBEVAL( {|| nTotal++ }, {|| !Empty((cAliasWK)->WK_MARCA) } , {|| .T.} ) )
+      (cAliasWK)->( DBEval( {|| nTotal++ }, {|| !Empty((cAliasWK)->WK_MARCA) } , {|| .T.} ) )
       If nTotal = 0
 	     MsgAlert("Não existem registros marcados. Marque pelo menos uma viagem válida para integrar!","MGLT00208")
-         LOOP
+         Loop
       EndIf
-	  If MsgYesNo("Confirma a Integração? Serão integrados "+ALLTRIM(STR(nTotal,10))+" atendimentos","MGLT00209")
+	  If MsgYesNo("Confirma a Integração? Serão integrados "+AllTrim(Str(nTotal,10))+" atendimentos","MGLT00209")
          Exit
       Else
-         LOOP
+         Loop
       EndIf
    ElseIf nOpca = 0
 	  If MsgYesNo("Confirma o Cancelamento? Todos os dados lidos e processados seram perdidos","MGLT00210")
          Return .F.
       Else
-         LOOP
+         Loop
       EndIf
    EndIf
 
@@ -2370,18 +2354,18 @@ If _lTodos
    EndIf
    bFor:={|| TRB_ZLJ->ZLJ_STATUS = 'P' } 
 Else
-   bFor:={|| TRB_ZLJ->ZLJ_STATUS = 'P' .AND. _cViagemMarca == TRB_ZLJ->ZLJ_VIAGEM  } 
+   bFor:={|| TRB_ZLJ->ZLJ_STATUS = 'P' .And. _cViagemMarca == TRB_ZLJ->ZLJ_VIAGEM  } 
 EndIf
 
-TRB_ZLJ->(DBGOTOP())
-DO While TRB_ZLJ->(!EOF())
+TRB_ZLJ->(DBGoTop())
+While TRB_ZLJ->(!Eof())
    If EVAL(bFor)    
       TRB_ZLJ->WK_MARCA:=_cMarcaAtual
    EndIf                            
-   TRB_ZLJ->(DBSKIP())    
+   TRB_ZLJ->(DBSkip())    
 EndDo
 
-TRB_ZLJ->(DBGOTO(_nRegAtual))
+TRB_ZLJ->(DBGoTo(_nRegAtual))
 
 Return .F.
 /*
@@ -2417,7 +2401,7 @@ EndIf
 
 TRB_ZLJ->ZLJ_MOTIVO := _cMotivo
 
-aAdd( _aLog , {_cDataLendo+" "+_cHoraLeu,TRB_ZLJ->ZLJ_FILIAL,TRB_ZLJ->ZLJ_VIAGEM+" "+ALLTRIM(TRB_ZLJ->ZLJ_VFILHA),TRB_ZLJ->ZLJ_NUMERO,TRB_ZLJ->ZLJ_SETOR,TRB_ZLJ->ZLJ_LINROT+"/"+TRB_ZLJ->ZLJ_LINHSQ,ALLTRIM(TRANSF(TRB_ZLJ->ZLJ_KMDVIA,"@E 999,999,999")),TRB_ZLJ->ZLJ_MOTIVO,If(Empty(TRB_ZLJ->WK_MARCA),"X","OK"),DTOC(TRB_ZLJ->ZLJ_DTCRIA)} )
+aAdd( _aLog , {_cDataLendo+" "+_cHoraLeu,TRB_ZLJ->ZLJ_FILIAL,TRB_ZLJ->ZLJ_VIAGEM+" "+AllTrim(TRB_ZLJ->ZLJ_VFILHA),TRB_ZLJ->ZLJ_NUMERO,TRB_ZLJ->ZLJ_SETOR,TRB_ZLJ->ZLJ_LINROT+"/"+TRB_ZLJ->ZLJ_LINHSQ,AllTrim(TRANSF(TRB_ZLJ->ZLJ_KMDVIA,"@E 999,999,999")),TRB_ZLJ->ZLJ_MOTIVO,If(Empty(TRB_ZLJ->WK_MARCA),"X","OK"),DToC(TRB_ZLJ->ZLJ_DTCRIA)} )
 
 Return .T.
 
@@ -2441,22 +2425,22 @@ Local _cXmlRet:= ''
 Local _cErro  := ''
 Local _cXml   := _cXmlAux1//AQUI ABRE AS TAGs DO XML
 Local _lRet   := .T.
-_cDtIni:= substr(dtos(_dDtini),1,4) + "-" + substr(dtos(_dDtini),5,2) + "-" + substr(dtos(_dDtini),7,2) + _cHrInicial//"T00:00:00"
-_cDtFim:= substr(dtos(_dDtini),1,4) + "-" + substr(dtos(_dDtini),5,2) + "-" + substr(dtos(_dDtini),7,2) + _cHrFinal  //"T23:59:59"
+_cDtIni:= SubStr(DToS(_dDtini),1,4) + "-" + SubStr(DToS(_dDtini),5,2) + "-" + SubStr(DToS(_dDtini),7,2) + _cHrInicial//"T00:00:00"
+_cDtFim:= SubStr(DToS(_dDtini),1,4) + "-" + SubStr(DToS(_dDtini),5,2) + "-" + SubStr(DToS(_dDtini),7,2) + _cHrFinal  //"T23:59:59"
 _cXml  += '<dataInicio>'+_cDtIni +'</dataInicio>'+CRLF
 _cXml  += '<dataFim>'   +_cDtFim +'</dataFim>'   +CRLF
 _cXml  += _cXmlAux2
 _cXml  += U_GLTSQXML( 2 , _cMetodo )//AQUI FECHA AS TAGs DO XML
 
 If _lVersaoNew
-   _cXml:= STRTRAN(_cXml,"v9","v14")//Usa versão nova
-   _cXml:= STRTRAN(_cXml,"V9","V14")//Usa versão nova
+   _cXml:= StrTran(_cXml,"v9","v14")//Usa versão nova
+   _cXml:= StrTran(_cXml,"V9","V14")//Usa versão nova
 EndIf
 
 U_GLTSQENV( _cWS , _cXml , _aHdrOut , @_cErro , _cMetodo , @_cXmlRet )
    
-If Empty(_cErro) .AND. !Empty(_cXmlRet)
-   AADD(_aXmlDia,{_dDtini,_cXmlRet,_cDtIni,_cDtFim, SUBSTR(_cHrInicial,2,9) })
+If Empty(_cErro) .And. !Empty(_cXmlRet)
+   aAdd(_aXmlDia,{_dDtini,_cXmlRet,_cDtIni,_cDtFim, SubStr(_cHrInicial,2,9) })
 Else
    U_ITConOut( 'Erro ao ler o xml da data: '+_cdtini+" ate "+_cDtFim+" -> Erro: ["+_cErro+"]" )
    If !_lShedule
@@ -2490,7 +2474,7 @@ Static Function MGLT002EML( _cObs,_aLog,_lProcessa,_lFiltra , _cEmail , _lTela )
 
 Local _aConfig	:= U_ITCFGEML('')
 Local _cMsgEml	:= '',_nI , E
-Local _cData	:= Dtoc(DATE())
+Local _cData	:= DToC(DATE())
 Local _cHoraT   := _cTimeInicial
 Local _cAssunto := 'Workflow - Integração com o SmartQuestion'
 Local _aEmail := {}
@@ -2505,24 +2489,24 @@ If _lProcessa
    ProcRegua(0)
    IncProc("Gerando anexo...")
    PswOrder(1)
-   PswSeek(__cUserID,.T.)
+   PswSeek(__cUserId,.T.)
    aUsuario:=PswRet()	
-   _cEmail :=Alltrim(aUsuario[1,14])+";sistema@italac.com.br"
-   IF TYPE("_aCabXML") = "A" .AND. TYPE("_aColsXML") = "A" .AND. LEN(_aColsXML) > 0
+   _cEmail :=AllTrim(aUsuario[1,14])+";sistema@italac.com.br"
+   If Type("_aCabXML") = "A" .And. Type("_aColsXML") = "A" .And. Len(_aColsXML) > 0
       IncProc("Gerando anexo...")
       _cDiretorio:=_cNomeArq:=NIL
                  //_cNomeArq ,_cDiretorio ,_cTitulo ,_cNomePlan,_aCabecalho,_aDetalhe,_lLeTabTemp,_cAliasTab,_aCampos,_lScheduller,_lCriaPastas,_aPergunte,_lEnviaEmail
       U_ITGEREXCEL(@_cNomeArq,@_cDiretorio,_cAssunto,          ,_aCabXML   ,_aColsXML,           ,          ,        ,.T.)
       _cAnexa:=_cDiretorio+_cNomeArq
 	   If FILE(_cAnexa)
-	      _cDestino:=ALLTRIM(GETMV("MV_RELT",,"\SPOOL\"))
-	      if CPYT2S(_cAnexa,_cDestino,.F.) // Terminal To Server
+	      _cDestino:=AllTrim(GETMV("MV_RELT",,"\SPOOL\"))
+	      If CPYT2S(_cAnexa,_cDestino,.F.) // Terminal To Server
 	         _cAnexa  :=_cDestino+_cNomeArq
-         ENDIF
-	   ENDIF
+         EndIf
+	   EndIf
 
       IncProc("Gerado anexo: "+_cAnexa)
-   ENDIF
+   EndIf
 Else
    If Empty(_cEmail)
 	  U_ITConOut('Sem e-mail cadastrado, verifique o parametro "LT_EML_SMQ" com a area de TI')
@@ -2534,7 +2518,7 @@ EndIf
 _cMsgEml := '<html>'
 _cMsgEml += '<head><title>Integração SmartQuestion</title></head>'
 _cMsgEml += '<body>'
-_cMsgEml += '<style type="text/css"><!--'
+_cMsgEml += '<style Type="text/css"><!--'
 _cMsgEml += 'table.bordasimples { border-collapse: collapse; }'
 _cMsgEml += 'table.bordasimples tr td { border:1px solid #777777; }'
 _cMsgEml += 'td.titulos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #C6E2FF; }'
@@ -2578,14 +2562,14 @@ _cMsgEml += '      <td class="titulos" align="center" colspan="2"><font color="r
 _cMsgEml += '    </tr>'
 _cMsgEml += '</table>'
 
-If _aLog # NIL .AND. !Empty(_aLog)  .AND. Len( _aLog ) > 0
+If _aLog # NIL .And. !Empty(_aLog)  .And. Len( _aLog ) > 0
 	
-	_aLog := aSort(_aLog,,,{|x,y| DTOS(CTOD(x[1]))+x[2]+x[3]+x[4]+x[5] < DTOS(CTOD(y[1]))+y[2]+y[3]+y[4]+y[5] })//Ordena por Data + Filial + Viagem + Atendimento + Setor
+	_aLog := aSort(_aLog,,,{|x,y| DToS(CTOD(x[1]))+x[2]+x[3]+x[4]+x[5] < DToS(CTOD(y[1]))+y[2]+y[3]+y[4]+y[5] })//Ordena por Data + Filial + Viagem + Atendimento + Setor
 	
 	_cMsgEml += '<br>'
 	_cMsgEml += '<table class="bordasimples" width="1200">'
 	_cMsgEml += '    <tr>'
-	_cMsgEml += '      <td align="center" colspan="'+ALLTRIM(STR(Len( _aLog[1])))+'" class="grupos">ATENDIMENTOS</b></td>'
+	_cMsgEml += '      <td align="center" colspan="'+AllTrim(Str(Len( _aLog[1])))+'" class="grupos">ATENDIMENTOS</b></td>'
 	_cMsgEml += '    </tr>'
 	_cMsgEml += '    <tr>'
 	//" " 'Data Rec','Data Conf','Filial','Viagem','Atendimento','Setor','Linha',Km SQ,'Observação'
@@ -2616,20 +2600,20 @@ If _aLog # NIL .AND. !Empty(_aLog)  .AND. Len( _aLog ) > 0
 		   IncProc("Lendo dados...")
 	    EndIf
 
-	    If _lFiltra .AND. _aLog[_nI][02] # cFilAnt
-		   LOOP
+	    If _lFiltra .And. _aLog[_nI][02] # cFilAnt
+		   Loop
 	    EndIf
 
 		_cMsgEml += '    <tr>'
 		If _aLog[_nI][09] = "X"
 			_cMsgEml += '      <td class="recusa" align="center" width="1%"><b>X</b></td>'
-		ELSEIf _aLog[_nI][09] = "EX"
+		ElseIf _aLog[_nI][09] = "EX"
 			_cMsgEml += '      <td class="estoque" align="center" width="1%"><b>X</b></td>'
 		Else
 			_cMsgEml += '      <td class="aceito" align="center" width="1%"><b>OK</b></td>'
 		EndIf
 		_cMsgEml += '      <td class="itens" align="center" width="7%">' + _aLog[_nI][01]+'</td>'
-		If LEN(_aLog[_nI]) > 9
+		If Len(_aLog[_nI]) > 9
 		   _cMsgEml += '      <td class="itens" align="center" width="7%">'+_aLog[_nI][10]+'</td>'
         Else
 		   _cMsgEml += '      <td class="itens" align="center" width="7%"> </td>'
@@ -2640,7 +2624,7 @@ If _aLog # NIL .AND. !Empty(_aLog)  .AND. Len( _aLog ) > 0
 		_cMsgEml += '      <td class="itens" align="center" width="8%">' + _aLog[_nI][05]+'</td>'
 		_cMsgEml += '      <td class="itens" align="center" width="8%">' + _aLog[_nI][06]+'</td>'
 		_cMsgEml += '      <td class="itens" align="center" width="8%">' + _aLog[_nI][07]+'</td>'
-		_cMsgEml += '      <td class="itens" align="left"   width="45%">'+ ALLTRIM(_aLog[_nI][08])+'</td>'
+		_cMsgEml += '      <td class="itens" align="left"   width="45%">'+ AllTrim(_aLog[_nI][08])+'</td>'
 		_cMsgEml += '    </tr>'
         
         If _lFiltra
@@ -2659,13 +2643,13 @@ If _aLog # NIL .AND. !Empty(_aLog)  .AND. Len( _aLog ) > 0
 	
 EndIf
 
-If _lFiltra .OR. _lTela
-   _cObsT:=ALLTRIM(STR(_nRecusado,10))+' Atendimentos Recusados "X" (vermelho) '+CRLF
-   _cObsT+=ALLTRIM(STR(_nConta   ,10))+' Atendimentos Gravados "OK" (verde) '   +CRLF
-   _cObsT+=ALLTRIM(STR(_nEstoque ,10))+' Entradas em Estoque "OK" (verde)'      +CRLF
-   _cMsgEml:=STRTRAN(_cMsgEml,"#OBS#",_cObsT)
+If _lFiltra .Or. _lTela
+   _cObsT:=AllTrim(Str(_nRecusado,10))+' Atendimentos Recusados "X" (vermelho) '+CRLF
+   _cObsT+=AllTrim(Str(_nConta   ,10))+' Atendimentos Gravados "OK" (verde) '   +CRLF
+   _cObsT+=AllTrim(Str(_nEstoque ,10))+' Entradas em Estoque "OK" (verde)'      +CRLF
+   _cMsgEml:=StrTran(_cMsgEml,"#OBS#",_cObsT)
 
-   U_ITConOut("Log de Processamento - Integração SmartQuestion  - "+TIME()+" - [ Enviando E-mail para Filial: "+cFilAnt+", "+ALLTRIM(STR(_nConta,10))+" Atendimentos Gravados ]")
+   U_ITConOut("Log de Processamento - Integração SmartQuestion  - "+TIME()+" - [ Enviando E-mail para Filial: "+cFilAnt+", "+AllTrim(Str(_nConta,10))+" Atendimentos Gravados ]")
 
 EndIf
 
@@ -2680,9 +2664,9 @@ _cMsgEml += '</body>'
 _cMsgEml += '</html>'
 _cEmlLog := ''
 
-_aEmail := STRTOKARR(_cEmail,",")// Lista de email
+_aEmail := StrTokArr(_cEmail,",")// Lista de email
 
-For E := 1 TO LEN(_aEmail)
+For E := 1 TO Len(_aEmail)
     
     _cEmail:=_aEmail[E]
     U_ITConOut('Enviando E-mail(s) para: '+_cEmail)
@@ -2692,7 +2676,7 @@ For E := 1 TO LEN(_aEmail)
 
     If !Empty( _cEmlLog )
        If _lProcessa
-          MsgInfo( _cEmlLog+CRLF+" E-mails: "+_cEmail +CRLF+IF(_cAnexa<>NIL," Anexo: "+_cAnexa,""), "MGLT00213 - Envio do WF por e-mail")
+          MsgInfo( _cEmlLog+CRLF+" E-mails: "+_cEmail +CRLF+If(_cAnexa<>NIL," Anexo: "+_cAnexa,""), "MGLT00213 - Envio do WF por e-mail")
        Else
           U_ITConOut(_cEmlLog+CRLF+" E-mails: "+_cEmail)
        EndIf
@@ -2722,7 +2706,7 @@ ElseIf (cAlias)->ZLJ_TIPPRO == 'F'
    cTipo:='Reboque'
 ElseIf (cAlias)->ZLJ_TIPPRO == 'R'
    cTipo:='Reboque (Filha)'
-ElseIf (cAlias)->ZLJ_TIPPRO == 'A' .OR. POSICIONE("SA2",1,Xfilial("SA2")+(cAlias)->ZLJ_CODPAT+(cAlias)->ZLJ_LOJPAT,"A2_L_TIPPR") = "A" 
+ElseIf (cAlias)->ZLJ_TIPPRO == 'A' .Or. Posicione("SA2",1,xFilial("SA2")+(cAlias)->ZLJ_CODPAT+(cAlias)->ZLJ_LOJPAT,"A2_L_TIPPR") = "A" 
    cTipo:='Atravessador'
 ElseIf (cAlias)->ZLJ_TIPPRO == 'P'
    cTipo:='Leite Proprio'
@@ -2755,7 +2739,7 @@ If ValType( XmlChildEx( _aDadAtd[_nX]:_LISTARESPOSTA,"_LISTACAMPORESPOSTA") ) = 
 					
 					If Val(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_VALORRESPOSTANUMERICO:TEXT ) > 100000
 						
-					   _cMemAux += " Valor volume invalido: " + alltrim(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_VALORRESPOSTANUMERICO:TEXT)
+					   _cMemAux += " Valor volume invalido: " + AllTrim(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_VALORRESPOSTANUMERICO:TEXT)
 					   
 					   If _lGrava
 					      TRB_ZLJ->ZLJ_VOLUME:= 0
@@ -2765,12 +2749,12 @@ If ValType( XmlChildEx( _aDadAtd[_nX]:_LISTARESPOSTA,"_LISTACAMPORESPOSTA") ) = 
 						
 					   If _lGrava
 					      TRB_ZLJ->ZLJ_VOLUME:=Val(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_VALORRESPOSTANUMERICO:TEXT )
-					   ElseIf !lVolumeZeroLOOP
+					   ElseIf !lVolumeZeroLoop
 						  _nTotLeite+=Val(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_VALORRESPOSTANUMERICO:TEXT )
 					   EndIf
 
 					   If Val(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_VALORRESPOSTANUMERICO:TEXT ) <> 0
-  					      lVolumeZeroLOOP:=.F.
+  					      lVolumeZeroLoop:=.F.
 					   EndIf
 						
 					EndIf
@@ -2783,7 +2767,7 @@ If ValType( XmlChildEx( _aDadAtd[_nX]:_LISTARESPOSTA,"_LISTACAMPORESPOSTA") ) = 
 					
 					If Val(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_VALORRESPOSTANUMERICO:TEXT ) > 1000
 						
-					    _cMemAux += " Valor temperatura invalido: " + alltrim(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_VALORRESPOSTANUMERICO:TEXT)
+					    _cMemAux += " Valor temperatura invalido: " + AllTrim(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_VALORRESPOSTANUMERICO:TEXT)
 					    If _lGrava
 						   TRB_ZLJ->ZLJ_TEMPER:= 0
 						EndIf
@@ -2805,7 +2789,7 @@ If ValType( XmlChildEx( _aDadAtd[_nX]:_LISTARESPOSTA,"_LISTACAMPORESPOSTA") ) = 
 					If Val(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_VALORRESPOSTANUMERICO:TEXT ) < 0 .OR.;
 						Val(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_VALORRESPOSTANUMERICO:TEXT ) > 10000
 						
-					    _cMemAux += " Valor Regua invalido: " + alltrim(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_VALORRESPOSTANUMERICO:TEXT)
+					    _cMemAux += " Valor Regua invalido: " + AllTrim(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_VALORRESPOSTANUMERICO:TEXT)
 					    If _lGrava
 						   TRB_ZLJ->ZLJ_REGUA:= 0
 						EndIf
@@ -2820,19 +2804,19 @@ If ValType( XmlChildEx( _aDadAtd[_nX]:_LISTARESPOSTA,"_LISTACAMPORESPOSTA") ) = 
 					
 				EndIf
 				
-			Case _lGrava .AND. Upper( AllTrim( _aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_CAMPOFORMULARIO:_CODIGO:TEXT ) ) == 'ALIZAROL'
+			Case _lGrava .And. Upper( AllTrim( _aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_CAMPOFORMULARIO:_CODIGO:TEXT ) ) == 'ALIZAROL'
 
 				If ValType( XmlChildEx(         _aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ],"_VALORRESPOSTAENUMERACAO") ) <> 'U'
 					TRB_ZLJ->ZLJ_ALIZAR:=AllTrim(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_VALORRESPOSTAENUMERACAO:_CODIGO:TEXT )
 				EndIf
 				
-			Case _lGrava .AND. Upper( AllTrim( _aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_CAMPOFORMULARIO:_CODIGO:TEXT ) ) == 'BOCA'
+			Case _lGrava .And. Upper( AllTrim( _aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_CAMPOFORMULARIO:_CODIGO:TEXT ) ) == 'BOCA'
 
 				If ValType( XmlChildEx(       _aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ],"_VALORRESPOSTAENUMERACAO") ) <> 'U'
 					TRB_ZLJ->ZLJ_BOCA:=AllTrim(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_VALORRESPOSTAENUMERACAO:TEXT )
 				EndIf
 				
-			Case _lGrava .AND. Upper( AllTrim( _aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_CAMPOFORMULARIO:_CODIGO:TEXT ) ) == 'AMOSTRA'
+			Case _lGrava .And. Upper( AllTrim( _aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_CAMPOFORMULARIO:_CODIGO:TEXT ) ) == 'AMOSTRA'
 
 				If ValType( XmlChildEx(         _aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ],"_VALORRESPOSTATEXTO") ) <> 'U'
 					TRB_ZLJ->ZLJ_AMOSTR:=AllTrim(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA[_nZ]:_VALORRESPOSTATEXTO:TEXT )
@@ -2853,7 +2837,7 @@ ElseIf Upper( AllTrim( _aDadAtd[_nX]:_TIPOVISITA:_CODIGO:TEXT ) ) # "REC"
 			 
 			 If Val(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA:_VALORRESPOSTANUMERICO:TEXT ) > 100000
 						
-			    _cMemAux += " Valor volume invalido: " + alltrim(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA:_VALORRESPOSTANUMERICO:TEXT)
+			    _cMemAux += " Valor volume invalido: " + AllTrim(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA:_VALORRESPOSTANUMERICO:TEXT)
 					   
 				If _lGrava
 				   TRB_ZLJ->ZLJ_VOLUME:= 0
@@ -2863,12 +2847,12 @@ ElseIf Upper( AllTrim( _aDadAtd[_nX]:_TIPOVISITA:_CODIGO:TEXT ) ) # "REC"
 						
 				If _lGrava
 				   TRB_ZLJ->ZLJ_VOLUME:=Val(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA:_VALORRESPOSTANUMERICO:TEXT )
-				ElseIf !lVolumeZeroLOOP
+				ElseIf !lVolumeZeroLoop
 				   _nTotLeite+=Val(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA:_VALORRESPOSTANUMERICO:TEXT )
 				EndIf						
 			    
 			    If Val(_aDadAtd[_nX]:_LISTARESPOSTA:_LISTACAMPORESPOSTA:_VALORRESPOSTANUMERICO:TEXT ) <> 0
-		           lVolumeZeroLOOP:=.F.
+		           lVolumeZeroLoop:=.F.
 				EndIf
 			 
 			 EndIf					
@@ -2900,18 +2884,18 @@ Static Function MGLT2AcumulaEstoque(cAlias)//"TRB_ZLJ"
 Local _nPos:=0
 
 If cAlias # NIL
-   If (_nPos:=Ascan(_aRecViagens,{|aVal| aVal[1] == TRB_ZLJ->ZLJ_VIAGEM .AND. aVal[2] == TRB_ZLJ->ZLJ_FILIAL})) == 0
-      AADD(_aRecViagens,{TRB_ZLJ->ZLJ_VIAGEM,;//01
+   If (_nPos:=aScan(_aRecViagens,{|aVal| aVal[1] == TRB_ZLJ->ZLJ_VIAGEM .And. aVal[2] == TRB_ZLJ->ZLJ_FILIAL})) == 0
+      aAdd(_aRecViagens,{TRB_ZLJ->ZLJ_VIAGEM,;//01
 	                     TRB_ZLJ->ZLJ_FILIAL,;//02
 	                    {TRB_ZLJ->(Recno())}})//03 Recnos
                        
    Else
-      AADD( _aRecViagens[_nPos,3] , TRB_ZLJ->(Recno()) )
+      aAdd( _aRecViagens[_nPos,3] , TRB_ZLJ->(Recno()) )
    EndIf
 EndIf
 
-If (_nPos:=Ascan(_aViagens,{|aVal| aVal[1] == TRB_ZLJ->ZLJ_VIAGEM .AND. aVal[7] == TRB_ZLJ->ZLJ_FILIAL})) == 0
-	aadd(_aViagens,{TRB_ZLJ->ZLJ_VIAGEM,;//01 //VIAGEM **
+If (_nPos:=aScan(_aViagens,{|aVal| aVal[1] == TRB_ZLJ->ZLJ_VIAGEM .And. aVal[7] == TRB_ZLJ->ZLJ_FILIAL})) == 0
+	aAdd(_aViagens,{TRB_ZLJ->ZLJ_VIAGEM,;//01 //VIAGEM **
 	                TRB_ZLJ->ZLJ_SETOR ,;//02
 	                0                  ,;//03 //Total Cooperativa *
 	                TRB_ZLJ->ZLJ_DTCRIA,;//04 //onde grava a data entrada no estoque: ZLJ_DTCRIA --> D3_EMISSAO / ZLW_DTLANC
@@ -2919,18 +2903,18 @@ If (_nPos:=Ascan(_aViagens,{|aVal| aVal[1] == TRB_ZLJ->ZLJ_VIAGEM .AND. aVal[7] 
 	                TRB_ZLJ->WK_DATA   ,;//06
 	                TRB_ZLJ->ZLJ_FILIAL,;//07 //FILIAL **
 	                TRB_ZLJ->ZLJ_DESCAR,;//08 //Descarte
-                   U_AGLT021V(1,cAlias),;//09 //Volume do Veiculo * -->  If (_cAlias)->ZLJ_LITRAG > 0  , (_cAlias)->ZLJ_LITRAG , ((_cAlias)->ZLJ_PSIVIA - (_cAlias)->ZLJ_PSFVIA) / POSICIONE("ZA7",1,(_cAlias)->ZLJ_FILIAL+"001","ZA7_DENPAD") )
+                   U_AGLT021V(1,cAlias),;//09 //Volume do Veiculo * -->  If (_cAlias)->ZLJ_LITRAG > 0  , (_cAlias)->ZLJ_LITRAG , ((_cAlias)->ZLJ_PSIVIA - (_cAlias)->ZLJ_PSFVIA) / Posicione("ZA7",1,(_cAlias)->ZLJ_FILIAL+"001","ZA7_DENPAD") )
 	                .F.                ,;//10 //Nao Tem Leite Proprio
 	                {}                 ,;//11 //Lista de Setores
 	                0                  ,;//12 //Total Leite Proprio
 	                TRB_ZLJ->ZLJ_DTCRIA,;//13 //Data criação da viagem no smartquestion //onde grava a data entrada no estoque: ZLJ_DTCRIA --> D3_EMISSAO / ZLW_DTLANC
 	                TRB_ZLJ->(Recno()) })//14 //Recno do TRB_ZLJ
-	_nPos:=LEN(_aViagens)
+	_nPos:=Len(_aViagens)
 EndIf
 
 If TRB_ZLJ->ZLJ_TIPPRO = 'F'//Recebimento: quando é julieta vale os totais desse atendimento de Recebimento
 	
-	_aViagens[_nPos][09]:=U_AGLT021V(1,cAlias)//Atualiza o total do veiculo com a linha de atendimento do recebimento  -->  If (_cAlias)->ZLJ_LITRAG > 0  , (_cAlias)->ZLJ_LITRAG , ((_cAlias)->ZLJ_PSIVIA - (_cAlias)->ZLJ_PSFVIA) / POSICIONE("ZA7",1,(_cAlias)->ZLJ_FILIAL+"001","ZA7_DENPAD") )
+	_aViagens[_nPos][09]:=U_AGLT021V(1,cAlias)//Atualiza o total do veiculo com a linha de atendimento do recebimento  -->  If (_cAlias)->ZLJ_LITRAG > 0  , (_cAlias)->ZLJ_LITRAG , ((_cAlias)->ZLJ_PSIVIA - (_cAlias)->ZLJ_PSFVIA) / Posicione("ZA7",1,(_cAlias)->ZLJ_FILIAL+"001","ZA7_DENPAD") )
 	_aViagens[_nPos][08]:=TRB_ZLJ->ZLJ_DESCAR //Atualiza com a linha de atendimento do recebimento
 	
 ElseIf TRB_ZLJ->ZLJ_TIPPRO = 'C'//Cooperativa
@@ -2942,8 +2926,8 @@ ElseIf TRB_ZLJ->ZLJ_TIPPRO = 'P'//Leite Proprio
 	_aViagens[_nPos][10]:=.T.//Tem Leite Proprio
 	_aViagens[_nPos][12]+= TRB_ZLJ->ZLJ_VOLUME//Total Leite Proprio
 	
-	If (_nPoSet:=Ascan(_aViagens[_nPos][11],{|aVal| aVal[1] == TRB_ZLJ->ZLJ_SETOR})) == 0
-		AADD(_aViagens[_nPos][11], {TRB_ZLJ->ZLJ_SETOR,0,TRB_ZLJ->ZLJ_VOLUME})
+	If (_nPoSet:=aScan(_aViagens[_nPos][11],{|aVal| aVal[1] == TRB_ZLJ->ZLJ_SETOR})) == 0
+		aAdd(_aViagens[_nPos][11], {TRB_ZLJ->ZLJ_SETOR,0,TRB_ZLJ->ZLJ_VOLUME})
 	Else
 		_aViagens[_nPos][11][_nPoSet][3] += TRB_ZLJ->ZLJ_VOLUME//Total do leite proprio por setor
 	EndIf
@@ -3060,15 +3044,15 @@ Local lRet		:= .F.
 Local _cFiltro	:= ''
 Local aArea	    := ''
 
-If Empty(dData) .OR. Empty(cSetor)//Empty(cCodProd) .OR. Empty(cLjProd) 
+If Empty(dData) .Or. Empty(cSetor)//Empty(cCodProd) .Or. Empty(cLjProd) 
    Return .T.//Devolvo como se tivesse recepcao para barrar na integração
 EndIf
 
-If (nPos:=ASCAN(_aTemRecepcao,{ |X| X[1] == DTOC(dData)+cSetor })) # 0//cCodProd+cLjProd
+If (nPos:=aScan(_aTemRecepcao,{ |X| X[1] == DToC(dData)+cSetor })) # 0//cCodProd+cLjProd
    Return (_aTemRecepcao[nPos,2])//Controle para NÃO executar mais de uma vez o SELECT no ZL8 para a mesma chave
 EndIf
 
-aArea	 := GetArea() 
+aArea	 := FWGetArea() 
 cAliasZLF:= GetNextAlias()
 
 _cFiltro += "% "
@@ -3076,8 +3060,8 @@ _cFiltro += "     ZLF.D_E_L_E_T_ = ' ' "
 _cFiltro += " AND ZL8.D_E_L_E_T_ = ' ' "
 _cFiltro += " AND ZL8.ZL8_COMPGT <> 'S' "
 _cFiltro += " AND ZL8.ZL8_ADICOM <> 'S' "
-_cFiltro += " AND '"+ dToS(dData) +"' >= ZLF_DTINI "
-_cFiltro += " AND '"+ dToS(dData) +"' <= ZLF_DTFIM "
+_cFiltro += " AND '"+ DToS(dData) +"' >= ZLF_DTINI "
+_cFiltro += " AND '"+ DToS(dData) +"' <= ZLF_DTFIM "
 _cFiltro += " AND ZLF_SETOR  = '"+ cSetor	+"' "
 _cFiltro += " AND ZLF_DTCALC >= ZLF_DTFIM "
 _cFiltro += " %"
@@ -3093,10 +3077,10 @@ If (cAliasZLF)->TOT_EVE > 0
    lRet := .T.			
 EndIf
 
-AADD(_aTemRecepcao,{DTOC(dData)+cSetor,lRet})//cCodProd+cLjProd
+aAdd(_aTemRecepcao,{DToC(dData)+cSetor,lRet})//cCodProd+cLjProd
 		
 (cAliasZLF)->( DBCloseArea() )
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return( lRet )
 
@@ -3121,17 +3105,17 @@ If Empty(dData)
    Return .T.//Devolvo como se tivesse dentro  para barrar na integração
 EndIf
 
-If (nPos:=ASCAN(_aTaNoMixAtual,{ |X| X[1] == DTOC(dData) })) # 0
+If (nPos:=aScan(_aTaNoMixAtual,{ |X| X[1] == DToC(dData) })) # 0
    Return (_aTaNoMixAtual[nPos,2])//Controle para NÃO executar mais de uma vez o SELECT 
 EndIf
 
-aArea	 := GetArea() 
+aArea	 := FWGetArea() 
 cAliasZLE:= GetNextAlias()
 
 _cFiltro += "% "
 _cFiltro += " ZLE.D_E_L_E_T_ = ' ' AND ZLE_STATUS = 'A' "
-_cFiltro += " AND '"+ dToS(dData) +"' >= ZLE_DTINI "
-_cFiltro += " AND '"+ dToS(dData) +"' <= ZLE_DTFIM "
+_cFiltro += " AND '"+ DToS(dData) +"' >= ZLE_DTINI "
+_cFiltro += " AND '"+ DToS(dData) +"' <= ZLE_DTFIM "
 _cFiltro += " %"
 		
 BeginSql alias cAliasZLE
@@ -3144,10 +3128,10 @@ If (cAliasZLE)->MIX_ATUAL > 0
    lRet := .T.			
 EndIf
 
-AADD(_aTaNoMixAtual,{DTOC(dData),lRet})
+aAdd(_aTaNoMixAtual,{DToC(dData),lRet})
 		
 (cAliasZLE)->( DBCloseArea() )
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return( lRet )
 
@@ -3208,7 +3192,7 @@ Local _cURL := SuperGetMV("IT_WSURL",.F.,"http://localhost:1026")
    oWsdl:SetOperation("U_EXECWF") // Define qual operação será realizada.
                        
       //Monta XML
-      _cXML := '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="'+Substr(_cURL,1,At(':',_cURL,At(':',_cURL,1)+1)-1)+':4043/ws/U_MGLT002.apw">'
+      _cXML := '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="'+SubStr(_cURL,1,At(':',_cURL,At(':',_cURL,1)+1)-1)+':4043/ws/U_MGLT002.apw">'
       _cXML += '<soapenv:Header/><soapenv:Body><u:U_EXECWF><u:U_EXECUTA><u:EXECUTA>teste</u:EXECUTA></u:U_EXECUTA></u:U_EXECWF></soapenv:Body></soapenv:Envelope>'
   		    
       // Envia para o servidor
@@ -3230,24 +3214,24 @@ Static Function MGLT2GrvZLJ(_oProcess,cChave,_lShedule)
 
 Local _lGravouNew := .F.
 
-If TRB_ZLJ->(DBSEEK(cChave))
+If TRB_ZLJ->(DBSeek(cChave))
 
-    Do While TRB_ZLJ->(!EOF()) .AND. cChave == TRB_ZLJ->ZLJ_FILIAL+TRB_ZLJ->ZLJ_VIAGEM
+    While TRB_ZLJ->(!Eof()) .And. cChave == TRB_ZLJ->ZLJ_FILIAL+TRB_ZLJ->ZLJ_VIAGEM
        
        If !_lShedule
           _oProcess:IncRegua1("6-Gravando Viagem: "+TRB_ZLJ->ZLJ_VIAGEM)
-          _oProcess:IncRegua2(STR(_nConta,6)+" Atendimentos Gravados...")
+          _oProcess:IncRegua2(Str(_nConta,6)+" Atendimentos Gravados...")
        ElseIf _lIDESENV
            U_ITConOut("6-Gravando Viagem: "+TRB_ZLJ->ZLJ_VIAGEM)
        EndIf
        
-       If !Empty(TRB_ZLJ->WK_MARCA) .AND. TRB_ZLJ->ZLJ_STATUS = 'P' 
+       If !Empty(TRB_ZLJ->WK_MARCA) .And. TRB_ZLJ->ZLJ_STATUS = 'P' 
           
           //Codigo de segurança para não integrar nada das reusadas e Efetivadas
           ZLJ->( DBSetOrder(5))//ZLJ_FILIAL+ZLJ_VIAGEM+ZLJ_TIPPRO+ZLJ_VFILHA+ZLJ_SETOR+ZLJ_LINROT
-          If ZLJ->( DBSeek( TRB_ZLJ->ZLJ_FILIAL + TRB_ZLJ->ZLJ_VIAGEM )) .AND. ZLJ->ZLJ_STATUS $ "R,E"
-             TRB_ZLJ->(DBSKIP())
-             LOOP
+          If ZLJ->( DBSeek( TRB_ZLJ->ZLJ_FILIAL + TRB_ZLJ->ZLJ_VIAGEM )) .And. ZLJ->ZLJ_STATUS $ "R,E"
+             TRB_ZLJ->(DBSkip())
+             Loop
           EndIf
           //Codigo de segurança para não integrar nada das reusadas
 
@@ -3263,8 +3247,8 @@ If TRB_ZLJ->(DBSEEK(cChave))
 
              If ZLJ->(RecLock( 'ZLJ' , .F.,.F.,.T.))
                 ZLJ->ZLJ_KMDVIA := TRB_ZLJ->ZLJ_KMDVIA
-		          ZLJ->( MsUnlock() )
-                cMOTIVO := 'KM atualizada com sucesso por '+_cZLJ_UINTSQ+" /Incluido primeiro por "+ALLTRIM(ZLJ->ZLJ_UINTSQ)
+		          ZLJ->( MSUnLock() )
+                cMOTIVO := 'KM atualizada com sucesso por '+_cZLJ_UINTSQ+" /Incluido primeiro por "+AllTrim(ZLJ->ZLJ_UINTSQ)
              EndIf
 
 		  Else
@@ -3273,24 +3257,24 @@ If TRB_ZLJ->(DBSEEK(cChave))
              AVREPLACE("TRB_ZLJ","ZLJ")
              ZLJ->ZLJ_FILIAL := TRB_ZLJ->ZLJ_FILIAL
        	    ZLJ->ZLJ_UINTSQ := _cZLJ_UINTSQ
-             ZLJ->ZLJ_HINTSQ := TIME()
-             ZLJ->ZLJ_DINTSQ := DATE()
-		       ZLJ->( MsUnlock() )
+             ZLJ->ZLJ_HINTSQ := Time()
+             ZLJ->ZLJ_DINTSQ := Date()
+		       ZLJ->( MSUnLock() )
              cMOTIVO := 'Atendimento incluido com sucesso por '+_cZLJ_UINTSQ
              _lGravouNew := .T.
              
 		  EndIf
-        IF !EMPTY(TRB_ZLJ->ZLJ_CODPAT)
+        If !Empty(TRB_ZLJ->ZLJ_CODPAT)
            cMOTIVO := cMOTIVO + " /Produtor: "+TRB_ZLJ->ZLJ_CODPAT+"-"+TRB_ZLJ->ZLJ_LOJPAT
            TRB_ZLJ->WKREC_ZLJ:=ZLJ->(RECNO())
-        EndIF
+        EndIf
 		  
           _nConta++
-		  aAdd( _aLog , {DTOC(TRB_ZLJ->WK_DATA)+" "+ALLTRIM(TRB_ZLJ->WK_HORA),TRB_ZLJ->ZLJ_FILIAL,TRB_ZLJ->ZLJ_VIAGEM+" "+ALLTRIM(TRB_ZLJ->ZLJ_VFILHA),TRB_ZLJ->ZLJ_NUMERO,TRB_ZLJ->ZLJ_SETOR,TRB_ZLJ->ZLJ_LINROT+"/"+TRB_ZLJ->ZLJ_LINHSQ,ALLTRIM(TRANSF(TRB_ZLJ->ZLJ_KMDVIA,"@E 999,999,999")), cMOTIVO,"OK",DTOC(TRB_ZLJ->ZLJ_DTCRIA)} )
+		  aAdd( _aLog , {DToC(TRB_ZLJ->WK_DATA)+" "+AllTrim(TRB_ZLJ->WK_HORA),TRB_ZLJ->ZLJ_FILIAL,TRB_ZLJ->ZLJ_VIAGEM+" "+AllTrim(TRB_ZLJ->ZLJ_VFILHA),TRB_ZLJ->ZLJ_NUMERO,TRB_ZLJ->ZLJ_SETOR,TRB_ZLJ->ZLJ_LINROT+"/"+TRB_ZLJ->ZLJ_LINHSQ,AllTrim(TRANSF(TRB_ZLJ->ZLJ_KMDVIA,"@E 999,999,999")), cMOTIVO,"OK",DToC(TRB_ZLJ->ZLJ_DTCRIA)} )
 		    
        EndIf
        
-       TRB_ZLJ->(DBSKIP())
+       TRB_ZLJ->(DBSkip())
     
     EndDo
 
@@ -3313,14 +3297,14 @@ Static Function MGLT2XmlParser(_cXML, _cCarac ,_cErro,_cWarning, _cMen)
 Local bError := ErrorBlock({|oError|  U_MGLT2Erro(oError:ErrorStack, _cMen,_cXML,@_cErro) })
 Local _oXml:=NIL
 
-BEGIN SEQUENCE
+Begin Sequence
    If _lIDESENV
       MemoWrite(_cNomeLog,_cXML)
    EndIf   
 
    _oXml := XmlParser(_cXML , _cCarac , @_cErro , @_cWarning )
 RECOVER
-END SEQUENCE
+End Sequence
 ErrorBlock(bError)
 
 If _lErroXmlParser
@@ -3348,7 +3332,7 @@ If _lShedule
    U_ITConOut( _cMen+" [XmlParser], Erro: [ "+cErro+" ]")
 Else
   _bMaisDetalhes:={||  AVISO("Erro e Pilha de chamadas","ERRO: "+cErro,{"Fechar"},3) }
-   U_ITMSG(UPPER(_cMen)+" [XmlParser]","MGLT00214",;
+   U_ITMsg(Upper(_cMen)+" [XmlParser]","MGLT00214",;
            "POR FAVOR ENTRE EM CONTATO COM A  AREA DE TI COM O PRINT DESSA MESAGEM CLICANCO EM MAIS DETALHES",3,,,,,,_bMaisDetalhes)
 EndIf  
 
@@ -3368,43 +3352,43 @@ Retorno---------: Nenhum
 */
 Static Function MGLT2GerEstoque(_nTime,_cChave,_cViagem,_nCustoEst,_oProcess,_aViagens)
 
-Local _PubVar:= "GERA_ESTOQUE"+ALLTRIM(_cChave)
-Local _PubTID:= "THREAD_ESTOQUE"+ALLTRIM(_cChave)
+Local _PubVar:= "GERA_ESTOQUE"+AllTrim(_cChave)
+Local _PubTID:= "THREAD_ESTOQUE"+AllTrim(_cChave)
 Local _tini,_dini,I
 
 If !_lShedule
    _oProcess:SetRegua2( _nTime )
 EndIf   
 
-U_ITConOut(" _PubVar "+_PubVar+" _PubTID "+_PubTID+ " TIME: "+ STRZERO(_nTime,3))		
+U_ITConOut(" _PubVar "+_PubVar+" _PubTID "+_PubTID+ " TIME: "+ StrZero(_nTime,3))		
 
 PutGlbValue(_PubVar,"Alterando")
 PutGlbValue(_PubTID,"0")
 _lRet := .T.
-StartJob("U_MGLT2JOB",GETENVSERVER(),.F.,_PubVar,_cViagem,_nCustoEst,_PubTID,_aViagens,_cChave,cUsername)
+StartJob("U_MGLT2JOB",GETENVSERVER(),.F.,_PubVar,_cViagem,_nCustoEst,_PubTID,_aViagens,_cChave,cUserName)
 
 _tini   := SECONDS()
-_dini   := DATE()
-_nThread:= VAL(GetGlbValue(_PubTID))
+_dini   := Date()
+_nThread:= Val(GetGlbValue(_PubTID))
 
-U_ITConOut(" _PubVar "+GetGlbValue(_PubVar)+" _nThread: "+ STRZERO(_nThread,6))		
+U_ITConOut(" _PubVar "+GetGlbValue(_PubVar)+" _nThread: "+ StrZero(_nThread,6))		
 
 For I := 1 TO 150
     If _nThread = 0
-       _nThread:= VAL(GetGlbValue(_PubTID))
-       U_ITConOut("Tentativa:"+ALLTRIM(STR(I))+" _PubVar "+GetGlbValue(_PubVar)+" _nThread: "+STRZERO(_nThread,6))		
+       _nThread:= Val(GetGlbValue(_PubTID))
+       U_ITConOut("Tentativa:"+AllTrim(Str(I))+" _PubVar "+GetGlbValue(_PubVar)+" _nThread: "+StrZero(_nThread,6))		
     Else
        Exit
     EndIf
     SLEEP(10)
 Next
 
-Do  While  DATE() == _dini
+Do  While  Date() == _dini
 
-     U_ITConOut("Acompanhando execauto do Estoque da Viagem " + _cChave + " na Thread " + STRZERO(_nThread,6)  + " por " + STRZERO((SECONDS() - _tini),3) + " segundos...")
+     U_ITConOut("Acompanhando execauto do Estoque da Viagem " + _cChave + " na Thread " + StrZero(_nThread,6)  + " por " + StrZero((SECONDS() - _tini),3) + " segundos...")
 
     If !_lShedule
-       _oProcess:IncRegua2("Viagem " + _cChave + " Aguarde: " + ALLTRIM(STR((SECONDS() - _tini),3)) + " segundos")
+       _oProcess:IncRegua2("Viagem " + _cChave + " Aguarde: " + AllTrim(Str((SECONDS() - _tini),3)) + " segundos")
   	EndIf   
 
 	If GetGlbValue(_PubVar) != "Alterando"
@@ -3413,19 +3397,19 @@ Do  While  DATE() == _dini
 	
 	_aMonitor := GetUserInfoArray() 
 	
-	_Ni := Ascan(_aMonitor,{|aVal| aVal[3] = _nThread})
+	_nI := aScan(_aMonitor,{|aVal| aVal[3] = _nThread})
 	
-	If  _Ni > 0 .AND. _nThread <> 0
+	If  _nI > 0 .And. _nThread <> 0
 	
 		If (SECONDS() - _tini) >= _nTime
 		
-		   U_ITConOut("Derrubando Estoque na Thread " +strzero(_amonitor[_ni][3],6) + " por timeout de "+STR(_nTime,3)+", Viagem " + _cChave + ", DERRUBANDO MGLT2JOB" )
+		   U_ITConOut("Derrubando Estoque na Thread " +StrZero(_amonitor[_nI][3],6) + " por timeout de "+Str(_nTime,3)+", Viagem " + _cChave + ", DERRUBANDO MGLT2JOB" )
 
          If !_lShedule
-               _oProcess:IncRegua2("Derrubando Estoque na Thread " +strzero(_amonitor[_ni][3],6) + " por timeout de "+STR(_nTime,3)+", Viagem " + _cChave + ", DERRUBANDO MGLT2JOB" )
+               _oProcess:IncRegua2("Derrubando Estoque na Thread " +StrZero(_amonitor[_nI][3],6) + " por timeout de "+Str(_nTime,3)+", Viagem " + _cChave + ", DERRUBANDO MGLT2JOB" )
   			EndIf   
 	
-			KillUser( _amonitor[_ni][1], _amonitor[_ni][2], _amonitor[_ni][3], _amonitor[_ni][4] )		
+			KillUser( _amonitor[_nI][1], _amonitor[_nI][2], _amonitor[_nI][3], _amonitor[_nI][4] )		
 
          _cErroSche:= "1-A gravacaode estoque  dessa viagem foi cancelada por timeout, tente novamente"
             
@@ -3452,9 +3436,9 @@ Do  While  DATE() == _dini
 	
 EndDo
 
-IF !_lRet
+If !_lRet
    SLEEP(10000)
-ENDIF
+EndIf
 
 If GetGlbValue(_PubVar) != "Alterando"
 	
@@ -3466,18 +3450,18 @@ If GetGlbValue(_PubVar) != "Alterando"
       _lRet:=.F.
    EndIf
 
-   U_ITConOut("1-Execauto do Estoque ["+_cErroSche+"] na Viagem " + _cChave + " pela thread " + STRZERO(_nThread,6) +  " - Encerrando monitor normalmente")
+   U_ITConOut("1-Execauto do Estoque ["+_cErroSche+"] na Viagem " + _cChave + " pela thread " + StrZero(_nThread,6) +  " - Encerrando monitor normalmente")
 		
 EndIf
 
-IF !_lRet
+If !_lRet
    _cFilial := _aViagens[7]//Filial da Viagem para dar entrada de estoque na filial certa
    _lVerificado:=.T.
    SLEEP(10000)
-   IF MGLT2ValEst( _cViagem , _cFilial  )
+   If MGLT2ValEst( _cViagem , _cFilial  )
       _lRet:=.T.
-   ENDIF
-ENDIF
+   EndIf
+EndIf
 
 Return _lRet
 
@@ -3494,16 +3478,16 @@ Retorno---------: .T. ou .F.
 User Function MGLT2JOB(_PubVar,_cViagem,_nCustoEst,_PubTID,_aViagens,_cChave,_cUsername)
 
 Local _lRet := .T.
-Local bError := ErrorBlock({|oError|  _cErroSche:=ALLTRIM(oError:ErrorStack) })
+Local bError := ErrorBlock({|oError|  _cErroSche:=AllTrim(oError:ErrorStack) })
 DEFAULT _cUsername:= "Schedule"
 
 Private _cErroSche:= ""
 
-BEGIN SEQUENCE
+Begin Sequence
 
 U_ITConOut("1-Iniciando ambiente no WATCHDOG, Viagem: "+_cChave+" - Usuario: "+_cUsername)
 
-PutGlbValue(_PubTID,STRZERO(ThreadID(),6))//PRIMEIRO COMANDO
+PutGlbValue(_PubTID,StrZero(ThreadID(),6))//PRIMEIRO COMANDO
 
 nTotBom   := _aViagens[9]-_aViagens[3] // Volume do veiculo - o total da cooperativa  = Volume do leite proprio com a diferença
 cFilAnt   := _aViagens[7]//Filial da Viagem para dar entrada de estoque na filial certa
@@ -3515,14 +3499,14 @@ RpcSetEnv( "01" , cFilAnt ,,,"ESP2", "JOB_WF_ESTOQUE" , {'ZLJ','SA2','ZL2','ZLT'
 
 U_ITConOut("2-Iniciado ambiente no WATCHDOG, Viagem: "+_cChave)
 
-cUsuario := SPACE(06)+"Administrador  "
-cUsername:= _cUsername
+cUsuario := Space(06)+"Administrador  "
+cUserName:= _cUsername
 
 _lRet:=U_AGLT003G(_cViagem , 3 , .T. , _nCustoEst ) //Grava movimento de estoque igual a rotina da recepção manual
 
 RECOVER
 _lRet	:= .F. 
-END SEQUENCE 
+End Sequence 
 ErrorBlock(bError)
 
 If _lRet
@@ -3542,7 +3526,7 @@ Autor-------------: Alex Wallauer Ferreria
 Data da Criacao---: 02/10/2020
 Descrição---------: Funcao usada verificar se existe um movimento interno relativo a entrada
 Parametros--------: ccod - ticket do movimento / _cFilial - Filial atual
-Retorno-----------: _lret - se existe ou não o movimento
+Retorno-----------: _lRet - se existe ou não o movimento
 ===============================================================================================================================
 */
 Static Function MGLT2ValEst( cCod , _cFilial )
@@ -3562,5 +3546,5 @@ EndSql
 _lRet := ( (_cAlias)->QTD_D3 > 0 )
 
 (_cAlias)->( DBCloseArea() )
-DBSELECTAREA("ZLJ")
+DBSelectArea("ZLJ")
 Return(_lRet)

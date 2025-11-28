@@ -596,7 +596,7 @@ For nX := 1 To Len(aVeiculo)
 		cString += '<placa>' + ConvType(aVeiculo[nX][2]) + '</placa>'
 		cString += NfeTag('<RENAVAM>',ConvType((aVeiculo[nX][15]),11,0))
 		cString += '<tara>' + ConvType((aVeiculo[nX][4]),6,0) + '</tara>'
-		cString += NfeTag('<capKG>',ConvType((aVeiculo[nX][9]),6,0))
+		cString += NfeTag('<capKG>',AllTrim(Str(NOROUND((aVeiculo[nX][9]),0))))
 
 		//Converte Valor da capacidade KG para M3
 		If !Empty(aVeiculo[nX][10]) .and. !Empty(aVeiculo[nX][11]) .and. !Empty(aVeiculo[nX][12])
@@ -657,7 +657,7 @@ For nX := 1 To Len(aVeiculo)
 		//Inclusão do renavam NT2014/003
 		cString += NfeTag('<RENAVAM>',ConvType((aVeiculo[nX][15]),11,0))
 		cString += '<tara>' + ConvType((aVeiculo[nX][4]),6,0) + '</tara>'
-		cString += NfeTag('<capKG>',ConvType((aVeiculo[nX][9]),6,0))
+		cString += NfeTag('<capKG>',AllTrim(Str(NOROUND((aVeiculo[nX][9]),0))))
 
 		//Converte Valor da capacidade KG para M3
 		If !Empty(aVeiculo[nX][10]) .and. !Empty(aVeiculo[nX][11]) .and. !Empty(aVeiculo[nX][12])

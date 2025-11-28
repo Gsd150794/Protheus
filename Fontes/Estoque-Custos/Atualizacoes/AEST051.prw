@@ -1,22 +1,21 @@
 /*
-                                    ATUALIZACOES SOFRIDAS DESDE A CONSTRUÇAO INICIAL
 ===============================================================================================================================
-     Autor    |    Data    |                              Motivo                                                          |
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+===============================================================================================================================
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-              |            | 
 =============================================================================================================================== 
 */
-#INCLUDE 'PROTHEUS.CH'
+
+#Include "TOTVS.ch"
+
 /*
 ===============================================================================================================================
 Programa----------: AEST051
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 20/05/2024
-===============================================================================================================================
 Descrição---------: Rotina de manutenção no Cadastro de Origem e Destino de Transferência de Produtos. Chamado 46556.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
@@ -26,8 +25,8 @@ Local _cVldAlt
 Local _cVldExc
 
 Begin Sequence 
-   DbSelectArea("ZCF")
-   ZCF->(dbSetOrder(1))
+   DBSelectArea("ZCF")
+   ZCF->(DBSetOrder(1))
    
    _cVldAlt := "U_AEST051V('BOK')" // Validacao para permitir a inclusao. Pode-se utilizar ExecBlock.
    _cVldExc := ".T."          // Validacao para permitir a exclusao. Pode-se utilizar ExecBlock.
@@ -37,18 +36,15 @@ Begin Sequence
 
 End Sequence
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
 Programa--------: AEST051V
 Autor-----------: Julio de Paula Paz
 Data da Criacao-: 20/05/2024
-===============================================================================================================================
 Descrição-------: Valida a gravação da inclusão e da alteração.
-===============================================================================================================================
 Parametros------: _cCampo = Campo que chamou a validação.
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -59,37 +55,37 @@ Begin Sequence
    If _cCampo == "BOK"
       If Inclui
          If Empty(M->ZCF_CODIGO)
-            U_ITMSG("O Preenchimento do codigo de Origem/Destino é obrigatório.","Atenção",,1) 
+            U_ITMsg("O Preenchimento do codigo de Origem/Destino é obrigatório.","Atenção",,1) 
             _lRet :=.F.
             Break
          Else 
-            ZCF->(DbSetOrder(1))
-            IF ZCF->(MsSeek(xFilial("ZCF")+M->ZCF_CODIGO))
-               U_ITMSG("Já existe uma Origem/Destino com este código.","Atenção",,1) 
+            ZCF->(DBSetOrder(1))
+            If ZCF->(MsSeek(xFilial("ZCF")+M->ZCF_CODIGO))
+               U_ITMsg("Já existe uma Origem/Destino com este código.","Atenção",,1) 
                _lRet :=.F.
                Break
             EndIf 
          EndIf
 
          If Empty(M->ZCF_ORIGDE)
-            U_ITMSG("O Preenchimento da descrição do Código de Origem/Destino  é obrigatório.","Atenção",,1) 
+            U_ITMsg("O Preenchimento da descrição do Código de Origem/Destino  é obrigatório.","Atenção",,1) 
             _lRet :=.F.
             Break 
          EndIf 
 
          If Empty(M->ZCF_MOTTRA)
-            U_ITMSG("O Preenchimento do Tipo de Transferência é obrigatório.","Atenção",,1) 
+            U_ITMsg("O Preenchimento do Tipo de Transferência é obrigatório.","Atenção",,1) 
             _lRet :=.F.
             Break
          Else 
-            CYO->(DbSetOrder(1)) // CYO_FILIAL+CYO_CDRF
+            CYO->(DBSetOrder(1)) // CYO_FILIAL+CYO_CDRF
             
             If ! CYO->(MsSeek(xFilial('CYO')+M->ZCF_MOTTRA))
-               U_ITMSG("O Código do Tipo de Transferência informado não existe.","Atenção",,1) 
+               U_ITMsg("O Código do Tipo de Transferência informado não existe.","Atenção",,1) 
                _lRet :=.F.
                Break
             ElseIf Left(M->ZCF_MOTTRA,1) <> "T"
-               U_ITMSG("Os Códigos dos Tipos de Transferências devem iniciar com T.","Atenção","O códigos iniciados com T são exclusivos para as transferências de descarte.",1) 
+               U_ITMsg("Os Códigos dos Tipos de Transferências devem iniciar com T.","Atenção","O códigos iniciados com T são exclusivos para as transferências de descarte.",1) 
                _lRet :=.F.
                Break  
             EndIf 
@@ -101,24 +97,24 @@ Begin Sequence
       ElseIf Altera 
  
          If Empty(M->ZCF_ORIGDE)
-            U_ITMSG("O Preenchimento da descrição do Código de Origem/Destino  é obrigatório.","Atenção",,1) 
+            U_ITMsg("O Preenchimento da descrição do Código de Origem/Destino  é obrigatório.","Atenção",,1) 
             _lRet :=.F.
             Break 
          EndIf 
 
          If Empty(M->ZCF_MOTTRA)
-            U_ITMSG("O Preenchimento do Tipo de Transferência é obrigatório.","Atenção",,1) 
+            U_ITMsg("O Preenchimento do Tipo de Transferência é obrigatório.","Atenção",,1) 
             _lRet :=.F.
             Break
          Else 
             
-            CYO->(DbSetOrder(1)) // CYO_FILIAL+CYO_CDRF
+            CYO->(DBSetOrder(1)) // CYO_FILIAL+CYO_CDRF
             If ! CYO->(MsSeek(xFilial('CYO')+M->ZCF_MOTTRA))
-               U_ITMSG("O Código do Tipo de Transferência informado não existe.","Atenção",,1) 
+               U_ITMsg("O Código do Tipo de Transferência informado não existe.","Atenção",,1) 
                _lRet :=.F.
                Break
             ElseIf Left(M->ZCF_MOTTRA,1) <> "T"
-               U_ITMSG("Os Códigos dos Tipos de Transferências devem iniciar com T.","Atenção","O códigos iniciados com T são exclusivos para as transferências de descarte.",1) 
+               U_ITMsg("Os Códigos dos Tipos de Transferências devem iniciar com T.","Atenção","O códigos iniciados com T são exclusivos para as transferências de descarte.",1) 
                _lRet :=.F.
                Break  
             EndIf 
@@ -132,13 +128,13 @@ Begin Sequence
    ElseIf _cCampo == "ZCF_CODIGO"
       If Inclui
          If Empty(M->ZCF_CODIGO)
-            U_ITMSG("O Preenchimento do codigo de Origem/Destino é obrigatório.","Atenção",,1) 
+            U_ITMsg("O Preenchimento do codigo de Origem/Destino é obrigatório.","Atenção",,1) 
             _lRet :=.F.
             Break
          Else 
-            ZCF->(DbSetOrder(1))
-            IF ZCF->(MsSeek(xFilial("ZCF")+M->ZCF_CODIGO))
-               U_ITMSG("Já existe uma Origem/Destino com este código.","Atenção",,1) 
+            ZCF->(DBSetOrder(1))
+            If ZCF->(MsSeek(xFilial("ZCF")+M->ZCF_CODIGO))
+               U_ITMsg("Já existe uma Origem/Destino com este código.","Atenção",,1) 
                _lRet :=.F.
                Break
             EndIf 
@@ -148,7 +144,7 @@ Begin Sequence
    ElseIf _cCampo == "ZCF_ORIGDE"
 
       If Empty(M->ZCF_ORIGDE)
-         U_ITMSG("O Preenchimento da descrição do Código de Origem/Destino  é obrigatório.","Atenção",,1) 
+         U_ITMsg("O Preenchimento da descrição do Código de Origem/Destino  é obrigatório.","Atenção",,1) 
          _lRet :=.F.
          Break 
      EndIf 
@@ -156,17 +152,17 @@ Begin Sequence
    ElseIf _cCampo == "ZCF_MOTTRA" 
         
      If Empty(M->ZCF_MOTTRA)
-        U_ITMSG("O Preenchimento do Tipo de Transferência é obrigatório.","Atenção",,1) 
+        U_ITMsg("O Preenchimento do Tipo de Transferência é obrigatório.","Atenção",,1) 
         _lRet :=.F.
         Break
      Else 
-        CYO->(DbSetOrder(1)) // CYO_FILIAL+CYO_CDRF
+        CYO->(DBSetOrder(1)) // CYO_FILIAL+CYO_CDRF
         If ! CYO->(MsSeek(xFilial('CYO')+M->ZCF_MOTTRA))
-           U_ITMSG("O Código do Tipo de Transferência informado não existe.","Atenção",,1) 
+           U_ITMsg("O Código do Tipo de Transferência informado não existe.","Atenção",,1) 
            _lRet :=.F.
            Break
         ElseIf Left(M->ZCF_MOTTRA,1) <> "T"
-           U_ITMSG("Os Códigos dos Tipos de Transferências devem iniciar com T.","Atenção","O códigos iniciados com T são exclusivos para as transferências de descarte.",1) 
+           U_ITMsg("Os Códigos dos Tipos de Transferências devem iniciar com T.","Atenção","O códigos iniciados com T são exclusivos para as transferências de descarte.",1) 
            _lRet :=.F.
            Break  
         EndIf 
@@ -186,32 +182,29 @@ Return _lRet
 Programa--------: AEST051N
 Autor-----------: Julio de Paula Paz
 Data da Criacao-: 20/05/2024
-===============================================================================================================================
 Descrição-------: Valida a gravação da inclusão e da alteração.
-===============================================================================================================================
 Parametros------: _cCampo = Campo que chamou a validação.
-===============================================================================================================================
 Retorno---------: _cNum = Novo numero para o código da tabela ZCF.
 ===============================================================================================================================
 */
 User Function AEST051N()
 Local _cQry := ""
-Local _aArea  := GetArea()
+Local _aArea  := FWGetArea()
 Local _cNum := ""
 
 Begin Sequence 
 
-   _cQry := " SELECT max(ZCF_CODIGO) MAXIMO FROM " + RetSqlName("ZCF") +" ZCF WHERE ZCF.D_E_L_E_T_ <> '*' "
+   _cQry := " SELECT max(ZCF_CODIGO) MAXIMO FROM " + RetSqlName("ZCF") +" ZCF WHERE ZCF.D_E_L_E_T_ = ' ' "
 	_cQry += " AND ZCF_FILIAL = '" + xFilial("ZCF") + "'"
 	
    If Select("TRBZCF") > 0
-	   TRBZCF->(Dbclosearea())
+	   TRBZCF->(DBCloseArea())
    EndIf
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry(,,_cQry) , "TRBZCF" , .T. , .F. )
    
    If !TRBZCF->(Eof())
-      _cNumZCF := ALLTRIM(TRBZCF->MAXIMO)
+      _cNumZCF := AllTrim(TRBZCF->MAXIMO)
    EndIf 
 
    _cNum   := GetSXENum("ZCF","ZCF_CODIGO")
@@ -221,15 +214,15 @@ Begin Sequence
        Processa( {|| _cNum := U_AEST051A(_cNumZCF)}, "Aguarde...","Atualizando hardlock para tabela ZCF...",.T.)
    EndIf 
 
-   TRBZCF->(Dbclosearea())	
+   TRBZCF->(DBCloseArea())	
 
 End Sequence 
 
 If Select("TRBZCF") > 0
-	TRBZCF->(Dbclosearea())
+	TRBZCF->(DBCloseArea())
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return _cNum
 
@@ -238,11 +231,8 @@ Return _cNum
 Programa----------: AEST051A
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 24/05/2024
-===============================================================================================================================
 Descrição---------: Roda atualização de hardlock para o cadastro ZCF.
-===============================================================================================================================
 Parametros--------: _cUltmoCod = Ultimo código da tabela ZCF.
-===============================================================================================================================
 Retorno-----------: _cRet = Ultimo código disponível para a tabela ZCF.
 ===============================================================================================================================
 */
@@ -254,15 +244,15 @@ Begin Sequence
    _cNumZCF := GetSXENum("ZCF","ZCF_CODIGO")
    Confirmsx8(.F.)
    
-   Do while AllTrim(_cNumZCF) <= AllTrim(_cUltmoCod)
+   While AllTrim(_cNumZCF) <= AllTrim(_cUltmoCod)
 	
-	   IncProc("Atualizando Hardlock -Tabela ZCF - Registro: " + ALLTRIM(_cNumZCF) + " de " + AllTrim(_cUltmoCod))
+	   IncProc("Atualizando Hardlock -Tabela ZCF - Registro: " + AllTrim(_cNumZCF) + " de " + AllTrim(_cUltmoCod))
 	
       _cNumZCF   := GetSXENum("ZCF","ZCF_CODIGO")
 
       Confirmsx8(.F.)
   
-   Enddo
+   EndDo
 
 End Sequence 
 

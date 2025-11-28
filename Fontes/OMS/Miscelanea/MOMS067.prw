@@ -7,15 +7,19 @@
  Alex Wallauer | 17/07/2023 | Chamado 44281. Ajuste de tamanho na selecao do F3 dos produtos.
 -------------------------------------------------------------------------------------------------------------------------------
  Igor Melgaço  | 24/07/2023 | Chamado 44281. Ajuste para gravação de log e janela de multipla alteração de preço.
-===============================================================================================================================
+==============================================================================================================================================================================================
+Analista       - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
+==============================================================================================================================================================================================
+Jerry Santiago - Julio Paz     - 11/08/24 - 15/09/25 - 50058   - Refazer Toda a Rotina de Gravação de Log de Alteração da Tabela de Preço. 
+==============================================================================================================================================================================================
 */
 
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#include "PROTHEUS.CH"
-#INCLUDE "rwmake.ch"
-#INCLUDE "TopConn.ch"
+#Include "TOTVS.ch"
+#Include "rwmake.ch"
+#Include "TopConn.ch"
 
 Static oBmpVerde    := LoadBitmap( GetResources(), "BR_VERDE")
 Static oBmpVermelho := LoadBitmap( GetResources(), "BR_VERMELHO")
@@ -36,19 +40,19 @@ Retorno-----------: Nenhum
 User Function MOMS067()
 Local _aParRet := {}
 Local _aParAux := {} , nI
-Local _bOK     := {|| Iif(Subs(MV_PAR01,1,1) $  "346",Iif(Empty(Alltrim(MV_PAR02)),(MsgAlert("Preencha o Produto!", "Atenção"),.F.),.T.),.T.)  } //IF(MV_PAR02 >= MV_PAR01,.T.,(U_ITMSG("Periodo INVALIDO",'Atenção!',"Tente novamente com outro periodo",3),.F.) ) }
+Local _bOK     := {|| IIf(Subs(MV_PAR01,1,1) $  "346",IIf(Empty(AllTrim(MV_PAR02)),(MsgAlert("Preencha o Produto!", "Atenção"),.F.),.T.),.T.)  } //If(MV_PAR02 >= MV_PAR01,.T.,(U_ITMsg("Periodo INVALIDO",'Atenção!',"Tente novamente com outro periodo",3),.F.) ) }
 
 MV_PAR01 := Space(100)
 MV_PAR02 := Space(1500)
 
-_cSelectSB1 := "SELECT B1_COD , B1_TIPO, B1_DESC FROM "+RETSQLNAME("SB1")+" SB1 WHERE D_E_L_E_T_ <> '*' AND B1_MSBLQL <> '1'  AND B1_TIPO = 'PA' ORDER BY B1_COD "
+_cSelectSB1 := "SELECT B1_COD , B1_TIPO, B1_DESC FROM "+RETSQLNAME("SB1")+" SB1 WHERE D_E_L_E_T_ = ' ' AND B1_MSBLQL <> '1'  AND B1_TIPO = 'PA' ORDER BY B1_COD "
 _aItalac_F3 := {} //       1           2         3                      4                      5               6                    7         8          9         10         11        12
 //AD(_aItalac_F3,{"1CPO_CAMPO1",_cTabela ,_nCpoChave              , _nCpoDesc              ,_bCondTab    , _cTitAux         , _nTamChv , _aDados  , _nMaxSel , _lFilAtual,_cMVRET,_bValida})
-AADD(_aItalac_F3,{"MV_PAR02" ,_cSelectSB1,{|Tab|(Tab)->B1_COD},{|Tab|(Tab)->B1_TIPO+" "+(Tab)->B1_DESC}, ,"Produtos"        ,          ,          ,100       ,.F.        ,       , } )
-_cValCC := ' Iif(Subs(MV_PAR01,1,1) <>  "1" .AND. Subs(MV_PAR01,1,1) <>  "2" .AND. Subs(MV_PAR01,1,1) <>  "5",.T.,(MV_PAR02 := Space(1500),.F.)) '
+aAdd(_aItalac_F3,{"MV_PAR02" ,_cSelectSB1,{|Tab|(Tab)->B1_COD},{|Tab|(Tab)->B1_TIPO+" "+(Tab)->B1_DESC}, ,"Produtos"        ,          ,          ,100       ,.F.        ,       , } )
+_cValCC := ' IIf(Subs(MV_PAR01,1,1) <>  "1" .And. Subs(MV_PAR01,1,1) <>  "2" .And. Subs(MV_PAR01,1,1) <>  "5",.T.,(MV_PAR02 := Space(1500),.F.)) '
 
-AADD( _aParAux , { 2 , "Alteração", MV_PAR01, {"1 - Ativar Tabela","2 - Desativar Tabela","3 - Ativar Produto","4 - Desativar Produto","5 - Alterar Vigencia","6 - Alterar Preco"}, 100 ,'.T.',.T.,".T."}) 
-AADD( _aParAux , { 1 , "Produtos" , MV_PAR02, "@!"   , ""  ,"F3ITLC", _cValCC , 100 , .F. } ) 
+aAdd( _aParAux , { 2 , "Alteração", MV_PAR01, {"1 - Ativar Tabela","2 - Desativar Tabela","3 - Ativar Produto","4 - Desativar Produto","5 - Alterar Vigencia","6 - Alterar Preco"}, 100 ,'.T.',.T.,".T."}) 
+aAdd( _aParAux , { 1 , "Produtos" , MV_PAR02, "@!"   , ""  ,"F3ITLC", _cValCC , 100 , .F. } ) 
 
 
 For nI := 1 To Len( _aParAux )
@@ -59,7 +63,7 @@ If !ParamBox( _aParAux , "Alteracao de Tabela de preco de Produtos" , @_aParRet,
    Return
 EndIf
 
-FWMSGRUN(,{|oproc|  MOMS067Proc(oproc) },'Aguarde processamento...','Lendo dados...')
+FWMsgRun(,{|oproc|  MOMS067Proc(oproc) },'Aguarde processamento...','Lendo dados...')
 
 Return
 
@@ -76,7 +80,7 @@ Parametros--------: oproc
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC Function MOMS067Proc(oproc)
+Static Function MOMS067Proc(oproc)
 Local _lRet    := .F.
 Local _cQry		:= ""
 Local _ntot    := 0
@@ -103,7 +107,7 @@ If Subs(MV_PAR01,1,1) == "3" .Or. Subs(MV_PAR01,1,1) == "4"
    _cQry += "   AND DA1.D_E_L_E_T_ = ' ' "
    _cQry += "   AND DA0.DA0_FILIAL = '"+xFilial("DA0")+"' "
 
-   If !Empty(Alltrim(MV_PAR02))
+   If !Empty(AllTrim(MV_PAR02))
       _cQry += "   AND DA1_CODPRO IN " + FormatIn(MV_PAR02,";")  // PRODUTO 
    EndIf
 
@@ -121,7 +125,7 @@ Else
 
    _cQry := "SELECT DA0_FILIAL, DA0_CODTAB, DA0_DESCRI, DA0_DATDE, DA0_HORADE, DA0_DATATE, DA0_HORATE, DA0_ATIVO, DA0.R_E_C_N_O_ RECNODA0 "
    
-   If !Empty(Alltrim(MV_PAR02))
+   If !Empty(AllTrim(MV_PAR02))
       _cQry += " FROM " + RetSqlName("DA0") + " DA0 JOIN " + RetSqlName("DA1") + " DA1 ON DA0.DA0_FILIAL = DA1.DA1_FILIAL AND DA0.DA0_CODTAB = DA1.DA1_CODTAB AND DA1.D_E_L_E_T_ = ' ' "
    Else
       _cQry += " FROM " + RetSqlName("DA0") + " DA0 "
@@ -132,15 +136,15 @@ Else
 
    If Subs(MV_PAR01,1,1) == "1"
       _cQry += "   AND DA0.DA0_ATIVO <> '1' "
-   ElseIf Subs(MV_PAR01,1,1) == "2" .OR. Subs(MV_PAR01,1,1) == "6" .OR. Subs(MV_PAR01,1,1) == "5"
+   ElseIf Subs(MV_PAR01,1,1) == "2" .Or. Subs(MV_PAR01,1,1) == "6" .Or. Subs(MV_PAR01,1,1) == "5"
       _cQry += "   AND DA0.DA0_ATIVO = '1' "
    EndIf
 
-   If !Empty(Alltrim(MV_PAR02))
+   If !Empty(AllTrim(MV_PAR02))
       _cQry += "   AND DA1_CODPRO IN " + FormatIn(MV_PAR02,";")  // PRODUTO 
    EndIf
 
-   If !Empty(Alltrim(MV_PAR02))
+   If !Empty(AllTrim(MV_PAR02))
       _cQry += " GROUP BY DA0_FILIAL, DA0_CODTAB, DA0_DESCRI, DA0_DATDE, DA0_HORADE, DA0_DATATE, DA0_HORATE, DA0_ATIVO, DA0.R_E_C_N_O_ "
    EndIf
 
@@ -154,28 +158,28 @@ COUNT TO _ntot
 
 _aDados := {}
 
-(_cAlias)->(dbGoTop())
+(_cAlias)->(DBGoTop())
 
-DO WHILE !(_cAlias)->(EOF())
+While !(_cAlias)->(Eof())
 	
-   oproc:cCaption := ("Lendo Registro " + STRZERO(_npos,9) + " de " + STRZERO(_ntot,9))
+   oproc:cCaption := ("Lendo Registro " + StrZero(_npos,9) + " de " + StrZero(_ntot,9))
    ProcessMessages()
    _npos++
    
    If Subs(MV_PAR01,1,1) == "3" .Or. Subs(MV_PAR01,1,1) == "4" 
 
-      AADD(_aDados,{ .F.,;
+      aAdd(_aDados,{ .F.,;
             (_cAlias)->DA0_CODTAB,;
             (_cAlias)->DA0_DESCRI,;
-            DTOC(STOD((_cAlias)->DA0_DATDE)),;
+            DToC(SToD((_cAlias)->DA0_DATDE)),;
             (_cAlias)->DA0_HORADE,;
-            DTOC(STOD((_cAlias)->DA0_DATATE)),;
+            DToC(SToD((_cAlias)->DA0_DATATE)),;
             (_cAlias)->DA0_HORATE,;
             (_cAlias)->DA1_CODPRO,;
-            Alltrim(Posicione("SB1",1,xFilial("SB1")+(_cAlias)->DA1_CODPRO,"B1_DESC")),;
+            AllTrim(Posicione("SB1",1,xFilial("SB1")+(_cAlias)->DA1_CODPRO,"B1_DESC")),;
             If((_cAlias)->DA1_ATIVO='1',"1-Sim","2-Nao"),;
             (_cAlias)->DA1_I_MIX,;
-            DTOC(STOD((_cAlias)->DA1_DATVIG)),;
+            DToC(SToD((_cAlias)->DA1_DATVIG)),;
             (_cAlias)->DA1_I_PRF1,;
             (_cAlias)->DA1_I_PMF1,;
             (_cAlias)->DA1_I_PRF2,;
@@ -187,27 +191,27 @@ DO WHILE !(_cAlias)->(EOF())
 
    Else
 
-      AADD(_aDados,{ .F.,;
+      aAdd(_aDados,{ .F.,;
             (_cAlias)->DA0_CODTAB,;
             (_cAlias)->DA0_DESCRI,;
-            DTOC(STOD((_cAlias)->DA0_DATDE)),;
+            DToC(SToD((_cAlias)->DA0_DATDE)),;
             (_cAlias)->DA0_HORADE,;
-            DTOC(STOD((_cAlias)->DA0_DATATE)),;
+            DToC(SToD((_cAlias)->DA0_DATATE)),;
             (_cAlias)->DA0_HORATE,;
             If((_cAlias)->DA0_ATIVO='1',"1-Sim","2-Nao"),;
             (_cAlias)->RECNODA0 })
 
    EndIf
 
-   (_cAlias)->(DBSKIP())
+   (_cAlias)->(DBSkip())
    
-ENDDO
+EndDo
 
-IF LEN(_aDados) = 0
-   U_ITMSG("Não foram encontrados dados para esses produtos ",'Atenção!',"Tente novamente com outros produtos",3)
+If Len(_aDados) = 0
+   U_ITMsg("Não foram encontrados dados para esses produtos ",'Atenção!',"Tente novamente com outros produtos",3)
    _lLoop:=.T.
-   RETURN .T.
-ENDIF
+   Return .T.
+EndIf
 
 _lLoop   := .F.
 
@@ -234,11 +238,11 @@ If _lRet
 
          DEFINE MSDIALOG _oDlg TITLE "Alteração de Vigencia " FROM 000, 000  TO 090, 500 COLORS 0, 16777215 PIXEL
 
-         @ 005, 004 SAY _oSaySol PROMPT "Data da Vigencia:" SIZE 055, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+         @ 005, 004 Say _oSaySol PROMPT "Data da Vigencia:" SIZE 055, 007 OF _oDlg COLORS 0, 16777215 PIXEL
          @ 017, 003 MSGET _oGetSol VAR _cGetSol SIZE 70, 010 OF _oDlg PICTURE "@!" COLORS 0, 16777215 PIXEL
 
-         DEFINE SBUTTON _oSBtOk  FROM 031, 185 TYPE 01 OF _oDlg ENABLE ACTION (_nOpca := 1, _oDlg:End())
-         DEFINE SBUTTON _oSBtCan FROM 031, 216 TYPE 02 OF _oDlg ENABLE ACTION (_nOpca := 2, _oDlg:End())
+         DEFINE SBUTTON _oSBtOk  FROM 031, 185 Type 01 OF _oDlg ENABLE ACTION (_nOpca := 1, _oDlg:End())
+         DEFINE SBUTTON _oSBtCan FROM 031, 216 Type 02 OF _oDlg ENABLE ACTION (_nOpca := 2, _oDlg:End())
 
          ACTIVATE MSDIALOG _oDlg CENTERED
 
@@ -246,7 +250,7 @@ If _lRet
             oproc:cCaption := ("Gravando dados...")
             ProcessMessages()
             MOMS067GRV(_cGetSol)
-         Endif
+         EndIf
 
       Else
          oproc:cCaption := ("Gravando dados...")
@@ -274,7 +278,7 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC Function MOMS067GRV(_cGetSol)
+Static Function MOMS067GRV(_cGetSol)
 Local i := 0
 
    For i := 1 To Len(_aDados)
@@ -282,36 +286,36 @@ Local i := 0
 
          Begin Transaction
 
-            If Subs(MV_PAR01,1,1) == "1" .OR. Subs(MV_PAR01,1,1) == "2" .OR. Subs(MV_PAR01,1,1) == "5"
+            If Subs(MV_PAR01,1,1) == "1" .Or. Subs(MV_PAR01,1,1) == "2" .Or. Subs(MV_PAR01,1,1) == "5"
                
-               DbSelectArea("DA0")
-               DbGoTo(_aDados[i][9])
+               DBSelectArea("DA0")
+               DBGoTo(_aDados[i][9])
 
                If Subs(MV_PAR01,1,1) == "5"
                   //Grava log
-                  MOMS067GL(,DA0->(Recno()),"A")
+                  MOMS067GL(,DA0->(Recno()),"A",_cGetSol)  
                EndIf
 
-               DA0->(Reclock("DA0",.F.))
+               DA0->(RecLock("DA0",.F.))
                If Subs(MV_PAR01,1,1) == "5"
                   DA0->DA0_DATATE := _cGetSol
                Else
                   DA0->DA0_ATIVO := Subs(MV_PAR01,1,1)
                EndIf
-               DA0->(Msunlock())
+               DA0->(MSUnLock())
 
                If Subs(MV_PAR01,1,1) <> "5"
-                  DbSelectArea("DA1")
-                  DbSetOrder(1)
-                  If Dbseek(xFilial("DA1")+DA0->DA0_CODTAB)
-                     Do While DA0->DA0_FILIAL+DA0->DA0_CODTAB == DA1->DA1_FILIAL+DA1->DA1_CODTAB .AND. DA1->(!EOF())
+                  DBSelectArea("DA1")
+                  DBSetOrder(1)
+                  If DBSeek(xFilial("DA1")+DA0->DA0_CODTAB)
+                     While DA0->DA0_FILIAL+DA0->DA0_CODTAB == DA1->DA1_FILIAL+DA1->DA1_CODTAB .And. DA1->(!Eof())
                         
                         //Grava log
                         MOMS067GL(DA1->(Recno()),DA0->(Recno()),"A")
 
-                        DA1->(Reclock("DA1",.F.))
+                        DA1->(RecLock("DA1",.F.))
                         DA1->DA1_ATIVO := Subs(MV_PAR01,1,1)
-                        DA1->(Msunlock())
+                        DA1->(MSUnLock())
 
                         DA1->(DBSkip())
                      EndDo
@@ -319,13 +323,13 @@ Local i := 0
                EndIf
             Else
                //Grava log
-               MOMS067GL(_aDados[i][Iif(Subs(MV_PAR01,1,1) == "6",18,19)],_aDados[i][19],"A")
+               MOMS067GL(_aDados[i][IIf(Subs(MV_PAR01,1,1) == "6",18,19)],_aDados[i][19],"A")
 
-               DbSelectArea("DA1")
-               DbGoTo(_aDados[i][Iif(Subs(MV_PAR01,1,1) == "6",18,19)])
-               DA1->(Reclock("DA1",.F.))
-               DA1->DA1_ATIVO := Iif(Subs(MV_PAR01,1,1)=="3","1","2")
-               DA1->(Msunlock())
+               DBSelectArea("DA1")
+               DBGoTo(_aDados[i][IIf(Subs(MV_PAR01,1,1) == "6",18,19)])
+               DA1->(RecLock("DA1",.F.))
+               DA1->DA1_ATIVO := IIf(Subs(MV_PAR01,1,1)=="3","1","2")
+               DA1->(MSUnLock())
 
             EndIf
 
@@ -333,7 +337,7 @@ Local i := 0
 
       EndIf
    Next
-RETURN .T.
+Return .T.
 
 /*
 ===============================================================================================================================
@@ -348,7 +352,7 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC Function MOMS067K(_aDados)
+Static Function MOMS067K(_aDados)
 Local oDlg
 Local _cTitulo		:= "Alteração de Tabelas de Preço"
 Local _aObjects 	:= {}
@@ -361,9 +365,9 @@ Private oLista                    //Declarando o objeto do browser
 Private aCabecalho := {}         //Variavel que montará o aHeader do grid
 Private aColsEx 	 := {}         //Variável que receberá os dados
 
-AADD( _aObjects , { 100 , 055 , .T. , .F. , .T. })
-AADD( _aObjects , { 100 , 100 , .T. , .T.       })
-AADD( _aObjects , { 100 , 002 , .T. , .F.       })
+aAdd( _aObjects , { 100 , 055 , .T. , .F. , .T. })
+aAdd( _aObjects , { 100 , 100 , .T. , .T.       })
+aAdd( _aObjects , { 100 , 002 , .T. , .F.       })
 
 _aPosObj := MsObjSize( _aInfo , _aObjects )
 
@@ -387,18 +391,18 @@ DEFINE MSDIALOG oDlg TITLE _cTitulo OF oMainWnd PIXEL FROM _aSize[7],0 TO _aSize
 	// RODAPE DA TELA
 	//================================================================================
    oPanelRoda := TPanel():New(_aPosObj[2,3],0,'',oDlg,, .F., .F.,,,300,20,.F.,.F. )
-	@ 4,005 SAY		"Total de Tabelas Selecionadas:"  Pixel of oPanelRoda
+	@ 4,005 Say		"Total de Tabelas Selecionadas:"  Pixel of oPanelRoda
    @ 2,090 MSGET	oTotCodRec var nTotCodRec Picture "@E 999,999.99"  WHEN .F. Pixel of oPanelRoda
 	
 	aButtons := IIf( Type("aButtons") == "U" , {} , aButtons )
-   AAdd(aButtons,{"Alteração Multipla",{||(MOMS067N(oGet:aCols),oGet:Refresh())},"Alteração Multipla","Alteração Multipla"})
+   aAdd(aButtons,{"Alteração Multipla",{||(MOMS067N(oGet:aCols),oGet:Refresh())},"Alteração Multipla","Alteração Multipla"})
 
 ACTIVATE MSDIALOG oDlg ON INIT (EnchoiceBar(oDlg,{|| lConfirmou := MOMS067J(oGet:aCols) ,If(lConfirmou,oDlg:End(),)},{||oDlg:End()},,aButtons),;
 	                                oPanel:Align:=CONTROL_ALIGN_TOP,oPanelRoda:Align:=CONTROL_ALIGN_BOTTOM,;
 	                                oGet:oBrowse:Align:=CONTROL_ALIGN_ALLCLIENT,oGet:oBrowse:Refresh())
 	
 
-RETURN .T.
+Return .T.
 
 
 /*
@@ -416,7 +420,7 @@ Retorno-----------: Nenhum
 */
 Static Function MOMS067CB()
    /*
-    Aadd(aCabecalho, {;
+    aAdd(aCabecalho, {;
                   "Filial",;	//X3Titulo()
                   "FILIAL",; 	//X3_CAMPO
                   "@!",;		   //X3_PICTURE
@@ -431,7 +435,7 @@ Static Function MOMS067CB()
                   "",;			   //X3_RELACAO
                   ".T."})			//X3_WHEN
    */
-   Aadd(aCabecalho, {;
+   aAdd(aCabecalho, {;
                "",;	//X3Titulo()
                " ",; 	//X3_CAMPO
                "@BMP",;		   //X3_PICTURE
@@ -446,7 +450,7 @@ Static Function MOMS067CB()
                "",;			   //X3_RELACAO
                ".T."})			//X3_WHEN    
 
-   Aadd(aCabecalho, {;
+   aAdd(aCabecalho, {;
                "Ativo?",;	//X3Titulo()
                "ATIVO",; 	//X3_CAMPO
                "",;		   //X3_PICTURE
@@ -461,7 +465,7 @@ Static Function MOMS067CB()
                "",;			   //X3_RELACAO
                ".T."})			//X3_WHEN      
 
-   Aadd(aCabecalho, {;
+   aAdd(aCabecalho, {;
                "Tabela",;	//X3Titulo()
                "TABELA",; 	//X3_CAMPO
                "@!",;		   //X3_PICTURE
@@ -476,7 +480,7 @@ Static Function MOMS067CB()
                "",;			   //X3_RELACAO
                ".T."})			//X3_WHEN       
    
-   Aadd(aCabecalho, {;
+   aAdd(aCabecalho, {;
                "Descricao",;	//X3Titulo()
                "DESC",; 	//X3_CAMPO
                "@!",;		   //X3_PICTURE
@@ -491,7 +495,7 @@ Static Function MOMS067CB()
                "",;			   //X3_RELACAO
                ".T."})			//X3_WHEN
 
-   Aadd(aCabecalho, {;
+   aAdd(aCabecalho, {;
                "Produto",;	   //X3Titulo()
                "PRODUTO",; 	//X3_CAMPO
                "@!",;		   //X3_PICTURE
@@ -506,7 +510,7 @@ Static Function MOMS067CB()
                "",;			   //X3_RELACAO
                ".T."})			//X3_WHEN
 
-   Aadd(aCabecalho, {;
+   aAdd(aCabecalho, {;
                "Desc.",;	   //X3Titulo()
                "DESCPRO",; 	//X3_CAMPO
                "@!",;		   //X3_PICTURE
@@ -521,7 +525,7 @@ Static Function MOMS067CB()
                "",;			   //X3_RELACAO
                ".T."})			//X3_WHEN
 
-   Aadd(aCabecalho, {;
+   aAdd(aCabecalho, {;
                "Mix",;	   //X3Titulo()
                "MIX",; 	//X3_CAMPO
                "@!",;		   //X3_PICTURE
@@ -536,7 +540,7 @@ Static Function MOMS067CB()
                "",;			   //X3_RELACAO
                ".T."})			//X3_WHEN
 
-   Aadd(aCabecalho, {;
+   aAdd(aCabecalho, {;
                "Pr Faixa 1",;	   //X3Titulo()
                "PF1",; 	//X3_CAMPO
                "@E 999,999.99",;		   //X3_PICTURE
@@ -551,7 +555,7 @@ Static Function MOMS067CB()
                "",;			   //X3_RELACAO
                ".T."})			//X3_WHEN
 
-   Aadd(aCabecalho, {;
+   aAdd(aCabecalho, {;
                "Pr Min Fx 1",;	   //X3Titulo()
                "PMF1",; 	//X3_CAMPO
                "@E 999,999.99",;		   //X3_PICTURE
@@ -567,7 +571,7 @@ Static Function MOMS067CB()
                ".T."})			//X3_WHEN
 
 
-   Aadd(aCabecalho, {;
+   aAdd(aCabecalho, {;
                "Pr Faixa 2",;	   //X3Titulo()
                "PF2",; 	//X3_CAMPO
                "@E 999,999.99",;		   //X3_PICTURE
@@ -582,7 +586,7 @@ Static Function MOMS067CB()
                "",;			   //X3_RELACAO
                ".T."})			//X3_WHEN
 
-   Aadd(aCabecalho, {;
+   aAdd(aCabecalho, {;
                "Pr Min Fx 2",;	   //X3Titulo()
                "PMF2",; 	//X3_CAMPO
                "@E 999,999.99",;		   //X3_PICTURE
@@ -597,7 +601,7 @@ Static Function MOMS067CB()
                "",;			   //X3_RELACAO
                ".T."})			//X3_WHEN
 
-   Aadd(aCabecalho, {;
+   aAdd(aCabecalho, {;
                "Pr Faixa 3",;	   //X3Titulo()
                "PF3",; 	//X3_CAMPO
                "@E 999,999.99",;		   //X3_PICTURE
@@ -612,7 +616,7 @@ Static Function MOMS067CB()
                "",;			   //X3_RELACAO
                ".T."})			//X3_WHEN
 
-   Aadd(aCabecalho, {;
+   aAdd(aCabecalho, {;
                   "Pr Min Fx 3",;	   //X3Titulo()
                   "PMF3",; 	//X3_CAMPO
                   "@E 999,999.99",;		   //X3_PICTURE
@@ -647,8 +651,8 @@ Local i := 0
 Local oBmp
 
    For i := 1 To Len(_aDados)
-         oBmp := Iif(Subs(_aDados[i][10],1,1) == "2",oBmpVermelho,oBmpVerde)
-         Aadd(aColsEx,{ oBmp,;
+         oBmp := IIf(Subs(_aDados[i][10],1,1) == "2",oBmpVermelho,oBmpVerde)
+         aAdd(aColsEx,{ oBmp,;
                         _aDados[i][10],; //2 - Aiivo (Sim/Nao)
                         _aDados[i][02],; //3 - Tabela
                         _aDados[i][03],; //4 - Descrição
@@ -695,18 +699,18 @@ Begin Transaction
 
    For i := 1 To Len(aColsEx)
       //Grava log
-      MOMS067GL(aColsEx[i,14],aColsEx[i,15],"A")
+      MOMS067GL(aColsEx[i,14],aColsEx[i,15],"A",,aColsEx[i]) 
 
-      DbSelectArea("DA1")
-      DbGoTo(aColsEx[i,14])
-      DA1->(Reclock("DA1",.F.))
+      DBSelectArea("DA1")
+      DBGoTo(aColsEx[i,14])
+      DA1->(RecLock("DA1",.F.))
       DA1->DA1_I_PRF1 := aColsEx[i,08]
       DA1->DA1_I_PMF1 := aColsEx[i,09]
       DA1->DA1_I_PRF2 := aColsEx[i,10]
       DA1->DA1_I_PMF2 := aColsEx[i,11]
       DA1->DA1_I_PRF3 := aColsEx[i,12]
       DA1->DA1_I_PMF3 := aColsEx[i,13]
-      DA1->(Msunlock())
+      DA1->(MSUnLock())
 
    Next
 
@@ -728,7 +732,7 @@ Parametros--------: oproc
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC Function MOMS067M(_aDados)
+Static Function MOMS067M(_aDados)
 Local _cQry		:= ""
 Local _ntot    := 0
 Local _npos    := 1
@@ -743,9 +747,9 @@ DEFAULT oproc  := NIL
 //oproc:cCaption := ("Lendo Tabelas de Preço...")
 //ProcessMessages()
 
-For i:=1 To len(_aDados)
+For i:=1 To Len(_aDados)
    If _aDados[i][1]
-      _cDados += Iif(Empty(_cDados),"",";")+_aDados[i][2]
+      _cDados += IIf(Empty(_cDados),"",";")+_aDados[i][2]
    EndIf
 Next
 
@@ -755,7 +759,7 @@ _cQry += " WHERE DA0.D_E_L_E_T_ = ' ' "
 _cQry += "   AND DA1.D_E_L_E_T_ = ' ' "
 _cQry += "   AND DA0.DA0_FILIAL = '"+xFilial("DA0")+"' "
 
-If !Empty(Alltrim(MV_PAR02))
+If !Empty(AllTrim(MV_PAR02))
    _cQry += "   AND DA1_CODPRO IN " + FormatIn(MV_PAR02,";")  // PRODUTO 
 EndIf
 
@@ -771,27 +775,27 @@ COUNT TO _ntot
 
 _aDados := {}
 
-(_cAlias)->(dbGoTop())
+(_cAlias)->(DBGoTop())
 
-DO WHILE !(_cAlias)->(EOF())
+While !(_cAlias)->(Eof())
 	
-   //oproc:cCaption := ("Lendo Tabela " + STRZERO(_npos,9) + " de " + STRZERO(_ntot,9))
+   //oproc:cCaption := ("Lendo Tabela " + StrZero(_npos,9) + " de " + StrZero(_ntot,9))
    //ProcessMessages()
    _npos++
    
 
-      AADD(_aDadosPd,{ .T.,;
+      aAdd(_aDadosPd,{ .T.,;
             (_cAlias)->DA0_CODTAB,;
             (_cAlias)->DA0_DESCRI,;
-            DTOC(STOD((_cAlias)->DA0_DATDE)),;
+            DToC(SToD((_cAlias)->DA0_DATDE)),;
             (_cAlias)->DA0_HORADE,;
-            DTOC(STOD((_cAlias)->DA0_DATATE)),;
+            DToC(SToD((_cAlias)->DA0_DATATE)),;
             (_cAlias)->DA0_HORATE,;
             (_cAlias)->DA1_CODPRO,;
-            Alltrim(Posicione("SB1",1,xFilial("SB1")+(_cAlias)->DA1_CODPRO,"B1_DESC")),;
+            AllTrim(Posicione("SB1",1,xFilial("SB1")+(_cAlias)->DA1_CODPRO,"B1_DESC")),;
             If((_cAlias)->DA1_ATIVO='1',"1-Sim","2-Nao"),;
             (_cAlias)->DA1_I_MIX,;
-            DTOC(STOD((_cAlias)->DA1_DATVIG)),;
+            DToC(SToD((_cAlias)->DA1_DATVIG)),;
             (_cAlias)->DA1_I_PRF1,;//13
             (_cAlias)->DA1_I_PMF1,;
             (_cAlias)->DA1_I_PRF2,;
@@ -801,14 +805,14 @@ DO WHILE !(_cAlias)->(EOF())
             (_cAlias)->RECNODA1,;
             (_cAlias)->RECNODA0 }) //20
 
-   (_cAlias)->(DBSKIP())
+   (_cAlias)->(DBSkip())
    
-ENDDO
+EndDo
 
-IF LEN(_aDadosPd) = 0
-   U_ITMSG("Não foram encontrados dados para esses produtos ",'Atenção!',"Tente novamente com outros produtos",3)
+If Len(_aDadosPd) = 0
+   U_ITMsg("Não foram encontrados dados para esses produtos ",'Atenção!',"Tente novamente com outros produtos",3)
    _lLoop:=.T.
-   RETURN .T.
+   Return .T.
 Else
 
    MOMS067K(_aDadosPd)
@@ -832,7 +836,7 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC Function MOMS067N(_aDados)
+Static Function MOMS067N(_aDados)
 Local oDlg 
 Local oPrFaixa1,oPrFaixa2,oPrFaixa3
 Local oPrMinF1,oPrMinF2,oPrMinF3
@@ -843,28 +847,28 @@ Local nPrFaixa3 := 0
 Local nPrMinF1  := 0
 Local nPrMinF2  := 0
 Local nPrMinF3  := 0
-Local _ni       := 0
+Local _nI       := 0
 Local _lSave    := .F.
 Local _cPicture := PesqPict("DA1","DA1_I_PRF1"	) //"@E 999,999,999,999.99"
 
 DEFINE DIALOG oDlg TITLE _cTitulo FROM 1,0 TO 280,330 Pixel
 	
-	@ 004,010 SAY		"Pr Faixa 1"  Size 70,8 Pixel of oDlg
+	@ 004,010 Say		"Pr Faixa 1"  Size 70,8 Pixel of oDlg
    @ 014,010 MSGET	oPrFaixa1 Var nPrFaixa1 Size 70,8 Picture _cPicture WHEN .T. Pixel of oDlg
 
-	@ 004,090 SAY		"Pr Min Faixa 1"  Size 70,8 Pixel of oDlg
+	@ 004,090 Say		"Pr Min Faixa 1"  Size 70,8 Pixel of oDlg
    @ 014,090 MSGET	oPrMinF1 Var nPrMinF1 Size 70,8 Picture _cPicture  WHEN .T. Pixel of oDlg
 
-	@ 040,010 SAY		"Pr Faixa 2"  Size 70,8 Pixel of oDlg
+	@ 040,010 Say		"Pr Faixa 2"  Size 70,8 Pixel of oDlg
    @ 050,010 MSGET	oPrFaixa2 Var nPrFaixa2 Size 70,8 Picture _cPicture  WHEN .T. Pixel of oDlg
 
-	@ 040,090 SAY		"Pr Min Faixa 2"  Size 70,8 Pixel of oDlg
+	@ 040,090 Say		"Pr Min Faixa 2"  Size 70,8 Pixel of oDlg
    @ 050,090 MSGET	oPrMinF2 Var nPrMinF2 Size 70,8 Picture _cPicture  WHEN .T. Pixel of oDlg
 
-	@ 076,010 SAY		"Pr Faixa 3"  Size 70,8 Pixel of oDlg
+	@ 076,010 Say		"Pr Faixa 3"  Size 70,8 Pixel of oDlg
    @ 086,010 MSGET	oPrFaixa3 Var nPrFaixa3 Size 70,8 Picture _cPicture  WHEN .T. Pixel of oDlg
      
-	@ 076,090 SAY		"Pr Min Faixa 3"  Size 70,8 Pixel of oDlg
+	@ 076,090 Say		"Pr Min Faixa 3"  Size 70,8 Pixel of oDlg
    @ 086,090 MSGET	oPrMinF3 Var nPrMinF3 Size 70,8 Picture _cPicture  WHEN .T. Pixel of oDlg
 
    @ 115,030 BUTTON "Confirma" SIZE 050, 015 PIXEL OF oDlg ACTION (_lSave:=.T.,oDlg:End()) 
@@ -873,29 +877,29 @@ DEFINE DIALOG oDlg TITLE _cTitulo FROM 1,0 TO 280,330 Pixel
 Activate Dialog oDlg Centered  
 
 If _lSave
-   For _ni := 1 To Len(_aDados)
+   For _nI := 1 To Len(_aDados)
       If nPrFaixa1 <> 0
-         _aDados[_ni][08] := nPrFaixa1
+         _aDados[_nI][08] := nPrFaixa1
       EndIf
       If nPrMinF1 <> 0
-         _aDados[_ni][09] := nPrMinF1
+         _aDados[_nI][09] := nPrMinF1
       EndIf
       If nPrFaixa2 <> 0
-         _aDados[_ni][10] := nPrFaixa2
+         _aDados[_nI][10] := nPrFaixa2
       EndIf
       If nPrMinF2 <> 0
-         _aDados[_ni][11] := nPrMinF2
+         _aDados[_nI][11] := nPrMinF2
       EndIf
       If nPrFaixa3 <> 0
-         _aDados[_ni][12] := nPrFaixa3
+         _aDados[_nI][12] := nPrFaixa3
       EndIf
       If nPrMinF3 <> 0
-         _aDados[_ni][13] := nPrMinF3
+         _aDados[_nI][13] := nPrMinF3
       EndIf
    Next
 EndIf
 
-RETURN .T.
+Return .T.
 
 
 
@@ -907,34 +911,38 @@ Data da Criacao---: 30/06/22
 ===============================================================================================================================
 Descricao---------: Processa a alteração Multipla
 ===============================================================================================================================
-Parametros--------: Nenhum
+Parametros--------: nRecnoDA1  = Recno posicionado da tabela DA1
+                    nRecnoDA0  = Recno posicionado da tagble DA0
+                    cOper      = Operação selecionada pelo usuário
+                    _dDtVigenc = Data de Vigencia informada pelo usuário
+                    _aNovoPrc  = Novos Preços informados pelo usuário.
 ===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC Function MOMS067GL(nRecnoDA1,nRecnoDA0,cOper)
+Static Function MOMS067GL(nRecnoDA1,nRecnoDA0,cOper,_dDtVigenc, _aNovoPrc)
 Default nRecnoDA1 := 0
 Default nRecnoDA0 := 0
 Default cOper     := "A"
 
 If nRecnoDA1 > 0
-   DbSelectArea("DA1")
-   DbGoTo(nRecnoDA1)
+   DBSelectArea("DA1")
+   DBGoTo(nRecnoDA1)
 EndIf
 
 If nRecnoDA0 > 0
-   DbSelectArea("DA0")
-   DbGoTo(nRecnoDA0)
+   DBSelectArea("DA0")
+   DBGoTo(nRecnoDA0)
 EndIf
 
 //===================================================================
 // Grava log de alteração.
 //===================================================================
-ZGS->(Reclock("ZGS",.T.))
+ZGS->(RecLock("ZGS",.T.))
 ZGS->ZGS_FILIAL   := xFilial("ZGS")
-ZGS->ZGS_DATA     := date()
-ZGS->ZGS_HORA     := time()
-ZGS->ZGS_USER     := cusername
+ZGS->ZGS_DATA     := Date()
+ZGS->ZGS_HORA     := Time()
+ZGS->ZGS_USER     := cUserName
 ZGS->ZGS_MODULO   := funname()	
 ZGS->ZGS_STATUS   := cOper
 
@@ -942,7 +950,14 @@ If nRecnoDA0 > 0
    ZGS->ZGS_CODTAB   := DA0->DA0_CODTAB
    ZGS->ZGS_DATDE 	:= DA0->DA0_DATDE
    ZGS->ZGS_HORADE	:= DA0->DA0_HORADE
-   ZGS->ZGS_DATATE	:= DA0->DA0_DATATE
+   
+   If ! Empty(_dDtVigenc)
+      ZGS->ZGS_DATATE := _dDtVigenc 
+   Else 
+      ZGS->ZGS_DATATE := DA0->DA0_DATATE
+   EndIf 
+   
+   ZGS->ZGS_ODATAT   := DA0->DA0_DATATE  // Grava a data de vigência Antes da Alteração. Esta função é chamada antes da alteração da data de vigência.
    ZGS->ZGS_HORATE	:= DA0->DA0_HORATE
    ZGS->ZGS_CONDPG	:= DA0->DA0_CONDPG
    ZGS->ZGS_TPHORA	:= DA0->DA0_TPHORA
@@ -977,14 +992,39 @@ If nRecnoDA1 > 0
    ZGS->ZGS_I_OPTB   := DA1->DA1_I_PTBN
    ZGS->ZGS_I_OVII   := DA1->DA1_I_VIGI
    ZGS->ZGS_I_OVIF   := DA1->DA1_I_VIGF
-   ZGS->ZGS_PRF1     := DA1->DA1_I_PRF1 // "Pr Faixa 1"
-   ZGS->ZGS_PMF1     := DA1->DA1_I_PMF1 // "Pr min Fx 1"
-   ZGS->ZGS_PRF2     := DA1->DA1_I_PRF2 // "Pr Faixa 2"
-   ZGS->ZGS_PMF2     := DA1->DA1_I_PMF2 // "Pr min Fx 2"
-   ZGS->ZGS_PRF3     := DA1->DA1_I_PRF3 // "Pr Faixa 3"
-   ZGS->ZGS_PMF3     := DA1->DA1_I_PMF3 // "Pr min Fx 3"
+
+   If ! Empty(_aNovoPrc)
+      ZGS->ZGS_PRF1 := _aNovoPrc[08]
+      ZGS->ZGS_PMF1 := _aNovoPrc[09]
+      ZGS->ZGS_PRF2 := _aNovoPrc[10]
+      ZGS->ZGS_PMF2 := _aNovoPrc[11]
+      ZGS->ZGS_PRF3 := _aNovoPrc[12]
+      ZGS->ZGS_PMF3 := _aNovoPrc[13]
+   Else 
+      ZGS->ZGS_PRF1     := DA1->DA1_I_PRF1 // "Pr Faixa 1"
+      ZGS->ZGS_PMF1     := DA1->DA1_I_PMF1 // "Pr min Fx 1"
+      ZGS->ZGS_PRF2     := DA1->DA1_I_PRF2 // "Pr Faixa 2"
+      ZGS->ZGS_PMF2     := DA1->DA1_I_PMF2 // "Pr min Fx 2"
+      ZGS->ZGS_PRF3     := DA1->DA1_I_PRF3 // "Pr Faixa 3"
+      ZGS->ZGS_PMF3     := DA1->DA1_I_PMF3 // "Pr min Fx 3"
+   EndIf 
+
+   //========================================================
+   // Grava os preços antes da alteração.
+   // Esta função é chamada antes das alterações de valores.
+   //========================================================
+   ZGS->ZGS_OPRCMA   := DA1->DA1_PRCMAX  // Prc Mx Ant	
+   //ZGS->ZGS_PMF1	   := DA1->DA1_I_PRF1  // Preço Fx 1 Ant	
+   //ZGS->ZGS_PMF2	   := DA1->DA1_I_PRF2  // Preço Fx 2 Ant
+   //ZGS->ZGS_PMF3	   := DA1->DA1_I_PRF3  // Preço Fx 3 Ant
+   ZGS->ZGS_OPRF1    := DA1->DA1_I_PRF1  // Preço Fx 1 Ant  // JPP TESTE.
+	ZGS->ZGS_OPRF2    := DA1->DA1_I_PRF2  // Preço Fx 2 Ant
+	ZGS->ZGS_OPRF3    := DA1->DA1_I_PRF3  // Preço Fx 3 Ant
+   ZGS->ZGS_OPMF1	   := DA1->DA1_I_PMF1  // Pr Min Fx1 A
+   ZGS->ZGS_OPMF2	   := DA1->DA1_I_PMF2  // Pr Min Fx2 A
+   ZGS->ZGS_OPMF3	   := DA1->DA1_I_PMF3  // Pr Min Fx3 A	
 EndIf
 
-ZGS->(Msunlock())
+ZGS->(MSUnLock())
 
 Return .T.

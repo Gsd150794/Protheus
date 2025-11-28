@@ -2,33 +2,25 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 12/08/2022 | Corrigido filtro para produtores que emitem a própria nota. Chamado 40932
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 16/08/2022 | Corrigida query para não considerar pre-notas. Chamado 41037
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 24/08/2022 | Retirado caracter inserido pelo notebook defeituoso. Chamado 41130
-===============================================================================================================================
+Lucas Borges  |12/08/2022| Chamado 40932. Corrigido filtro para produtores que emitem a própria nota.
+Lucas Borges  |16/08/2022| Chamado 41037. Corrigida query para não considerar pre-notas.
+Lucas Borges  |24/08/2022| Chamado 41130. Retirado caracter inserido pelo notebook defeituoso.
+==============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE 'Protheus.ch' 
+#Include "TOTVS.ch" 
 
 /*
 ===============================================================================================================================
 Programa----------: MCTB001
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 21/06/2017
-===============================================================================================================================
 Descrição---------: Rotina para Contabilizar Fechamento do Leite. Criada rotina para contabilizar os descontos dos produtores 
 					de leite apurados na rotina de fechamento. Os créditos geram itens nas notas fiscais, sendo assim, já são 
 					contabilizados pelo Compras.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -59,18 +51,15 @@ Return
 Programa----------: MCTB001P
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 08/06/2017
-===============================================================================================================================
 Descrição---------: Processa registros
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function MCTB01P(_oSelf, _cPerg)
 
 Local _cAlias	:= "CTBALT"//GetNextAlias()
-Local _aArea 	:= GetArea()
+Local _aArea 	:= FWGetArea()
 Local _cArquivo := " "
 Local _cLote  	:= AvKey(AllTrim(MV_PAR05),"CT2_LOTE")
 Local _nTotal   := 0 
@@ -93,11 +82,11 @@ _oSelf:IncRegua1("Buscando registros...")
 If MV_PAR06 == 1
 	_aSelFil := AdmGetFil(.F.,.F.,"ZLF")
 	If Empty(_aSelFil)
-		Aadd(_aSelFil,cFilAnt)
-	Endif
+		aAdd(_aSelFil,cFilAnt)
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 _oSelf:SaveLog("Thread:"+_cThread+" Iniciando a rotina. Parâmetros: "+CValToChar(MV_PAR01)+"-"+CValToChar(MV_PAR02)+"-"+DToC(MV_PAR03)+"-"+DToC(MV_PAR04)+"-"+MV_PAR05+"-"+AsString(_aSelFil))
 _oSelf:SetRegua1(Len(_aSelFil))
@@ -109,7 +98,7 @@ For _nX:=1 to Len(_aSelFil)
 	_oSelf:IncRegua1("Processando Filial: "+cFilAnt)
 	
 	//Este função cria o cabeçalho da contabilização
-	_nHdlPrv:= HeadProva(_cLote,_cPerg,Alltrim(cUserName),@_cArquivo) 
+	_nHdlPrv:= HeadProva(_cLote,_cPerg,AllTrim(cUserName),@_cArquivo) 
 	
 	If _nHdlPrv <= 0
 	     Help(" ",,1,"A100NOPRV")
@@ -118,9 +107,9 @@ For _nX:=1 to Len(_aSelFil)
 	EndIf 
 	//Necessária a segunda query para pegar as notas dos produtores que emitem a própria nota. Além de serem várias notas por mix, elas se referem à todos
 	//os setore e linha, logo, não é possível fazer a referência 1x1. Ainda não encontrei uma forma de pegar corretamente os casos onde esse tipo de produtor
-	//for fechado apenas no mês seguinte. A nota emitida é para o mesmo código mas a loja pode ser diferente por isso não deve ser amarrada.
+	//For fechado apenas no mês seguinte. A nota emitida é para o mesmo código mas a loja pode ser diferente por isso não deve ser amarrada.
 	//Visto que a nota emitida pelo produtor não tem data para ser emitida, não será feito um filtro de data, pegando todo o passado e não ficando nada sem contabilizar.
-	BeginSQL Alias _cAlias
+	BeginSql Alias _cAlias
 		SELECT ZLF.ZLF_FILIAL, ZLF.ZLF_A2COD, ZLF.ZLF_A2LOJA, ZLF.ZLF_SETOR, ZLF.ZLF_LINROT, ZLF.ZLF_DEBCRE, ZLF.ZLF_EVENTO,
 				ZLF.ZLF_DTFIM, ZLF.ZLF_L_SEEK, SA2.A2_CONTA, ZL8.ZL8_CONTA, ZLF.R_E_C_N_O_,
 				'NF ' || SF1.F1_DOC || ' ' || ZLF.ZLF_A2COD || ' ' || SA2.A2_NOME HISTORICO, ZLF.ZLF_TOTAL
@@ -176,7 +165,7 @@ For _nX:=1 to Len(_aSelFil)
 			GROUP BY ZLF.ZLF_FILIAL, ZLF.ZLF_A2COD, ZLF.ZLF_A2LOJA, ZLF.ZLF_SETOR, ZLF.ZLF_LINROT, ZLF.ZLF_DEBCRE, ZLF.ZLF_EVENTO,
 				ZLF.ZLF_DTFIM, ZLF.ZLF_L_SEEK, SA2.A2_CONTA, ZL8.ZL8_CONTA, ZLF.R_E_C_N_O_, ZLF.ZLF_TOTAL, SA2.A2_NOME
 		ORDER BY ZLF_FILIAL, ZLF_SETOR, ZLF_A2COD
-	EndSQL
+	EndSql
 	
 	While (_cAlias)->( !Eof() )
 		If VerPadrao(_cPadrao)
@@ -192,12 +181,12 @@ For _nX:=1 to Len(_aSelFil)
 			If _lUsaFlag
 				aFlagCTB := {}  // Limpa o coteudo apos a efetivacao do lancamento
 			Else 
-				DbSelectArea("ZLF")
-				ZLF->(DbGoTo((_cAlias)->R_E_C_N_O_))
+				DBSelectArea("ZLF")
+				ZLF->(DBGoTo((_cAlias)->R_E_C_N_O_))
 				ZLF->(RecLock("ZLF", .F.))
 				REPLACE ZLF_LA With "S"
-				ZLF->(MsUnLock())
-				ZLF->(DbCloseArea())
+				ZLF->(MSUnLock())
+				ZLF->(DBCloseArea())
 			EndIf
 			
 	     EndIf
@@ -211,11 +200,11 @@ For _nX:=1 to Len(_aSelFil)
 		cA100Incl(_cArquivo,_nHdlPrv,3,_cLote,_lDigita,_lAglut,_cOnLine,_dData,,@_aFlagCTB)
 	EndIf
 
-	(_cAlias)->(DbClosearea())
+	(_cAlias)->(DBCloseArea())
 	_oSelf:SaveLog("Thread:"+_cThread+" Término filial "+ _aSelFil[_nX])
 Next _nX
 
 cFilAnt := _cFilAnt //Restaura filial
 _oSelf:SaveLog("Thread:"+_cThread+" Término normal")
-RestArea(_aArea)
+FWRestArea(_aArea)
 Return

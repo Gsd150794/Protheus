@@ -9,16 +9,16 @@ Lucas Borges  	  | 23/07/2025 | Chamado 51340. Trocado e-mail padrão para sistem
 ==============================================================================================================================================================
 Analista - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
 ==============================================================================================================================================================
-Alex     - Igor Melgaço  - 02/05/25 - 06/05/25 -  50525  - Ajuste para remoção de diretório local C:\SMARTCLIENT\.
+Alex     - Igor Melgaço  - 02/05/25 - 06/05/25 -  50525  - Ajuste para remoção de diretório Local C:\SMARTCLIENT\.
 ==============================================================================================================================================================
 */
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //===================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "RPTDEF.CH"
-#INCLUDE "TBICONN.CH"
-#INCLUDE "FONT.CH"
+#Include "TOTVS.ch"
+#Include "RPTDEF.CH"
+#Include "TBICONN.CH"
+#Include "FONT.CH"
 #Include 'totvs.ch'
 
 /*
@@ -37,7 +37,7 @@ Retorno-----------: Nenhum
 */
 User Function ROMS057(_omodel,_cfatura2)
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _oModelMAS := _oModel:GetModel('ZZNMASTER')
 Default _cfatura2 := _oModelMAS:GetValue("ZZN_FATFIN")
 
@@ -47,23 +47,23 @@ If SE2->( DBSeek( cfilant + "MAN" + _cfatura2  + '01' + "FT " +;
 								 _oModelMAS:GetValue( 'ZZN_FTRANS') + _oModelMAS:GetValue( 'ZZN_LOJAFT') ) )
 
 	//Posiciona ZZN
-	ZZN->(Dbsetorder(1))
-	If ZZN->(Dbseek(cfilant + _oModelMAS:GetValue("ZZN_FATURA") + _oModelMAS:GetValue( 'ZZN_FTRANS') + _oModelMAS:GetValue( 'ZZN_LOJAFT')))
+	ZZN->(DBSetOrder(1))
+	If ZZN->(DBSeek(cfilant + _oModelMAS:GetValue("ZZN_FATURA") + _oModelMAS:GetValue( 'ZZN_FTRANS') + _oModelMAS:GetValue( 'ZZN_LOJAFT')))
 
-		FwMsgRun(,{|| U_ROMS057E()},,"Aguarde, gerando documento de fatura...")
+		FWMsgRun(,{|| U_ROMS057E()},,"Aguarde, gerando documento de fatura...")
 
 	Else
-		u_itmsg("Falha na localização da fatura do transportador!","Atenção",,1)
+		U_ITMsg("Falha na localização da fatura do transportador!","Atenção",,1)
 
-	Endif
+	EndIf
 
 Else
 
-	u_itmsg("Fatura do transportador não possui fatura gerada no financeiro!","Atenção",,1)
+	U_ITMsg("Fatura do transportador não possui fatura gerada no financeiro!","Atenção",,1)
 
-Endif
+EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 Return
 
 
@@ -81,7 +81,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function ROMS057E()
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local _cAnexo		:= ""
 Local _cEmail		:= ""
 Local _cCc			:= ""
@@ -120,7 +120,7 @@ Private oFont16b	:= TFont():New("Arial",,16,,.T.,,,,,.F.,.F.)
 lImpObs := .F.                                                              
 
 
-cFileName := "fatura_" + alltrim(SE2->E2_NUM) + "_" + alltrim(SE2->E2_FILIAL)+"_" + alltrim(SE2->E2_FORNECE) + ".pdf"
+cFileName := "fatura_" + AllTrim(SE2->E2_NUM) + "_" + AllTrim(SE2->E2_FILIAL)+"_" + AllTrim(SE2->E2_FORNECE) + ".pdf"
 
 //==========================
 // Cria Arquivo do Relatorio
@@ -167,8 +167,8 @@ If nLinAux > (nLinIni+590)
 EndIf
 
 _cchaven := ZZN->ZZN_FILIAL + ZZN->ZZN_FATURA + ZZN->ZZN_FTRANS + ZZN->ZZN_LOJAFT
-ZZN->(Dbsetorder(1))
-ZZN->(Dbseek(_cchaven))
+ZZN->(DBSetOrder(1))
+ZZN->(DBSeek(_cchaven))
 
 _ntot := 0
 _nvaltot := 0
@@ -176,52 +176,52 @@ _ndesctot := 0
 _aimp := {}
 
 //Conta itens para dividir páginas
-Do while _cchaven == ZZN->ZZN_FILIAL + ZZN->ZZN_FATURA + ZZN->ZZN_FTRANS + ZZN->ZZN_LOJAFT
+While _cchaven == ZZN->ZZN_FILIAL + ZZN->ZZN_FATURA + ZZN->ZZN_FTRANS + ZZN->ZZN_LOJAFT
 
 	_ntot++
 	_nvaltot += ZZN->ZZN_VLRCTR
 	_ndesctot += ZZN->ZZN_DESCONT
 
 	//Guarda totais de cada ctr para impressão
-	_nk := ascan(_aimp, {|x| x[1] = ZZN->ZZN_CTRANS})
+	_nk := aScan(_aimp, {|x| x[1] = ZZN->ZZN_CTRANS})
 
 	If  _nk == 0
 
-		aadd(_aimp, {ZZN->ZZN_CTRANS, ZZN->ZZN_VLRCTR, ZZN->ZZN_DESCONT, 0})
+		aAdd(_aimp, {ZZN->ZZN_CTRANS, ZZN->ZZN_VLRCTR, ZZN->ZZN_DESCONT, 0})
 
 	Else
 
 		_aimp[_nk][2] += ZZN->ZZN_VLRCTR
 		_aimp[_nk][3] += ZZN->ZZN_DESCONT
 
-	Endif
+	EndIf
 
-	ZZN->(Dbskip())
+	ZZN->(DBSkip())
 
-Enddo
+EndDo
 
-ZZN->(Dbsetorder(1))
-ZZN->(Dbseek(_cchaven))
+ZZN->(DBSetOrder(1))
+ZZN->(DBSeek(_cchaven))
 
 _ntpags := noround((_ntot)/73,0) + 1
 _npag := 1
 
 oPrint:Say( (nLinIni+025) , (nColIni+210) , "FATURA "  + SE2->E2_NUM  , oFont14b )
-oPrint:Say( (nLinIni+025) , (nColIni+500) , "Pag " + strzero(_npag,3) + "/" + strzero(_ntpags,3)  , oFont14 )
-oPrint:Say( (nLinIni+045) , (nColIni+210) , posicione("SA2",1,xfilial("SA2")+SE2->E2_FORNECE+SE2->E2_LOJA,"A2_NREDUZ") , oFont14b )
+oPrint:Say( (nLinIni+025) , (nColIni+500) , "Pag " + StrZero(_npag,3) + "/" + StrZero(_ntpags,3)  , oFont14 )
+oPrint:Say( (nLinIni+045) , (nColIni+210) , Posicione("SA2",1,xFilial("SA2")+SE2->E2_FORNECE+SE2->E2_LOJA,"A2_NREDUZ") , oFont14b )
 
 
-oPrint:Say( (nLinIni+065) , (nColIni+020) , POSICIONE("ZZM",1,XFILIAL("ZZM")+cfilant,"ZZM_DESCRI") , oFont14b )		
+oPrint:Say( (nLinIni+065) , (nColIni+020) , Posicione("ZZM",1,xFilial("ZZM")+cfilant,"ZZM_DESCRI") , oFont14b )		
 oPrint:Say( (nLinIni+080) , (nColIni+020) , "R$ " + transform(SE2->E2_VALOR,"@E 999,999.99") , oFont14b )
-oPrint:Say( (nLinIni+095) , (nColIni+020) , "Emissão: " + dtoc(SE2->E2_EMISSAO) , oFont14b )
-oPrint:Say( (nLinIni+110) , (nColIni+020) , "Vencimento: " + dtoc(SE2->E2_VENCTO) , oFont14b )
-oPrint:Say( (nLinIni+125) , (nColIni+020) , "Lib.: " + substr(alltrim(UsrFullName(SE2->E2_I_CLIB)),1,10) , oFont14b )
+oPrint:Say( (nLinIni+095) , (nColIni+020) , "Emissão: " + DToC(SE2->E2_EMISSAO) , oFont14b )
+oPrint:Say( (nLinIni+110) , (nColIni+020) , "Vencimento: " + DToC(SE2->E2_VENCTO) , oFont14b )
+oPrint:Say( (nLinIni+125) , (nColIni+020) , "Lib.: " + SubStr(AllTrim(UsrFullName(SE2->E2_I_CLIB)),1,10) , oFont14b )
 oPrint:Say( (nLinIni+140) , (nColIni+020) , "Conf.: ___________________" , oFont14b )
 
-SA2->(dbSetOrder(1))
-SA2->(dbSeek(xFilial("SA2") + SE2->E2_FORNECE+SE2->E2_LOJA))
+SA2->(DBSetOrder(1))
+SA2->(DBSeek(xFilial("SA2") + SE2->E2_FORNECE+SE2->E2_LOJA))
 
-oPrint:Say( (nLinIni+070) , (nColIni+210) , "FATURA DE ORIGEM: " + alltrim(ZZN->ZZN_FATURA) , oFont08 )		
+oPrint:Say( (nLinIni+070) , (nColIni+210) , "FATURA DE ORIGEM: " + AllTrim(ZZN->ZZN_FATURA) , oFont08 )		
 oPrint:Say( (nLinIni+080) , (nColIni+210) , AllTrim(SA2->A2_NOME) + " - " + SA2->A2_COD + "/" + SA2->A2_LOJA , oFont08 )
 oPrint:Say( (nLinIni+090) , (nColIni+210) ,  AllTrim(SA2->A2_END) , oFont08 )
 oPrint:Say( (nLinIni+100) , (nColIni+210) , "CEP: " + SubStr(AllTrim(SA2->A2_CEP),1,2) + "." + SubStr(AllTrim(SA2->A2_CEP),3,3) + "-" + SubStr(AllTrim(SA2->A2_CEP),6,3) + " - " + AllTrim(SA2->A2_MUN) + " - " + SA2->A2_EST , oFont08 )
@@ -237,13 +237,13 @@ _npos := 0
 _ntot := 0
 
 _natual :=0
-ZZN->(Dbsetorder(1))
-ZZN->(Dbseek(_cchaven))
+ZZN->(DBSetOrder(1))
+ZZN->(DBSeek(_cchaven))
 
-Do while _cchaven == ZZN->ZZN_FILIAL + ZZN->ZZN_FATURA + ZZN->ZZN_FTRANS + ZZN->ZZN_LOJAFT
+While _cchaven == ZZN->ZZN_FILIAL + ZZN->ZZN_FATURA + ZZN->ZZN_FTRANS + ZZN->ZZN_LOJAFT
 
 	//Impede impressão duplicada
-	_nk := ascan(_aimp, {|x| x[1] = ZZN->ZZN_CTRANS})
+	_nk := aScan(_aimp, {|x| x[1] = ZZN->ZZN_CTRANS})
 
 	If _aimp[_nk][4] == 0
 
@@ -253,14 +253,14 @@ Do while _cchaven == ZZN->ZZN_FILIAL + ZZN->ZZN_FATURA + ZZN->ZZN_FTRANS + ZZN->
 
 	Else
 
-		ZZN->(Dbskip())
+		ZZN->(DBSkip())
 		Loop
 	
-	Endif
+	EndIf
 
-	oPrint:SayAlign( (nLinAux+040) , (nColIni-10) ,  strzero(_npos,3) , oFont08, 55, 14, CLR_BLACK, 1, 0 )
-	oPrint:SayAlign( (nLinAux+040) , (nColIni+40) ,  alltrim(strzero(val(ZZN->ZZN_CTRANS),9)) + "/" + alltrim(ZZN->ZZN_SERCTR) , oFont08, 55, 14, CLR_BLACK, 1, 0 )
-	oPrint:Say( (nLinAux+047) , (nColIni+180) , DTOC(ZZN->ZZN_DTDIGT), oFont08 )
+	oPrint:SayAlign( (nLinAux+040) , (nColIni-10) ,  StrZero(_npos,3) , oFont08, 55, 14, CLR_BLACK, 1, 0 )
+	oPrint:SayAlign( (nLinAux+040) , (nColIni+40) ,  AllTrim(StrZero(Val(ZZN->ZZN_CTRANS),9)) + "/" + AllTrim(ZZN->ZZN_SERCTR) , oFont08, 55, 14, CLR_BLACK, 1, 0 )
+	oPrint:Say( (nLinAux+047) , (nColIni+180) , DToC(ZZN->ZZN_DTDIGT), oFont08 )
 	oPrint:SayAlign( (nLinAux+040) , (nColIni+300) , (transform(_nvalor,"@E 999,999,999.99")), oFont08, 55, 14, CLR_BLACK, 1, 0 )
 	oPrint:SayAlign( (nLinAux+040) , (nColIni+380) , (transform(_ndesconto,"@E 999,999,999.99")), oFont08, 55, 14, CLR_BLACK, 1, 0 )
 	oPrint:SayAlign( (nLinAux+040) ,(nColIni+490) ,  Transform(_nvalor-_ndesconto,"@E 999,999,999.99") , oFont08, 55, 14, CLR_BLACK, 1, 0 )
@@ -272,7 +272,7 @@ Do while _cchaven == ZZN->ZZN_FILIAL + ZZN->ZZN_FATURA + ZZN->ZZN_FTRANS + ZZN->
 	_natual++
 
 	//Quebra de página
-	If (_natual == 63 .and. _npag == 1) .or. (_npag > 1 .and. _natual == 73)
+	If (_natual == 63 .And. _npag == 1) .Or. (_npag > 1 .And. _natual == 73)
 
 		_natual := 0
 		_npag++
@@ -290,17 +290,17 @@ Do while _cchaven == ZZN->ZZN_FILIAL + ZZN->ZZN_FATURA + ZZN->ZZN_FTRANS + ZZN->
 		nCont++
 
 		oPrint:Say( (nLinIni+025) , (nColIni+210) , "FATURA "  + SE2->E2_NUM  , oFont14b )
-		oPrint:Say( (nLinIni+025) , (nColIni+500) , "Pag " + strzero(_npag,3) + "/" + strzero(_ntpags,3)  , oFont14 )
-		oPrint:Say( (nLinIni+045) , (nColIni+210) , posicione("SA2",1,xfilial("SA2")+SE2->E2_FORNECE+SE2->E2_LOJA,"A2_NREDUZ") , oFont14b )
+		oPrint:Say( (nLinIni+025) , (nColIni+500) , "Pag " + StrZero(_npag,3) + "/" + StrZero(_ntpags,3)  , oFont14 )
+		oPrint:Say( (nLinIni+045) , (nColIni+210) , Posicione("SA2",1,xFilial("SA2")+SE2->E2_FORNECE+SE2->E2_LOJA,"A2_NREDUZ") , oFont14b )
 
 		oPrint:Say( (nLinAux+030) , (nColIni+020) ,  "   Item      CTR                      Data de emissão             Valor Principal          Desconto              Valor a Pagar", oFont14b )
 
 
-	Endif
+	EndIf
 
-	ZZN->(Dbskip())
+	ZZN->(DBSkip())
 
-Enddo
+EndDo
 
 	nlinAux += 20
 
@@ -322,7 +322,7 @@ If File(cPathSrvJ + cFileName)
 	_cAnexo := cPathSrvJ + cFileName
 EndIf
 
-cNreduz := alltrim(posicione("SA2",1,xfilial("SA2")+SE2->E2_FORNECE+SE2->E2_LOJA,"A2_NREDUZ"))
+cNreduz := AllTrim(Posicione("SA2",1,xFilial("SA2")+SE2->E2_FORNECE+SE2->E2_LOJA,"A2_NREDUZ"))
 
 _cAssunto := "Fatura de transporte - " + SE2->E2_FILIAL + "/" + SE2->E2_NUM + " do transportador " + cNReduz + Space(30)
 
@@ -337,7 +337,7 @@ ROMS057M(_cAnexo,@_cEmail,@_cCc,@_cAssunto,@_cMens,cMailCom,cNReduz,_cFilial,SE2
 //========================================================
 ROMS057D(cPathSrvJ + cFileName)
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -425,7 +425,7 @@ Else
 	//=================
 	oPrint:Line( nLinIni + 80 , nColIni + 010 , nLinIni + 80 , nColMax	)
 
-Endif
+EndIf
 
 Return
 
@@ -471,7 +471,7 @@ Local cPathSrvJ	 := GETMV("MV_RELT")
 Local cPathLocal := GetTempPath()
 Local cGetAnxl   := StrTran( cGetAnx, cPathSrvJ, cPathLocal ) 
 Local cGetAssun	:= _cAssunto
-Local cGetCc	:= _cCc + SPACE(80)
+Local cGetCc	:= _cCc + Space(80)
 Local cGetMens	:= ""
 Local cGetPara	:= _cEmail + Space(80)
 
@@ -480,25 +480,25 @@ Private oDlgMail
 //Copia anexo para estação local
 CpyS2T(cGetAnx,cPathLocal)
 
-If (Len(PswRet()) # 0) // Quando nao for rotina automatica do configurador
+If (Len(PswRet()) # 0) // Quando nao For rotina automatica do configurador
 
 	_csetor	:= AllTrim(PswRet()[1][12])		// Pega departamento do usuario
    
-Endif
+EndIf
 
 
-If empty(alltrim(_csetor))
+If Empty(AllTrim(_csetor))
  
  	_csetor := "Logistica"
  	
-Endif
+EndIf
 
 cHtml := 'Ao departamento financeiro,'
 cHtml += '<br><br>'
-cHtml += '&nbsp;&nbsp;&nbsp;Segue anexo Fatura de transporte - ' + SE2->E2_FILIAL + "/"  + SE2->E2_NUM + ' do transportador ' + posicione("SA2",1,xfilial("SA2")+SE2->E2_FORNECE+SE2->E2_LOJA,"A2_NREDUZ") + '.<br>'
+cHtml += '&nbsp;&nbsp;&nbsp;Segue anexo Fatura de transporte - ' + SE2->E2_FILIAL + "/"  + SE2->E2_NUM + ' do transportador ' + Posicione("SA2",1,xFilial("SA2")+SE2->E2_FORNECE+SE2->E2_LOJA,"A2_NREDUZ") + '.<br>'
 cHtml += '&nbsp;&nbsp;&nbsp;Favor confirmar o recebimento, retornando com o seu CIENTE!'
 cHtml += '<br><br>'
-cHtml += '<font color="#FF0000"><b><u>Título: ' + SE2->E2_NUM + ' no valor de ' + transform(SE2->E2_VALOR-SE2->E2_DECRESC,"@E 999,999.99") + ' com vencimento em ' + dtoc(SE2->E2_VENCTO) +'. </u></b><br><br></font>'
+cHtml += '<font color="#FF0000"><b><u>Título: ' + SE2->E2_NUM + ' no valor de ' + transform(SE2->E2_VALOR-SE2->E2_DECRESC,"@E 999,999.99") + ' com vencimento em ' + DToC(SE2->E2_VENCTO) +'. </u></b><br><br></font>'
 cHtml += '<br><br>'
 
 
@@ -554,8 +554,8 @@ cHtml +=             '<b><span style="font-size:12.0pt;font-family:'+"'"+'Times 
 cHtml +=             '<span style="font-size:12.0pt;font-family:'+"'"+'Times New Roman'+"'"+','+"'"+'serif'+"'"+';mso-fareast-language:PT-BR"></span></p>
 cHtml +=             '<p class=MsoNormal style="mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;text-align:justify">'
 cHtml +=             '<span style="font-size:7.5pt;font-family:'+"'"+'Times New Roman'+"'"+','+"'"+'serif'+"'"+';color:#1D2668;mso-fareast-language:PT-BR">
-cHtml +=                 'Esta mensagem é destinada exclusivamente para fins profissionais, para a(s) pessoa(s) a quem for dirigida, podendo conter informação confidencial e legalmente privilegiada. '
-cHtml +=                 'Ao recebê-la, se você não for destinatário desta mensagem, fica automaticamente notificado de abster-se a divulgar, copiar, distribuir, examinar ou, de qualquer forma, utilizar '
+cHtml +=                 'Esta mensagem é destinada exclusivamente para fins profissionais, para a(s) pessoa(s) a quem For dirigida, podendo conter informação confidencial e legalmente privilegiada. '
+cHtml +=                 'Ao recebê-la, se você não For destinatário desta mensagem, fica automaticamente notificado de abster-se a divulgar, copiar, distribuir, examinar ou, de qualquer forma, utilizar '
 cHtml +=                 'sua informação, por configurar ato ilegal. Caso você tenha recebido esta mensagem indevidamente, solicitamos que nos retorne este e-mail, promovendo, concomitantemente sua '
 cHtml +=                 'eliminação de sua base de dados, registros ou qualquer outro sistema de controle. Fica desprovida de eficácia e validade a mensagem que contiver vínculos obrigacionais, expedida '
 cHtml +=                 'por quem não detenha poderes de representação, bem como não esteja legalmente habilitado para utilizar o referido endereço eletrônico, configurando falta grave conforme nossa '
@@ -571,31 +571,31 @@ DEFINE MSDIALOG oDlgMail TITLE "E-Mail" FROM 000, 000  TO 415, 584 COLORS 0, 167
 	//======
 	// Para:
 	//======
-	@ 005, 006 SAY oPara PROMPT "Para:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+	@ 005, 006 Say oPara PROMPT "Para:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
 	@ 005, 030 MSGET oGetPara VAR cGetPara SIZE 256, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 PIXEL
 
 	//===========
 	// Com cópia:
 	//===========
-	@ 021, 006 SAY oCc PROMPT "Cc:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+	@ 021, 006 Say oCc PROMPT "Cc:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
 	@ 021, 030 MSGET oGetCc VAR cGetCc SIZE 256, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 PIXEL
 
 	//=========
 	// Assunto:
 	//=========
-	@ 037, 006 SAY oAssunto PROMPT "Assunto:" SIZE 022, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+	@ 037, 006 Say oAssunto PROMPT "Assunto:" SIZE 022, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
 	@ 037, 030 MSGET oGetAssun VAR cGetAssun SIZE 256, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 PIXEL
 
 	//======
 	// Anexo
 	//======
-	@ 053, 006 SAY oAnexo PROMPT "Anexo:" SIZE 019, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+	@ 053, 006 Say oAnexo PROMPT "Anexo:" SIZE 019, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
 	@ 053, 030 MSGET oGetAnx VAR cGetAnx SIZE 256, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 READONLY PIXEL
 
 	//==========
 	// Mensagem:
 	//==========
-	@ 069, 006 SAY oMens PROMPT "Mensagem:" SIZE 030, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+	@ 069, 006 Say oMens PROMPT "Mensagem:" SIZE 030, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
 	_oFont		:= TFont():New( 'Courier new' ,, 12 , .F. )
 	_oScrAux	:= TSimpleEditor():New( 080 , 006 , oDlgMail , 285 , 105 ,,,,, .T. )
 	
@@ -615,10 +615,10 @@ If nOpcA == 1
 	U_ITENVMAIL( Lower(AllTrim(UsrRetMail(RetCodUsr()))), cGetPara, cGetCc, cMailCom, cGetAssun, cHtml, cGetAnx, _aConfig[01], _aConfig[02], _aConfig[03], _aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog )
 
 Else
-	u_itmsg( 'Envio de e-mail cancelado pelo usuário.' , 'Atenção!' , ,1 )
+	U_ITMsg( 'Envio de e-mail cancelado pelo usuário.' , 'Atenção!' , ,1 )
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -639,7 +639,7 @@ Local nRet := 0
 If File(cFile)
 	nRet := fErase(cFile)
 	If nRet <> 0
-		u_itconout("Erro ao excluir o arquivo: " + cFile + " - Erro: " + str(FError()))
+		u_itconout("Erro ao excluir o arquivo: " + cFile + " - Erro: " + Str(FError()))
 	Else
 		u_itconout("Arquivo: " + cFile + " foi excluído com sucesso.")
 	EndIf
@@ -666,7 +666,7 @@ Local cCampFormat := ""	//Armazena o CPF ou CNPJ formatado
 If Len(AllTrim(cCPFCNPJ)) == 11			//CPF
 	cCampFormat:=SubStr(cCPFCNPJ,1,3) + "." + SubStr(cCPFCNPJ,4,3) + "." + SubStr(cCPFCNPJ,7,3) + "-" + SubStr(cCPFCNPJ,10,2) 
 Else									//CNPJ
-	cCampFormat:=Substr(cCPFCNPJ,1,2)+"."+Substr(cCPFCNPJ,3,3)+"."+Substr(cCPFCNPJ,6,3)+"/"+Substr(cCPFCNPJ,9,4)+"-"+ Substr(cCPFCNPJ,13,2)
+	cCampFormat:=SubStr(cCPFCNPJ,1,2)+"."+SubStr(cCPFCNPJ,3,3)+"."+SubStr(cCPFCNPJ,6,3)+"/"+SubStr(cCPFCNPJ,9,4)+"-"+ SubStr(cCPFCNPJ,13,2)
 EndIf
 	
 Return cCampFormat

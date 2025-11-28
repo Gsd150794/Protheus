@@ -2,42 +2,36 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges | 09/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Lucas Borges  |09/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#include "protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: FA480BENE
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 20/10/2010
-===============================================================================================================================
 Descrição---------: Altera descrição do beneficiario na impressao do cheque
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: cBenef -> C -> Deverá retornar o nome do Beneficiário/Favorecido.
 ===============================================================================================================================
 */
 User Function FA480BENE()
 
 Local _cBenef   := ''    
-Local _aArea    := GetArea()      
+Local _aArea    := FWGetArea()      
 Local _cQuery   := ""
 Local nCountRec := 0
 Local _cAliasSEF:= GetNextAlias()  
 
-//Se for numeracao automatica na impressao do cheque
+//Se For numeracao automatica na impressao do cheque
 If MV_PAR06 == 1                     
 	DBSelectArea("SA2")  
-	SA2->(dbSetOrder(1))
+	SA2->(DBSetOrder(1))
 	If SA2->(DBSeek( xFilial("SA2") + SEF->EF_FORNECE + SEF->EF_LOJA ))
 		//Verifique se o cheque eh referente a um produtor
 		If SubStr(SA2->A2_COD,1,1) == 'P'   
@@ -55,9 +49,9 @@ If MV_PAR06 == 1
 			EndIf
 		EndIf 
 	EndIf     
-//Se for numeracao automatica na impressao do cheque.
+//Se For numeracao automatica na impressao do cheque.
 Else		
-	//Se for baixado o titulo atraves da baixa manual
+	//Se For baixado o titulo atraves da baixa manual
 	If AllTrim(SEF->EF_ORIGEM) == 'FINA080'      
 		_cQuery := "SELECT"  
 		_cQuery += " EF_FORNECE,EF_LOJA "
@@ -72,14 +66,14 @@ Else
 		_cQuery += " AND EF.EF_IMPRESS = 'A'" 				
 				        	  
 		If Select(_cAliasSEF) > 0
-			(_cAliasSEF)->(dbCloseArea())
+			(_cAliasSEF)->(DBCloseArea())
 		EndIf                                                     
 					
 		dbUseArea( .T., "TOPCONN",TcGenQry(,,_cQuery),_cAliasSEF,.T.,.T.)
 		COUNT TO nCountRec //Contabiliza o numero de registros encontrados pela query
 					
-		dbSelectArea(_cAliasSEF)   
-		(_cAliasSEF)->(dbGotop())
+		DBSelectArea(_cAliasSEF)   
+		(_cAliasSEF)->(DBGoTop())
 					
 		If nCountRec > 0  
 					
@@ -103,7 +97,7 @@ Else
 				EndIf 
 			EndIf
 		EndIf				
-		(_cAliasSEF)->(dbCloseArea())     
+		(_cAliasSEF)->(DBCloseArea())     
 	EndIf
 EndIf       	
 //==============================================================
@@ -115,6 +109,6 @@ If Len(AllTrim(_cBenef)) == 0
 	_cBenef:= cBenef
 EndIf
 
-restArea(_aArea)
+FWRestArea(_aArea)
 
 Return _cBenef

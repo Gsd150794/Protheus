@@ -2,40 +2,34 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                              Motivo                                                          
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- 
 ===============================================================================================================================
 */
 
-#INCLUDE "FWMBROWSE.CH"
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "TOPCONN.CH"
-#INCLUDE "RWMAKE.CH"
-#INCLUDE "TBICONN.CH"
+#Include "FWMBROWSE.CH"
+#Include "FWMVCDEF.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MFIS009
 Autor-------------: Igor Melgaço
 Data da Criacao---: 23/12/2022
-===============================================================================================================================
 Descrição---------: Acertos Fiscais Italac. Chamado: 43865 
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------:  
 ===============================================================================================================================
 */ 
 User Function MFIS009()
-LOCAL nA 
+
+Local nA 
 Local _aParRet   := {}
 Local _aParAux   := {}
 Local _bOK       := {|| .T. }
 Local _cFiltro   := ""
 Local _cTabela := ""
-Local _cTimeIni  := TIME()
+Local _cTimeIni  := Time()
 Local _cTitAux   := "Acertos Fiscais Italac"
 
 _aStatus:={"1-Entrada     ",;
@@ -57,104 +51,103 @@ MV_PAR13 := Space(Len(SF1->F1_LOJA))
 MV_PAR14 := Space(Len(SF1->F1_FORNECE))
 MV_PAR15 := Space(Len(SF1->F1_LOJA))
 
-AADD( _aParAux , { 2 , "Movimento"     , MV_PAR01, _aStatus, 060   ,".T.",.T. ,".T."}) 
-AADD( _aParAux , { 1 , "Data Inicial"  , MV_PAR02, "@D", "", ""	, "" , 050 , .F.  })
-AADD( _aParAux , { 1 , "Data Final"	   , MV_PAR03, "@D", "", ""	, "" , 050 , .F.  })
-AADD( _aParAux , { 1 , "De Nota"       , MV_PAR04, "@!"  , ""    , ""        , "" , 060 , .F. } )
-AADD( _aParAux , { 1 , "De Serie"      , MV_PAR05, "@!"  , ""    , ""        , "" , 060 , .F. } )
-AADD( _aParAux , { 1 , "Ate Nota"      , MV_PAR06, "@!"  , ""    , ""        , "" , 060 , .F. } )
-AADD( _aParAux , { 1 , "Ate Serie"     , MV_PAR07, "@!"  , ""    , ""        , "" , 060 , .F. } )
-AADD( _aParAux , { 1 , "Fornecedor de" , MV_PAR08, ""	   , ""	, "SA2"		, "" , 50         , .F. } )
-AADD( _aParAux , { 1 , "Loja de"	   , MV_PAR09, ""	   , ""	, ""		   , "" , 25         , .F. } )
-AADD( _aParAux , { 1 , "Fornecedor até", MV_PAR10, ""	   , ""	, "SA2"		, "" , 50         , .F. } )
-AADD( _aParAux , { 1 , "Loja até"	   , MV_PAR11, ""	   , ""	, ""		   , "" , 25         , .F. } )
-AADD( _aParAux , { 1 , "Cliente de"	   , MV_PAR12, ""	   , ""	, "SA1"		, "" , 50         , .F. } )
-AADD( _aParAux , { 1 , "Loja de"	   , MV_PAR13, ""	   , ""	, ""		   , "" , 25         , .F. } )
-AADD( _aParAux , { 1 , "Cliente até"   , MV_PAR14, ""	   , ""	, "SA1"		, "" , 50         , .F. } )
-AADD( _aParAux , { 1 , "Loja até"	   , MV_PAR15, ""	   , ""	, ""		   , "" , 25         , .F. } )
+aAdd( _aParAux , { 2 , "Movimento"     , MV_PAR01, _aStatus, 060   ,".T.",.T. ,".T."}) 
+aAdd( _aParAux , { 1 , "Data Inicial"  , MV_PAR02, "@D", "", ""	, "" , 050 , .F.  })
+aAdd( _aParAux , { 1 , "Data Final"	   , MV_PAR03, "@D", "", ""	, "" , 050 , .F.  })
+aAdd( _aParAux , { 1 , "De Nota"       , MV_PAR04, "@!"  , ""    , ""        , "" , 060 , .F. } )
+aAdd( _aParAux , { 1 , "De Serie"      , MV_PAR05, "@!"  , ""    , ""        , "" , 060 , .F. } )
+aAdd( _aParAux , { 1 , "Ate Nota"      , MV_PAR06, "@!"  , ""    , ""        , "" , 060 , .F. } )
+aAdd( _aParAux , { 1 , "Ate Serie"     , MV_PAR07, "@!"  , ""    , ""        , "" , 060 , .F. } )
+aAdd( _aParAux , { 1 , "Fornecedor de" , MV_PAR08, ""	   , ""	, "SA2"		, "" , 50         , .F. } )
+aAdd( _aParAux , { 1 , "Loja de"	   , MV_PAR09, ""	   , ""	, ""		   , "" , 25         , .F. } )
+aAdd( _aParAux , { 1 , "Fornecedor até", MV_PAR10, ""	   , ""	, "SA2"		, "" , 50         , .F. } )
+aAdd( _aParAux , { 1 , "Loja até"	   , MV_PAR11, ""	   , ""	, ""		   , "" , 25         , .F. } )
+aAdd( _aParAux , { 1 , "Cliente de"	   , MV_PAR12, ""	   , ""	, "SA1"		, "" , 50         , .F. } )
+aAdd( _aParAux , { 1 , "Loja de"	   , MV_PAR13, ""	   , ""	, ""		   , "" , 25         , .F. } )
+aAdd( _aParAux , { 1 , "Cliente até"   , MV_PAR14, ""	   , ""	, "SA1"		, "" , 50         , .F. } )
+aAdd( _aParAux , { 1 , "Loja até"	   , MV_PAR15, ""	   , ""	, ""		   , "" , 25         , .F. } )
 
 For nA := 1 To Len( _aParAux )
     aAdd( _aParRet , _aParAux[nA][03] )
 Next
 
-DO WHILE .T.
+While .T.
                             //aParametros, cTitle                                , @aRet    ,[bOk], [ aButtons ] [ lCentered ] [ nPosX ] [ nPosy ] [ oDlgWizard ] [ cLoad ] [ lCanSave ] [ lUserSave ] 
     If !ParamBox( _aParAux , _cTitAux, @_aParRet, _bOK, /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
-        RETURN .F.
+        Return .F.
     EndIf
     
-    _cTabela := Iif(Subs(MV_PAR01,1,1) == "1","SF1","SF2")
+    _cTabela := IIf(Subs(MV_PAR01,1,1) == "1","SF1","SF2")
 
     _cFiltro := _cTabela+"->"+Subs(_cTabela,2,2)+"_FILIAL == '"+cFilAnt+"' .AND." 
 
     If Subs(MV_PAR01,1,1) == "1" 
         If !Empty(MV_PAR02)
-            _cFiltro += " DTOS(SF1->F1_DTDIGIT) >= '" + DTOS(MV_PAR02)+"' "
+            _cFiltro += " DToS(SF1->F1_DTDIGIT) >= '" + DToS(MV_PAR02)+"' "
         EndIf
         If !Empty(MV_PAR03)
-            _cFiltro += " .AND. DTOS(SF1->F1_DTDIGIT) <= '" + DTOS(MV_PAR03)+"' "
+            _cFiltro += " .And. DToS(SF1->F1_DTDIGIT) <= '" + DToS(MV_PAR03)+"' "
         EndIf
     Else
         If !Empty(MV_PAR02)
-            _cFiltro += " DTOS(SF2->F2_EMISSAO) >= '" + DTOS(MV_PAR02)+"' "
+            _cFiltro += " DToS(SF2->F2_EMISSAO) >= '" + DToS(MV_PAR02)+"' "
         EndIf
         If !Empty(MV_PAR03)
-            _cFiltro += " .AND. DTOS(SF2->F2_EMISSAO) <= '" + DTOS(MV_PAR03)+"' "
+            _cFiltro += " .And. DToS(SF2->F2_EMISSAO) <= '" + DToS(MV_PAR03)+"' "
         EndIf
     EndIf
     
     If !Empty(MV_PAR04) 
-        _cFiltro += Iif(Empty(_cFiltro),""," .AND. ")+_cTabela+"->"+Subs(_cTabela,2,2)+"_DOC >= '" + MV_PAR04+"' "
+        _cFiltro += IIf(Empty(_cFiltro),""," .And. ")+_cTabela+"->"+Subs(_cTabela,2,2)+"_DOC >= '" + MV_PAR04+"' "
     EndIf
     If !Empty(MV_PAR06)
-        _cFiltro += Iif(Empty(_cFiltro),""," .AND. ")+_cTabela+"->"+Subs(_cTabela,2,2)+"_DOC <= '" + MV_PAR06+"' "
+        _cFiltro += IIf(Empty(_cFiltro),""," .And. ")+_cTabela+"->"+Subs(_cTabela,2,2)+"_DOC <= '" + MV_PAR06+"' "
     EndIf
 
     If !Empty(MV_PAR05)
-        _cFiltro += Iif(Empty(_cFiltro),""," .AND. ") + _cTabela + "->" + Subs(_cTabela,2,2) + "_SERIE >= '" + MV_PAR05+"' "
+        _cFiltro += IIf(Empty(_cFiltro),""," .And. ") + _cTabela + "->" + Subs(_cTabela,2,2) + "_SERIE >= '" + MV_PAR05+"' "
     EndIf
     If !Empty(MV_PAR07)
-        _cFiltro += Iif(Empty(_cFiltro),""," .AND. ") + _cTabela + "->" + Subs(_cTabela,2,2) + "_SERIE <= '" + MV_PAR07+"' "
+        _cFiltro += IIf(Empty(_cFiltro),""," .And. ") + _cTabela + "->" + Subs(_cTabela,2,2) + "_SERIE <= '" + MV_PAR07+"' "
     EndIf
 
     If Subs(MV_PAR01,1,1) = "1"
         If !Empty(MV_PAR08) 
-            _cFiltro += Iif(Empty(_cFiltro),"",".AND.") + " SF1->F1_FORNECE >= '" + MV_PAR08+"' "
+            _cFiltro += IIf(Empty(_cFiltro),"",".AND.") + " SF1->F1_FORNECE >= '" + MV_PAR08+"' "
         EndIf
         If !Empty(MV_PAR10)
-            _cFiltro += Iif(Empty(_cFiltro),"",".AND.") + " SF1->F1_FORNECE <= '" + MV_PAR10+"' "
+            _cFiltro += IIf(Empty(_cFiltro),"",".AND.") + " SF1->F1_FORNECE <= '" + MV_PAR10+"' "
         EndIf
 
         If !Empty(MV_PAR09)
-            _cFiltro += Iif(Empty(_cFiltro),"",".AND.") + " SF1->F1_LOJA >= '" + MV_PAR09+"' "
+            _cFiltro += IIf(Empty(_cFiltro),"",".AND.") + " SF1->F1_LOJA >= '" + MV_PAR09+"' "
         EndIf
         If !Empty(MV_PAR11)
-            _cFiltro += Iif(Empty(_cFiltro),"",".AND.") + " SF1->F1_LOJA <= '" + MV_PAR11+"' "
+            _cFiltro += IIf(Empty(_cFiltro),"",".AND.") + " SF1->F1_LOJA <= '" + MV_PAR11+"' "
         EndIf
-    ELSE
+    Else
         If !Empty(MV_PAR12) 
-            _cFiltro += Iif(Empty(_cFiltro),"",".AND.") + " SF2->F2_CLIENTE >= '" + MV_PAR12+"' "
+            _cFiltro += IIf(Empty(_cFiltro),"",".AND.") + " SF2->F2_CLIENTE >= '" + MV_PAR12+"' "
         EndIf
         If !Empty(MV_PAR14)
-            _cFiltro += Iif(Empty(_cFiltro),"",".AND.") + " SF2->F2_CLIENTE <= '" + MV_PAR14+"' "
+            _cFiltro += IIf(Empty(_cFiltro),"",".AND.") + " SF2->F2_CLIENTE <= '" + MV_PAR14+"' "
         EndIf
         If !Empty(MV_PAR13) 
-            _cFiltro += Iif(Empty(_cFiltro),"",".AND.") + " SF2->F2_LOJA >= '" + MV_PAR13+"' "
+            _cFiltro += IIf(Empty(_cFiltro),"",".AND.") + " SF2->F2_LOJA >= '" + MV_PAR13+"' "
         EndIf
         If !Empty(MV_PAR15)
-            _cFiltro += Iif(Empty(_cFiltro),"",".AND.") + " SF2->F2_LOJA <= '" + MV_PAR15+"' "
+            _cFiltro += IIf(Empty(_cFiltro),"",".AND.") + " SF2->F2_LOJA <= '" + MV_PAR15+"' "
         EndIf
     EndIf
 
     If Subs(MV_PAR01,1,1) = "1"
-        FWMSGRUN( ,{|| U_MFIS010(_cFiltro) } , "Aguarde!" , "Hor Inicial: "+_cTimeIni+" / Carregando dados..." )
+        FWMsgRun( ,{|| U_MFIS010(_cFiltro) } , "Aguarde!" , "Hor Inicial: "+_cTimeIni+" / Carregando dados..." )
     Else
-        FWMSGRUN( ,{|| U_MFIS011(_cFiltro) } , "Aguarde!" , "Hor Inicial: "+_cTimeIni+" / Carregando dados..." )
+        FWMsgRun( ,{|| U_MFIS011(_cFiltro) } , "Aguarde!" , "Hor Inicial: "+_cTimeIni+" / Carregando dados..." )
     EndIf    
-ENDDO
+EndDo
 
-
-RETURN
+Return
 
 
 /*
@@ -162,20 +155,18 @@ RETURN
 Programa----------: MFIS009ALT
 Autor-------------: Igor Melgaço
 Data da Criacao---: 23/05/2023
-===============================================================================================================================
 Descrição---------: Validação para alteração de campos
-===============================================================================================================================
 Parametros--------: _oModel
-===============================================================================================================================
 Retorno-----------: lRet
 ===============================================================================================================================
 */
 User Function MFIS009ALT(cTIPO)
+
 Local lRet := .F. 
 
-dbSelectArea("ZZL")
-dbSetOrder(3) //ZZL_FILIAL + ZZL_CODUSU
-If dbSeek(xFilial("ZZL") + __cUserId)
+DBSelectArea("ZZL")
+DBSetOrder(3) //ZZL_FILIAL + ZZL_CODUSU
+If DBSeek(xFilial("ZZL") + __cUserId)
     If cTIPO = "FED" // FED Federal
         If ZZL->ZZL_AIMPF == "S"
             lRet := .T.
@@ -188,26 +179,23 @@ If dbSeek(xFilial("ZZL") + __cUserId)
         Else
             lRet := .F.
         EndIf
-    Endif
+    EndIf
 EndIf
 
 Return lRet
-
 
 /*
 ===============================================================================================================================
 Programa----------: MFIS010MON
 Autor-------------: Igor Melgaço
 Data da Criacao---: 19/05/2023
-===============================================================================================================================
 Descrição---------: Consulta Histórico de Alterações 
-===============================================================================================================================
 Parametros--------: _cChave
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function MFIS010T(_aCabec,_cTabela,_cChave,_cCpoChave,_cTitulo)
+
 Local oDlg			:= Nil
 Local oLbxTOP		:= Nil
 Local oLbxDET		:= Nil
@@ -236,12 +224,12 @@ Private	cCadastro	:= "["+ _cChave +"] - " + _cTitulo
 //================================================================================
 DBSelectArea("Z07")
 Z07->( DBSetOrder(1) )
-IF !Z07->( DBSeek( xFilial("Z07") + _cTabela + " 1" + _cChave ) )
+If !Z07->( DBSeek( xFilial("Z07") + _cTabela + " 1" + _cChave ) )
 	//MessageBox( "A chave ["+ _cChave +"] não possui histórico de alterações." , _cTitulo , 0 )
-	U_ITMSG("A chave ["+ _cChave +"] não possui histórico de alterações.","Atenção",,3)
+	U_ITMsg("A chave ["+ _cChave +"] não possui histórico de alterações.","Atenção",,3)
 	
-    Return()
-EndIF
+    Return
+EndIf
 
 aAdd( aObjects, { 100 , 025 , .T. , .F. , .T. } )
 aAdd( aObjects, { 100 , 070 , .T. , .F. } )
@@ -265,18 +253,16 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Of oM
 	//================================================================================
 	@ aPosObj[01][01],aPosObj[01][02] MSPANEL oScrPanel PROMPT "" SIZE aPosObj[01][03],aPosObj[01][04] OF oDlg LOWERED
 	
-	@ 004 , 004 SAY _aCabec[1,1] 	SIZE 060,07 OF oScrPanel PIXEL
-	@ 012 , 004 SAY _aCabec[1,2]   	SIZE 060,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
-    //@ 012 , 004 SAY SA3->A3_COD  	SIZE 060,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ 004 , 004 Say _aCabec[1,1] 	SIZE 060,07 OF oScrPanel PIXEL
+	@ 012 , 004 Say _aCabec[1,2]   	SIZE 060,09 OF oScrPanel PIXEL FONT oBold
 
-	@ 004 , 070 SAY _aCabec[2,1]  	SIZE 165,07 OF oScrPanel PIXEL
-	@ 012 , 070 SAY _aCabec[2,2]   	SIZE 165,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
-	//@ 012 , 030 SAY SA3->A3_NOME 	SIZE 165,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ 004 , 070 Say _aCabec[2,1]  	SIZE 165,07 OF oScrPanel PIXEL
+	@ 012 , 070 Say _aCabec[2,2]   	SIZE 165,09 OF oScrPanel PIXEL FONT oBold
 	
 	//================================================================================
 	//| Monta o resumo das alterações do cadastro                                    |
 	//================================================================================
-	@aPosObj[02][01],aPosObj[02][02] To aPosObj[02][03],aPosObj[02][04] LABEL "Campos Alterados" COLOR CLR_HBLUE OF oDlg PIXEL
+	@aPosObj[02][01],aPosObj[02][02] To aPosObj[02][03],aPosObj[02][04] LABEL "Campos Alterados" OF oDlg PIXEL
 	
 	@aPosObj[02][01]+7,aPosObj[02][02]+4 	Listbox oLbxTOP Fields	;
 											HEADER 	""		 		;
@@ -317,22 +303,20 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Of oM
 	
 ACTIVATE MSDIALOG oDlg CENTERED
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MFIS009CAR
 Autor-------------: Igor Melgaço
 Data da Criacao---: 19/05/2023
-===============================================================================================================================
 Descrição---------: Carregamento do Histórico de Alterações
-===============================================================================================================================
 Parametros--------: oLbxAux, _cChave
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function MFIS009CAR( oLbxAux , _cTabela, _cChave, _cCpoChave )
+
 Local _cQuery	:= ""
 Local _cAlias	:= GetNextAlias()
 Local _aLbxAux	:= {}
@@ -359,12 +343,12 @@ _cQuery += " ORDER BY Z07.Z07_CAMPO "
 _cQuery	:= ChangeQuery(_cQuery)
 DBUseArea( .T. , "TOPCONN" , TCGenQry(,,_cQuery) , _cAlias , .F. , .T. )
 
-TcSetField( _cAlias , "Z07.Z07_DATA" , "D" , 8 , 0 )
+TCSetField( _cAlias , "Z07.Z07_DATA" , "D" , 8 , 0 )
 
 DBSelectArea(_cAlias)
 (_cAlias)->(DBGoTop())
 
-(_cAlias)->( dbEval( { || _nTotReg++ } ) )
+(_cAlias)->( DBEval( { || _nTotReg++ } ) )
 
 ProcRegua(_nTotReg)
 
@@ -403,25 +387,20 @@ If	Len(_aLbxAux) > 0 .And. ValType(oLbxAux) == "O"
 
 EndIf
 
-Return()
-
-
-
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MFIS009DET
 Autor-------------: Igor Melgaço
 Data da Criacao---: 19/05/2023
-===============================================================================================================================
 Descrição---------: Monta estrutura de Detalhes do Log de Alterações do Campo
-===============================================================================================================================
 Parametros--------: oLbxAux , nRegSF1 , cCampo 
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function MFIS009DET( oLbxAux , cTabela , nReg , cCpoChave , cCampo )
+
 Local _cQuery	:= ""
 Local _cAlias	:= GetNextAlias()
 Local _aLbxAux	:= {}
@@ -452,7 +431,7 @@ _cQuery	:= ChangeQuery(_cQuery)
 
 DBUseArea( .T. , "TOPCONN" , TCGenQry(,,_cQuery) , _cAlias , .F. , .T. )
 
-TcSetField( _cAlias , "Z07.Z07_DATA" , "D" , 8 , 0 )
+TCSetField( _cAlias , "Z07.Z07_DATA" , "D" , 8 , 0 )
 
 DBSelectArea(_cAlias)
 (_cAlias)->(DBGoTop()) 
@@ -500,4 +479,4 @@ If	Len(_aLbxAux) > 0 .And. ValType(oLbxAux) == "O"
 
 EndIf
 
-Return()
+Return

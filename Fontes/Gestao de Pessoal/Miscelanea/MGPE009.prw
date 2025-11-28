@@ -1,40 +1,26 @@
-/* 
+/*
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 09/05/2019 | Chamado 28346. Revisão de fontes.
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 17/09/2019 | Chamado 28346. Retirada chamada da função itputx1. 
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 02/10/2019 | Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 23/10/2023 | Chamado 45297. Ajuste da integração p/ inclusão de dependentes e agregados no plano odontológico.
+Lucas Borges  |17/09/2019| Chamado 28346. Retirada chamada da função itputx1. 
+Lucas Borges  |02/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
+Alex Wallauer |23/10/2023| Chamado 45297. Ajuste da integração p/ inclusão de dependentes e agregados no plano odontológico.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.Ch"
+#Include "TOTVS.ch"
 
-//===========================================================================
-//| Definicoes Gerais da Rotina.                                            |
-//===========================================================================
 #Define		TITULO	"Gestão de Pessoal - Integração Plano de Saúde"
-#Define		CRLF	Chr(13)+Chr(10)
 
 /*
 ===============================================================================================================================
 Programa----------: MGPE009
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
 Descrição---------: Rotina de Integracao de Funcionarios x Plano de Saude. Chamado 5518
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -63,7 +49,7 @@ lSemaforo := MayIUseCode( cNomeSema , cUserName )
 //===========================================================================
 If !lSemaforo
 	MessageBox( "Essa rotina exige execução em modo exclusivo e nesse momento já está sendo utilizada por outro usuário." , TITULO , 0 )
-	Return()
+	Return
 EndIf
 
 Pergunte(cPerg,.F.)
@@ -79,18 +65,15 @@ While lProcOk
 	
 EndDo
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MGPE009INI
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
 Descrição---------: Rotina de Controle do Processamento
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -106,14 +89,14 @@ Private lGravaLog	:= GetMV( "IT_GRVLOG" ,, .F. ) //Caso necessario ativar o LOG 
 aParAux := {	MV_PAR01								,; //01 - Filiais consideradas
 				MGPE009FIL( MV_PAR02 , 2 )				,; //02 - Categorias Funcionais consideradas
 				MGPE009FIL( MV_PAR03 , 3 )				,; //03 - Situacoes na Folha consideradas
-				AllTrim( STR( MV_PAR10 ) )				,; //04 - Tipo de Pessoas consideradas (Funcionarios/Dependentes/Ambos)
+				AllTrim( Str( MV_PAR10 ) )				,; //04 - Tipo de Pessoas consideradas (Funcionarios/Dependentes/Ambos)
 				MV_PAR04								,; //05 - Centro de Custo Inicial
 				MV_PAR05								,; //06 - Centro de Custo Final
 				MV_PAR06								,; //07 - Matricula Inicial
 				MV_PAR07								,; //08 - Matricula Final
-				AllTrim( STR(MV_PAR11) )				,; //09 - Tipo de Servico
+				AllTrim( Str(MV_PAR11) )				,; //09 - Tipo de Servico
 				MV_PAR12								,; //10 - Fornecedor do Servico
-				AllTrim( STR(MV_PAR13) )				,; //11 - Tipo do Plano
+				AllTrim( Str(MV_PAR13) )				,; //11 - Tipo do Plano
 				MV_PAR14								,; //12 - Codigo do Plano
 				MV_PAR15								,; //13 - Verba para o Titular
 				MV_PAR16								,; //14 - Verba para os Dependentes
@@ -127,15 +110,15 @@ If	lGravaLog
 
 	PlsLogFil(""															,cDvArqLog)
 	PlsLogFil("------- I N I C I O  D O  P R O C E S S A M E N T O -------"	,cDvArqLog)
-	PlsLogFil("DATABASE...........: " + DtoC( dDataBase ) 					,cDvArqLog)
-	PlsLogFil("DATA...............: " + DtoC( Date() ) 						,cDvArqLog)
+	PlsLogFil("DATABASE...........: " + DToC( dDataBase ) 					,cDvArqLog)
+	PlsLogFil("DATA...............: " + DToC( Date() ) 						,cDvArqLog)
 	PlsLogFil("HORA...............: " + Time() 								,cDvArqLog)
 	PlsLogFil("ENVIRONMENT........: " + GetEnvServer() 						,cDvArqLog)
 	PlsLogFil("PATCH..............: " + GetSrvProfString( 'StartPath', '' )	,cDvArqLog)
 	PlsLogFil("ROOT...............: " + GetSrvProfString( 'RootPath', '' )	,cDvArqLog)
 	PlsLogFil("VERSÃO.............: " + GetVersao() 						,cDvArqLog)
 	PlsLogFil("MÓDULO.............: " + 'SIGA' + cModulo 					,cDvArqLog)
-	PlsLogFil("EMPRESA / FILIAL...: " + SM0->M0_CODIGO+"/"+alltrim(SM0->M0_CODFIL)	,cDvArqLog)
+	PlsLogFil("EMPRESA / FILIAL...: " + SM0->M0_CODIGO+"/"+AllTrim(SM0->M0_CODFIL)	,cDvArqLog)
 	PlsLogFil("NOME EMPRESA.......: " + Capital( Trim( SM0->M0_NOME ) ) 	,cDvArqLog)
 	PlsLogFil("NOME FILIAL........: " + Capital( Trim( SM0->M0_FILIAL ) ) 	,cDvArqLog)
 	PlsLogFil("USUÁRIO............: " + SubStr( cUsuario, 7, 15 ) 			,cDvArqLog)
@@ -154,19 +137,16 @@ MGPE009DLG( aParAux , oProcess )
 //===========================================================================
 lProcOk := .F.
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MGPE009DLG
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
-Descrição---------: Monta a DIALOG para o processamento quando a rotina for executada do Menu
-===============================================================================================================================
+Descrição---------: Monta a DIALOG para o processamento quando a rotina For executada do Menu
 Parametros--------: aParAux - Parametrização inical da Rotina
 ------------------: oProcess - Controle do processamento
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -287,7 +267,7 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Of oM
 			PlsLogFil("",cDvArqLog)
 			PlsLogFil("-> Inicio Folder...: " + AllTrim( aTitFol[nI] ) , cDvArqLog )
 			PlsLogFil("...................: Iniciado......................................................................: "+ ;
-						"Data : " + DtoC(Date()) + " Hora : " + Time() , cDvArqLog )
+						"Data : " + DToC(Date()) + " Hora : " + Time() , cDvArqLog )
 			
 		EndIf
 		
@@ -315,7 +295,7 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Of oM
 	//===========================================================================
 	//| Insere a legenda do Folder.                                             |
 	//===========================================================================
-	@aPosObj[2,1] , aColTot[01] SAY AllTrim( aTitFol[oFolder01:nOption] ) SIZE 600,09 COLOR CLR_HBLUE OF oDlg PIXEL
+	@aPosObj[2,1] , aColTot[01] Say AllTrim( aTitFol[oFolder01:nOption] ) SIZE 600,09 COLOR CLR_HBLUE OF oDlg PIXEL
 
 	//===========================================================================
 	//| Inclusao dos Controles/Totalizadores.                                   |
@@ -356,25 +336,25 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Of oM
 	//| Objetos dos Totalizadores.                                              |
 	//===========================================================================
 	//-- Desmarcados --//
-	@aPosObj[2,1]+20,aColTot[02]+010	SAY "Funcionários:"												SIZE 040,009 COLOR CLR_HRED 	OF oDlg PIXEL
-	@aPosObj[2,1]+20,aColTot[02]+052	SAY oTotFun[1] VAR Transform( aTotFun[1] , "@E 999,999,999" )	SIZE 100,009  FONT oBold 		OF oDlg PIXEL
+	@aPosObj[2,1]+20,aColTot[02]+010	Say "Funcionários:"												SIZE 040,009 COLOR CLR_HRED 	OF oDlg PIXEL
+	@aPosObj[2,1]+20,aColTot[02]+052	Say oTotFun[1] VAR Transform( aTotFun[1] , "@E 999,999,999" )	SIZE 100,009  FONT oBold 		OF oDlg PIXEL
 	
-	@aPosObj[2,1]+33,aColTot[02]+010	SAY "Dependentes:"												SIZE 040,009 COLOR CLR_HRED 	OF oDlg PIXEL
-	@aPosObj[2,1]+33,aColTot[02]+052	SAY oTotDep[1] VAR Transform( aTotDep[1] , "@E 999,999,999" )	SIZE 100,009  FONT oBold 		OF oDlg PIXEL
+	@aPosObj[2,1]+33,aColTot[02]+010	Say "Dependentes:"												SIZE 040,009 COLOR CLR_HRED 	OF oDlg PIXEL
+	@aPosObj[2,1]+33,aColTot[02]+052	Say oTotDep[1] VAR Transform( aTotDep[1] , "@E 999,999,999" )	SIZE 100,009  FONT oBold 		OF oDlg PIXEL
 
 	//-- Marcados --//
-	@aPosObj[2,1]+20,aColTot[03]+010	SAY "Funcionários:"												SIZE 040,009 COLOR CLR_HRED 	OF oDlg PIXEL
-	@aPosObj[2,1]+20,aColTot[03]+052	SAY oTotFun[2] VAR Transform( aTotFun[2] , "@E 999,999,999" )	SIZE 100,009  FONT oBold 		OF oDlg PIXEL
+	@aPosObj[2,1]+20,aColTot[03]+010	Say "Funcionários:"												SIZE 040,009 COLOR CLR_HRED 	OF oDlg PIXEL
+	@aPosObj[2,1]+20,aColTot[03]+052	Say oTotFun[2] VAR Transform( aTotFun[2] , "@E 999,999,999" )	SIZE 100,009  FONT oBold 		OF oDlg PIXEL
 	
-	@aPosObj[2,1]+33,aColTot[03]+010	SAY "Dependentes:"												SIZE 040,009 COLOR CLR_HRED 	OF oDlg PIXEL
-	@aPosObj[2,1]+33,aColTot[03]+052	SAY oTotDep[2] VAR Transform( aTotDep[2] , "@E 999,999,999" )	SIZE 100,009  FONT oBold  		OF oDlg PIXEL
+	@aPosObj[2,1]+33,aColTot[03]+010	Say "Dependentes:"												SIZE 040,009 COLOR CLR_HRED 	OF oDlg PIXEL
+	@aPosObj[2,1]+33,aColTot[03]+052	Say oTotDep[2] VAR Transform( aTotDep[2] , "@E 999,999,999" )	SIZE 100,009  FONT oBold  		OF oDlg PIXEL
 	
 	//-- Totais --//
-	@aPosObj[2,1]+20,aColTot[04]+010	SAY "Funcionários:"											 	SIZE 040,009 COLOR CLR_HRED 	OF oDlg PIXEL
-	@aPosObj[2,1]+20,aColTot[04]+052	SAY oTotFun[3] VAR Transform( aTotFun[3] , "@E 999,999,999" )	SIZE 100,009  FONT oBold 		OF oDlg PIXEL
+	@aPosObj[2,1]+20,aColTot[04]+010	Say "Funcionários:"											 	SIZE 040,009 COLOR CLR_HRED 	OF oDlg PIXEL
+	@aPosObj[2,1]+20,aColTot[04]+052	Say oTotFun[3] VAR Transform( aTotFun[3] , "@E 999,999,999" )	SIZE 100,009  FONT oBold 		OF oDlg PIXEL
 	
-	@aPosObj[2,1]+33,aColTot[04]+010	SAY "Dependentes:"												SIZE 040,009 COLOR CLR_HRED 	OF oDlg PIXEL
-	@aPosObj[2,1]+33,aColTot[04]+052	SAY oTotDep[3] VAR Transform( aTotDep[3] , "@E 999,999,999" )	SIZE 100,009  FONT oBold	 	OF oDlg PIXEL
+	@aPosObj[2,1]+33,aColTot[04]+010	Say "Dependentes:"												SIZE 040,009 COLOR CLR_HRED 	OF oDlg PIXEL
+	@aPosObj[2,1]+33,aColTot[04]+052	Say oTotDep[3] VAR Transform( aTotDep[3] , "@E 999,999,999" )	SIZE 100,009  FONT oBold	 	OF oDlg PIXEL
 	
 	//===========================================================================
 	//| Define acao da mudanca de Folder e inicaliza os contadores.             |
@@ -389,21 +369,18 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Of oM
 //===========================================================================
 ACTIVATE MSDIALOG oDlg	ON INIT EnchoiceBar(oDlg,bOk,bCancel,,aButtons) CENTERED
 	
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MGPE009DLG
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
-Descrição---------: Monta a DIALOG para o processamento quando a rotina for executada do Menu
-===============================================================================================================================
+Descrição---------: Monta a DIALOG para o processamento quando a rotina For executada do Menu
 Parametros--------: oLbxAux := Objeto de dados que sera carregado no Dialog.
 ------------------: aParAux := Ordem da execução atual.
 ------------------: aParAux := Parametrização do Wizard.
 ------------------: oProcess:= Controle do Processamento.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -420,7 +397,7 @@ Local cAlias		:= GetNextAlias()
 //===========================================================================
 If	lGravaLog
 	PlsLogFil("...................: Iniciando Montagem do Select..................................................: "+;
-				DtoC(Date())+" - "+Time(),cDvArqLog)
+				DToC(Date())+" - "+Time(),cDvArqLog)
 	nTempoX := Seconds()
 EndIf
 
@@ -451,8 +428,8 @@ If nOrdExe == 1 .And. ( aParAux[04] == "1" .Or. aParAux[04] == "3" ) // Verifica
 	cQuery += " AND		SRA.RA_SITFOLH	IN "+ FormatIn( aParAux[03] , ";" )										//Filtra por Situacoes na Folha
 	cQuery += " AND		SRA.RA_CC		BETWEEN '"+ aParAux[05]			+"' AND '"+ aParAux[06] +"' "			//Filtra por Centro de Custo
 	cQuery += " AND		SRA.RA_MAT		BETWEEN '"+ aParAux[07]			+"' AND '"+ aParAux[08] +"' "  			//Filtra por Matricula
-	cQuery += " AND		SRA.RA_ADMISSA	BETWEEN '"+ DtoS( aParAux[15] )	+"' AND '"+ DtoS( aParAux[16] ) +"' "	//Filtra por Data de Admissao
-	cQuery += " AND		SRA.RA_ADMISSA	<= '"+ DtoS( dDataBase - nDiasCad ) +"' "					  			//Filtra Funcionarios em Periodo de Experiencia
+	cQuery += " AND		SRA.RA_ADMISSA	BETWEEN '"+ DToS( aParAux[15] )	+"' AND '"+ DToS( aParAux[16] ) +"' "	//Filtra por Data de Admissao
+	cQuery += " AND		SRA.RA_ADMISSA	<= '"+ DToS( dDataBase - nDiasCad ) +"' "					  			//Filtra Funcionarios em Periodo de Experiencia
 	cQuery += " AND		NOT EXISTS	( 	SELECT	RHK.RHK_MAT FROM "+ RetSqlName("RHK") +" RHK "
 	cQuery += "							WHERE	RHK.D_E_L_E_T_	= ' ' "
 	cQuery += "							AND		RHK.RHK_FILIAL	= SRA.RA_FILIAL "
@@ -462,7 +439,7 @@ If nOrdExe == 1 .And. ( aParAux[04] == "1" .Or. aParAux[04] == "3" ) // Verifica
 	cQuery += "							AND		RHK.RHK_TPPLAN	= '"+ aParAux[11] +"' "
 	cQuery += "							AND		RHK.RHK_PLANO	= '"+ aParAux[12] +"' ) "
 	
-	IF aParAux[04] == "3"
+	If aParAux[04] == "3"
 		
 		//===========================================================================
 		//| Caso deva considerar os Dependentes adiciona a consulta principal.      |
@@ -491,8 +468,8 @@ If nOrdExe == 1 .And. ( aParAux[04] == "1" .Or. aParAux[04] == "3" ) // Verifica
 		cQuery += " AND		SRA.RA_SITFOLH	IN "+ FormatIn( aParAux[03] , ";" )										//Filtra por Situacoes na Folha
 		cQuery += " AND		SRA.RA_CC		BETWEEN '"+ aParAux[05]			+"' AND '"+ aParAux[06] +"' "			//Filtra por Centro de Custo
 		cQuery += " AND		SRA.RA_MAT		BETWEEN '"+ aParAux[07]			+"' AND '"+ aParAux[08] +"' "			//Filtra por Matricula
-		cQuery += " AND		SRA.RA_ADMISSA	BETWEEN '"+ DtoS( aParAux[15] )	+"' AND '"+ DtoS( aParAux[16] ) +"' "	//Filtra por Data de Admissao
-		cQuery += " AND		SRA.RA_ADMISSA	<= '"+ DtoS( dDataBase - nDiasCad ) +"' "								//Filtra Funcionarios em Periodo de Experiencia
+		cQuery += " AND		SRA.RA_ADMISSA	BETWEEN '"+ DToS( aParAux[15] )	+"' AND '"+ DToS( aParAux[16] ) +"' "	//Filtra por Data de Admissao
+		cQuery += " AND		SRA.RA_ADMISSA	<= '"+ DToS( dDataBase - nDiasCad ) +"' "								//Filtra Funcionarios em Periodo de Experiencia
 		
 		cQuery += " WHERE	SRB.D_E_L_E_T_	= ' ' "
 		cQuery += " AND		SRA.D_E_L_E_T_	= ' ' "
@@ -516,7 +493,7 @@ If nOrdExe == 1 .And. ( aParAux[04] == "1" .Or. aParAux[04] == "3" ) // Verifica
 		cQuery += " 						AND		RHL.RHL_TPPLAN	= '"+ aParAux[11] +"'  "
 		cQuery += " 						AND		RHL.RHL_PLANO   = '"+ aParAux[12] +"' )  "
 	 	
-	ENDIF
+	EndIf
 	
 	cQuery += " ORDER BY FILIAL, MATRICULA, SEQ "
 	
@@ -527,7 +504,7 @@ If nOrdExe == 1 .And. ( aParAux[04] == "1" .Or. aParAux[04] == "3" ) // Verifica
 		PlsLogFil("...................: Finalizou Montagem do Select em...............................................: "+;
 					AllTrim(Str((Seconds()-nTempoX),10,0))+" Segundo(s)",cDvArqLog)
 		PlsLogFil("...................: Iniciando Criação do TRB......................................................: "+;
-					DtoC(Date())+" - "+Time(),cDvArqLog)
+					DToC(Date())+" - "+Time(),cDvArqLog)
 		nTempoX := Seconds()
 	EndIf
 
@@ -559,8 +536,8 @@ ElseIf nOrdExe == 2 .And. ( aParAux[04] == "2" .Or. aParAux[04] == "3" )
 	cQuery += " AND		SRA.RA_CATFUNC	IN "+ FormatIn( aParAux[02] , ";" )										//Filtra por Categorias Funcionais
 	cQuery += " AND		SRA.RA_SITFOLH	IN "+ FormatIn( aParAux[03] , ";" )										//Filtra por Situacoes na Folha
 	cQuery += " AND		SRA.RA_CC		BETWEEN '"+ aParAux[05]			+"' AND '"+ aParAux[06] +"' "			//Filtra por Centro de Custo
-	cQuery += " AND		SRA.RA_ADMISSA	BETWEEN '"+ DtoS( aParAux[15] )	+"' AND '"+ DtoS( aParAux[16] ) +"' "	//Filtra por Data de Admissao
-	cQuery += " AND		SRA.RA_ADMISSA	<= '"+ DtoS( dDataBase - nDiasCad ) +"' "								//Filtra Funcionarios em Periodo de Experiencia
+	cQuery += " AND		SRA.RA_ADMISSA	BETWEEN '"+ DToS( aParAux[15] )	+"' AND '"+ DToS( aParAux[16] ) +"' "	//Filtra por Data de Admissao
+	cQuery += " AND		SRA.RA_ADMISSA	<= '"+ DToS( dDataBase - nDiasCad ) +"' "								//Filtra Funcionarios em Periodo de Experiencia
 	
 	cQuery += " INNER JOIN	"+ RetSqlName("RHK") +" RHK "
 	cQuery += " ON "
@@ -594,14 +571,14 @@ ElseIf nOrdExe == 2 .And. ( aParAux[04] == "2" .Or. aParAux[04] == "3" )
 	//===========================================================================
 	If	lGravaLog
 		PlsLogFil("...................: Finalizou Montagem do Select em...............................................: "+ AllTrim(Str((Seconds()-nTempoX),10,0))+" Segundo(s)",cDvArqLog)
-		PlsLogFil("...................: Iniciando Criação do TRB......................................................: "+ DtoC(Date())+" - "+Time(),cDvArqLog)
+		PlsLogFil("...................: Iniciando Criação do TRB......................................................: "+ DToC(Date())+" - "+Time(),cDvArqLog)
 		nTempoX := Seconds()
 	EndIf
 
 EndIf
 
 If Empty(cQuery)
-	Return()
+	Return
 EndIf
 
 //===========================================================================
@@ -620,7 +597,7 @@ If	lGravaLog
 	PlsLogFil("...................: Finalizou Criação do TRB em...................................................: "+;
 				AllTrim(Str((Seconds()-nTempoX),10,0))+" Segundo(s)",cDvArqLog)
 	PlsLogFil("...................: Ativando TRB para leitura dos dados...........................................: "+;
-				DtoC(Date())+" - "+Time(),cDvArqLog)
+				DToC(Date())+" - "+Time(),cDvArqLog)
 	nTempoX := Seconds()
 EndIf
 
@@ -643,7 +620,7 @@ If	lGravaLog
 	PlsLogFil("...................: Ativou e Selecionou TRB no Primeiro Arquivo em................................: "+;
 				AllTrim(Str((Seconds()-nTempoX),10,0))+" Segundo(s)",cDvArqLog)
 	PlsLogFil("...................: Iniciando Contagem dos Registros..............................................: "+;
-				DtoC(Date())+" - "+Time(),cDvArqLog)
+				DToC(Date())+" - "+Time(),cDvArqLog)
 	nTempoX := Seconds()
 EndIf
 
@@ -662,7 +639,7 @@ If	lGravaLog
 	PlsLogFil("...................: Finalizou Contagem dos Registros em...........................................: "+;
 				AllTrim(Str((Seconds()-nTempoX),10,0))+" Segundo(s)",cDvArqLog)
 	PlsLogFil("...................: Iniciando Processamento dos Dados.............................................: "+;
-				DtoC(Date())+" - "+Time(),cDvArqLog)
+				DToC(Date())+" - "+Time(),cDvArqLog)
 	nTempoX := Seconds()
 EndIf
 
@@ -683,9 +660,9 @@ While (cAlias)->(!Eof())
 					   	AllTrim( (cAlias)->SEQ )																								,; //"Sequencia"	 	|04
 						AllTrim( (cAlias)->TIPO )															 									,; //"Tipo"			 	|05
 						AllTrim( (cAlias)->NOME ) 		  																						,; //"Nome"				|06
-						DtoC( StoD( (cAlias)->DT_ADM  ) ) 	 																					,; //"Dt. Admissao"		|07
-						DtoC( StoD( (cAlias)->DT_NASC ) )							 															,; //"Dt. Nascimento"	|08
-						AllTrim( IIF( EMPTY( (cAlias)->GRAUPAR ) , "Titular" , U_ITRetBox( AllTrim( (cAlias)->GRAUPAR ) , "RB_GRAUPAR" ) ) )	,; //"Grau Parentesco"	|09
+						DToC( SToD( (cAlias)->DT_ADM  ) ) 	 																					,; //"Dt. Admissao"		|07
+						DToC( SToD( (cAlias)->DT_NASC ) )							 															,; //"Dt. Nascimento"	|08
+						AllTrim( IIf( Empty( (cAlias)->GRAUPAR ) , "Titular" , U_ITRetBox( AllTrim( (cAlias)->GRAUPAR ) , "RB_GRAUPAR" ) ) )	,; //"Grau Parentesco"	|09
 						AllTrim( (cAlias)->NOME_TIT )			 																				,; //"Nome Titular"		|10
 						AllTrim( (cAlias)->REGTAB )																								}) //"Recno"			|11
     
@@ -704,7 +681,7 @@ If	lGravaLog
 	PlsLogFil("...................: Finalizou Processamento dos Dados em..........................................: "+;
 				AllTrim(Str((Seconds()-nTempoX),10,0))+" Segundo(s)",cDvArqLog)
 	PlsLogFil("...................: Iniciando Carregamento dos Dados no Objeto oLbx...............................: "+;
-				DtoC(Date())+" - "+Time(),cDvArqLog)
+				DToC(Date())+" - "+Time(),cDvArqLog)
 	nTempoX := Seconds()
 EndIf
 
@@ -739,19 +716,16 @@ If	lGravaLog
 	AllTrim(Str((Seconds()-nTempoX),10,0))+" Segundo(s)",cDvArqLog)
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MGPE009COB
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
 Descrição---------: Retorna as coordenadas do objeto para exibição na tela
-===============================================================================================================================
 Parametros--------: oLbxAux := Objeto de dados.
-===============================================================================================================================
-Setor-------------: TI
+Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function MGPE009COB(oObjAux)
@@ -768,16 +742,13 @@ Return(aCoordAux)
 Programa----------: MGPE009CIT
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
 Descrição---------: Realiza a Contagem dos Itens
-===============================================================================================================================
 Parametros--------: oLbxAux := Objeto de dados para a atualização.
 ------------------: aTotFun := Array que receberá as contagens de Titulares.
 ------------------: aTotDep := Array que receberá as contagens de Dependentes.
 ------------------: oTotFun := Objeto de dados da contagem de Titulares.
 ------------------: oTotDep := Objeto de dados da contagem de Dependentes.
 ------------------: nAux    := Identificação para controle de marcação.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -837,22 +808,19 @@ oTotFun[02]:Refresh()
 oTotDep[01]:Refresh()
 oTotDep[02]:Refresh()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MGPE009CON
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
 Descrição---------: Realiza a Contagem Inicial dos Itens
-===============================================================================================================================
 Parametros--------: oLbxAux := Objeto de dados para a atualização.
 ------------------: aTotFun := Array que receberá as contagens de Titulares.
 ------------------: aTotDep := Array que receberá as contagens de Dependentes.
 ------------------: oTotFun := Objeto de dados da contagem de Titulares.
 ------------------: oTotDep := Objeto de dados da contagem de Dependentes.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -906,19 +874,16 @@ oTotDep[01]:Refresh()
 oTotDep[02]:Refresh()
 oTotDep[03]:Refresh()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MGPE009PRO
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
 Descrição---------: Realiza o Processamento das Integrações
-===============================================================================================================================
 Parametros--------: oLbxDados := Objeto de dados para a atualização.
 ------------------: aParAux   := Parametrização inicial do ambiente.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -935,7 +900,7 @@ Local nI		:= 0
 Begin Transaction
 
 //===========================================================================
-//| Verifica e processa os dados do primeiro folder.                        |
+//| Verifica e Processa os dados do primeiro folder.                        |
 //===========================================================================
 aDadObj := oLbxDados[01]:aArray
 
@@ -969,7 +934,7 @@ If !Empty(aDadObj)
 EndIf
 
 //===========================================================================
-//| Verifica e processa os dados do segundo folder.                         |
+//| Verifica e Processa os dados do segundo folder.                         |
 //===========================================================================
 aDadObj := oLbxDados[02]:aArray
 aDadAux	:= {}
@@ -1008,22 +973,19 @@ EndIf
 //===========================================================================
 End Transaction
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MGPEF3GN
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
 Descrição---------: Processamento genérico para o F3 do Wizard
-===============================================================================================================================
 Parametros--------: cTpFor := Tipo do Fornecedor.
 ------------------: cTpPla := Tipo do Plano.
 ------------------: nOpc   := Define o campo que esta chamando.
 ------------------: lValid := Define se a rotina foi chamada para efeito de validação.
 ------------------: cCodAux:= Código que deverá ser validado.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1086,8 +1048,8 @@ EndIf
 If !Empty( cCodTab )
 
 	cQuery := " SELECT DISTINCT "
-	cQuery += "     SUBSTR( RCC.RCC_CONTEU , 1 , 2 )	AS CODIGO, "
-	cQuery += "     SUBSTR( RCC.RCC_CONTEU , 3 , 20 )	AS DESCRI, "
+	cQuery += "     SubStr( RCC.RCC_CONTEU , 1 , 2 )	AS CODIGO, "
+	cQuery += "     SubStr( RCC.RCC_CONTEU , 3 , 20 )	AS DESCRI, "
 	cQuery += "     RCC.R_E_C_N_O_						AS REGRCC "
 	cQuery += " FROM "+ RetSqlName("RCC") +" RCC "
 	cQuery += " WHERE "
@@ -1096,7 +1058,7 @@ If !Empty( cCodTab )
 	cQuery += " ORDER BY CODIGO "
 	
 	//===========================================================================
-	//| Se for chamado pela validacao verifica se o codigo existe               |
+	//| Se For chamado pela validacao verifica se o codigo existe               |
 	//===========================================================================
 	If lValid
 		
@@ -1117,7 +1079,7 @@ If !Empty( cCodTab )
 				lRet := .T.
 				Exit
 				
-			EndIF
+			EndIf
 			
 		(cAliasAux)->( DBSkip() )
 		EndDo
@@ -1128,7 +1090,7 @@ If !Empty( cCodTab )
 		//| Monta tela de consulta para escolha das opcoes                          |
 		//===========================================================================
 		If 	Tk510F3Qry( cQuery /*cQuery*/,IIf(nOpc==1,"RCC001","RCC002")/*cCodCon*/,"REGRCC"/*cCpoRecno*/,@nRetorno/*nRetorno*/,/*aCoord*/,/*aSearch*/,"RCC"/*cAlias*/)
-			RCC->( DBGoto( nRetorno ) )
+			RCC->( DBGoTo( nRetorno ) )
 			lRet := .T.
 		EndIf
 	
@@ -1143,13 +1105,10 @@ Return(lRet)
 Programa----------: MGPEMOK
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
 Descrição---------: Controle de Marcação do ListBox
-===============================================================================================================================
 Parametros--------: nTipo := Tipo de acao a executar.
 ------------------: oGetAux := objeto do ListBox.
 ------------------: lCheck := Define se deve marcar ou desmarcar os itens
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1164,7 +1123,7 @@ nTotReg := Len(oGetAux:aArray) //Tamanho total do ListBox
 
 For nI := 1 To nTotReg
 	
-	If nTipo == 1 .And. oGetAux:aArray[nI][04] == "00" //Quando for para marcar/desmarcar Titulares
+	If nTipo == 1 .And. oGetAux:aArray[nI][04] == "00" //Quando For para marcar/desmarcar Titulares
 	
 		oGetAux:aArray[nI][nColMarka] := lCheck
 		
@@ -1177,9 +1136,9 @@ For nI := 1 To nTotReg
 			nX++
 			EndDo
 			
-		EndIF
+		EndIf
 		
-	ElseIf nTipo == 2 .And. oGetAux:aArray[nI][04] <> "00" //Quando for para marcar/desmarcar Dependentes
+	ElseIf nTipo == 2 .And. oGetAux:aArray[nI][04] <> "00" //Quando For para marcar/desmarcar Dependentes
 	
 		oGetAux:aArray[nI][nColMarka] := lCheck
 		
@@ -1193,7 +1152,7 @@ For nI := 1 To nTotReg
 			
 			If nX > 0 .And. !oGetAux:aArray[nX][nColMarka]
 				oGetAux:aArray[nX][nColMarka] := .T.
-			EndIF
+			EndIf
 		
 		EndIf
 	
@@ -1214,13 +1173,10 @@ Return(.T.)
 Programa----------: MGPE009DBC
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
-Descrição---------: Controle de Marcação do ListBox para quando um Dependente for selecionado marcar também o Titular
-===============================================================================================================================
+Descrição---------: Controle de Marcação do ListBox para quando um Dependente For selecionado marcar também o Titular
 Parametros--------: oLbxDados := Objeto do ListBox.
 ------------------: nOpc      := Define se a ação ocorreu sobre Titular/Dependente
 ------------------: nAux      := Controle para contabilizar as marcações
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1249,12 +1205,12 @@ If nOpc == 1 .And. !oLbxDados[nOpc]:aArray[oLbxDados[nOpc]:nAt,01] .And. oLbxDad
 		If oLbxDados[nOpc]:aArray[nX,01]
 			oLbxDados[nOpc]:aArray[nX,01] := .F.
 			nAux++
-		EndIF
+		EndIf
 		
 	nX++
 	EndDo
 	
-EndIF
+EndIf
 
 //===========================================================================
 //| Caso tenha marcado um Dependente, verifica o Titular                    |
@@ -1271,28 +1227,25 @@ If nOpc == 1 .And. oLbxDados[nOpc]:aArray[oLbxDados[nOpc]:nAt,01] .And. !( AllTr
 	If !oLbxDados[nOpc]:aArray[nI,01]
 		oLbxDados[nOpc]:aArray[nI,01] := .T.
 		nAux := 1
-	EndIF
+	EndIf
 
 EndIf
 
 oLbxDados[nOpc]:Refresh()
 oLbxDados[nOpc]:nAt := nAtAux
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MGPE009MVC
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
 Descrição---------: Rotina de processamento do ExecAuto utilizando o MVC da Rotina Padrão
-===============================================================================================================================
 Parametros--------: aDadosAux := Objeto de Dados do Listbox
 ------------------: aParAux   := Parametrizacao Inicial da Rotina
 ------------------: nOpc      := Numero da Opcao de Processamento (Titulares/Dependentes)
 ------------------: cNumLote  := Numero do lote de Processamento
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1302,7 +1255,7 @@ Local aSay	   		:= {}
 Local aButton  		:= {}
 //					   |....:....|....:....|....:....|....:....|....:....|....:....|....:....|....:....|....:....|....:....|
 Local cDesc1   		:= "Esta rotina fará a importação da Integração conforme parâmetros definidos."
-Local cDesc2   		:= "Nesse processamento serão importados dados de: [ "+ IIf( nOpc==1 , "Titulares e Dependentes" , "Dependentes" ) +" ]"
+Local cDesc2   		:= "Nesse processamento serão importados dados de: [ "+IIf( nOpc==1 , "Titulares e Dependentes" , "Dependentes" ) +" ]"
 Local cDesc3   		:= ""
 Local cTitBat		:= "Integração Funcionários x Plano de Saúde"
 Local lOk	   		:= .T.
@@ -1343,21 +1296,18 @@ If !Empty(aDadosAux)
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MGPE009GRV
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
 Descrição---------: Rotina que chama a gravação do ExecAuto utilizando o MVC da Rotina Padrão
-===============================================================================================================================
 Parametros--------: aDadosAux := Objeto de Dados do Listbox
 ------------------: aParAux   := Parametrizacao Inicial da Rotina
 ------------------: nOpc      := Numero da Opcao de Processamento (Titulares/Dependentes)
 ------------------: cNumLote  := Numero do lote de Processamento
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1374,11 +1324,11 @@ Default nOpc   		:= 0
 Default cNumLote	:= ""
 
 //-- Corrige desvio do mes/ano --//
-if MV_PAR11 = 1 //Tipo do Plano: SAUDE
+If MV_PAR11 = 1 //Tipo do Plano: SAUDE
    cDtAux := StrZero( Month(dDataBase) + 1 , 2 )
-ELSEif MV_PAR11 = 2 //Tipo do Plano: ONDONTOLOGICO
+ElseIf MV_PAR11 = 2 //Tipo do Plano: ONDONTOLOGICO
    cDtAux := StrZero( Month(dDataBase)     , 2 )
-ENDIF
+EndIf
 If Val(cDtAux) > 12
 	cDtAux := StrZero( Val(cDtAux) - 12 , 2 ) + AllTrim( Str( Year(dDataBase)+1 ) )
 Else
@@ -1489,9 +1439,7 @@ Return( lRet )
 Programa----------: MGPE009IMP
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
 Descrição---------: Rotina de importação do ExecAuto utilizando o MVC da Rotina Padrão
-===============================================================================================================================
 Parametros--------: nOpc       := Identifica se o processamento e de Titular/Dependentes.
 ------------------: cMaster    := Nome do Alias para o Objeto de planos dos Titulares.
 ------------------: cDetail    := Nome do Alias para o Objeto de planos dos Dependentes.
@@ -1499,7 +1447,6 @@ Parametros--------: nOpc       := Identifica se o processamento e de Titular/Dep
 ------------------: aCpoDetail := Array com os campos/dados dos Dependentes.
 ------------------: cNumLote   := Numero do Lote de Processamento.
 ------------------: aLoteIn    := Array com os dados para alimentar o Log de Processamento.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1542,8 +1489,8 @@ If nOpc == 1
 		DBSelectArea("SM0")
 		SM0->( DBSetOrder(1) )
 		SM0->( DBGoTop() )
-		IF SM0->( DBSeek( cEmpAnt + aCpoMaster[01][02] ) )
-			cFilAnt := alltrim(SM0->M0_CODFIL)
+		If SM0->( DBSeek( cEmpAnt + aCpoMaster[01][02] ) )
+			cFilAnt := AllTrim(SM0->M0_CODFIL)
 		Else
 			lRet := .F.
 		EndIf
@@ -1570,13 +1517,13 @@ If nOpc == 1
 		If !Empty( oAux:GetValue( "RHK_CODFOR" ) )
 		
 			nLinAux := oAux:Length()
-			If ( nItErro := oAux:AddLine() ) == nLinAux // Se for igual e porque nao conseguiu incluir mais uma linha
+			If ( nItErro := oAux:AddLine() ) == nLinAux // Se For igual e porque nao conseguiu incluir mais uma linha
 				lRet := .F.
 			EndIf
 			
 		EndIf
 	
-	EndIF
+	EndIf
 	
 	If lRet
 	
@@ -1666,8 +1613,8 @@ ElseIf nOpc == 2
 			DBSelectArea("SM0")
 			SM0->( DBSetOrder(1) )
 			SM0->( DBGoTop() )
-			IF SM0->( DBSeek( cEmpAnt + aCpoDetail[nI][01][02] ) )
-				cFilAnt := alltrim(SM0->M0_CODFIL)
+			If SM0->( DBSeek( cEmpAnt + aCpoDetail[nI][01][02] ) )
+				cFilAnt := AllTrim(SM0->M0_CODFIL)
 			Else
 				nI++
 				Loop
@@ -1686,7 +1633,7 @@ ElseIf nOpc == 2
 		//| Posiciona o cadastro do plano do Funcionário                                 |
 		//================================================================================
 		(cMaster)->( DBGoTop() )
-		IF (cMaster)->( DBSeek( aCpoDetail[nI][01][02] + aCpoDetail[nI][02][02] + aCpoDetail[nI][03][02] + aCpoDetail[nI][04][02] ) )
+		If (cMaster)->( DBSeek( aCpoDetail[nI][01][02] + aCpoDetail[nI][02][02] + aCpoDetail[nI][03][02] + aCpoDetail[nI][04][02] ) )
 			
 			oModel:SetOperation( 4 ) // Operação: 3 – Inclusão / 4 – Alteração / 5 - Exclusão
 			oModel:Activate()
@@ -1741,7 +1688,7 @@ ElseIf nOpc == 2
 			//================================================================================
 			If nLinAux > 1 .Or. !Empty( oAux:GetValue( "RHL_CODIGO" ) )
 			
-				If ( nItErro := oAux:AddLine() ) == nLinAux // Se for igual e porque nao conseguiu incluir mais uma linha
+				If ( nItErro := oAux:AddLine() ) == nLinAux // Se For igual e porque nao conseguiu incluir mais uma linha
 					lRet := .F.
 					Exit
 				EndIf
@@ -1749,7 +1696,7 @@ ElseIf nOpc == 2
 			EndIf
 			
 			//================================================================================
-			//| Verifica e processa a gravação dos campos                                    |
+			//| Verifica e Processa a gravação dos campos                                    |
 			//================================================================================
 			For nJ := 1 To Len( aCpoDetail[nI] )
 			
@@ -1837,7 +1784,7 @@ oModel:DeActivate()
 DBSelectArea("SM0")
 SM0->( DBSetOrder(1) )
 SM0->( DBSeek( cEmpAux + cFilAux ) )
-cFilAnt := alltrim(SM0->M0_CODFIL)
+cFilAnt := AllTrim(SM0->M0_CODFIL)
 
 Return(lRet)
 
@@ -1846,11 +1793,8 @@ Return(lRet)
 Programa----------: MGPE009P
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
 Descrição---------: Rotina de validação da parametrização do Sistema
-===============================================================================================================================
 Parametros--------: nOpc := Identifica a Pergunta que deve ser validada.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1859,7 +1803,7 @@ User Function MGPE009P( nOpc )
 Local lRet		:= .T. //Se retornar .F. nao deixa sair do campo
 Local cNomeVar	:= ReadVar()
 Local xVarAux	:= &(cNomeVar)
-Local aArea		:= GetArea()
+Local aArea		:= FWGetArea()
 Local cEmpAux	:= cEmpAnt
 Local aAcesso	:= FWEmpLoad(.F.)
 Local aDadAux	:= {}
@@ -1870,7 +1814,7 @@ Do Case
 	Case nOpc == 1 //Filiais Consideradas ?
 		
 		//-- Verifica se o campo esta vazio --//
-		If EMPTY(xVarAux)
+		If Empty(xVarAux)
 		
 			Aviso( "Atenção!" , "É obrigatório informar o filtro de Filiais, clique em 'selecionar todas' para utilizar todas as Filiais." , {"Fechar"} )
 			lRet := .F.
@@ -1903,7 +1847,7 @@ Do Case
 				SM0->( DBGoTop() )
 				While SM0->(!Eof())
 					
-					If SM0->M0_CODIGO == cEmpAux .And. alltrim(SM0->M0_CODFIL) == aDadAux[nI]
+					If SM0->M0_CODIGO == cEmpAux .And. AllTrim(SM0->M0_CODFIL) == aDadAux[nI]
 						lRet := .T.
 						Exit
 					EndIf
@@ -1922,7 +1866,7 @@ Do Case
 	
 	Case nOpc == 2 //Categorias a Imp. ?
 	
-		If EMPTY(xVarAux)
+		If Empty(xVarAux)
 		
 			Aviso( "Atenção!" , "É obrigatório informar o filtro de Categorias Funcionais, clique em 'selecionar todas' para utilizar todas as Categorias." , {"Fechar"} )
 			lRet := .F.
@@ -1950,7 +1894,7 @@ Do Case
 
 	Case nOpc == 3 //Situações ?
 
-		If EMPTY(xVarAux)
+		If Empty(xVarAux)
 		
 			&(cNomeVar) := " ;"
 		
@@ -1977,7 +1921,7 @@ Do Case
 
 	Case nOpc == 4 //C Custo De ?
 
-		If !EMPTY(xVarAux)
+		If !Empty(xVarAux)
 		
 			DBSelectArea("CTT")
 			CTT->( DBSetOrder(1) )
@@ -1993,14 +1937,14 @@ Do Case
 
 	Case nOpc == 5 //C Custo Ate ?
 
-		If EMPTY(xVarAux)
+		If Empty(xVarAux)
 			
 			Aviso( "Atenção!" , "O 'Centro de Custo' final é obrigatório! Verifique os dados digitados." , {"Fechar"} )
 			lRet := .F.
 			
 		Else
 			
-			If !( UPPER(ALLTRIM(xVarAux)) == "ZZZZZZZZ" )
+			If !( Upper(AllTrim(xVarAux)) == "ZZZZZZZZ" )
 			
 				DBSelectArea("CTT")
 				CTT->( DBSetOrder(1) )
@@ -2018,7 +1962,7 @@ Do Case
 
 	Case nOpc == 7 //Matricula Ate ?
 
-		If EMPTY(xVarAux)
+		If Empty(xVarAux)
 			
 			Aviso( "Atenção!" , "A 'Matrícula' final é obrigatória! Verifique os dados digitados." , {"Fechar"} )
 			lRet := .F.
@@ -2027,12 +1971,12 @@ Do Case
 
 	Case nOpc == 8 //Admissão De ?
 
-		If ( xVarAux == StoD("") )
+		If ( xVarAux == SToD("") )
 			
 			Aviso( "Atenção!" , "A 'Data de Admissão' inicial é obrigatória! Verifique os dados digitados." , {"Fechar"} )
 			lRet := .F.
 			
-		ElseIf !( MV_PAR09 == StoD("") ) .And. xVarAux > MV_PAR09
+		ElseIf !( MV_PAR09 == SToD("") ) .And. xVarAux > MV_PAR09
 		
 			Aviso( "Atenção!" , "A 'Data de Admissão' inicial deve ser menor ou igual a final! Verifique os dados digitados." , {"Fechar"} )
 			lRet := .F.
@@ -2041,12 +1985,12 @@ Do Case
 
 	Case nOpc == 9 //Admissão Até ?
 
-		If ( xVarAux == StoD("") )
+		If ( xVarAux == SToD("") )
 			
 			Aviso( "Atenção!" , "A 'Data de Admissão' final é obrigatória! Verifique os dados digitados." , {"Fechar"} )
 			lRet := .F.
 			
-		ElseIf !( MV_PAR08 == StoD("") ) .And. xVarAux < MV_PAR08
+		ElseIf !( MV_PAR08 == SToD("") ) .And. xVarAux < MV_PAR08
 		
 			Aviso( "Atenção!" , "A 'Data de Admissão' final deve ser maior ou igual a inicial! Verifique os dados digitados." , {"Fechar"} )
 			lRet := .F.
@@ -2055,7 +1999,7 @@ Do Case
 
 	Case nOpc == 12 //Fornecedor ?
 	
-		If EMPTY(xVarAux)
+		If Empty(xVarAux)
 		
 			Aviso( "Atenção!" , "É obrigatório informar o 'Código do Fornecedor'!" , {"Fechar"} )
 			lRet := .F.
@@ -2069,7 +2013,7 @@ Do Case
 
 	Case nOpc == 14 //Plano ?
 
-		If EMPTY(xVarAux)
+		If Empty(xVarAux)
 		
 			Aviso( "Atenção!" , "É obrigatório informar o 'Código do Plano'!" , {"Fechar"} )
 			lRet := .F.
@@ -2083,7 +2027,7 @@ Do Case
 
 	Case nOpc == 15 //Verba Tit. ?
 
-		If EMPTY(xVarAux)
+		If Empty(xVarAux)
 			
 			Aviso( "Atenção!" , "A 'Verba do Titular' é obrigatória! Verifique os dados digitados." , {"Fechar"} )
 			lRet := .F.
@@ -2104,7 +2048,7 @@ Do Case
 
 	Case nOpc == 16 //Verba Dep. ?
 
-		If EMPTY(xVarAux)
+		If Empty(xVarAux)
 			
 			Aviso( "Atenção!" , "A 'Verba do Dependente' é obrigatória! Verifique os dados digitados." , {"Fechar"} )
 			lRet := .F.
@@ -2125,7 +2069,7 @@ Do Case
 
 EndCase
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return(lRet)
 
@@ -2134,11 +2078,8 @@ Return(lRet)
 Programa----------: MGPE009FIL
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
 Descrição---------: Trata o conteúdo das respostas da parametrização para ser usado na query.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -2163,7 +2104,7 @@ ElseIf nParAux == 3
 	
 		If !( SubStr( cParAux , nI , 1 ) + ";" $ cRet )
 			cRet += SubStr( cParAux , nI , 1 ) + ";"
-		EndIF
+		EndIf
 		
 	Next nI
 

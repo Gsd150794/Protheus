@@ -4,7 +4,7 @@
 ===============================================================================================================================
    Autor     |    Data    |                                             Motivo                                           
 ===============================================================================================================================
-Julio Paz    | 05/10/2017 | Chamado 21340. Inclusão de campo que informa o local de retirada das mercadorias.
+Julio Paz    | 05/10/2017 | Chamado 21340. Inclusão de campo que informa o Local de retirada das mercadorias.
 Lucas Borges | 17/10/2019 | Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 Igor Melgaço | 18/06/2024 | Chamado 47474. Inclusão de Campo de VR. do IPI.
 ==================================================================================================================================================================================================================
@@ -16,7 +16,7 @@ Jerry        - Alex Wallauer - 14/10/20 - 14/10/24 - 48807   - Alteração das dec
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#Include "Protheus.Ch"
+#Include "TOTVS.ch"
 #Include "Fileio.Ch"
 
 #Define TITULO	"Solicitação de Vendas - Funcionários"
@@ -52,7 +52,7 @@ Else
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -129,7 +129,7 @@ _nLinha += 040
 
 DBSelectArea('Z13')
 Z13->( DBSetOrder(1) )
-IF Z13->( DBSeek( xFilial('Z13') + Z12->Z12_CODIGO ) )
+If Z13->( DBSeek( xFilial('Z13') + Z12->Z12_CODIGO ) )
 	
 	While Z13->(!Eof()) .And. Z13->( Z13_FILIAL + Z13_CODPED ) == xFilial('Z13') + Z12->Z12_CODIGO
 		
@@ -197,7 +197,7 @@ If !Empty( Z12->Z12_PEDSC5 )
 
 	_oPrint:Say( _nLinha , 2000 , AllTrim( Z12->Z12_PEDSC5 )										, _oFont02 )
 	_oPrint:Say( _nLinha , 2400 , 'Emissão: '														, _oFont02 )
-	_oPrint:Say( _nLinha , 2600 , DtoC( Posicione( 'SC5' , 1 , Z12->Z12_PEDSC5 , 'C5_EMISSAO' ) )	, _oFont02 )
+	_oPrint:Say( _nLinha , 2600 , DToC( Posicione( 'SC5' , 1 , Z12->Z12_PEDSC5 , 'C5_EMISSAO' ) )	, _oFont02 )
 
 EndIf
 
@@ -206,7 +206,7 @@ EndIf
 //=================================================================================================
 _oPrint:Preview()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -233,9 +233,9 @@ If _nLinha > _nLimPag
 	//====================================================================================================
 	// Verifica se encerra a página atual
 	//====================================================================================================
-	IF _lFinPag
+	If _lFinPag
 		_oPrint:EndPage()
-	EndIF
+	EndIf
 	
 	//====================================================================================================
 	// Inicializa a nova página e o posicionamento
@@ -259,17 +259,17 @@ If _nLinha > _nLimPag
 	_oPrint:Line( 050 , 3350 , 290 , 3350 )
 	
 	
-	_oPrint:Say( 060 , 420 , TITULO +" [ "+ DtoC( Z12->Z12_DATA ) +" - "+ Z12->Z12_HORA +"]"																		, _oFont01 )
+	_oPrint:Say( 060 , 420 , TITULO +" [ "+ DToC( Z12->Z12_DATA ) +" - "+ Z12->Z12_HORA +"]"																		, _oFont01 )
 	_oPrint:Say( 120 , 420 ,	"> Funcionário: "+ AllTrim( Posicione( 'SRA' , 1 , xFilial('SRA') + Z12->Z12_MATRIC , 'RA_NOME' ) )	+" - Filial: "+ SRA->RA_FILIAL	, _oFont04 )
 	_oPrint:Say( 160 , 420 ,	"> CPF: "+ SRA->RA_CIC																												, _oFont04 )
 	_oPrint:Say( 200 , 420 ,	"> Matrícula: "+ Z12->Z12_MATRIC																									, _oFont04 )
-	_oPrint:Say( 240 , 420 ,	"> Local de Entrega: "+ Alltrim(Upper(U_ITRetBox( Z12->Z12_LOCENT,"Z12_LOCENT")))													, _oFont04 )
+	_oPrint:Say( 240 , 420 ,	"> Local de Entrega: "+ AllTrim(Upper(U_ITRetBox( Z12->Z12_LOCENT,"Z12_LOCENT")))													, _oFont04 )
 	
 	//====================================================================================================
 	// Adiciona cabecalho de conteúdo
 	//====================================================================================================
 	_nLinha := 295
 	
-EndIF
+EndIf
 
-Return()
+Return

@@ -2,37 +2,26 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor          |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Guilherme Diogo | 10/12/2012 | Ajustada as queries para que o arredondamento dos valores calculados das parcelas nao 
-                |            | interferissem no resultado do relatorio. 
--------------------------------------------------------------------------------------------------------------------------------
-Julio Paz       | 09/10/2017 | Realização de ajustes a alinhamentos na tela de parâmetros iniciais do relório de Prestação de
-                |            | Contas. Chamado: 21846.
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges    | 11/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Guilherme D.  |10/12/2012| Ajustada as queries para que o arredondamento dos valores calculados das parcelas nao 
+              |          | interferissem no resultado do relatorio. 
+Julio Paz     |09/10/2017| Chamado 21846. Realização de ajustes a alinhamentos na tela de parâmetros iniciais do relório de 
+              |          | Prestação de Contas.
+Lucas Borges  |11/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-
-#include "report.ch"
-#include "protheus.ch"      
-#include "rwmake.ch"        	
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RFIN009
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 23/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Relatorio financeiro que demonstra as vendas: a vista, a prazo, as NCC, as notas fiscais canceladas, as 
                     saidas que não geraram financeiro e as devolucoes(Prestacao de contas Manaus).	
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -52,12 +41,12 @@ Private cObs   := ""
 
   DEFINE MSDIALOG oDlg TITLE "RELATÓRIO DE PRESTAÇÃO DE CONTAS" FROM 000, 000  TO 250, 500 COLORS 0, 16777215 PIXEL
 
-    @ 030+_nLin, 008 SAY oSay1 PROMPT "Data Base:" SIZE 030, 008 OF oDlg COLORS 0, 16777215 PIXEL
+    @ 030+_nLin, 008 Say oSay1 PROMPT "Data Base:" SIZE 030, 008 OF oDlg COLORS 0, 16777215 PIXEL
     @ 025+_nLin, 040 MSGET oGet1 VAR dDtBase SIZE 077, 010 OF oDlg COLORS 0, 16777215 PIXEL
-    @ 042+_nLin, 008 SAY oSay2 PROMPT "Observação:" SIZE 038, 007 OF oDlg COLORS 0, 16777215 PIXEL
+    @ 042+_nLin, 008 Say oSay2 PROMPT "Observação:" SIZE 038, 007 OF oDlg COLORS 0, 16777215 PIXEL
     @ 050+_nLin, 039 GET oObs VAR cObs OF oDlg MULTILINE SIZE 197, 058 COLORS 0, 16777215 HSCROLL PIXEL
      
-  ACTIVATE MSDIALOG oDlg CENTERED ON INIT EnchoiceBar(oDlg,{|| If(obrigator(),geraRel(),.f.),nOpca := 1},{||oDlg:End()},,aButtons)
+  ACTIVATE MSDIALOG oDlg CENTERED ON INIT EnchoiceBar(oDlg,{|| If(obrigator(),geraRel(),.F.),nOpca := 1},{||oDlg:End()},,aButtons)
 
 Return     
 
@@ -66,11 +55,8 @@ Return
 Programa----------: obrigator
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Validação
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -78,9 +64,9 @@ Static Function obrigator()
 
 Local lRet:= .T.
 
-	If DtoC(dDtBase) == '  /  /  '
+	If DToC(dDtBase) == '  /  /  '
 	
-			xmaghelpfis("Campo Obrigatório","Favor informar a Data-Base para geração dos dados do Relatório.",;
+			xMagHelpFis("Campo Obrigatório","Favor informar a Data-Base para geração dos dados do Relatório.",;
 					    "É necessário para que seja executado este relatório que se forneça a Data-Base.")  
 							       
 	    	lRet:= .F.
@@ -93,11 +79,8 @@ Return lRet
 Programa----------: geraRel
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Gera relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -128,7 +111,7 @@ Private nAjuAltLi1  := 10 //ajusta a altura de impressao dos dados do relatorio
 
 Private oBrush      := TBrush():New( ,CLR_LIGHTGRAY)   
    
-Private horaImp     := TIME()
+Private horaImp     := Time()
 
 Define Font oFont08    Name "Courier New"       Size 0,-06       // Tamanho 14 
 Define Font oFont09    Name "Courier New"       Size 0,-07       // Tamanho 14                                                                              
@@ -161,18 +144,15 @@ Return
 Programa----------: Cabecalho
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Imprime cabeçalho
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function Cabecalho(impNrPag)    
 
 Local cRaizServer := If(issrvunix(), "/", "\")    
-Local cTitulo     := "PRESTAÇÃO DE CONTAS DATA-BASE " + DtoC(dDtBase)
+Local cTitulo     := "PRESTAÇÃO DE CONTAS DATA-BASE " + DToC(dDtBase)
 
 nLinha      := 0100
  
@@ -183,7 +163,7 @@ nLinha      := 0100
 		Else
 			oPrint:Say (nlinha,nColFinal - 550,"SIGA/RFIN009",oFont12b)
 	EndIf
-	oPrint:Say (nlinha + 50 ,nColFinal - 550,"DATA DE EMISSÃO: " + DtoC(DATE()),oFont12b)   
+	oPrint:Say (nlinha + 50 ,nColFinal - 550,"DATA DE EMISSÃO: " + DToC(DATE()),oFont12b)   
 	oPrint:Say (nlinha + 100,nColFinal - 550,"HORA: " + horaImp                ,oFont12b)
 	oPrint:Say (nlinha + 100,nColInic + 10,AllTrim(SM0->M0_NOME) + '/' + AllTrim(SM0->M0_FILIAL) + '-' + AllTrim(SM0->M0_ESTCOB)        ,oFont12b)  
 	nlinha+=(nSaltoLinha * 3)           
@@ -202,11 +182,8 @@ Return
 Programa----------: cabecDados
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Imprime cabeçalho
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -245,11 +222,8 @@ Return
 Programa----------: cabecDad02
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Imprime cabeçalho
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -272,11 +246,8 @@ Return
 Programa----------: cabecDad03
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Imprime cabeçalho
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -296,40 +267,37 @@ Return
 Programa----------: printDados
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Imprime dados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function printDados(cEmissao,cVencto,cTitulo,cTitParcel,cCodCli,cLojaCli,cRazaoSoc,nValor,impCol,cDescCol,cTipCabec,cNfEntrada,cNfRefer)
 
-oPrint:Say (nlinha + nAjuAltLi1,nColInic + 10	    ,IIF(Len(AllTrim(cEmissao)) > 0,DtoC(StoD(cEmissao)) ,"")     ,oFont10)     
+oPrint:Say (nlinha + nAjuAltLi1,nColInic + 10	    ,IIf(Len(AllTrim(cEmissao)) > 0,DToC(SToD(cEmissao)) ,"")     ,oFont10)     
 
 If cTipCabec == 1       
 
-oPrint:Say (nlinha + nAjuAltLi1,nColInic + 183	    ,IIF(Len(AllTrim(cEmissao)) > 0,DtoC(StoD(cVencto)) ,"")      ,oFont10)
-oPrint:Say (nlinha + nAjuAltLi1,nColInic + 426	    ,IIF(Len(AllTrim(cTitulo)) > 0,cTitulo + "/" + cTitParcel,"") ,oFont10)   
+oPrint:Say (nlinha + nAjuAltLi1,nColInic + 183	    ,IIf(Len(AllTrim(cEmissao)) > 0,DToC(SToD(cVencto)) ,"")      ,oFont10)
+oPrint:Say (nlinha + nAjuAltLi1,nColInic + 426	    ,IIf(Len(AllTrim(cTitulo)) > 0,cTitulo + "/" + cTitParcel,"") ,oFont10)   
 	Else
 oPrint:Say (nlinha + nAjuAltLi1,nColInic + 183	    ,cNfEntrada             				 			            ,oFont10)
 oPrint:Say (nlinha + nAjuAltLi1,nColInic + 426	    ,cNfRefer               				 			            ,oFont10)   
 
 EndIf               
 
-oPrint:Say (nlinha + nAjuAltLi1,nColInic + 800	    ,IIF(Len(AllTrim(cCodCli)) > 0,cCodCli + "-" + cLojaCli,"")   ,oFont10)
+oPrint:Say (nlinha + nAjuAltLi1,nColInic + 800	    ,IIf(Len(AllTrim(cCodCli)) > 0,cCodCli + "-" + cLojaCli,"")   ,oFont10)
 oPrint:Say (nlinha + nAjuAltLi1,nColInic + 1042	    ,SubStr(cRazaoSoc,1,40)    				 			            ,oFont10)    
 
 If impCol == 1                                                                                           
-	oPrint:Say (nlinha + nAjuAltLi1,nColInic + 1780	    ,IIF(nValor > 0,Transform(nValor,"@E 9,999,999,999.99"),""),oFont10)   
+	oPrint:Say (nlinha + nAjuAltLi1,nColInic + 1780	    ,IIf(nValor > 0,Transform(nValor,"@E 9,999,999,999.99"),""),oFont10)   
 	If Len(AllTrim(cDescCol)) > 14
 		oPrint:Say (nlinha + nAjuAltLi1,nColInic + 2075	,cDescCol    							                    ,oFont08) 
 			Else
 				oPrint:Say (nlinha + nAjuAltLi1,nColInic + 2075	,cDescCol    							            ,oFont10)    
 	EndIf
 		Else
-			oPrint:Say (nlinha + nAjuAltLi1,nColInic + 2015	    ,IIF(nValor > 0,Transform(nValor,"@E 9,999,999,999.99"),""),oFont10)  
+			oPrint:Say (nlinha + nAjuAltLi1,nColInic + 2015	    ,IIf(nValor > 0,Transform(nValor,"@E 9,999,999,999.99"),""),oFont10)  
 EndIf
 
 Return       
@@ -339,17 +307,14 @@ Return
 Programa----------: printDad02
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Imprime dados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function printDad02(cEmissao,cNotaFisc,cSerieNF,cCodCli,cLojaCli,cRazaoSoc,nValor)
 
-oPrint:Say (nlinha + nAjuAltLi1,nColInic + 10	    ,DtoC(StoD(cEmissao))      				 			,oFont10)         
+oPrint:Say (nlinha + nAjuAltLi1,nColInic + 10	    ,DToC(SToD(cEmissao))      				 			,oFont10)         
 oPrint:Say (nlinha + nAjuAltLi1,nColInic + 183	    ,cNotaFisc +'-'+cSerieNF      				 		,oFont10)       
 oPrint:Say (nlinha + nAjuAltLi1,nColInic + 426	    ,cCodCli + "-" + cLojaCli  				 			,oFont10)
 oPrint:Say (nlinha + nAjuAltLi1,nColInic + 800	    ,SubStr(cRazaoSoc,1,51)    				 			,oFont10)    
@@ -362,11 +327,8 @@ Return
 Programa----------: printDad03
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Imprime dados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -392,11 +354,8 @@ Return
 Programa----------: printTotal
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Imprime dados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -417,11 +376,8 @@ Return
 Programa----------: printTot02
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Imprime dados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -437,11 +393,8 @@ Return
 Programa----------: boxDivisor
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Imprime dados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -470,11 +423,8 @@ Return
 Programa----------: boxDiv02
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Imprime dados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -494,11 +444,8 @@ Return
 Programa----------: boxDiv03
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Imprime dados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -515,11 +462,8 @@ Return
 Programa----------: qbrPag
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Imprime dados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -570,11 +514,8 @@ Return
 Programa----------: quebraPag
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Imprime dados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -600,11 +541,8 @@ Return
 Programa----------: qbraPagin
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Imprime dados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -644,11 +582,8 @@ Return
 Programa----------: Assinatura
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Pesquisa os dados do usuario corrente para imprimir a assinatura.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -691,7 +626,7 @@ Local _nTotVend := 0
 	_cQuery += " AND E1.E1_FILIAL = '" + xFilial("SE1") + "'"   
 	_cQuery += " AND E1.E1_TIPO = 'NF '"
 	_cQuery += " AND E1.E1_ORIGEM = 'MATA460'"  
-	_cQuery += " AND E1.E1_EMISSAO = '" + DtoS(dDtBase) + "'" 
+	_cQuery += " AND E1.E1_EMISSAO = '" + DToS(dDtBase) + "'" 
 	_cQuery += " AND E1.E1_EMISSAO = E1.E1_VENCTO " 
 	_cQuery += " AND E1.E1_VALOR >" 
 	//_cQuery += " (SELECT COALESCE(SUM(D1.D1_TOTAL),0) FROM SD1010 D1 WHERE D1.D_E_L_E_T_ = ' ' AND D1_FILIAL = E1_FILIAL AND D1_TIPO = 'D'"         
@@ -701,7 +636,7 @@ Local _nTotVend := 0
 	_cQuery += " E1.E1_NUM,E1.E1_PARCELA"       
 
 	If Select(_cAliasVis) > 0
-		(_cAliasVis)->(dbCloseArea())
+		(_cAliasVis)->(DBCloseArea())
 	EndIf                                                     
 	
 	dbUseArea( .T., "TOPCONN",TcGenQry(,,_cQuery),_cAliasVis,.T.,.T.)
@@ -709,8 +644,8 @@ Local _nTotVend := 0
 	
 	ProcRegua(nCountRec) 
 	 
-	dbSelectArea(_cAliasVis)
-	(_cAliasVis)->(dbGotop())    
+	DBSelectArea(_cAliasVis)
+	(_cAliasVis)->(DBGoTop())    
 	
 	//Verifica a existencia de pelo menos um registro para criar o cabecalho da pagina e de dados
 	If nCountRec > 0 
@@ -757,7 +692,7 @@ Local _nTotVend := 0
 			printDados((_cAliasVis)->E1_EMISSAO,(_cAliasVis)->E1_VENCTO,(_cAliasVis)->E1_NUM,(_cAliasVis)->E1_PARCELA,;
 			           (_cAliasVis)->E1_CLIENTE,(_cAliasVis)->E1_LOJA,(_cAliasVis)->A1_NOME,(_cAliasVis)->E1_VALOR,0,"",1,"","")
 		     
-		(_cAliasVis)->(dbSkip())
+		(_cAliasVis)->(DBSkip())
 	    EndDo         
 	    
 	    nlinha+=nSaltoLinha   
@@ -772,8 +707,8 @@ Local _nTotVend := 0
     
     EndIf
     
-    dbSelectArea(_cAliasVis)  
-    (_cAliasVis)->(dbCloseArea())        
+    DBSelectArea(_cAliasVis)  
+    (_cAliasVis)->(DBCloseArea())        
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
@@ -818,17 +753,17 @@ Local _nTotVend := 0
 	_cQuery += " AND E1.E1_FILIAL = '" + xFilial("SE1") + "'"   
 	_cQuery += " AND E1.E1_TIPO = 'NF '"
 	_cQuery += " AND E1.E1_ORIGEM = 'MATA460'"  
-	_cQuery += " AND E1.E1_EMISSAO = '" + DtoS(dDtBase) + "'" 
+	_cQuery += " AND E1.E1_EMISSAO = '" + DToS(dDtBase) + "'" 
 	_cQuery += " AND E1.E1_EMISSAO <> E1.E1_VENCTO"           
 	_cQuery += " AND E1.E1_NUMBCO <> ' ' "
 	_cQuery += " AND E1.E1_VALOR >"
-	_cQuery += " (CASE WHEN(E1.E1_VALOR - (SELECT COALESCE(SUM(D1.D1_TOTAL+D1.D1_ICMSRET),0) FROM " + RetSqlName("SD1") + " D1 WHERE D1.D_E_L_E_T_ = ' ' AND D1_FILIAL = E1_FILIAL AND D1_TIPO = 'D' AND D1_NFORI = E1_NUM AND D1_SERIORI = E1_PREFIXO AND D1_FORNECE = E1_CLIENTE AND D1_LOJA = E1_LOJA) " //GUILHERME - 07/12/2012
-	_cQuery += " / (SELECT MAX(TO_NUMBER(REPLACE(E1_PARCELA,'  ','1'))) FROM " + RetSqlName("SE1") + " E1G WHERE E1G.D_E_L_E_T_ = ' ' AND E1G.E1_FILIAL  = E1.E1_FILIAL AND E1G.E1_NUM = E1.E1_NUM AND E1G.E1_EMISSAO = E1.E1_EMISSAO AND E1G.E1_CLIENTE = E1.E1_CLIENTE AND E1G.E1_LOJA = E1.E1_LOJA GROUP BY E1G.E1_FILIAL, E1G.E1_NUM, E1G.E1_EMISSAO, E1G.E1_CLIENTE, E1G.E1_LOJA)) <= 0.05 THEN E1.E1_VALOR ELSE 0 END) " 
+	_cQuery += " (Case WHEN(E1.E1_VALOR - (SELECT COALESCE(SUM(D1.D1_TOTAL+D1.D1_ICMSRET),0) FROM " + RetSqlName("SD1") + " D1 WHERE D1.D_E_L_E_T_ = ' ' AND D1_FILIAL = E1_FILIAL AND D1_TIPO = 'D' AND D1_NFORI = E1_NUM AND D1_SERIORI = E1_PREFIXO AND D1_FORNECE = E1_CLIENTE AND D1_LOJA = E1_LOJA) " //GUILHERME - 07/12/2012
+	_cQuery += " / (SELECT MAX(TO_NUMBER(REPLACE(E1_PARCELA,'  ','1'))) FROM " + RetSqlName("SE1") + " E1G WHERE E1G.D_E_L_E_T_ = ' ' AND E1G.E1_FILIAL  = E1.E1_FILIAL AND E1G.E1_NUM = E1.E1_NUM AND E1G.E1_EMISSAO = E1.E1_EMISSAO AND E1G.E1_CLIENTE = E1.E1_CLIENTE AND E1G.E1_LOJA = E1.E1_LOJA GROUP BY E1G.E1_FILIAL, E1G.E1_NUM, E1G.E1_EMISSAO, E1G.E1_CLIENTE, E1G.E1_LOJA)) <= 0.05 THEN E1.E1_VALOR Else 0 END) " 
 	_cQuery += "ORDER BY"
 	_cQuery += " E1.E1_NUM,E1.E1_PARCELA"       	
 
 	If Select(_cAliasPrz) > 0
-		(_cAliasPrz)->(dbCloseArea())
+		(_cAliasPrz)->(DBCloseArea())
 	EndIf                                                     
 	
 	dbUseArea( .T., "TOPCONN",TcGenQry(,,_cQuery),_cAliasPrz,.T.,.T.)
@@ -836,8 +771,8 @@ Local _nTotVend := 0
 	
 	ProcRegua(nCountRec) 
 	 
-	dbSelectArea(_cAliasPrz)
-	(_cAliasPrz)->(dbGotop())    
+	DBSelectArea(_cAliasPrz)
+	(_cAliasPrz)->(DBGoTop())    
 	
 	//Verifica a existencia de pelo menos um registro para criar o cabecalho da pagina e de dados
 	If nCountRec > 0 	                     
@@ -881,7 +816,7 @@ Local _nTotVend := 0
 			printDados((_cAliasPrz)->E1_EMISSAO,(_cAliasPrz)->E1_VENCTO,(_cAliasPrz)->E1_NUM,(_cAliasPrz)->E1_PARCELA,;
 			           (_cAliasPrz)->E1_CLIENTE,(_cAliasPrz)->E1_LOJA,(_cAliasPrz)->A1_NOME,(_cAliasPrz)->E1_VALOR,1,(_cAliasPrz)->E1_NUMBCO,1,"","")
 		     
-		(_cAliasPrz)->(dbSkip())
+		(_cAliasPrz)->(DBSkip())
 	    EndDo         
 	    
 	    nlinha+=nSaltoLinha   
@@ -896,8 +831,8 @@ Local _nTotVend := 0
 		
 	EndIf	 
 	
-	dbSelectArea(_cAliasPrz)    
-	(_cAliasPrz)->(dbCloseArea())  
+	DBSelectArea(_cAliasPrz)    
+	(_cAliasPrz)->(DBCloseArea())  
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
                 
@@ -918,12 +853,12 @@ Local _nTotVend := 0
 	_cQuery += " AND E1.E1_FILIAL = '" + xFilial("SE1") + "'"   
 	_cQuery += " AND E1.E1_TIPO = 'NF '"
 	_cQuery += " AND E1.E1_ORIGEM = 'MATA460'"  
-	_cQuery += " AND E1.E1_EMISSAO = '" + DtoS(dDtBase) + "'" 
+	_cQuery += " AND E1.E1_EMISSAO = '" + DToS(dDtBase) + "'" 
 	_cQuery += " AND E1.E1_EMISSAO <> E1.E1_VENCTO"           
 	_cQuery += " AND E1.E1_NUMBCO = ' ' "
 	_cQuery += " AND E1.E1_VALOR >"
-	_cQuery += " (CASE WHEN(E1.E1_VALOR - (SELECT COALESCE(SUM(D1.D1_TOTAL+D1.D1_ICMSRET),0) FROM " + RetSqlName("SD1") + " D1 WHERE D1.D_E_L_E_T_ = ' ' AND D1_FILIAL = E1_FILIAL AND D1_TIPO = 'D' AND D1_NFORI = E1_NUM AND D1_SERIORI = E1_PREFIXO AND D1_FORNECE = E1_CLIENTE AND D1_LOJA = E1_LOJA) " //GUILHERME - 07/12/2012
-	_cQuery += " / (SELECT MAX(TO_NUMBER(REPLACE(E1_PARCELA,'  ','1'))) FROM " + RetSqlName("SE1") + " E1G WHERE E1G.D_E_L_E_T_ = ' ' AND E1G.E1_FILIAL  = E1.E1_FILIAL AND E1G.E1_NUM = E1.E1_NUM AND E1G.E1_EMISSAO = E1.E1_EMISSAO AND E1G.E1_CLIENTE = E1.E1_CLIENTE AND E1G.E1_LOJA = E1.E1_LOJA GROUP BY E1G.E1_FILIAL, E1G.E1_NUM, E1G.E1_EMISSAO, E1G.E1_CLIENTE, E1G.E1_LOJA)) <= 0.05 THEN E1.E1_VALOR ELSE 0 END) "
+	_cQuery += " (Case WHEN(E1.E1_VALOR - (SELECT COALESCE(SUM(D1.D1_TOTAL+D1.D1_ICMSRET),0) FROM " + RetSqlName("SD1") + " D1 WHERE D1.D_E_L_E_T_ = ' ' AND D1_FILIAL = E1_FILIAL AND D1_TIPO = 'D' AND D1_NFORI = E1_NUM AND D1_SERIORI = E1_PREFIXO AND D1_FORNECE = E1_CLIENTE AND D1_LOJA = E1_LOJA) " //GUILHERME - 07/12/2012
+	_cQuery += " / (SELECT MAX(TO_NUMBER(REPLACE(E1_PARCELA,'  ','1'))) FROM " + RetSqlName("SE1") + " E1G WHERE E1G.D_E_L_E_T_ = ' ' AND E1G.E1_FILIAL  = E1.E1_FILIAL AND E1G.E1_NUM = E1.E1_NUM AND E1G.E1_EMISSAO = E1.E1_EMISSAO AND E1G.E1_CLIENTE = E1.E1_CLIENTE AND E1G.E1_LOJA = E1.E1_LOJA GROUP BY E1G.E1_FILIAL, E1G.E1_NUM, E1G.E1_EMISSAO, E1G.E1_CLIENTE, E1G.E1_LOJA)) <= 0.05 THEN E1.E1_VALOR Else 0 END) "
 	//_cQuery += " (SELECT COALESCE(SUM(D1.D1_TOTAL),0) FROM SD1010 D1 WHERE D1.D_E_L_E_T_ = ' ' AND D1_FILIAL = E1_FILIAL AND D1_TIPO = 'D'"         
 	//_cQuery += " (SELECT COALESCE(SUM(D1.D1_TOTAL+D1.D1_ICMSRET),0) FROM SD1010 D1 WHERE D1.D_E_L_E_T_ = ' ' AND D1_FILIAL = E1_FILIAL AND D1_TIPO = 'D'"  //HEDER - 05/10/12 - HELP 1482 - Consideracao valor ST
 	//_cQuery += " AND D1_NFORI = E1_NUM AND D1_SERIORI = E1_PREFIXO AND D1_FORNECE = E1_CLIENTE AND D1_LOJA = E1_LOJA) " 
@@ -931,7 +866,7 @@ Local _nTotVend := 0
 	_cQuery += " E1.E1_NUM,E1.E1_PARCELA"       
 
 	If Select(_cAliasBol) > 0
-		(_cAliasBol)->(dbCloseArea())
+		(_cAliasBol)->(DBCloseArea())
 	EndIf                                                     
 	
 	dbUseArea( .T., "TOPCONN",TcGenQry(,,_cQuery),_cAliasBol,.T.,.T.)
@@ -939,8 +874,8 @@ Local _nTotVend := 0
 	
 	ProcRegua(nCountRec) 
 	 
-	dbSelectArea(_cAliasBol)
-	(_cAliasBol)->(dbGotop())    
+	DBSelectArea(_cAliasBol)
+	(_cAliasBol)->(DBGoTop())    
 	
 	//Verifica a existencia de pelo menos um registro para criar o cabecalho da pagina e de dados
 	If nCountRec > 0   
@@ -984,7 +919,7 @@ Local _nTotVend := 0
 			printDados((_cAliasBol)->E1_EMISSAO,(_cAliasBol)->E1_VENCTO,(_cAliasBol)->E1_NUM ,(_cAliasBol)->E1_PARCELA,;
 			           (_cAliasBol)->E1_CLIENTE,(_cAliasBol)->E1_LOJA  ,(_cAliasBol)->A1_NOME,(_cAliasBol)->E1_VALOR,0,"",1,"","")
 		     
-		(_cAliasBol)->(dbSkip())
+		(_cAliasBol)->(DBSkip())
 	    EndDo         
 	    
 	    nlinha+=nSaltoLinha   
@@ -999,8 +934,8 @@ Local _nTotVend := 0
 		
 	EndIf	 
 	
-	dbSelectArea(_cAliasBol)    
-	(_cAliasBol)->(dbCloseArea())	       
+	DBSelectArea(_cAliasBol)    
+	(_cAliasBol)->(DBCloseArea())	       
 	
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
 		             
@@ -1037,7 +972,7 @@ Local _nTotVend := 0
 	_cQuery += " AND F4.F4_FILIAL = '" + xFilial("SF4") + "'" 	
 	_cQuery += " AND D2.D2_TIPO NOT IN ('D','B')" 
 	_cQuery += " AND F4.F4_DUPLIC = 'N' "   
-	_cQuery += " AND D2.D2_EMISSAO = '" + DtoS(dDtBase) + "' " 
+	_cQuery += " AND D2.D2_EMISSAO = '" + DToS(dDtBase) + "' " 
 	_cQuery += "GROUP BY"         
 	_cQuery += " D2.D2_EMISSAO, D2.D2_DOC, D2.D2_SERIE, A1.A1_COD, A1.A1_LOJA, A1.A1_NOME,F4.F4_CODIGO,F4.F4_TEXTO "       
 	_cQuery += "UNION ALL " 	
@@ -1053,14 +988,14 @@ Local _nTotVend := 0
 	_cQuery += " AND D2.D2_FILIAL = '" + xFilial("SD2") + "'"   
 	_cQuery += " AND F4.F4_FILIAL = '" + xFilial("SF4") + "'" 	
 	_cQuery += " AND D2.D2_TIPO IN ('D','B')" 
-	_cQuery += " AND D2.D2_EMISSAO = '" + DtoS(dDtBase) + "' " 
+	_cQuery += " AND D2.D2_EMISSAO = '" + DToS(dDtBase) + "' " 
 	_cQuery += "GROUP BY"         
 	_cQuery += " D2.D2_EMISSAO, D2.D2_DOC, D2.D2_SERIE, A2.A2_COD, A2.A2_LOJA, A2.A2_NOME,F4.F4_CODIGO,F4.F4_TEXTO " 
 	_cQuery += "ORDER BY"
 	_cQuery += " 2,3"       
 	
 	If Select(_cAliasSai) > 0
-		(_cAliasSai)->(dbCloseArea())
+		(_cAliasSai)->(DBCloseArea())
 	EndIf                                                     
 	
 	dbUseArea( .T., "TOPCONN",TcGenQry(,,_cQuery),_cAliasSai,.T.,.T.)
@@ -1068,8 +1003,8 @@ Local _nTotVend := 0
 	
 	ProcRegua(nCountRec) 
 	 
-	dbSelectArea(_cAliasSai)
-	(_cAliasSai)->(dbGotop())    
+	DBSelectArea(_cAliasSai)
+	(_cAliasSai)->(DBGoTop())    
 	
 	//Verifica a existencia de pelo menos um registro para criar o cabecalho da pagina e de dados
 	If nCountRec > 0   
@@ -1111,7 +1046,7 @@ Local _nTotVend := 0
 			printDad02((_cAliasSai)->D2_EMISSAO,(_cAliasSai)->D2_DOC,(_cAliasSai)->D2_SERIE,;
 			           (_cAliasSai)->A1_COD,(_cAliasSai)->A1_LOJA,AllTrim(SubStr((_cAliasSai)->A1_NOME,1,30)) +'('+ AllTrim(SubStr((_cAliasSai)->F4_TEXTO,1,20))+')',(_cAliasSai)->VLRNOTA)
 		     
-		(_cAliasSai)->(dbSkip())
+		(_cAliasSai)->(DBSkip())
 	    EndDo         
 	    
 	    nlinha+=nSaltoLinha   
@@ -1126,8 +1061,8 @@ Local _nTotVend := 0
 		
 	EndIf	 
 	
-	dbSelectArea(_cAliasSai)    
-	(_cAliasSai)->(dbCloseArea())	
+	DBSelectArea(_cAliasSai)    
+	(_cAliasSai)->(DBCloseArea())	
       
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
               
@@ -1148,7 +1083,7 @@ Local _nTotVend := 0
 	_cQuery += " AND E1.E1_FILIAL = '" + xFilial("SE1") + "'"   
 	_cQuery += " AND E1.E1_TIPO = 'NF '"
 	_cQuery += " AND E1.E1_ORIGEM = 'MATA460'"  
-	_cQuery += " AND E1.E1_EMISSAO = '" + DtoS(dDtBase) + "'" 
+	_cQuery += " AND E1.E1_EMISSAO = '" + DToS(dDtBase) + "'" 
 	_cQuery += " AND E1.E1_EMISSAO = E1.E1_VENCTO"           
 	_cQuery += " AND " 
 	//_cQuery += " (SELECT COALESCE(SUM(D1.D1_TOTAL),0) FROM SD1010 D1 WHERE D1.D_E_L_E_T_ = ' ' AND D1_FILIAL = E1_FILIAL AND D1_TIPO = 'D'"         
@@ -1158,7 +1093,7 @@ Local _nTotVend := 0
 	_cQuery += " E1.E1_VENCTO,E1.E1_NUM,E1.E1_PARCELA"                     
     
 	If Select(_cAliasNCC) > 0
-		(_cAliasNCC)->(dbCloseArea())
+		(_cAliasNCC)->(DBCloseArea())
 	EndIf                                                     
 	
 	dbUseArea( .T., "TOPCONN",TcGenQry(,,_cQuery),_cAliasNCC,.T.,.T.)
@@ -1166,8 +1101,8 @@ Local _nTotVend := 0
 	
 	ProcRegua(nCountRec) 
 	 
-	dbSelectArea(_cAliasNCC)
-	(_cAliasNCC)->(dbGotop())    
+	DBSelectArea(_cAliasNCC)
+	(_cAliasNCC)->(DBGoTop())    
 	
 	//Verifica a existencia de pelo menos um registro para criar o cabecalho da pagina e de dados
 	If nCountRec > 0 	                     
@@ -1186,7 +1121,7 @@ Local _nTotVend := 0
 		nlinha+=nSaltoLinha
 		quebraPag(nlinha)
 		
-		oPrint:Say (nlinha + nAjuAltLi1,nColInic + 10,"Notas fiscais faturadas dia: " + DtoC(dDtBase) + " porem canceladas por entrada de NCC(Devolução):",oFont12b) 
+		oPrint:Say (nlinha + nAjuAltLi1,nColInic + 10,"Notas fiscais faturadas dia: " + DToC(dDtBase) + " porem canceladas por entrada de NCC(Devolução):",oFont12b) 
 		
 		lCabecNcc:= .T.
 		
@@ -1233,7 +1168,7 @@ Local _nTotVend := 0
 			               
 			     Next x 			               
 		     
-		(_cAliasNCC)->(dbSkip())
+		(_cAliasNCC)->(DBSkip())
 	    EndDo         
 	    
 	    nlinha+=nSaltoLinha   
@@ -1248,8 +1183,8 @@ Local _nTotVend := 0
 		
 	EndIf	 
 	
-	dbSelectArea(_cAliasNCC)    
-	(_cAliasNCC)->(dbCloseArea()) 
+	DBSelectArea(_cAliasNCC)    
+	(_cAliasNCC)->(DBCloseArea()) 
 	
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
@@ -1271,7 +1206,7 @@ Local _nTotVend := 0
 	_cQuery += " AND E1.E1_FILIAL = '" + xFilial("SE1") + "'"   
 	_cQuery += " AND E1.E1_TIPO = 'NF '"
 	_cQuery += " AND E1.E1_ORIGEM = 'MATA460'"  
-	_cQuery += " AND E1.E1_EMISSAO = '" + DtoS(dDtBase) + "'" 
+	_cQuery += " AND E1.E1_EMISSAO = '" + DToS(dDtBase) + "'" 
 	_cQuery += " AND E1.E1_EMISSAO <> E1.E1_VENCTO"           
 	_cQuery += " AND " 
 	//_cQuery += " (SELECT COALESCE(SUM(D1.D1_TOTAL),0) FROM SD1010 D1 WHERE D1.D_E_L_E_T_ = ' ' AND D1_FILIAL = E1_FILIAL AND D1_TIPO = 'D'"         
@@ -1283,7 +1218,7 @@ Local _nTotVend := 0
 	_cQuery += " E1.E1_NUM"
 
 	If Select(_cAliasNCC) > 0
-		(_cAliasNCC)->(dbCloseArea())
+		(_cAliasNCC)->(DBCloseArea())
 	EndIf                                                     
 	
 	dbUseArea( .T., "TOPCONN",TcGenQry(,,_cQuery),_cAliasNCC,.T.,.T.)
@@ -1291,8 +1226,8 @@ Local _nTotVend := 0
 	
 	ProcRegua(nCountRec) 
 	 
-	dbSelectArea(_cAliasNCC)
-	(_cAliasNCC)->(dbGotop())    
+	DBSelectArea(_cAliasNCC)
+	(_cAliasNCC)->(DBGoTop())    
 	
 	//Verifica a existencia de pelo menos um registro para criar o cabecalho da pagina e de dados
 	If nCountRec > 0 	                     
@@ -1312,7 +1247,7 @@ Local _nTotVend := 0
 	    	nlinha+=nSaltoLinha 
 			nlinha+=nSaltoLinha
 			quebraPag(nlinha)
-	    	oPrint:Say (nlinha + nAjuAltLi1,nColInic + 10,"Notas fiscais faturadas dia: " + DtoC(dDtBase) + " porem canceladas por entrada de NCC(Devolução):",oFont12b) 								  		
+	    	oPrint:Say (nlinha + nAjuAltLi1,nColInic + 10,"Notas fiscais faturadas dia: " + DToC(dDtBase) + " porem canceladas por entrada de NCC(Devolução):",oFont12b) 								  		
 	    
 	    EndIf
 		
@@ -1359,7 +1294,7 @@ Local _nTotVend := 0
 			               
 			  Next x 			                
 		     
-		(_cAliasNCC)->(dbSkip())
+		(_cAliasNCC)->(DBSkip())
 	    EndDo         
 	    
 	    nlinha+=nSaltoLinha   
@@ -1374,8 +1309,8 @@ Local _nTotVend := 0
 		
 	EndIf	 
 	
-	dbSelectArea(_cAliasNCC)    
-	(_cAliasNCC)->(dbCloseArea()) 	
+	DBSelectArea(_cAliasNCC)    
+	(_cAliasNCC)->(DBCloseArea()) 	
 	
 	
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
@@ -1394,7 +1329,7 @@ Local _nTotVend := 0
 	_cQuery += " AND A1.D_E_L_E_T_ = ' '"
 	_cQuery += " AND D1.D1_FILIAL = '" + xFilial("SD1") + "'"   
 	_cQuery += " AND D1.D1_TIPO = 'D'" 
-	_cQuery += " AND D1.D1_DTDIGIT = '" + DtoS(dDtBase) + "'" 
+	_cQuery += " AND D1.D1_DTDIGIT = '" + DToS(dDtBase) + "'" 
 	_cQuery += " AND D1_FORMUL = 'S' "           
 	_cQuery += "GROUP BY"
 	_cQuery += " D1.D1_DTDIGIT, D1.D1_DOC, D1.D1_SERIE, D1.D1_NFORI, D1.D1_SERIORI, D1.D1_FORNECE, D1.D1_LOJA, A1.A1_NOME " 
@@ -1402,7 +1337,7 @@ Local _nTotVend := 0
 	_cQuery += " D1.D1_DOC, D1.D1_SERIE"       
 
 	If Select(_cAliasDv1) > 0
-		(_cAliasDv1)->(dbCloseArea())
+		(_cAliasDv1)->(DBCloseArea())
 	EndIf                                                     
 	
 	dbUseArea( .T., "TOPCONN",TcGenQry(,,_cQuery),_cAliasDv1,.T.,.T.)
@@ -1410,8 +1345,8 @@ Local _nTotVend := 0
 	
 	ProcRegua(nCountRec) 
 	 
-	dbSelectArea(_cAliasDv1)
-	(_cAliasDv1)->(dbGotop())    
+	DBSelectArea(_cAliasDv1)
+	(_cAliasDv1)->(DBGoTop())    
 	
 	//Verifica a existencia de pelo menos um registro para criar o cabecalho da pagina e de dados
 	If nCountRec > 0 	                     
@@ -1453,7 +1388,7 @@ Local _nTotVend := 0
 			printDados((_cAliasDv1)->D1_EMISSAO,"","","",(_cAliasDv1)->D1_FORNECE,(_cAliasDv1)->D1_LOJA,(_cAliasDv1)->A1_NOME,;
 			           (_cAliasDv1)->VLRTOTAL,0,"",2,(_cAliasDv1)->D1_DOC + '-' + (_cAliasDv1)->D1_SERIE,(_cAliasDv1)->D1_NFORI + '-' + (_cAliasDv1)->D1_SERIORI)
 		     
-		(_cAliasDv1)->(dbSkip())
+		(_cAliasDv1)->(DBSkip())
 	    EndDo         
 	    
 	    nlinha+=nSaltoLinha   
@@ -1468,8 +1403,8 @@ Local _nTotVend := 0
 		
 	EndIf	 
 	
-	dbSelectArea(_cAliasDv1)    
-	(_cAliasDv1)->(dbCloseArea())  	
+	DBSelectArea(_cAliasDv1)    
+	(_cAliasDv1)->(DBCloseArea())  	
 		
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
@@ -1488,7 +1423,7 @@ Local _nTotVend := 0
 	_cQuery += " AND A1.D_E_L_E_T_ = ' '"
 	_cQuery += " AND D1.D1_FILIAL = '" + xFilial("SD1") + "'"   
 	_cQuery += " AND D1.D1_TIPO = 'D'" 
-	_cQuery += " AND D1.D1_DTDIGIT = '" + DtoS(dDtBase) + "'" 
+	_cQuery += " AND D1.D1_DTDIGIT = '" + DToS(dDtBase) + "'" 
 	_cQuery += " AND D1_FORMUL <> 'S' "           
 	_cQuery += "GROUP BY"
 	_cQuery += " D1.D1_DTDIGIT, D1.D1_DOC, D1.D1_SERIE, D1.D1_NFORI, D1.D1_SERIORI, D1.D1_FORNECE, D1.D1_LOJA, A1.A1_NOME " 
@@ -1496,7 +1431,7 @@ Local _nTotVend := 0
 	_cQuery += " D1.D1_DOC, D1.D1_SERIE"       
 
 	If Select(_cAliasDv2) > 0
-		(_cAliasDv2)->(dbCloseArea())
+		(_cAliasDv2)->(DBCloseArea())
 	EndIf                                                     
 	
 	dbUseArea( .T., "TOPCONN",TcGenQry(,,_cQuery),_cAliasDv2,.T.,.T.)
@@ -1504,8 +1439,8 @@ Local _nTotVend := 0
 	
 	ProcRegua(nCountRec) 
 	 
-	dbSelectArea(_cAliasDv2)
-	(_cAliasDv2)->(dbGotop())    
+	DBSelectArea(_cAliasDv2)
+	(_cAliasDv2)->(DBGoTop())    
 	
 	//Verifica a existencia de pelo menos um registro para criar o cabecalho da pagina e de dados
 	If nCountRec > 0 	                     
@@ -1547,7 +1482,7 @@ Local _nTotVend := 0
 			printDados((_cAliasDv2)->D1_EMISSAO,"","","",(_cAliasDv2)->D1_FORNECE,(_cAliasDv2)->D1_LOJA,(_cAliasDv2)->A1_NOME,;
 			           (_cAliasDv2)->VLRTOTAL,0,"",2,(_cAliasDv2)->D1_DOC + '-' + (_cAliasDv2)->D1_SERIE,(_cAliasDv2)->D1_NFORI + '-' + (_cAliasDv2)->D1_SERIORI)
 		     
-		(_cAliasDv2)->(dbSkip())
+		(_cAliasDv2)->(DBSkip())
 	    EndDo         
 	    
 	    nlinha+=nSaltoLinha   
@@ -1562,8 +1497,8 @@ Local _nTotVend := 0
 		
 	EndIf	 
 	
-	dbSelectArea(_cAliasDv2)    
-	(_cAliasDv2)->(dbCloseArea())  	
+	DBSelectArea(_cAliasDv2)    
+	(_cAliasDv2)->(DBCloseArea())  	
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -1574,7 +1509,7 @@ Local _nTotVend := 0
 	_cQuery += "WHERE"  
 	_cQuery += " FT.D_E_L_E_T_ = ' '" 
 	_cQuery += " AND FT.FT_FILIAL = '" + xFilial("SFT") + "'"   
-	_cQuery += " AND FT.FT_DTCANC = '" + DtoS(dDtBase)  + "'" 
+	_cQuery += " AND FT.FT_DTCANC = '" + DToS(dDtBase)  + "'" 
 	_cQuery += " AND FT.FT_OBSERV LIKE '%CANCELADA%'"     
 	_cQuery += "GROUP BY"
 	_cQuery += " FT_NFISCAL,FT_SERIE,FT_TIPOMOV "        
@@ -1582,7 +1517,7 @@ Local _nTotVend := 0
 	_cQuery += " FT_TIPOMOV,FT_NFISCAL,FT_SERIE"       
 
 	If Select(_cAliasCan) > 0
-		(_cAliasCan)->(dbCloseArea())
+		(_cAliasCan)->(DBCloseArea())
 	EndIf                                                     
 	
 	dbUseArea( .T., "TOPCONN",TcGenQry(,,_cQuery),_cAliasCan,.T.,.T.)
@@ -1590,8 +1525,8 @@ Local _nTotVend := 0
 	
 	ProcRegua(nCountRec) 
 	 
-	dbSelectArea(_cAliasCan)
-	(_cAliasCan)->(dbGotop())    
+	DBSelectArea(_cAliasCan)
+	(_cAliasCan)->(DBGoTop())    
 	
 	//Verifica a existencia de pelo menos um registro para criar o cabecalho da pagina e de dados
 	If nCountRec > 0 	                     
@@ -1629,13 +1564,13 @@ Local _nTotVend := 0
 			
 			prtDad03((_cAliasCan)->FT_NFISCAL,(_cAliasCan)->FT_SERIE,(_cAliasCan)->FT_TIPOMOV)
 	
-		(_cAliasCan)->(dbSkip())
+		(_cAliasCan)->(DBSkip())
 	    EndDo        
 	    
 	    boxDiv03()
 	                            
-	    dbSelectArea(_cAliasCan)
-	    (_cAliasCan)->(dbCloseArea()) 
+	    DBSelectArea(_cAliasCan)
+	    (_cAliasCan)->(DBCloseArea()) 
 
 	EndIf     
 	   
@@ -1656,11 +1591,8 @@ Return
 Programa----------: getNccs
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Imprime dados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1687,13 +1619,13 @@ Local _aNfori  := {}
 	_cQuery += " D1_DOC,D1_SERIE "        
 
 	If Select(_cAliasNF) > 0
-		(_cAliasNF)->(dbCloseArea())
+		(_cAliasNF)->(DBCloseArea())
 	EndIf                                                     
 	
 	dbUseArea( .T., "TOPCONN",TcGenQry(,,_cQuery),_cAliasNF,.T.,.T.) 
 	 
-	dbSelectArea(_cAliasNF)
-	(_cAliasNF)->(dbGotop())    
+	DBSelectArea(_cAliasNF)
+	(_cAliasNF)->(DBGoTop())    
 	
 	While (_cAliasNF)->(!Eof())         
 	
@@ -1701,11 +1633,11 @@ Local _aNfori  := {}
 			aAdd(_aNfori,{(_cAliasNF)->D1_DOC,(_cAliasNF)->D1_SERIE})
 		
 	
-	(_cAliasNF)->(dbSkip())
+	(_cAliasNF)->(DBSkip())
 	EndDo                   
 	
-	dbSelectArea(_cAliasNF)
-	(_cAliasNF)->(dbCloseArea())	
+	DBSelectArea(_cAliasNF)
+	(_cAliasNF)->(DBCloseArea())	
 
 Return _aNfori
 
@@ -1714,11 +1646,8 @@ Return _aNfori
 Programa----------: ImpMemo
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Imprime dados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1727,14 +1656,14 @@ User Function ImpMemo(msgValor,oFont)
 Local nAux  :=1
       
 	nAux := 1
-	while nAux <= len(msgValor)                                           
+	While nAux <= Len(msgValor)                                           
 	
 		nlinha+=nSaltoLinha     
 		quebraPag(nLinha)
-		oPrint:Say (nLinha,nColInic + 10,ALLTRIM(msgValor[nAux]),oFont)
+		oPrint:Say (nLinha,nColInic + 10,AllTrim(msgValor[nAux]),oFont)
 		nAux++
 		 
-	enddo
+	EndDo
 
 Return 
 
@@ -1743,11 +1672,8 @@ Return
 Programa----------: Assinatura
 Autor-------------: Fabiano Dias 
 Data da Criacao---: 05/08/2010                                     .
-===============================================================================================================================
 Descrição---------: Pesquisa os dados do usuario corrente para imprimir a assinatura.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1769,9 +1695,9 @@ If PswSeek( AllTrim(cUserName), .T. )
 	        
 	oPrint:Say (nlinha,nColFinal / 2,'_____________________________________________________'    ,oFont12b,nColFinal,,,2)
 	nlinha+=nSaltoLinha
-	oPrint:Say (nlinha,nColFinal / 2 ,Upper(alltrim(_aDadUsuaio[1,4]))                         ,oFont12b,nColFinal,,,2)
+	oPrint:Say (nlinha,nColFinal / 2 ,Upper(AllTrim(_aDadUsuaio[1,4]))                         ,oFont12b,nColFinal,,,2)
 	nlinha+=nSaltoLinha
-	oPrint:Say (nlinha,nColFinal / 2 ,Upper(alltrim(_aDadUsuaio[1,12]))                        ,oFont12b,nColFinal,,,2)
+	oPrint:Say (nlinha,nColFinal / 2 ,Upper(AllTrim(_aDadUsuaio[1,12]))                        ,oFont12b,nColFinal,,,2)
 
 EndIf
 

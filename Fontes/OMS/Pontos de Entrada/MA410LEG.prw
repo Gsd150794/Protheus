@@ -32,12 +32,12 @@ Retorno-----------: Nenhum
 */
 User Function MA410LEG()
 
-Local _aCorLegen:= PARAMIXB //Armazena a legenda padrao utilizada 
+Local _aCorLegen:= ParamIXB //Armazena a legenda padrao utilizada 
 
 // PADRAO MATA410.PRX
-// aCores:={{ "EMPTY(C5_LIBEROK) .AND. EMPTY(C5_NOTA) .AND. EMPTY(C5_BLQ)"	- 'ENABLE'	   - 01 - Pedido em Aberto - VERDE
-//          { "!EMPTY(C5_NOTA) .OR. C5_LIBEROK=='E' .AND. EMPTY(C5_BLQ)"	- 'DISABLE'	   - 02 - Pedido Encerrado - VERMELHO
-//          { "!EMPTY(C5_LIBEROK) .AND. EMPTY(C5_NOTA) .AND. EMPTY(C5_BLQ)"	- 'BR_AMARELO' - 03 - Pedido Liberado
+// aCores:={{ "Empty(C5_LIBEROK) .And. Empty(C5_NOTA) .And. Empty(C5_BLQ)"	- 'ENABLE'	   - 01 - Pedido em Aberto - VERDE
+//          { "!Empty(C5_NOTA) .Or. C5_LIBEROK=='E' .And. Empty(C5_BLQ)"	- 'DISABLE'	   - 02 - Pedido Encerrado - VERMELHO
+//          { "!Empty(C5_LIBEROK) .And. Empty(C5_NOTA) .And. Empty(C5_BLQ)"	- 'BR_AMARELO' - 03 - Pedido Liberado
 //          { "C5_BLQ == '1'"												- 'BR_AZUL'	   - 04 - Pedido Bloquedo por regra
 //          { "C5_BLQ == '2'"												- 'BR_LARANJA' - 05 - Pedido Bloquedo por verba
 

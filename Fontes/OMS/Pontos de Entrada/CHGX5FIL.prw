@@ -1,4 +1,4 @@
-#INCLUDE 'Protheus.ch' 
+#Include "TOTVS.ch" 
 
 /*
 ===============================================================================================================================
@@ -9,7 +9,7 @@ Data da Criacao---: 07/07/2017
 Descrição---------: Utiliza Tabela 01 Exclusiva em um SX5 Compartilhado
 ===============================================================================================================================
 Uso---------------: Ponto de Entrada para utilizar uma Tabela 01 exclusiva em um SX5 compartilhado.
-					http://tdn.totvs.com/display/public/PROT/CHGX5FIL+-+Utiliza+Tabela+01+Exclusiva+em+um+SX5+Compartilhado
+					http://tdn.totvs.com/display/Public/PROT/CHGX5FIL+-+Utiliza+Tabela+01+Exclusiva+em+um+SX5+Compartilhado
 ===============================================================================================================================
 Parametros--------: Nenhum
 ===============================================================================================================================

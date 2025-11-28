@@ -1,34 +1,26 @@
-/*  
+/*
 ===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS -                             
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |   Data   |                              Motivo                       										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-
-#INCLUDE "rwmake.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa--------: REST023 // U_REST023
 Autor-----------: Igor Melgaço
 Data da Criacao-: 07/03/2023   
-===============================================================================================================================
 Descrição-------: Chamado 43157 - ANDRE. Relação de Produtos e seu ultimo custo. 
-===============================================================================================================================
 Parametros------: NENHUM
-===============================================================================================================================
 Retorno---------: NENHUM
 ===============================================================================================================================
 */
-
 User Function REST023()
+
 Local _aParAux  := {} , nI
 Local _aParRet  := {}
 
@@ -42,32 +34,32 @@ _aItalac_F3 := {}
 
 _BSelectSB1:={|| "SELECT DISTINCT B1_GRUPO FROM "+RETSQLNAME("SB1")+" SB1 WHERE"+;
 				 " SB1.B1_GRUPO  <> ' '  AND "+;	
-				 " D_E_L_E_T_ <> '*' ORDER BY B1_GRUPO " }
+				 " D_E_L_E_T_ = ' ' ORDER BY B1_GRUPO " }
 
 //Italac_F3:={}         1           2         3                                   4                                                                                        5            6             7             8             9         10         11        12
 //AD(_aItalac_F3,{"1CPO_CAMPO1",_cTabela,_nCpoChave                         , _nCpoDesc                                                                              ,_bCondTab , _cTitAux, _nTamChv            , _aDados  , _nMaxSel , _lFilAtual,_cMVRET,_bValida})
-AADD(_aItalac_F3,{"MV_PAR02"   ,_BSelectSB1,{|Tab| (Tab)->B1_GRUPO },{|Tab| AllTrim(Posicione("SBM",1,xFilial("SBM")+(Tab)->B1_GRUPO,"BM_DESC")) },          ,"Grupos"  , LEN(SB1->B1_GRUPO),          ,           ,.F.       ,       , } )
+aAdd(_aItalac_F3,{"MV_PAR02"   ,_BSelectSB1,{|Tab| (Tab)->B1_GRUPO },{|Tab| AllTrim(Posicione("SBM",1,xFilial("SBM")+(Tab)->B1_GRUPO,"BM_DESC")) },          ,"Grupos"  , Len(SB1->B1_GRUPO),          ,           ,.F.       ,       , } )
 
 _BSelectSB1:={|| "SELECT DISTINCT B1_TIPO FROM "+RETSQLNAME("SB1")+" SB1 WHERE"+;
 				 " SB1.B1_TIPO  <>  ' ' AND "+;	
-				 " D_E_L_E_T_ <> '*' ORDER BY B1_TIPO " }
+				 " D_E_L_E_T_ = ' ' ORDER BY B1_TIPO " }
 
 //Italac_F3:={}         1           2         3                                   4                                                                                        5            6             7             8             9         10         11        12
 //AD(_aItalac_F3,{"1CPO_CAMPO1",_cTabela,_nCpoChave                         , _nCpoDesc                                                                              ,_bCondTab , _cTitAux, _nTamChv            , _aDados  , _nMaxSel , _lFilAtual,_cMVRET,_bValida})
-AADD(_aItalac_F3,{"MV_PAR03"   ,_BSelectSB1,{|Tab| (Tab)->B1_TIPO },{|Tab| AllTrim(Posicione("SX5",1,xFilial("SX5")+"02"+AllTrim((Tab)->B1_TIPO),"X5_DESCRI")) },          ,"Grupos"  , LEN(SB1->B1_TIPO),          ,           ,.F.       ,       , } )
+aAdd(_aItalac_F3,{"MV_PAR03"   ,_BSelectSB1,{|Tab| (Tab)->B1_TIPO },{|Tab| AllTrim(Posicione("SX5",1,xFilial("SX5")+"02"+AllTrim((Tab)->B1_TIPO),"X5_DESCRI")) },          ,"Grupos"  , Len(SB1->B1_TIPO),          ,           ,.F.       ,       , } )
 
-//_cSelSA2:="SELECT DISTINCT A2_COD,A2_NREDUZ FROM "+RETSQLNAME("SA2")+" SA2 WHERE D_E_L_E_T_ <> '*' AND SUBSTR(A2_COD,1,1) = 'F' AND A2_COD <> 'F00001'  ORDER BY A2_COD "
-_cSelSA2:="SELECT A2_COD, A2_LOJA, A2_NREDUZ FROM SA2010 WHERE D_E_L_E_T_ <> '*' AND A2_COD||A2_LOJA IN ( "
+//_cSelSA2:="SELECT DISTINCT A2_COD,A2_NREDUZ FROM "+RETSQLNAME("SA2")+" SA2 WHERE D_E_L_E_T_ = ' ' AND SubStr(A2_COD,1,1) = 'F' AND A2_COD <> 'F00001'  ORDER BY A2_COD "
+_cSelSA2:="SELECT A2_COD, A2_LOJA, A2_NREDUZ FROM SA2010 WHERE D_E_L_E_T_ = ' ' AND A2_COD||A2_LOJA IN ( "
 _cSelSA2+="       SELECT T.A2_COD||T.A2_LOJA  FROM("
 _cSelSA2+="              SELECT A2_COD, MIN(A2_LOJA) A2_LOJA FROM SIGA.SA2010 "
-_cSelSA2+="                     WHERE D_E_L_E_T_ <> '*' AND SUBSTR(A2_COD,1,1) = 'F' AND A2_COD <> 'F00001' GROUP BY A2_COD) T) ORDER BY A2_COD "
+_cSelSA2+="                     WHERE D_E_L_E_T_ = ' ' AND SubStr(A2_COD,1,1) = 'F' AND A2_COD <> 'F00001' GROUP BY A2_COD) T) ORDER BY A2_COD "
 //Italac_F3:={}         1           2         3                                   4             5            6             7         8             9         10         11        12
 //AD(_aItalac_F3,{"1CPO_CAMPO1",_cTabela,_nCpoChave                         , _nCpoDesc     ,_bCondTab , _cTitAux      , _nTamChv , _aDados  , _nMaxSel , _lFilAtual,_cMVRET,_bValida})
-AADD(_aItalac_F3,{"MV_PAR04"   ,_cSelSA2,{|Tab|(Tab)->A2_COD},{|Tab| (Tab)->A2_NREDUZ}, ,"Fornecedores" ,          ,          ,20        ,.F.        ,       , } )
+aAdd(_aItalac_F3,{"MV_PAR04"   ,_cSelSA2,{|Tab|(Tab)->A2_COD},{|Tab| (Tab)->A2_NREDUZ}, ,"Fornecedores" ,          ,          ,20        ,.F.        ,       , } )
 
-AADD( _aParAux , { 1 , "Filial"             , MV_PAR01, "@!"  , ""  ,"LSTFIL", "" , 060 , .F. } ) 
-AADD( _aParAux , { 1 , "Grupo de Produto"  	, MV_PAR02, "@!"  , ""  ,"F3ITLC", "" , 100 , .F. } ) 
-AADD( _aParAux , { 1 , "Tipo de Produto"   	, MV_PAR03, "@!"  , ""  ,"F3ITLC", "" , 100 , .F. } ) 
+aAdd( _aParAux , { 1 , "Filial"             , MV_PAR01, "@!"  , ""  ,"LSTFIL", "" , 060 , .F. } ) 
+aAdd( _aParAux , { 1 , "Grupo de Produto"  	, MV_PAR02, "@!"  , ""  ,"F3ITLC", "" , 100 , .F. } ) 
+aAdd( _aParAux , { 1 , "Tipo de Produto"   	, MV_PAR03, "@!"  , ""  ,"F3ITLC", "" , 100 , .F. } ) 
 aAdd( _aParAux , { 1 , "Fornecedor"	  		, MV_PAR04, "@!"  , ""	,'F3ITLC', "" , 100 , .F. } )
 aAdd( _aParAux , { 3 , "Considera Produto Bloqueado"	, MV_PAR05, { "Sim" , "Nao"  }		, 50 , ""	, .F. } )
 
@@ -75,9 +67,9 @@ For nI := 1 To Len( _aParAux )
     aAdd( _aParRet , _aParAux[nI][03] )
 Next 
 
-DO WHILE ParamBox( _aParAux , "SELECIONE OS FILTROS" , _aParRet , {|| .T. } , , , , , , , .T. , .T. )
-	FWMSGRUN(,{|oproc|  REST023PROC(oProc) },'Aguarde processamento...','Lendo dados...')
-ENDDO
+While ParamBox( _aParAux , "SELECIONE OS FILTROS" , _aParRet , {|| .T. } , , , , , , , .T. , .T. )
+	FWMsgRun(,{|oproc|  REST023PROC(oProc) },'Aguarde processamento...','Lendo dados...')
+EndDo
 
 Return
 
@@ -86,36 +78,33 @@ Return
 Programa--------: REST023PROC 
 Autor-----------: Igor Melgaço
 Data da Criacao-: 11/08/2022   
-===============================================================================================================================
 Descrição-------: Rotina de Processamento da Listagem. 
-===============================================================================================================================
 Parametros------: oProc = Objeto da regua de processamento
-===============================================================================================================================
 Retorno---------: NENHUM
 ===============================================================================================================================
 */
-STATIC Function REST023PROC(oproc)
+Static Function REST023PROC(oproc)
 Local _aDados := {}
 Local _aCab := {}
 
 _aDados := REST023QRY(oproc)
 
 If Len(_aDados) = 0 
-    U_ITMSG("Não há dados no periodo.","Envio do E-MAIL",,3)
+    U_ITMsg("Não há dados no periodo.","Envio do E-MAIL",,3)
 Else
 	_cTitulo := "Relação de Produtos e seu ultimo valor de compra"
 
-	AADD(_aCab,"Filial")
-	AADD(_aCab,"Documento")
-	AADD(_aCab,"Emissao")
-	AADD(_aCab,"Data Digit.")
-	AADD(_aCab,"Cod Fornecedor")
-	AADD(_aCab,"Loja")
-	AADD(_aCab,"Nome")
-	AADD(_aCab,"Código")
-	AADD(_aCab,"Descricao")
-	AADD(_aCab,"Vr Unit")
-	AADD(_aCab,"Custo Unit")
+	aAdd(_aCab,"Filial")
+	aAdd(_aCab,"Documento")
+	aAdd(_aCab,"Emissao")
+	aAdd(_aCab,"Data Digit.")
+	aAdd(_aCab,"Cod Fornecedor")
+	aAdd(_aCab,"Loja")
+	aAdd(_aCab,"Nome")
+	aAdd(_aCab,"Código")
+	aAdd(_aCab,"Descricao")
+	aAdd(_aCab,"Vr Unit")
+	aAdd(_aCab,"Custo Unit")
 
 						  //  , _aCols   ,_lMaxSiz,_nTipo,_cMsgTop, _lSelUnc ,_aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab , bDblClk , _aColXML , bCondMarca )
 	U_ITListBox(_cTitulo,_aCab,_aDados   , .T.    , 1    ,        ,          ,        ,         ,     ,        ,          ,       ,         ,          ,            )
@@ -129,15 +118,12 @@ Return
 Programa--------: REST023QRY 
 Autor-----------: Igor Melgaço
 Data da Criacao-: 06/03/2023
-===============================================================================================================================
 Descrição-------: Processamento da Query 
-===============================================================================================================================
 Parametros------: oProc = Objeto da regua de processamento
-===============================================================================================================================
 Retorno---------: _aDados = Dados de retorno do processamento da query
 ===============================================================================================================================
 */
-STATIC Function REST023QRY(oproc)
+Static Function REST023QRY(oproc)
 Local _cAliasQRY   := ''
 Local _cFiltro	   := ''
 Local _aDados      := {}
@@ -149,20 +135,20 @@ _cFiltro += "% "
 _cFiltro += " SF1.D_E_L_E_T_ = ' ' "
 _cFiltro += " AND SF1.F1_STATUS = 'A'  "
 
-If !Empty(ALLTRIM(MV_PAR01))
-	_cFiltro += " AND SF1.F1_FILIAL IN " +FormatIn(ALLTRIM(MV_PAR01),";")
+If !Empty(AllTrim(MV_PAR01))
+	_cFiltro += " AND SF1.F1_FILIAL IN " +FormatIn(AllTrim(MV_PAR01),";")
 EndIf
 
-If !Empty(ALLTRIM(MV_PAR02))
-	_cFiltro += " AND SB1.B1_GRUPO IN " +FormatIn(ALLTRIM(MV_PAR02),";")
+If !Empty(AllTrim(MV_PAR02))
+	_cFiltro += " AND SB1.B1_GRUPO IN " +FormatIn(AllTrim(MV_PAR02),";")
 EndIf
 
-If !Empty(ALLTRIM(MV_PAR03))
-	_cFiltro += " AND SB1.B1_TIPO IN " +FormatIn(ALLTRIM(MV_PAR03),";")
+If !Empty(AllTrim(MV_PAR03))
+	_cFiltro += " AND SB1.B1_TIPO IN " +FormatIn(AllTrim(MV_PAR03),";")
 EndIf
 
-If !Empty(ALLTRIM(MV_PAR04))
-	_cFiltro += " AND SF1.F1_FORNECE  IN "+FormatIn(ALLTRIM(MV_PAR04),";")
+If !Empty(AllTrim(MV_PAR04))
+	_cFiltro += " AND SF1.F1_FORNECE  IN "+FormatIn(AllTrim(MV_PAR04),";")
 EndIf
 
 If MV_PAR05 = 2
@@ -202,24 +188,24 @@ BeginSql Alias _cAliasQRY
 
 EndSql
 
-DbSelectArea(_cAliasQRY)
+DBSelectArea(_cAliasQRY)
 (_cAliasQRY)->(DBGoTop())
-If !(_cAliasQRY)->(EOF())
+If !(_cAliasQRY)->(Eof())
 	nTotal := (_cAliasQRY)->(FCount())
 	ProcRegua(nTotal)
-	Do While !(_cAliasQRY)->(EOF())
+	While !(_cAliasQRY)->(Eof())
 		_nAtual++
-		AADD(_aDados,{	(_cAliasQRY)->F1_FILIAL,;
+		aAdd(_aDados,{	(_cAliasQRY)->F1_FILIAL,;
 						(_cAliasQRY)->D1_DOC,;
-						DTOC(StoD((_cAliasQRY)->F1_EMISSAO)),;
-						DTOC(StoD((_cAliasQRY)->F1_DTDIGIT)),;
+						DToC(SToD((_cAliasQRY)->F1_EMISSAO)),;
+						DToC(SToD((_cAliasQRY)->F1_DTDIGIT)),;
 						(_cAliasQRY)->F1_FORNECE,;
 						(_cAliasQRY)->F1_LOJA,;
 						(_cAliasQRY)->A2_NOME,;
                         (_cAliasQRY)->D1_COD,;
 						(_cAliasQRY)->B1_DESC,;						
 						Transform( (_cAliasQRY)->D1_VUNIT ,"@E 9,999,999,999.99999"),;
-						Transform( Iif((_cAliasQRY)->D1_QUANT>0,(_cAliasQRY)->D1_CUSTO/(_cAliasQRY)->D1_QUANT,0) ,"@E 9,999,999,999.99999")})
+						Transform( IIf((_cAliasQRY)->D1_QUANT>0,(_cAliasQRY)->D1_CUSTO/(_cAliasQRY)->D1_QUANT,0) ,"@E 9,999,999,999.99999")})
 
 		(_cAliasQRY)->(DBSkip())
 		
@@ -229,4 +215,4 @@ If !(_cAliasQRY)->(EOF())
 	(_cAliasQRY)->( DBCloseArea() )
 EndIf
 
-RETURN _aDados
+Return _aDados

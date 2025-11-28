@@ -1,32 +1,24 @@
 /*
 ===============================================================================================================================
-                                    ATUALIZACOES SOFRIDAS DESDE A CONSTRUÇAO INICIAL
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                            
--------------------------------:-----------------------------------------------------------------------------------------------
- Lucas B. Ferreira| 04/02/2019 | Retirados campos desnecessários. Chamado 27636
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Lucas B. Ferreira| 25/07/2019 | Corrigida a barra de progresso. Help 28346
- -------------------------------------------------------------------------------------------------------------------------------
- Lucas B. Ferreira| 19/06/2024 | Incluído novo produto na regra. Chamado 47627
+Lucas Borges  |04/02/2019| Chamado 27636. Retirados campos desnecessários.
+Lucas Borges  |25/07/2019| Chamado 28346. Corrigida a barra de progresso.
+Lucas Borges  |19/06/2024| Chamado 47627. Incluído novo produto na regra.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT011
 Autor-------------: Marcelo Sanches/Abrahao
 Data da Criacao---: 22/10/2008
-===============================================================================================================================
 Descrição---------: Resumo dos Eventos
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 29/01/2019
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -92,11 +81,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 29/01/2019
-===============================================================================================================================
 Descrição---------: Processa dados do relatório
-===============================================================================================================================
 Parametros--------: oReport, _aOrdem
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -118,10 +104,10 @@ Local _nCountRec	:= 0
 If MV_PAR03 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLF")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -190,12 +176,12 @@ oReport:SetMeter(0)
 
 BeginSql alias _cAlias
   SELECT ZLF_FILIAL, ZLF_EVENTO,ZL8_DESCRI, ZL8_SB1COD,
-         SUM(CASE WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL ELSE 0 END) CREDITO,
-         SUM(CASE WHEN ZLF_DEBCRE = 'D' THEN ZLF_TOTAL ELSE 0END) DEBITO,
-         CASE WHEN SUM(ZLF_QTDBOM) > 0 THEN ROUND(SUM(ZLF_TOTAL)/SUM(ZLF_QTDBOM),4) ELSE 0 END TOTAL,
+         SUM(Case WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL Else 0 END) CREDITO,
+         SUM(Case WHEN ZLF_DEBCRE = 'D' THEN ZLF_TOTAL Else 0END) DEBITO,
+         Case WHEN SUM(ZLF_QTDBOM) > 0 THEN Round(SUM(ZLF_TOTAL)/SUM(ZLF_QTDBOM),4) Else 0 END TOTAL,
          SUM(ZLF_QTDBOM) VOLUME, DECODE(ZLF_ENTMIX, 'S', 'Sim', 'Nao') ENTMIX
          %Exp:_cCampo%
-    FROM %table:ZL8% ZL8, %table:ZLF% ZLF, %table:ZL2% ZL2
+    FROM %Table:ZL8% ZL8, %Table:ZLF% ZLF, %Table:ZL2% ZL2
    WHERE ZL8.D_E_L_E_T_ = ' '
      AND ZLF.D_E_L_E_T_ = ' '
      AND ZL2.D_E_L_E_T_ = ' '
@@ -223,11 +209,11 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	//Alimentar essa variável antes da impressão da linha
 	//para carregar o valor correto.
 	_cProd := AllTrim((_cAlias)->ZL8_SB1COD)
@@ -239,10 +225,10 @@ While !oReport:Cancel() .And. (_cAlias)->(!EOF())
 	If _nOrdem == 2 //Quebra por Setor
 		_cSetor	:= (_cAlias)->ZL2_COD + ' - ' + (_cAlias)->ZL2_DESCRI
 	EndIf
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

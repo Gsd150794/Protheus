@@ -1,24 +1,20 @@
 /*
 ===============================================================================================================================
-                                    ATUALIZACOES SOFRIDAS DESDE A CONSTRUÇAO INICIAL
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                            
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include	"Protheus.Ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MGPE021
 Autor-------------: Alex Wallauer Ferreira
 Data da Criacao---: 23/10/2019
-===============================================================================================================================
 Descrição---------: Relatorio de transferências de setor - Chamado 30942
-===============================================================================================================================
 Retorno-----------: Nenhum  
 ===============================================================================================================================
 */
@@ -27,58 +23,53 @@ User Function MGPE021()
 Local _aParAux:={} , nI
 Local _aParRet:={}
 
-MV_PAR01:=SPACE(200)
+MV_PAR01:=Space(200)
 MV_PAR02:=dDataBase
 MV_PAR03:=dDataBase
-MV_PAR04:=SPACE(LEN(SRE->RE_CCD))
-MV_PAR05:=SPACE(LEN(SRE->RE_CCP))
+MV_PAR04:=Space(Len(SRE->RE_CCD))
+MV_PAR05:=Space(Len(SRE->RE_CCP))
 
-AADD( _aParAux , { 1 , "Filial"               , MV_PAR01, "@!"  , ""    ,"LSTFIL"   , "" , 060 , .T. } ) 
-AADD( _aParAux , { 1 , "Data de"	          , MV_PAR02, "@D"	, ""	, ""		, "" , 060 , .T. } )
-AADD( _aParAux , { 1 , "Data ate"             , MV_PAR03, "@D"	, ""	, ""		, "" , 060 , .T. } )
-AADD( _aParAux , { 1 , "Centro de Custo de"   , MV_PAR04, "@!"  , ""    , "CTT"     , "" , 060 , .F. } ) 
-AADD( _aParAux , { 1 , "Centro de Custo ate"  , MV_PAR05, "@!"  , ""    , "CTT"     , "" , 060 , .F. } ) 
+aAdd( _aParAux , { 1 , "Filial"               , MV_PAR01, "@!"  , ""    ,"LSTFIL"   , "" , 060 , .T. } ) 
+aAdd( _aParAux , { 1 , "Data de"	          , MV_PAR02, "@D"	, ""	, ""		, "" , 060 , .T. } )
+aAdd( _aParAux , { 1 , "Data ate"             , MV_PAR03, "@D"	, ""	, ""		, "" , 060 , .T. } )
+aAdd( _aParAux , { 1 , "Centro de Custo de"   , MV_PAR04, "@!"  , ""    , "CTT"     , "" , 060 , .F. } ) 
+aAdd( _aParAux , { 1 , "Centro de Custo ate"  , MV_PAR05, "@!"  , ""    , "CTT"     , "" , 060 , .F. } ) 
 
 For nI := 1 To Len( _aParAux )
     aAdd( _aParRet , _aParAux[nI][03] )
 Next 
 
-DO WHILE .T.
+While .T.
 
    lSair:=.T.
    
-   IF !ParamBox( _aParAux , "Seleção de dados do Relatorio de transferências" , @_aParRet )
+   If !ParamBox( _aParAux , "Seleção de dados do Relatorio de transferências" , @_aParRet )
       Return .T.
    EndIf
 
-   FWMSGRUN( ,{|oproc| lSair:=MPGE021INI(oproc) } , "Processando..." , "Iniciando o processamento..." )
+   FWMsgRun( ,{|oproc| lSair:=MPGE021INI(oproc) } , "Processando..." , "Iniciando o processamento..." )
 
-   IF lSair
-      EXIT
-   ENDIF
+   If lSair
+      Exit
+   EndIf
 
-ENDDO
+EndDo
 
 Return .T.
-
-
 
 /*
 ===============================================================================================================================
 Programa----------: MPGE021INI
 Autor-------------: Alex Wallauer Ferreira
 Data da Criacao---: 29/07/2019
-===============================================================================================================================
 Descrição---------: Rotina de montagem da tela de processamento
-===============================================================================================================================
 Parametros--------: oproc - objeto da barra de processamento
-===============================================================================================================================
 Retorno-----------: .T. OU .F.
 ===============================================================================================================================
 */
 Static Function MPGE021INI(oproc)
 
-Local _cquery	:= ""
+Local _cQuery	:= ""
 Local _aDados	:= {}
 Private cAliasAux	:= GetNextAli8as()
 
@@ -88,66 +79,66 @@ U_ITLOGACS( "MPGE021" )
 oproc:cCaption := ("Lendo dados...")
 ProcessMessages()
 
-_cquery := " SELECT  R_E_C_N_O_ REC_SRE "
-_cquery += " FROM " +RETSQLNAME("SRE") + " SRE WHERE  "
-_cquery += "(   SRE.RE_FILIALD IN "+ FormatIn(ALLTRIM(MV_PAR01), ";" )
-_cquery += " OR SRE.RE_FILIALP IN "+ FormatIn(ALLTRIM(MV_PAR01), ";" )+")"
-IF !EMPTY(MV_PAR02)
-   _cquery += " AND RE_DATA BETWEEN '" + DTOS(MV_PAR02) + "' AND '" + DTOS(MV_PAR03) + "'"
-ELSEIF !EMPTY(MV_PAR01) 
-   _cquery += " AND RE_DATA >= '" + DTOS(MV_PAR02) + "'"
-ENDIF
-IF !EMPTY(MV_PAR05)
-   _cquery += " AND (   RE_CCP  BETWEEN '" + MV_PAR04 + "' AND '" + MV_PAR05 + "' "
-   _cquery += "      OR RE_CCD  BETWEEN '" + MV_PAR04 + "' AND '" + MV_PAR05 + "')"
-ELSEIF !EMPTY(MV_PAR04) 
-   _cquery += " AND (   RE_CCD  >= '" + MV_PAR04 + "'"
-   _cquery += "      OR RE_CCP  >= '" + MV_PAR04 + "')"
-ENDIF
-_cquery += "  AND D_E_L_E_T_ <> '*' " 
+_cQuery := " SELECT  R_E_C_N_O_ REC_SRE "
+_cQuery += " FROM " +RETSQLNAME("SRE") + " SRE WHERE  "
+_cQuery += "(   SRE.RE_FILIALD IN "+ FormatIn(AllTrim(MV_PAR01), ";" )
+_cQuery += " OR SRE.RE_FILIALP IN "+ FormatIn(AllTrim(MV_PAR01), ";" )+")"
+If !Empty(MV_PAR02)
+   _cQuery += " AND RE_DATA BETWEEN '" + DToS(MV_PAR02) + "' AND '" + DToS(MV_PAR03) + "'"
+ElseIf !Empty(MV_PAR01) 
+   _cQuery += " AND RE_DATA >= '" + DToS(MV_PAR02) + "'"
+EndIf
+If !Empty(MV_PAR05)
+   _cQuery += " AND (   RE_CCP  BETWEEN '" + MV_PAR04 + "' AND '" + MV_PAR05 + "' "
+   _cQuery += "      OR RE_CCD  BETWEEN '" + MV_PAR04 + "' AND '" + MV_PAR05 + "')"
+ElseIf !Empty(MV_PAR04) 
+   _cQuery += " AND (   RE_CCD  >= '" + MV_PAR04 + "'"
+   _cQuery += "      OR RE_CCP  >= '" + MV_PAR04 + "')"
+EndIf
+_cQuery += "  AND D_E_L_E_T_ = ' ' " 
 
-_cquery += " ORDER BY RE_DATA,RE_CCP,RE_MATP "
+_cQuery += " ORDER BY RE_DATA,RE_CCP,RE_MATP "
 	
-MPSysOpenQuery( _cquery , cAliasAux ) 
+MPSysOpenQuery( _cQuery , cAliasAux ) 
 
 oProc:cCaption := ("Contando os dados lidos...")
 ProcessMessages()
-DBSELECTAREA(cAliasAux)
-(cAliasAux)->(Dbgotop())
+DBSelectArea(cAliasAux)
+(cAliasAux)->(DBGoTop())
 _cTot := 0
 COUNT TO _cTot
-_cTot:=ALLTRIM(STR(_cTot))
-_nTam:=LEN(_cTot)
-(cAliasAux)->(Dbgotop())
+_cTot:=AllTrim(Str(_cTot))
+_nTam:=Len(_cTot)
+(cAliasAux)->(DBGoTop())
 _npv:=0
 
-DO While (cAliasAux)->(!EOF())
+While (cAliasAux)->(!Eof())
 
-    SRE->(DBGOTO((cAliasAux)->REC_SRE))
+    SRE->(DBGoTo((cAliasAux)->REC_SRE))
 	_npv++
-	oProc:cCaption := ("Processando Dados: "+ STRZERO(_npv,_nTam) +" de "+ _cTot)
+	oProc:cCaption := ("Processando Dados: "+ StrZero(_npv,_nTam) +" de "+ _cTot)
 	ProcessMessages()
 
     _aItens:={}
-	AADD(_aItens,DTOC(SRE->RE_DATA))
-	AADD(_aItens,SRE->RE_FILIALD)
-	AADD(_aItens,SRE->RE_MATD)
-	AADD(_aItens,SRE->RE_CCD+"-"+POSICIONE("CTT",1,XFILIAL("CTT")+SRE->RE_CCD,"CTT_DESC01"))
-	AADD(_aItens,Posicione("SRA",1,ALLTRIM(SRE->RE_FILIALP)+SRE->RE_MATP,"RA_NOME"))
-	AADD(_aItens,SRE->RE_FILIALP)
-	AADD(_aItens,SRE->RE_MATP)
-	AADD(_aItens,SRE->RE_CCP+"-"+POSICIONE("CTT",1,XFILIAL("CTT")+SRE->RE_CCP,"CTT_DESC01"))
-	cSetor:=Posicione("SRA",1,ALLTRIM(SRE->RE_FILIALP)+SRE->RE_MATP,"RA_I_SETOR")
-	IF !EMPTY(cSetor)
-       AADD(_aItens,cSetor+"-"+Posicione("ZAK",1,xFilial("ZAK")+cSetor,"ZAK_DESCRI"))
-    ELSE   
-       AADD(_aItens," ")
-    ENDIF   
-	AADD(_aDados,_aItens)
+	aAdd(_aItens,DToC(SRE->RE_DATA))
+	aAdd(_aItens,SRE->RE_FILIALD)
+	aAdd(_aItens,SRE->RE_MATD)
+	aAdd(_aItens,SRE->RE_CCD+"-"+Posicione("CTT",1,xFilial("CTT")+SRE->RE_CCD,"CTT_DESC01"))
+	aAdd(_aItens,Posicione("SRA",1,AllTrim(SRE->RE_FILIALP)+SRE->RE_MATP,"RA_NOME"))
+	aAdd(_aItens,SRE->RE_FILIALP)
+	aAdd(_aItens,SRE->RE_MATP)
+	aAdd(_aItens,SRE->RE_CCP+"-"+Posicione("CTT",1,xFilial("CTT")+SRE->RE_CCP,"CTT_DESC01"))
+	cSetor:=Posicione("SRA",1,AllTrim(SRE->RE_FILIALP)+SRE->RE_MATP,"RA_I_SETOR")
+	If !Empty(cSetor)
+       aAdd(_aItens,cSetor+"-"+Posicione("ZAK",1,xFilial("ZAK")+cSetor,"ZAK_DESCRI"))
+    Else   
+       aAdd(_aItens," ")
+    EndIf   
+	aAdd(_aDados,_aItens)
 
-    (cAliasAux)->(DBSKIP())
+    (cAliasAux)->(DBSkip())
  
-ENDDO
+EndDo
 
 (cAliasAux)->( DBCloseArea() )
 
@@ -155,32 +146,32 @@ ENDDO
 //Monta _aCab
 _aCab:={}
 _aSizes:={}
-AAdd(_aCab,Getsx3cache("RE_DATA"   ,"X3_TITULO"))
-AAdd(_aSizes,38)
-AAdd(_aCab,Getsx3cache("RE_FILIALD","X3_TITULO"))
-AAdd(_aSizes,37)
-AAdd(_aCab,Getsx3cache("RE_MATD"   ,"X3_TITULO"))
-AAdd(_aSizes,39)
-AAdd(_aCab,Getsx3cache("RE_CCD"    ,"X3_TITULO"))
-AAdd(_aSizes,140)
-AAdd(_aCab,Getsx3cache("RA_NOME"   ,"X3_TITULO"))
-AAdd(_aSizes,130)
-AAdd(_aCab,Getsx3cache("RE_FILIALP","X3_TITULO"))
-AAdd(_aSizes,37)
-AAdd(_aCab,Getsx3cache("RE_MATP"   ,"X3_TITULO"))
-AAdd(_aSizes,39)
-AAdd(_aCab,Getsx3cache("RE_CCP"    ,"X3_TITULO"))
-AAdd(_aSizes,140)
-AAdd(_aCab,"Setor Atual")
-AAdd(_aSizes,200)
+aAdd(_aCab,Getsx3cache("RE_DATA"   ,"X3_TITULO"))
+aAdd(_aSizes,38)
+aAdd(_aCab,Getsx3cache("RE_FILIALD","X3_TITULO"))
+aAdd(_aSizes,37)
+aAdd(_aCab,Getsx3cache("RE_MATD"   ,"X3_TITULO"))
+aAdd(_aSizes,39)
+aAdd(_aCab,Getsx3cache("RE_CCD"    ,"X3_TITULO"))
+aAdd(_aSizes,140)
+aAdd(_aCab,Getsx3cache("RA_NOME"   ,"X3_TITULO"))
+aAdd(_aSizes,130)
+aAdd(_aCab,Getsx3cache("RE_FILIALP","X3_TITULO"))
+aAdd(_aSizes,37)
+aAdd(_aCab,Getsx3cache("RE_MATP"   ,"X3_TITULO"))
+aAdd(_aSizes,39)
+aAdd(_aCab,Getsx3cache("RE_CCP"    ,"X3_TITULO"))
+aAdd(_aSizes,140)
+aAdd(_aCab,"Setor Atual")
+aAdd(_aSizes,200)
 
-If LEN(_aDados) > 0
+If Len(_aDados) > 0
    _cTitulo:="Relatorio de transferências de Setor"
    _cMsgTop:="Relatorio de transferências de Setor"
 //    ITListBox(_cTitAux, _aHeader , _aCols    , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _abuttons )
 	U_ITLISTBOX(_cTitulo, _aCab    , _aDados   , .T.      , 1      ,_cMsgTop  ,          , _aSizes )
 Else
-	U_ITMSG("Nenhum registro gerado!","Atenção",,1)
-Endif
+	U_ITMsg("Nenhum registro gerado!","Atenção",,1)
+EndIf
 
 Return .F.

@@ -9,7 +9,7 @@ Lucas Borges  |27/05/2025| Chamado 50617. Revisões diversas visando padronizar o
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -37,12 +37,12 @@ DEFINE MSDIALOG oDlg TITLE "Transportadora do Pedido de Compra" FROM C(249),C(31
 
 	@ C(010),C(007) Say "Codigo:"							   						   		Size C(020),C(008) PIXEL OF oDlg
 	@ C(008),C(030) MsGet cCodigo	F3 "SA2_03";
-		Valid ((substr(cCodigo,1,1) == "T" .AND. existCpo("SA2",cCodigo)) .OR. (cCodigo == space(6) .AND. cLoja == space(4)) );
+		Valid ((SubStr(cCodigo,1,1) == "T" .And. existCpo("SA2",cCodigo)) .Or. (cCodigo == Space(6) .And. cLoja == Space(4)) );
 		When {|| cNome := Posicione("SA2",1,xFilial("SA2")+cCodigo,"SA2->A2_NOME") }		Size C(042),C(009) PIXEL OF oDlg
 
 	@ C(010),C(092) Say "Loja:"								   			   			   		Size C(013),C(008) PIXEL OF oDlg
 	@ C(008),C(105) MsGet cLoja;	
-		Valid ((substr(cCodigo,1,1) == "T" .AND. existCpo("SA2",cCodigo+cLoja)) .OR. (cCodigo == space(6) .AND. cLoja == space(4)) );
+		Valid ((SubStr(cCodigo,1,1) == "T" .And. existCpo("SA2",cCodigo+cLoja)) .Or. (cCodigo == Space(6) .And. cLoja == Space(4)) );
 		When {|| cNome := Posicione("SA2",1,xFilial("SA2")+cCodigo+cLoja,"SA2->A2_NOME") }	Size C(022),C(009) PIXEL OF oDlg
 
 	@ C(025),C(007) Say "Razão Social:"									   			   		Size C(035),C(008) PIXEL OF oDlg
@@ -84,7 +84,7 @@ EndIf
 																			
 //³Tratamento para tema "Flat"³
 If "MP8" $ oApp:cVersion
-	If (Alltrim(GetTheme()) == "FLAT") .Or. SetMdiChild()
+	If (AllTrim(GetTheme()) == "FLAT") .Or. SetMdiChild()
 		nTam *= 0.90
 	EndIf
 EndIf
@@ -106,10 +106,10 @@ Static Function GrvTrans(cCodigo As Character, cLoja As Character, cFrete As Cha
 Local _cFilial := SC7->C7_FILIAL As Character
 Local cPedido := SC7->C7_NUM As Character
 
-SC7->(DbSetOrder(1))
-SC7->(DbSeek(_cFilial+cPedido))
+SC7->(DBSetOrder(1))
+SC7->(DBSeek(_cFilial+cPedido))
 
-While SC7->(Eof()) .And. (SC7->C7_FILIAL == _cFilial) .AND. (SC7->C7_NUM == cPedido)
+While SC7->(Eof()) .And. (SC7->C7_FILIAL == _cFilial) .And. (SC7->C7_NUM == cPedido)
 	SC7->(RecLock("SC7",.F.))
 		SC7->C7_I_CDTRA	:= cCodigo
 		SC7->C7_I_LJTRA	:= cLoja
@@ -118,8 +118,8 @@ While SC7->(Eof()) .And. (SC7->C7_FILIAL == _cFilial) .AND. (SC7->C7_NUM == cPed
 		Else
 			SC7->C7_I_TPFRT	:= "2"
 		EndIf
-	SC7->(MsUnlock())
-	SC7->(dbSkip())
+	SC7->(MSUnLock())
+	SC7->(DBSkip())
 EndDo
 
 Return

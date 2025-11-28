@@ -2,55 +2,49 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Jerry         | 23/08/2019 | Chamado 30350. Correções na função de Indicar Comprador para SC.
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 05/09/2019 | Chamado 33350. Ajustes e melhorias na gravacao do cTempTab e na função ACOM009F1().
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 17/10/2019 | Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 05/09/2019 | Chamado 33609. Ajuste na estrutura do campo C1_I_ULTPR do TRB.
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 05/04/2023 | Chamado 43472. Acrescentada a opcao NF no campo C1_I_URGEN : S(SIM), N(NAO) F(NF).
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 20/02/2024 | Chamado 46303. Andre. Correção da limpeza dos Campos da indicação do Comprador.
+Alex Wallauer |05/04/2023| Chamado 43472. Acrescentada a opcao NF no campo C1_I_URGEN : S(SIM), N(NAO) F(NF).
+Alex Wallauer |20/02/2024| Chamado 46303. Andre. Correção da limpeza dos Campos da indicação do Comprador.
+Alex Wallauer |05/09/2025| Chamado 51785. Ajustes dos campos custumizados da capa para o tema Dark.
+Jose Gavetti  |25/11/2025| Chamado 52473. Perguntas Solicitacao e Comprador retirando a opção de até para multiplas seleções.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes e Defines da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "FWBROWSE.CH"
-#INCLUDE "TBICONN.CH"                     
-#INCLUDE "TBICODE.CH"
+#Include "TOTVS.ch"
+#Include "FWBROWSE.CH"
+#Include "TBICONN.CH"                     
+#Include "TBICODE.CH"
 #Include 'FWMVCDef.ch'
 
 Static cAliasMrk	:= ""
+Static cSelFil		:= ''
+Static cArqTrab		:= ''
+Static _oACOM009
 
 /*
 ===============================================================================================================================
 Programa----------: ACOM009
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 22/09/2015
-===============================================================================================================================
 Descrição---------: Rotina responsável por Indicar Comprador para SC.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function ACOM009()
+User Function ACOM009
 
 Local aAlias		:= {}
-Local aColumns	:= {}
-Local oproc
-
-Local bChkMarca	:= {|| IIf( aScan( aRegsSC1 , { |x| x[1] + x[2] + x[3] == (cAliasMrk)->C1_FILIAL + (cAliasMrk)->C1_NUM + (cAliasMrk)->C1_ITEM  } ) == 0 , 'LBNO' , 'LBOK' ) }
-Local bSelMarca	:= {|| ( IIf( ( nPos := aScan( aRegsSC1 , { |x| x[1] + x[2] + x[3] == (cAliasMrk)->C1_FILIAL + (cAliasMrk)->C1_NUM + (cAliasMrk)->C1_ITEM } ) ) == 0 , ( aAdd( aRegsSC1 , { (cAliasMrk)->C1_FILIAL, (cAliasMrk)->C1_NUM, (cAliasMrk)->C1_ITEM }  ) , lMarcou := .T. ) , ( aDel( aRegsSC1 , nPos ) , aSize( aRegsSC1 , Len( aRegsSC1 ) -1 ) ) ) ) }
-Local bAllMarca	:= {|| IIF( Empty( aRegsSC1 ) , aRegsSC1 := aClone( aRegsAll ) , aRegsSC1 := {} ) , oMrkBrowse:Refresh() , oMrkBrowse:GoTop() }
+Local aColumns		:= {}
+Local aParAux 		:= {}
+Local aParRet 		:= {}
+Local nI			:= 0
+Local bChkMarca		:= {|| IIf( aScan( aRegsSC1 , { |x| x[1] + x[2] + x[3] == (cAliasMrk)->C1_FILIAL + (cAliasMrk)->C1_NUM + (cAliasMrk)->C1_ITEM  } ) == 0 , 'LBNO' , 'LBOK' ) }
+Local bSelMarca		:= {|| ( IIf( ( nPos := aScan( aRegsSC1 , { |x| x[1] + x[2] + x[3] == (cAliasMrk)->C1_FILIAL + (cAliasMrk)->C1_NUM + (cAliasMrk)->C1_ITEM } ) ) == 0 , ( AAdd( aRegsSC1 , { (cAliasMrk)->C1_FILIAL, (cAliasMrk)->C1_NUM, (cAliasMrk)->C1_ITEM }  ) , lMarcou := .T. ) , ( aDel( aRegsSC1 , nPos ) , aSize( aRegsSC1 , Len( aRegsSC1 ) -1 ) ) ) ) }
+Local bAllMarca		:= {|| IIf( Empty( aRegsSC1 ) , aRegsSC1 := aClone( aRegsAll ) , aRegsSC1 := {} ) , oMrkBrowse:Refresh() , oMrkBrowse:GoTop() }
+Local bOK     		:= {|| If(MV_PAR03 >= MV_PAR02 .Or. MV_PAR03 > DATE(),.T.,(U_ITMsg("Periodo INVALIDO",'Atenção!',"Tente novamente com outro periodo ate a data de hoje",3),.F.) ) }
+Local bSelectSC1    := {|| U_SelectSC1() }
+Local oproc         := Nil
 
 Private aSelFil	:= {}
 Private aRegsSC1:= {}
@@ -58,26 +52,51 @@ Private aRegsAll:= {}
 Private cPerg	:= "ACOM009"
 Private aRotina	:= ACOM009M()
 
-If !Pergunte(cPerg,.T.)
-     return
+_aItalac_F3	:= {} // Variável Private.
+AAdd(_aItalac_F3,{"MV_PAR04" ,"SY1"      ,                        ,                   ,     ,"Compradores"     ,} )
+aAdd(_aItalac_F3,{"MV_PAR08" ,bSelectSC1,{|Tab| (Tab)->C1_NUM }, {|Tab|DToC(SToD((Tab)->C1_EMISSAO))},  ,"Solicitacoes"    ,          ,          ,60        ,.T.        ,       , } )
+
+MV_PAR01 := Space(200)
+MV_PAR02 := dDataBase
+MV_PAR03 := dDataBase
+MV_PAR04 := Space(200)
+MV_PAR05 := "Ambos"
+MV_PAR06 := "Todos"
+MV_PAR07 := "Ambos"
+MV_PAR08 := Space(200)
+
+AAdd( aParAux , { 2 , "SC Por "   			, MV_PAR01 , { "1-Todas Filiais","2-Filial Corrente","3-Selec. Filiais",}, 100 , ".T." , .F. , ".T." } )
+AAdd( aParAux , { 1 , "Dt Emissao Inic"  	, MV_PAR02, "@D", ""  , ""	   , "" , 050 , .F. } )
+AAdd( aParAux , { 1 , "Dt Emissao Fim"   	, MV_PAR03, "@D", ""  , ""	   , "" , 050 , .F. } )
+AAdd( aParAux , { 1 , "Comprador"     		, MV_PAR04, "@!", ""  ,"F3ITLC", "" , 100 , .F. } )
+AAdd( aParAux , { 2 , "SC Urgente"       	, MV_PAR05, {"1-Sim","2-Nao","3-NF","Ambos"}, 100 , ".T." , .F. , ".T." } )
+AAdd( aParAux , { 2 , "Aplicacao"        	, MV_PAR06, {"1-Consumo  ","2-Investimento  ","3-Manutencao","4-Servico","Todos"}, 100 , ".T." , .F. , ".T." } )
+AAdd( aParAux , { 2 , "Situação"        	, MV_PAR07, {"1-Nao Atendidos","2-Parcial","Ambos"}, 100 , ".T." , .F. , ".T." } )
+AAdd( aParAux , { 1 , "Solicitacao"      	, MV_PAR08, "@!", ""  ,"F3ITLC", "" , 100 , .F. } )
+
+For nI := 1 To Len( aParAux )
+    AAdd( aParRet , aParAux[nI][03] )
+Next nI
+
+If !ParamBox( aParAux , "Indicar Comprador P/sc" , @aParRet, bOK, /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
+	U_ItMsg( "Operação cancelada pelo usuário!" , "Atenção!",,1 )
+	Break
 Else
-	If mv_par01 == 3
-		aSelFil := AdmGetFil()
+	If SubStr( MV_PAR01 , 1 , 1 ) == "3"	//Seleciona Filiais
+		 ACOMSELFIL()
 	EndIf
 EndIf
 
 //--------------------------------------------------------
 //Retorna as colunas para o preenchimento da FWMarkBrowse
 //--------------------------------------------------------
-fwmsgrun( ,{|oproc| aAlias := aCom009Qry(oproc) } , 'Aguarde!' , 'Verificando os registros...' )
+FWMsgRun( ,{|oproc| aAlias := aCom009Qry(oproc) } , 'Aguarde!' , 'Verificando os registros...' )
 	
 cAliasMrk	:= aAlias[1]
 aColumns 	:= aAlias[2]
 
 If !(cAliasMrk)->(Eof())
-	//----------------------
 	//Criação da MarkBrowse
-	//----------------------
 	oMrkBrowse:= FWMarkBrowse():New()
 	oMrkBrowse:SetDataTable(.T.)
 	oMrkBrowse:SetAlias(cAliasMrk)
@@ -85,26 +104,22 @@ If !(cAliasMrk)->(Eof())
 	oMrkBrowse:SetDescription("")
 	oMrkBrowse:SetColumns(aColumns)
 	oMrkBrowse:Activate()
-
 Else
-	U_ITMSG("Não foram localizadas SCs com os filtros selecionados","Atenção",,1)
+	U_ITMsg("Não foram localizadas SCs com os filtros selecionados","Atenção",,1)
 EndIf
 
 If !Empty (cAliasMrk)
-	dbSelectArea(cAliasMrk)
-	dbCloseArea()
+	DBSelectArea(cAliasMrk)
+	DBCloseArea()
 	Ferase(cAliasMrk+GetDBExtension())
 	Ferase(cAliasMrk+OrdBagExt())
 	cAliasMrk := ""
-	dbSelectArea("SC1")
-	dbSetOrder(1)
-Endif
+	DBSelectArea("SC1")
+	DBSetOrder(1)
+EndIf
 
-//======================================================================
 // Grava log da Rotina responsável por Indicar Comprador para SC 
-//====================================================================== 
 U_ITLOGACS('ACOM009')
-
 
 Return (.T.)
 
@@ -113,11 +128,8 @@ Return (.T.)
 Programa----------: ACOM009Qry
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 29/07/2015
-===============================================================================================================================
 Descrição---------: Função utilizada para montar a query e arquivo temporário
-===============================================================================================================================
 Parametros--------: oproc - objeto da barra de processamento
-===============================================================================================================================
 Retorno-----------: Array [1] - Tabela temporária / [2] - Colunas do browse
 ===============================================================================================================================
 */
@@ -130,23 +142,29 @@ Local aStructSC1	:= SC1->(DBSTRUCT())
 Local aColumns		:= {}
 Local nX			:= 0					
 Local cTempTab		:= ""
+Local cFiliais 		:= SubStr( MV_PAR01 , 1 , 1 )
 Local dEmissIni		:= MV_PAR02
 Local dEmissFim		:= MV_PAR03
-Local cSolicIni		:= MV_PAR04
-Local cSolicFim		:= MV_PAR05
-Local cCompraDe		:= MV_PAR06
-Local cCompraAte	:= MV_PAR07
-Local cUrgente		:= MV_PAR08
-Local cAplic		:= MV_PAR09
-Local cSituac		:= MV_PAR11
+Local cComprador	:= MV_PAR04
+Local cUrgente		:= SubStr( MV_PAR05 , 1 , 1 )
+Local cAplic		:= SubStr( MV_PAR06 , 1 , 1 )
+Local cSituac		:= SubStr( MV_PAR07 , 1 , 1 )
+Local cSoliciti		:= MV_PAR08
 
 //Variaveis utilizadas para montar o where da query, referente aos filtros preenchidos pelo usuario.
 Local cWFilial		:= ""
-Local cWFils		:= ""
 Local cWUrgen		:= ""
 Local cWAplic		:= ""
 Local cWhere		:= ""
 Local cWSitu		:= ""
+
+If !Empty(MV_PAR08)
+	cSoliciti := FormatIn(AllTrim(MV_PAR08),";") //"%"+FormatIn(AllTrim(MV_PAR04),";")+"%"
+EndIf
+
+If !Empty(MV_PAR04)
+	cComprador := FormatIn(AllTrim(MV_PAR04),";")
+EndIf	
 
 oproc:cCaption := ("Iniciando rotina...")
 ProcessMessages()
@@ -155,117 +173,115 @@ For nX := 1 To Len(aFields)
 	cSelect += aFields[nX] + ", "
 Next nX
 
-AADD(aStructSC1,{"SC1RECNO","N",15,0 })
+AAdd(aStructSC1,{"SC1RECNO","N",15,0 })
 
 //======================================
 //Tratamento da clausula where da filial
 //======================================
-If mv_par01 == 1			//Todas as Filiais
+If cFiliais == '1'			//Todas as Filiais
 	cWFilial := "%"
 	cWFilial += " SC1.C1_FILIAL >= '" + Space(TamSX3("C1_FILIAL")[1]) + "' AND SC1.C1_FILIAL <= '" + Replicate("Z", TamSX3("C1_FILIAL")[1]) + "' "
 	cWFilial += "%"
-ElseIf mv_par01 == 2		//Filial Corrente
+ElseIf cFiliais == '2'		//Filial Corrente
 	cWFilial := "%"
 	cWFilial += " SC1.C1_FILIAL  = '" + xFilial("SC1") + "' "
 	cWFilial += "%"
-ElseIf mv_par01 == 3 		//Seleciona Filiais
+ElseIf cFiliais == '3' 		//Seleciona Filiais
 	//Leitura das filiais selecionadas
-	For nX := 1 To Len(aSelFil)
-		If nX == Len(aSelFil)
-			cWFils += "'" + aSelFil[nX] + "'"
-		Else
-			cWFils += "'" + aSelFil[nX] + "',"
-		EndIf
-	Next nX
 	cWFilial := "%"
-	cWFilial += " SC1.C1_FILIAL IN (" + cWFils + ") "
+	If Empty(cSelFil)
+		cWFilial += " SC1.C1_FILIAL IN ('" + xFilial("SC1") + "') "
+	Else
+		cWFilial += " SC1.C1_FILIAL IN (" + cSelFil + ") "
+	EndIf 
 	cWFilial += "%"
 EndIf
 
-//=======================================
 //Tratamento da clausula where do urgente
-//=======================================
-If cUrgente == 1				//Sim
+If cUrgente == '1'				//Sim
 	cWUrgen := "%"
 	cWUrgen += " SC1.C1_I_URGEN = 'S' "
 	cWUrgen += "%"
-ElseIf cUrgente == 2			//Nao
+ElseIf cUrgente == '2'			//Nao
 	cWUrgen := "%"
 	cWUrgen += " SC1.C1_I_URGEN = 'N' "
 	cWUrgen += "%"
-ElseIf cUrgente == 3			//NF
+ElseIf cUrgente == '3'			//NF
 	cWUrgen := "%"
 	cWUrgen += " SC1.C1_I_URGEN = 'F' "
 	cWUrgen += "%"
-ElseIf cUrgente == 4			//NF
+ElseIf cUrgente == 'A'			//NF
 	cWUrgen := "%"
 	cWUrgen += " SC1.C1_I_URGEN IN (' ','S','N','F') "
 	cWUrgen += "%"
 EndIf
 
-//=========================================
 //Tratamento da clausula where da aplicacao
-//=========================================
-If cAplic == 1				//Consumo
+If cAplic == '1'				//Consumo
 	cWAplic := "%"
 	cWAplic += " SC1.C1_I_APLIC = 'C' "
 	cWAplic += "%"
-ElseIf cAplic == 2			//Investimento
+ElseIf cAplic == '2'			//Investimento
 	cWAplic := "%"
 	cWAplic += " SC1.C1_I_APLIC = 'I' "
 	cWAplic += "%"
-ElseIf cAplic == 3			//Manutenção
+ElseIf cAplic == '3'			//Manutenção
 	cWAplic := "%"
 	cWAplic += " SC1.C1_I_APLIC = 'M' "
 	cWAplic += "%"
-ElseIf cAplic == 4			//Serviço
+ElseIf cAplic == '4'			//Serviço
 	cWAplic := "%"
 	cWAplic += " SC1.C1_I_APLIC = 'S' "
 	cWAplic += "%"
-ElseIf cAplic == 5			//Todos
+ElseIf cAplic == 'T'			//Todos
 	cWAplic := "%"
 	cWAplic += " SC1.C1_I_APLIC <> ' ' "
 	cWAplic += "%"
 EndIf
 
-If cSituac == 1
+//Tratamento da clausula where da Situação
+If cSituac == '1'
 	cWSitu := "%"
 	cWSitu += " SC1.C1_QUJE = 0 "
 	cWSitu += "%"
-ElseIf cSituac == 2
+ElseIf cSituac == '2'
 	cWSitu := "%"
 	cWSitu += " (SC1.C1_QUJE > 0 AND SC1.C1_QUJE < SC1.C1_QUANT) "
 	cWSitu += "%"
-ElseIf cSituac == 3
+ElseIf cSituac == 'A'
 	cWSitu := "%"
 	cWSitu += " SC1.C1_QUJE < SC1.C1_QUANT "
 	cWSitu += "%"
 EndIf
 
 cWhere := "%"
-cWhere += " SC1.C1_CODCOMP BETWEEN '" + cCompraDe + "' AND '" + cCompraAte + "' AND "
+If !Empty(MV_PAR08)
+	cWhere += " SC1.C1_NUM IN "+cSoliciti+" AND "
+EndIf
+If !Empty(MV_PAR04)
+	cWhere += " SC1.C1_CODCOMP IN "+cComprador+" AND "
+EndIf
 cWhere += " SC1.C1_QUJE < SC1.C1_QUANT AND "
 cWhere += " SC1.C1_APROV = 'L' AND "
 cWhere += " SC1.C1_RESIDUO <> 'S' "
 cWhere += "%"
 
-BeginSQL alias cAliasTrb
+BeginSql alias cAliasTrb
 
 SELECT ' ' SC1_OK, C1_FILIAL, C1_EMISSAO, C1_NUM, C1_ITEM, C1_CODCOMP, Y1_NOME, C1_I_CODAP, ZZ7_NOME,
         C1_PRODUTO, C1_DESCRI, C1_UM, C1_QUANT, C1_QUJE, C1_I_ULTPR, C1_I_ULTDT, C1_I_URGEN, C1_I_APLIC,
 		 C1_I_CDINV, ZZI_DESINV, C1_CC, C1_I_DTRET, C1_DATPRF, C1_OBS, B1_I_DESCD,C1_I_INDIC,C1_I_INDDT,
-		 C7_NUM,C7_ITEM,C7_FORNECE,C7_LOJA,(SELECT A2_NREDUZ FROM %table:SA2% SA2 WHERE SA2.A2_COD = SC7.C7_FORNECE AND
+		 C7_NUM,C7_ITEM,C7_FORNECE,C7_LOJA,(SELECT A2_NREDUZ FROM %Table:SA2% SA2 WHERE SA2.A2_COD = SC7.C7_FORNECE AND
 		                                              SA2.A2_LOJA = SC7.C7_LOJA AND SC7.%notDel%) A2_NREDUZ,
 		 C1_I_INDHR,SC1.R_E_C_N_O_ SC1RECNO  //SC1_OK é o campo criado para o campo de Marcação
-FROM %table:SC1% SC1
-LEFT JOIN %table:SY1% SY1 ON SY1.Y1_FILIAL = %xFilial:SY1% AND SC1.C1_CODCOMP = SY1.Y1_COD AND SY1.%notDel%
-JOIN %table:ZZ7% ZZ7 ON SC1.C1_FILIAL = ZZ7.ZZ7_FILIAL AND SC1.C1_I_CODAP = ZZ7.ZZ7_CODUSR AND ZZ7.%notDel%
-LEFT JOIN %table:ZZI% ZZI ON SC1.C1_FILIAL = ZZI.ZZI_FILIAL AND SC1.C1_I_CDINV = ZZI.ZZI_CODINV AND ZZI.%notDel%
-LEFT JOIN %table:SB1% SB1 ON SB1.B1_FILIAL = %xFilial:SB1% AND SB1.B1_COD = SC1.C1_PRODUTO AND SB1.%notDel%
-LEFT JOIN %table:SC7% SC7 ON SC7.C7_FILIAL = SC1.C1_FILIAL AND SC7.C7_NUMSC = SC1.C1_NUM AND SC7.C7_ITEMSC = SC1.C1_ITEM AND SC7.%notDel%
+FROM %Table:SC1% SC1
+LEFT JOIN %Table:SY1% SY1 ON SY1.Y1_FILIAL = %xFilial:SY1% AND SC1.C1_CODCOMP = SY1.Y1_COD AND SY1.%notDel%
+JOIN %Table:ZZ7% ZZ7 ON SC1.C1_FILIAL = ZZ7.ZZ7_FILIAL AND SC1.C1_I_CODAP = ZZ7.ZZ7_CODUSR AND ZZ7.%notDel%
+LEFT JOIN %Table:ZZI% ZZI ON SC1.C1_FILIAL = ZZI.ZZI_FILIAL AND SC1.C1_I_CDINV = ZZI.ZZI_CODINV AND ZZI.%notDel%
+LEFT JOIN %Table:SB1% SB1 ON SB1.B1_FILIAL = %xFilial:SB1% AND SB1.B1_COD = SC1.C1_PRODUTO AND SB1.%notDel%
+LEFT JOIN %Table:SC7% SC7 ON SC7.C7_FILIAL = SC1.C1_FILIAL AND SC7.C7_NUMSC = SC1.C1_NUM AND SC7.C7_ITEMSC = SC1.C1_ITEM AND SC7.%notDel%
 WHERE
 	%Exp:cWFilial%							AND
-	SC1.C1_NUM BETWEEN %exp:cSolicIni%		AND %exp:cSolicFim%	AND
 	SC1.C1_EMISSAO BETWEEN %exp:dEmissIni%	AND %exp:dEmissFim% AND
 	%Exp:cWUrgen%							AND
 	%Exp:cWAplic%							AND
@@ -281,19 +297,19 @@ EndSql
 //----------------------------------------------------------------------
 aStruTRB:=(cAliasTrb)->(DBSTRUCT())    
  
-If (NpOS:=ASCAN(aStruTRB,{|A|A[1]=="C1_QUANT"})) <> 0
+If (NpOS:=aScan(aStruTRB,{|A|A[1]=="C1_QUANT"})) <> 0
    aStruTRB[NpOS,3]:=22
 EndIf
 
-If (NpOS:=ASCAN(aStruTRB,{|A|A[1]=="C1_QUJE"})) <> 0
+If (NpOS:=aScan(aStruTRB,{|A|A[1]=="C1_QUJE"})) <> 0
    aStruTRB[NpOS,3]:=22
 EndIf
 
-If (NpOS:=ASCAN(aStruTRB,{|A|A[1]=="C1_I_ULTPR"})) <> 0
+If (NpOS:=aScan(aStruTRB,{|A|A[1]=="C1_I_ULTPR"})) <> 0
    aStruTRB[NpOS,3]:=22
 EndIf
 
-If (NpOS:=ASCAN(aStruTRB,{|A|A[1]=="SC1RECNO"})) <> 0
+If (NpOS:=aScan(aStruTRB,{|A|A[1]=="SC1RECNO"})) <> 0
    aStruTRB[NpOS,3]:=22
 EndIf
 
@@ -302,23 +318,23 @@ _otemp := FWTemporaryTable():New( cTempTab,aStruTRB )
 _otemp:Create()
 
 
-(cAliasTrb)->(Dbgotop())
+(cAliasTrb)->(DBGoTop())
 
-Do while (cAliasTrb)->(!Eof())
+While (cAliasTrb)->(!Eof())
 
 	(cTempTab)->(DBAPPEND())
-    if EMPTY((cAliasTrb)->C7_FORNECE)
+    If Empty((cAliasTrb)->C7_FORNECE)
        aForn:=ACOM009F1(,cAliasTrb)
-    ENDIF   
+    EndIf   
 	
 	(cTempTab)->C1_FILIAL := (cAliasTrb)->C1_FILIAL
 	(cTempTab)->C1_NUM    := (cAliasTrb)->C1_NUM
 	(cTempTab)->C1_ITEM   := (cAliasTrb)->C1_ITEM
 	(cTempTab)->C7_NUM    := (cAliasTrb)->C7_NUM
 	(cTempTab)->C7_ITEM   := (cAliasTrb)->C7_ITEM
-	(cTempTab)->C7_FORNECE:= IF(EMPTY((cAliasTrb)->C7_FORNECE),aForn[1],(cAliasTrb)->C7_FORNECE)
-	(cTempTab)->C7_LOJA   := IF(EMPTY((cAliasTrb)->C7_FORNECE),aForn[2],(cAliasTrb)->C7_LOJA)
-	(cTempTab)->A2_NREDUZ := POSICIONE("SA2",1,xfilial("SA2")+(cTempTab)->C7_FORNECE+(cTempTab)->C7_LOJA,"A2_NREDUZ")
+	(cTempTab)->C7_FORNECE:= If(Empty((cAliasTrb)->C7_FORNECE),aForn[1],(cAliasTrb)->C7_FORNECE)
+	(cTempTab)->C7_LOJA   := If(Empty((cAliasTrb)->C7_FORNECE),aForn[2],(cAliasTrb)->C7_LOJA)
+	(cTempTab)->A2_NREDUZ := Posicione("SA2",1,xFilial("SA2")+(cTempTab)->C7_FORNECE+(cTempTab)->C7_LOJA,"A2_NREDUZ")
 	(cTempTab)->SC1RECNO  := (cAliasTrb)->SC1RECNO
 	(cTempTab)->C1_EMISSAO:= (cAliasTrb)->C1_EMISSAO
 	(cTempTab)->C1_CODCOMP:= (cAliasTrb)->C1_CODCOMP
@@ -345,13 +361,13 @@ Do while (cAliasTrb)->(!Eof())
 	(cTempTab)->C1_DATPRF  := (cAliasTrb)->C1_DATPRF
 	(cTempTab)->C1_OBS  := (cAliasTrb)->C1_OBS
 	
-	(cAliasTrb)->(Dbskip())
+	(cAliasTrb)->(DBSkip())
 
-Enddo
+EndDo
 
 If ( Select( cAliasTrb ) > 0 )
-	DbSelectArea(cAliasTrb)
-	DbCloseArea()
+	DBSelectArea(cAliasTrb)
+	DBCloseArea()
 EndIf
 
 oproc:cCaption := ("Montando dados...")
@@ -360,7 +376,7 @@ ProcessMessages()
 (cTempTab)->( DBGoTop() )
 While (cTempTab)->(!Eof())
 	
-	aAdd( aRegsAll , { (cTempTab)->C1_FILIAL, (cTempTab)->C1_NUM, (cTempTab)->C1_ITEM , (cTempTab)->SC1RECNO } )
+	AAdd( aRegsAll , { (cTempTab)->C1_FILIAL, (cTempTab)->C1_NUM, (cTempTab)->C1_ITEM , (cTempTab)->SC1RECNO } )
 	
 (cTempTab)->( DBSkip() )
 EndDo
@@ -370,8 +386,8 @@ EndDo
 For nX := 1 To Len(aFields)
 	If	!aFields[nX] == "SC1_OK" .And. aFields[nX] $ cSelect
 		AAdd(aColumns,FWBrwColumn():New())
-		If aFields[nX] == "C1_EMISSAO" .Or. aFields[nX] == "C1_I_ULTDT" .Or. aFields[nX] == "C1_I_DTRET" .OR. aFields[nX] == "C1_I_INDDT"
-			aColumns[Len(aColumns)]:SetData( &("{||StoD(" + aFields[nX] + ")}") )
+		If aFields[nX] == "C1_EMISSAO" .Or. aFields[nX] == "C1_I_ULTDT" .Or. aFields[nX] == "C1_I_DTRET" .Or. aFields[nX] == "C1_I_INDDT"
+			aColumns[Len(aColumns)]:SetData( &("{||SToD(" + aFields[nX] + ")}") )
 		Else
 			aColumns[Len(aColumns)]:SetData( &("{||" + aFields[nX] + "}") )
 		EndIf
@@ -398,22 +414,20 @@ Return( { cTempTab , aColumns } )
 Programa----------: ACOM009M
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 29/07/2015
-===============================================================================================================================
 Descrição---------: Função utilizada para criação do menu.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: aRotina - Opções de menu
 ===============================================================================================================================
 */
 Static Function ACOM009M()     
+
 Local aRot := {}
 Private oproc
 
-ADD OPTION aRot Title 'Indicar Comprador'		Action 'fwmsgrun( ,{|oproc| U_ACOM009F(oproc) },"Processando...","Aguarde..." )'		OPERATION 2 ACCESS 0
-ADD OPTION aRot Title 'Qtd SC x Comprador'		Action 'fwmsgrun( ,{|oproc| U_ACOM010(oproc) },"Processando","Aguarde..." )'		OPERATION 2 ACCESS 0
+ADD OPTION aRot Title 'Indicar Comprador'		Action 'FWMsgRun( ,{|oproc| U_ACOM009F(oproc) },"Processando...","Aguarde..." )'		OPERATION 2 ACCESS 0
+ADD OPTION aRot Title 'Qtd SC x Comprador'		Action 'FWMsgRun( ,{|oproc| U_ACOM010(oproc) },"Processando","Aguarde..." )'		OPERATION 2 ACCESS 0
 ADD OPTION aRot Title 'Visualizar'			Action 'U_Acom009Vis()'						OPERATION 2 ACCESS 0
-ADD OPTION aRot Title 'Planilha'			Action 'fwmsgrun( ,{|oproc| U_ACOM009T(oproc) },"Processando...","Aguarde..." )'		OPERATION 2 ACCESS 0
+ADD OPTION aRot Title 'Planilha'			Action 'FWMsgRun( ,{|oproc| U_ACOM009T(oproc) },"Processando...","Aguarde..." )'		OPERATION 2 ACCESS 0
 
 Return(Aclone(aRot))
 
@@ -422,22 +436,18 @@ Return(Aclone(aRot))
 Programa----------: ACOM009F
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 29/07/2015
-===============================================================================================================================
 Descrição---------: Função utilizada para fazer a gravação do comprador e data de retorno.
-===============================================================================================================================
 Parametros--------: oproc - objeto da barra de processamento
-===============================================================================================================================
 Retorno-----------: aRotina - Opções de menu
 ===============================================================================================================================
 */
 User Function ACOM009F(oproc)
 
-Local aArea			:= GetArea()
+Local aArea			:= FWGetArea()
 Local nX			:= 0
 Local nI			:= 0
 Local nCont			:= 0
 Local nLenRegs 		:= 0
-//Local cInfo			:= ''
 Local nOpcC			:= 0
 
 Local oGCNom
@@ -465,25 +475,25 @@ Local aAlias		:= {}
 
 //Valida se usuário pode usar rotina
 
-dbSelectArea("ZZL")
-dbSetOrder(3)
+DBSelectArea("ZZL")
+DBSetOrder(3)
 
 
-If !(dbSeek(xFilial("ZZL") + __cUserID) .AND. ZZL->ZZL_ADMSC == "S")
+If !(DBSeek(xFilial("ZZL") + __cUserId) .And. ZZL->ZZL_ADMSC == "S")
 
-    U_ITMSG("Usuário não autorizado a indicar comprador!","Ação não permitida","Solicite autorização a area responsavel.",1)
+    U_ITMsg("Usuário não autorizado a indicar comprador!","Ação não permitida","Solicite autorização a area responsavel.",1)
 	Return
 
-Endif
+EndIf
 
 Static oDlg
 
-DEFINE MSDIALOG oDlg TITLE "Indica Comprador" FROM 000, 000  TO 150, 435 COLORS 0, 16777215 PIXEL
+DEFINE MSDIALOG oDlg TITLE "Indica Comprador" FROM 000, 000  TO 150, 435  PIXEL
 
-	@ 005, 006 SAY oSComp PROMPT "Código Comprador ?" SIZE 051, 007 OF oDlg COLORS 0, 16777215 PIXEL
-    @ 005, 058 MSGET oGComp VAR cGComp SIZE 010, 010 OF oDlg COLORS 0, 16777215 F3 "SY1" VALID ACOM009R(cGComp, @cGCNom) PIXEL
-    @ 021, 058 MSGET oGCNom VAR cGCNom SIZE 151, 010 OF oDlg COLORS 0, 16777215 READONLY PIXEL
-    @ 037, 006 SAY oSDTRet PROMPT "Data Prevista Retorno ?" SIZE 059, 007 OF oDlg COLORS 0, 16777215 PIXEL
+	@ 005, 006 SAY oSComp PROMPT "Código Comprador ?" SIZE 051, 007 OF oDlg  PIXEL
+    @ 005, 058 MSGET oGComp VAR cGComp SIZE 010, 010 OF oDlg  F3 "SY1" VALID ACOM009R(cGComp, @cGCNom) PIXEL
+    @ 021, 058 MSGET oGCNom VAR cGCNom SIZE 151, 010 OF oDlg  READONLY PIXEL
+    @ 037, 006 SAY oSDTRet PROMPT "Data Prevista Retorno ?" SIZE 065, 010 OF oDlg PIXEL
     @ 037, 070 MSGET oGDTRet VAR dGDTRet SIZE 039, 010 OF oDlg PIXEL 
 
 	DEFINE SBUTTON oSBtOK	FROM 053, 082 TYPE 01 OF oDlg ENABLE ACTION (Iif(ACOM009B(dGDTRet),(nOpcC := 1, oDlg:End()),nOpcC := 0))
@@ -510,13 +520,13 @@ If nOpcC == 1
 
 	nLenRegs := Len(aRegsSC1)
 
-	dbSelectArea("SY1")
-	dbSetOrder(1)
-	dbSeek(xFilial("SY1") + alltrim(cGComp))
+	DBSelectArea("SY1")
+	DBSetOrder(1)
+	DBSeek(xFilial("SY1") + AllTrim(cGComp))
 
-    _cComprador:=cGComp+" - "+ALLTRIM(SY1->Y1_NOME)//" / Comprador: "+
+    _cComprador:=cGComp+" - "+AllTrim(SY1->Y1_NOME)//" / Comprador: "+
     _cCodUser  :=SY1->Y1_USER//" / Cod. Usuario: "+
-	_cEmail := ALLTRIM(UsrRetMail(SY1->Y1_USER))
+	_cEmail := AllTrim(UsrRetMail(SY1->Y1_USER))
 	_cGrupo := SY1->Y1_GRUPCOM
 
 	//====================================================================================================
@@ -549,16 +559,16 @@ If nOpcC == 1
             _aCapaSC:={}	
             _aCompAnterior:={}	
             _cSCsIndicado:=""
-			dbSelectArea('SC1')
-			SC1->(dbSetOrder(1))
-			_cusername := UsrFullName(__cUserID)
+			DBSelectArea('SC1')
+			SC1->(DBSetOrder(1))
+			_cusername := UsrFullName(__cUserId)
 			For nX := 1 To Len(aRegsSC1)
 
-			    IF ASCAN(_aCapaSC,aRegsSC1[nX][1]+aRegsSC1[nX][2]) = 0
-                   AADD(_aCapaSC,aRegsSC1[nX][1]+aRegsSC1[nX][2])
-                ELSE
-                   LOOP//Para fazer só uma vez por SC, caso tenha marcado mais de um item da SC
-			    ENDIF
+			    If aScan(_aCapaSC,aRegsSC1[nX][1]+aRegsSC1[nX][2]) = 0
+                   AAdd(_aCapaSC,aRegsSC1[nX][1]+aRegsSC1[nX][2])
+                Else
+                   Loop//Para fazer só uma vez por SC, caso tenha marcado mais de um item da SC
+			    EndIf
 
 				For nI := 1 To Len(aRegsAll)
 
@@ -568,45 +578,45 @@ If nOpcC == 1
 						oproc:cCaption := ('Processando Registros...')
 						ProcessMessages()
 
-						SC1->(Dbgoto(aRegsAll[nI][4]))
+						SC1->(DBGoTo(aRegsAll[nI][4]))
 						_nPosComp:=0
-						IF !EMPTY(SC1->C1_CODCOMP) .AND. cGComp <> SC1->C1_CODCOMP .AND. (_nPosComp:=ASCAN(_aCompAnterior, {|C|C[1]==SC1->C1_CODCOMP} )) = 0
-						   AADD(_aCompAnterior,{ SC1->C1_CODCOMP , "" , "" })
-						   _nPosComp:=LEN(_aCompAnterior)
-						ENDIF
+						If !Empty(SC1->C1_CODCOMP) .And. cGComp <> SC1->C1_CODCOMP .And. (_nPosComp:=aScan(_aCompAnterior, {|C|C[1]==SC1->C1_CODCOMP} )) = 0
+						   AAdd(_aCompAnterior,{ SC1->C1_CODCOMP , "" , "" })
+						   _nPosComp:=Len(_aCompAnterior)
+						EndIf
 						
-						IF SC1->C1_CODCOMP <> cGComp .OR. SC1->C1_I_DTRET <> dGDTRet
+						If SC1->C1_CODCOMP <> cGComp .Or. SC1->C1_I_DTRET <> dGDTRet
 						   SC1->( RecLock( "SC1" , .F. ) )
 						   SC1->C1_CODCOMP := cGComp
 						   SC1->C1_I_DTRET := dGDTRet
 						   SC1->C1_GRUPCOM := _cGrupo
-					       SC1->C1_I_INDIC := ALLTRIM(_cusername)
-					       SC1->C1_I_INDDT := DATE()
-					       SC1->C1_I_INDHR := TIME()
-						   SC1->( MsUnLock() )
-						ENDIF
+					       SC1->C1_I_INDIC := AllTrim(_cusername)
+					       SC1->C1_I_INDDT := Date()
+					       SC1->C1_I_INDHR := Time()
+						   SC1->( MSUnLock() )
+						EndIf
 						
 						If aRegsSC1[nX][1] + aRegsSC1[nX][2] <> _cChave
 
-							SC1->(Dbgoto(aRegsAll[nI][4]))
+							SC1->(DBGoTo(aRegsAll[nI][4]))
 	
 							_cTxtAuxHTM := '<TR>'
 							_cTxtAuxHTM += '  <TD width="05%" class="itens" align="left">' + SC1->C1_FILIAL + " - " + AllTrim(FWFilialName(cEmpAnt,SC1->C1_FILIAL,1)) + '</TD>'
-							_cTxtAuxHTM += '  <TD width="05%" class="itens" align="left">' + DtoC(SC1->C1_EMISSAO) + '</TD>'
+							_cTxtAuxHTM += '  <TD width="05%" class="itens" align="left">' + DToC(SC1->C1_EMISSAO) + '</TD>'
 							_cTxtAuxHTM += '  <TD width="05%" class="itens" align="left">' + SC1->C1_NUM + '</TD>'
 							_cTxtAuxHTM += '  <TD width="05%" class="itens" align="center">' + SC1->C1_I_URGEN + '</TD>'
 							_cTxtAuxHTM += '  <TD width="05%" class="itens" align="center">' + SC1->C1_I_APLIC + '</TD>'
 							_cTxtAuxHTM += '  <TD width="32%" class="itens" align="left">' + AllTrim(Posicione("ZZI",1,xFilial("ZZI") + SC1->C1_I_CDINV,"ZZI_DESINV")) + '</TD>'
-							_cTxtAuxHTM += '  <TD width="05%" class="itens" align="left">' + DtoC(C1_I_DTRET) + '</TD>'
-							_cTxtAuxHTM += '  <TD width="05%" class="itens" align="left">' + DtoC(C1_DATPRF) + '</TD>'
+							_cTxtAuxHTM += '  <TD width="05%" class="itens" align="left">' + DToC(C1_I_DTRET) + '</TD>'
+							_cTxtAuxHTM += '  <TD width="05%" class="itens" align="left">' + DToC(C1_DATPRF) + '</TD>'
 							_cTxtAuxHTM += '</TR>'
 
 							_cTxtSCHTM   += _cTxtAuxHTM
 							_cSCsIndicado+= SC1->C1_FILIAL+"-"+SC1->C1_NUM+", "
-							IF _nPosComp > 0 
+							If _nPosComp > 0 
 							   _aCompAnterior[_nPosComp,2]+=_cTxtAuxHTM
 							   _aCompAnterior[_nPosComp,3]+=SC1->C1_FILIAL+"-"+SC1->C1_NUM+", "
-							ENDIF
+							EndIf
 							
 							_cChave := aRegsSC1[nX][1] + aRegsSC1[nX][2]
 						EndIf
@@ -623,7 +633,7 @@ If nOpcC == 1
 		// Sessão Indicado por:                   
 		//====================================================================================================
 		_cTxtRHTM += '<tr>'
-		_cTxtRHTM += '	<td class="grupos" align="center" colspan="8">Indicado Por: <b>' + UsrFullName(__cUserID) + '</b></td>'
+		_cTxtRHTM += '	<td class="grupos" align="center" colspan="8">Indicado Por: <b>' + UsrFullName(__cUserId) + '</b></td>'
 		_cTxtRHTM += '</tr>'
 		_cTxtRHTM += '<tr>'
 		_cTxtRHTM += '	<td class="grupos" align="center" colspan="8"><a href="http://www.italac.com.br/">http://www.italac.com.br/</a></td>'
@@ -647,33 +657,33 @@ If nOpcC == 1
 		        //Cabecalho+SCS       +RODAPE
         _cTxtHTM:=_cTxtCHTM+_cTxtSCHTM+_cTxtRHTM
 
-		U_ITENVMAIL( _aConfig[01] , _cEmail ,,, 'Protocolo das SC´s indicadas no dia ['+ DtoC(Date()) +']' , _cTxtHTM ,, _aConfig[01] , _aConfig[02] , _aConfig[03] , _aConfig[04] , _aConfig[05] , _aConfig[06] , _aConfig[07] , @_cEmlLog )
+		U_ITENVMAIL( _aConfig[01] , _cEmail ,,, 'Protocolo das SC´s indicadas no dia ['+ DToC(Date()) +']' , _cTxtHTM ,, _aConfig[01] , _aConfig[02] , _aConfig[03] , _aConfig[04] , _aConfig[05] , _aConfig[06] , _aConfig[07] , @_cEmlLog )
 
         _aStatus:={}
-        AADD(_aStatus,{"Atual",_cComprador,_cCodUser,Lower(_cEmail),_cEmlLog,SUBSTR(_cSCsIndicado,1,LEN(_cSCsIndicado)-2)})
+        AAdd(_aStatus,{"Atual",_cComprador,_cCodUser,Lower(_cEmail),_cEmlLog,SubStr(_cSCsIndicado,1,Len(_cSCsIndicado)-2)})
         
-         FOR nI := 1 TO LEN(_aCompAnterior)
+         For nI := 1 TO Len(_aCompAnterior)
 
-	         IF SY1->(DBSEEK(xFilial("SY1") + _aCompAnterior[nI,1] ))
+	         If SY1->(DBSeek(xFilial("SY1") + _aCompAnterior[nI,1] ))
 
 	            _cEmailAnt:= UsrRetMail(SY1->Y1_USER)
 		                //Cabecalho+SCS                 +RODAPE
                 _cTxtHTM:=_cTxtCHTM+_aCompAnterior[nI,2]+_cTxtRHTM
                 _cEmlLog:=""
 
-		        U_ITENVMAIL( _aConfig[01] , _cEmailAnt ,,, 'Sua(s) SC(s) foram indicadas para outro comprador no dia ['+ DtoC(Date()) +']' , _cTxtHTM ,, _aConfig[01] , _aConfig[02] , _aConfig[03] , _aConfig[04] , _aConfig[05] , _aConfig[06] , _aConfig[07] , @_cEmlLog )
+		        U_ITENVMAIL( _aConfig[01] , _cEmailAnt ,,, 'Sua(s) SC(s) foram indicadas para outro comprador no dia ['+ DToC(Date()) +']' , _cTxtHTM ,, _aConfig[01] , _aConfig[02] , _aConfig[03] , _aConfig[04] , _aConfig[05] , _aConfig[06] , _aConfig[07] , @_cEmlLog )
                
-                AADD(_aStatus,{"Anterior",_aCompAnterior[nI,1]+" - "+SY1->Y1_NOME,SY1->Y1_USER,Lower(_cEmailAnt),_cEmlLog,SUBSTR(_aCompAnterior[nI,3],1,LEN(_aCompAnterior[nI,3])-2)})
+                AAdd(_aStatus,{"Anterior",_aCompAnterior[nI,1]+" - "+SY1->Y1_NOME,SY1->Y1_USER,Lower(_cEmailAnt),_cEmlLog,SubStr(_aCompAnterior[nI,3],1,Len(_aCompAnterior[nI,3])-2)})
 
-             ENDIF
+             EndIf
              
-         NEXT
+         Next
 
-        IF LEN(_aStatus) > 0 
+        If Len(_aStatus) > 0 
    	       U_ITListBox( 'Status do(s) Email(s) para o(s) compradore(s):' , {'Indicação','Comprador','Cod Usuario','Email','Status do envio','SCs Marcadas'} , _aStatus , .T. , 1 )
-   	    ENDIF
+   	    EndIf
 
-		fwmsgrun( ,{|oproc| aAlias := aCom009Qry(oproc) } , 'Aguarde!' , 'Verificando os registros...' )
+		FWMsgRun( ,{|oproc| aAlias := aCom009Qry(oproc) } , 'Aguarde!' , 'Verificando os registros...' )
 
 		aRegsSC1	:= {}
 		
@@ -688,13 +698,13 @@ If nOpcC == 1
 		oMrkBrowse:Gotop()
 	Else
 
-        U_ITMSG("Não foi selecionado nenhum item para o processamento.","Seleção Inválida","Favor selecionar pelo menos um registro.",1)
+        U_ITMsg("Não foi selecionado nenhum item para o processamento.","Seleção Inválida","Favor selecionar pelo menos um registro.",1)
 
 	EndIf
 
 EndIf
 
-RestArea(aArea)
+FWRestArea(aArea)
 Return
 
 /*
@@ -702,31 +712,30 @@ Return
 Programa----------: ACOM009R
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 28/09/2015
-===============================================================================================================================
 Descrição---------: Função utilizada para retornar o nome do comprador caso ele exista, senão retorna mensagem.
-===============================================================================================================================
 Parametros--------: cGComp - Código do Comprador
 ------------------: cGCNom - Variável que irá receber o nome do comprador
-===============================================================================================================================
 Retorno-----------: lRet - Retorno .T. caso ache o comprador, .F. caso contrário e não deixa seguir o processo
 ===============================================================================================================================
 */
 Static Function ACOM009R(cGComp, cGCNom)
-Local aArea			:= GetArea()
+
+Local aArea			:= FWGetArea()
 Local lRet			:= .T.
 
-dbSelectArea("SY1")
-dbSetOrder(1)
-If dbSeek(xFilial("SY1") + cGComp)
+DBSelectArea("SY1")
+DBSetOrder(1)
+If DBSeek(xFilial("SY1") + cGComp)
 	cGCNom := SY1->Y1_NOME
 Else
 
-    U_ITMSG("Código do comprador não encontrado.","Comprador Inválido","Favor verificar o código informado.",1)
+    U_ITMsg("Código do comprador não encontrado.","Comprador Inválido","Favor verificar o código informado.",1)
 	lRet := .F.
 
 EndIf
 
-RestArea(aArea)
+FWRestArea(aArea)
+
 Return(lRet)
 
 /*
@@ -734,30 +743,28 @@ Return(lRet)
 Programa----------: Acom009Vis
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 28/09/2015
-===============================================================================================================================
 Descrição---------: Função utilizada para visualizar um única SC selecionada.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function Acom009Vis()
-Local aArea		:= GetArea()
+
+Local aArea		:= FWGetArea()
 Local cFilAntOld := cFilAnt
 
 Private lCopia  := Inclui:=Altera:=.F.//Inica essas variavel por causa do botão visualizar
                            
 cFilAnt :=aRegsAll[oMrkBrowse:OBROWSE:NAT][1]
 
-dbSelectArea("SC1")
-SC1->(dbSetOrder(1))
-If SC1->(dbSeek(aRegsAll[oMrkBrowse:OBROWSE:NAT][1] + aRegsAll[oMrkBrowse:OBROWSE:NAT][2] + aRegsAll[oMrkBrowse:OBROWSE:NAT][3]))
+DBSelectArea("SC1")
+SC1->(DBSetOrder(1))
+If SC1->(DBSeek(aRegsAll[oMrkBrowse:OBROWSE:NAT][1] + aRegsAll[oMrkBrowse:OBROWSE:NAT][2] + aRegsAll[oMrkBrowse:OBROWSE:NAT][3]))
 	A110Visual("SC1",SC1->(Recno()),2)
 EndIf 
 
 cFilAnt := cFilAntOld
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return
 
@@ -766,31 +773,29 @@ Return
 Programa----------: ACOM009B
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 28/09/2015
-===============================================================================================================================
 Descrição---------: Função utilizada para validar a data de retorno.
-===============================================================================================================================
 Parametros--------: dGDTRet - Data de retorno informada
-===============================================================================================================================
 Retorno-----------: lRet - Retorno .T. caso ache o comprador, .F. caso contrário e não deixa seguir o processo
 ===============================================================================================================================
 */
 Static Function ACOM009B(dGDTRet)
-Local aArea			:= GetArea()
+
+Local aArea			:= FWGetArea()
 Local lRet			:= .T.
 
 If Empty(dGDTRet)
 
-    U_ITMSG("Data prevista de retorno é obrigatória","Data Prevista Retorno","Favor preencher a data prevista de retorno.",1)
+    U_ITMsg("Data prevista de retorno é obrigatória","Data Prevista Retorno","Favor preencher a data prevista de retorno.",1)
 	lRet := .F.
 
-ELSEIF dGDTRet < DATE() 
+ElseIf dGDTRet < Date() 
 
-   U_ITMSG("Data prevista de retorno menor que Hoje",'Atenção!',"Favor preencher a data prevista de retorno maior ou igual a Hoje.",1)
+   U_ITMsg("Data prevista de retorno menor que Hoje",'Atenção!',"Favor preencher a data prevista de retorno maior ou igual a Hoje.",1)
    lRet := .F.
 
 EndIf
 
-RestArea(aArea)
+FWRestArea(aArea)
 Return(lRet)
 
 
@@ -799,16 +804,14 @@ Return(lRet)
 Programa----------: ACOM009T
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 13/10/2015
-===============================================================================================================================
 Descrição---------: Função criada para gerar tela para exportação dos dados para planilha
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function ACOM009T()
-Local aArea		:= GetArea()
+
+Local aArea		:= FWGetArea()
 Local aCampPla	:= {	'Índice',;
 						'Filial',;
 						'Dt Emissão',;
@@ -843,13 +846,13 @@ Local aCampPla	:= {	'Índice',;
 Local aLogPla	:= {}
 Local nCont		:= 1
 
-dbSelectArea(cAliasMrk)
-(cAliasMrk)->(dbGoTop())
+DBSelectArea(cAliasMrk)
+(cAliasMrk)->(DBGoTop())
 
 While !(cAliasMrk)->(Eof())
-	aAdd( aLogPla , {	StrZero(nCont++,4),;																		//[1]Índice
+	AAdd( aLogPla , {	StrZero(nCont++,4),;																		//[1]Índice
 						(cAliasMrk)->C1_FILIAL + " - " + AllTrim(FWFilialName(cEmpAnt,(cAliasMrk)->C1_FILIAL,1)),;	//[2]Filial
-						StoD((cAliasMrk)->C1_EMISSAO),;																//[3]Emissão
+						SToD((cAliasMrk)->C1_EMISSAO),;																//[3]Emissão
 						(cAliasMrk)->C1_NUM,;																		//[4]Número SC
 						(cAliasMrk)->C1_ITEM,;												 						//[5]Item
 						(cAliasMrk)->C7_NUM,;																		//[6]Número SC
@@ -858,7 +861,7 @@ While !(cAliasMrk)->(Eof())
 						(cAliasMrk)->C1_CODCOMP,;										   							//[9]Cod. Comprador
 						(cAliasMrk)->Y1_NOME,;											   							//[10]Nome Comprador
 						(cAliasMrk)->C1_I_INDIC,;																	//[11]Cod Indicador
-						DTOC(STOD((cAliasMrk)->C1_I_INDDT)),;														//[12] Data indicação
+						DToC(SToD((cAliasMrk)->C1_I_INDDT)),;														//[12] Data indicação
 						(cAliasMrk)->C1_I_INDHR,;																	//[13] Hora indicação
 						(cAliasMrk)->C1_I_CODAP,;										  							//[14]Cod. Aprovador
 						(cAliasMrk)->ZZ7_NOME,;											   							//[15]Nome Aprovador
@@ -869,21 +872,21 @@ While !(cAliasMrk)->(Eof())
 						AllTrim(Transform((cAliasMrk)->C1_QUANT,PesqPict("SC1","C1_QUANT"))),;						//[20]Quantidade
 						AllTrim(Transform((cAliasMrk)->C1_QUJE,PesqPict("SC1","C1_QUJE"))),;						//[21]Quantidade Entregue
 						AllTrim(Transform((cAliasMrk)->C1_I_ULTPR,PesqPict("SC1","C1_I_ULTPR"))),;					//[22]Último Preço
-						StoD((cAliasMrk)->C1_I_ULTDT),;											  					//[23]Última Compra
+						SToD((cAliasMrk)->C1_I_ULTDT),;											  					//[23]Última Compra
 						(cAliasMrk)->C1_I_URGEN,;												  					//[24]Urgente
 						(cAliasMrk)->C1_I_APLIC,;												  					//[25]Aplicação
 						(cAliasMrk)->C1_I_CDINV,;												 					//[26]Código Investimento
 						(cAliasMrk)->ZZI_DESINV,;												 					//[27]Descrição Investimento
 						(cAliasMrk)->C1_CC,;																		//[28]Centro de Custo
-						StoD((cAliasMrk)->C1_I_DTRET),;											  					//[29]Data Retorno
-						StoD((cAliasMrk)->C1_DATPRF),; 											 					//[30]Necessidade
+						SToD((cAliasMrk)->C1_I_DTRET),;											  					//[29]Data Retorno
+						SToD((cAliasMrk)->C1_DATPRF),; 											 					//[30]Necessidade
 						(cAliasMrk)->C1_OBS} )												   						//[31]Observação
-	(cAliasMrk)->(dbSkip())
+	(cAliasMrk)->(DBSkip())
 End
 
 U_ITListBox( 'Geração Planilha' , aCampPla , aLogPla , .T. , 1 )
 
-RestArea(aArea)
+FWRestArea(aArea)
 Return
 
 /*
@@ -891,25 +894,23 @@ Return
 Programa----------: ACOM009F1
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 08/03/2019
-===============================================================================================================================
 Descrição---------: Localiza último fornecedor para um produto na filial
-===============================================================================================================================
 Parametros--------: _ntipo - 1 Retorna código do fornecedor, 2 Retorna código da loja
-					_CALIAS - alias de trabalho
-===============================================================================================================================
+					_cAlias - alias de trabalho
 Retorno-----------: _cret - código do fornecedor ou loja
 ===============================================================================================================================
 */
 Static Function ACOM009F1(_ntipo,_cAlias)
-Local _cAliaFor  := GetNextAlias()
-Local _c1produto := Alltrim((_cAlias)->C1_PRODUTO) 
-Local _cFilSC    := Alltrim((_cAlias)->C1_FILIAL) 
-LOCAL dData      := DTOS(CTOD("01/01"+STR(YEAR(dDataBase),4)))
-LOCAL _aRet      := {"",""}
 
-BeginSQL alias _cAliaFor
+Local _cAliaFor  := GetNextAlias()
+Local _c1produto := AllTrim((_cAlias)->C1_PRODUTO) 
+Local _cFilSC    := AllTrim((_cAlias)->C1_FILIAL) 
+Local dData      := DToS(CTOD("01/01"+Str(YEAR(dDataBase),4)))
+Local _aRet      := {"",""}
+
+BeginSql alias _cAliaFor
 	SELECT C7_FORNECE,C7_LOJA
-	FROM %table:SC7% SC7
+	FROM %Table:SC7% SC7
 	WHERE	SC7.%notDel%
 			AND SC7.C7_FILIAL  = %exp:_cFilSC% 
 			AND SC7.C7_PRODUTO = %exp:_c1produto% 
@@ -919,11 +920,11 @@ EndSql
 
 If (_cAliaFor)->(!Eof())
 	_aRet := {(_cAliaFor)->C7_FORNECE,(_cAliaFor)->C7_LOJA,}
-ELSE
-    (_cAliaFor)->(DBCLOSEAREA())
-	BeginSQL alias _cAliaFor
+Else
+    (_cAliaFor)->(DBCloseArea())
+	BeginSql alias _cAliaFor
 		SELECT C7_FORNECE,C7_LOJA
-		FROM %table:SC7% SC7
+		FROM %Table:SC7% SC7
 		WHERE	SC7.%notDel%
 		AND SC7.C7_FILIAL  = %exp:_cFilSC%
 		AND SC7.C7_PRODUTO = %exp:_c1produto%
@@ -931,9 +932,343 @@ ELSE
 	EndSql
 	If (_cAliaFor)->(!Eof())
 		_aRet := {(_cAliaFor)->C7_FORNECE,(_cAliaFor)->C7_LOJA,}
-	Endif	
-Endif
+	EndIf	
+EndIf
 
-(_cAliaFor)->(DBCLOSEAREA())
+(_cAliaFor)->(DBCloseArea())
 
 Return _aRet
+
+/*
+===============================================================================================================================
+Programa----------: SelectSC1
+Autor-------------: Jose Gavetti
+Data da Criacao---: 14/10/2025
+Descrição---------: Retorna select da SC1 conforme filtros da tela de seleção
+Parametros--------: Nenhum
+Retorno-----------: Nenhum
+===============================================================================================================================
+*/
+User Function SelectSC1()
+	
+	Local cQrySC1 	:= "" 							As Character
+	Local cFiliais  := SubStr( MV_PAR01 , 1 , 1 )   As Character
+	Local cUrgente	:= SubStr( MV_PAR05 , 1 , 1 )   As Character
+	Local cAplic	:= SubStr( MV_PAR06 , 1 , 1 )   As Character
+	Local cSituac	:= SubStr( MV_PAR07 , 1 , 1 )	As Character
+	Local cAliasSC1 := GetNextAlias()               As Character
+	Local lRet      := .F.                          As Logical
+
+	cQrySC1 := " SELECT DISTINCT C1_NUM , C1_EMISSAO FROM "+RETSQLNAME("SC1")+" SC1 "
+	cQrySC1 += " WHERE C1_RESIDUO <> 'S' "
+	cQrySC1 += " AND SC1.C1_APROV = 'L' "
+	cQrySC1 += " AND D_E_L_E_T_ = ' ' "
+	
+	//Filial Corrente
+	If cFiliais == '2' 
+		cQrySC1 += " AND C1_FILIAL  = '" + xFilial("SC1") + "' "
+	EndIf
+
+	//Filtro Data Ini Data Fim
+	If !Empty(MV_PAR03)
+		cQrySC1 += " AND C1_EMISSAO BETWEEN '" + DToS(MV_PAR02) + "' AND '" + DToS(MV_PAR03) + "' "
+	ElseIf !Empty(MV_PAR02)
+		cQrySC1 += " AND C1_EMISSAO >= '" + DToS(MV_PAR02) + "' "
+	EndIf  
+
+	//Filtra comprador
+	If !Empty(MV_PAR04)
+		cQrySC1 += " AND C1_CODCOMP  IN "+FormatIn(AllTrim(MV_PAR04),";")
+	EndIf
+
+	//Filtra SC Urgente
+	If cUrgente == '1'				//Sim
+		cQrySC1 += " AND SC1.C1_I_URGEN = 'S' "
+	ElseIf cUrgente == '2'			//Nao
+		cQrySC1 += " AND SC1.C1_I_URGEN = 'N' "
+	ElseIf cUrgente == '3'			//NF
+		cQrySC1 += " AND SC1.C1_I_URGEN = 'F' "
+	ElseIf cUrgente == 'A'			//NF
+		cQrySC1 += " AND SC1.C1_I_URGEN IN (' ','S','N','F') "
+	EndIf
+
+	//Filtra Aplicação
+	If cAplic == '1'				//Consumo
+		cQrySC1 += " AND SC1.C1_I_APLIC = 'C' "
+	ElseIf cAplic == '2'			//Investimento
+		cQrySC1 += " AND SC1.C1_I_APLIC = 'I' "
+	ElseIf cAplic == '3'			//Manutenção
+		cQrySC1 += " AND SC1.C1_I_APLIC = 'M' "
+	ElseIf cAplic == '4'			//Serviço
+		cQrySC1 += " AND SC1.C1_I_APLIC = 'S' "
+	ElseIf cAplic == 'T'			//Todos
+		cQrySC1 += " AND SC1.C1_I_APLIC <> ' ' "
+	EndIf
+	//Filtra Situação
+	If cSituac == '1'
+		cQrySC1 += " AND C1_QUJE = 0 "
+	ElseIf cSituac == '2'
+		cQrySC1 += " AND (C1_QUJE > 0 AND C1_QUJE < C1_QUANT) "
+	ElseIf cSituac == 'A'
+		cQrySC1 += "AND  C1_QUJE < C1_QUANT "
+	EndIf
+
+	cQrySC1 += " ORDER BY 1 " 
+
+	cQrySC1 := ChangeQuery(cQrySC1)
+	MPSysOpenQuery(cQrySC1,cAliasSC1)
+
+	If !(cAliasSC1)->(Eof())
+		lRet := .T.
+	Else
+		lRet := .F.
+		U_ITMsg("Não foram localizados Solicitantes com os filtros selecionados","Atenção",,1)
+	EndIf
+
+Return cQrySC1
+
+//-------------------------------------------------------------------
+/*/{Protheus.doc} ACOMSELFIL
+Seleciona filiais conforme filtros da rotina  
+@Return lRet filiais selecionadas
+@author Jose Gavetti
+@since  19/11/2025
+/*/
+//-------------------------------------------------------------------
+Static Function ACOMSELFIL() As Logical
+
+	Local aColumns	As Array
+	Local aSize     As Array
+	Local aStru     aS Array
+	Local bOk		As Codeblock
+	Local bCancel	As Codeblock
+	Local cQuery	As Character
+	Local cUrgente	As Character
+	Local cAplic    As Character
+	Local cSituac	As Character
+	Local cArqTrab  As Character
+	Local cChave	As Character
+	Local lRet		As Logical
+
+	lRet		:= .F.
+	cQuery		:= ''
+	cChave		:= ''
+	cArqTrab    := ''
+	aColumns	:= {}
+	aSize		:= {}
+	aStru       := SM0->(DBSTRUCT())
+	bOk			:= {||lRet := GRVSELFIL(cArqTrab),oDlg:End()}
+	bCancel		:= {|| oMrkBrowse:Deactivate(),oDlg:End()}
+	cUrgente	:= SubStr( MV_PAR05 , 1 , 1 )   
+	cAplic		:= SubStr( MV_PAR06 , 1 , 1 )   
+	cSituac		:= SubStr( MV_PAR07 , 1 , 1 )	
+
+	If Empty(cArqTrab)
+		
+		cQuery := " SELECT M0_CODFIL , M0_FILIAL, M0_CGC, COUNT(C1_NUM) AS TOTSOLIC  FROM "+RETSQLNAME("SC1")+" SC1 "
+		cQuery += " JOIN SYS_COMPANY ON M0_CODFIL = C1_FILIAL "
+		cQuery += " WHERE C1_RESIDUO <> 'S' "
+		cQuery += " AND SC1.C1_APROV = 'L' "
+		cQuery += " AND SC1.D_E_L_E_T_ = ' ' "
+
+		//Filtro Data Ini Data Fim
+		If !Empty(MV_PAR03)
+			cQuery += " AND C1_EMISSAO BETWEEN '" + DToS(MV_PAR02) + "' AND '" + DToS(MV_PAR03) + "' "
+		ElseIf !Empty(MV_PAR02)
+			cQuery += " AND C1_EMISSAO >= '" + DToS(MV_PAR02) + "' "
+		EndIf  
+
+		//Filtra comprador
+		If !Empty(MV_PAR04)
+			cQuery += " AND C1_CODCOMP  IN "+FormatIn(AllTrim(MV_PAR04),";")
+		EndIf
+
+		//Filtra SC Urgente
+		If cUrgente == '1'				//Sim
+			cQuery += " AND SC1.C1_I_URGEN = 'S' "
+		ElseIf cUrgente == '2'			//Nao
+			cQuery += " AND SC1.C1_I_URGEN = 'N' "
+		ElseIf cUrgente == '3'			//NF
+			cQuery += " AND SC1.C1_I_URGEN = 'F' "
+		ElseIf cUrgente == 'A'			//NF
+			cQuery += " AND SC1.C1_I_URGEN IN (' ','S','N','F') "
+		EndIf
+
+		//Filtra Aplicação
+		If cAplic == '1'				//Consumo
+			cQuery += " AND SC1.C1_I_APLIC = 'C' "
+		ElseIf cAplic == '2'			//Investimento
+			cQuery += " AND SC1.C1_I_APLIC = 'I' "
+		ElseIf cAplic == '3'			//Manutenção
+			cQuery += " AND SC1.C1_I_APLIC = 'M' "
+		ElseIf cAplic == '4'			//Serviço
+			cQuery += " AND SC1.C1_I_APLIC = 'S' "
+		ElseIf cAplic == 'T'			//Todos
+			cQuery += " AND SC1.C1_I_APLIC <> ' ' "
+		EndIf
+		//Filtra Situação
+		If cSituac == '1'
+			cQuery += " AND C1_QUJE = 0 "
+		ElseIf cSituac == '2'
+			cQuery += " AND (C1_QUJE > 0 AND C1_QUJE < C1_QUANT) "
+		ElseIf cSituac == 'A'
+			cQuery += "AND  C1_QUJE < C1_QUANT "
+		EndIf
+
+		cQuery += " GROUP BY M0_CODFIL,M0_FILIAL, M0_CGC " 
+		cQuery += " ORDER BY M0_CODFIL " 
+
+		cChave := SM0->(IndexKey())
+		aAdd(aStru, {'SM0_OK','C',1,0}) // Adiciono o campo de marca
+		aAdd(aStru, { "TOTSOLIC", "N", 10, 0 } )
+
+		cArqTrab := GetNextAlias()
+		If _oACOM009 <> Nil
+			_oACOM009:Delete()
+			_oACOM009	:= Nil
+		EndIf
+
+		_oACOM009 := FwTemporaryTable():New(cArqTrab)
+
+		_oACOM009:SetFields(aStru)
+
+		_oACOM009:AddIndex("01", {"M0_CODFIL"})
+		_oACOM009:AddIndex("02", {"M0_FILIAL"})
+		_oACOM009:AddIndex("03", {"M0_CGC"})
+
+		//Criando a Tabela Temporaria
+		_oACOM009:Create()
+	
+		Processa({||SqlToTrb(cQuery, aStru, cArqTrab)})	// Cria arquivo temporario
+
+	EndIf
+
+	// COLUNA M0_CODFIL
+	AAdd(aColumns, FWBrwColumn():New())
+	aColumns[Len(aColumns)]:SetData( {|| (cArqTrab)->M0_CODFIL } )
+	aColumns[Len(aColumns)]:SetTitle("FILIAL")
+	aColumns[Len(aColumns)]:SetSize(2)
+	aColumns[Len(aColumns)]:SetPicture("@!")
+
+	// COLUNA M0_FILIAL
+	AAdd(aColumns, FWBrwColumn():New())
+	aColumns[Len(aColumns)]:SetData( {|| (cArqTrab)->M0_FILIAL } )
+	aColumns[Len(aColumns)]:SetTitle("NOME")
+	aColumns[Len(aColumns)]:SetSize(30)
+	aColumns[Len(aColumns)]:SetPicture("@!")
+
+	// COLUNA M0_CGC
+	AAdd(aColumns, FWBrwColumn():New())
+	aColumns[Len(aColumns)]:SetData( {|| (cArqTrab)->M0_CGC } )
+	aColumns[Len(aColumns)]:SetTitle("CNPJ")
+	aColumns[Len(aColumns)]:SetSize(15)
+	aColumns[Len(aColumns)]:SetPicture("@R 99.999.999/9999-99")
+
+	// COLUNA TOTAL SOLICITAÇÕES
+	AAdd(aColumns, FWBrwColumn():New())
+	aColumns[Len(aColumns)]:SetData( {|| (cArqTrab)->TOTSOLIC } )
+	aColumns[Len(aColumns)]:SetTitle("TOTAL SOLIC")
+	aColumns[Len(aColumns)]:SetSize(10)
+	aColumns[Len(aColumns)]:SetPicture("@E 99999")
+
+	If !(cArqTrab)->(Eof())
+
+		aSize := MsAdvSize(,.F.,250)
+
+		DEFINE MSDIALOG oDlg TITLE "Seleciona Filiais" From 200,0 to 600,600 OF oMainWnd PIXEL
+
+		oMrkBrowse := FWMarkBrowse():New()
+		oMrkBrowse:oBrowse:SetEditCell(.T.)
+		oMrkBrowse:oBrowse:SetMainProc("ACOM009")
+		oMrkBrowse:SetFieldMark("SM0_OK")
+		oMrkBrowse:SetOwner(oDlg)
+		oMrkBrowse:SetAlias(cArqTrab)
+		oMrkBrowse:SetProfileId("0007")
+		oMrkBrowse:SetMenuDef("")
+		oMrkBrowse:AddButton("Confirmar", bOk,,2)
+		oMrkBrowse:AddButton("Cancelar", bCancel,,2)
+		oMrkBrowse:bMark       := {||}
+		oMrkBrowse:bAllMark    := {|| ACOMMARK(oMrkBrowse, cArqTrab)}
+		oMrkBrowse:SetMark("X", cArqTrab, "SM0_OK")
+		oMrkBrowse:SetDescription("")
+		oMrkBrowse:SetColumns(aColumns)
+		oMrkBrowse:SetTemporary(.T.)
+		oMrkBrowse:Activate()
+
+		ACTIVATE MSDIALOG oDlg CENTERED
+
+	EndIf
+
+Return lRet
+
+//-------------------------------------------------------------------
+/*/{Protheus.doc}GRVSELFIL
+Grava em uma string com as filiais selecionadas
+@author Jose Gavetti
+@since  19/11/2025
+/*/
+//-------------------------------------------------------------------
+Static Function GRVSELFIL( cArqTrab As Character ) As Logical
+
+	Local lRet		As Logical
+	Local nRecno	As Numeric
+	Local nX		As Numeric
+
+	lRet	:= .F.
+	nRecno	:= 0
+	nX		:= 0
+
+	DBSelectArea(cArqTrab)
+	nRecno := (cArqTrab)->(RecNo())
+	(cArqTrab)->(DBGoTop())
+
+	While !(cArqTrab)->(Eof())
+		If !Empty((cArqTrab)->SM0_OK)
+			cSelFil += "'" + RTrim((cArqTrab)->M0_CODFIL) + "',"
+			nX++
+		EndIf
+		(cArqTrab)->(DBSkip())
+	EndDo
+
+	(cArqTrab)->(DBGoTo(nRecno))
+
+	// Remove a última vírgula desnecessária
+	If !Empty(cSelFil)
+		cSelFil := Substr(cSelFil, 1, Len(cSelFil) - 1)
+	EndIf
+
+	lRet := IIf(Len(cSelFil) > 0,.T., .F.)
+
+Return lRet
+
+//-------------------------------------------------------------------
+/*/{Protheus.doc}ACOMMARK
+Marca ou desmarca filiais selecionadas
+@author Jose Gavetti
+@since  19/11/2025
+/*/
+//-------------------------------------------------------------------
+Static Function ACOMMARK( oMrkBrowse As Object, cArqTrab As Character ) As Logical
+
+	Local cMarca As Character
+
+	cMarca := oMrkBrowse:Mark()
+
+	DBSelectArea(cArqTrab)
+	(cArqTrab)->(DBGoTop())
+
+	While !(cArqTrab)->(Eof())
+		RecLock(cArqTrab, .F.)
+			If (cArqTrab)->SM0_OK == cMarca
+				(cArqTrab)->SM0_OK := ' '
+			Else
+				(cArqTrab)->SM0_OK := cMarca
+			EndIf
+		MSUnLock()
+		(cArqTrab)->(DBSkip())
+	EndDo
+
+	(cArqTrab)->(DBGoTop())
+	oMrkBrowse:oBrowse:Refresh(.T.)
+
+Return .T.

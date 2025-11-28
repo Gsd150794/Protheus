@@ -8,17 +8,9 @@ Lucas Borges  |13/10/2024| Chamado 48465. Retirada da função de conout
 ===============================================================================================================================
 */ 
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
+#Include "TOTVS.ch"
 
-#INCLUDE "Protheus.ch"
-#INCLUDE "RwMake.ch"
-#Include "TopConn.ch" 
-
-#DEFINE _ENTER CHR(13)+CHR(10)
-
-Static _lScheduler := FWGetRunSchedule() .OR. SELECT("SX3") <= 0
+Static _lScheduler := FWGetRunSchedule() .Or. SELECT("SX3") <= 0
 
 /*
 ===============================================================================================================================
@@ -97,14 +89,14 @@ Begin Sequence
    _cQry := " SELECT E1_FILIAL, E1_PREFIXO, E1_NUM, E1_CLIENTE, E1_LOJA, MIN(SE1.R_E_C_N_O_) R_E_C_N_O_ " 
    _cQry += " FROM " + RetSqlName("SE1") + " SE1 "
    _cQry += " INNER JOIN " + RetSqlName("SA1") + " SA1 ON A1_COD = E1_CLIENTE AND A1_LOJA = E1_LOJA AND SE1.D_E_L_E_T_ = ' ' AND A1_I_IBOLE <> 'N' " 
-   _cQry += " WHERE E1_EMISSAO = '" + DTos(Date()-_nDias) + "' "
+   _cQry += " WHERE E1_EMISSAO = '" + DToS(Date()-_nDias) + "' "
    _cQry += " AND E1_SALDO > 0 AND E1_TIPO = 'NF' " 
    _cQry += " AND E1_ORIGEM = 'MATA460' " // Linha de Filtro solicitada pelo Antônio
    _cQry += " GROUP BY E1_FILIAL, E1_PREFIXO, E1_NUM, E1_CLIENTE, E1_LOJA" 
    _cQry += " ORDER BY E1_FILIAL, E1_PREFIXO, E1_NUM, E1_CLIENTE, E1_LOJA" 
 
    If Select(_cAlias) <> 0
-      (_cAlias)->(DbCloseArea())
+      (_cAlias)->(DBCloseArea())
    EndIf
 
    DbUseArea(.T., "TOPCONN", TcGenQry(,,_cQry), _cAlias, .T., .F.)
@@ -112,28 +104,28 @@ Begin Sequence
    DBSelectArea(_cAlias)
    Count to _nTotRegs
 
-   If !_lScheduler .AND. ! U_ItMsg("Confirma envio dos Boletos?","Inicio de processamento",,4,2,2) 
+   If !_lScheduler .And. ! U_ITMsg("Confirma envio dos Boletos?","Inicio de processamento",,4,2,2) 
       Break
    EndIf
 
-   (_cAlias)->(DbGoTop())
-   Do While !(_cAlias)->(Eof())
+   (_cAlias)->(DBGoTop())
+   While !(_cAlias)->(Eof())
 
       _nRegAtu++
 
-      DbSelectArea("SE1")
-      SE1->(DbSetOrder(1))
-      SE1->(DbGoTo((_cAlias)->R_E_C_N_O_))
+      DBSelectArea("SE1")
+      SE1->(DBSetOrder(1))
+      SE1->(DBGoTo((_cAlias)->R_E_C_N_O_))
 
       If _lScheduler
-         FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MFIN025"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MFIN02502"/*cMsgId*/, "MFIN02502 - Enviando o Boleto ref. ao Titulo "+SE1->E1_NUM+" Prefixo "+SE1->E1_PREFIXO+" Parcela "+SE1->E1_PARCELA+" - Registro : " + Alltrim(Str(_nRegAtu)) + " de " + Alltrim(Str(_nTotRegs))/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+         FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MFIN025"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MFIN02502"/*cMsgId*/, "MFIN02502 - Enviando o Boleto ref. ao Titulo "+SE1->E1_NUM+" Prefixo "+SE1->E1_PREFIXO+" Parcela "+SE1->E1_PARCELA+" - Registro : " + AllTrim(Str(_nRegAtu)) + " de " + AllTrim(Str(_nTotRegs))/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
       Else
-         IncProc("Enviando o Boleto ref. ao Titulo "+SE1->E1_NUM+" Prefixo "+SE1->E1_PREFIXO+" Parcela "+SE1->E1_PARCELA+" - Registro : " + Alltrim(Str(_nRegAtu)) + " de " + Alltrim(Str(_nTotRegs)))  
+         IncProc("Enviando o Boleto ref. ao Titulo "+SE1->E1_NUM+" Prefixo "+SE1->E1_PREFIXO+" Parcela "+SE1->E1_PARCELA+" - Registro : " + AllTrim(Str(_nRegAtu)) + " de " + AllTrim(Str(_nTotRegs)))  
       EndIf
 
       U_RFIN002()
 
-      (_cAlias)->(dbSkip())
+      (_cAlias)->(DBSkip())
 
    EndDo
 

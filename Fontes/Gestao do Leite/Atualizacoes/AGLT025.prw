@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 06/02/2016 | Ajustes no filtro de setores.  Chamados: 17833
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 28/09/2018 | Trocado campo ZLU_ALLSET para ZLU_SETALL - Chamado 26404
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 07/08/2019 | Modificada validação de acesso aos setores. Chamado 30185
+Alex Wallauer |06/02/2016| Chamados 17833. Ajustes no filtro de setores.
+Lucas Borges  |28/09/2018| Chamado 26404. Trocado campo ZLU_ALLSET para ZLU_SETALL
+Lucas Borges  |07/08/2019| Chamado 30185. Modificada validação de acesso aos setores.
 ===============================================================================================================================
 */
 
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-#INCLUDE 'Protheus.ch' 
+#Include "TOTVS.ch" 
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT025
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 17/11/2008
-===============================================================================================================================
 Descrição---------: Cadastro de Desvio de Rotas/Linhas
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,7 +37,7 @@ Private cAlias		:= "ZLC"
 //ário, filtro só a filial corrente
 //=====================================================================================
 If Posicione("ZLU",1,xFilial("ZLU")+RetCodUsr(),"ZLU_SETALL") <> 'S'
-	_cFilter :="ZLC_SETOR IN "+FormatIn(U_LisSetor(IIf(Substr(cAcesso,114,1)=='S',.F.,.T.)),";")
+	_cFilter :="ZLC_SETOR IN "+FormatIn(U_LisSetor(IIf(SubStr(cAcesso,114,1)=='S',.F.,.T.)),";")
 EndIf
 
 MBrowse(,,,,cAlias,,,,,,,,,,,,,,_cFilter)
@@ -57,9 +49,7 @@ Return
 Programa----------: MenuDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 18/09/2018
-===============================================================================================================================
 Descrição---------: Utilizacao de Menu Funcional
-===============================================================================================================================
 Parametros--------: aRotina
 					1. Nome a aparecer no cabecalho
 					2. Nome da Rotina associada
@@ -73,7 +63,6 @@ Parametros--------: aRotina
 						6 - Altera determinados campos sem incluir novos Regs
 					5. Nivel de acesso
 					6. Habilita Menu Funcional
-===============================================================================================================================
 Retorno-----------: Array com opcoes da rotina
 ===============================================================================================================================
 */
@@ -92,11 +81,8 @@ Return( aRotina )
 Programa----------: AGLT025A
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 02/08/2018
-===============================================================================================================================
 Descrição---------: Funcao usada para alterar registro da ZLC
-===============================================================================================================================
 Parametros--------: cAlias,nReg,nOpc
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -110,12 +96,9 @@ Return
 Programa----------: AGLT025V
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 08/07/2011
-===============================================================================================================================
 Descrição---------: Funcao desenvolvida para validar a se um desvio de rota que ja possua eventos gerados no Mix
-===============================================================================================================================
 Parametros--------: _nOpcao -> 1 -> utiliza conteúdo em mémoria
 					_nOpcao -> 2 -> utiliza conteúdo em mémoria
-===============================================================================================================================
 Retorno-----------: _lRet -> L -> Indica se foi encontrada referencia do registro usado em outra tabela
 ===============================================================================================================================
 */
@@ -130,18 +113,18 @@ If _nOpcao == 1
 	_cFiltro += " AND ZLF.ZLF_LINROT = '" + M->ZLC_LINROT  + "'"
 	_cFiltro += " AND ZLF.ZLF_A2COD = '"  + M->ZLC_FRETIS  + "'"
 	_cFiltro += " AND ZLF.ZLF_A2LOJA = '" + M->ZLC_LJFRET  + "'"
-	_cFiltro += " AND '" + DtoS(M->ZLC_DTCOLE) + "' >= ZLE.ZLE_DTINI AND '" + DtoS(M->ZLC_DTCOLE) + "' <= ZLE.ZLE_DTFIM"
+	_cFiltro += " AND '" + DToS(M->ZLC_DTCOLE) + "' >= ZLE.ZLE_DTINI AND '" + DToS(M->ZLC_DTCOLE) + "' <= ZLE.ZLE_DTFIM"
 Else
 	_cFiltro += " AND ZLF.ZLF_SETOR = '"  + ZLC->ZLC_SETOR   + "'"
 	_cFiltro += " AND ZLF.ZLF_LINROT = '" + ZLC->ZLC_LINROT  + "'"
 	_cFiltro += " AND ZLF.ZLF_A2COD = '"  + ZLC->ZLC_FRETIS  + "'"
 	_cFiltro += " AND ZLF.ZLF_A2LOJA = '" + ZLC->ZLC_LJFRET  + "'"
-	_cFiltro += " AND '" + DtoS(ZLC->ZLC_DTCOLE) + "' >= ZLE.ZLE_DTINI AND '" + DtoS(ZLC->ZLC_DTCOLE) + "' <= ZLE.ZLE_DTFIM"
+	_cFiltro += " AND '" + DToS(ZLC->ZLC_DTCOLE) + "' >= ZLE.ZLE_DTINI AND '" + DToS(ZLC->ZLC_DTCOLE) + "' <= ZLE.ZLE_DTFIM"
 EndIf
 
 _cFiltro += "%"
 
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT COUNT(1) QTD
 	FROM %Table:ZLF% ZLF, %Table:ZLE% ZLE
 	WHERE ZLF.D_E_L_E_T_ =' '
@@ -150,7 +133,7 @@ BeginSQL Alias _cAlias
 	AND ZLF_FILIAL = %xFilial:ZLF%
 	AND ZLE.ZLE_COD = ZLF.ZLF_CODZLE
 	%exp:_cFiltro%
-EndSQL
+EndSql
 
 If (_cAlias)->QTD > 0
 	_lRet := .F.

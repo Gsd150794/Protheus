@@ -2,30 +2,22 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 03/04/2024 | Inclusão do total da apuração. Chamado 46819
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 18/04/2024 | Corrigida data do movimento quando existe apenas o totalizador. Chamado 46993
+Lucas Borges  |03/04/2024| Chamado 46819. Inclusão do total da apuração.
+Lucas Borges  |18/04/2024| Chamado 46993. Corrigida data do movimento quando existe apenas o totalizador.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-
-#INCLUDE 'PROTHEUS.CH'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MCTB005
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 20/03/2024
-===============================================================================================================================
 Descrição---------: Rotina para Contabilizar Apuração de IPI - Chamado 46677
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: 
 ===============================================================================================================================
 */
@@ -54,16 +46,14 @@ tNewProcess():New(	"MCTB005"										,; // Função inicial
 					.T.									 ) // Opção para criação de apenas uma régua de processamento
 
 Return
+
 /*
 ===============================================================================================================================
 Programa----------: MCTB05P
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 20/03/2024
-===============================================================================================================================
 Descrição---------: Processa registros
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: 
 ===============================================================================================================================
 */
@@ -71,7 +61,7 @@ Static Function MCTB05P(_oSelf)
 
 Local _aStru	:= {}
 Local _cAlias	:= "CTBAPUR"
-Local _aArea 	:= GetArea()
+Local _aArea 	:= FWGetArea()
 Local _cArquivo := " "
 Local _cLote  	:= AvKey(AllTrim(MV_PAR04),"CT2_LOTE")
 Local _nTotal   := 0 
@@ -89,18 +79,18 @@ Local _aTotais  := {}
 Local _oTempTable
 Local _cQuery	:= ""
 
-aadd(_aTotais,{'014','015'})
-aadd(_aTotais,{0,0})
+aAdd(_aTotais,{'014','015'})
+aAdd(_aTotais,{0,0})
 
 //Chama função que permitirá a seleção das filiais
 If MV_PAR05 == 1
 	_aSelFil := AdmGetFil(.F.,.F.,"CDP")
 	If Empty(_aSelFil)
-		Aadd(_aSelFil,cFilAnt)
-	Endif
+		aAdd(_aSelFil,cFilAnt)
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 _oSelf:SetRegua1(Len(_aSelFil))
 
@@ -122,7 +112,7 @@ For _nX:=1 to Len(_aSelFil)
 	_oSelf:IncRegua1("Processando Filial: "+cFilAnt)
 	
 	//Este função cria o cabeçalho da contabilização
-	_nHdlPrv:= HeadProva(_cLote,_cPerg,Alltrim(cUserName),@_cArquivo) 
+	_nHdlPrv:= HeadProva(_cLote,_cPerg,AllTrim(cUserName),@_cArquivo) 
 	
 	If _nHdlPrv <= 0
 	     Help(" ",,1,"A100NOPRV")
@@ -131,7 +121,7 @@ For _nX:=1 to Len(_aSelFil)
 	EndIf 
 
 	//Levanta os itens da apuração	
-	BeginSQL Alias _cAlias
+	BeginSql Alias _cAlias
     SELECT CDP.CDP_FILIAL, CDP.CDP_DTFIM, CDP.CDP_LINHA, CDP.CDP_CODLAN, CDP.CDP_DESC, CDP.CDP_VALOR, CDP.R_E_C_N_O_
 		  FROM %Table:CDP% CDP
 		 WHERE CDP.D_E_L_E_T_ = ' '
@@ -149,9 +139,9 @@ For _nX:=1 to Len(_aSelFil)
 		                          AND CDP.CDP_DTINI = B.CDP_DTINI
 		                          AND CDP.CDP_PERIOD = B.CDP_PERIOD)
 		 ORDER BY  CDP.CDP_FILIAL, CDP.CDP_TIPOIP, CDP.CDP_LINHA
-	EndSQL
+	EndSql
 	
-	_dData:= StoD((_cAlias)->CDP_DTFIM)
+	_dData:= SToD((_cAlias)->CDP_DTFIM)
 
 	While (_cAlias)->( !Eof() )
 		If VerPadrao(_cPadrao)
@@ -167,26 +157,26 @@ For _nX:=1 to Len(_aSelFil)
 			If _lUsaFlag
 				aFlagCTB := {}  // Limpa o coteudo apos a efetivacao do lancamento
 			Else 
-				DbSelectArea("CDP")
-				DbGoTo((_cAlias)->R_E_C_N_O_)
-				Reclock("CDP")
+				DBSelectArea("CDP")
+				DBGoTo((_cAlias)->R_E_C_N_O_)
+				RecLock("CDP")
 				REPLACE CDP_LA With "S"
-				MsUnlock( )
-				CDP->(DbCloseArea())
+				MSUnLock( )
+				CDP->(DBCloseArea())
 			EndIf
 			
 	     EndIf
 	     (_cAlias)->( DBSkip() )
 	EndDo 
 
-	(_cAlias)->(DbClosearea())
+	(_cAlias)->(DBCloseArea())
   	
 	//Levanta os totais da apuração
 	_cQuery:= "    SELECT CDP.CDP_FILIAL, "
 	_cQuery+= "           CDP.CDP_DTFIM, "
 	_cQuery+= "           CDP.CDP_LINHA, "
 	_cQuery+= "           CDP.CDP_CODLAN, "
-	_cQuery+= "           'IPI APURACAO '||SUBSTR(CDP.CDP_DTFIM,5,2)||' '|| SUBSTR(CDP.CDP_DTFIM,1,4) CDP_DESC, "
+	_cQuery+= "           'IPI APURACAO '||SubStr(CDP.CDP_DTFIM,5,2)||' '|| SubStr(CDP.CDP_DTFIM,1,4) CDP_DESC, "
 	_cQuery+= "           CDP.CDP_VALOR, "
 	_cQuery+= "           CDP.R_E_C_N_O_ RECNO"
 	_cQuery+= "		  FROM " + RetSQLName("CDP") + " CDP "
@@ -222,11 +212,11 @@ For _nX:=1 to Len(_aSelFil)
 		_aTotais[2][aScan(_aTotais[1],(_cAlias)->CDP_LINHA)] :=(_cAlias)->CDP_VALOR
 		RecLock(_cAlias,.F.)
 		Replace (_cAlias)->CDP_VALOR With 0
-		MsUnLock()
+		MSUnLock()
 		(_cAlias)->( DBSkip() )
 	EndDo
 	
-	(_cAlias)->( dbGotop() )
+	(_cAlias)->( DBGoTop() )
 	While (_cAlias)->( !Eof() ) 
 		If VerPadrao(_cPadrao)
 			If (_cAlias)-> CDP_LINHA == IIf(_aTotais[2][1] < _aTotais[2][2],_aTotais[1][1],_aTotais[1][2])
@@ -235,7 +225,7 @@ For _nX:=1 to Len(_aSelFil)
 				EndIf
 				RecLock(_cAlias,.F.)
 				Replace (_cAlias)->CDP_VALOR With IIf(_aTotais[2][1] > _aTotais[2][2],_aTotais[2][2],_aTotais[2][1])
-				MsUnLock()
+				MSUnLock()
 			EndIf
 			
 	     	//gera linha da contabilização de acordo com as regras do LP passado
@@ -245,12 +235,12 @@ For _nX:=1 to Len(_aSelFil)
 			If _lUsaFlag
 				aFlagCTB := {}  // Limpa o coteudo apos a efetivacao do lancamento
 			Else 
-				DbSelectArea("CDP")
-				DbGoTo((_cAlias)->RECNO)
-				Reclock("CDP")
+				DBSelectArea("CDP")
+				DBGoTo((_cAlias)->RECNO)
+				RecLock("CDP")
 				REPLACE CDP_LA With "S"
-				MsUnlock( )
-				CDP->(DbCloseArea())
+				MSUnLock( )
+				CDP->(DBCloseArea())
 			EndIf
 			
 	    EndIf
@@ -267,7 +257,7 @@ For _nX:=1 to Len(_aSelFil)
 	//---------------------------------
 	//Exclui a tabela
 	//---------------------------------
-	(_cAlias)->(DbClosearea())
+	(_cAlias)->(DBCloseArea())
 	_oTempTable:Delete()
 	
 	If Select("TMP") > 0 //Fecho a tabela caso o cA100Incl tenha mantido ela aberta
@@ -278,7 +268,7 @@ Next _nX
 	
 cFilAnt := _cFilAnt //Restaura filial
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 Return
 
 /*
@@ -286,16 +276,14 @@ Return
 Programa----------: MCTB05CC
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 20/03/2024
-===============================================================================================================================
 Descrição---------: Retorna conta contábil
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: 
 ===============================================================================================================================
 */
 User Function MCTB05CC(_cCod)
-Local _aArea	:= GetArea()
+
+Local _aArea	:= FWGetArea()
 Local _cRetorno	:= ''
 //===========================================================================================
 //Z03001CD - Apuração de IPI - Débito
@@ -374,29 +362,30 @@ If Empty(_cRetorno)
 	_cRetorno := "1101010020"
 EndIf 
 
-RestArea(_aArea)
+FWRestArea(_aArea)
+
 Return (_cRetorno)
+
 /*
 ===============================================================================================================================
 Programa----------: MCTB05VL
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 20/03/2024
-===============================================================================================================================
 Descrição---------: Valida data informada nos parâmetros
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: 
 ===============================================================================================================================
 */
 User Function MCTB05VL()
+
 Local _lRet:= .T. 
-Private _cMesAnoCtab := mv_par03
+Private _cMesAnoCtab := MV_PAR03
 Private _aMesValid:= { "01","02","03","04","05","06","07","08","09","10","11","12" }
 
-	//Verifica se a competencia informada e invalida e exibe uma mensagem de alerta
-	If aScan( _aMesValid, Subst( _cMesAnoCtab, 1 , 2 ) ) == 0 
-		_lRet := .F.
-		Help(NIL, NIL, "MCTB00501", NIL, "Data informada " + _cMesAnoCtab + " inválida!", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Corrija a informação!"})//Formato Invalido
-	Endif 
+//Verifica se a competencia informada e invalida e exibe uma mensagem de alerta
+If aScan( _aMesValid, Subst( _cMesAnoCtab, 1 , 2 ) ) == 0 
+	_lRet := .F.
+	Help(NIL, NIL, "MCTB00501", NIL, "Data informada " + _cMesAnoCtab + " inválida!", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Corrija a informação!"})//Formato Invalido
+EndIf
+
 Return (_lRet)

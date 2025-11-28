@@ -2,16 +2,16 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 08/03/2024 | Chamado 45006. Ajustar variável __cUserId em ambiente Scheduller p/ Protheus criar e preencher. 
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
-Lucas Borges  | 23/07/2025 | Chamado 51340. Ajustar função para validação de ambiente de teste
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |23/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
+Lucas Borges  |14/09/2025| Chamado 51799. Implementada função para validar ambiente de teste totvs.framework.environment.Type.get()
 ===============================================================================================================================
 */
 
-#include "Protheus.ch" 
-#INCLUDE "TBICONN.CH"
+#Include "TOTVS.ch" 
+#Include "TBICONN.CH"
  
 /*
 ===============================================================================================================================
@@ -24,6 +24,7 @@ Retorno------------: Nenhum
 ===============================================================================================================================
 */  
 User Function MOMS069(_lScheduller)
+
 Local _lRecebCli  := .T.
 Local _lRecebPv   := .T.
 Local _lEnviaPv   := .T.
@@ -36,19 +37,14 @@ Default _lScheduller := .F.
 
 Begin Sequence 
 
-   //=======================================================================
    // Recebe os dados dos clientes e grava no cadastro de Prospect.
-   //=======================================================================
    If ! _lScheduller
-      If ! U_ITMSG("Confirma o recebimento dos dados dos Clientes e grava no cadastro de Prospect?","Atenção" , , ,2, 2)
+      If ! U_ITMsg("Confirma o recebimento dos dados dos Clientes e grava no cadastro de Prospect?","Atenção" , , ,2, 2)
          _lRecebCli := .F.
       EndIf 
    Else  
       U_ItConOut("[MOMS069] Recebendo dados dos Clientes e gravando no cadastro de Prospect.")
    EndIf 
-
-//_cDateTime := FWTimeStamp(6, Date() , Time() )
-//Break 
 
    If ! _lScheduller
       If _lRecebCli
@@ -56,7 +52,7 @@ Begin Sequence
          
          Processa( {|| U_MOMS069C(_lScheduller,"P") } , 'Aguarde!' , 'Recebendo dados dos Clientes...' )
 
-         U_ItMsg("Recebimento dos dados dos clientes do Broker concluido.","Atenção",,2)
+         U_ITMsg("Recebimento dos dados dos clientes do Broker concluido.","Atenção",,2)
       EndIf 
    Else  
       U_MOMS069C(_lScheduller,"P")
@@ -64,11 +60,9 @@ Begin Sequence
       U_ItConOut("[MOMS069] - Recebimento dos dados dos clientes do Broker concluído.")
    EndIf 
 
-   //=======================================================================
    // Recebe os dados dos pedidos de vendas e grava no portal.
-   //=======================================================================
    If ! _lScheduller
-      If ! U_ITMSG("Confirma o recebimento dos dados dos Pedidos de Vendas e grava no cadastro de Portal do Representante?","Atenção" , , ,2, 2)
+      If ! U_ITMsg("Confirma o recebimento dos dados dos Pedidos de Vendas e grava no cadastro de Portal do Representante?","Atenção" , , ,2, 2)
          _lRecebPv := .F.
       EndIf 
    Else  
@@ -81,7 +75,7 @@ Begin Sequence
          
          Processa( {|| U_MOMS069R(_lScheduller) } , 'Aguarde!' , 'Recebendo dados dos Pedidos de Vendas e Gravando no Portal de Representantes...' )
 
-         U_ItMsg("Recebimento dos dados dos Pedidos de Vendas do Broker e gravando no portal de representantes.","Atenção",,2)
+         U_ITMsg("Recebimento dos dados dos Pedidos de Vendas do Broker e gravando no portal de representantes.","Atenção",,2)
       EndIf 
    Else  
       U_MOMS069R(_lScheduller)
@@ -89,11 +83,9 @@ Begin Sequence
       U_ItConOut("[MOMS069] - Recebimento dos dados dos pedidos de vendas e gravando portal de representantes.")
    EndIf 
 
-   //=======================================================================
    // Envia dados das notas fiscais para o Broker.
-   //=======================================================================
    If ! _lScheduller
-      If ! U_ITMSG("Confirma o envio dos dados das Notas Fiscais para o Broker?","Atenção" , , ,2, 2)
+      If ! U_ITMsg("Confirma o envio dos dados das Notas Fiscais para o Broker?","Atenção" , , ,2, 2)
          _lEnviaPv := .F.
       EndIf 
    Else  
@@ -106,7 +98,7 @@ Begin Sequence
          
          Processa( {|| U_MOMS069E(_lScheduller) } , 'Aguarde!' , 'Enviando dados das Notas fiscais para o Broker...' )
 
-         U_ItMsg("Envio dos dados das Notas Fiscais para o Broker concluido.","Atenção",,2)
+         U_ITMsg("Envio dos dados das Notas Fiscais para o Broker concluido.","Atenção",,2)
       EndIf 
    Else  
       U_MOMS069E(_lScheduller)
@@ -114,11 +106,9 @@ Begin Sequence
       U_ItConOut("[MOMS069] - Envio dos dados das Notas Fiscais para o Broker concluido.")
    EndIf 
 
-   //=======================================================================
    // Visualizar clientes rejeitados na Integração Broker
-   //=======================================================================
    If ! _lScheduller
-      If ! U_ITMSG("Confirma a visualização dos Clientes rejeitados na integração com o Broker?","Atenção" , , ,2, 2)
+      If ! U_ITMsg("Confirma a visualização dos Clientes rejeitados na integração com o Broker?","Atenção" , , ,2, 2)
          _lVisualRej := .F.
       EndIf 
    EndIf 
@@ -129,11 +119,9 @@ Begin Sequence
       EndIf 
    EndIf 
 
-   //=======================================================================
    // Visualizar clientes aceitos na Integração Broker
-   //=======================================================================
    If ! _lScheduller
-      If ! U_ITMSG("Confirma a visualização dos Clientes aceitos na integração com o Broker?","Atenção" , , ,2, 2)
+      If ! U_ITMsg("Confirma a visualização dos Clientes aceitos na integração com o Broker?","Atenção" , , ,2, 2)
          _lVisualApr := .F.
       EndIf 
    
@@ -142,11 +130,9 @@ Begin Sequence
       EndIf 
    EndIf 
 
-   //=======================================================================
    // Visualizar pedidos de vendas rejeitados na Integração Broker
-   //=======================================================================
    If ! _lScheduller
-      If ! U_ITMSG("Confirma a visualização dos pedidos de vendas rejeitados na integração com o Broker?","Atenção" , , ,2, 2)
+      If ! U_ITMsg("Confirma a visualização dos pedidos de vendas rejeitados na integração com o Broker?","Atenção" , , ,2, 2)
          _lVisPvRej := .F.
       EndIf 
 
@@ -155,11 +141,9 @@ Begin Sequence
       EndIf 
    EndIf 
 
-   //=======================================================================
    // Visualizar pedidos de vendas aceitos na Integração Broker
-   //=======================================================================
    If ! _lScheduller
-      If ! U_ITMSG("Confirma a visualização dos pedidos de vendas aceitos na integração com o Broker?","Atenção" , , ,2, 2)
+      If ! U_ITMsg("Confirma a visualização dos pedidos de vendas aceitos na integração com o Broker?","Atenção" , , ,2, 2)
          _lVisPvApr := .F.
       EndIf 
 
@@ -170,7 +154,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -187,10 +171,9 @@ Retorno------------: _lRet    = .T. = Gravou Prospect.
 ===============================================================================================================================
 */  
 User Function MOMS069C(_cChamada, _cTipo, _cCodigo)
-//Local _cEmpWebService := U_ITGETMV('IT_CODWSBR', "000004") 
-Local _cEmpWebSe := U_ITGETMV('IT_CODWSBR', "000004") 
+
+Local _cEmpWebSe := SuperGetMV('IT_CODWSBR',.T.,"000004") 
 Local _cDirJSon, _cLinkWS
-//Local _lResult 
 Local _cKey
 Local _cCodVend := ""
 Local _cPagina  := ""
@@ -208,8 +191,8 @@ Default _cTipo := "P"
 
 Begin Sequence 
 
-   ZFM->(DbSetOrder(1))
-   If ZFM->(DbSeek(xFilial("ZFM")+_cEmpWebSe))
+   ZFM->(DBSetOrder(1))
+   If ZFM->(DBSeek(xFilial("ZFM")+_cEmpWebSe))
       _cDirJSon := AllTrim(ZFM->ZFM_LOCXML)
       
       If _cTipo == "C"
@@ -222,7 +205,7 @@ Begin Sequence
       _cPagina  := AllTrim(ZFM->ZFM_AUX02)    // Numero da ultima página de cliente lida.
    Else 
       If _cChamada == "M" // Chamada via menu.
-         U_ItMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
+         U_ITMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[MOMS069] - Empresa WebService para envio dos dados não localizada.")
       EndIf 
@@ -234,12 +217,12 @@ Begin Sequence
       _cPagina := "1"
    EndIf 
     
-   Do While .T. 
+   While .T. 
       _cKey := U_MOMS069T(_cChamada, _cEmpWebSe) // Obtem o Token de acesso. 
 
       If Empty(_cKey)
          If _cChamada == "M" // Chamada via menu.   
-            U_ItMsg("Erro ao na obtenção do Token. Rotina de Integração de Clientes Broker cancelada.","Atenção",,1)
+            U_ITMsg("Erro ao na obtenção do Token. Rotina de Integração de Clientes Broker cancelada.","Atenção",,1)
          Else // Chamada via Scheduller
             U_ItConOut("[MOMS069] - Erro ao na obtenção do Token. Rotina de Integração de Clientes Broker cancelada.")
          EndIf
@@ -255,8 +238,8 @@ Begin Sequence
 
       _aHeadOut := {}              
    
-      Aadd(_aHeadOut,'accept: application/json')
-      Aadd(_aHeadOut,'Authorization: Bearer ' + Alltrim(_cKey) )
+      aAdd(_aHeadOut,'accept: application/json')
+      aAdd(_aHeadOut,'Authorization: Bearer ' + AllTrim(_cKey) )
 
       _nStart 		:= 0
       _nRetry 		:= 0
@@ -282,14 +265,12 @@ Begin Sequence
          Break // Não foi possível obter dados dos clientes para inserção no Prospect.
       EndIf 
 
-      //==============================================================================
       // As novas funções Totvs para arquivos JSon não estão funcionando com os JSons
       // retornados pelo Broker. Devido ao Conteúdo muito grande.
       // Usando como alternativa a função descontinuada da Totvs: FWJSonDeserialize() 
-      //==============================================================================
 
-      DbSelectArea("SZX")
-      SZX->(DbSetOrder(1)) // ZX_FILIAL+ZX_CGC  
+      DBSelectArea("SZX")
+      SZX->(DBSetOrder(1)) // ZX_FILIAL+ZX_CGC  
       
       If Len(_oRetJSonC) < 100 .And. _cTipo == "P" // A ultima página possui quantidade de registros menor que 100. Deve ser linda novamente na próxima integração.
          _lPagCompl := .F.
@@ -310,7 +291,6 @@ Begin Sequence
           _oRetCli  := _oRetJSonC[_nI]
           _cJSonCli := FwJsonSerialize(_oRetCli)
 
-          //========================================================================
           _cCnpj          := _oRetJSonC[_nI]:CnpjCpf       // CNPJ           // cnpj                       
           _cRazaosocial   := _oRetJSonC[_nI]:RazaoSocial   // RAZAOSOCIAL    // razao_social           
           _cNomefantasia  := _oRetJSonC[_nI]:NomeFantasia  // NOMEFANTASIA   // nome_fantasia  
@@ -334,7 +314,6 @@ Begin Sequence
           _cDdd            := _oRetJSonC[_nI]:DDD          // DDD            //                        
           _cTelefone       := _oRetJSonC[_nI]:Telefone     // TELEFONE       // telefone_geral_1       
           
-          //====================================================
           _cNumero       := ""
           _cCep          := ""
           _cEndereco     := ""
@@ -344,9 +323,7 @@ Begin Sequence
           _cCodmunicipio := ""
           _cSegmento     := "" 
                      
-          //====================================================
-
-          For _nJ := 1 To len(_oRetJSonC[_nI]:clienteendereco) 
+          For _nJ := 1 To Len(_oRetJSonC[_nI]:clienteendereco) 
               
               If _oRetJSonC[_nI]:clienteendereco[_nJ]:tpend == "EN"  // "CO" = Endereço de Cobrança // "FA" = Endereço de Faturamento
                                
@@ -387,7 +364,7 @@ Begin Sequence
 
           _cGrupoVen := U_MOMS069G(_cCnpj)
 
-          If SZX->(DbSeek(xFilial("SZX") + _cCnpj))
+          If SZX->(DBSeek(xFilial("SZX") + _cCnpj))
              U_ITCONOUT("[FALSO] Ja exisite o cliente: " + AllTrim(SZX->ZX_NOME) + ", cadastrado com o CNPJ " + Transform(_cCnpj,"@R! NN.NNN.NNN/NNNN-99") + ".")
 
              _cMotivoCli := "Ja exisite o cliente: " + AllTrim(SZX->ZX_NOME) + ", cadastrado com o CNPJ " + Transform(_cCnpj,"@R! NN.NNN.NNN/NNNN-99") + "."
@@ -404,13 +381,13 @@ Begin Sequence
              ZBM->ZBM_DTREC  := Date()    		// Data Recebim
              ZBM->ZBM_HRREC  := Time()    		// Hora Recebim
              ZBM->ZBM_STATUS := "R"		         // Status Integração
-             ZBM->(MsUnLock()) 
+             ZBM->(MSUnLock()) 
 
              Loop          
           Else
-             DbSelectArea("SA1")
-             DbSetOrder(3)
-             If SA1->(DbSeek(xFilial("SA1") + _cCnpj))
+             DBSelectArea("SA1")
+             DBSetOrder(3)
+             If SA1->(DBSeek(xFilial("SA1") + _cCnpj))
                 U_ITCONOUT("[MOMS069] Ja exisite o cliente: " + AllTrim(SA1->A1_NOME) + ", cadastrado com o CNPJ " + Transform(_cCnpj,"@R! NN.NNN.NNN/NNNN-99") + ".")
       
                 _cMotivoCli := "Ja exisite o cliente: " + AllTrim(SA1->A1_NOME) + ", cadastrado com o CNPJ " + Transform(_cCnpj,"@R! NN.NNN.NNN/NNNN-99") + "."
@@ -428,7 +405,7 @@ Begin Sequence
                 ZBM->ZBM_DTREC  := Date()    		// Data Recebim
                 ZBM->ZBM_HRREC  := Time(    )		// Hora Recebim
                 ZBM->ZBM_STATUS := "R"		         // Status Integração
-                ZBM->(MsUnLock()) 
+                ZBM->(MSUnLock()) 
 
                 Loop
              EndIf
@@ -439,28 +416,24 @@ Begin Sequence
 	          Loop
           EndIf
     
-          //================================================================================
           // Inicia gravação do prospect
-          //================================================================================   
           // Campos fixos pelo padrão
           _cPaisBacen	:= "01058"
           _cPais		:= "105"
  
           // regra 01 - se o nome reduzido estiver em branco, assumo o campo cRazão, que alimentará o A1_NOME
-          If Empty(alltrim(_cNomefantasia))
+          If Empty(AllTrim(_cNomefantasia))
              _cNomefantasia := _cRazaosocial
           Else
-             _cNomefantasia := alltrim(_cNomefantasia)
+             _cNomefantasia := AllTrim(_cNomefantasia)
           EndIf
           
           If Empty(_cFisicajuridica)
-             _cPessoa	     	:= Iif(Len(_cCnpj) < 14,"F","J")
+             _cPessoa	     	:= IIf(Len(_cCnpj) < 14,"F","J")
              _cFisicajuridica	:= _cPessoa
           EndIf 
 
-          //================================================================================
           // Removendo caracteres especiais de campos texto.
-          //================================================================================
           _cRazaosocial    := U_ITSUBCHR(_cRazaosocial)
           _cNomefantasia   := U_ITSUBCHR(_cNomefantasia)
           _cFisicajuridica := U_ITSUBCHR(_cFisicajuridica)
@@ -478,9 +451,7 @@ Begin Sequence
 
           _cGrupoVen := U_MOMS069G(_cCnpj)
 
-          //================================================================================
           // Incluindo os novos clientes no Prospect.
-          //================================================================================          
           SZX->(RecLock("SZX",.T.))
           SZX->ZX_FILIAL  := xFilial("SZX")
           SZX->ZX_CGC     := _cCnpj          // CNPJ           // cnpj                       
@@ -501,7 +472,7 @@ Begin Sequence
           SZX->ZX_GRCLI   := _cSegmento      // SEGMENTO       // Segmento               
    
           SZX->ZX_VEND    := _cVendedor      // CODIGOVENDEDOR // Código Vendedor   
-          SZX->ZX_EMISSAO := DATE()   
+          SZX->ZX_EMISSAO := Date()   
           SZX->ZX_CODEMP  := '010' 
           SZX->ZX_MSBLQL  := '2'
           SZX->ZX_STATUS  := 'L'
@@ -520,7 +491,7 @@ Begin Sequence
           SZX->ZX_I_ACRED := "Cliente importado via API broker"
           SZX->ZX_I_IBOLE := "S"
 
-          SZX->(MsUnLock())  
+          SZX->(MSUnLock())  
           _lRet := .T.
 
           U_ITConOut("[MOMS069] - Cliente " + _cRazaosocial + " CNPJ " + Transform(_cCnpj,"@R! NN.NNN.NNN/NNNN-99") + " - incluido com sucesso no prospect!")
@@ -533,14 +504,11 @@ Begin Sequence
           ZBM->ZBM_IDCLIE := AllTrim(Str(_oRetJSonC[_nI]:IdCliente,18))		// ID.Cliente
           ZBM->ZBM_VEND   := _cVendedor		// Cod.Vendedor
           ZBM->ZBM_MOTIVO := _cMotivoCli		// Motivo Rej
-          //ZBM->ZBM_DTREJ  := Date()		   // Data Rejeic
-          //ZBM->ZBM_HRREJ  := Time()		   // Hora Rejeic
           ZBM->ZBM_JSONRC := _cJSonCli 		// Json Recebid
           ZBM->ZBM_DTREC  := Date()    		// Data Recebim
           ZBM->ZBM_HRREC  := Time()    		// Hora Recebim
           ZBM->ZBM_STATUS := "A"		         // Status Integração
-          ZBM->(MsUnLock()) 
-          
+          ZBM->(MSUnLock()) 
       Next
       
       If _lPagCompl .And. _cTipo == "P"
@@ -551,13 +519,11 @@ Begin Sequence
 
    EndDo 
    
-   //=====================================================================
    // Grava a ultima página lida para a nova integração.
-   //=====================================================================
    If _cTipo == "P"
       ZFM->(RecLock("ZFM",.F.)) 
       ZFM->ZFM_AUX02 := AllTrim(_cPagina) // Numero da ultima página de cliente lida.
-      ZFM->(MsUnlock())
+      ZFM->(MSUnLock())
    EndIf 
 
 End Sequence
@@ -578,8 +544,9 @@ Retorno------------: _cRet = Vazio ou o Token de acesso.
 ===============================================================================================================================
 */  
 User Function MOMS069T(_cChamada, _cEmpWebSe)
+
 Local _cRet := "" 
-Local _cEmpWebService := U_ITGETMV('IT_CODWSBR', "000004")
+Local _cEmpWebService := SuperGetMV('IT_CODWSBR',.T.,"000004")
 Local _cDirJSon, _cLinkWS
 Local _cUsuario, _cSenha 
 Local _aHeadOut := {}
@@ -592,18 +559,16 @@ Begin Sequence
    _cUsuario := ""
    _cSenha   := ""
    
-   //===============================================================
    // Obtem os dados do servidor Webservice.
-   //===============================================================
-   ZFM->(DbSetOrder(1))
-   If ZFM->(DbSeek(xFilial("ZFM")+_cEmpWebService))
+   ZFM->(DBSetOrder(1))
+   If ZFM->(DBSeek(xFilial("ZFM")+_cEmpWebService))
       _cDirJSon := AllTrim(ZFM->ZFM_LOCXML)
       _cLinkWS  := AllTrim(ZFM->ZFM_LINK01) 
       _cUsuario := AllTrim(ZFM->ZFM_USRNOM)
       _cSenha   := AllTrim(ZFM->ZFM_SENHA)
    Else 
       If _cChamada == "M" // Chamada via menu.
-         U_ItMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
+         U_ITMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[MOMS069] - Empresa WebService para envio dos dados não localizada.")
       EndIf 
@@ -617,9 +582,9 @@ Begin Sequence
    _nTimOut	 	:= 120
    
    _aHeadOut := {}              
-   Aadd(_aHeadOut,'accept: application/json')     
-   Aadd(_aHeadOut,'username: '+AllTrim(_cUsuario)) 
-   Aadd(_aHeadOut,'password: '+AllTrim(_cSenha)) 
+   aAdd(_aHeadOut,'accept: application/json')     
+   aAdd(_aHeadOut,'username: '+AllTrim(_cUsuario)) 
+   aAdd(_aHeadOut,'password: '+AllTrim(_cSenha)) 
 
    _cLinkWS := AllTrim(_cLinkWS) 
    
@@ -665,7 +630,8 @@ Retorno------------: Nenhum
 ===============================================================================================================================
 */  
 User Function MOMS069R(_cChamada)
-Local _cEmpWebService := U_ITGETMV('IT_CODWSBR', "000004") 
+
+Local _cEmpWebService := SuperGetMV('IT_CODWSBR',.T.,"000004") 
 Local _cDirJSon, _cLinkWS
 Local _cKey
 Local _cCodVend := ""
@@ -681,15 +647,15 @@ Local _oRetPedV, _cJSonPedV, _cMotivoPV
 
 Begin Sequence 
 
-   ZFM->(DbSetOrder(1))
-   If ZFM->(DbSeek(xFilial("ZFM")+_cEmpWebService))
+   ZFM->(DBSetOrder(1))
+   If ZFM->(DBSeek(xFilial("ZFM")+_cEmpWebService))
       _cDirJSon := AllTrim(ZFM->ZFM_LOCXML)
       _cLinkWS  := AllTrim(ZFM->ZFM_LINK03)   // Link de Leitura dos Dados dos Pedidos de Vendas do Broker.  
       _cCodVend := AllTrim(ZFM->ZFM_AUX01)    // Código do Vendedor do Broker.
       _cPagina  := AllTrim(ZFM->ZFM_AUX03)    // Numero da ultima página de Pedidos de Vendas.
    Else 
       If _cChamada == "M" // Chamada via menu.
-         U_ItMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
+         U_ITMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[MOMS069] - Empresa WebService para envio dos dados não localizada.")
       EndIf 
@@ -703,27 +669,25 @@ Begin Sequence
  
    _cCodVend := U_ItKey(_cCodVend,"A3_COD")
    
-   SA1->(DbSetOrder(3))    // A1_FILIAL+A1_CGC 
-   SB1->(DbSetOrder(5))    // B1_FILIAL+B1_CODBAR
-   //SZW->(DbSetOrder(1))  // ZW_FILIAL+ZW_IDPED
-   //SZW->(DbSetOrder(16)) // G = ZW_FILIAL+ZW_IDPED+ZW_PRODUTO
-   SZW->(DbSetOrder(17))   // H-ZW_FILIAL+ZW_PEDIMPO
-   ZG5->(DbSetOrder(3))  
-   SA3->(DbSetOrder(1))
-   SZX->(DbSetOrder(1))    // ZX_FILIAL+ZX_CGC  
+   SA1->(DBSetOrder(3))    // A1_FILIAL+A1_CGC 
+   SB1->(DBSetOrder(5))    // B1_FILIAL+B1_CODBAR
+   SZW->(DBSetOrder(17))   // H-ZW_FILIAL+ZW_PEDIMPO
+   ZG5->(DBSetOrder(3))  
+   SA3->(DBSetOrder(1))
+   SZX->(DBSetOrder(1))    // ZX_FILIAL+ZX_CGC  
     
    _cTabPrcVe := "" 
    If SA3->(MsSeek(xFilial("SA3")+U_ITkEY(_cCodVend,"A3_COD")))
       _cTabPrcVe := SA3->A3_I_TABPR
    EndIf 
 
-   Do While .T. 
+   While .T. 
 
       _cKey := U_MOMS069T(_cChamada) // Obtem o Token de acesso. 
 
       If Empty(_cKey)
          If _cChamada == "M" // Chamada via menu.   
-            U_ItMsg("Erro ao na obtenção do Token. Rotina de Integração de Pedidos de Vendas Broker cancelada.","Atenção",,1)
+            U_ITMsg("Erro ao na obtenção do Token. Rotina de Integração de Pedidos de Vendas Broker cancelada.","Atenção",,1)
          Else // Chamada via Scheduller
             U_ItConOut("[MOMS069] - Erro ao na obtenção do Token. Rotina de Integração de Pedidos de Vendas Broker cancelada.")
          EndIf
@@ -733,8 +697,8 @@ Begin Sequence
    
       _aHeadOut := {}              
    
-      Aadd(_aHeadOut,'accept: application/json')
-      Aadd(_aHeadOut,'Authorization: Bearer ' + Alltrim(_cKey) )
+      aAdd(_aHeadOut,'accept: application/json')
+      aAdd(_aHeadOut,'Authorization: Bearer ' + AllTrim(_cKey) )
 
       _nStart 		:= 0
       _nRetry 		:= 0
@@ -759,12 +723,9 @@ Begin Sequence
          Break // Não foi possível obter dados dos clientes para inserção no Prospect.
       EndIf 
 
-      //==============================================================================
       // As novas funções Totvs para arquivos JSon não estão funcionando com os JSons
       // retornados pelo Broker. Devido ao Conteúdo muito grande.
       // Usando como alternativa a função descontinuada da Totvs: FWJSonDeserialize() 
-      //==============================================================================
-     
       If Len(_oRetJSonP) < 100 // A ultima página possui quantidade de registros menor que 100. Deve ser linda novamente na próxima integração.
          _lPagCompl := .F.
       EndIf 
@@ -781,9 +742,7 @@ Begin Sequence
 
           IncProc("Processando registro: " + AllTrim(Str(_nI,10)) + " de " + AllTrim(Str(_nTotRegs,10))) 
           
-          //=====================================================================================================================================
           // Se não achar o cliente no SA1 e no Prospect, desenvolver uma função para consultar o cliente no Broker, se achar integrar para o Protheus.
-          //=====================================================================================================================================
           If ! SA1->(MsSeek(xFilial("SA1")+U_ItKey(_oRetJSonP[_nI]:CnpjCpf,"A1_CGC"))) // Não achou o cliente na SA1 então verifica no Prospect.
              If ! SZX->(MsSeek(xFilial("SZX")+U_ItKey(_oRetJSonP[_nI]:CnpjCpf,"A1_CGC"))) // Não achou o cliente no Prospect, então chama a integração de clientes para o Pedido de Vendas.
                 If ! U_MOMS069C(_cChamada, "C", _oRetJSonP[_nI]:idCliente) // Não conseguiu incluir no Prospect o cliente.
@@ -803,7 +762,7 @@ Begin Sequence
                    ZBN->ZBN_DTREC   := Date()                                      // Data de Recebimento
                    ZBN->ZBN_HRREC   := Time()                                      // Hora de Recebimento
                    ZBN->ZBN_STATUS  := "R"                                         // Status da Integração
-                   ZBN->(MsUnLock())
+                   ZBN->(MSUnLock())
 
                    Loop // Não inclui o Pedido de Vendas no Portal.
                 EndIf
@@ -834,13 +793,9 @@ Begin Sequence
 
           _cIdPedVen  := U_MOMS069N(_cCodVend)
 
-          //================================
           // CAPA
-          //================================
           If SZW->(MsSeek(xFilial("SZW") + U_ITkey(_cIdPedCli,"ZW_PEDIMPO")))
-             //===============================================================
              // Não haverá alterações de Pedidos de Vendas nesta integração. 
-             //===============================================================
              _cMotivoPV := "Pedido de Vendas Rejeitado. O pedido de vendas informado: " + _cIdPedCli + ", já existe no portal de pedidos de vendas Italac. Não é permitido alterações."
 
              ZBN->(RecLock("ZBN",.T.))
@@ -856,7 +811,7 @@ Begin Sequence
              ZBN->ZBN_DTREC   := Date()                                      // Data de Recebimento
              ZBN->ZBN_HRREC   := Time()                                      // Hora de Recebimento
              ZBN->ZBN_STATUS  := "R"                                         // Status da Integração
-             ZBN->(MsUnLock())
+             ZBN->(MSUnLock())
 
              Loop
           EndIf 
@@ -882,59 +837,17 @@ Begin Sequence
                  ZBN->ZBN_DTREC   := Date()                                      // Data de Recebimento
                  ZBN->ZBN_HRREC   := Time()                                      // Hora de Recebimento
                  ZBN->ZBN_STATUS  := "R"                                         // Status da Integração
-                 ZBN->(MsUnLock())
+                 ZBN->(MSUnLock())
 
                  Loop 
               EndIf 
-/*              
-              //ZW_PEDIMPO
-              If ValType(_oRetJSonP[_nI]:idPedido) == "N"
-                 _cIdPedCli := _cCodVend + AllTrim(Str(_oRetJSonP[_nI]:idPedido,16))
-              Else
-                 _cIdPedCli := _cCodVend + AllTrim(_oRetJSonP[_nI]:idPedido)                 
-              EndIf 
-
-              _cIdPedVen  := U_MOMS069N(_cCodVend)
-
-              //================================
-              // CAPA
-              //================================
-              If SZW->(MsSeek(xFilial("SZW") + U_ITkey(_cIdPedCli,"ZW_PEDIMPO")))
-                 //===============================================================
-                 // Não haverá alterações de Pedidos de Vendas nesta integração. 
-                 //===============================================================
-                 _cMotivoPV := "Pedido de Vendas Rejeitado. O pedido de vendas informado: " + _cIdPedCli + ", já existe no portal de pedidos de vendas Italac. Não é permitido alterações."
-
-                 ZBN->(RecLock("ZBN",.T.))
-                 ZBN->ZBN_FILIAL	 := xFilial("ZBN")                              // Filial do Sistema
-                 ZBN->ZBN_IDPEDV	 := AllTrim(Str(_oRetJSonP[_nI]:idPedido,16))   // Id.Pedido de Vendas
-                 ZBN->ZBN_CNPJ	 := _oRetJSonP[_nI]:CnpjCpf                     // Cnpj / Cpf do Cliente
-                 ZBN->ZBN_IDCLIE  := AllTrim(Str(_oRetJSonP[_nI]:idCliente ,16)) // Id.Cliente
-                 ZBN->ZBN_VEND    := _cCodVend                                   // Codigo do Vendedor
-                 ZBN->ZBN_MOTIVO  := _cMotivoPV                                  // Motivo da Rejeição
-                 ZBN->ZBN_DTREJ   := Date()                                      // Data da Rejeição
-                 ZBN->ZBN_HRREJ   := Time()                                      // Hora da Rejeição
-                 ZBN->ZBN_JSONRC  := _cJSonPedV                                  // Json Recebido
-                 ZBN->ZBN_DTREC   := Date()                                      // Data de Recebimento
-                 ZBN->ZBN_HRREC   := Time()                                      // Hora de Recebimento
-                 ZBN->ZBN_STATUS  := "R"                                         // Status da Integração
-                 ZBN->(MsUnLock())
-
-                 Loop
-                 
-              Else
-                 SZW->(Reclock("SZW",.T.))              
-              EndIf 
-*/
-              _cTimeStamp := FWTimeStamp( 4, DATE(), TIME() )
+              _cTimeStamp := FWTimeStamp( 4, DATE(), Time() )
              
-              //_cIdPedVen := U_MOMS069N(_cCodVend)
-              SZW->(Reclock("SZW",.T.)) 
+              SZW->(RecLock("SZW",.T.)) 
 			     SZW->ZW_FILIAL := xFilial("SZW")
 			     SZW->ZW_CODEMP := "010"
-              //   CODIGO REPRESENTANTE  "-" NUMERO PEDIDO
 			     SZW->ZW_IDPED  := _cIdPedVen 
-			     SZW->ZW_EMISSAO:= DATE()
+			     SZW->ZW_EMISSAO:= Date()
 			     SZW->ZW_TIMEEMI:= "0"
 			     SZW->ZW_IDUSER := _cCodVend //"001583"
 			     SZW->ZW_VEND1  := _cCodVend //"001583"
@@ -953,9 +866,8 @@ Begin Sequence
 			     SZW->ZW_PEDCLI  := "NT"
 			     SZW->ZW_PEDIMPO := AllTrim(SZW->ZW_VEND1) + AllTrim(Str(_oRetJSonP[_nI]:idPedido,16))
               SZW->ZW_TIMEEMI:= _cTimeStamp   
-              //====================================
+
 			     // ITENS
-              //====================================
               If ValType(_oRetJSonP[_nI]:PedidoItem[_nX]:seqPedidoItem) == "N"
                  _cItem := AllTrim(Str(_oRetJSonP[_nI]:PedidoItem[_nX]:seqPedidoItem,2))
               Else 
@@ -969,7 +881,7 @@ Begin Sequence
 			     SZW->ZW_PRCVEN  := _oRetJSonP[_nI]:PedidoItem[_nX]:ValorUnitario 
 		        SZW->ZW_OBSCOM  := "Pedido Integrado do Broker."
               SZW->ZW_DESCONT := _oRetJSonP[_nI]:PedidoItem[_nX]:PercentualDesconto
-			     SZW->ZW_HORAINC := TIME()
+			     SZW->ZW_HORAINC := Time()
 			     SZW->ZW_2UM     := SB1->B1_SEGUM // "CX"
 			     SZW->ZW_I_PRMP  := _oRetJSonP[_nI]:PedidoItem[_nX]:ValorUnitario // Preço minimo portal
 			     SZW->ZW_I_PRNET := SZW->ZW_PRCVEN
@@ -977,19 +889,19 @@ Begin Sequence
 			     SZW->ZW_I_AGEND := "I"
 			     SZW->ZW_TPVENDA := 'V'
 			     
-              _cArm := POSICIONE("SBZ",1,SZW->ZW_FILIAL+SZW->ZW_PRODUTO,"BZ_LOCPAD")
+              _cArm := Posicione("SBZ",1,SZW->ZW_FILIAL+SZW->ZW_PRODUTO,"BZ_LOCPAD")
 			     
               SZW->ZW_LOCAL   := _cArm 
 			     
-			     IF SB1->B1_CONV > 0
-			        IF SB1->B1_TIPCONV = 'D'
+			     If SB1->B1_CONV > 0
+			        If SB1->B1_TIPCONV = 'D'
 				        SZW->ZW_SEGQTD := (SZW->ZW_QTDVEN/SB1->B1_CONV)
-				     ELSE
+				     Else
 				 	     SZW->ZW_SEGQTD := (SZW->ZW_QTDVEN*SB1->B1_CONV)
-				     ENDIF
-			     ELSE
-			        SZW->ZW_SEGQTD:=VAL(_aDados[_nCpo,11])
-			     ENDIF
+				     EndIf
+			     Else
+			        SZW->ZW_SEGQTD:=Val(_aDados[_nCpo,11])
+			     EndIf
 
 			     _cfilft    := SZW->ZW_FILIAL
 			     _cLocal    := _cArm
@@ -1001,17 +913,17 @@ Begin Sequence
 			     _lAchou    := .F.
 
 			     If !Empty(_cLocal)
-   			     //ZG5->(DbSetOrder(3))
-				     If ZG5->(Dbseek(xFilial("ZG5")+_cfilft+_cLocal+_cEstado+_cMesoReg+_cMicroReg+_cCodMunic))
+   			     //ZG5->(DBSetOrder(3))
+				     If ZG5->(DBSeek(xFilial("ZG5")+_cfilft+_cLocal+_cEstado+_cMesoReg+_cMicroReg+_cCodMunic))
 				        _lAchou   := .T.
 					     _lBusca_2 := .F.
-				     ElseIf ZG5->(Dbseek(xFilial("ZG5")+_cfilft+_cLocal+_cEstado+_cMesoReg+_cMicroReg))
+				     ElseIf ZG5->(DBSeek(xFilial("ZG5")+_cfilft+_cLocal+_cEstado+_cMesoReg+_cMicroReg))
 					     _lAchou   := .T.
 					     _lBusca_2 := .F.
-				     ElseIf ZG5->(Dbseek(xFilial("ZG5")+_cfilft+_cLocal+_cEstado+_cMesoReg))
+				     ElseIf ZG5->(DBSeek(xFilial("ZG5")+_cfilft+_cLocal+_cEstado+_cMesoReg))
 					     _lAchou   := .T.
 					     _lBusca_2 := .F.
-				     ElseIf ZG5->(Dbseek(xFilial("ZG5")+_cfilft+_cLocal+_cEstado))
+				     ElseIf ZG5->(DBSeek(xFilial("ZG5")+_cfilft+_cLocal+_cEstado))
 					     _lAchou   := .T.
 					     _lBusca_2 := .F.
 				     Else
@@ -1022,14 +934,14 @@ Begin Sequence
 			     EndIf
 
 			     If _lBusca_2
-				     ZG5->(DbSetOrder(2))
-				     If ZG5->(Dbseek(xFilial("ZG5")+_cfilft+_cEstado+_cMesoReg+_cMicroReg+_cCodMunic))
+				     ZG5->(DBSetOrder(2))
+				     If ZG5->(DBSeek(xFilial("ZG5")+_cfilft+_cEstado+_cMesoReg+_cMicroReg+_cCodMunic))
 					      _lAchou := .T.
-				     ElseIf ZG5->(Dbseek(xFilial("ZG5")+_cfilft+_cEstado+_cMesoReg+_cMicroReg))
+				     ElseIf ZG5->(DBSeek(xFilial("ZG5")+_cfilft+_cEstado+_cMesoReg+_cMicroReg))
 					      _lAchou := .T.
-				     ElseIf ZG5->(Dbseek(xFilial("ZG5")+_cfilft+_cEstado+_cMesoReg))
+				     ElseIf ZG5->(DBSeek(xFilial("ZG5")+_cfilft+_cEstado+_cMesoReg))
 					     _lAchou := .T.
-				     ElseIf ZG5->(Dbseek(xFilial("ZG5")+_cfilft+_cEstado))
+				     ElseIf ZG5->(DBSeek(xFilial("ZG5")+_cfilft+_cEstado))
 				        _lAchou := .T.
 				     Else
 				        _lAchou := .F.
@@ -1037,12 +949,12 @@ Begin Sequence
 			     EndIf
 
 			     If _lAchou
-			        SZW->ZW_FECENT := DATE() + Iif(ZG5->ZG5_FRDIAS >0,ZG5->ZG5_FRDIAS,ZG5->ZG5_DIAS) + 1
+			        SZW->ZW_FECENT := Date() + IIf(ZG5->ZG5_FRDIAS >0,ZG5->ZG5_FRDIAS,ZG5->ZG5_DIAS) + 1
 			     Else
-				     SZW->ZW_FECENT := (DATE() + 1)
+				     SZW->ZW_FECENT := (Date() + 1)
 			     EndIf
 
-			     SZW->(Msunlock())
+			     SZW->(MSUnLock())
 
               _cMotivoPV := "Pedido de Vendas integrado com Sucesso. O pedido de vendas informado: " + _cIdPedCli + ", foi incluído com sucesso no cadastro de pedidos de vendas do portal."
 
@@ -1053,29 +965,25 @@ Begin Sequence
               ZBN->ZBN_IDCLIE  := AllTrim(Str(_oRetJSonP[_nI]:idCliente ,16)) // Id.Cliente
               ZBN->ZBN_VEND    := _cCodVend                                   // Codigo do Vendedor
               ZBN->ZBN_MOTIVO  := _cMotivoPV                                  // Motivo da Rejeição
-              //ZBN->ZBN_DTREJ   := Date()                                      // Data da Rejeição
-              //ZBN->ZBN_HRREJ   := Time()                                      // Hora da Rejeição
               ZBN->ZBN_JSONRC  := _cJSonPedV                                  // Json Recebido
               ZBN->ZBN_DTREC   := Date()                                      // Data de Recebimento
               ZBN->ZBN_HRREC   := Time()                                      // Hora de Recebimento
               ZBN->ZBN_STATUS  := "A"                                         // Status da Integração
-              ZBN->(MsUnLock())
+              ZBN->(MSUnLock())
 
           Next 
       Next 
 
    EndDo 
 
-   //=====================================================================
    // Grava a ultima página lida para a nova integração.
-   //=====================================================================
    ZFM->(RecLock("ZFM", .F.))
    ZFM->ZFM_AUX03 := _cPagina   // Numero da ultima página de Pedidos do Portal lida.
-   ZFM->(MsUnLock())
+   ZFM->(MSUnLock())
    
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -1089,97 +997,73 @@ Retorno------------: Nenhum
 ===============================================================================================================================
 */  
 User Function MOMS069S()
+
 Local _cFilIntWS, _aFilIntWS
 Local _nI  
 Local _LigaDesWS 
 
 Begin Sequence
 
-   //=============================================================================
    // Ativa a filial "01" apenas para leitura das filiais do parâmetro.
-   //=============================================================================
    RESET ENVIRONMENT
    RpcSetType(2) // 3
    
-   //=============================================================================
    // Inicia processamento com base nas filiais do parâmetro.
-   //=============================================================================
 	U_ItConOut( '[MOMS069] -  Abrindo o ambiente para filial 01...' )
  
-   //===========================================================================================
    // Preparando o ambiente com a filial 01
-   //===========================================================================================
-   //PREPARE ENVIRONMENT EMPRESA '01' FILIAL "01" ; //USER 'Administrador' PASSWORD '' ;
-   //            TABLES "SA2","ZLD",'ZBG', "ZBH", "ZBI", "ZZM" MODULO 'OMS'
    RpcSetEnv("01", "01",,,,, {"SA2","SZW","SZX","SB1"})
 
    Sleep( 5000 ) //Aguarda 5 segundos para subam as configurações do ambiente.
    
-   //====================================================================
    // Liga ou Desliga a integração Webservice via Scheduller
-   //====================================================================
-   _LigaDesWS := U_ITGETMV('IT_LIGAWSBR', .T.) 
+   _LigaDesWS := SuperGetMV('IT_LIGAWSB',.T.,.T.) 
    If ! _LigaDesWS
       Break 
    EndIf 
 
-   //====================================================================
    // Inicia a Integração Webservice via Scheduller.
-   //====================================================================
-   _cFilIntWS := U_ITGETMV('IT_FILITBR', "01;04;23;")  
+   _cFilIntWS := SuperGetMV('IT_FILITBR',.T.,"01;04;23;")  
 
    _aFilIntWS := {}
    
-   ZZM->(DbGoTop())
+   ZZM->(DBGoTop())
 
-   Do While ! ZZM->(Eof())
+   While ! ZZM->(Eof())
       If ZZM->ZZM_CODIGO $ _cFilIntWS
-         Aadd(_aFilIntWS,ZZM->ZZM_CODIGO)
+         aAdd(_aFilIntWS,ZZM->ZZM_CODIGO)
       EndIf 
      
-      ZZM->(DbSkip())
+      ZZM->(DBSkip())
    EndDo 
 
-   //===================================================================================================
    // Para cada empresa cadastrada no parâmetro IT_FILITCL, inicializa o ambiente, simulando o usuário
    // fazendo login na filial a ser processada.
-   //===================================================================================================
    For _nI := 1 To Len(_aFilIntWS)   
        
        _cfilial := _aFilIntWS[_nI]
 
-       //=============================================================================
        // Ativa a filial contida em _aFilIntWS
-       //=============================================================================
        RESET ENVIRONMENT
        RpcSetType(2) // 3
    
-       //=============================================================================
        // Inicia processamento com base nas filiais do parâmetro.
-       //=============================================================================
 	    U_ItConOut( '[MOMS069] -  Abrindo o ambiente para filial 01...' )
  
-       //===========================================================================================
        // Preparando o ambiente com a filial 01
-       //===========================================================================================
-       //PREPARE ENVIRONMENT EMPRESA '01' FILIAL _cfilial ; //USER 'Administrador' PASSWORD '' ;
-       //        TABLES "SA2","ZLD",'ZBG', "ZBH", "ZBI", "ZZM", "SM0" MODULO 'OMS'
        RpcSetEnv("01", _cfilial ,,,,, {"SA2","SZW","SZX","SB1"})
     
        Sleep( 5000 ) //Aguarda 5 segundos para subam as configurações do ambiente.
       
        cFilAnt := _cfilial 
     
-	    cUSUARIO := SPACE(06)+"Administrador  "
-	    cUsername:= "Schedule"
-	    //__CUSERID:= "SCHEDULE"
+	    cUSUARIO := Space(06)+"Administrador  "
+	    cUserName:= "Schedule"
 
        U_ItConOut( '[MOMS069] - Iniciando schedule de integração de dados do Broker. ' )
    
-       //===================================================================================================
        // Rotina de integração de envio dos dados de Produtores, Coleta de Leite e Recebimento dos dados 
        // dos Produtores do App Companhia do Leite.
-       //===================================================================================================
        U_ItConOut( '[MOMS069] - Integrando dados dos Clientes e Pedidos de Vendas do Broker. ' )
 
        U_MOMS069(.T.)  // .T. = Indica que a rotina foi chamada via Scheduller. 
@@ -1189,7 +1073,7 @@ Begin Sequence
 
  End Sequence 
 
- Return Nil 
+ Return 
 
 /*
 ===============================================================================================================================
@@ -1202,6 +1086,7 @@ Retorno-----------: _cRet   = Código da condição de pagamento.
 ===============================================================================================================================
 */
 User Function MOMS069P(_nPrazo)
+
 Local _cRet := "" 
 Local _cQry
 Local _cDias 
@@ -1223,7 +1108,7 @@ Begin Sequence
 
    If Select("TRBSE4") > 0
 	   TRGSE4->( DBCloseArea() )
-   EndIF
+   EndIf
 
 	_cQry := " SELECT E4_CODIGO AS CODIGO , E4_I_PRZMD FROM "+ RetSqlName('SE4') +" SE4 WHERE "+ RetSqlCond('SE4') +" AND  E4_I_PRZMD  = " + _cDias + "  AND E4_I_PARCS = 1 AND E4_MSBLQL <> '1' "
 	
@@ -1232,7 +1117,6 @@ Begin Sequence
 	TRBSE4->( DBGoTop() )
 	If TRBSE4->(!Eof())
 		_cRet := TRBSE4->CODIGO
-		//_cE4_I_PRZMD:=(_cAlias)->E4_I_PRZMD
 	Else
 		_cRet := ""
 	EndIf
@@ -1242,7 +1126,7 @@ End Sequence
 
 If Select("TRBSE4") > 0
 	TRBSE4->( DBCloseArea() )
-EndIF
+EndIf
 
 Return _cRet
 
@@ -1257,11 +1141,11 @@ Retorno-----------: _cRet     = Próximo numero do Pedido de Vendas Portal, por V
 ===============================================================================================================================
 */
 User Function MOMS069N(_cCodVend)
+
 Local _cAlias := GetNextAlias()
 Local _nPos   := 0 
 Local _cQry   
 
-Begin Sequence 
    _cQry := " SELECT  NVL(MAX(ZW_IDPED),'0') AS CODIGO FROM "+ RetSqlName('SZW') +" SZW WHERE ZW_VEND1 = '"+_cCodVend+"' "
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQry) , _cAlias , .T., .F. )
@@ -1276,14 +1160,13 @@ Begin Sequence
    EndIf
 
    If Empty(_cRet) 
-      _cRet := AllTrim(STR(VAL(_cCodVen)))+"-00001"
+      _cRet := AllTrim(Str(Val(_cCodVen)))+"-00001"
    EndIf
 
-End Sequence 
 
-(_cAlias)->(DbCloseArea())
+(_cAlias)->(DBCloseArea())
 
-DbSelectArea("SZW")
+DBSelectArea("SZW")
 
 Return _cRet
 
@@ -1300,7 +1183,8 @@ Retorno------------: _lRet    = .T. = Gravou Prospect.
 ===============================================================================================================================
 */  
 User Function MOMS069E(_lSCheduller)
-Local _cEmpWebSe := U_ITGETMV('IT_CODWSBR', "000004") 
+
+Local _cEmpWebSe := SuperGetMV('IT_CODWSBR',.T.,"000004") 
 Local _cDirJSon, _cLinkWS
 Local _cKey
 Local _cCodVend := ""
@@ -1312,8 +1196,8 @@ Default _cTipo := "P"
 
 Begin Sequence 
 
-   ZFM->(DbSetOrder(1))
-   If ZFM->(DbSeek(xFilial("ZFM")+_cEmpWebSe))
+   ZFM->(DBSetOrder(1))
+   If ZFM->(DBSeek(xFilial("ZFM")+_cEmpWebSe))
       _cDirJSon  := AllTrim(ZFM->ZFM_LOCXML)
       _cLinkWS   := AllTrim(ZFM->ZFM_LINK05)  // Link envio dos dados das notas fiscais Pedidos Venadas Broker.
       _cCodVend  := AllTrim(ZFM->ZFM_AUX01)   // Código do Vendedor do Broker.
@@ -1321,7 +1205,7 @@ Begin Sequence
 
    Else 
       If ! _lSCheduller // Chamada via menu.
-         U_ItMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
+         U_ITMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[MOMS069] - Empresa WebService para envio dos dados não localizada.")
       EndIf 
@@ -1329,9 +1213,9 @@ Begin Sequence
       Break
    EndIf
 
-   If SuperGetMV("IT_AMBTEST",.F.,.T.) .Or. Empty(_LinkCerto)
+   If !totvs.framework.environment.Type.get() == '1' .Or. Empty(_LinkCerto) //1-Produção, 2-Homologação,3-Desenvolvimento
       If ! _lSCheduller // Chamada via menu.
-         U_ItMsg("Você está em um ambiente de testes, mas os links estão direcionados para o ambiente de produção. ","Atenção","Altere os links deste ambiente para os links dos ambientes de testes.",1)
+         U_ITMsg("Você está em um ambiente de testes, mas os links estão direcionados para o ambiente de produção. ","Atenção","Altere os links deste ambiente para os links dos ambientes de testes.",1)
       Else // Chamada via Scheduller
          U_ItConOut("[MOMS069] - Você está em um ambiente de testes, mas os links estão direcionados para o ambiente de produção. Altere os links deste ambiente para os links dos ambientes de testes.")      
       EndIf 
@@ -1339,18 +1223,16 @@ Begin Sequence
       Break
    EndIf  
 
-   _cDirJSon := Alltrim(_cDirJSon)
+   _cDirJSon := AllTrim(_cDirJSon)
    If Right(_cDirJSon,1) <> "\"
       _cDirJSon := _cDirJSon + "\"
    EndIf
 
-   //================================================================================
    // Lê os arquivos modelo JSON e os transforma em String.
-   //================================================================================
    _cCabec := U_MOMS069X(_cDirJSon+"Cabec_Faturamento_Broker.txt") 
    If Empty(_cCabec)
       If ! _lSCheduller  // Chamada via menu.   
-         U_ItMsg("Erro na leitura do arquivo modelo JSON modelo do cabeçalho integração Italac x Broker.","Atenção",,1) 
+         U_ITMsg("Erro na leitura do arquivo modelo JSON modelo do cabeçalho integração Italac x Broker.","Atenção",,1) 
       Else // Chamada via Scheduller
          U_ItConOut("[MOMS069] - Erro na leitura do arquivo modelo JSON modelo do cabeçalho integração Italac x Broker.")
       EndIf 
@@ -1362,7 +1244,7 @@ Begin Sequence
 
    If Empty(_cDetalhe)
       If ! _lSCheduller  // Chamada via menu.   
-         U_ItMsg("Erro na leitura do arquivo modelo JSON detalhe integração com o Broker.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo modelo JSON detalhe integração com o Broker.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[MOMS069] - Erro na leitura do arquivo modelo JSON detalhe integração com o Broker.")
       EndIf
@@ -1373,7 +1255,7 @@ Begin Sequence
    _cRodape := U_MOMS069X(_cDirJSon+"Rodape_Faturamento_Broker.txt") 
    If Empty(_cRodape)
       If ! _lSCheduller  // Chamada via menu.   
-         U_ItMsg("Erro na leitura do arquivo modelo JSON Rodape de integração Italac x Broker.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo modelo JSON Rodape de integração Italac x Broker.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[MOMS069] - Erro na leitura do arquivo modelo JSON Rodape de integração Italac x Broker.")
       EndIf 
@@ -1397,7 +1279,7 @@ Begin Sequence
 
    If Empty(_cKey)
       If ! _lSCheduller // Chamada via menu.   
-         U_ItMsg("Erro ao na obtenção do Token. Rotina de Integração de Clientes Broker cancelada.","Atenção",,1)
+         U_ITMsg("Erro ao na obtenção do Token. Rotina de Integração de Clientes Broker cancelada.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[MOMS069] - Erro ao na obtenção do Token. Rotina de Integração de Clientes Broker cancelada.")
       EndIf
@@ -1408,25 +1290,12 @@ Begin Sequence
    _cLinkEnv := _cLinkWS 
    _cChaveNFE := QRYSF2->F2_CHVNFE
 
-/*
-         _nStart 		:= 0
-         _nRetry 		:= 0
-         _cJSonRet 	:= Nil 
-         _nTimOut	 	:= 120
-         _cGetParms  := ""   
-         _cRetHttp   := ''
-         _oJSonRet   := ""
-         _oRetJSonC   := ""
-     
-         _cRetHttp := AllTrim(HttpGet( _cLinkEnv , _cGetParms, _nTimOut, _aHeadOut, @_cJSonRet))   
-         _cRetHttp := U_ITSUBCHR(_cRetHttp,{{"\n", ""}})
-*/
    _cJSonDet := ""
    _cJSonRod := _cRodape 
 
-   SZW->(DbSetOrder(1)) // ZW_FILIAL+ZW_IDPED
+   SZW->(DBSetOrder(1)) // ZW_FILIAL+ZW_IDPED
 
-   Do While ! QRYSF2->(Eof())
+   While ! QRYSF2->(Eof())
       
       SZW->(MsSeek(QRYSF2->F2_FILIAL + QRYSF2->C5_I_IDPED))
 
@@ -1436,9 +1305,8 @@ Begin Sequence
          
          _aHeadOut := {}              
    
-         //Aadd(_aHeadOut,'accept: application/json')
-         Aadd(_aHeadOut,'Content-Type: application/json')
-         Aadd(_aHeadOut,'Authorization: Bearer ' + Alltrim(_cKey) )
+         aAdd(_aHeadOut,'Content-Type: application/json')
+         aAdd(_aHeadOut,'Authorization: Bearer ' + AllTrim(_cKey) )
 
          _cJSonEnv :=  _cJSonCab + _cJSonDet  + _cJSonRod
 
@@ -1460,46 +1328,35 @@ Begin Sequence
          _cJSonDet := ""
       EndIf
 
-      //==============================================
       // Dados de cabeçalho
-      //==============================================
-      //_cIdPedido   := SubStr(QRYSF2->C5_I_IDPED,6,20)
       _cIdPedido   := SubStr(SZW->ZW_PEDIMPO,7,20)
-      //_cIdPedido   := Str(Val(AllTrim(_cIdPedido)),16)
 
       _cIdNotaF    := QRYSF2->F2_FILIAL + QRYSF2->F2_DOC + QRYSF2->F2_SERIE + QRYSF2->F2_CLIENTE + QRYSF2->F2_LOJA 
       _cNrNotaF    := AllTrim(Str(Val(AllTrim(QRYSF2->F2_DOC)),16))
       _cSerieNF    := QRYSF2->F2_SERIE
-      _cDtEmisNf   := Dtos(QRYSF2->F2_EMISSAO)
+      _cDtEmisNf   := DToS(QRYSF2->F2_EMISSAO)
       _cChaveNf    := QRYSF2->F2_CHVNFE
       _cProtocNf   := QRYSF2->F3_PROTOC
       
       _cJSonCab    := &(_cCabec)
 
-      //==============================================
       // Dados de detalhe
-      //==============================================
       _cIdFinanc := QRYSF2->F2_FILIAL + QRYSF2->E1_NUM + QRYSF2->E1_PREFIXO + QRYSF2->E1_CLIENTE + QRYSF2->E1_LOJA 
-      //_cNrTitulo := AllTrim(Str(Val(AllTrim(QRYSF2->E1_NUM)),16)) 
       _cNrTitulo := AllTrim(Str(Val(AllTrim(QRYSF2->E1_NUM)),9))
 		_cParcela  := QRYSF2->E1_PARCELA
       _cTipoTit  := If(QRYSF2->A1_I_IBOLE = "S","DP","CR")
       _cLinhaDig := If(QRYSF2->A1_I_IBOLE = "S","COBRANCA VIA BOLETO BANCARIO","CREDIDO EM CONTA BANCARIA")
-		//_cDtEmiss  := Str(Year(QRYSF2->E1_EMISSAO),4) + "/" + StrZero(Month(QRYSF2->E1_EMISSAO),2) + "/" + StrZero(Day(QRYSF2->E1_EMISSAO),2)
-      //_cDtVenc   := Str(Year(QRYSF2->E1_VENCREA),4) + "/" + StrZero(Month(QRYSF2->E1_VENCREA),2) + "/" + StrZero(Day(QRYSF2->E1_VENCREA),2)
-      _cDtEmiss  := Dtos(QRYSF2->E1_EMISSAO)
-      _cDtVenc   := Dtos(QRYSF2->E1_VENCREA) 
+      _cDtEmiss  := DToS(QRYSF2->E1_EMISSAO)
+      _cDtVenc   := DToS(QRYSF2->E1_VENCREA) 
 		_cValTitul := Str(QRYSF2->E1_VALOR,17,2)
       _cValAbati := Str(QRYSF2->E1_I_DESCO,17,2)
       _cValDesco := Str(QRYSF2->E1_DESCONT + QRYSF2->E1_I_DESCO + QRYSF2->E1_DESCFIN,17,2)
       _cValTaxa  := Str(QRYSF2->E1_JUROS,17,2)
       _cTaxaJuro := Str(QRYSF2->E1_PORCJUR,17,2)
       _cValMulta := Str(QRYSF2->E1_MULTA,17,2)
-      //_cDtPagto  := Str(Year(QRYSF2->E1_BAIXA),4) + "/" + StrZero(Month(QRYSF2->E1_BAIXA),2) + "/" + StrZero(Day(QRYSF2->E1_BAIXA),2)
-      _cDtPagto  := Dtos(QRYSF2->E1_BAIXA)
+      _cDtPagto  := DToS(QRYSF2->E1_BAIXA)
       _cValPago  := "0"
-		//_cDataAtua := FWTimeStamp(5, Date() , Time() )
-      _cDataAtua := Dtos(Date())
+      _cDataAtua := DToS(Date())
 
       _cSituacao := ""
       If QRYSF2->E1_SALDO == QRYSF2->E1_VALOR
@@ -1518,16 +1375,15 @@ Begin Sequence
 
       _cJSonDet += If(!Empty(_cJSonDet) , ',' ," ") + &(_cDetalhe)
       
-      QRYSF2->(DbSkip())
+      QRYSF2->(DBSkip())
 
    EndDo   
 
    If ! Empty(_cJSonDet)
       _aHeadOut := {}              
    
-      //Aadd(_aHeadOut,'accept: application/json')
-      Aadd(_aHeadOut,'Content-Type: application/json')
-      Aadd(_aHeadOut,'Authorization: Bearer ' + Alltrim(_cKey) )
+      aAdd(_aHeadOut,'Content-Type: application/json')
+      aAdd(_aHeadOut,'Authorization: Bearer ' + AllTrim(_cKey) )
 
       _cJSonEnv :=  _cJSonCab + _cJSonDet + _cJSonRod
 
@@ -1543,7 +1399,6 @@ Begin Sequence
       If ! Empty(_cRetHttp)
          varinfo("WebPage-http ret.", _cRetHttp)
          _cRetHttp := StrTran( _cRetHttp, "\n", "" )
-         //FWJSonDeserialize(DecodeUtf8(_cRetHttp),@_oRetJSonC)             
       EndIf
 
    EndIf 
@@ -1556,19 +1411,15 @@ Break // JPP TESTE
          Break // Não há mais dados de retonro para clientes disponíveis no WebService do Broker.  
       EndIf
 
-      //FWJSonDeserialize(DecodeUtf8(_cRetHttp),@_oRetJSonC)  
       FWJSonDeserialize(_cRetHttp,@_oRetJSonC)  
 
       If ValType(_oRetJSonC) <> "O" .And. ValType(_oRetJSonC) <> "A"
          Break // Não foi possível obter dados dos clientes para inserção no Prospect.
       EndIf 
 
-      //==============================================================================
       // As novas funções Totvs para arquivos JSon não estão funcionando com os JSons
       // retornados pelo Broker. Devido ao Conteúdo muito grande.
       // Usando como alternativa a função descontinuada da Totvs: FWJSonDeserialize() 
-      //==============================================================================
-   
 
 End Sequence
 
@@ -1593,7 +1444,6 @@ Private cCadastro
 Begin Sequence 
    
    If _cTipoDado == "R"
-      //(cT1)->(DbSetFilter( { || Left( FIELD_NAME, 4 ) = "BABA" }, 'Left(FIELD_NAME, 4) = "BABA"' ) )
       ZBM->(DbSetFilter( { || ZBM_STATUS == "R" }, 'ZBM_STATUS == "R"' ) )
       cCadastro := "Clientes Rejeitados no Recebimento de Dados do Broker" 
    Else
@@ -1603,12 +1453,12 @@ Begin Sequence
 
    ZBM->(DBGoTop())
    
-   Aadd(aRotina,{"Pesquisar"                      ,"AxPesqui"   ,0,1})
-   Aadd(aRotina,{"Visualizar"                     ,"AxVisual" ,0,2})
+   aAdd(aRotina,{"Pesquisar"                      ,"AxPesqui"   ,0,1})
+   aAdd(aRotina,{"Visualizar"                     ,"AxVisual" ,0,2})
 
-   DbSelectArea("ZBM")
-   ZBM->(DbSetOrder(1)) 
-   ZBM->(DbGoTop())
+   DBSelectArea("ZBM")
+   ZBM->(DBSetOrder(1)) 
+   ZBM->(DBGoTop())
       
    MBrowse(6,1,22,75,"ZBM")
 
@@ -1616,7 +1466,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil    
+Return    
 
 /*
 ===============================================================================================================================
@@ -1637,7 +1487,6 @@ Private cCadastro
 Begin Sequence 
    
    If _cTipoDado == "R"
-      //(cT1)->(DbSetFilter( { || Left( FIELD_NAME, 4 ) = "BABA" }, 'Left(FIELD_NAME, 4) = "BABA"' ) )
       ZBN->(DbSetFilter( { || ZBN_STATUS == "R" }, 'ZBN_STATUS == "R"' ) )
       cCadastro := "Pedidos de Vendas Rejeitados no Recebimento de Dados do Broker" 
    Else
@@ -1647,12 +1496,12 @@ Begin Sequence
 
    ZBN->(DBGoTop())
    
-   Aadd(aRotina,{"Pesquisar"                      ,"AxPesqui"   ,0,1})
-   Aadd(aRotina,{"Visualizar"                     ,"AxVisual" ,0,2})
+   aAdd(aRotina,{"Pesquisar"                      ,"AxPesqui"   ,0,1})
+   aAdd(aRotina,{"Visualizar"                     ,"AxVisual" ,0,2})
 
-   DbSelectArea("ZBN")
-   ZBN->(DbSetOrder(1)) 
-   ZBN->(DbGoTop())
+   DBSelectArea("ZBN")
+   ZBN->(DBSetOrder(1)) 
+   ZBN->(DBGoTop())
       
    MBrowse(6,1,22,75,"ZBN")
 
@@ -1660,7 +1509,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil    
+Return    
 
 /*
 ===============================================================================================================================
@@ -1673,6 +1522,7 @@ Retorno-----------: _cRet = Grupo de vendas.
 ===============================================================================================================================
 */  
 User Function MOMS069G(_cCnpj)
+
 Local _cQry 
 Local _cRaizCnpj
 Local _cRet := "999999"
@@ -1685,7 +1535,7 @@ Begin Sequence
    _cQry += " FROM "+ RetSqlName("SA1") + " SA1 "
    _cQry += " WHERE SA1.D_E_L_E_T_	<> '*' "
    _cQry += " AND A1_MSBLQL = '2' "
-   _cQry += " AND	SUBSTR(SA1.A1_CGC,1,8)	= '"+_cRaizCnpj+"' "
+   _cQry += " AND	SubStr(SA1.A1_CGC,1,8)	= '"+_cRaizCnpj+"' "
 
    If Select("QRYSA1") > 0
 	   QRYSA1->( DBCloseArea() )
@@ -1722,89 +1572,14 @@ Retorno-----------: _lRet = .T. = Há dados
 ===============================================================================================================================
 */  
 User Function MOMS069I(_lScheduller,_cCodVend)
+
 Local _lRet := .F.
 Local _cQry := ""
 Local _nTotRegs
 Local _dPerInic, _cPerInic
 
-Begin Sequence 
 
-/*
-SZW.ZW_FILIAL  = SC5.C5_FILIAL 
-SZW.ZW_IDPED   = SC5.C5_I_IDPED  
-
-SF2.F2_FILIAL  = SC5.C5_FILIAL 
-SF2.F2_DOC     = SC5.C5_NOTA     
-SF2.F2_SERIE   = SC5.C5_SERIE 
-SF2.F2_CLIENTE  = SC5.C5_CLIENTE 
-SF2.F2_LOJA    = SC5.C5_LOJACLI 
-*/
-
-
-// F2_CHVNFE 
-// F2_FILIAL+F2_I_PEDID
-// F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA+F2_FORMUL+F2_TIPO
-// F2_EMISSAO
-// F2_VEND1  
-// F2_PREFIXO
-
-// SE1 = CONTAS A RECEBER = EXCLUSIVO
-//----------------------------------------
-// E1_FILIAL 
-// E1_PREFIXO
-// E1_NUM    
-// E1_PARCELA
-// E1_CLIENTE
-// E1_LOJA   
-// E1_TIPO   
-
-// SF3 = LIVROS FISCAIS = EXCLUSIVO
-//---------------------------------------
-// F3_CHVNFE 
-// F3_PROTOC
-// F3_CODRSEF // 100 = AUTORIZADO O USO DA NFE / 101 = Cancelamento de NF-e homologado/ 102 = Inutilização de número homologado / 302 = Rejeição: Irregularidade fiscal do destinatário / 
-// F3_FILIAL
-
-// C5_I_IDPED // IdPedido             integer   Deve ser o mesmo identificador gerado pela DISTRIBUIDORA no envio do pedido de venda
-// F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA //IdNotaFiscal         string    Identificador da nota fiscal para a indústria
-// F2_DOC     // NumeroNF             integer   Número da nota fiscal
-// F2_SERIE   // SerieNF              integer   Série da nota fiscal
-// F2_EMISSAO // DataEmissaoNF        datetime  Data de emissão da nota fiscal
-// F2_CHVNFE  // ChaveAcessoNF        string    Chave de acesso da nota fiscal
-// F3_PROTOC  // ProtocoloAutorizacao string    Número do protocolo de autorização da Sefaz
-//Financeiro           list    
-//----------------------------------------------------------------------------------------------------------------------
-//IdFinanceiro         string    Id único gerado pelo sistema de origem
-// C5_I_IDPED          // IdPedido             integer   Deve ser o mesmo identificador gerado pela DISTRIBUIDORA no envio do pedido de venda
-// E1_NUM              // NumeroTitulo         integer   Número do título a receber, normalmente igual ao número da nota fiscal
-// E1_PARCELA          // Parcela              integer   Número da parcela, enviar "1" se não houver parcelamento
-// E1_TIPO             // TipoTitulo           string    Tipo do título a receber: DP: boleto // Se na SA1, A1_I_IBOLE = "S", Tiver GERA BOLETO IGUAL A SIM // SENÃO CR = CREDITO.
-// LinhaDigitavel      // DP = Cobrança via boleto bancário. CR = Crédito em Conta bancária.     string    Linha digitável do boleto, obrigatória quando tipo de título for boleto
-// E1_EMISSAO          // DataEmissao          date      Data de emissão do título
-// E1_VENCREA          // DataVencimento       date      Data de vencimento do título a receber
-// E1_VALOR            // Valor                numeric   Valor original do título
-// E1_I_DESCO          // ValorAbatimento      numeric   Valor de abatimento do título
-// E1_DESCONT+E1_I_DESCO+E1_DESCFIN // ValorDescFinanceiro  numeric   Valor de desconto até o vencimento do título
-// E1_JUROS            // ValorTaxa            numeric   Valor de taxas do título
-// E1_PORCJUR          // TaxaJuros            numeric   Taxa de juros do título após vencimento
-// E1_MULTA            // ValorMulta           numeric   Valor de multa por atraso
-// E1_SALDO = E1_VALOR // Situacao            // string    “AB” (aberto E1_SALDO = E1_VALOR), “LQ” (liquidado E1_SALDO = 0), “PL” (parcialmenteliquidado E1_SALDO < E1_VALOR E E1_SALDO > 0 ) ou “CA” (cancelado = VERIFICAR O DELETE DA SE1)
-// E1_BAIXA            // DataPagamento        date      Data de Pagamento do título
-// ENVIAR ZEROS        // ValorPago            numeric   Valor total pago (Sem possibilidade de pagamentos parciais)
-// DataAtualizacao     // (Data do sistema)    datetime  Data/hora na qual o sistema de origem gerou o registro, pode ser um controle para a replicação de dados
-//--------------------------------------------------------------------------
-/*
-SZW.ZW_FILIAL  = SC5.C5_FILIAL 
-SZW.ZW_IDPED   = SC5.C5_I_IDPED  
-
-SF2.F2_FILIAL  = SC5.C5_FILIAL 
-SF2.F2_DOC     = SC5.C5_NOTA     
-SF2.F2_SERIE   = SC5.C5_SERIE 
-SF2.F2_CLIENT  = SC5.C5_CLIENTE 
-SF2.F2_LOJA    = SC5.C5_LOJACLI 
-*/
-   
-   _cPerInic := U_ItGetMv("IT_PERINBR", "20/03/2023") // Periodo inicial de leitura dos dados da query.
+   _cPerInic := SuperGetMV("IT_PERINBR",.T.,"20/03/2023") // Periodo inicial de leitura dos dados da query.
    _dPerInic := Ctod(_cPerInic)
 
    _cQry := " SELECT DISTINCT F2_CHVNFE, " 
@@ -1845,7 +1620,7 @@ SF2.F2_LOJA    = SC5.C5_LOJACLI
    _cQry += "        E1_LOJA, "
    _cQry += "        SE1.D_E_L_E_T_ AS SITRSE1 "
    _cQry += "        FROM " + RetSqlName("SF2") + " SF2, " + RetSqlName("SE1") + " SE1, " + RetSqlName("SA1") + " SA1, " + RetSqlName("SC5") + " SC5, " + RetSqlName("SF3") + " SF3, " + RetSqlName("SZW") + " SZW "      
-   _cQry += "        WHERE SF2.D_E_L_E_T_ <> '*' AND SA1.D_E_L_E_T_ <> '*' AND SC5.D_E_L_E_T_ <> '*' AND SF3.D_E_L_E_T_ <> '*' AND SZW.D_E_L_E_T_ <> '*' " // Não incluir o delete da SE1 pois os registros excluidos da SE1 referem-se a Titulos Cancelados.
+   _cQry += "        WHERE SF2.D_E_L_E_T_ = ' ' AND SA1.D_E_L_E_T_ = ' ' AND SC5.D_E_L_E_T_ = ' ' AND SF3.D_E_L_E_T_ = ' ' AND SZW.D_E_L_E_T_ = ' ' " // Não incluir o delete da SE1 pois os registros excluidos da SE1 referem-se a Titulos Cancelados.
    _cQry += "        AND SF2.F2_FILIAL  = SC5.C5_FILIAL "
    _cQry += "        AND SF2.F2_DOC     = SC5.C5_NOTA "    
    _cQry += "        AND SF2.F2_SERIE   = SC5.C5_SERIE "
@@ -1860,19 +1635,17 @@ SF2.F2_LOJA    = SC5.C5_LOJACLI
    _cQry += "        AND SF2.F2_LOJA    = SE1.E1_LOJA  "
    _cQry += "        AND SF2.F2_CLIENTE  = SA1.A1_COD "
    _cQry += "        AND SF2.F2_LOJA    = SA1.A1_LOJA "
-//------------------------------------------------------------------------------   
    _cQry += "        AND SZW.ZW_FILIAL  = SC5.C5_FILIAL "
    _cQry += "        AND SZW.ZW_NUMPED	 = SC5.C5_NUM "
    _cQry += "        AND SZW.ZW_I_PEDDW = SC5.C5_I_PEDDW "
    _cQry += "        AND SZW.ZW_STATUS  = 'I'  "
    _cQry += "        AND SZW.ZW_OBSCOM  = 'Pedido Integrado do Broker.' "
-//------------------------------------------------------------------------------
-   _cQry += "        AND F2_EMISSAO     >= '" + DTOS(_dPerInic) + "' "
+   _cQry += "        AND F2_EMISSAO     >= '" + DToS(_dPerInic) + "' "
    _cQry += "        AND F2_VEND1       = '" + _cCodVend + "' "
    _cQry += "        AND F3_CODRSEF     = '100' "
 
    If Select("QRYSF2") > 0
-      QRYSF2->(DbCloseArea())
+      QRYSF2->(DBCloseArea())
    EndIf
 
    DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQry ) , "QRYSF2" , .F. , .T. )
@@ -1883,7 +1656,7 @@ SF2.F2_LOJA    = SC5.C5_LOJACLI
    
    Count to _nTotRegs
 
-   QRYSF2->(DbGoTop())
+   QRYSF2->(DBGoTop())
 
    If _nTotRegs > 0
       _lRet := .T.
@@ -1892,8 +1665,6 @@ SF2.F2_LOJA    = SC5.C5_LOJACLI
    EndIf
 
    ProcRegua(_nTotRegs)
-    
-End Sequence
 
 Return _lRet 
 
@@ -1908,6 +1679,7 @@ Retorno-----------: _cRet
 ===============================================================================================================================
 */  
 User Function MOMS069X(_cArq)
+
 Local _cRet := ""
 Local _nStatusArq 
 Local _cLine 
@@ -1918,7 +1690,7 @@ Begin Sequence
    // Se houver erro de abertura abandona processamento
    If _nStatusArq = -1  
       Break
-   Endif
+   EndIf
    
    // Posiciona na primeria linha
    FT_FGoTop()

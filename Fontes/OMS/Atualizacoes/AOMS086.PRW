@@ -10,7 +10,7 @@ Lucas Borges  | 16/10/2019 | Removidos os Warning na compilação da release 12.1.
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -34,24 +34,24 @@ Private nintpal := 1
 Begin Sequence
    cCadastro := "Impressão de etiquetas de produtos"
    
-   Aadd(aRotina,{"Etiqueta"     ,"U_AOMS086C()" ,0,3})
-   Aadd(aRotina,{"Reimprimir"   ,"U_AOMS086R()" ,0,2})
-   Aadd(aRotina,{"Pesquisar"  ,"AxPesqui" ,0,1})
-   Aadd(aRotina,{"Visualizar","AxVisual",0,2})
-   Aadd(aRotina,{"Legenda"   ,"U_AOMS086L" ,0,2})
-   Aadd(aRotina,{"Alterar"     ,"Axaltera" ,0,4})
+   aAdd(aRotina,{"Etiqueta"     ,"U_AOMS086C()" ,0,3})
+   aAdd(aRotina,{"Reimprimir"   ,"U_AOMS086R()" ,0,2})
+   aAdd(aRotina,{"Pesquisar"  ,"AxPesqui" ,0,1})
+   aAdd(aRotina,{"Visualizar","AxVisual",0,2})
+   aAdd(aRotina,{"Legenda"   ,"U_AOMS086L" ,0,2})
+   aAdd(aRotina,{"Alterar"     ,"Axaltera" ,0,4})
    
-   Aadd(_aCores,{"ZFW_TIPO == 'C'" ,"BR_VERDE" })
-   Aadd(_aCores,{"ZFW_TIPO == 'P'" ,"BR_AMARELO" })
+   aAdd(_aCores,{"ZFW_TIPO == 'C'" ,"BR_VERDE" })
+   aAdd(_aCores,{"ZFW_TIPO == 'P'" ,"BR_AMARELO" })
 
-   DbSelectArea("ZFW")
-   ZFW->(DbSetOrder(1)) 
-   ZFW->(DbGoTop())
+   DBSelectArea("ZFW")
+   ZFW->(DBSetOrder(1)) 
+   ZFW->(DBGoTop())
    MBrowse(6,1,22,75,"ZFW", , , , , 4 , _aCores)
    
 End Sequence
 
-Return Nil  
+Return  
 
 /*
 ===============================================================================================================================
@@ -70,14 +70,14 @@ User Function AOMS086L
 Local _aLegenda := {}
 
 Begin Sequence
-   Aadd(_aLegenda,{"BR_VERDE"    ,"Caixa" })
-   Aadd(_aLegenda,{"BR_AMARELO"  ,"Pallet" })
+   aAdd(_aLegenda,{"BR_VERDE"    ,"Caixa" })
+   aAdd(_aLegenda,{"BR_AMARELO"  ,"Pallet" })
 
    BrwLegenda(cCadastro, "Legenda", _aLegenda)
 
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -102,9 +102,9 @@ Else
 
 	U_ROMS046(.T.)//reimprime etiquea caixa
 	
-Endif
+EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -123,4 +123,4 @@ User Function AOMS086C()
 
 U_ROMS046() //Imprime Etiqueta Caixa 
 
-Return Nil
+Return

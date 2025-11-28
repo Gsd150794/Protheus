@@ -10,11 +10,8 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
 #Include "Report.ch"
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -66,7 +63,7 @@ oPrint:SetPaperSize(9)	// Seta para papel A4
 oPrint:StartPage() 
 
 If !Pergunte(_cPerg,.T.) 
-     return
+     Return
 EndIf
 //0 - para nao imprimir a numeracao de pagina na emissao da pagina de parametros
 RCOM008ICP(0)   
@@ -77,7 +74,7 @@ Processa({|| RCOM008DDR() })
 oPrint:EndPage()	// Finaliza a Pagina.
 oPrint:Preview()	// Visualiza antes de Imprimir.
 
-Return()       
+Return       
    
 /*
 ===============================================================================================================================
@@ -105,18 +102,18 @@ nLinha+= 080
 oPrint:Line(nLinha,nColInic,nLinha,nColFinal)
 nLinha+= 60
 
-Aadd(_aDadosPegunte,{"01", "Da Filial ?"             , "MV_PAR01"})       
-Aadd(_aDadosPegunte,{"02", "Da Dt.Saida ?"           , "MV_PAR02"})           
-Aadd(_aDadosPegunte,{"03", "Ate Dt.Saida ?"          , "MV_PAR03"})
-Aadd(_aDadosPegunte,{"04", "Do Fornecedor ?"         , "MV_PAR04"})           
-Aadd(_aDadosPegunte,{"05", "Da Loja ?"               , "MV_PAR05"})          
-Aadd(_aDadosPegunte,{"06", "Ate Fornecedor ?"        , "MV_PAR06"})
-Aadd(_aDadosPegunte,{"07", "Ate Loja ?"              , "MV_PAR07"})
-Aadd(_aDadosPegunte,{"08", "Tipo devolucao ?"        , "MV_PAR08"})  //-->"Gerou financeiro" ## "Não gerou" ## "Ambas"
-Aadd(_aDadosPegunte,{"09", "NDF Compensadas ?"       , "MV_PAR09"})  //-->"Sim"              ## "Não"       ## "Ambas"
-Aadd(_aDadosPegunte,{"10", "Ordem ?"                 , "MV_PAR10"})  //-->"Emissão"          ##       
-Aadd(_aDadosPegunte,{"11", "Considera Desc Suframa ?", "MV_PAR11"})  //-->"Sim"              ## "Não"
-Aadd(_aDadosPegunte,{"12", "Grupo Produto ?"         , "MV_PAR12"})
+aAdd(_aDadosPegunte,{"01", "Da Filial ?"             , "MV_PAR01"})       
+aAdd(_aDadosPegunte,{"02", "Da Dt.Saida ?"           , "MV_PAR02"})           
+aAdd(_aDadosPegunte,{"03", "Ate Dt.Saida ?"          , "MV_PAR03"})
+aAdd(_aDadosPegunte,{"04", "Do Fornecedor ?"         , "MV_PAR04"})           
+aAdd(_aDadosPegunte,{"05", "Da Loja ?"               , "MV_PAR05"})          
+aAdd(_aDadosPegunte,{"06", "Ate Fornecedor ?"        , "MV_PAR06"})
+aAdd(_aDadosPegunte,{"07", "Ate Loja ?"              , "MV_PAR07"})
+aAdd(_aDadosPegunte,{"08", "Tipo devolucao ?"        , "MV_PAR08"})  //-->"Gerou financeiro" ## "Não gerou" ## "Ambas"
+aAdd(_aDadosPegunte,{"09", "NDF Compensadas ?"       , "MV_PAR09"})  //-->"Sim"              ## "Não"       ## "Ambas"
+aAdd(_aDadosPegunte,{"10", "Ordem ?"                 , "MV_PAR10"})  //-->"Emissão"          ##       
+aAdd(_aDadosPegunte,{"11", "Considera Desc Suframa ?", "MV_PAR11"})  //-->"Sim"              ## "Não"
+aAdd(_aDadosPegunte,{"12", "Grupo Produto ?"         , "MV_PAR12"})
 
 For _nI := 1 To Len(_aDadosPegunte)          
 	nAux:= 1      
@@ -156,7 +153,7 @@ For _nI := 1 To Len(_aDadosPegunte)
     Else
        _cTexto := &(_aDadosPegunte[_nI,3])
        If ValType(_cTexto) == "D"
-          _cTexto := DTOC(_cTexto)
+          _cTexto := DToC(_cTexto)
        EndIf   
     EndIf	
     oPrint:Say (nLinha,1200,_cTexto,oFont14Prb)  		
@@ -185,7 +182,7 @@ Retorno---------: Nenhum
 Static Function RCOM008ICP( impNrPag )
 
 Local cRaizServer := IIf( issrvunix() , "/" , "\" )
-Local cTitulo     := "DEVOLUÇÕES DE COMPRAS - DE " +  dtoc(mv_par02) + " À " + dtoc(mv_par03)
+Local cTitulo     := "DEVOLUÇÕES DE COMPRAS - DE " +  DToC(MV_PAR02) + " À " + DToC(MV_PAR03)
  
  
 nLinha:=0100
@@ -197,7 +194,7 @@ nLinha:=0100
 			oPrint:Say (nlinha,(nColInic + 2750),"SIGA/RCOM008",oFont12b)
 			oPrint:Say (nlinha + 100,(nColInic + 2750),"EMPRESA: " + AllTrim(SM0->M0_NOME) + '/' + AllTrim(SM0->M0_FILIAL),oFont12b)
 	EndIf
-	oPrint:Say (nlinha + 50,(nColInic + 2750),"DATA DE EMISSÃO: " + DtoC(DATE()),oFont12b)
+	oPrint:Say (nlinha + 50,(nColInic + 2750),"DATA DE EMISSÃO: " + DToC(DATE()),oFont12b)
 	nlinha+=(nSaltoLinha * 3)           
 	                                                   
 	oPrint:Say (nlinha,nColFinal / 2,cTitulo,oFont16b,nColFinal,,,2)
@@ -260,14 +257,14 @@ RCOM008QBP(1,.T.,.F.,"RCOM008IBR()","",3)
 oPrint:Say (nlinha,nColInic + 20  ,"DT.SAÍDA"	  ,oFont12b)
 oPrint:Say (nlinha,nColInic + 416 ,"NDF-SÉRIE"   ,oFont12b) 
 oPrint:Say (nlinha,nColInic + 812 ,"NF REF-SÉRIE",oFont12b)
-oPrint:Say (nlinha,nColInic + 1208,"FOR-LOJA"    ,oFont12b) 
+oPrint:Say (nlinha,nColInic + 1208,"For-LOJA"    ,oFont12b) 
 oPrint:Say (nlinha,nColInic + 1604,"NOME"		  ,oFont12b)
 oPrint:Say (nlinha,nColInic + 2404,"MUNICÍPIO"   ,oFont12b) 
 oPrint:Say (nlinha,nColInic + 3204,"ESTADO"      ,oFont12b)          
 
 nlinha+=nSaltoLinha
 
-oPrint:Say (nlinha,nColInic + 20  ,DtoC(sToD(_sDtEmis))							 	,oFont12)
+oPrint:Say (nlinha,nColInic + 20  ,DToC(SToD(_sDtEmis))							 	,oFont12)
 oPrint:Say (nlinha,nColInic + 416 ,AllTrim(_cDoc) + '-' + AllTrim(_cSerie)   	 	,oFont12) 
 oPrint:Say (nlinha,nColInic + 812 ,AllTrim(_cDocOri) + '-' + AllTrim(_cSerieOri)	,oFont12)
 oPrint:Say (nlinha,nColInic + 1208,_cCodForn + '-' + _cLjForn    				  	,oFont12) 
@@ -275,7 +272,7 @@ oPrint:Say (nlinha,nColInic + 1604,SubStr(_cDesForn,1,35)						  	,oFont12)
 oPrint:Say (nlinha,nColInic + 2404,SubStr(_cMunic,1,34)						  		,oFont12) 
 oPrint:Say (nlinha,nColInic + 3204,_cEst      									  	,oFont12)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -347,7 +344,7 @@ oPrint:Line(nLinInDado,nColInic + 2938,nLinha + nSaltoLinha,nColInic  + 2938)
 
 oPrint:Box(nLinInDado,nColInic,nLinha + nSaltoLinha,nColFinal)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -364,7 +361,7 @@ Static Function RCOM008IBG()
 RCOM008IBD()
 RCOM008IBR()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -381,7 +378,7 @@ Static Function RCOM008ITG(_cDescri,_nVlrTotal)
 oPrint:Say( nlinha , nColInic + 0020 , _cDescri	  									, oFont12b )
 oPrint:Say( nlinha , nColInic + 2988 , Transform(_nVlrTotal,"@E 9,999,999,999.99")	, oFont12b )
 
-Return()
+Return
                  
 /*
 ===============================================================================================================================
@@ -397,7 +394,7 @@ Static Function RCOM008IBR()
 
 oPrint:Box( nLinInBox , nColInic , nLinha , nColFinal )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -454,7 +451,7 @@ If  _nLinhaQbr > nqbrPagina
 					
 EndIf  
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -467,7 +464,6 @@ Parametros------: _nOcao  - Indica qual query será processada
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-
 Static Function RCOM008QRY( _nOpcao , _cAlias )
 
 Local _cQuery := ""
@@ -527,12 +523,12 @@ Do Case
 			_cQuery += " AND F2.F2_FILIAL IN " + FormatIn(MV_PAR01,";")
 		EndIf	       
 
-        IF !EMPTY(MV_PAR12)
-            _cQuery += " AND D2.D2_GRUPO IN " + FormatIn(ALLTRIM(MV_PAR12),";")
-        ENDIF   
+        If !Empty(MV_PAR12)
+            _cQuery += " AND D2.D2_GRUPO IN " + FormatIn(AllTrim(MV_PAR12),";")
+        EndIf   
 
 		//Da data de emissao inicial ate a data de emissao final
-		_cQuery += " AND D2.D2_EMISSAO BETWEEN '" + DtoS(MV_PAR02) + "' AND '" + DtoS(MV_PAR03) + "'"
+		_cQuery += " AND D2.D2_EMISSAO BETWEEN '" + DToS(MV_PAR02) + "' AND '" + DToS(MV_PAR03) + "'"
 		
 		//Do Fornecedor inicial ate o fornecedor final
 		_cQuery += " AND F2.F2_CLIENTE BETWEEN '" + MV_PAR04 + "' AND '" + MV_PAR06 + "'"
@@ -576,7 +572,7 @@ If MV_PAR10 == 1
 	RCOM008IOR()
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -607,7 +603,7 @@ Local _nValBruto := 0
 MsgRun( "Selecionando os dados favor aguardar..." ,, {||  RCOM008QRY(1,_cAlias)  } )
 
 DBSelectArea(_cAlias)
-(_cAlias)->( DBGotop() )
+(_cAlias)->( DBGoTop() )
 
 COUNT TO _nContReg
 
@@ -617,7 +613,7 @@ ProcRegua(_nContReg)
 //Caso existam dados a serem exebidos imprime o cabecalho da primeira pagina de dados.
 //====================================================================================================
 DBSelectArea(_cAlias)
-(_cAlias)->( DBGotop() )
+(_cAlias)->( DBGoTop() )
 If (_cAlias)->(!Eof())         
 
 	oPrint:StartPage()					//Inicia uma nova Pagina					
@@ -843,6 +839,6 @@ EndIf
 //Finaliza a area criada anteriormente.
 //====================================================================================================
 DBSelectArea(_cAlias)
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

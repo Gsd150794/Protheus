@@ -10,7 +10,7 @@ Lucas Borges  |04/07/2025| Chamado 51254. Corrigido error.log na geração do log 
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include "FWMVCDef.ch"
 
 /*
@@ -121,12 +121,12 @@ EndIf
 ZZ4->( DBSetOrder(1) )
 If ZZ4->( DBSeek( xFilial('ZZ4') + ZLE->ZLE_COD ) )
 	While xFilial('ZZ4') + ZLE->ZLE_COD == ZZ4->(ZZ4_FILIAL + ZZ4_CODMIX)
-		cStatus := IIF( AGLT036VNF( { ZZ4->ZZ4_CODPRO , ZZ4->ZZ4_LOJPRO , ZZ4->ZZ4_SERIE , ZZ4->ZZ4_NUMCNF } ) , "2" , "1" )
+		cStatus := IIf( AGLT036VNF( { ZZ4->ZZ4_CODPRO , ZZ4->ZZ4_LOJPRO , ZZ4->ZZ4_SERIE , ZZ4->ZZ4_NUMCNF } ) , "2" , "1" )
 
 		If cStatus <> ZZ4->ZZ4_STATUS
 			ZZ4->( RecLock( 'ZZ4' , .F. ) )
 			ZZ4->ZZ4_STATUS := cStatus
-			ZZ4->( MsUnLock() )
+			ZZ4->( MSUnLock() )
 		EndIf
 		
 		aAdd( aCols , {	ZZ4->ZZ4_CODPRO																				,;
@@ -150,7 +150,7 @@ If Empty(aCols)
 		Return
 	EndIf
 	aCols := { {'','','','','','','',0,0,'Lançamento de CNF'} }
-EndIF
+EndIf
 
 aAdd( aObjects , { 100 , 100 , .T. , .T. } )
 aInfo   := { aSize[1] , aSize[2] , aSize[3] , aSize[4] , 3 , 2 }
@@ -161,7 +161,7 @@ DEFINE FONT oFont NAME "Verdana" SIZE 05,12
 aAdd( aButtons , { "Excel"		, {|| DlgToExcel( { { "ARRAY" , cTitAux , aHeader , aCols } } ) }	, "Exportação de Dados para Excel"	, "Excel"		} )
 
 //====================================================================================================
-// Só permite lançar/excluir se não for "visualização"
+// Só permite lançar/excluir se não For "visualização"
 //====================================================================================================
 If nOper <> 2
 	aAdd( aButtons , { "Lançamento"	, {|| AGLT036LCB( @oLbxAux ) } , "Lançamento de CNF"	, "Lançar CNF"	} )
@@ -170,7 +170,7 @@ EndIf
 
 DEFINE MSDIALOG oDlg TITLE cTitAux FROM aCoors[1],aCoors[2] TO aCoors[3],aCoors[4] PIXEL
 	
-	@aPosObj[01][01] , 010 SAY 'MIX: '+ ZLE->ZLE_COD +' | Emissão: '+ StrZero( Month(Date()) , 2 ) +'/'+ StrZero( Year(Date()) , 4 ) OF oDLg PIXEL
+	@aPosObj[01][01] , 010 Say 'MIX: '+ ZLE->ZLE_COD +' | Emissão: '+ StrZero( Month(Date()) , 2 ) +'/'+ StrZero( Year(Date()) , 4 ) OF oDLg PIXEL
 	
 	@aPosObj[01][01] + 10 , aPosObj[01][02]	LISTBOX oLbxAux					;
 											FIELDS HEADER ""				;
@@ -219,7 +219,7 @@ Local bOk		:= {|| nOpc := 1 , oDlgAux:End() } As Codeblock
 Local bCancel	:= {|| nOpc := 0 , oDlgAux:End() } As Codeblock
 Local aButtons	:= {} As Array
 
-aAdd( aButtons , { "Recalcular" , {|| LjMsgRun( "Reprocessando valores..." , "Aguarde!" , {|| AGLT036VSA( { SA2->A2_COD , SA2->A2_LOJA , ZL3->ZL3_SETOR , ZL3->ZL3_COD , DtoS(MonthSub(ZLE->ZLE_DTFIM,nQtdMes)) , DtoS(ZLE->ZLE_DTFIM) } , @nQtdAux , @nValAux ) } ) } , "Recalcular valores" , "Recalcular" } )
+aAdd( aButtons , { "Recalcular" , {|| LjMsgRun( "Reprocessando valores..." , "Aguarde!" , {|| AGLT036VSA( { SA2->A2_COD , SA2->A2_LOJA , ZL3->ZL3_SETOR , ZL3->ZL3_COD , DToS(MonthSub(ZLE->ZLE_DTFIM,nQtdMes)) , DToS(ZLE->ZLE_DTFIM) } , @nQtdAux , @nValAux ) } ) } , "Recalcular valores" , "Recalcular" } )
 
 SA2->( DBSetOrder(1) )
 If SA2->( DBSeek( xFilial("SA2") + oLbxDados:aArray[oLbxDados:nAt][01] + oLbxDados:aArray[oLbxDados:nAt][02] ) )
@@ -229,16 +229,16 @@ If SA2->( DBSeek( xFilial("SA2") + oLbxDados:aArray[oLbxDados:nAt][01] + oLbxDad
 
 		DEFINE MSDIALOG oDlgAux TITLE "Alteração dos Dados da CNF" FROM 000,000 TO 160,500 PIXEL
 
-			@030,010 SAY 'MIX: '+			ZLE->ZLE_COD													OF oDLgAux PIXEL
-			@030,180 SAY '| Emissão: '+		StrZero( Month(Date()) , 2 ) +'/'+ StrZero( Year(Date()) , 4 )	OF oDLgAux PIXEL
-			@040,010 SAY 'Código/Loja: '+ 	SA2->A2_COD +'/'+ SA2->A2_LOJA									OF oDLgAux PIXEL
-			@040,100 SAY '| Nome: '+		Capital( AllTrim( SA2->A2_NOME ) )								OF oDLgAux PIXEL
-			@050,010 SAY 'Série: '+ 		oLbxDados:aArray[oLbxDados:nAt][06]								OF oDLgAux PIXEL
-			@050,050 SAY 'Número CNF: '+	oLbxDados:aArray[oLbxDados:nAt][07]								OF oDlgAux PIXEL
-			@055,000 SAY Replicate('_',500)																	OF oDlgAux PIXEL
-			@070,010 SAY 'Quantidade:'																		OF oDLgAux PIXEL
+			@030,010 Say 'MIX: '+			ZLE->ZLE_COD													OF oDLgAux PIXEL
+			@030,180 Say '| Emissão: '+		StrZero( Month(Date()) , 2 ) +'/'+ StrZero( Year(Date()) , 4 )	OF oDLgAux PIXEL
+			@040,010 Say 'Código/Loja: '+ 	SA2->A2_COD +'/'+ SA2->A2_LOJA									OF oDLgAux PIXEL
+			@040,100 Say '| Nome: '+		Capital( AllTrim( SA2->A2_NOME ) )								OF oDLgAux PIXEL
+			@050,010 Say 'Série: '+ 		oLbxDados:aArray[oLbxDados:nAt][06]								OF oDLgAux PIXEL
+			@050,050 Say 'Número CNF: '+	oLbxDados:aArray[oLbxDados:nAt][07]								OF oDlgAux PIXEL
+			@055,000 Say Replicate('_',500)																	OF oDlgAux PIXEL
+			@070,010 Say 'Quantidade:'																		OF oDLgAux PIXEL
 			@068,043 MSGET nQtdAux PICTURE "@E 999999.99"	SIZE 050,010									OF oDlgAux PIXEL
-			@070,120 SAY 'Valor Unit.:'		   																OF oDLgAux PIXEL
+			@070,120 Say 'Valor Unit.:'		   																OF oDLgAux PIXEL
 			@068,150 MSGET nValAux PICTURE "@E 999999.99"	SIZE 050,010									OF oDlgAux PIXEL
 		
 		ACTIVATE MSDIALOG oDlgAux ON INIT ( EnchoiceBar( oDlgAux , bOk , bCancel ,, aButtons ) ) CENTERED
@@ -272,14 +272,14 @@ Local nConf		:= 0 As Numeric
 Local nChars	:= SuperGetMV("LT_CNFTAMC",.F.,20) As Numeric
 Local nI		:= 0 As Numeric
 Local cCodBar	:= '' As Character
-Local cDtIni	:= DtoS( MonthSub( ZLE->ZLE_DTFIM , nQtdMes ) ) As Character
-Local cDtFim	:= DtoS(ZLE->ZLE_DTFIM) As Character
+Local cDtIni	:= DToS( MonthSub( ZLE->ZLE_DTFIM , nQtdMes ) ) As Character
+Local cDtFim	:= DToS(ZLE->ZLE_DTFIM) As Character
 Local aDadosP	:= {} As Array
 Local oDlgAux	:= NIL As Object
 Local bOk		:= {|| nConf := 1 , oDlgAux:End() } As Codeblock
 Local bCancel	:= {|| nConf := 0 , oDlgAux:End() } As Codeblock
 
-IF FWAlertYesNo('O processamento atual irá gravar as CNF no: '+ CRLF +;
+If FWAlertYesNo('O processamento atual irá gravar as CNF no: '+ CRLF +;
 						'MIX: '+ ZLE->ZLE_COD + CRLF + CRLF +;
 						'Deseja continuar?' , "AGLT03603" )
 
@@ -301,7 +301,7 @@ IF FWAlertYesNo('O processamento atual irá gravar as CNF no: '+ CRLF +;
 					lIncNovo := .F.
 				Else
 					ZL3->( DBSetOrder(1) )
-					IF ZL3->( DBSeek( SubStr( SA2->A2_L_LI_RO , 1 , 2 ) + SA2->A2_L_LI_RO ) )
+					If ZL3->( DBSeek( SubStr( SA2->A2_L_LI_RO , 1 , 2 ) + SA2->A2_L_LI_RO ) )
 					
 						lIncNovo := .T.
 						
@@ -378,16 +378,16 @@ IF FWAlertYesNo('O processamento atual irá gravar as CNF no: '+ CRLF +;
 				
 					DEFINE MSDIALOG oDlgAux TITLE "Confirmação dos Dados da CNF" FROM 000,000 TO 160,500 PIXEL
 						
-						@030,010 SAY 'MIX: '+			ZLE->ZLE_COD													OF oDLgAux PIXEL
-						@030,180 SAY '| Emissão: '+		StrZero( Month(Date()) , 2 ) +'/'+ StrZero( Year(Date()) , 4 )	OF oDLgAux PIXEL
-						@040,010 SAY 'Código/Loja: '+ 	SA2->A2_COD +'/'+ SA2->A2_LOJA									OF oDLgAux PIXEL
-						@040,100 SAY '| Nome: '+		Capital( AllTrim( SA2->A2_NOME ) )								OF oDLgAux PIXEL
-						@050,010 SAY 'Série: '+ 		SubStr( cCodBar , 12 , 03 )										OF oDLgAux PIXEL
-						@050,050 SAY 'Número CNF: '+	PadL(AllTrim(SubStr( cCodBar , 15 , 06 )),9,"0")				OF oDlgAux PIXEL
-						@052,000 SAY Replicate('_',500)																	OF oDlgAux PIXEL
-						@065,010 SAY 'Quantidade:'																		OF oDLgAux PIXEL
+						@030,010 Say 'MIX: '+			ZLE->ZLE_COD													OF oDLgAux PIXEL
+						@030,180 Say '| Emissão: '+		StrZero( Month(Date()) , 2 ) +'/'+ StrZero( Year(Date()) , 4 )	OF oDLgAux PIXEL
+						@040,010 Say 'Código/Loja: '+ 	SA2->A2_COD +'/'+ SA2->A2_LOJA									OF oDLgAux PIXEL
+						@040,100 Say '| Nome: '+		Capital( AllTrim( SA2->A2_NOME ) )								OF oDLgAux PIXEL
+						@050,010 Say 'Série: '+ 		SubStr( cCodBar , 12 , 03 )										OF oDLgAux PIXEL
+						@050,050 Say 'Número CNF: '+	PadL(AllTrim(SubStr( cCodBar , 15 , 06 )),9,"0")				OF oDlgAux PIXEL
+						@052,000 Say Replicate('_',500)																	OF oDlgAux PIXEL
+						@065,010 Say 'Quantidade:'																		OF oDLgAux PIXEL
 						@063,040 MSGET nQtdAux PICTURE "@E 999999.99"	SIZE 050,010									OF oDlgAux PIXEL
-						@065,120 SAY 'Valor:'																			OF oDLgAux PIXEL
+						@065,120 Say 'Valor:'																			OF oDLgAux PIXEL
 						@063,150 MSGET nValAux PICTURE "@E 999999.99"	SIZE 050,010									OF oDlgAux PIXEL
 										
 					ACTIVATE MSDIALOG oDlgAux ON INIT ( EnchoiceBar( oDlgAux , bOk , bCancel ) ) CENTERED
@@ -397,7 +397,7 @@ IF FWAlertYesNo('O processamento atual irá gravar as CNF no: '+ CRLF +;
 				EndIf
 				
 				If lIncNovo .And. nConf == 1
-					IF Len(oLbxDados:aArray) > 0 .And. Empty( oLbxDados:aArray[oLbxDados:nAt][01] )
+					If Len(oLbxDados:aArray) > 0 .And. Empty( oLbxDados:aArray[oLbxDados:nAt][01] )
 						oLbxDados:aArray[oLbxDados:nAt][01] := SA2->A2_COD
 						oLbxDados:aArray[oLbxDados:nAt][02] := SA2->A2_LOJA
 						oLbxDados:aArray[oLbxDados:nAt][03] := AllTrim(SA2->A2_NOME)
@@ -460,13 +460,13 @@ If Empty(_cInsEst)
 	Return(_aRet)
 EndIf
 
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT SA2.A2_COD	AS CODIGO, SA2.A2_LOJA	AS LOJA, SA2.A2_NOME	AS NOME
 	FROM  %Table:SA2% SA2
 	WHERE SA2.D_E_L_E_T_ = ' '
 	AND LENGTH( TRIM( TRANSLATE( SA2.A2_INSCR , '0123456789' , ' ' ) ) ) IS NULL
 	AND TRIM(LTRIM(SA2.A2_INSCR,0)) = TRIM(LTRIM(%exp:_cInsEst%,0))
-EndSQL
+EndSql
 
 While (_cAlias)->(!Eof())
 	aAdd( _aOpc	, { (_cAlias)->CODIGO , (_cAlias)->LOJA , AllTrim( (_cAlias)->NOME ) } )
@@ -528,20 +528,20 @@ For _nI := 1 To Len( oLbxAux:aArray )
 					If ZZ4->ZZ4_STATUS == '1'
 						ZZ4->( RecLock('ZZ4',.F.) )
 						ZZ4->ZZ4_STATUS := '2'
-						ZZ4->( MsUnLock() )
+						ZZ4->( MSUnLock() )
 					EndIf
 				Else
 					If ZZ4->ZZ4_STATUS == '2'
 						ZZ4->( RecLock('ZZ4',.F.) )
 						ZZ4->ZZ4_STATUS := '1'
-						ZZ4->( MsUnLock() )
+						ZZ4->( MSUnLock() )
 					EndIf
 				EndIf
 				
 				ZZ4->( RecLock('ZZ4',.F.) )
 					ZZ4->ZZ4_QTDE	:= oLbxAux:aArray[_nI][08]
 					ZZ4->ZZ4_VALOR	:= oLbxAux:aArray[_nI][09]
-				ZZ4->( MsUnLock() )
+				ZZ4->( MSUnLock() )
 			EndIf
 		Else
 			ZZ4->( RecLock( "ZZ4" , .T. ) )
@@ -555,7 +555,7 @@ For _nI := 1 To Len( oLbxAux:aArray )
 				ZZ4->ZZ4_QTDE	:= oLbxAux:aArray[_nI][08]
 				ZZ4->ZZ4_VALOR	:= oLbxAux:aArray[_nI][09]
 				ZZ4->ZZ4_STATUS	:= "1"
-			ZZ4->( MsUnLock() )
+			ZZ4->( MSUnLock() )
 		EndIf
 	EndIf
 Next _nI
@@ -589,7 +589,7 @@ Local _cAlias		:= GetNextAlias() As Character
 
 Default _aFiltro	:= {}
 
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT ZZ4.R_E_C_N_O_ REGZZ4
 	FROM  %Table:ZZ4% ZZ4
 	WHERE ZZ4.D_E_L_E_T_ = ' '
@@ -597,7 +597,7 @@ BeginSQL Alias _cAlias
 	AND ZZ4_LOJPRO = %exp:_aFiltro[02]%
 	AND ZZ4_SERIE = %exp:_aFiltro[03]%
 	AND ZZ4_NUMCNF = %exp:_aFiltro[04]%
-EndSQL
+EndSql
 	
 _lRet := (_cAlias)->(!Eof())
 (_cAlias)->(DBCloseArea())
@@ -623,7 +623,7 @@ If Empty(_aFiltro) .Or. Empty(_aFiltro[01]) .Or. Empty(_aFiltro[02]) .Or. Empty(
 	Return(_lRet)
 EndIf
 
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT SF1.R_E_C_N_O_ REGSF1
 	FROM  %Table:SF1% SF1
 	WHERE SF1.D_E_L_E_T_ = ' '   
@@ -632,7 +632,7 @@ BeginSQL Alias _cAlias
 	AND SF1.F1_LOJA = %exp:_aFiltro[02]%
 	AND SF1.F1_SERIE = %exp:_aFiltro[03]%
 	AND SF1.F1_DOC = %exp:_aFiltro[04]%
-EndSQL
+EndSql
 
 _lRet := (_cAlias)->(!Eof())
 (_cAlias)->(DBCloseArea())
@@ -666,7 +666,7 @@ ElseIf FWAlertYesNo( "Confirma a exclusão? Essa operação não poderá ser desfeita
 	If ZZ4->(DBSeek(xFilial('ZZ4')+ZLE->ZLE_COD+oLbxAux:aArray[oLbxAux:nAt][01]+oLbxAux:aArray[oLbxAux:nAt][02]+oLbxAux:aArray[oLbxAux:nAt][06]+oLbxAux:aArray[oLbxAux:nAt][07]))
 		ZZ4->( RecLock( 'ZZ4' , .F. ) )
 		ZZ4->( DBDelete() )
-		ZZ4->( MsUnLock() )
+		ZZ4->( MSUnLock() )
 	EndIf
 	aDel( oLbxAux:aArray	, oLbxAux:nAt				)
 	aSize( oLbxAux:aArray	, Len(oLbxAux:aArray) - 1	)
@@ -690,7 +690,7 @@ Local _cAlias	:= GetNextAlias() As Character
 Local _nCont	:= 0 As Numeric
 
 // Verifica os fechamentos para recuperar a média de Valor
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT SUM(ZLF_TOTAL) TOTAL
 	FROM  %Table:ZLF% ZLF
 	WHERE ZLF.D_E_L_E_T_ = ' '   
@@ -703,7 +703,7 @@ BeginSQL Alias _cAlias
 	AND ZLF.ZLF_DTFIM <= %exp:aDadFor[06]%
 	AND ZLF.ZLF_TP_MIX = 'L'
 	AND ZLF.ZLF_DEBCRE = 'C'
-EndSQL
+EndSql
 
 If (_cAlias)->(!Eof())
 	nValAux := (_cAlias)->TOTAL
@@ -711,13 +711,13 @@ EndIf
 
 (_cAlias)->(DBCloseArea())
 
-nQtdAux := U_VolLeite( xFilial('ZZ4') , StoD(aDadFor[05]) , StoD(aDadFor[06]) , ZL3->ZL3_SETOR , ZL3->ZL3_COD , SA2->A2_COD , SA2->A2_LOJA )
+nQtdAux := U_VolLeite( xFilial('ZZ4') , SToD(aDadFor[05]) , SToD(aDadFor[06]) , ZL3->ZL3_SETOR , ZL3->ZL3_COD , SA2->A2_COD , SA2->A2_LOJA )
 nQtdAux := Round( nQtdAux , 2 )
 nValAux := Round( ( nValAux / nQtdAux ) , 2 )
 
 _cAlias	:= GetNextAlias()
-BeginSQL Alias _cAlias
-	SELECT SUBSTR( ZLD_DTCOLE , 1 , 6 )	DT_REF,
+BeginSql Alias _cAlias
+	SELECT SubStr( ZLD_DTCOLE , 1 , 6 )	DT_REF,
 			SUM( ZLD_QTDBOM ) AS QT_REF
 	FROM  %Table:ZLD% ZLD
 	WHERE ZLD.D_E_L_E_T_ = ' '   
@@ -727,9 +727,9 @@ BeginSQL Alias _cAlias
 	AND ZLD.ZLD_SETOR = %exp:aDadFor[03]%
 	AND ZLD.ZLD_LINROT = %exp:aDadFor[04]%
 	AND ZLD.ZLD_DTCOLE BETWEEN %exp:aDadFor[05]% AND %exp:aDadFor[06]%
-	GROUP BY SUBSTR( ZLD_DTCOLE , 1 , 6 )
-	ORDER BY SUBSTR( ZLD_DTCOLE , 1 , 6 )
-EndSQL
+	GROUP BY SubStr( ZLD_DTCOLE , 1 , 6 )
+	ORDER BY SubStr( ZLD_DTCOLE , 1 , 6 )
+EndSql
 nQtdAux := 0
 
 While (_cAlias)->(!Eof())
@@ -862,14 +862,14 @@ Local _lTemSel	:= .F. As Logical
 ProcRegua(0)
 
 ZZ4->( DBSetOrder(1) )
-IF ZZ4->( DBSeek( xFilial("ZZ4") + ZLE->ZLE_COD) )
+If ZZ4->( DBSeek( xFilial("ZZ4") + ZLE->ZLE_COD) )
 	While ZZ4->( ZZ4_FILIAL + ZZ4_CODMIX) == xFilial("ZZ4") + ZLE->ZLE_COD
 		_nConta++
 		IncProc( 'Lendo registros: '+ StrZero( _nConta , 6 ) )
 		
-		IF ZZ4->ZZ4_STATUS == "1"
+		If ZZ4->ZZ4_STATUS == "1"
 			SA2->( DBSetOrder(1) )
-			IF SA2->( DBSeek( xFilial('SA2') + ZZ4->( ZZ4_CODPRO + ZZ4_LOJPRO ) ) )
+			If SA2->( DBSeek( xFilial('SA2') + ZZ4->( ZZ4_CODPRO + ZZ4_LOJPRO ) ) )
 				If !Empty(MV_PAR02) .And. !Empty(MV_PAR03) .And. ( SA2->A2_L_LI_RO < MV_PAR02 .Or. SA2->A2_L_LI_RO > MV_PAR03 )
 					ZZ4->( DBSkip() )
 					Loop
@@ -888,7 +888,7 @@ IF ZZ4->( DBSeek( xFilial("ZZ4") + ZLE->ZLE_COD) )
 										ZZ4->( Recno() )				})
 				Else
 					ZL3->( DBSetOrder(1) )
-					IF ZL3->( DBSeek( xFilial('ZL3') + SA2->A2_L_LI_RO ) ) .And. ZL3->ZL3_SETOR == MV_PAR01
+					If ZL3->( DBSeek( xFilial('ZL3') + SA2->A2_L_LI_RO ) ) .And. ZL3->ZL3_SETOR == MV_PAR01
 						aAdd( _aLstCNF , {	.F.			  					,;
 											ZZ4->ZZ4_EMISSA					,;
 											ZZ4->ZZ4_CODPRO					,;
@@ -939,7 +939,7 @@ IF ZZ4->( DBSeek( xFilial("ZZ4") + ZLE->ZLE_COD) )
 	EndIf
 Else
 	FWAlertInfo("Não foram encontrados registros nessa Filial para o MIX Selecionado.","AGLT03624")
-EndIF
+EndIf
 
 If !Empty(_aLogErr)
 	FWAlertWarning( "Foram encontrados problemas na inclusão das NF de Entrada! Verifique o Log a seguir.","AGLT03625")
@@ -978,7 +978,7 @@ _aLogErr			:= {}
 
 If !Empty( _aDadCNF )
 	SA2->( DBSetOrder(1) )
-	IF SA2->( DBSeek( xFilial("SA2") + _aDadCNF[03] + _aDadCNF[04] ) )
+	If SA2->( DBSeek( xFilial("SA2") + _aDadCNF[03] + _aDadCNF[04] ) )
 		_aFiltro := { _aDadCNF[03] , _aDadCNF[04] , _aDadCNF[05] , _aDadCNF[06] }
 		ZZ4->( DBGoTo( _aDadCNF[10] ) )
 
@@ -1009,15 +1009,15 @@ If !Empty( _aDadCNF )
 									{ "D1_VALFRE"	, 0											, NIL },; // Frete
 									{ "D1_DESPESA"	, 0											, NIL },; // Despesa
 									{ 'D1_CC'		, _cCodCC									, NIL },; // Centro de Custo
-									{ 'D1_DFABRIC'	, StoD('')									, NIL },; // Data de Fabricação
+									{ 'D1_DFABRIC'	, SToD('')									, NIL },; // Data de Fabricação
 									{ "D1_L_SEEK"	, ''										, NIL }}) // Chave de pesquisa da SD1 na ZLF
 			EndIf
 		Else
 			ZZ4->( DBGoTo( _aDadCNF[10] ) )
 			ZZ4->( RecLock( 'ZZ4' , .F. ) )
 			ZZ4->ZZ4_STATUS := '2'
-			ZZ4->( MsUnLock() )
-			aAdd( _aLogErr , { 'VLD_GER: Já existe uma NF para o Produtor com o código atual!' , 'SF1: '+ DtoC(Date()) +' Validação.' , 'Registro duplicado!' } )
+			ZZ4->( MSUnLock() )
+			aAdd( _aLogErr , { 'VLD_GER: Já existe uma NF para o Produtor com o código atual!' , 'SF1: '+ DToC(Date()) +' Validação.' , 'Registro duplicado!' } )
 		EndIf
 	EndIf
 	
@@ -1036,7 +1036,7 @@ If !Empty( _aDadCNF )
 	Else
 		ZZ4->( RecLock( 'ZZ4' , .F. ) )
 		ZZ4->ZZ4_STATUS := '2'
-		ZZ4->( MsUnLock() )
+		ZZ4->( MSUnLock() )
 	EndIf
 	
 EndIf
@@ -1072,7 +1072,7 @@ Private _cCodUsr	:= Space( TamSX3('ZLU_CODUSU')[01] ) As Character
 aAdd( _aParAux , { 3 , 'Tipo de Registro'	, 1			, _aParOpc , 80            , ''     , .T. } ) ; aAdd( _aParRet , _aParAux[01][03] )
 aAdd( _aParAux , { 1 , 'Código do Técnico'	, _cCodUsr	, ''       , '' , 'ZLU_01' , '' , 0 , .F. } ) ; aAdd( _aParRet , _aParAux[02][03] )
 
-If Parambox( _aParAux , 'Configuração Inicial:' , @_aParRet ,,, .T. ,,,,, .F. , .F. )
+If ParamBox( _aParAux , 'Configuração Inicial:' , @_aParRet ,,, .T. ,,,,, .F. , .F. )
 	_nOpcFil := _aParRet[01]
 Else
 	FWAlertInfo("Operação cancelada pelo usuário!","AGLT03626")
@@ -1086,7 +1086,7 @@ _cQuery +="%"
 
 LjMsgRun( "Verificando dados do Mix..." , "Aguarde!" )
 
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 SELECT ZLD.ZLD_RETIRO,
        ZLD.ZLD_RETILJ,
        SA2.A2_NOME,
@@ -1126,7 +1126,7 @@ SELECT ZLD.ZLD_RETIRO,
  ORDER BY ZLD.ZLD_RETIRO
 EndSql
 
-IF (_cAlias)->( !Eof() )
+If (_cAlias)->( !Eof() )
 	While (_cAlias)->( !Eof() )
 		// Verifica o Filtro caso deva exibir somente os pendentes
 		If _nOpcFil == 1 .And. !Empty( (_cAlias)->REGSF1 )
@@ -1146,17 +1146,17 @@ IF (_cAlias)->( !Eof() )
 							(_cAlias)->ZL3_COD										,; //Código da Linha
 							AllTrim((_cAlias)->ZL3_DESCRI)							,; //Descrição da Linha
 							ZLE->ZLE_COD											,; //Código do MIX
-							DtoC(ZLE->ZLE_DTINI) +' - '+ DtoC(ZLE->ZLE_DTFIM)		,; //Período do MIX
+							DToC(ZLE->ZLE_DTINI) +' - '+ DToC(ZLE->ZLE_DTFIM)		,; //Período do MIX
 							(_cAlias)->VOL_LEITE								  	,; //Volume Movimentado
-							IIF( Empty((_cAlias)->REGZZ4) , 'Pendente' , 'Lançada'	),; //Status CNF
-							IIF( Empty((_cAlias)->REGSF1) , 'Pendente' , 'Gerada'	)}) //Status SF1
+							IIf( Empty((_cAlias)->REGZZ4) , 'Pendente' , 'Lançada'	),; //Status CNF
+							IIf( Empty((_cAlias)->REGSF1) , 'Pendente' , 'Gerada'	)}) //Status SF1
 	
 		
 		(_cAlias)->( DBSkip() )
 	EndDo
     
 	If Empty(_aResult)
-		FWAlertInfo("Não foram encontrados registros "+ IIF( _nOpcFil == 1 , "Pendentes" , IIF( _nOpcFil == 2 , "Concluídos" , "" ) ) +" para exibir!", "AGLT03627")
+		FWAlertInfo("Não foram encontrados registros "+ IIf( _nOpcFil == 1 , "Pendentes" , IIf( _nOpcFil == 2 , "Concluídos" , "" ) ) +" para exibir!", "AGLT03627")
 	Else
 		If _nOpcFil == 1
 			_cMsgAux	:= '['+ StrZero( Len(_aResult) , 6 )+'] Produtores não possuem lançamentos de CNF no período do MIX analisado.'
@@ -1189,17 +1189,17 @@ Retorno-----------: Nenhum
 Static Function AGLT036VFT
 
 ZZ4->( DBSetOrder(1) )
-IF ZZ4->( DBSeek( xFilial('ZZ4') + ZLE->ZLE_COD ) )
+If ZZ4->( DBSeek( xFilial('ZZ4') + ZLE->ZLE_COD ) )
 	While xFilial('ZZ4') + ZLE->ZLE_COD == ZZ4->( ZZ4_FILIAL + ZZ4_CODMIX)
-		cStatus := IIF( AGLT036VNF( { ZZ4->ZZ4_CODPRO , ZZ4->ZZ4_LOJPRO , ZZ4->ZZ4_SERIE , ZZ4->ZZ4_NUMCNF } ) , "2" , "1" )
+		cStatus := IIf( AGLT036VNF( { ZZ4->ZZ4_CODPRO , ZZ4->ZZ4_LOJPRO , ZZ4->ZZ4_SERIE , ZZ4->ZZ4_NUMCNF } ) , "2" , "1" )
 		If cStatus <> ZZ4->ZZ4_STATUS
 			ZZ4->( RecLock( 'ZZ4' , .F. ) )
 			ZZ4->ZZ4_STATUS := cStatus
-			ZZ4->( MsUnLock() )
+			ZZ4->( MSUnLock() )
 		EndIf
 	ZZ4->( DBSkip() )
 	EndDo
-EndIF
+EndIf
 
 Return
 

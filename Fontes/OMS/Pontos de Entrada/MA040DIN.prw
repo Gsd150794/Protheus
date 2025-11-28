@@ -11,8 +11,8 @@
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#include "TopConn.ch" 
-#INCLUDE "PROTHEUS.CH"
+#Include "TopConn.ch" 
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -45,11 +45,11 @@ Begin Sequence
        _cCampo := "SA3->"+_aLogSA3[_nI,1]
        _xDado  := &(_cCampo)
        
-       Aadd(_aDadosAlt, {_aLogSA3[_nI,1] , _aLogSA3[_nI,2] , _xDado })
+       aAdd(_aDadosAlt, {_aLogSA3[_nI,1] , _aLogSA3[_nI,2] , _xDado })
 
    Next 
  
-   U_ITGrvLog(_aDadosAlt , "SA3" , 1 , xFilial("SA3") + SA3->A3_COD , "I" , __CUSERID, date() , time() )           
+   U_ITGrvLog(_aDadosAlt , "SA3" , 1 , xFilial("SA3") + SA3->A3_COD , "I" , __cUserId, Date() , Time() )           
 
 End Sequence
 

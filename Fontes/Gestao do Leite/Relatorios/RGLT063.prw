@@ -2,13 +2,13 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -106,12 +106,12 @@ Local _lPlanilha 	:= oReport:nDevice == 4
 
 //Chama função que permitirá a seleção das filiais
 If MV_PAR01 == 1
-	If Empty(_aSelFil)
-		_aSelFil := AdmGetFil(.F.,.F.,"SD2")
-	Endif
+    If Empty(_aSelFil)
+        _aSelFil := AdmGetFil(.F.,.F.,"SD2")
+    EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -172,9 +172,9 @@ oReport:SetMeter(0)
 BeginSql alias _cAlias
 	column DT_INC as Date
      SELECT D2_FILIAL, D2_EMISSAO, D2_DOC, D2_SERIE, D2_CLIENTE||'-'|| D2_LOJA CLIENTE, A1_CGC, A1_NOME, D2_COD,B1_DESC,
-          D2_QUANT, D2_QTDEDEV, D2_QUANT - D2_QTDEDEV QTD_LIQ, ROUND(D2_PRCVEN, 4) D2_PRCVEN, D2_TOTAL, D2_VALDEV,
+          D2_QUANT, D2_QTDEDEV, D2_QUANT - D2_QTDEDEV QTD_LIQ, Round(D2_PRCVEN, 4) D2_PRCVEN, D2_TOTAL, D2_VALDEV,
           D2_TOTAL - D2_VALDEV TOTAL_LIQ, F2_I_CTRA||'-'||F2_I_LTRA TRANSP, F2_I_NTRAN, F2_I_PLACA,
-          CASE WHEN E1_VALOR IS NULL THEN '-'
+          Case WHEN E1_VALOR IS NULL THEN '-'
           WHEN E1_SALDO = 0 THEN 'Baixado'
           WHEN E1_SALDO = E1_VALOR THEN 'Aberto'
           WHEN E1_VALOR <> E1_SALDO THEN 'Parc.' END STATUS
@@ -228,7 +228,7 @@ oReport:Section(1):Init()
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	//Mascara para impressao - CNPJ/CPF
 	If RetPessoa((_cAlias)->A1_CGC) == "J"
 		oReport:Section(1):Cell("A1_CGC"):SetPicture("@R! NN.NNN.NNN/NNNN-99")
@@ -239,7 +239,7 @@ While !oReport:Cancel() .And. (_cAlias)->(!EOF())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->D2_FILIAL
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()

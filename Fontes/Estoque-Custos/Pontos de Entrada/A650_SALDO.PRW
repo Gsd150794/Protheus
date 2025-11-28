@@ -1,31 +1,24 @@
 /*
 ===============================================================================================================================
-                          ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-   Autor      |    Data    |                                             Motivo                                          
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 06/06/2022 | Chamado 40378. Alterado para retorna 0 para gerar OPs intermediarias com o lote ativado.
+Alex Wallauer |06/06/2022| Chamado 40378. Alterado para retorna 0 para gerar OPs intermediarias com o lote ativado.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina. 
-//====================================================================================================
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: A650SALDO
 Autor-------------: Alex Wallauer
 Data da Criacao---: 07/03/2022
-===============================================================================================================================
 Descrição---------: PE para gerar OPs intermediarias com o parametro MV_CONSEST = "S" - Chamado 34943
-===============================================================================================================================
-Parametros--------: PARAMIXB = nSldDisp
-===============================================================================================================================
+Parametros--------: ParamIXB = nSldDisp
 Retorno-----------: Zero para o saldo disponivel
 ===============================================================================================================================
 */
-User Function A650SALDO()
-//LOCAL nSldDisp:=PARAMIXB
-//MsgAlert("nSldDisp = "+CValToChar(nSldDisp),"A650SALDO")
-RETURN 0 //nSldDisp
+User Function A650SALDO
+Return 0 

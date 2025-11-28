@@ -15,7 +15,7 @@ Lucas Borges      | 14/10/2019 | Removidos os Warning na compilação da release 1
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include 'ApWizard.Ch'
 #Include 'FWMVCDEF.ch'
 
@@ -56,7 +56,7 @@ oBrowse:DisableDetails()
 
 oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -107,11 +107,11 @@ Local _aParAux	:= {}
 Local nI		:= 0
 
 If !AOMS066VUS()
-	Return()
+	Return
 EndIf
 
 //================================================================================
-// Desativa a Flag de Cópia quando não for Replicação de Propostas
+// Desativa a Flag de Cópia quando não For Replicação de Propostas
 //================================================================================
 _lOpcCopy := .F.
 
@@ -123,8 +123,8 @@ DEFINE	WIZARD 	_oWizard TITLE "Italac"																							;
        	MESSAGE	"Cálculo das Médias"				 																			;
        	TEXT 	"Esta rotina tem o objetivo de iniciar o processo de cálculo das médias de vendas para os produtos"		+CRLF+	;
        			"que serão utilizadas para o processamento e cadastro de metas de vendas para os Vendedores."			+CRLF	;
-       	NEXT	{||.T.} 																										;
-       	FINISH 	{||.F.} 																										;
+       	Next	{||.T.} 																										;
+       	Finish 	{||.F.} 																										;
        	PANEL
 	
 	//================================================================================
@@ -134,7 +134,7 @@ DEFINE	WIZARD 	_oWizard TITLE "Italac"																							;
 	        HEADER 	'Confirmar o processamento'								;
 	        MESSAGE ''														;
 	        BACK 	{|| .T. } 												;
-	        FINISH 	{|| Eval( _bFinish ) } 									;
+	        Finish 	{|| Eval( _bFinish ) } 									;
 	        PANEL
 	
 	//================================================================================
@@ -159,7 +159,7 @@ If	_lGravaOK
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -190,14 +190,14 @@ Local _nMesRef	:= GetMV( 'IT_QTMESVN' ,, 12 )
 Local _cPeriod	:= _aRetPar[02]
 
 If Empty( _cPeriod )
-	_cPeriod := SubStr( DtoS( dDataBase ) , 1 , 6 )
+	_cPeriod := SubStr( DToS( dDataBase ) , 1 , 6 )
 EndIf
 
 ProcRegua(0)
 IncProc( 'Montando a estrutura...' )
 
-_cPerIni := SubStr( DtoS( MonthSub( StoD( _cPeriod + '01' ) , _nMesRef ) ) , 1 , 6 )
-_cPerFim := SubStr( DtoS( MonthSub( StoD( _cPeriod + '01' ) , 1 ) ) , 1 , 6 )
+_cPerIni := SubStr( DToS( MonthSub( SToD( _cPeriod + '01' ) , _nMesRef ) ) , 1 , 6 )
+_cPerFim := SubStr( DToS( MonthSub( SToD( _cPeriod + '01' ) , 1 ) ) , 1 , 6 )
 
 //================================================================================
 // Valida se já foi calculada a Estimativa de Produção para o período
@@ -219,8 +219,8 @@ If (_cAlias)->( !Eof() ) .And. (_cAlias)->QTDREG > 0
 Else
 
 	(_cAlias)->( DBCloseArea() )
-	u_itmsg( 'Para calcular a Meta dos Vendedores é necessário ter calculada a Estimativa de Produção para o período informado. Verifique os dados e tente novamente.' ,  'Atenção!' , 1 )
-	Return()
+	U_ITMsg( 'Para calcular a Meta dos Vendedores é necessário ter calculada a Estimativa de Produção para o período informado. Verifique os dados e tente novamente.' ,  'Atenção!' , 1 )
+	Return
 	
 EndIf
 
@@ -236,7 +236,7 @@ If _aRetPar[01] == 1
 	_cQuery += "     SUM( SD2.D2_QTSEGUM ) AS QTDSUM  , "
 	_cQuery += "     SD2.D2_SEGUM          AS SUM     , "
 	_cQuery += "     SUM( SD2.D2_TOTAL )   AS VALTOT  , "
-	_cQuery += "     COUNT( DISTINCT SUBSTR( SD2.D2_EMISSAO , 1 , 6 ) ) AS QTDMES "
+	_cQuery += "     COUNT( DISTINCT SubStr( SD2.D2_EMISSAO , 1 , 6 ) ) AS QTDMES "
 	_cQuery += " FROM "+ RetSqlName('SD2') +" SD2 "
 	
 	_cQuery += " INNER JOIN "+ RetSqlName('SF2') +" SF2 "
@@ -266,7 +266,7 @@ If _aRetPar[01] == 1
 	_cQuery += " AND SB1.B1_TIPO    = 'PA' "
 	_cQuery += " AND SB1.B1_MSBLQL	<> '1' "
 	_cQuery += " AND ZAY.ZAY_TPOPER = 'V' "
-	_cQuery += " AND SUBSTR( SD2.D2_EMISSAO , 1 , 6 ) BETWEEN '"+ _cPerIni +"' AND '"+ _cPerFim +"' "
+	_cQuery += " AND SubStr( SD2.D2_EMISSAO , 1 , 6 ) BETWEEN '"+ _cPerIni +"' AND '"+ _cPerFim +"' "
 	
 	_cQuery += " GROUP BY SF2.F2_VEND1 , SA3.A3_NOME , SD2.D2_COD , SB1.B1_DESC , SD2.D2_UM , SD2.D2_SEGUM "
 	_cQuery += " ORDER BY SF2.F2_VEND1 , SD2.D2_COD "
@@ -297,19 +297,19 @@ If _aRetPar[01] == 1
 			
 			DBSelectArea('ZC5')
 			ZC5->( DBSetOrder(1) )
-			IF ZC5->( DBSeek( xFilial('ZC5') + (_cAlias)->VENDEDOR + (_cAlias)->PRODUTO + _cPeriod ) )
+			If ZC5->( DBSeek( xFilial('ZC5') + (_cAlias)->VENDEDOR + (_cAlias)->PRODUTO + _cPeriod ) )
 				
 				If !_lAtual
 					
 					If _lExeAut .And. _lPriReg
 						
-						If u_itmsg(  'Já existem dados para o período informado, deseja atualizar os dados existentes?' , 'Atenção!' , 2,2,2 ) 
+						If U_ITMsg(  'Já existem dados para o período informado, deseja atualizar os dados existentes?' , 'Atenção!' , 2,2,2 ) 
 							
 							_lAtual := .T.
 						
 						Else
 							
-							u_itmsg(  'Operação cancelada pelo usuário!' , 'Atenção!' , 1 )
+							U_ITMsg(  'Operação cancelada pelo usuário!' , 'Atenção!' , 1 )
 							Exit
 							
 						EndIf
@@ -334,7 +334,7 @@ If _aRetPar[01] == 1
 					ZC5->ZC5_VALVEN	:= Round( (_cAlias)->VALTOT / (_cAlias)->QTDMES , 2 )
 					ZC5->ZC5_DATCAL	:= Date()
 					
-					ZC5->( MsUnLock() )
+					ZC5->( MSUnLock() )
 
 				EndIf
 				
@@ -354,7 +354,7 @@ If _aRetPar[01] == 1
 				ZC5->ZC5_VALVEN	:= Round( (_cAlias)->VALTOT / (_cAlias)->QTDMES , 2 )
 				ZC5->ZC5_DATCAL	:= Date()
 				
-				ZC5->( MsUnLock() )
+				ZC5->( MSUnLock() )
 				
 			EndIf
 			
@@ -379,7 +379,7 @@ If _aRetPar[01] == 1
 		
 	Else
 		
-		u_itmsg( 	'Não foram encontrados históricos de produção para gerar a estimativa automaticamente! '	,'Atenção' ,;
+		U_ITMsg( 	'Não foram encontrados históricos de produção para gerar a estimativa automaticamente! '	,'Atenção' ,;
 							'Para a configuração atual será necessário realizar o cadastro manualmente.'		, 1 )
 	
 	EndIf
@@ -394,7 +394,7 @@ Else
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -632,7 +632,7 @@ If _nOper == MODEL_OPERATION_INSERT
 
 	DBSelectArea('ZC5')
 	ZC5->( DBSetOrder(2) )
-	IF ZC5->( DBSeek( xFilial('ZC5') + _oModel:GetValue('ZC5MASTER','ZC5_CODVEN') + _oModel:GetValue('ZC5MASTER','ZC5_PERMET') ) )
+	If ZC5->( DBSeek( xFilial('ZC5') + _oModel:GetValue('ZC5MASTER','ZC5_CODVEN') + _oModel:GetValue('ZC5MASTER','ZC5_PERMET') ) )
 		
 		Help( ,, "AOMS066" ,, "Já existem registros configurados nesse período para esse vendedor!" , 1 , 0 )
 		_lRet := .F.
@@ -703,7 +703,7 @@ If !Empty( _aTotVen )
 	
 		DBSelectArea('ZC4')
 		ZC4->( DBSetOrder(1) )
-		IF ZC4->( DBSeek( xFilial('ZC4') + _aResumo[_nI][01] + _aResumo[_nI][02] ) )
+		If ZC4->( DBSeek( xFilial('ZC4') + _aResumo[_nI][01] + _aResumo[_nI][02] ) )
 			
 			ZC4->( RecLock( 'ZC4' , .F. ) )
 			
@@ -718,14 +718,14 @@ If !Empty( _aTotVen )
 		
 		ZC4->ZC4_QTDUM	:= _aResumo[_nI][04]
 		ZC4->ZC4_VALTOT := _aResumo[_nI][06]
-		ZC4->ZC4_DATA	:= DATE()
+		ZC4->ZC4_DATA	:= Date()
 		ZC4->ZC4_PERMES	:= _aResumo[_nI][03]
 	
 	Next _nI
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -753,10 +753,10 @@ _cQuery += "     ZC5.ZC5_CODVEN        AS VENDEDOR	, "
 _cQuery += "     ZC5.ZC5_CODPRO        AS PRODUTO	, "
 _cQuery += "     ZC4.ZC4_QTDUM         AS QTD_ZC4	, "
 _cQuery += "     ZC5.ZC5_QTDUM         AS QTD_ZC5	, "
-_cQuery += "     ROUND( ( ZC5.ZC5_QTDUM / ZC4.ZC4_QTDUM ) * 100 , 4 ) AS REPR_TOTAL , "
+_cQuery += "     Round( ( ZC5.ZC5_QTDUM / ZC4.ZC4_QTDUM ) * 100 , 4 ) AS REPR_TOTAL , "
 _cQuery += "     SUM( ZC3.ZC3_QTDEST ) AS QTD_ZC3	, "
-_cQuery += "     ROUND( ( ( SUM( ZC3.ZC3_QTDEST ) / ZC4.ZC4_QTDUM ) - 1 ) * 100 , 4 ) AS VARIACAO , "
-_cQuery += "     ROUND( SUM( ZC3.ZC3_QTDEST ) * ( ZC5.ZC5_QTDUM / ZC4.ZC4_QTDUM ) ) AS META "
+_cQuery += "     Round( ( ( SUM( ZC3.ZC3_QTDEST ) / ZC4.ZC4_QTDUM ) - 1 ) * 100 , 4 ) AS VARIACAO , "
+_cQuery += "     Round( SUM( ZC3.ZC3_QTDEST ) * ( ZC5.ZC5_QTDUM / ZC4.ZC4_QTDUM ) ) AS META "
 _cQuery += " FROM "+ RetSqlName('ZC5') +" ZC5 "
 
 _cQuery += " INNER JOIN "+ RetSqlName('ZC4') +" ZC4 "
@@ -804,12 +804,12 @@ While (_cAlias)->( !Eof() )
 		ZC5->ZC5_METAUM	:= (_cAlias)->META
 		ZC5->ZC5_MET2UM := AOMS066SUM( ZC5->ZC5_CODPRO , ZC5->ZC5_METAUM )
 		
-	ZC5->( MsUnLock() )
+	ZC5->( MSUnLock() )
 	
 (_cAlias)->( DBSkip() )
 EndDo
 
-Return()
+Return
 
 /*
 ===============================================================================================================================

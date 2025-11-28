@@ -10,7 +10,7 @@ Lucas Borges  |27/06/2025| Chamado 50617. Revisões diversas visando padronizar o
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include 'Report.ch'
 
 /*
@@ -42,7 +42,7 @@ Private aOrdem  := {"Setor","Nome"} As Array
 //MV_PAR07 = Periodo?
 //MV_PAR08 = Situacoes?
 //MV_PAR09 = Filiais?
-Do While .T.
+While .T.
 	If !Pergunte(cPerg,.T.)
 		Return .F.
 	EndIf
@@ -65,14 +65,8 @@ EndDo
 
 DEFINE REPORT oReport NAME "RPON001" TITLE "Relação Abonos" PARAMETER cPerg ACTION {|oReport| PrintReport(oReport)}
 
-//Nao imprimir pagina de parametros
-//oReport:HideParamPage()
-
 //Define que será impressa a página de parâmetros do relatório.
 oReport:ShowParamPage()
-
-//Seta Padrao de impressao Paisagem.
-//oReport:SetLandscape()
 
 //Seta Padrao de impressao Retrato
 oReport:SetPortrait()
@@ -83,12 +77,12 @@ oReport:SetTotalInLine(.F.)
 //Desabilita a modificacao de orientacao do relatorio
 oReport:DisableOrientation()
 
-DEFINE SECTION oZAK OF oReport TITLE "SETORES" TABLES "QRYSPH" ORDERS aOrdem
+DEFINE Section oZAK OF oReport TITLE "SETORES" TABLES "QRYSPH" ORDERS aOrdem
 	DEFINE CELL NAME "FILIAL"       OF oZAK ALIAS "QRYSPH" TITLE "Filial" 			    SIZE 04
 	DEFINE CELL NAME "ZAK_COD" 		OF oZAK ALIAS "QRYSPH" TITLE "Cód." 			    SIZE 06 //COD DO SETOR
 	DEFINE CELL NAME "DESC_SETOR"	OF oZAK ALIAS "QRYSPH" TITLE "Setor" 			    SIZE 30 //DESCRICAO DO SETOR
 
-DEFINE SECTION oSPH OF oZAK TITLE "MOVIMENTACOES" TABLES "SPH", "SP6", "SRA"
+DEFINE Section oSPH OF oZAK TITLE "MOVIMENTACOES" TABLES "SPH", "SP6", "SRA"
 	DEFINE CELL NAME "ZAK_COD" 	   OF oSPH ALIAS "QRYSPH" TITLE "Cód." 			        SIZE 06 //COD DO SETOR
 	DEFINE CELL NAME "DESC_SETOR"  OF oSPH ALIAS "QRYSPH" TITLE "Setor" 			    SIZE 30 //DESCRICAO DO SETOR
 	DEFINE CELL NAME "RA_MAT"	   OF oSPH ALIAS "SPH"    TITLE "Matrícula"             SIZE 06
@@ -142,7 +136,7 @@ Private nOrdem  	:= oZAK:GetOrder() As Numeric//Retorna a ordem de impressão sel
 U_ITLOGACS() // Grava log de utilização
 
 //Define o título do relatório.
-oReport:SetTitle(oReport:Title() + " " + aOrdem[nOrdem] + " - Mov. de " + DtoC(mv_par01) + " até "  + DtoC(mv_par02))
+oReport:SetTitle(oReport:Title() + " " + aOrdem[nOrdem] + " - Mov. de " + DToC(MV_PAR01) + " até "  + DToC(MV_PAR02))
 
 If nOrdem = 1 //ORDENA POR SETOR
    oSPH:Cell("ZAK_COD"):Disable()
@@ -158,13 +152,13 @@ If MV_PAR07 = 2
 
 	//verIfica se vai filtrar data de movimentacoes
 	If !Empty(MV_PAR01) .And. !Empty(MV_PAR02)
-		_cFiltro += " AND PH.PH_DATA BETWEEN '" + DToS(mv_par01) + "' AND '" + DToS(mv_par02) + "' "	
+		_cFiltro += " AND PH.PH_DATA BETWEEN '" + DToS(MV_PAR01) + "' AND '" + DToS(MV_PAR02) + "' "	
 	EndIf
 
 	//verIfica se vai filtrar motivo de abono
 	If !Empty(MV_PAR03)
 	   _cFiltro += " AND PH.PH_ABONO = '" + MV_PAR03 + "' "
-	ELSE
+	Else
 	   _cFiltro += " AND PH.PH_PD IN ('017','413') "//TRAZ AS FALTAS COM OU SEM ABONO, solicitado pela Regina, chamado 47228
 	EndIf
 
@@ -177,13 +171,13 @@ Else
 
 	//VERIFICA SE VAI FILTRAR DATA DE MOVIMENTACOES
 	If !Empty(MV_PAR01) .And. !Empty(MV_PAR02)
-		_cFiltro += " AND PH.PC_DATA BETWEEN '" + DtoS(mv_par01) + "' AND '" + DtoS(mv_par02) + "' "	
+		_cFiltro += " AND PH.PC_DATA BETWEEN '" + DToS(MV_PAR01) + "' AND '" + DToS(MV_PAR02) + "' "	
 	EndIf
 
 	//VERIFICA SE VAI FILTRAR MOTIVO DE ABONO
 	If !Empty(MV_PAR03)
 	   _cFiltro += " AND PH.PC_ABONO = '" + MV_PAR03 + "' "
-	ELSE
+	Else
 	   _cFiltro += " AND PH.PC_PD IN ('017','413') "//TRAZ AS FALTAS COM OU SEM ABONO, solicitado pela Regina, chamado 47228
 	EndIf
 
@@ -202,14 +196,14 @@ If !Empty(MV_PAR04)
 EndIf
 
 //FILTRA SITUACAO DA FOLHA
-If !Empty(Alltrim(MV_PAR08)) .And. Alltrim(MV_PAR08) <> "*****"
-	_cFiltro  += " AND SRA.RA_SITFOLH IN (" + FSQLIN(STRTRAN(MV_PAR08,"*",""),1) + ") "
-	_cFiltroSR8 += " AND SRA.RA_SITFOLH IN (" + FSQLIN(STRTRAN(MV_PAR08,"*",""),1) + ") "
+If !Empty(AllTrim(MV_PAR08)) .And. AllTrim(MV_PAR08) <> "*****"
+	_cFiltro  += " AND SRA.RA_SITFOLH IN (" + FSQLIN(StrTran(MV_PAR08,"*",""),1) + ") "
+	_cFiltroSR8 += " AND SRA.RA_SITFOLH IN (" + FSQLIN(StrTran(MV_PAR08,"*",""),1) + ") "
 EndIf
 
 If !Empty(MV_PAR01) .And. !Empty(MV_PAR02)
-	_cFiltroSR8 += " AND (SR8.R8_DATAINI BETWEEN '" + DtoS(MV_PAR01) + "' AND '" + DTOS(MV_PAR02) + "' OR "
-	_cFiltroSR8 += "      SR8.R8_DATAFIM BETWEEN '" + DTOS(MV_PAR01) + "' AND '" + DTOS(MV_PAR02) + "' ) "	
+	_cFiltroSR8 += " AND (SR8.R8_DATAINI BETWEEN '" + DToS(MV_PAR01) + "' AND '" + DToS(MV_PAR02) + "' OR "
+	_cFiltroSR8 += "      SR8.R8_DATAFIM BETWEEN '" + DToS(MV_PAR01) + "' AND '" + DToS(MV_PAR02) + "' ) "	
 EndIf
 
 //VERIFICA SE VAI FILTRAR O TIPO DO AFASTAMENTO
@@ -220,9 +214,9 @@ EndIf
 _cFiltro += "%"
 _cFiltroSR8+= "%"
 
-IF nOrdem = 1     // ORDENA POR QUEBRA DO SETOR + DATA + MATRICULA
+If nOrdem = 1     // ORDENA POR QUEBRA DO SETOR + DATA + MATRICULA
    _cOrdem:="% FILIAL, DESC_SETOR , PH_DATA, RA_MAT  %"
-ELSEIF nOrdem = 2 // ORDENA POR NOME DO FUNCIONARIO + MATRICULA + DATA
+ElseIf nOrdem = 2 // ORDENA POR NOME DO FUNCIONARIO + MATRICULA + DATA
    _cOrdem:="% FILIAL, FUNCIONARIO, RA_MAT , PH_DATA %"
 EndIf
 
@@ -240,7 +234,7 @@ If MV_PAR07 = 2 //LE O SPH  - FECHADO
     UNION	  
         SELECT SR8.R8_FILIAL FILIAL , ZAK.ZAK_COD, TRIM(ZAK.ZAK_DESCRI) DESC_SETOR, SR8.R8_DATAINI AS PH_DATA, SRA.RA_MAT , TRIM(SRA.RA_NOMECMP) FUNCIONARIO,  
                SR8.R8_TIPOAFA AS PH_PD, SR8.R8_DURACAO AS PH_QUANTC, 0 AS PH_QUANTI, SR8.R8_TIPOAFA AS PH_ABONO, 
-			   'Afastamento Dt.final: '||SUBSTR(R8_DATAFIM, 7, 2) || '/' || SUBSTR(R8_DATAFIM, 5, 2) || '/' || SUBSTR(R8_DATAFIM, 1, 4) AS P6_DESC, 0 AS PH_QTABONO 
+			   'Afastamento Dt.final: '||SubStr(R8_DATAFIM, 7, 2) || '/' || SubStr(R8_DATAFIM, 5, 2) || '/' || SubStr(R8_DATAFIM, 1, 4) AS P6_DESC, 0 AS PH_QTABONO 
         FROM  %Table:SR8% SR8
         JOIN  %Table:SRA% SRA ON SRA.D_E_L_E_T_ = ' ' AND SRA.RA_FILIAL = SR8.R8_FILIAL AND SRA.RA_MAT = SR8.R8_MAT  
         JOIN  %Table:ZAK% ZAK ON ZAK.D_E_L_E_T_ = ' ' AND ZAK.ZAK_COD   = SRA.RA_I_SETOR //FILIAL COMPARTILHADO
@@ -259,7 +253,7 @@ Else            //LE O SPC - ABERTO
     UNION	  
         SELECT SR8.R8_FILIAL FILIAL, ZAK.ZAK_COD, TRIM(ZAK.ZAK_DESCRI) DESC_SETOR, SR8.R8_DATAINI AS PH_DATA, SRA.RA_MAT , TRIM(SRA.RA_NOMECMP) FUNCIONARIO,  
                SR8.R8_TIPOAFA AS PH_PD, SR8.R8_DURACAO AS PH_QUANTC, 0 AS PH_QUANTI, SR8.R8_TIPOAFA AS PH_ABONO, 
-			   'Afastamento Dt.final: '||SUBSTR(R8_DATAFIM, 7, 2) || '/' || SUBSTR(R8_DATAFIM, 5, 2) || '/' || SUBSTR(R8_DATAFIM, 1, 4) AS P6_DESC, 0 AS PH_QTABONO 
+			   'Afastamento Dt.final: '||SubStr(R8_DATAFIM, 7, 2) || '/' || SubStr(R8_DATAFIM, 5, 2) || '/' || SubStr(R8_DATAFIM, 1, 4) AS P6_DESC, 0 AS PH_QTABONO 
         FROM  %Table:SR8% SR8
         JOIN  %Table:SRA% SRA ON SRA.D_E_L_E_T_ = ' ' AND SRA.RA_FILIAL = SR8.R8_FILIAL AND SRA.RA_MAT = SR8.R8_MAT  
         JOIN  %Table:ZAK% ZAK ON ZAK.D_E_L_E_T_ = ' ' AND ZAK.ZAK_COD   = SRA.RA_I_SETOR //FILIAL COMPARTILHADO
@@ -273,10 +267,10 @@ END REPORT QUERY oReport:Section(1)
 //Define que a seção filha utiliza a query da seção pai na impressão da seção.
 oReport:Section(1):Section(1):SetParentQuery()
 
-If nOrdem = 1 .OR. (oReport:nDevice = 4 .AND. oReport:nExcelPrintType >= 3)//EXCEL //ORDENA POR SETOR
-   //SetParentFilter - Define a regra de saída do loop de impressão das seções filhas ou seja qdo serão efetuadas as quebras de secoes.
-   //bFilter Bloco de código com a regra para saída do loop
-   //bParam Bloco de código com a expressão que retorna o valor que é enviado como parâmetro para a regra de saída do loop
+If nOrdem = 1 .Or. (oReport:nDevice = 4 .And. oReport:nExcelPrintType >= 3)//EXCEL //ORDENA POR SETOR
+   //SetParentFilter - Define a regra de saída do Loop de impressão das seções filhas ou seja qdo serão efetuadas as quebras de secoes.
+   //bFilter Bloco de código com a regra para saída do Loop
+   //bParam Bloco de código com a expressão que retorna o valor que é enviado como parâmetro para a regra de saída do Loop
    oReport:Section(1):Section(1):SetParentFilter({|cParam| QRYSPH->FILIAL+QRYSPH->ZAK_COD == cParam },{|| QRYSPH->FILIAL+QRYSPH->ZAK_COD })
 Else//PRO NOME
    oReport:Section(1):Section(1):SetParentFilter({|cParam| QRYSPH->FILIAL == cParam },{|| QRYSPH->FILIAL })

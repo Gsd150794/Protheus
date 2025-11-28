@@ -2,38 +2,26 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor            |    Data    |                              Motivo                      										 
--------------------------------------------------------------------------------------------------------------------------------        
-
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
-#include "rwmake.ch"
-#include "APWEBSRV.CH"
-#INCLUDE "TBICONN.CH"   
-#INCLUDE "RESTFUL.CH"
-
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MGPE028
 Autor-------------: Igor Melgaço
 Data da Criacao---: 15/01/2025
-===============================================================================================================================
 Descrição---------: Rotina de verificação de caracteres inválidos na SQ3 - Chamado 49377
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function MGPE028()
 
-    FWMSGRUN(,{|oproc|  MGPE028P(oProc) },'Aguarde processamento...','Lendo dados...')
+    FWMsgRun(,{|oproc|  MGPE028P(oProc) },'Aguarde processamento...','Lendo dados...')
 
 Return
 
@@ -42,11 +30,8 @@ Return
 Programa----------: MGPE028P
 Autor-------------: Igor Melgaço
 Data da Criacao---: 15/01/2025
-===============================================================================================================================
 Descrição---------: Rotina processamento de verificação de caracteres inválidos 
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -58,16 +43,16 @@ Local _aCab := {"","Filial","Cargo","Descrição Sumária","CC","Campo","Mensagem"}
 Local _cTitAux := "Log de processamento de verificação da SQ3" As Char
 Local _cMsgTop := "Verifique as falhas de gravações de acordo com o Log:" As Char
 
-DbSelectArea("SQ3")
-DbSetOrder(1)
-SQ3->(DbGoTop())
-Do While SQ3->(!Eof())
+DBSelectArea("SQ3")
+DBSetOrder(1)
+SQ3->(DBGoTop())
+While SQ3->(!Eof())
 
-	oProc:cCaption := ("Lendo Filial "+SQ3->Q3_FILIAL+" Cargo "+SQ3->Q3_CARGO+" - "+Alltrim(SQ3->Q3_DESCSUM)+" CC"+SQ3->Q3_CC)
+	oProc:cCaption := ("Lendo Filial "+SQ3->Q3_FILIAL+" Cargo "+SQ3->Q3_CARGO+" - "+AllTrim(SQ3->Q3_DESCSUM)+" CC"+SQ3->Q3_CC)
 
 	For i := 1 to Len(aCampos)
 
-		If aCampos[i,1] == "Q3_MEMO1" .OR. aCampos[i,1] == "Q3_MEMO2" .OR. aCampos[i,1] == "Q3_MEMO3"
+		If aCampos[i,1] == "Q3_MEMO1" .Or. aCampos[i,1] == "Q3_MEMO2" .Or. aCampos[i,1] == "Q3_MEMO3"
 			&("_c"+aCampos[i,1]) := MSMM(SQ3->&(aCampos[i,2]),80,,,,,,"SQ3",,"RDY")
 		Else
 			&("_c"+aCampos[i,1]) := SQ3->&(aCampos[i,1])
@@ -81,25 +66,25 @@ Do While SQ3->(!Eof())
 
 			If &("_c"+aCampos[i,1]) <> &("_cTMP"+aCampos[i,1])
 				
-				If aCampos[i,1] == "Q3_MEMO1" .OR. aCampos[i,1] == "Q3_MEMO2" .OR. aCampos[i,1] == "Q3_MEMO3"
+				If aCampos[i,1] == "Q3_MEMO1" .Or. aCampos[i,1] == "Q3_MEMO2" .Or. aCampos[i,1] == "Q3_MEMO3"
 			       	RecLock("SQ3", .F.)
 					//MSMM(SQ3->Q3_DRELINT,80,,,,,,"SQ3",,"RDY")
 		            MSMM(, 80, , &("_c"+aCampos[i,1]), 1, , , "SQ3", aCampos[i,1])
-		        	SQ3->(MsUnlock())
+		        	SQ3->(MSUnLock())
 				Else
 					
 					RecLock("SQ3",.F.)
 					SQ3->&(aCampos[i,1]) := &("_c"+aCampos[i,1])
-					MsUnlock()
+					MSUnLock()
 				EndIf
-				AADD(_aErro,{.T.,SQ3->Q3_FILIAL,SQ3->Q3_CARGO,SQ3->Q3_DESCSUM,SQ3->Q3_CC,aCampos[i,1],"Há caracteres inválidos no campo"})
+				aAdd(_aErro,{.T.,SQ3->Q3_FILIAL,SQ3->Q3_CARGO,SQ3->Q3_DESCSUM,SQ3->Q3_CC,aCampos[i,1],"Há caracteres inválidos no campo"})
 			EndIf
 		Else
-			AADD(_aErro,{.F.,SQ3->Q3_FILIAL,SQ3->Q3_CARGO,SQ3->Q3_DESCSUM,SQ3->Q3_CC,aCampos[i,1],"Há caracteres inválidos no campo"})
+			aAdd(_aErro,{.F.,SQ3->Q3_FILIAL,SQ3->Q3_CARGO,SQ3->Q3_DESCSUM,SQ3->Q3_CC,aCampos[i,1],"Há caracteres inválidos no campo"})
 		EndIf
 
 	Next
-	SQ3->(DbSkip())
+	SQ3->(DBSkip())
 EndDo
 
 If Len(_aErro) > 0

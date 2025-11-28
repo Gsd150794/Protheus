@@ -5,20 +5,18 @@
  Autor        |    Data    |                              Motivo                      										 
 -------------------------------------------------------------------------------------------------------------------------------
  Alex Wallauer| 20/10/2017 | Chamado 22114. Separação do envio de EMAIL da Carga e do Status do PV no Schedule - 
--------------------------------------------------------------------------------------------------------------------------------
  Julio Paz    | 02/07/2019 | Chamado 29759. Alterar a rotina de envio de e-mail para ler dados das tabela ZFU e ZGY.  
--------------------------------------------------------------------------------------------------------------------------------
  Lucas Borges | 16/10/2019 | Chamado 28346. Removidos os Warning na compilação da release 12.1.25. 
--------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer| 28/02/2024 | Chamado 46694. Jerry. Alteracao para não marcar e-mail enviado se o e-mail não for enviado.
+ Alex Wallauer| 28/02/2024 | Chamado 46694. Jerry. Alteracao para não marcar e-mail enviado se o e-mail não For enviado.
+ Jose Gavetti | 26/11/2025 | Chamado 51341. __cUserId não deve ter seu conteúdo alterado orientação TOTVS.
 ===============================================================================================================================
 */
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#Include 'Protheus.ch'  
-#INCLUDE "TopConn.ch"
-#INCLUDE "RWMAKE.CH"
+#Include "TOTVS.ch"  
+#Include "TopConn.ch"
+#Include "RWMAKE.CH"
 
 /*
 =========================================================================================================================================================
@@ -44,7 +42,7 @@ Private _nConSta  := 0
 Private _nTotRegs := 0
 
 DEFAULT _cLEnvio := {"E"}//-Email ou "S"=Status ou "T"-Tela
-PRIVATE _cEnvio:=_cLEnvio[1]
+Private _cEnvio:=_cLEnvio[1]
 
 Begin Sequence
    //==========================================================================
@@ -54,7 +52,7 @@ Begin Sequence
    _lScheduler := ( Select("SM0") <= 0 )
 
    //==========================================================================
-   // Se for processamento Scheduller abre os ambientes
+   // Se For processamento Scheduller abre os ambientes
    //==========================================================================
    If _lScheduler
       SET DATE FORMAT TO "DD/MM/YYYY"
@@ -72,16 +70,16 @@ Begin Sequence
    _cQry := "SELECT ZFU_FILIAL, ZFU_DATA, ZFU_HORA, ZFU_CODIGO, ZFU_NCARGA, ZFU_ENMAIL, ' ' AS ZGY_ENSTUS,"
    _cQry += " ZFU_RDCUSR, ZFU_SITUAC, ZFU_RETORN, ZFU.R_E_C_N_O_ ZFU_REC, 0 AS ZGY_REC "
    _cQry += " FROM "+ RetSqlName("ZFU") +" ZFU "
-   _cQry += " WHERE ZFU.D_E_L_E_T_ <> '*' "
-   _cQry += " AND ZFU.ZFU_DATA >= '" + Dtos(_cDtInicial) + "' "
+   _cQry += " WHERE ZFU.D_E_L_E_T_ = ' ' "
+   _cQry += " AND ZFU.ZFU_DATA >= '" + DToS(_cDtInicial) + "' "
    _cQry += " AND ZFU.ZFU_ENMAIL = 'S' "
    _cQry += " UNION"
    _cQry += " SELECT ZGY_FILIAL AS ZFU_FILIAL, ZGY_DATA AS ZFU_DATA , ZGY_HORA  AS ZFU_HORA, ZGY_CODIGO AS ZFU_CODIGO,"
    _cQry += " ZGY_NCARGA AS ZFU_NCARGA, ' ' AS ZFU_ENMAIL, ZGY_ENSTUS , ' ' AS  ZFU_RDCUSR, ZGY_SITUAC AS ZFU_SITUAC, ZGY_RETORN AS ZFU_RETORN,"
    _cQry += " 0 AS ZFU_REC, ZGY.R_E_C_N_O_ AS ZGY_REC "
    _cQry += " FROM "+ RetSqlName("ZGY") +" ZGY "
-   _cQry += " WHERE ZGY.D_E_L_E_T_ <> '*' "
-   _cQry += " AND ZGY.ZGY_DATA >= '" + Dtos(_cDtInicial) + "' "
+   _cQry += " WHERE ZGY.D_E_L_E_T_ = ' ' "
+   _cQry += " AND ZGY.ZGY_DATA >= '" + DToS(_cDtInicial) + "' "
    _cQry += " AND ZGY.ZGY_ENSTUS = 'S' "
    _cQry += " ORDER BY ZFU_FILIAL, ZFU_DATA, ZFU_ENMAIL, ZGY_ENSTUS "
    
@@ -90,30 +88,30 @@ Begin Sequence
    EndIf
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry(,,_cQry) , "QRYTRB" , .T. , .F. )
-   DBSELECTAREA("QRYTRB")
+   DBSelectArea("QRYTRB")
    
    //TCSetField( < cAlias >, < cField >, < cType >, [ nSize ], [ nPrecision ] )
    TCSetField( "QRYTRB", "ZFU_DATA", "D", 8 )
 
-   DbSelectArea("QRYTRB")
+   DBSelectArea("QRYTRB")
    Count To _nTotRegs
 
    //================================================================================
    // Define a estrutura da tabela TRB.
    //================================================================================
    _aStrucTrb := {}
-   Aadd(_aStrucTrb,{ "ZFU_FILIAL" ,"C", 2  , 0, "" })
-   Aadd(_aStrucTrb,{ "ZFU_DATA"   ,"D", 8  , 0, "" })
-   Aadd(_aStrucTrb,{ "ZFU_HORA"   ,"C", 8  , 0, "" })
-   Aadd(_aStrucTrb,{ "ZFU_CODIGO" ,"C", 9  , 0, "" })
-   Aadd(_aStrucTrb,{ "ZFU_NCARGA" ,"C", 6  , 0, "" })
-   Aadd(_aStrucTrb,{ "ZFU_ENMAIL" ,"C", 1  , 0, "" })
-   Aadd(_aStrucTrb,{ "ZGY_ENSTUS" ,"C", 1  , 0, "" })
-   Aadd(_aStrucTrb,{ "ZFU_RDCUSR" ,"C", 6  , 0, "" })
-   Aadd(_aStrucTrb,{ "ZFU_SITUAC" ,"C", 1  , 0, "" })
-   Aadd(_aStrucTrb,{ "ZFU_RETORN" ,"C", 400, 0, "" })
-   Aadd(_aStrucTrb,{ "ZFU_REC"    ,"N", 10 , 0, "" })
-   Aadd(_aStrucTrb,{ "ZGY_REC"    ,"N", 10 , 0, "" })
+   aAdd(_aStrucTrb,{ "ZFU_FILIAL" ,"C", 2  , 0, "" })
+   aAdd(_aStrucTrb,{ "ZFU_DATA"   ,"D", 8  , 0, "" })
+   aAdd(_aStrucTrb,{ "ZFU_HORA"   ,"C", 8  , 0, "" })
+   aAdd(_aStrucTrb,{ "ZFU_CODIGO" ,"C", 9  , 0, "" })
+   aAdd(_aStrucTrb,{ "ZFU_NCARGA" ,"C", 6  , 0, "" })
+   aAdd(_aStrucTrb,{ "ZFU_ENMAIL" ,"C", 1  , 0, "" })
+   aAdd(_aStrucTrb,{ "ZGY_ENSTUS" ,"C", 1  , 0, "" })
+   aAdd(_aStrucTrb,{ "ZFU_RDCUSR" ,"C", 6  , 0, "" })
+   aAdd(_aStrucTrb,{ "ZFU_SITUAC" ,"C", 1  , 0, "" })
+   aAdd(_aStrucTrb,{ "ZFU_RETORN" ,"C", 400, 0, "" })
+   aAdd(_aStrucTrb,{ "ZFU_REC"    ,"N", 10 , 0, "" })
+   aAdd(_aStrucTrb,{ "ZGY_REC"    ,"N", 10 , 0, "" })
 
    //================================================================================
    // Verifica se ja existe um arquivo com mesmo nome, se sim fecha.
@@ -139,49 +137,49 @@ Begin Sequence
 
    Processa( {|| U_AOMS101Q(_nTotRegs) } ,, "Carregando Dados Carga/Situacao PV..." )
 
-   DbSelectArea("TRB")
-   TRB->(DbSetOrder(1)) 
-   TRB->(DbGoTop())
+   DBSelectArea("TRB")
+   TRB->(DBSetOrder(1)) 
+   TRB->(DBGoTop())
 
    //================================================================================   
    // Processamento em tela 
    //================================================================================
-   IF !_lScheduler
+   If !_lScheduler
       _cEnvio := "T"
       cCadastro := "LISTA DAS CARGAS QUE NAO ENVIARAM E-MAIL"
 
-      Aadd(aRotina,{"Pesquisar" ,"AxPesqui"   ,0,1})
-      Aadd(aRotina,{"Visualizar","U_AOMS085V" ,0,2})   
-      Aadd(aRotina,{"Envia Email Atual","U_AOMS101A(.F.)" ,0,6})
-      Aadd(aRotina,{"Envia Email Todos","U_AOMS101A(.T.)" ,0,6})
+      aAdd(aRotina,{"Pesquisar" ,"AxPesqui"   ,0,1})
+      aAdd(aRotina,{"Visualizar","U_AOMS085V" ,0,2})   
+      aAdd(aRotina,{"Envia Email Atual","U_AOMS101A(.F.)" ,0,6})
+      aAdd(aRotina,{"Envia Email Todos","U_AOMS101A(.T.)" ,0,6})
 
-      Aadd(_aCores,{"ZFU_ENMAIL == 'S' .OR. ZGY_ENSTUS == 'S'" ,"BR_VERDE" })
-      Aadd(_aCores,{"(ZFU_ENMAIL == 'N' .AND. ZGY_ENSTUS == ' ') .Or. (ZFU_ENMAIL == ' ' .AND. ZGY_ENSTUS == 'N') " ,"BR_VERMELHO" })
+      aAdd(_aCores,{"ZFU_ENMAIL == 'S' .Or. ZGY_ENSTUS == 'S'" ,"BR_VERDE" })
+      aAdd(_aCores,{"(ZFU_ENMAIL == 'N' .And. ZGY_ENSTUS == ' ') .Or. (ZFU_ENMAIL == ' ' .And. ZGY_ENSTUS == 'N') " ,"BR_VERMELHO" })
 
-      //Aadd(_aCmp, {"Titulo", {|| Alias->campo}, "Tipo", Tamanho, Decimal, ""})
+      //aAdd(_aCmp, {"Titulo", {|| Alias->campo}, "Tipo", Tamanho, Decimal, ""})
        _aCmp := {}
-      Aadd(_aCmp,{ "Filial"                  , {|| TRB->ZFU_FILIAL} ,"C", 2  , 0, "" })
-      Aadd(_aCmp,{ "Emissão"                 , {|| TRB->ZFU_DATA}   ,"D", 8  , 0, "" })
-      Aadd(_aCmp,{ "Hora"                    , {|| TRB->ZFU_HORA}   ,"C", 8  , 0, "" })
-      Aadd(_aCmp,{ "Carga RDC/Ped.Vend"      , {|| TRB->ZFU_CODIGO} ,"C", 9  , 0, "" })
-      Aadd(_aCmp,{ "Carga Protheus/Ped.Vend" , {|| TRB->ZFU_NCARGA} ,"C", 6  , 0, "" })
-      Aadd(_aCmp,{ "Envia Email"             , {|| TRB->ZFU_ENMAIL} ,"C", 1  , 0, "" })
-      Aadd(_aCmp,{ "Envia Status PV"         , {|| TRB->ZGY_ENSTUS} ,"C", 1  , 0, "" })
-      Aadd(_aCmp,{ "Usuario RDC"             , {|| TRB->ZFU_RDCUSR} ,"C", 6  , 0, "" })
-      Aadd(_aCmp,{ "Situação"                , {|| TRB->ZFU_SITUAC} ,"C", 1  , 0, "" })
-      Aadd(_aCmp,{ "Retorno"                 , {|| TRB->ZFU_RETORN} ,"C", 250, 0, "" })
-      Aadd(_aCmp,{ "Recno Carga"             , {|| TRB->ZFU_REC}    ,"N", 10 , 0, "" })
-      Aadd(_aCmp,{ "Recno Status PV"         , {|| TRB->ZGY_REC}    ,"N", 10 , 0, "" })
+      aAdd(_aCmp,{ "Filial"                  , {|| TRB->ZFU_FILIAL} ,"C", 2  , 0, "" })
+      aAdd(_aCmp,{ "Emissão"                 , {|| TRB->ZFU_DATA}   ,"D", 8  , 0, "" })
+      aAdd(_aCmp,{ "Hora"                    , {|| TRB->ZFU_HORA}   ,"C", 8  , 0, "" })
+      aAdd(_aCmp,{ "Carga RDC/Ped.Vend"      , {|| TRB->ZFU_CODIGO} ,"C", 9  , 0, "" })
+      aAdd(_aCmp,{ "Carga Protheus/Ped.Vend" , {|| TRB->ZFU_NCARGA} ,"C", 6  , 0, "" })
+      aAdd(_aCmp,{ "Envia Email"             , {|| TRB->ZFU_ENMAIL} ,"C", 1  , 0, "" })
+      aAdd(_aCmp,{ "Envia Status PV"         , {|| TRB->ZGY_ENSTUS} ,"C", 1  , 0, "" })
+      aAdd(_aCmp,{ "Usuario RDC"             , {|| TRB->ZFU_RDCUSR} ,"C", 6  , 0, "" })
+      aAdd(_aCmp,{ "Situação"                , {|| TRB->ZFU_SITUAC} ,"C", 1  , 0, "" })
+      aAdd(_aCmp,{ "Retorno"                 , {|| TRB->ZFU_RETORN} ,"C", 250, 0, "" })
+      aAdd(_aCmp,{ "Recno Carga"             , {|| TRB->ZFU_REC}    ,"N", 10 , 0, "" })
+      aAdd(_aCmp,{ "Recno Status PV"         , {|| TRB->ZGY_REC}    ,"N", 10 , 0, "" })
 
       // mBrowse(,,,,cAli>,<aFixe, <cCpo>, <nPar>, <cCorFun>, <nClickDef>, <aColors>, <cTopFun>, <cBotFun>, <nPar14>, <bInitBloc>, <lNoMnuFilter>, <lSeeAll>, <lChgAll>, <cExprFilTop>, <nInterval>, <uPar22>, <uPar23> )
       mBrowse(,,,,"TRB",_aCmp ,       ,       ,          ,            , _aCores)
-   ELSE
+   Else
       //================================================================================   
       // Processamento em Sheduller 
       //================================================================================  
       U_AOMS101A(.T.)
   
-   ENDIF   
+   EndIf   
 
 
 End Sequence
@@ -198,7 +196,7 @@ If Select("TRB") > 0
 EndIf
 
 
-Return Nil    
+Return    
 
 
 /*
@@ -214,7 +212,7 @@ Parametros------: Nenhum
 Retorno---------: Nenhum                  
 ===============================================================================================================================
 */
-USER Function AOMS101A(_lTodos)
+User Function AOMS101A(_lTodos)
 
 Begin Sequence
    //================================================================================
@@ -225,11 +223,11 @@ Begin Sequence
 
       Processa( {|| cObs:=U_AOMS101E(_lTodos) } )
 
-	   U_ITMSG(cObs,;
+	   U_ITMsg(cObs,;
 			   "Envios Concluidos",;
 			   "As Cargas não encontradas foram marcadas para não enviar mais.",2)
-      Break 
-   ENDIF
+      Break
+   EndIf
 
    //================================================================================
    // Processamento em Scheduller: Lê os dados e envia e-mail
@@ -259,10 +257,11 @@ Retorno---------: Nenhum
 */
 User Function AOMS101E( _lTodos )
 
-LOCAL _cFilOld:= cFilAnt
-LOCAL _cCarga := ""
-LOCAL _cAlias
-PRIVATE _lEnvioOK:=.T.//ALTERADO NA FUNCTION OM200EMAIL() DO OM200FIM.PRW
+Local _cFilOld:= cFilAnt
+Local _cCarga := ""
+Local _cAlias
+Local _cCodUser := ""
+Private _lEnvioOK:=.T.//ALTERADO NA FUNCTION OM200EMAIL() DO OM200FIM.PRW
 
 
 Begin Sequence
@@ -272,18 +271,18 @@ Begin Sequence
       IncProc("Lendo dados...")
       IncProc("Lendo dados...")
    Else
-      cUsuario := SPACE(06)+"Administrador  "
-      cUsername:= "Schedure"
+      cUsuario := Space(06)+"Administrador  "
+      cUserName:= "Schedure"
    EndIf
 
    If !_lScheduler
       ProcRegua(_nTotRegs)
-   ELSE
-      U_ITCONOUT(ALLTRIM(STR(_nTotRegs,10))+' Registros encontrados. SELECT: ')
-   ENDIF
+   Else
+      U_ITCONOUT(AllTrim(Str(_nTotRegs,10))+' Registros encontrados. SELECT: ')
+   EndIf
 
-   DAK->(DBSETORDER(1))
-   SC5->(DbSetOrder(1) )
+   DAK->(DBSetOrder(1))
+   SC5->(DBSetOrder(1) )
    DAI->(DBSetOrder(1) )
 
    cObs:=""
@@ -293,16 +292,16 @@ Begin Sequence
    _aPVsStatus:={}
 
    If _lTodos
-      TRB->(DBGOTOP())
+      TRB->(DBGoTop())
    EndIf
 
-   DO WHILE TRB->(!EOF())  
+   While TRB->(!Eof())  
       If TRB->ZFU_REC > 0
          _lPV := .F.
-         ZFU->(DBGOTO(TRB->ZFU_REC ))
+         ZFU->(DBGoTo(TRB->ZFU_REC ))
       Else
          _lPV := .T.
-         ZGY->(DBGOTO(TRB->ZGY_REC ))
+         ZGY->(DBGoTo(TRB->ZGY_REC ))
       EndIf
 
       If !_lScheduler
@@ -311,116 +310,116 @@ Begin Sequence
          Else
             IncProc("Lendo Filial/Ped.Venda: "+ZGY->ZGY_FILIAL+"-"+ZGY->ZGY_CODIGO )
          EndIf
-      ENDIF
+      EndIf
    
       If ! _lPV
          cFilAnt :=ZFU->ZFU_FILIAL
-         _cCarga :=ALLTRIM(ZFU->ZFU_NCARGA)  
+         _cCarga :=AllTrim(ZFU->ZFU_NCARGA)  
       Else
          cFilAnt :=ZGY->ZGY_FILIAL
-         _cCarga :=ALLTRIM(ZGY->ZGY_NCARGA) 
+         _cCarga :=AllTrim(ZGY->ZGY_NCARGA) 
       EndIf
    
       _cObsAux:=""
 
       _lEnvioOK:=.T.//ALTERADO NA FUNCTION OM200EMAIL() DO OM200FIM.PRW
-      DAK->(DBSETORDER(1))//No envio do email muda a ordem
-      IF ! _lPV .AND. (EMPTY(_cCarga) .OR. !DAK->(DBSEEK(cFilAnt+_cCarga)))
-         _cObsAux:="[DAK] Carga não Encontrada: [Filial "+ZFU->ZFU_FILIAL+"] [RDC: "+ALLTRIM(ZFU->ZFU_CODIGO)+"] [Protheus: "+_cCarga+"]"
-      ELSE
+      DAK->(DBSetOrder(1))//No envio do email muda a ordem
+      If ! _lPV .And. (Empty(_cCarga) .Or. !DAK->(DBSeek(cFilAnt+_cCarga)))
+         _cObsAux:="[DAK] Carga não Encontrada: [Filial "+ZFU->ZFU_FILIAL+"] [RDC: "+AllTrim(ZFU->ZFU_CODIGO)+"] [Protheus: "+_cCarga+"]"
+      Else
          //===============================================================
          //             ENVIO DE EMAIL (Carga) 
          //===============================================================
          _lEnvioOK:=.T.//ALTERADO NA FUNCTION OM200EMAIL() DO OM200FIM.PRW
-         IF _cEnvio $ "E,T" .AND. !_lPV .AND. ZFU->ZFU_ENMAIL = "S" .AND. ASCAN(_aPVsEmail,cFilAnt+_cCarga) = 0
-            _cMailUsrCarga:=Posicione("ZZL",5,xfilial("ZZL")+AllTrim(ZFU->ZFU_RDCUSR),"ZZL_EMAIL") // E-mail do usuário que criou a carga utilizado na rotina de envio de e-mail da carga.
+         If _cEnvio $ "E,T" .And. !_lPV .And. ZFU->ZFU_ENMAIL = "S" .And. aScan(_aPVsEmail,cFilAnt+_cCarga) = 0
+            _cMailUsrCarga:=Posicione("ZZL",5,xFilial("ZZL")+AllTrim(ZFU->ZFU_RDCUSR),"ZZL_EMAIL") // E-mail do usuário que criou a carga utilizado na rotina de envio de e-mail da carga.
             _cEmlLog:=""
-            __cUserID := SubStr( Embaralha( DAK->DAK_USERGI, 1 ), 3, 6 )
-            U_OM200Email(.F.,Nil,.T.,.T.,.F.)//_lEstorno,_aCargas,_lEnviaDireto,_lScheduller,_lMarcaEnvio
+            _cCodUser := SubStr( Embaralha( DAK->DAK_USERGI, 1 ), 3, 6 )
+            U_OM200Email(.F.,Nil,.T.,.T.,.F.,_cCodUser)//_lEstorno,_aCargas,_lEnviaDireto,_lScheduller,_lMarcaEnvio
             _nConta++
-            _cObsAux:="[DAK] "+ALLTRIM(STR(_nConta,10))+" E-mail(s) Enviado(s), Carga: [Filial "+ZFU->ZFU_FILIAL+"] [RDC: "+ALLTRIM(ZFU->ZFU_CODIGO)+"] [Protheus: "+_cCarga+"]"
-            IF !EMPTY(_cEmlLog)
-               _cObsAux+=" [Log: "+ALLTRIM(_cEmlLog)+"]"
-            ENDIF
-            AADD(_aPVsEmail,cFilAnt+_cCarga)
-         ENDIF
+            _cObsAux:="[DAK] "+AllTrim(Str(_nConta,10))+" E-mail(s) Enviado(s), Carga: [Filial "+ZFU->ZFU_FILIAL+"] [RDC: "+AllTrim(ZFU->ZFU_CODIGO)+"] [Protheus: "+_cCarga+"]"
+            If !Empty(_cEmlLog)
+               _cObsAux+=" [Log: "+AllTrim(_cEmlLog)+"]"
+            EndIf
+            aAdd(_aPVsEmail,cFilAnt+_cCarga)
+         EndIf
 
          //===============================================================
          //             ENVIO DE Status Pedido de Vendas 
          //===============================================================
-         If ZGY->ZGY_ENSTUS = "S" .AND. ASCAN(_aPVsStatus,cFilAnt+_cCarga) = 0
+         If ZGY->ZGY_ENSTUS = "S" .And. aScan(_aPVsStatus,cFilAnt+_cCarga) = 0
          
             If ! Empty(_cObsAux)
                _cObsAux+=CHR(13)+CHR(10)
             EndIf
 
-            IF _cEnvio $ "S,T" .AND. _lPV
+            If _cEnvio $ "S,T" .And. _lPV
                //********  ENVIO DOS STATUS DOS PEDIDOS 
-               SC5->(DbSetOrder(1) )
-               If SC5->( DbSeek( cFilAnt+_cCarga ) )
+               SC5->(DBSetOrder(1) )
+               If SC5->( DBSeek( cFilAnt+_cCarga ) )
                   U_ENVSITPV(,.F.)  //Envia situação do pedido de venda para o RDC
                   _nConSta++
                   //U_GrvMonitor()//Monitor pedido de vendas
-                  _cObsAux+="[SC5] "+ALLTRIM(STR(_nConSta,10))+" Envio(s) de Status efetuado(s), Pedido: [Filial "+cFilAnt+"] [PV: "+_cCarga+"] "
-               ELSE
+                  _cObsAux+="[SC5] "+AllTrim(Str(_nConSta,10))+" Envio(s) de Status efetuado(s), Pedido: [Filial "+cFilAnt+"] [PV: "+_cCarga+"] "
+               Else
                   _cObsAux+="[SC5] Pedido não Encontrado: [Filial "+cFilAnt+"] [PV: "+_cCarga+"] "
-               ENDIF 
+               EndIf 
         
-            ELSEIF _cEnvio $ "E,T"
+            ElseIf _cEnvio $ "E,T"
                //********  ENVIO DOS STATUS DOS PEDIDOS DA CARGA QUANDO ENVIA O EMAIL
                DAI->(DBSetOrder(1) )
                If DAI->( DBSeek( DAK->DAK_FILIAL + DAK->DAK_COD ) )
-                  _cObsAux+="[DAI] Carga para Envio de Status de PV: [Filial "+ZGY->ZGY_FILIAL+"] [RDC: "+ALLTRIM(ZGY->ZGY_CODIGO)+"] [Protheus: "+_cCarga+"]"
-	               DO While DAI->( !EOF() ) .And. DAI->DAI_FILIAL + DAI->DAI_COD == DAK->DAK_FILIAL + DAK->DAK_COD
-                     SC5->(DbSetOrder(1) )
-                     If SC5->( DbSeek( DAI->DAI_FILIAL + DAI->DAI_PEDIDO ) )
+                  _cObsAux+="[DAI] Carga para Envio de Status de PV: [Filial "+ZGY->ZGY_FILIAL+"] [RDC: "+AllTrim(ZGY->ZGY_CODIGO)+"] [Protheus: "+_cCarga+"]"
+	               While DAI->( !Eof() ) .And. DAI->DAI_FILIAL + DAI->DAI_COD == DAK->DAK_FILIAL + DAK->DAK_COD
+                     SC5->(DBSetOrder(1) )
+                     If SC5->( DBSeek( DAI->DAI_FILIAL + DAI->DAI_PEDIDO ) )
                         U_ENVSITPV(,.F.)  //Envia situação do pedido de venda para o RDC
                         _nConSta++
                         //U_GrvMonitor()//Monitor pedido de vendas
-                        _cObsAux+=CHR(13)+CHR(10)+"[DAI] "+ALLTRIM(STR(_nConSta,10))+" Envio(s) de Status efetuado(s), PV: [Filial "+DAI->DAI_FILIAL+"] [PV: "+DAI->DAI_PEDIDO+"] "
-                     ELSE
+                        _cObsAux+=CHR(13)+CHR(10)+"[DAI] "+AllTrim(Str(_nConSta,10))+" Envio(s) de Status efetuado(s), PV: [Filial "+DAI->DAI_FILIAL+"] [PV: "+DAI->DAI_PEDIDO+"] "
+                     Else
                         _cObsAux+=CHR(13)+CHR(10)+"[DAI] Pedido não Encontrado: [Filial "+DAI->DAI_FILIAL+"] [PV: "+DAI->DAI_PEDIDO+"] "
-                     ENDIF 
-                     DAI->( DBSKIP() )
-                  ENDDO
-               ELSE
-                  _cObsAux+="[DAI] Carga não Encontrada: [Filial "+ZGY->ZGY_FILIAL+"] [RDC: "+ALLTRIM(ZGY->ZGY_CODIGO)+"] [Protheus: "+_cCarga+"]"
-               ENDIF
+                     EndIf 
+                     DAI->( DBSkip() )
+                  EndDo
+               Else
+                  _cObsAux+="[DAI] Carga não Encontrada: [Filial "+ZGY->ZGY_FILIAL+"] [RDC: "+AllTrim(ZGY->ZGY_CODIGO)+"] [Protheus: "+_cCarga+"]"
+               EndIf
 
-            ENDIF
-            AADD(_aPVsStatus,cFilAnt+_cCarga)
-         ENDIF
-      ENDIF
+            EndIf
+            aAdd(_aPVsStatus,cFilAnt+_cCarga)
+         EndIf
+      EndIf
      
       If ! _lPV
-         IF _lEnvioOK
-            ZFU->(DBGOTO(TRB->ZFU_REC ))
-            ZFU->(RECLOCK("ZFU",.F.))
+         If _lEnvioOK
+            ZFU->(DBGoTo(TRB->ZFU_REC ))
+            ZFU->(RecLock("ZFU",.F.))
             If _cEnvio $ "E,T"
                ZFU->ZFU_ENMAIL:="N" // DesMarcou para enviar E-MAIL
             EndIf
-            ZFU->(MsUnLock())
+            ZFU->(MSUnLock())
    
             TRB->(RecLock("TRB",.F.))
             TRB->ZFU_ENMAIL := "N"
-            TRB->(MsUnLock())
-         ENDIF
+            TRB->(MSUnLock())
+         EndIf
       Else
-         ZGY->(DBGOTO(TRB->ZGY_REC ))
-         ZGY->(RECLOCK("ZGY",.F.))
+         ZGY->(DBGoTo(TRB->ZGY_REC ))
+         ZGY->(RecLock("ZGY",.F.))
          ZGY->ZGY_ENSTUS := "N" // DesMarcou para enviar Status
-         ZGY->(MsUnLock())
+         ZGY->(MSUnLock())
 
          TRB->(RecLock("TRB",.F.))
          TRB->ZGY_ENSTUS := "N"
-         TRB->(MsUnLock())
+         TRB->(MSUnLock())
       EndIf
 
-      IF !EMPTY(_cObsAux)
+      If !Empty(_cObsAux)
          cObs+=_cObsAux+CHR(13)+CHR(10)
-         _cObsAux:=STRTRAN(_cObsAux,CHR(13)+CHR(10)," ")
+         _cObsAux:=StrTran(_cObsAux,CHR(13)+CHR(10)," ")
          U_ITCONOUT(_cObsAux)
-      ENDIF
+      EndIf
       
       //===================================================================
       // Se o usuário opnou pelo registro posicionado finaliza o looping.
@@ -429,24 +428,24 @@ Begin Sequence
          Exit 
       EndIf
 
-      TRB->(DBSKIP())
+      TRB->(DBSkip())
    EndDo 
 
    cFilAnt:=_cFilOld
 
    _cAlias:="[SC5] "
-   IF _cEnvio $ "E,T"
-      cObs+="[DAK] "+ALLTRIM(STR(_nConta,10))+' Email(s) enviado(s)'+CHR(13)+CHR(10)
-      U_ITCONOUT("[DAK] "+ALLTRIM(STR(_nConta,10))+' Email(s) enviado(s)')
-      IF _cEnvio = "T"
+   If _cEnvio $ "E,T"
+      cObs+="[DAK] "+AllTrim(Str(_nConta,10))+' Email(s) enviado(s)'+CHR(13)+CHR(10)
+      U_ITCONOUT("[DAK] "+AllTrim(Str(_nConta,10))+' Email(s) enviado(s)')
+      If _cEnvio = "T"
          _cAlias+="[DAI] "
-      ELSE
+      Else
          _cAlias:="[DAI] "
-      ENDIF
-   ENDIF
+      EndIf
+   EndIf
 
-   cObs+=_cAlias+ALLTRIM(STR(_nConSta,10))+' Status enviados'
-   U_ITCONOUT(_cAlias+ALLTRIM(STR(_nConSta,10))+' Status enviados')
+   cObs+=_cAlias+AllTrim(Str(_nConSta,10))+' Status enviados'
+   U_ITCONOUT(_cAlias+AllTrim(Str(_nConSta,10))+' Status enviados')
 
 End Sequence
 
@@ -471,9 +470,9 @@ Local _nI := 0
 Begin Sequence
    ProcRegua(_ntotRegs)
 
-   QRYTRB->(DbGoTop())
+   QRYTRB->(DBGoTop())
 
-   Do While ! QRYTRB->(Eof())
+   While ! QRYTRB->(Eof())
       _nI += 1
       IncProc("Carregando Dados: "+ StrZero(_nI,10)+ "/" + StrZero(_ntotRegs,10))
 
@@ -490,11 +489,11 @@ Begin Sequence
       TRB->ZFU_RETORN := QRYTRB->ZFU_RETORN
       TRB->ZFU_REC    := QRYTRB->ZFU_REC
       TRB->ZGY_REC    := QRYTRB->ZGY_REC
-      TRB->(MsUnlock()) 
+      TRB->(MSUnLock()) 
 
-      QRYTRB->(DbSkip())
+      QRYTRB->(DBSkip())
    EndDo
 
 End Sequence
 
-Return Nil
+Return

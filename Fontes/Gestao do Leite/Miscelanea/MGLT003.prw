@@ -2,32 +2,24 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 21/07/2021 | Replicação dos dados importados para os produtores filhos e tratamento da linha. Chamado 37147
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 20/02/2023 | Alterado para permitir importar o layout 1 várias vezes. Chamado 43052
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 30/04/2024 | Correção na conversão da linha. Chamado 47117
+Lucas Borges  |21/07/2021| Chamado 37147. Replicação dos dados importados para os produtores filhos e tratamento da linha.
+Lucas Borges  |20/02/2023| Chamado 43052. Alterado para permitir importar o layout 1 várias vezes.
+Lucas Borges  |30/04/2024| Chamado 47117. Correção na conversão da linha.
 ===============================================================================================================================
 */
 
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "FILEIO.CH"
+#Include "TOTVS.ch"
+#Include "FILEIO.CH"
 
 /*
 ===============================================================================================================================
 Programa----------: MGLT003
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 10/12/2018
-===============================================================================================================================
 Descrição---------: Rotina para imporação dos dados de análises de Leite a partir de arquivo recebido do Laboratório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -58,11 +50,8 @@ Return
 Programa----------: MGLT003P
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 10/12/2018
-===============================================================================================================================
 Descrição---------: Realiza o processamento da rotina.
-===============================================================================================================================
 Parametros--------: _oSelf
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -140,7 +129,7 @@ For _nJ := 1 to Len(_aArq)
 		ZLB->( DBSetOrder(1) )
 	
 		While !(_nFilePos < 0 .Or. _nFilePos >= _nTamArq) .And. _lRet
-		    _cBuffer	:= SPACE(_nBuffer) //Aloca Buffer
+		    _cBuffer	:= Space(_nBuffer) //Aloca Buffer
 			FRead(_nHandle, _cBuffer, _nBuffer) //Lê os primeiros 100 caracteres do arquivo
 			_nPos	:= AT(_cEOL, _cBuffer) // Procura o primeiro final de linha
 			For _nX:= 1 To _nPos
@@ -149,10 +138,10 @@ For _nJ := 1 to Len(_aArq)
 			
 		    If _nPos == 0
 				MsgStop("Arquivo + "+_aArq[_nJ]+" + inconsistênte. Favor acionar o área de TI.","MGLT00302")
-				Return()
+				Return
 			EndIf	    	
 		    // Leitura dos campos e gravação dos dados na tabela
-		    _cLine := Substr(_cBuffer, 0, _nPos)
+		    _cLine := SubStr(_cBuffer, 0, _nPos)
 			_aTemp:= StrTokArr(Upper(_cLine),';')
 			
 			//Evito de importar as possíveis linhas em branco que esquecem no fim do arquivo
@@ -237,20 +226,20 @@ For _nJ := 1 to Len(_aArq)
 
 					_oSelf:IncRegua2("Gravando registros...["+ StrZero(_nI,6) +"] de ["+ StrZero(_nQtdReg,6) +"]" ) 
 					If _nLayout == 1
-						_cCodPrd := Substr(_aDados[_nI][02],1,GetSx3Cache("A2_COD","X3_TAMANHO"))
-						_cLojPrd := Substr(_aDados[_nI][02],GetSx3Cache("A2_COD","X3_TAMANHO")+2,GetSx3Cache("A2_COD","X3_TAMANHO")+1+GetSx3Cache("A2_LOJA","X3_TAMANHO"))
+						_cCodPrd := SubStr(_aDados[_nI][02],1,GetSx3Cache("A2_COD","X3_TAMANHO"))
+						_cLojPrd := SubStr(_aDados[_nI][02],GetSx3Cache("A2_COD","X3_TAMANHO")+2,GetSx3Cache("A2_COD","X3_TAMANHO")+1+GetSx3Cache("A2_LOJA","X3_TAMANHO"))
 						
 						If Val( AllTrim( StrTran( StrTran( _aDados[_nI][04] , '.' , '' ) , ',' , '.' ) ) ) > _nLimGor
 							aAdd( _aNaoPrc , { _cCodPrd , _cLojPrd , 'Resultado da análise de gordura acima do limite permitido!' } )
 							Loop
 						EndIf
 					ElseIf _nLayout == 4 .Or. _nLayout == 5 .Or. _nLayout == 6
-						_cCodPrd := Substr(_aDados[_nI][02],1,GetSx3Cache("A2_COD","X3_TAMANHO"))
-						_cLojPrd := Substr(_aDados[_nI][02],GetSx3Cache("A2_COD","X3_TAMANHO")+2,GetSx3Cache("A2_COD","X3_TAMANHO")+1+GetSx3Cache("A2_LOJA","X3_TAMANHO"))
+						_cCodPrd := SubStr(_aDados[_nI][02],1,GetSx3Cache("A2_COD","X3_TAMANHO"))
+						_cLojPrd := SubStr(_aDados[_nI][02],GetSx3Cache("A2_COD","X3_TAMANHO")+2,GetSx3Cache("A2_COD","X3_TAMANHO")+1+GetSx3Cache("A2_LOJA","X3_TAMANHO"))
 						_cData := _aDados[_nI][01]
 					Else
-						_cCodPrd:= Substr(_aDados[_nI][05],1,GetSx3Cache("A2_COD","X3_TAMANHO"))
-						_cLojPrd:= Substr(_aDados[_nI][05],GetSx3Cache("A2_COD","X3_TAMANHO")+2,GetSx3Cache("A2_COD","X3_TAMANHO")+1+GetSx3Cache("A2_LOJA","X3_TAMANHO"))
+						_cCodPrd:= SubStr(_aDados[_nI][05],1,GetSx3Cache("A2_COD","X3_TAMANHO"))
+						_cLojPrd:= SubStr(_aDados[_nI][05],GetSx3Cache("A2_COD","X3_TAMANHO")+2,GetSx3Cache("A2_COD","X3_TAMANHO")+1+GetSx3Cache("A2_LOJA","X3_TAMANHO"))
 						_cData := _aDados[_nI][02]
 						_cHora := '00:00:00'
 		
@@ -271,7 +260,7 @@ For _nJ := 1 to Len(_aArq)
 						EndIf
 						
 						If _lRet .And. _nLayout == 3
-							If !ZLB->( DBSeek( xFilial('ZLB') + _cCodPrd + _cLojPrd + DtoS( CtoD( _cData ) ) ) )
+							If !ZLB->( DBSeek( xFilial('ZLB') + _cCodPrd + _cLojPrd + DToS( CtoD( _cData ) ) ) )
 								aAdd( _aNaoPrc , { _cCodPrd , _cLojPrd , 'Não foi importada a análise do arquivo tipo "1" para esse produtor!' } )
 								Loop
 							EndIf
@@ -307,7 +296,7 @@ For _nJ := 1 to Len(_aArq)
 							AND A2_MSBLQL <> '1' 
 							AND A2_L_ATIVO = 'S'
 						EndSql
-						Do While (_cAlias)->(!Eof())
+						While (_cAlias)->(!Eof())
 							_cLinha := Space(6)
 							_cSetor := ""
 							If _nLayout == 6 .And. !Empty(_aDados[_nI][06]) .And. ZL3->( DBSeek( xFilial('ZL3') + PadR(AllTrim(_aDados[_nI][6]),6,'0')) )//Conversão burra necessária porque apesar do tipo ser reconhecido como caracter, as validações retornam F para a última coluna do arquivo
@@ -360,14 +349,14 @@ For _nJ := 1 to Len(_aArq)
 	
 							For _nZ := 1 To Len(_aUTC)
 								_lGrava := .T.
-								If ZLB->(DBSeek( xFilial('ZLB') + _aUTC[_nZ][01] + _aUTC[_nZ][02] + DtoS(CtoD(_cData))))
-									While ZLB->(ZLB_FILIAL+ZLB_RETIRO+ZLB_RETILJ+ZLB_SETOR+ZLB_LINROT) + DtoS( ZLB->ZLB_DATA ) == xFilial('ZLB') + _aUTC[_nZ][01] + _aUTC[_nZ][02] + _aUTC[_nZ][04] + _aUTC[_nZ][05]+ DtoS(CtoD(_cData))
+								If ZLB->(DBSeek( xFilial('ZLB') + _aUTC[_nZ][01] + _aUTC[_nZ][02] + DToS(CtoD(_cData))))
+									While ZLB->(ZLB_FILIAL+ZLB_RETIRO+ZLB_RETILJ+ZLB_SETOR+ZLB_LINROT) + DToS( ZLB->ZLB_DATA ) == xFilial('ZLB') + _aUTC[_nZ][01] + _aUTC[_nZ][02] + _aUTC[_nZ][04] + _aUTC[_nZ][05]+ DToS(CtoD(_cData))
 										If ( _nLayout == 2 .And. ZLB->ZLB_TIPOFX == StrZero(_nX,6));
 											.Or. (_nLayout == 3 .And. ZLB->ZLB_TIPOFX == '000007');
 											.Or. (_nLayout == 4 .And. ZLB->ZLB_TIPOFX == '000012');
 											.Or. (_nLayout == 5 .And. ZLB->ZLB_TIPOFX == '000013');
 											.Or. (_nLayout == 6 .And. ZLB->ZLB_TIPOFX == _aDados[1][5])
-											aAdd( _aNaoPrc , { _aUTC[_nZ][01] , _aUTC[_nZ][02] , 'Laudo do produtor já importado para ['+ _cDCRTPF +'] com a data ['+ DtoC( ZLB->ZLB_DATA ) +']!' } )
+											aAdd( _aNaoPrc , { _aUTC[_nZ][01] , _aUTC[_nZ][02] , 'Laudo do produtor já importado para ['+ _cDCRTPF +'] com a data ['+ DToC( ZLB->ZLB_DATA ) +']!' } )
 											_lGrava := .F.
 											Exit
 										EndIf
@@ -377,7 +366,7 @@ For _nJ := 1 to Len(_aArq)
 								
 								If _lGrava
 									If _nLayout == 1
-										ZLB->( Reclock( 'ZLB' , .T. ) )
+										ZLB->( RecLock( 'ZLB' , .T. ) )
 										ZLB->ZLB_FILIAL	:= xFilial('ZLB')
 										ZLB->ZLB_LAUDO	:= _cLaudo
 										ZLB->ZLB_SETOR	:= _aUTC[_nZ][04]
@@ -390,13 +379,13 @@ For _nJ := 1 to Len(_aArq)
 										ZLB->ZLB_VLRFX	:= Val( AllTrim( StrTran( StrTran( _aDados[_nI][_nX+3] , '.' , '' ) , ',' , '.' ) ) )
 										ZLB->ZLB_DTINCL	:= Date()
 										ZLB->ZLB_HRINCL	:= Time()
-										ZLB->( MsUnlock() )
+										ZLB->( MSUnLock() )
 										_nProc++
 									ElseIf _nLayout == 2
 										If _nX > 6
 											Exit
 										EndIf
-										ZLB->( Reclock( 'ZLB' , .T. ) )
+										ZLB->( RecLock( 'ZLB' , .T. ) )
 										ZLB->ZLB_FILIAL	:= xFilial('ZLB')
 										ZLB->ZLB_LAUDO	:= _cLaudo
 										ZLB->ZLB_SETOR	:= _aUTC[_nZ][04]
@@ -414,14 +403,14 @@ For _nJ := 1 to Len(_aArq)
 										EndIf
 										ZLB->ZLB_DTINCL	:= Date()
 										ZLB->ZLB_HRINCL	:= Time()
-										ZLB->( MsUnlock() )
+										ZLB->( MSUnLock() )
 										_nProc++
 									ElseIf _nLayout == 3
 										If _nX > 1
 											Exit
 										EndIf
 										
-										ZLB->( Reclock( 'ZLB' , .T. ) )
+										ZLB->( RecLock( 'ZLB' , .T. ) )
 										ZLB->ZLB_FILIAL	:= xFilial('ZLB')
 										ZLB->ZLB_LAUDO	:= _cLaudo
 										ZLB->ZLB_SETOR	:= _aUTC[_nZ][04]
@@ -433,15 +422,15 @@ For _nJ := 1 to Len(_aArq)
 										ZLB->ZLB_VLRFX	:= Val(AllTrim(StrTran(StrTran(_aDados[_nI][07],'.',''),',','.')))
 										ZLB->ZLB_DTINCL	:= Date()
 										ZLB->ZLB_HRINCL	:= Time()
-										ZLB->( MsUnlock() )
+										ZLB->( MSUnLock() )
 										_nProc++
 									ElseIf _nLayout == 4
 										_nVlrFx := Val( AllTrim( StrTran( StrTran( _aDados[_nI][4] , '.' , '' ) , ',' , '.' ) ) )
 										//Busco no cadastro de faixas e já calculo o valor a ser abatido na litragem do dia
 										_cAlias	:= GetNextAlias()
 										BeginSql alias _cAlias
-										SELECT  ROUND(SUM(ZLD_QTDBOM)* ZLA_VALOR /100,0) DESCLT
-											FROM %table:ZLD% ZLD, %table:ZLA% ZLA
+										SELECT  Round(SUM(ZLD_QTDBOM)* ZLA_VALOR /100,0) DESCLT
+											FROM %Table:ZLD% ZLD, %Table:ZLA% ZLA
 										  WHERE ZLD.D_E_L_E_T_ = ' '
 										  AND ZLA.D_E_L_E_T_ = ' '
 										  AND ZLD.ZLD_FILIAL = %xFilial:ZLD%
@@ -458,7 +447,7 @@ For _nJ := 1 to Len(_aArq)
 										  GROUP BY ZLA_VALOR
 										EndSql
 										
-										ZLB->( Reclock( 'ZLB' , .T. ) )
+										ZLB->( RecLock( 'ZLB' , .T. ) )
 										ZLB->ZLB_FILIAL	:= xFilial('ZLB')
 										ZLB->ZLB_LAUDO	:= ''
 										ZLB->ZLB_SETOR	:= _aUTC[_nZ][04]
@@ -473,12 +462,12 @@ For _nJ := 1 to Len(_aArq)
 										ZLB->ZLB_VOLCRI	:= (_cAlias)->DESCLT
 										ZLB->ZLB_DTINCL	:= Date()
 										ZLB->ZLB_HRINCL	:= Time()
-										ZLB->( MsUnlock() )
+										ZLB->( MSUnLock() )
 										
 										(_cAlias)->(DBCloseArea())
 										_nProc++
 									ElseIf _nLayout == 5 .Or. _nLayout == 6
-										ZLB->( Reclock( 'ZLB' , .T. ) )
+										ZLB->( RecLock( 'ZLB' , .T. ) )
 										ZLB->ZLB_FILIAL	:= xFilial('ZLB')
 										ZLB->ZLB_LAUDO	:= ''
 										ZLB->ZLB_SETOR	:= _aUTC[_nZ][04]
@@ -493,7 +482,7 @@ For _nJ := 1 to Len(_aArq)
 										ZLB->ZLB_VOLCRI	:= IIf(_nLayout == 5,Int(Val( AllTrim( StrTran( StrTran( _aDados[_nI][4] , '.' , '' ) , ',' , '.' ) ) )),0)
 										ZLB->ZLB_DTINCL	:= Date()
 										ZLB->ZLB_HRINCL	:= Time()
-										ZLB->( MsUnlock() )
+										ZLB->( MSUnLock() )
 										_nProc++
 									EndIf
 								EndIf
@@ -510,7 +499,7 @@ For _nJ := 1 to Len(_aArq)
 			End Transaction
 		
 			// Fecha arquivo	
-		    fClose(_nHandle)
+		    FClose(_nHandle)
 		    _cMsg := "Arquivo: "+_aArq[_nJ]+". Foram atualizados "+AllTrim(Str(_nProc))+" produtores com sucesso."
 		    If Len( _aNaoPrc ) > 0
 			    _cMsg := "Arquivo: "+_aArq[_nJ]+". Foram encontrados "+AllTrim(Str(Len( _aNaoPrc )))+" registros relacionados ao arquivo que não puderam ser gravados corretamente!"
@@ -531,11 +520,8 @@ Return
 Programa----------: ValTexto
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 10/12/2018
-===============================================================================================================================
 Descrição---------: Valido se o conteúdo do campo informado é válido.
-===============================================================================================================================
 Parametros--------: _cString,_cTipo,_lRet,_aNaoPrc
-===============================================================================================================================
 Retorno-----------: _cRet
 ===============================================================================================================================
 */

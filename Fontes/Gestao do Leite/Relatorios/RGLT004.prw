@@ -2,35 +2,26 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 28/05/2018 | Alterar o relatório e substituir a ferramenta TMSPRINTER para Treport - Chamado 17422
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 30/04/2019 | Revisão de fontes. Help 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 27/09/2019 | Revisão de fontes. Chamado 28346
+Julio Paz     |28/05/2018| Chamado 17422. Alterar o relatório e substituir a ferramenta TMSPRINTER para Treport
+Lucas Borges  |30/04/2019| Chamado 28346. Revisão de fontes
+Lucas Borges  |27/09/2019| Chamado 28346. Revisão de fontes.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.Ch"
+#Include "TOTVS.ch"
 
 #Define TITULO	"Recepção do Leite de Terceiros - Detalhamento do Frete"
-#Define CRLF	Chr(13)+Chr(10)
 
 /*
 ===============================================================================================================================
 Programa--------: RGLT002
 Autor-----------: Alexandre Villar  
 Data da Criacao-: 13/07/2015
-===============================================================================================================================
 Descrição-------: Relatório dos registros de recebimentos de leite de terceiros - Detalhamento por produto.
                   Migrado da ferramenta TMSPRINTER para TREPORT por Julio de Paula Paz.
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -49,12 +40,9 @@ Return
 Programa--------: RGLT004B
 Autor-----------: Alexandre Villar
 Data da Criacao-: 13/07/2015
-===============================================================================================================================
 Descrição-------: Relatório dos registros de recebimentos de leite de terceiros - Detalhamento por Frete.
                   Migrado da ferramenta TMSPRINTER para TREPORT por Julio de Paula Paz.
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -77,11 +65,8 @@ Return
 Programa----------: RGLT004D
 Autor-------------: Alexandre Villar  
 Data da Criacao---: 13/07/2015
-===============================================================================================================================
 Descrição---------: Realiza as definições do relatório. (ReportDef)
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -162,11 +147,8 @@ Return(_oReport)
 Programa--------: RGLT004SEL
 Autor-----------: Alexandre Villar
 Data da Criacao-: 13/07/2015
-===============================================================================================================================
 Descrição-------: Função para consulta e preparação dos dados do relatório
-===============================================================================================================================
 Parametros------: _oReport = Objeto do relatório.
-===============================================================================================================================
 Retorno---------: _aRet - Dados do relatório
 ===============================================================================================================================
 */
@@ -215,32 +197,32 @@ Private _aTotaisPrd := {}
 //================================================================================
 // Cria as estruturas das tabelas temporárias
 //================================================================================
-Aadd(_aStruct,{"ZLX_DTENTR","D",8,0})   // 01 - Data da Recepção      
-Aadd(_aStruct,{"ZZX_CODPRD","C",40,0})  // 02 - Tipo de Produto      
-Aadd(_aStruct,{"CHAVEPESQ" ,"C",25,0})  // 22 - Chave de Pesquisa       
+aAdd(_aStruct,{"ZLX_DTENTR","D",8,0})   // 01 - Data da Recepção      
+aAdd(_aStruct,{"ZZX_CODPRD","C",40,0})  // 02 - Tipo de Produto      
+aAdd(_aStruct,{"CHAVEPESQ" ,"C",25,0})  // 22 - Chave de Pesquisa       
    // "Detalhes da Recepção 
-Aadd(_aStruct,{"ZLX_CODIGO","C",15,0})  // 03 - Código da Recepção                               1
-Aadd(_aStruct,{"FORNECE"   ,"C",40,0})  // 04 - Nome do Fornecedor                               2
-Aadd(_aStruct,{"ZLX_NRONF" ,"C",09,0})  // 05 - Número da NF                                     3
-Aadd(_aStruct,{"TRANSP"    ,"C",40,0})  // 06 - Nome do Transportador                            4
-Aadd(_aStruct,{"ZLX_PLACA" ,"C",09,0})  // 07 - Placa do veículo                                 5
-Aadd(_aStruct,{"ZLX_VOLREC","N",18,4})  // 08 - Volume Recebido                                  6
-Aadd(_aStruct,{"ZLX_VOLNF" ,"N",18,4})  // 09 - Volume NF                                        7
-Aadd(_aStruct,{"ZLX_DIFVOL","N",18,4})  // 10 - Diferença de Volume                              8
-Aadd(_aStruct,{"ZZV_CAPACI","N",05,0})  // 11 - Capacidade do Veículo                            9
-Aadd(_aStruct,{"DIFVOLCAP" ,"N",18,4})  // 12 - Diferença de Volume x Capacidade                10
-Aadd(_aStruct,{"ZLX_VLRNF" ,"N",18,4})  // 13 - Valor NF                                        11
-Aadd(_aStruct,{"ZLX_ICMSNF","N",18,4})  // 14 - ICMS da NF                                      12
-Aadd(_aStruct,{"ZLX_CTE"   ,"C",44,0})  // 15 - Número do CTE                                   13
-Aadd(_aStruct,{"ZLX_VLRFRT","N",18,4})  // 16 - Valor do Frete                                  14 
-Aadd(_aStruct,{"ZLX_PEDAGI","N",18,4})  // 17 - Valor de Pedágio                                15
-Aadd(_aStruct,{"ZLX_ICMSFR","N",18,4})  // 18 - ICMS do Frete                                   16
-Aadd(_aStruct,{"ZLX_TVLFRT","N",18,4})  // 19 - Total do Frete                                  17
-Aadd(_aStruct,{"ZLX_ADCFRT","N",18,4})  // 20 - Adicional do Frete                              18
-Aadd(_aStruct,{"ZLX_STATUS","C",15,0})  // 21 - Status da Recepção                              19
-Aadd(_aStruct,{"ZLX_OBS"   ,"C",30,0})  // 22 - Observação                                      20
-Aadd(_aStruct,{"ZLX_TIPOLT","C",15,0})  // 23 - Procedencia                                     21
-Aadd(_aStruct,{"POSICTOTAL","C",1,0})
+aAdd(_aStruct,{"ZLX_CODIGO","C",15,0})  // 03 - Código da Recepção                               1
+aAdd(_aStruct,{"FORNECE"   ,"C",40,0})  // 04 - Nome do Fornecedor                               2
+aAdd(_aStruct,{"ZLX_NRONF" ,"C",09,0})  // 05 - Número da NF                                     3
+aAdd(_aStruct,{"TRANSP"    ,"C",40,0})  // 06 - Nome do Transportador                            4
+aAdd(_aStruct,{"ZLX_PLACA" ,"C",09,0})  // 07 - Placa do veículo                                 5
+aAdd(_aStruct,{"ZLX_VOLREC","N",18,4})  // 08 - Volume Recebido                                  6
+aAdd(_aStruct,{"ZLX_VOLNF" ,"N",18,4})  // 09 - Volume NF                                        7
+aAdd(_aStruct,{"ZLX_DIFVOL","N",18,4})  // 10 - Diferença de Volume                              8
+aAdd(_aStruct,{"ZZV_CAPACI","N",05,0})  // 11 - Capacidade do Veículo                            9
+aAdd(_aStruct,{"DIFVOLCAP" ,"N",18,4})  // 12 - Diferença de Volume x Capacidade                10
+aAdd(_aStruct,{"ZLX_VLRNF" ,"N",18,4})  // 13 - Valor NF                                        11
+aAdd(_aStruct,{"ZLX_ICMSNF","N",18,4})  // 14 - ICMS da NF                                      12
+aAdd(_aStruct,{"ZLX_CTE"   ,"C",44,0})  // 15 - Número do CTE                                   13
+aAdd(_aStruct,{"ZLX_VLRFRT","N",18,4})  // 16 - Valor do Frete                                  14 
+aAdd(_aStruct,{"ZLX_PEDAGI","N",18,4})  // 17 - Valor de Pedágio                                15
+aAdd(_aStruct,{"ZLX_ICMSFR","N",18,4})  // 18 - ICMS do Frete                                   16
+aAdd(_aStruct,{"ZLX_TVLFRT","N",18,4})  // 19 - Total do Frete                                  17
+aAdd(_aStruct,{"ZLX_ADCFRT","N",18,4})  // 20 - Adicional do Frete                              18
+aAdd(_aStruct,{"ZLX_STATUS","C",15,0})  // 21 - Status da Recepção                              19
+aAdd(_aStruct,{"ZLX_OBS"   ,"C",30,0})  // 22 - Observação                                      20
+aAdd(_aStruct,{"ZLX_TIPOLT","C",15,0})  // 23 - Procedencia                                     21
+aAdd(_aStruct,{"POSICTOTAL","C",1,0})
 
 //----------------------------------------------------------------------
 // Cria arquivo de dados temporário
@@ -293,8 +275,8 @@ While (_cAlias)->( !Eof() )
    //====================================================================================================
    // Montando chave de quebra de seção dos dados do relatório.
    //====================================================================================================		 
-   _cChavepesq := Dtoc(TRBZLX->ZLX_DTENTR)+TRBZLX->ZZX_CODPRD
-   _cCondicao := "(_cChavepesq  == Dtoc(TRBZLX->ZLX_DTENTR)+TRBZLX->ZZX_CODPRD)"
+   _cChavepesq := DToC(TRBZLX->ZLX_DTENTR)+TRBZLX->ZZX_CODPRD
+   _cCondicao := "(_cChavepesq  == DToC(TRBZLX->ZLX_DTENTR)+TRBZLX->ZZX_CODPRD)"
 
    //===============================================================
    // Zera as variáveis de subtotais.
@@ -316,7 +298,7 @@ While (_cAlias)->( !Eof() )
    _nTotPrest   := 0
    _nTotAcres   := 0
      
-   Do While &(_cCondicao)	
+   While &(_cCondicao)	
 
       //===============================================================
       // Soma Subtotais
@@ -368,11 +350,11 @@ While (_cAlias)->( !Eof() )
       //===============================================================
       // Total Geral por Produtos
       //===============================================================
-      _nI := AsCan(_aTotaisPrd, {|x| x[1] == TRBZLX->ZZX_CODPRD})
+      _nI := aScan(_aTotaisPrd, {|x| x[1] == TRBZLX->ZZX_CODPRD})
       
       If _nI == 0
-         _cDescPrd := Posicione('SX5',1,xfilial("SX5")+"Z7"+TRBZLX->ZZX_CODPRD,"X5_DESCRI")
-         Aadd(_aTotaisPrd, {TRBZLX->ZZX_CODPRD, _cDescPrd, TRBZLX->ZLX_VOLREC})
+         _cDescPrd := Posicione('SX5',1,xFilial("SX5")+"Z7"+TRBZLX->ZZX_CODPRD,"X5_DESCRI")
+         aAdd(_aTotaisPrd, {TRBZLX->ZZX_CODPRD, _cDescPrd, TRBZLX->ZLX_VOLREC})
       Else
          _aTotaisPrd[_nI,3] += TRBZLX->ZLX_VOLREC
       EndIf
@@ -381,7 +363,7 @@ While (_cAlias)->( !Eof() )
       _cTextoRecep := 'Recepção de '+ Posicione('SX5',1,xFilial('SX5')+'Z7'+PadR(TRBZLX->ZZX_CODPRD,TamSX3('X5_CHAVE')[01]),'X5_DESCRI')
       
       TRBREL->ZZX_CODPRD := _cTextoRecep                                                                // 02 - Tipo de Produto
-      TRBREL->CHAVEPESQ  := Dtoc(TRBZLX->ZLX_DTENTR)+TRBZLX->ZZX_CODPRD                                 // 03 - Agrupamento       // Dtoc(TRBZLX->ZLX_DTENTR)+"-"+TRBZLX->ZZX_CODPRD
+      TRBREL->CHAVEPESQ  := DToC(TRBZLX->ZLX_DTENTR)+TRBZLX->ZZX_CODPRD                                 // 03 - Agrupamento       // DToC(TRBZLX->ZLX_DTENTR)+"-"+TRBZLX->ZZX_CODPRD
       
       TRBREL->ZLX_CODIGO  := TRBZLX->ZLX_CODIGO       // 03 - Código da Recepção    
       TRBREL->FORNECE     := TRBZLX->FORNECE          // 04 - Fornecedor
@@ -428,35 +410,35 @@ While (_cAlias)->( !Eof() )
    TRBREL->ZLX_ADCFRT := _nTotAcres      // 7
 //-------------------------------------------------------//   
    TRBREL->POSICTOTAL := "1"          // Ordena a posição dos totais. Conteúdo: 1 = Registro de Sub Totais.
-   TRBREL->(MsUnlock())
+   TRBREL->(MSUnLock())
    //--------------------------------------------------------------------------------------------------------//
    TRBREL->(RecLock("TRBREL",.T.))
    TRBREL->CHAVEPESQ  := _cChavepesq  // Agrupamento
    TRBREL->ZLX_CODIGO := "Plataformas:"     // Código da Recepção  
    TRBREL->ZLX_VOLREC := _nTotPlat
    TRBREL->POSICTOTAL := "2"          // Ordena a posição dos totais. Conteúdo: 2 = Registro de Sub PLATAFORMAS
-   TRBREL->(MsUnlock())
+   TRBREL->(MSUnLock())
    //--------------------------------------------------------------------------------------------------------//
    TRBREL->(RecLock("TRBREL",.T.))
    TRBREL->CHAVEPESQ  := _cChavepesq  // Agrupamento
    TRBREL->ZLX_CODIGO := "Filiais:"     // Código da Recepção  
    TRBREL->ZLX_VOLREC := _nTotFil
    TRBREL->POSICTOTAL := "3"          // Ordena a posição dos totais. Conteúdo: 3 = Registro de Sub FILIAIS.
-   TRBREL->(MsUnlock())
+   TRBREL->(MSUnLock())
    //--------------------------------------------------------------------------------------------------------//
    TRBREL->(RecLock("TRBREL",.T.))
    TRBREL->CHAVEPESQ  := _cChavepesq  // Agrupamento
    TRBREL->ZLX_CODIGO := "Terceiros:"     // Código da Recepção  
    TRBREL->ZLX_VOLREC := _nTotTerc
    TRBREL->POSICTOTAL := "4"          // Ordena a posição dos totais. Conteúdo: 4 = Registro de Sub TERCEIROS.
-   TRBREL->(MsUnlock())
+   TRBREL->(MSUnLock())
    //--------------------------------------------------------------------------------------------------------//
    TRBREL->(RecLock("TRBREL",.T.))
    TRBREL->CHAVEPESQ  := _cChavepesq  // Agrupamento
    TRBREL->ZLX_CODIGO := "Totais:"     // Código da Recepção  
    TRBREL->ZLX_VOLREC := _nTotTot
    TRBREL->POSICTOTAL := "5"          // Ordena a posição dos totais. Conteúdo: 5 = Registro de Sub TOTAIS.
-   TRBREL->(MsUnlock())
+   TRBREL->(MSUnLock())
 EndDo
 
 //====================================================================================================
@@ -476,35 +458,35 @@ TRBREL->ZLX_ICMSFR := _nTotGICMS      // 5
 TRBREL->ZLX_TVLFRT := _nTotGPrest     // 6
 TRBREL->ZLX_ADCFRT := _nTotGAcres     // 7 
 TRBREL->POSICTOTAL := "1"          // Ordena a posição dos totais. Conteúdo: 1 = Registro de Sub Totais.
-TRBREL->(MsUnlock())
+TRBREL->(MSUnLock())
 //--------------------------------------------------------------------------------------------------------//
 TRBREL->(RecLock("TRBREL",.T.))
 TRBREL->CHAVEPESQ  := "ZZZZZZZZZZZZZZZZZZZ"  // Agrupamento // Conteúdo ZZZ... para ficar no final do relatório.
 TRBREL->ZLX_CODIGO := "Plataformas:"     // Código da Recepção  
 TRBREL->ZLX_VOLREC := _nTotGPlat
 TRBREL->POSICTOTAL := "2"          // Ordena a posição dos totais. Conteúdo: 2 = Registro de Sub PLATAFORMAS
-TRBREL->(MsUnlock())
+TRBREL->(MSUnLock())
 //--------------------------------------------------------------------------------------------------------//
 TRBREL->(RecLock("TRBREL",.T.))
 TRBREL->CHAVEPESQ  :="ZZZZZZZZZZZZZZZZZZZ"  // Agrupamento // Conteúdo ZZZ... para ficar no final do relatório.
 TRBREL->ZLX_CODIGO := "Filiais:"     // Código da Recepção  
 TRBREL->ZLX_VOLREC := _nTotGFil
 TRBREL->POSICTOTAL := "3"          // Ordena a posição dos totais. Conteúdo: 3 = Registro de Sub FILIAIS.
-TRBREL->(MsUnlock())
+TRBREL->(MSUnLock())
 //--------------------------------------------------------------------------------------------------------//
 TRBREL->(RecLock("TRBREL",.T.))
 TRBREL->CHAVEPESQ  := "ZZZZZZZZZZZZZZZZZZZ"  // Agrupamento // Conteúdo ZZZ... para ficar no final do relatório.
 TRBREL->ZLX_CODIGO := "Terceiros:"     // Código da Recepção  
 TRBREL->ZLX_VOLREC := _nTotGTerc
 TRBREL->POSICTOTAL := "4"          // Ordena a posição dos totais. Conteúdo: 4 = Registro de Sub TERCEIROS.
-TRBREL->(MsUnlock())
+TRBREL->(MSUnLock())
 //--------------------------------------------------------------------------------------------------------//
 TRBREL->(RecLock("TRBREL",.T.))
 TRBREL->CHAVEPESQ  := "ZZZZZZZZZZZZZZZZZZZ"  // Agrupamento // Conteúdo ZZZ... para ficar no final do relatório.
 TRBREL->ZLX_CODIGO := "Totais:"     // Código da Recepção  
 TRBREL->ZLX_VOLREC := _nTotGTot
 TRBREL->POSICTOTAL := "5"          // Ordena a posição dos totais. Conteúdo: 5 = Registro de Sub TOTAIS.
-TRBREL->(MsUnlock())
+TRBREL->(MSUnLock())
 
 //=============================================================================================================
 // Total Geral por Produtos
@@ -517,11 +499,11 @@ For _nI := 1 To Len(_aTotaisPrd)
     TRBREL->TRANSP     := _aTotaisPrd[_nI,2]
     TRBREL->ZLX_VOLREC := _aTotaisPrd[_nI,3]
     TRBREL->POSICTOTAL := "6"          // Ordena a posição dos totais. Conteúdo: 5 = Registro de Sub TOTAIS.
-    TRBREL->(MsUnlock())
+    TRBREL->(MSUnLock())
 Next
 
 //--------------------------------------------------------------------------------------------------------//
-TRBREL->(DbGoTop())   
+TRBREL->(DBGoTop())   
 
 While TRBREL->( !Eof() )
    If _oReport:Cancel()
@@ -543,11 +525,11 @@ While TRBREL->( !Eof() )
    _oSect1_A:Cell("ZZX_CODPRD"):SetValue(TRBREL->ZZX_CODPRD)  // 02 - Tipo de Produto
    _oSect1_A:Cell("CHAVEPESQ"):SetValue(TRBREL->CHAVEPESQ)    // 03 - Agrupamento
    _oSect1_A:Cell("CHAVEPESQ"):Disable()
-   _oSect1_A:Printline()
+   _oSect1_A:PrintLine()
    
    _oSect2_A:init()
      
-   Do While &(_cCondicao)
+   While &(_cCondicao)
       _oReport:IncMeter()   
 
       //====================================================================================================
@@ -575,7 +557,7 @@ While TRBREL->( !Eof() )
       _oSect2_A:Cell("ZLX_OBS"):SetValue(TRBREL->ZLX_OBS)		// 22 - Observação                                      20
       _oSect2_A:Cell("ZLX_TIPOLT"):SetValue(TRBREL->ZLX_TIPOLT)	// 23 - Procedencia                                     21
       _oSect2_A:Cell("CHAVEPESQ"):Disable()
-      _oSect2_A:Printline()
+      _oSect2_A:PrintLine()
       
       TRBREL->( DBSkip() )
    EndDo
@@ -606,9 +588,9 @@ While TRBREL->( !Eof() )
    _oSect2_A:Cell("ZLX_OBS"):SetValue("")		                // 22 - Observação                                      20
    _oSect2_A:Cell("ZLX_TIPOLT"):SetValue("")	                // 23 - Procedencia                                     21
    _oSect2_A:Cell("CHAVEPESQ"):Disable()
-   _oSect2_A:Printline()
+   _oSect2_A:PrintLine()
    
-   TRBREL->(DbSkip())
+   TRBREL->(DBSkip())
    
    //====================================================================================================
    // Ordena a posição dos totais. Conteúdo: 2 = Registro de Sub Totais.
@@ -636,9 +618,9 @@ While TRBREL->( !Eof() )
    _oSect2_A:Cell("ZLX_OBS"):SetValue("")		                // 22 - Observação                                      20
    _oSect2_A:Cell("ZLX_TIPOLT"):SetValue("")	                // 23 - Procedencia                                     21
    _oSect2_A:Cell("CHAVEPESQ"):Disable()
-   _oSect2_A:Printline()
+   _oSect2_A:PrintLine()
    
-   TRBREL->(DbSkip())
+   TRBREL->(DBSkip())
    
    //====================================================================================================
    // Ordena a posição dos totais. Conteúdo: 3 = Registro de Sub FILIAIS.
@@ -666,9 +648,9 @@ While TRBREL->( !Eof() )
    _oSect2_A:Cell("ZLX_OBS"):SetValue("")		                // 22 - Observação                                      20
    _oSect2_A:Cell("ZLX_TIPOLT"):SetValue("")	                // 23 - Procedencia                                     21
    _oSect2_A:Cell("CHAVEPESQ"):Disable()
-   _oSect2_A:Printline()
+   _oSect2_A:PrintLine()
    
-   TRBREL->(DbSkip())
+   TRBREL->(DBSkip())
    
    //====================================================================================================
    // Ordena a posição dos totais. Conteúdo: 4 = Registro de Sub TERCEIROS.
@@ -696,9 +678,9 @@ While TRBREL->( !Eof() )
    _oSect2_A:Cell("ZLX_OBS"):SetValue("")		                // 22 - Observação                                      20
    _oSect2_A:Cell("ZLX_TIPOLT"):SetValue("")	                // 23 - Procedencia                                     21
    _oSect2_A:Cell("CHAVEPESQ"):Disable()
-   _oSect2_A:Printline()
+   _oSect2_A:PrintLine()
    
-   TRBREL->(DbSkip())
+   TRBREL->(DBSkip())
    //====================================================================================================
    // Ordena a posição dos totais. Conteúdo: 5 = Registro de Sub TOTAIS.
    //====================================================================================================
@@ -725,12 +707,12 @@ While TRBREL->( !Eof() )
    _oSect2_A:Cell("ZLX_OBS"):SetValue("")		                // 22 - Observação                                      20
    _oSect2_A:Cell("ZLX_TIPOLT"):SetValue("")	                // 23 - Procedencia                                     21
    _oSect2_A:Cell("CHAVEPESQ"):Disable()
-   _oSect2_A:Printline()
+   _oSect2_A:PrintLine()
    
-   TRBREL->(DbSkip())
+   TRBREL->(DBSkip())
    
    //====================================================================================================
-   // Se for os registros de totais gerais Incia a impressão final.
+   // Se For os registros de totais gerais Incia a impressão final.
    //====================================================================================================	 	  
    If AllTrim(TRBREL->CHAVEPESQ)  == "ZZZZZZZZZZZZZZZZZZZ"
 
@@ -749,7 +731,7 @@ While TRBREL->( !Eof() )
    		_oSect1_A:Cell("CHAVEPESQ"):Disable()
    		_oSect1_A:Cell("ZLX_DTENTR"):Disable()
    		_oSect1_A:Cell("ZZX_CODPRD"):Disable()
-   		_oSect1_A:Printline()
+   		_oSect1_A:PrintLine()
    
    		_oSect2_A:init()
  
@@ -779,9 +761,9 @@ While TRBREL->( !Eof() )
       _oSect2_A:Cell("ZLX_OBS"):SetValue("")		               // 22 - Observação                                      20
       _oSect2_A:Cell("ZLX_TIPOLT"):SetValue("")	                   // 23 - Procedencia                                     21
       _oSect2_A:Cell("CHAVEPESQ"):Disable()
-      _oSect2_A:Printline()
+      _oSect2_A:PrintLine()
    
-      TRBREL->(DbSkip())
+      TRBREL->(DBSkip())
    
       //====================================================================================================
       // Ordena a posição dos totais. Conteúdo: 1 = Registro de Sub Totais.
@@ -809,9 +791,9 @@ While TRBREL->( !Eof() )
       _oSect2_A:Cell("ZLX_OBS"):SetValue("")		                // 22 - Observação                                      20
       _oSect2_A:Cell("ZLX_TIPOLT"):SetValue("")	                // 23 - Procedencia                                     21
       _oSect2_A:Cell("CHAVEPESQ"):Disable()
-      _oSect2_A:Printline()
+      _oSect2_A:PrintLine()
    
-      TRBREL->(DbSkip())
+      TRBREL->(DBSkip())
 
       //====================================================================================================
       // Ordena a posição dos totais. Conteúdo: 3 = Registro de Sub FILIAIS.
@@ -839,9 +821,9 @@ While TRBREL->( !Eof() )
       _oSect2_A:Cell("ZLX_OBS"):SetValue("")		                // 22 - Observação                                      20
       _oSect2_A:Cell("ZLX_TIPOLT"):SetValue("")	                // 23 - Procedencia                                     21
       _oSect2_A:Cell("CHAVEPESQ"):Disable()
-      _oSect2_A:Printline()
+      _oSect2_A:PrintLine()
    
-      TRBREL->(DbSkip())
+      TRBREL->(DBSkip())
       
       //====================================================================================================
       // Ordena a posição dos totais. Conteúdo: 4 = Registro de Sub TERCEIROS.
@@ -869,9 +851,9 @@ While TRBREL->( !Eof() )
       _oSect2_A:Cell("ZLX_OBS"):SetValue("")		                // 22 - Observação                                      20
       _oSect2_A:Cell("ZLX_TIPOLT"):SetValue("")	                // 23 - Procedencia                                     21
       _oSect2_A:Cell("CHAVEPESQ"):Disable()
-      _oSect2_A:Printline()
+      _oSect2_A:PrintLine()
    
-      TRBREL->(DbSkip())
+      TRBREL->(DBSkip())
 
       //====================================================================================================
       // Ordena a posição dos totais. Conteúdo: 5 = Registro de Sub TOTAIS.
@@ -899,7 +881,7 @@ While TRBREL->( !Eof() )
       _oSect2_A:Cell("ZLX_OBS"):SetValue("")		                // 22 - Observação                                      20
       _oSect2_A:Cell("ZLX_TIPOLT"):SetValue("")	                // 23 - Procedencia                                     21
       _oSect2_A:Cell("CHAVEPESQ"):Disable()
-      _oSect2_A:Printline()
+      _oSect2_A:PrintLine()
    
        _oReport:ThinLine()
        
@@ -908,7 +890,7 @@ While TRBREL->( !Eof() )
       //=============================================================================
       For _nI := 1 To Len(_aTotaisPrd)
  
-          TRBREL->(DbSkip())
+          TRBREL->(DBSkip())
             
            _oSect2_A:Cell("FORNECE"):SetValue("")                       // 04 - Nome do Fornecedor                               2
           _oSect2_A:Cell("ZLX_NRONF"):SetValue("")                     // 05 - Número da NF                                     3
@@ -934,7 +916,7 @@ While TRBREL->( !Eof() )
           _oSect2_A:Cell("ZLX_CODIGO"):SetValue(TRBREL->ZLX_CODIGO)   // 03 - Código da Recepção     // 1
           _oSect2_A:Cell("ZLX_VOLREC"):SetValue(TRBREL->ZLX_VOLREC)   // 12 - Volume Recebido        // 10
           _oSect2_A:Cell("CHAVEPESQ"):Disable()
-          _oSect2_A:Printline()
+          _oSect2_A:PrintLine()
   
       Next
     
@@ -972,11 +954,8 @@ Return
 Programa--------: RGLT004A
 Autor-----------: Alexandre Villar
 Data da Criacao-: 13/07/2015
-===============================================================================================================================
 Descrição-------: Relatório dos registros de recebimentos de leite de terceiros - Detalhamento por Frete
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -1028,13 +1007,8 @@ Return
 Programa--------: RGLT004ASEL
 Autor-----------: Alexandre Villar
 Data da Criacao-: 13/07/2015
-===============================================================================================================================
 Descrição-------: Função para consulta e preparação dos dados do relatório
-===============================================================================================================================
-Uso-------------: Italac
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: _aRet - Dados do relatório
 ===============================================================================================================================
 */
@@ -1095,15 +1069,12 @@ Return( _aRet )
 Programa--------: RGLT004APRT
 Autor-----------: Alexandre Villar
 Data da Criacao-: 13/07/2015
-===============================================================================================================================
 Descrição-------: Função para controlar e imprimir os dados do relatório
-===============================================================================================================================
 Parametros------: _aCabec1 - Primeira linha dos dados de cabeçalho
 ----------------: _aCabec2 - Segunda linha dos dados de cabeçalho
 ----------------: _aColCab - Posicionamento dos dados de cabeçalho
 ----------------: _aColItn - Ajuste do posicionamento dos dados
 ----------------: _aDados  - Dados do relatório
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -1152,7 +1123,7 @@ For _nI := 1 To Len( _aDados )
 	//====================================================================================================
 	// Inicializa a primeira página do relatório
 	//====================================================================================================
-	IF _nI == 1
+	If _nI == 1
 
 		_nLinha		:= 50000
 		
@@ -1163,7 +1134,7 @@ For _nI := 1 To Len( _aDados )
 			_cDtMov := _aDados[_nI][01]
 			
 			_nLinha += 030
-			_oPrint:Say( _nLinha , _aColItn[01] , 'Movimentação do dia: '+ DtoC( StoD( _aDados[_nI][01] ) ) , _oFont02 )
+			_oPrint:Say( _nLinha , _aColItn[01] , 'Movimentação do dia: '+ DToC( SToD( _aDados[_nI][01] ) ) , _oFont02 )
 			_nLinha += 035
 			
 			_oPrint:Line( _nLinha , 0 , _nLinha , 5000 ) ; _nLinha++
@@ -1183,7 +1154,7 @@ For _nI := 1 To Len( _aDados )
 		If _nTotCol > 0
 		
 			For _nX := 1 To _nTotCol
-				_oPrint:Say( IIF( Empty( _aCabec2[_nX] ) , _nLinha + 07 , _nLinha ) , _aColCab[_nX] , _aCabec1[_nX] , _oFont02 )
+				_oPrint:Say( IIf( Empty( _aCabec2[_nX] ) , _nLinha + 07 , _nLinha ) , _aColCab[_nX] , _aCabec1[_nX] , _oFont02 )
 			Next _nX
 			
 			_nLinha += 030
@@ -1206,7 +1177,7 @@ For _nI := 1 To Len( _aDados )
 	//=============================================================================
 	//| Encerra Lote do Setor atual                                               |
 	//=============================================================================	
-	ElseIF _nLinha > 2100
+	ElseIf _nLinha > 2100
 		
 		_nLinha := 50000
 		//=============================================================================
@@ -1261,7 +1232,7 @@ For _nI := 1 To Len( _aDados )
 			_cDtMov := _aDados[_nI][01]
 			
 			_nLinha += 030
-			_oPrint:Say( _nLinha , _aColItn[01] , 'Movimentação do dia: '+ DtoC( StoD( _aDados[_nI][01] ) ) , _oFont02 )
+			_oPrint:Say( _nLinha , _aColItn[01] , 'Movimentação do dia: '+ DToC( SToD( _aDados[_nI][01] ) ) , _oFont02 )
 			_nLinha += 035
 			
 			_oPrint:Line( _nLinha , 0 , _nLinha , 5000 ) ; _nLinha++
@@ -1279,7 +1250,7 @@ For _nI := 1 To Len( _aDados )
 			If _nTotCol > 0
 				
 				For _nX := 1 To _nTotCol
-					_oPrint:Say( IIF( Empty( _aCabec2[_nX] ) , _nLinha + 07 , _nLinha ) , _aColCab[_nX] , _aCabec1[_nX] , _oFont02 )
+					_oPrint:Say( IIf( Empty( _aCabec2[_nX] ) , _nLinha + 07 , _nLinha ) , _aColCab[_nX] , _aCabec1[_nX] , _oFont02 )
 				Next _nX
 				
 				_nLinha += 030
@@ -1361,7 +1332,7 @@ For _nI := 1 To Len( _aDados )
 		If _nTotCol > 0
 			
 			For _nX := 1 To _nTotCol
-				_oPrint:Say( IIF( Empty( _aCabec2[_nX] ) , _nLinha + 07 , _nLinha ) , _aColCab[_nX] , _aCabec1[_nX] , _oFont02 )
+				_oPrint:Say( IIf( Empty( _aCabec2[_nX] ) , _nLinha + 07 , _nLinha ) , _aColCab[_nX] , _aCabec1[_nX] , _oFont02 )
 			Next _nX
 			
 			_nLinha += 030
@@ -1433,7 +1404,7 @@ For _nI := 1 To Len( _aDados )
 		
 		RGLT004AVPG( @_oPrint , @_nLinha , .T. , _aCabec1 , _aCabec2 , _aColCab )
 		
-		_oPrint:Say( _nLinha , _aColItn[01] , 'Movimentação do dia: '+ DtoC( StoD( _aDados[_nI][01] ) ) , _oFont02 )
+		_oPrint:Say( _nLinha , _aColItn[01] , 'Movimentação do dia: '+ DToC( SToD( _aDados[_nI][01] ) ) , _oFont02 )
 		_nLinha += 035
 		
 		_oPrint:Line( _nLinha , 0 , _nLinha , 5000 ) ; _nLinha++
@@ -1453,7 +1424,7 @@ For _nI := 1 To Len( _aDados )
 		If _nTotCol > 0
 		
 			For _nX := 1 To _nTotCol
-				_oPrint:Say( IIF( Empty( _aCabec2[_nX] ) , _nLinha + 07 , _nLinha ) , _aColCab[_nX] , _aCabec1[_nX] , _oFont02 )
+				_oPrint:Say( IIf( Empty( _aCabec2[_nX] ) , _nLinha + 07 , _nLinha ) , _aColCab[_nX] , _aCabec1[_nX] , _oFont02 )
 			Next _nX
 			
 			_nLinha += 030
@@ -1535,7 +1506,7 @@ For _nI := 1 To Len( _aDados )
 		If _nTotCol > 0
 		
 			For _nX := 1 To _nTotCol
-				_oPrint:Say( IIF( Empty( _aCabec2[_nX] ) , _nLinha + 07 , _nLinha ) , _aColCab[_nX] , _aCabec1[_nX] , _oFont02 )
+				_oPrint:Say( IIf( Empty( _aCabec2[_nX] ) , _nLinha + 07 , _nLinha ) , _aColCab[_nX] , _aCabec1[_nX] , _oFont02 )
 			Next _nX
 			
 			_nLinha += 030
@@ -1559,12 +1530,12 @@ For _nI := 1 To Len( _aDados )
 	
 		_nLinha += 030
 		
-	EndIF
+	EndIf
 	
 	RGLT004AVPG( @_oPrint , @_nLinha , .T. , _aCabec1 , _aCabec2 , _aColCab )
 	
 	For _nX := 1 To _nTotCol
-		_oPrint:Say( _nLinha , _aColItn[_nX] , _aDados[_nI][_nX+2] , _oFont03 ,,,, IIF( StrZero(_nX,2) $ '06;07;08;09;10;11;12;13;14;15;16;17;18' , 1 , 0 ) )
+		_oPrint:Say( _nLinha , _aColItn[_nX] , _aDados[_nI][_nX+2] , _oFont03 ,,,, IIf( StrZero(_nX,2) $ '06;07;08;09;10;11;12;13;14;15;16;17;18' , 1 , 0 ) )
 	Next _nX
 	
 	_nConTot++
@@ -1812,12 +1783,9 @@ Return
 Programa--------: RGLT004AVPG
 Autor-----------: Alexandre Villar
 Data da Criacao-: 29/04/2014
-===============================================================================================================================
 Descrição-------: Validação do pocicionamento da página atual para quebras
-===============================================================================================================================
 Parametros------: oPrint	- Objeto de Impressão do Relatório
 ----------------: nLinha	- Variável de controle do posicionamento
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -1857,9 +1825,9 @@ If _nLinha > _nLimPag
 	_oPrint:Line( 050 , 0400 , 240 , 0400 )
 	_oPrint:Line( 050 , 3350 , 240 , 3350 )
 	
-	_oPrint:Say( 060 , 420 , TITULO +" ( "+ DtoC(Date()) +" - "+ Time() +")" , _oFont01 )
-	_oPrint:Say( 120 , 420 , "Período de Recepção: "+ DTOC( MV_PAR01 ) +" - "+ DTOC( MV_PAR02 ) +" | Filial: "+ cFilAnt , _oFont02 )
-	_oPrint:Say( 150 , 420 ,	"Considera: "+ IIF(MV_PAR03==1,'Leite de Filiais',IIF(MV_PAR03==2,'Leite de Terceiros',IIF(MV_PAR03==3,'Leite de Plataformas','Todas as Procedências'))) , _oFont02 )
+	_oPrint:Say( 060 , 420 , TITULO +" ( "+ DToC(Date()) +" - "+ Time() +")" , _oFont01 )
+	_oPrint:Say( 120 , 420 , "Período de Recepção: "+ DToC( MV_PAR01 ) +" - "+ DToC( MV_PAR02 ) +" | Filial: "+ cFilAnt , _oFont02 )
+	_oPrint:Say( 150 , 420 ,	"Considera: "+ IIf(MV_PAR03==1,'Leite de Filiais',IIf(MV_PAR03==2,'Leite de Terceiros',IIf(MV_PAR03==3,'Leite de Plataformas','Todas as Procedências'))) , _oFont02 )
 	
 	//====================================================================================================
 	// Adiciona cabecalho de conteúdo
@@ -1875,11 +1843,8 @@ Return
 Programa--------: RGLT004Q
 Autor-----------: Lucas Borges Ferreira
 Data da Criacao-: 25/07/2019
-===============================================================================================================================
 Descrição-------: Query para extração dos dados
-===============================================================================================================================
 Parametros------: _cAlias -> Alias para realização da consulta
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -1890,10 +1855,10 @@ Local _cFiltro := "%"
 // Efetua a Seleção de Dados do Relatório.
 //================================================================================
 If MV_PAR03 < 4
-	_cFiltro += IIf( !Empty( MV_PAR03 ) , " AND ZLX.ZLX_TIPOLT = '"+ IIF( MV_PAR03 == 1 , 'F' , IIF( MV_PAR03 == 2 , 'T' , 'P' ) ) +"' ","")
+	_cFiltro += IIf( !Empty( MV_PAR03 ) , " AND ZLX.ZLX_TIPOLT = '"+ IIf( MV_PAR03 == 1 , 'F' , IIf( MV_PAR03 == 2 , 'T' , 'P' ) ) +"' ","")
 EndIf
 
-_cFiltro += IIf( !Empty( MV_PAR04 ) , " AND ZZX.ZZX_CODPRD IN "+ FormatIn( ALLTRIM(MV_PAR04) , ';' ),"")
+_cFiltro += IIf( !Empty( MV_PAR04 ) , " AND ZZX.ZZX_CODPRD IN "+ FormatIn( AllTrim(MV_PAR04) , ';' ),"")
 _cFiltro += IIf( !Empty( MV_PAR13 ) , " AND ZLX.ZLX_PLACA  IN "+ FormatIn( MV_PAR13 , ';' ),"")
 _cFiltro += IIf( !Empty( MV_PAR14 ) , " AND ZZV.ZZV_FXCAPA IN "+ FormatIn( MV_PAR14 , ';' ),"")
 _cFiltro += IIf( !Empty( MV_PAR19 ) , " AND ZLX.ZLX_STATUS IN "+ FormatIn( MV_PAR19 , ';' ),"")

@@ -2,28 +2,22 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges | 19/12/2023 | Incluída amarração na ZZX para evitar duplicidade quando o mesmo produto possui 2 tipos de cadsatro
-              |            | na ZA7. Chamado 45906
+ Lucas Borges |19/12/2023| Chamado 45906. Incluída amarração na ZZX para evitar duplicidade quando o mesmo produto possui 2 
+              |          | tipos de cadsatro na ZA7. 
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT074
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 30/06/2023
-===============================================================================================================================
 Descrição---------: Relatório Análise Custo Contábil MIX - Chamado 44347
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -42,11 +36,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 30/06/2023
-===============================================================================================================================
 Descrição---------: Processa a montagem do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -108,11 +99,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 12/05/2023
-===============================================================================================================================
 Descrição---------: Processa a impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -127,10 +115,10 @@ Local _nOrdem	    := oReport:Section(1):GetOrder()
 If MV_PAR01 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"SF1")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -169,8 +157,8 @@ SELECT F1_FILIAL, F1_DOC, F1_SERIE, F1_FORNECE, F1_LOJA, F1_EMISSAO, F1_DTDIGIT,
        CT2_DOC, CT2_LINHA, CT2_VALOR, CT2_DEBITO, CT1_DESC01, CT1_I_UNIF, CT2_HIST, CT2_LP, CT2_ORIGEM, CT2_CCD, CTT_DESC01, CTT_I_UNIF, CT2_ITEMD
   FROM 
 (SELECT F1_FILIAL, F1_DOC, F1_SERIE, F1_FORNECE, F1_LOJA, F1_EMISSAO, F1_DTDIGIT, D1_COD, D1_CUSTO, D1_TOTAL, F1_L_MIX, D1_MSUIDT, ZLE_DTINI, ZLE_DTFIM, 
-       CASE
-         WHEN SUBSTR(F1_FORNECE, 1, 1) = 'P' AND D1_ITEM = '0001' AND F1_L_SETOR <> ' ' THEN
+       Case
+         WHEN SubStr(F1_FORNECE, 1, 1) = 'P' AND D1_ITEM = '0001' AND F1_L_SETOR <> ' ' THEN
           (SELECT NVL(SUM(ZLD_QTDBOM), 0)
              FROM %Table:ZLD% ZLD
             WHERE ZLD.D_E_L_E_T_ = ' '
@@ -181,7 +169,7 @@ SELECT F1_FILIAL, F1_DOC, F1_SERIE, F1_FORNECE, F1_LOJA, F1_EMISSAO, F1_DTDIGIT,
               AND F1_LOJA = ZLD_RETILJ
               AND F1_L_SETOR = ZLD_SETOR
               AND F1_L_LINHA = ZLD_LINROT)
-         WHEN SUBSTR(F1_FORNECE, 1, 1) = 'P' AND D1_ITEM = '0001' AND F1_L_SETOR = ' ' THEN D1_QUANT ELSE 0 END VOL
+         WHEN SubStr(F1_FORNECE, 1, 1) = 'P' AND D1_ITEM = '0001' AND F1_L_SETOR = ' ' THEN D1_QUANT Else 0 END VOL
   FROM %Table:SD1% SD1, %Table:SF1% SF1, %Table:ZLE% ZLE
  WHERE SD1.D_E_L_E_T_ = ' '
    AND SF1.D_E_L_E_T_ = ' '
@@ -260,13 +248,13 @@ oReport:Section(1):Init()
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(0)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

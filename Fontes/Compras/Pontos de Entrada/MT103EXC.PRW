@@ -4,16 +4,13 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |19/06/2024| Chamado 47627. Retirada validaçao do estorno da transferência quando for o fechamento do leite
+Lucas Borges  |19/06/2024| Chamado 47627. Retirada validaçao do estorno da transferência quando For o fechamento do leite
 Lucas Borges  |19/06/2025| Chamado 50617. Revisões diversas visando padronizar os fontes
-===============================================================================================================================
-Analista    - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
-===============================================================================================================================
-Andre       - Alex Wallauer - 17/03/25 - 17/03/25 - 50203   - Retirada da validacao de saldo retroativo quando tem OP preenchida.
+Alex Wallauer |17/03/2025| Chamado 50203. Retirada da validacao de saldo retroativo quando tem OP preenchida.
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -22,25 +19,25 @@ Autor-------------: Josué /Danich Prestes
 Data da Criacao---: 15/10/2015
 Descrição---------: Ponto de entrada para validar exclusão documento de entrada - Chamado 12080
 Parametros--------: Nenhum
-Retorno-----------: Lógico - .T. se o registro for válido, .F. para descartar o registro
+Retorno-----------: Lógico - .T. se o registro For válido, .F. para descartar o registro
 ===============================================================================================================================
 */
 User Function MT103EXC
 
 Local _aArea    := FwGetArea() As Array
 Local _lRet     := .T. As Logical
-Local _nCodArmaz:= aScan( aHeader , {|x| UPPER( Alltrim( x[2] ) ) == "D1_LOCAL"  } ) As Numeric
-Local _nCodPro  := aScan( aHeader , {|x| UPPER( Alltrim( x[2] ) ) == "D1_COD"    } ) As Numeric
-Local _nCodQtd  := aScan( aHeader , {|x| UPPER( Alltrim( x[2] ) ) == "D1_QUANT"  } ) As Numeric
-Local _nCoddta  := aScan( aHeader , {|x| UPPER( Alltrim( x[2] ) ) == "D1_DTDIGIT"} ) As Numeric
-Local _nCodTes  := aScan( aHeader , {|x| UPPER( Alltrim( x[2] ) ) == "D1_TES"    } ) As Numeric
-Local _nCodITEM := aScan( aHeader , {|x| UPPER( Alltrim( x[2] ) ) == "D1_ITEM"   } ) As Numeric
-Local _nOrdProd := aScan( aHeader , {|x| UPPER( Alltrim( x[2] ) ) == "D1_OP"     } ) As Numeric
+Local _nCodArmaz:= aScan( aHeader , {|x| Upper( AllTrim( x[2] ) ) == "D1_LOCAL"  } ) As Numeric
+Local _nCodPro  := aScan( aHeader , {|x| Upper( AllTrim( x[2] ) ) == "D1_COD"    } ) As Numeric
+Local _nCodQtd  := aScan( aHeader , {|x| Upper( AllTrim( x[2] ) ) == "D1_QUANT"  } ) As Numeric
+Local _nCoddta  := aScan( aHeader , {|x| Upper( AllTrim( x[2] ) ) == "D1_DTDIGIT"} ) As Numeric
+Local _nCodTes  := aScan( aHeader , {|x| Upper( AllTrim( x[2] ) ) == "D1_TES"    } ) As Numeric
+Local _nCodITEM := aScan( aHeader , {|x| Upper( AllTrim( x[2] ) ) == "D1_ITEM"   } ) As Numeric
+Local _nOrdProd := aScan( aHeader , {|x| Upper( AllTrim( x[2] ) ) == "D1_OP"     } ) As Numeric
 Local _cmens    := "" As Character
 Local _aRet     := {} As Array
-Local _Ni       := 1 As Numeric
+Local _nI       := 1 As Numeric
 Local _lRet2    := .T. As Logical
-Local _cVldCM   := Posicione("NNR",1,xFilial("NNR")+alltrim(aCols[_Ni][_nCodArmaz]),"NNR_I_VDCM") As Character
+Local _cVldCM   := Posicione("NNR",1,xFilial("NNR")+AllTrim(aCols[_nI][_nCodArmaz]),"NNR_I_VDCM") As Character
 Local _lgranel  := .F. As Logical
 Local _aErros   := {} As Array
 Local _cAlias   := GetNextAlias() As Character
@@ -48,9 +45,9 @@ Local _cLtGrn   := SuperGetMV("IT_LTGRN",.F.,'08000000062') As Character
 Local _cCrGrn   := SuperGetMV("IT_CRGRN",.F.,'08000000064;08000000063') As Character
 
 //Lucas - Valida se NF-e foi vinculada há algum fechamento
-If !FwIsInCallStack("U_MGLT010")
+If !FWIsInCallStack("U_MGLT010")
    If !Empty(SF1->F1_L_MIX) .And. Empty(SF1->F1_L_SETOR)
-      BeginSQL alias _cAlias
+      BeginSql alias _cAlias
          SELECT COUNT(1) QTD
          FROM %Table:ZLF%
          WHERE D_E_L_E_T_ = ' '
@@ -58,7 +55,7 @@ If !FwIsInCallStack("U_MGLT010")
          AND ZLF_A2COD = %exp:SF1->F1_FORNECE%
          AND ZLF_CODZLE = %exp:SF1->F1_L_MIX%
          AND ZLF_STATUS = 'F'
-      EndSQL
+      EndSql
       If (_cAlias)->QTD > 0
          _lRet := .F.
          FWAlertWarning("Esse documento não pode ser excluído pois está vinculado ao Fechamento do Leite.","MT103EXC01")
@@ -71,13 +68,13 @@ If !FwIsInCallStack("U_MGLT010")
    //========================================================================================
    _ccodusr := RetCodUsr()
 
-   For _ni := 1 to len(aCols)
-      If !aCols[_ni][Len(aHeader)+1] .AND. posicione("SF4",1,xfilial("SF4")+alltrim(aCols[_Ni][_nCodTes]),"F4_ESTOQUE") = "S" //Não verifica linhas deletadas
+   For _nI := 1 to Len(aCols)
+      If !aCols[_nI][Len(aHeader)+1] .And. Posicione("SF4",1,xFilial("SF4")+AllTrim(aCols[_nI][_nCodTes]),"F4_ESTOQUE") = "S" //Não verifica linhas deletadas
                                                                                                 // ou que não mov estoque
          //============================================
          //Valida armazémxprodutoxfilialxusuário
          //============================================
-         _aRet:= U_ACFG004E(alltrim(_ccodusr), alltrim(xFilial("SD1")), alltrim(aCols[_Ni][_nCodArmaz]),alltrim(aCols[_Ni][_nCodPro]),.F.)
+         _aRet:= U_ACFG004E(AllTrim(_ccodusr), AllTrim(xFilial("SD1")), AllTrim(aCols[_nI][_nCodArmaz]),AllTrim(aCols[_nI][_nCodPro]),.F.)
          
          //se ainda está valido verifica se não teve erro
          If _lRet
@@ -87,7 +84,7 @@ If !FwIsInCallStack("U_MGLT010")
          // adiciona armazens com problema se ainda não estiver na mensagem
          If Empty(_cmens)
             _cmens += _aRet[2]
-         ElseIf !(_aRet[2]$_cmens) .and. !(Empty(_aRet[2])) 
+         ElseIf !(_aRet[2]$_cmens) .And. !(Empty(_aRet[2])) 
             _cmens += ", " + _aRet[2]
          EndIf
       EndIf
@@ -96,42 +93,42 @@ If !FwIsInCallStack("U_MGLT010")
    //============================================
    //Realiza validações linha a linha, 2a. parte
    //============================================
-   If _lret
+   If _lRet
       _aErros := {}
-      For _ni := 1 to len(aCols)
+      For _nI := 1 to Len(aCols)
          //Verifica se tem produto de transferência de leite a granel
-         If ascan(STRTOKARR(_cLtGrn,";"),alltrim(aCols[_Ni][_nCodPro])) > 0
+         If aScan(StrTokArr(_cLtGrn,";"),AllTrim(aCols[_nI][_nCodPro])) > 0
             _lgranel := .T.
-         Endif
+         EndIf
          
          //Verifica se tem produto de transferência de leite a granel
-         If ascan(STRTOKARR(_cCrGrn,";"),alltrim(aCols[_Ni][_nCodPro])) > 0
+         If aScan(StrTokArr(_cCrGrn,";"),AllTrim(aCols[_nI][_nCodPro])) > 0
             _lgranel := .T.
-         Endif
+         EndIf
          
          //============================================
          //Valida se não vai gerar saldos negativos
          //============================================ 
          _agetsd1 := SD1->(FwGetArea())
-         SD1->(Dbsetorder(1))
+         SD1->(DBSetOrder(1))
          
-         If  EMPTY(aCols[_Ni][_nOrdProd]) .AND. SD1->(Dbseek(SF1->F1_FILIAL+SF1->F1_DOC+SF1->F1_SERIE+SF1->F1_FORNECE+SF1->F1_LOJA+aCols[_Ni][_nCodPro]+aCols[_Ni][_nCodITEM]))
-            If _cVldCM = "S" .AND. !aCols[_ni][Len(aHeader)+1] .AND. posicione("SF4",1,xfilial("SF4")+SD1->D1_TES,"F4_ESTOQUE") = "S" //Não verifica linhas deletadas
-               _aneg := U_VldEstRetrNeg(aCols[_Ni][_nCodPro],alltrim(aCols[_Ni][_nCodArmaz]),aCols[_Ni][_nCodQtd],aCols[_Ni][_nCoddta])
-               If len(_aneg) > 0
-                  nDif :=  _aNeg[2] - aCols[_Ni][_nCodQtd]
-                  AADD(_aErros,{aCols[_Ni][_nCodPro],posicione("SB1",1,xfilial("SB1")+aCols[_Ni][_nCodPro],"B1_DESC"),alltrim(aCols[_Ni][_nCodArmaz]),dtoc(_aNeg[1]),TRANSFORM(nDif,"@E 999,999,999.99")})
+         If  Empty(aCols[_nI][_nOrdProd]) .And. SD1->(DBSeek(SF1->F1_FILIAL+SF1->F1_DOC+SF1->F1_SERIE+SF1->F1_FORNECE+SF1->F1_LOJA+aCols[_nI][_nCodPro]+aCols[_nI][_nCodITEM]))
+            If _cVldCM = "S" .And. !aCols[_nI][Len(aHeader)+1] .And. Posicione("SF4",1,xFilial("SF4")+SD1->D1_TES,"F4_ESTOQUE") = "S" //Não verifica linhas deletadas
+               _aneg := U_VldEstRetrNeg(aCols[_nI][_nCodPro],AllTrim(aCols[_nI][_nCodArmaz]),aCols[_nI][_nCodQtd],aCols[_nI][_nCoddta])
+               If Len(_aneg) > 0
+                  nDif :=  _aNeg[2] - aCols[_nI][_nCodQtd]
+                  aAdd(_aErros,{aCols[_nI][_nCodPro],Posicione("SB1",1,xFilial("SB1")+aCols[_nI][_nCodPro],"B1_DESC"),AllTrim(aCols[_nI][_nCodArmaz]),DToC(_aNeg[1]),TRANSFORM(nDif,"@E 999,999,999.99")})
                   _lRet2 := .F.
                EndIf
             EndIf
          EndIf
    
          SD1->(FwRestArea(_agetsd1))
-      Next _Ni
+      Next _nI
    EndIf
 
-   //Bloqueia se tiver produto a granel e não for rotina excluir italac
-   If _lgranel .and. !FwIsInCallStack("U_ITEXCNF") .and. !FwIsInCallStack("U_MA140ESTCLA")
+   //Bloqueia se tiver produto a granel e não For rotina excluir italac
+   If _lgranel .And. !FWIsInCallStack("U_ITEXCNF") .And. !FWIsInCallStack("U_MA140ESTCLA")
       FWAlertWarning("Doc de entrada de produto a granel. Use a rotina Acoes Relacionadas->Excluir italac","MT103EXC02")
       _lRet := .F.
    EndIf
@@ -150,9 +147,9 @@ If !FwIsInCallStack("U_MGLT010")
       aCampPla := {"Produto","Descr","Armazém","Data","Diferença"}
       _odet := {|| U_ITListBox( 'Produtos com saldo negativo' , aCampPla , _aErros , .T. , 1 )}
 
-      u_itmsg( "Quantidade a estornar é maior que o saldo diário em um ou mais produtos","MT103EXC04",;
+      U_ITMsg( "Quantidade a estornar é maior que o saldo diário em um ou mais produtos","MT103EXC04",;
                "Verique os produtos e datas no botão mais detalhes e confira com o kardex",2,,,,,,_odet)
-      _lret := .F.
+      _lRet := .F.
    EndIf
 EndIf
 FwRestArea(_aArea)

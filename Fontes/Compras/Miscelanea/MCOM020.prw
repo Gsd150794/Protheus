@@ -4,13 +4,13 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |24/09/2024| Chamado 48465. Sanado problemas apresentados no Code Analysis
 Lucas Borges  |30/09/2024| Chamado 48677. Corrigida validação do objeto
 Lucas Borges  |23/05/2025| Chamado 50754. Incluído tratamento para CT-e Simplificado
+Lucas Borges  |27/11/2025| Chamado 53171. Incluída notificação por e-mail quando algum XML é carregado.
 ===============================================================================================================================
 */
 
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -79,11 +79,14 @@ Local _cError	:= ' ' As Character
 Local _cWarning	:= ' ' As Character
 Local _cCodRet	:= "Codigo de retorno: " As Character
 Local _cMensRet := "Mensagem de retorno: " As Character
+Local _cMensagem:= "" As Character
+Local _cErro    := "" As Character
+Local _cTO      := SuperGetMV("IT_MCOM020",.F.,"") As Character
 
-DbSelectArea("SF1")
-SF1->(dbSetorder(8))
-DbSelectArea("CKO")
-CKO->(dbSetorder(1))
+DBSelectArea("SF1")
+SF1->(DBSetOrder(8))
+DBSelectArea("CKO")
+CKO->(DBSetOrder(1))
 
 //Verifica se o servidor da Totvs esta no ar
 oWs := WsSpedCfgNFe():New()
@@ -169,15 +172,15 @@ If oWs:CFGCONNECT()
             EndIf
             
             //Verifica se documento já foi gerado
-            If SF1->(dbSeek(xFilial("SF1") + _cChaveNFe)) .Or. CKO->(dbSeek(_cChaveCKO))
+            If SF1->(DBSeek(xFilial("SF1") + _cChaveNFe)) .Or. CKO->(DBSeek(_cChaveCKO))
                 FWAlertWarning("Chave informada já consta no sistema e será ignorada: "+_aFiles[_nX][1],"MCOM02003")
                 Loop
             EndIf
 
             ows:cCHVNFE := _cChaveNFe
             If oWS:ConsultaChaveNFE()
-                If oWs:oWSCONSULTACHAVENFERESULT:cPROTOCOLO == Nil .OR. Empty (oWs:oWSCONSULTACHAVENFERESULT:cPROTOCOLO)
-					If AllTrim(oWs:oWSCONSULTACHAVENFERESULT:cCODRETNFE) == "731" .or. AllTrim(oWs:oWSCONSULTACHAVENFERESULT:cCODRETNFE) == "526"
+                If oWs:oWSCONSULTACHAVENFERESULT:cPROTOCOLO == Nil .Or. Empty (oWs:oWSCONSULTACHAVENFERESULT:cPROTOCOLO)
+					If AllTrim(oWs:oWSCONSULTACHAVENFERESULT:cCODRETNFE) == "731" .Or. AllTrim(oWs:oWSCONSULTACHAVENFERESULT:cCODRETNFE) == "526"
                         If MsgNoYes(_cCodRet+oWs:oWSCONSULTACHAVENFERESULT:cCODRETNFE+CRLF+;
                                     _cMensRet+oWs:oWSCONSULTACHAVENFERESULT:cMSGRETNFE+CRLF+;
                                     "Verificar se o Ano-Mês da Chave de Acesso está com atraso"+CRLF+;
@@ -187,7 +190,7 @@ If oWs:CFGCONNECT()
                         Else
                             _lRet := .F.
                         EndIf
-					ElseIf AllTrim(oWs:oWSCONSULTACHAVENFERESULT:cCODRETNFE) == "101" .or. AllTrim(oWs:oWSCONSULTACHAVENFERESULT:cCODRETNFE) == "151"
+					ElseIf AllTrim(oWs:oWSCONSULTACHAVENFERESULT:cCODRETNFE) == "101" .Or. AllTrim(oWs:oWSCONSULTACHAVENFERESULT:cCODRETNFE) == "151"
 						FWAlertHelp("  ",1,"MCOM02005",,_cCodRet+oWs:oWSCONSULTACHAVENFERESULT:cCODRETNFE+CRLF+;
 				   		       _cMensRet+oWs:oWSCONSULTACHAVENFERESULT:cMSGRETNFE+CRLF+CRLF+_cChaveNFe,1,0)
 						_lRet := .F.
@@ -196,7 +199,7 @@ If oWs:CFGCONNECT()
 						_lRet := .F.
 					EndIf
 				Else
-				    If AllTrim(oWs:oWSCONSULTACHAVENFERESULT:cCODRETNFE) == "101" .or. AllTrim(oWs:oWSCONSULTACHAVENFERESULT:cCODRETNFE) == "151"
+				    If AllTrim(oWs:oWSCONSULTACHAVENFERESULT:cCODRETNFE) == "101" .Or. AllTrim(oWs:oWSCONSULTACHAVENFERESULT:cCODRETNFE) == "151"
 						FWAlertHelp("  ",1,"MCOM02007",,_cCodRet+oWs:oWSCONSULTACHAVENFERESULT:cCODRETNFE+CRLF+;
 				   		       _cMensRet+oWs:oWSCONSULTACHAVENFERESULT:cMSGRETNFE+CRLF+CRLF+_cChaveNFe,1,0)
 						_lRet := .F.
@@ -214,6 +217,11 @@ If oWs:CFGCONNECT()
                         If _oArquivo:Exists()
                             FWAlertInfo("Documento incluído na fila para processamento: "+_aFiles[_nX][1]+".",'MCOM02008')
                             _oSelf:SaveLog("Documento incluído na fila para processamento: "+_aFiles[_nX][1]+".")
+                            _cMensagem:="Documento incluído na fila para processamento: "+_cArquiv+". Usuário: " + __cUserId + ' - '+ cUserName
+                            U_EnvMail(_cMensagem/*_cMensagem*/,/*_cFrom*/,_cTO/*_cTO*/,/*_cCC*/,/*_cBCC*/,/*_cReplyTo*/,'MCOM020 - Upload manual de XML'/*_cAssunto*/,@_cErro/*_cErro*/,/*_aAttach*/)
+                            If !Empty(_cErro)
+                                FWAlertError("Erro ao enviar o e-mail de notificação. Acione o Suporte!","MCOM02012")
+                            EndIf
                         EndIf
                     Else
                         FWAlertError("Erro na criação do arquivo XML no Servidor: "+_aFiles[_nX][1]+". Ele será ignorado. Erro: "+ _oArquivo:Error():Message,"MCOM02009")
@@ -221,7 +229,7 @@ If oWs:CFGCONNECT()
                     FreeObj(_oArquivo)
                 EndIf
             Else
-                FWAlertWarning("Erro ao consultar chave do arquivo "+_aFiles[_nX][1]+". Ele será ignorado. " +IIf(Empty(GetWscError(3)),GetWscError(1),GetWscError(3)),"MCOM02010") 
+                FWAlertWarning("Erro ao consultar chave do arquivo "+_aFiles[_nX][1]+". Ele será ignorado. "+IIf(Empty(GetWscError(3)),GetWscError(1),GetWscError(3)),"MCOM02010") 
             EndIf
         Next _nX
     Else

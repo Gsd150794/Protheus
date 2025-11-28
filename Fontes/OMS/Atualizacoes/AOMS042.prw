@@ -2,37 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                           
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer     | 02/08/2017 | Chamado 20782 - Ajustes para versão 12.
-Julio Paz         | 27/11/2018 | Chamado 27001 - Ajustar o fonte para funcionar no novo servidor Totvs Lobo Guará. 
-Lucas Borges      | 15/10/2019 | Chamado 28346 - Removidos os Warning na compilação da release 12.1.25. 
-==============================================================================================================================
-
-===============================================================================================================================
-Analista         - Programador       - Inicio     - Envio      - Chamado  - Motivo da Alteração
-===============================================================================================================================
-Antonio Ramos    - Igor Melgaço      - 30/09/2024 -            - 48661    - Erro na emissao de RPA da unidade de Girua.
+Lucas Borges  |15/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25. 
+Igor Melgaço  |30/09/2024| Chamado 48661. Erro na emissao de RPA da unidade de Girua.
+Lucas Borges  |02/10/2025| Chamado 51526. Modificada forma para recuperar a matrícula do usuário.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
-
-#DEFINE _ENTER CHR(13)+CHR(10) 
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa--------: AOMS042
 Autor-----------: Fabiano Dias
 Data da Criacao-: 22/12/2010
-===============================================================================================================================
 Descrição-------: Inclusão e geração de RPA Avulso
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -58,8 +44,8 @@ Private iTab1		:= "ZZA"
 //================================================================================
 //| Guarda as dimensões da tela                                                  |
 //================================================================================
-AADD( aObjects , { 100 , 050 , .T. , .F. , .F. } )
-AADD( aObjects , { 100 , 100 , .T. , .T. , .F. } )
+aAdd( aObjects , { 100 , 050 , .T. , .F. , .F. } )
+aAdd( aObjects , { 100 , 100 , .T. , .T. , .F. } )
 
 aPosObj := MsObjSize( aInfo , aObjects )
 
@@ -70,18 +56,15 @@ DBSelectArea(iTab1)
 (iTab1)->( DBSetOrder(1) )
 MBrowse( ,,,, iTab1 )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS042R
 Autor-------------: Fabiano Dias
 Data da Criacao---: 22/12/2010
-===============================================================================================================================
 Descrição---------: Monta tela com os dados do RPA Avulso
-===============================================================================================================================
 Parametros--------: nOpc: opcao
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -106,7 +89,7 @@ Local aHeaderZZA
 Local _nPosALIWT, _nPosRECWT
 
 Private oDlg			:= ""
-Private _cMatrUsr		:= U_UCFG001(1)
+Private _cMatrUsr		:= FWSFAllUsers({__cUserID},{"USR_FILIAL"})[1][3]+FWSFAllUsers({__cUserID},{"USR_CODFUNC"})[1][3]
 Private xVarAux	 		:= Nil
 
 Private AHEADER	 		:= {}
@@ -128,17 +111,17 @@ Begin Sequence
    //Verifica se o usuario tem acesso ao RPA Avulso na inclusao ou exclusao
    If ( nOpc == 3 .Or. nOpc == 4 ) .And. Empty( _cTpOper )
 
-	  xmaghelpfis(	"Usuário sem acesso!"																				,;
+	  xMagHelpFis(	"Usuário sem acesso!"																				,;
 					"O usuário corrente não possui acesso para realizar a operação solicitada na rotina de RPA Avulso."	,;
 					"Verificar a necessidade e informar a área de TI/ERP."												 )
 	  Break
 
    EndIf
 
-   //Quando for realizar a exclusao Verifica se o usuario tem acesso para realizar a exclusao
+   //Quando For realizar a exclusao Verifica se o usuario tem acesso para realizar a exclusao
    If nOpc == 4 .And. _cExcluir <> 'S'
 
-	  xmaghelpfis(	"Usuário sem acesso!"																				,;
+	  xMagHelpFis(	"Usuário sem acesso!"																				,;
 					"O usuário corrente não possui acesso para realizar a exclusão de um RPA Avulso em seu cadastro."	,;
 					"A exclusão só poderá ser efetuada por responsável contábil."										 )
 	
@@ -177,7 +160,7 @@ Begin Sequence
    nUsado := Len(aHeader)
 
    //                          1                    2               3              4               5                6             7        8              9                 10 
-   // AADD(aHeader, {Alltrim(SX3->X3_TITULO), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL,"AllwaysTrue()", USADO, SX3->X3_TIPO, SX3->X3_ARQUIVO, SX3->X3_CONTEXT})
+   // aAdd(aHeader, {AllTrim(SX3->X3_TITULO), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL,"AllwaysTrue()", USADO, SX3->X3_TIPO, SX3->X3_ARQUIVO, SX3->X3_CONTEXT})
 
    aCpoEnchoice := {}
 
@@ -187,14 +170,14 @@ Begin Sequence
        EndIf
        
        If X3USO( aHeaderZZA[_nI,7] ) 
-		  Aadd( aCpoEnchoice , aHeaderZZA[_nI,2] )
+		  aAdd( aCpoEnchoice , aHeaderZZA[_nI,2] )
 	   EndIf
 	
 	   xVarAux	:= "M->"+ aHeaderZZA[_nI,2]
 	   &xVarAux	:= CriaVar( aHeaderZZA[_nI,2] )
    Next
 
-   If nOpc <> 3 // se nao for inclusao preenche os campos do cabecalho
+   If nOpc <> 3 // se nao For inclusao preenche os campos do cabecalho
 
 	  DBSelectArea(iTab1)
 	
@@ -205,17 +188,17 @@ Begin Sequence
 	  For v := 1 To Len( vCampos ) // CAMPOS DE VISUALIZACAO
 		  xVarAux	:= "M->"+ vCampos[v,1]
 		  &xVarAux	:= &( vCampos[v,2] )
-	  next v
+	  Next v
 	
    EndIf
 
    //Incluir
    If nOpc == 3
 
-      M->ZZA_USUARI := U_UCFG001(1) 
+      M->ZZA_USUARI := FWSFAllUsers({__cUserID},{"USR_FILIAL"})[1][3]+FWSFAllUsers({__cUserID},{"USR_CODFUNC"})[1][3]
       M->ZZA_DESUSR := Posicione( "SRA" , 1 , M->ZZA_USUARI , "SRA->RA_NOME" )
      
-      //Se o tipo da operacao que o usuario for realizar na inclusao for diferente de todos
+      //Se o tipo da operacao que o usuario For realizar na inclusao For diferente de todos
       //o progrma ja seta o tipo de acordo com o acesso pre-definido em seu cadastro
       If _cTpOper <> 'T'
      
@@ -228,7 +211,7 @@ Begin Sequence
 	  //Os RPA's gerados pela rotina do Leite somente poderao ser excluidos por ela
 	  If M->ZZA_ORIGEM <> '1'
 	
-		 xmaghelpfis(	"Informação" , "O RPA: " + M->ZZA_CODRPA + " foi gerado pela rotina de Fechamento do Frete."	,;
+		 xMagHelpFis(	"Informação" , "O RPA: " + M->ZZA_CODRPA + " foi gerado pela rotina de Fechamento do Frete."	,;
 						"Sendo assim somente podera ser excluido pela rotina de Cancelamento do frete"					 )
      	
    		 Break 
@@ -249,8 +232,8 @@ Begin Sequence
 	   &xVarAux	:= CriaVar( aHeader[_nI,2] )
    Next
 
-   _nPosALIWT := Ascan(aHeader,{|x| x[2] == "ZZB_ALI_WT"})
-   _nPosRECWT := Ascan(aHeader,{|x| x[2] == "ZZB_REC_WT"})
+   _nPosALIWT := aScan(aHeader,{|x| x[2] == "ZZB_ALI_WT"})
+   _nPosRECWT := aScan(aHeader,{|x| x[2] == "ZZB_REC_WT"})
 
    DBSelectArea(iTab1)
 
@@ -280,7 +263,7 @@ Begin Sequence
 	
 	  DBSelectArea("ZZB")
 	  ZZB->( DBSetOrder(1) )
-	  IF ZZB->( DBSeek( ZZA->ZZA_FILIAL + ZZA->ZZA_CODRPA ) )
+	  If ZZB->( DBSeek( ZZA->ZZA_FILIAL + ZZA->ZZA_CODRPA ) )
 	
 		 While ZZB->(!Eof()) .And. ZZB->( ZZB_FILIAL + ZZB_CODRPA ) == xFilial("ZZB") + M->ZZA_CODRPA
 		
@@ -291,7 +274,7 @@ Begin Sequence
 	               Loop
 	            EndIf
 			
-				aCols[Len(aCols)][_ni] := IIf( aHeader[_ni][10] # "V" , FieldGet( FieldPos( aHeader[_ni][02] ) ) , CriaVar( aHeader[_ni][02] ) )
+				aCols[Len(aCols)][_nI] := IIf( aHeader[_nI][10] # "V" , FieldGet( FieldPos( aHeader[_nI][02] ) ) , CriaVar( aHeader[_nI][02] ) )
 				
 			Next _nI
 			
@@ -310,7 +293,7 @@ Begin Sequence
 	            Loop
 	         EndIf
 	            
-			 aCols[1,_ni] := CriaVar( aHeader[_ni][02] )
+			 aCols[1,_nI] := CriaVar( aHeader[_nI][02] )
 			
 		 Next _nI
 		
@@ -318,7 +301,7 @@ Begin Sequence
 		
 	  EndIf 
 	
-   Endif
+   EndIf
 
    //================================================================================
    //| Monta a tela para exibição                                                   |
@@ -334,8 +317,8 @@ Begin Sequence
 
 	  aSize    := MsAdvSize()
 	  aObjects := {}
-	  AAdd( aObjects, { 100, 100, .T., .T. } )
-	  AAdd( aObjects, { 100, 100, .T., .T. } )
+	  aAdd( aObjects, { 100, 100, .T., .T. } )
+	  aAdd( aObjects, { 100, 100, .T., .T. } )
 	
 	  aInfo   := { aSize[ 1 ],aSize[ 2 ],aSize[ 3 ],aSize[ 4 ],03,03 }
 	  aPosObj := MsObjSize( aInfo, aObjects )
@@ -349,30 +332,27 @@ Begin Sequence
 		 oGetDados:LACTIVE := .F.
 		
 	  ACTIVATE MSDIALOG oDlg CENTERED ON INIT ;
-	           EnchoiceBar( oDlg , {|| IIf( Obrigatorio(aGets,aTela) .And. AOMS042V(nOpcE) , LjMsgRun( "Gerando a "+ _cOpcao +" do RPA..." , "Aguarde!" , {|| CursorWait() , _nOpc := 1 , AOMS042G() , CursorArrow() } ) , _nOpc := 0 ) , IIF( _nOpc == 1 , oDlg:End() , Nil ) } , {|| _nOpc := 0 , oDlg:End() , RollBackSX8() } ,, aButtons )
+	           EnchoiceBar( oDlg , {|| IIf( Obrigatorio(aGets,aTela) .And. AOMS042V(nOpcE) , LjMsgRun( "Gerando a "+ _cOpcao +" do RPA..." , "Aguarde!" , {|| CursorWait() , _nOpc := 1 , AOMS042G() , CursorArrow() } ) , _nOpc := 0 ) , IIf( _nOpc == 1 , oDlg:End() , Nil ) } , {|| _nOpc := 0 , oDlg:End() , RollBackSX8() } ,, aButtons )
 
    EndIf
 
 End Sequence
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS042V
 Autor-------------: Fabiano Dias
 Data da Criacao---: 22/12/2010
-===============================================================================================================================
 Descrição---------: Validação dos dados preenchidos
-===============================================================================================================================
 Parametros--------: iopc: opcao
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS042V( iopc )
 
-Local _lret		:= .T.
+Local _lRet		:= .T.
 
 Begin Sequence
    //================================================================================
@@ -390,11 +370,11 @@ Begin Sequence
 	  //================================================================================
 	  If _lRet .And. ( Len(aCols) == 1 .And. aCols[1,3] == 0 ) .Or. ( Len(aCols) < 1 )
           
-		 xmaghelpfis(	"Atenção!"																				,;
+		 xMagHelpFis(	"Atenção!"																				,;
 						"Favor calcular os impostos do RPA antes de confirmar a sua inclusão."					,;
 						"A opção de cálculo de impostos esta situada no cabeçalho da tela no botão IMPOSTOS."	 )
 		
-		 _lret := .F.
+		 _lRet := .F.
 		
 	  EndIf
 
@@ -402,13 +382,13 @@ Begin Sequence
 	  //| Tratamento efetuado para quando o usuario nao  fornece  nenhum  conteudo  no |
 	  //| Memo mais sim dar enter, ele considera isto como conteudo.                   |
 	  //================================================================================
-	  If _lRet .And. Empty( STRTRAN( M->ZZA_OBSERV , CHR(13)+CHR(10) , " " ) )
+	  If _lRet .And. Empty( StrTran( M->ZZA_OBSERV , CHR(13)+CHR(10) , " " ) )
 	
-		 xmaghelpfis(	"Atenção!"																					,;
+		 xMagHelpFis(	"Atenção!"																					,;
 						"Favor fornecer um conteúdo no campo observação para que esta rotina possa ser efetivada."	,;
 						"Favor preencher o campo observação."														 )
 		
-		 _lret := .F.
+		 _lRet := .F.
 	
 	  EndIf
 	
@@ -418,10 +398,10 @@ Begin Sequence
 	  DBSelectArea("SA2")
 	  SA2->( DBOrderNickName( "IT_AUTONOM" ) )
 	  If !SA2->( DBSeek( xFilial("SA2") + M->ZZA_CODAUT ) ) .And. _lRet
-		 DbSelectArea("SA2")
+		 DBSelectArea("SA2")
 		 SA2->( DBOrderNickName( "IT_AUTAVUL" ) )
 		 If !SA2->( DBSeek( xFilial("SA2") + M->ZZA_CODAUT ) ) .And. _lRet
-			xmaghelpfis(	"Atenção"																																,;
+			xMagHelpFis(	"Atenção"																																,;
 							"O Autonomo indicado para a geração do RPA nao esta com o relacionamento no cadastro do Fornecedor."									,;
 							"Favor verificar no cadastro do Fornecedor se o autonomo indicado possui cadastro, e se esta relacionado no cadastro de fornecedor. "	 )
 			_lRet:= .F.
@@ -435,7 +415,7 @@ Begin Sequence
 		 SED->( DBSetOrder(1) )
 		 If SED->( DBSeek( xFilial("SED") + ZZA_NATURE ) )
 			If SED->ED_CALCINS == 'S' .Or. SED->ED_CALCIRF == 'S' .Or. SED->ED_CALCSES == 'S'
-			   xmaghelpfis(	"Informação"																,;
+			   xMagHelpFis(	"Informação"																,;
 							"Não foi informada uma natureza válida!"									,;
 							"A natureza para geração do RPA não pode calcular INSS,IRRF e SEST/SENAT."	 )
 			   _lRet:= .F.
@@ -452,15 +432,15 @@ Begin Sequence
       //================================================================================
       //| Validacao para exclusão de um RPA                                            |
       //================================================================================
-      Elseif iopc == 4
+      ElseIf iopc == 4
          _lRet := vldExcRPA()
 	     If !_lRet
 		    //================================================================================
 		    //| Verifica se o usuario tem permissao para executar o Estorno sem validar      | - 31/07/14 - Alexandre Villar
 		    //================================================================================
-		    DbSelectArea("ZZL")
-		    ZZL->( DbSetOrder(3) )
-		    If ZZL->( DbSeek( xFILIAL("ZZL") + RetCodUsr() ) )
+		    DBSelectArea("ZZL")
+		    ZZL->( DBSetOrder(3) )
+		    If ZZL->( DBSeek( xFilial("ZZL") + RetCodUsr() ) )
 			   If ZZL->ZZL_ECARGA == "S"
 				  If Aviso( 'Atenção!' , 'O estorno do documento atual não passou pela validação de impostos, deseja prosseguir com o estorno mesmo assim?' , {'Estornar','Cancelar'} ) == 1
 					 _lRet := .T.
@@ -472,18 +452,15 @@ Begin Sequence
 
 End Sequence      
 
-Return( _lret )
+Return( _lRet )
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS042G
 Autor-------------: Fabiano Dias
 Data da Criacao---: 22/12/2010
-===============================================================================================================================
 Descrição---------: Grava dados do cabecalho e itens do RPA AVULSO
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -498,7 +475,7 @@ Private _cCodRecib := ""
 
 Begin Sequence
    //================================================================================
-   //| Quando não for consulta                                                      |
+   //| Quando não For consulta                                                      |
    //================================================================================
    If nOpcG # 2
 
@@ -558,10 +535,10 @@ Begin Sequence
 		    If ZZ2->( DBSeek( xFilial("ZZ2") + M->ZZA_RPA ) )
 			   ZZ2->( RecLock( "ZZ2" , .F. ) )
 			   ZZ2->( DBDelete() )
-			   ZZ2->( MsUnlock() )
+			   ZZ2->( MSUnLock() )
 			   WriteSx2("ZZ2")
 		    Else
-			   xmaghelpfis(	"Atenção!" 																															,;
+			   xMagHelpFis(	"Atenção!" 																															,;
 							"Não foi localizado o registro do RPA na tabela ZZ2."																				,;
 		  					"Favor comunicar o departamento de informática do problema ocorrido, diante disso não será possível realizar a exclusão do RPA "	 )
 			   Break
@@ -583,7 +560,7 @@ Begin Sequence
 				   &ax	:= &xVarAux
 				EndIf
 			Next x
-		    ZZA->( MsUnlock() )
+		    ZZA->( MSUnLock() )
 		    
 		    If Inclui
 			   ConfirmSx8()
@@ -591,7 +568,7 @@ Begin Sequence
 	     Else
 		    ZZA->( RecLock( "ZZA" , .F. ) )
 		    ZZA->( DBDelete() )
-		    ZZA->( MsUnlock() )
+		    ZZA->( MSUnLock() )
 		    WriteSx2("ZZA")
 	     EndIf
 	     
@@ -604,10 +581,10 @@ Begin Sequence
 	
 	     wProcura := ZZB->( DBSeek( xFilial("ZZB") + M->ZZA_CODRPA ) )
 	
-	     While ( ZZB->(!EOF()) .And. ( XFILIAL("ZZB") + ZZB->ZZB_CODRPA == xFilial("ZZB") + M->ZZA_CODRPA ) )
+	     While ( ZZB->(!Eof()) .And. ( xFilial("ZZB") + ZZB->ZZB_CODRPA == xFilial("ZZB") + M->ZZA_CODRPA ) )
 		    ZZB->( RecLock("ZZB",.F.,.T.) )
 		    ZZB->( DBDelete() )
-		    ZZB->( MsUnlock() )
+		    ZZB->( MSUnLock() )
 		
 		    WriteSx2("ZZB")
 		
@@ -626,26 +603,26 @@ Begin Sequence
 		
 		     If Inclui //.or. Altera
 		
-			    If aCols[i,len(aCols[i])] .And. wProcura // exclusao
+			    If aCols[i,Len(aCols[i])] .And. wProcura // exclusao
 			
 				   RecLock("ZZB",.F.,.T.)
 				   dbdelete()
-				   ZZB->(MsUnlock())
+				   ZZB->(MSUnLock())
 				   WriteSx2("ZZB")
 				
 			    Else
 			
-				   If !aCols[i,len(aCols[i])]  
+				   If !aCols[i,Len(aCols[i])]  
 				
 					  ZZB->( RecLock( "ZZB" , IIf( wProcura , .F. , .T. ) ) )
 					
-					  ZZB->ZZB_FILIAL   := XFILIAL("ZZB")
+					  ZZB->ZZB_FILIAL   := xFilial("ZZB")
 					  ZZB->ZZB_CODRPA   := M->ZZA_CODRPA
 					  ZZB->ZZB_ITEM     := aCols[i][01]
 					  ZZB->ZZB_VENCTO   := aCols[i][02]
 					  ZZB->ZZB_VALOR    := aCols[i][03]
 					
-					  ZZB->( MsUnlock() )
+					  ZZB->( MSUnLock() )
 					
 					  If Inclui
 						 ConfirmSx8()
@@ -662,7 +639,7 @@ Begin Sequence
 				   // deletando ZLB
 				   ZZB->( RecLock( "ZZB" , .F. ) )
 				   ZZB->( DBDelete() )
-				   ZZB->( MsUnlock() )
+				   ZZB->( MSUnLock() )
 				
 				   WriteSx2("ZZB")
 			    EndIf
@@ -686,7 +663,7 @@ Begin Sequence
    //================================================================================
    If Inclui .And. _lRet
 	  U_ROMS024( 0 , _cCodRecib , _cCodRecib , "" )
-   EndIF
+   EndIf
 
 End Sequuence.
 
@@ -697,16 +674,13 @@ Return( .T. )
 Programa----------: AOMS042IZ2
 Autor-------------: Fabiano Dias
 Data da Criacao---: 22/12/2010
-===============================================================================================================================
 Descrição---------: Grava dados do RPA avulso na tabela de RPA para futuros calculos
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS042IZ2()     
-Local _aArea:= GetArea()
+Local _aArea:= FWGetArea()
 
 Begin Sequence 
    DBSelectArea("ZZ2")
@@ -727,23 +701,20 @@ Begin Sequence
    ZZ2->ZZ2_PAMVLR := 0
    ZZ2->ZZ2_ORIGEM := "2"
    ZZ2->ZZ2_VRPEDA := M->ZZA_VRPEDA//AWF 17/10/2016
-   ZZ2->( MsUnlock() )
-   RestArea(_aArea)
+   ZZ2->( MSUnLock() )
+   FWRestArea(_aArea)
 
 End Sequence
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS042PAR
 Autor-------------: Fabiano Dias
 Data da Criacao---: 22/12/2010
-===============================================================================================================================
 Descrição---------: Grava dados do RPA avulso na tabela de RPA para futuros calculos
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -786,24 +757,21 @@ Begin Sequence
 
 End Sequence
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS042IE2
 Autor-------------: Fabiano Dias
 Data da Criacao---: 22/12/2010
-===============================================================================================================================
 Descrição---------: Efetua a insercao na tabela SE2 dos titulos a pagar referente ao RPA.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS042IE2()
 
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local _nDesconto	:= 0
 Local _cRecibo		:= ""
 Local _cCodAuton	:= ""
@@ -820,9 +788,9 @@ Local _nVLRETIR		:= GETMV( 'MV_VLRETIR' ,, 0 )
 Local _aParc		:= {}
 
 Local _cNatIRRF		:= StrTran( GetMv("MV_IRF",,"") , '"' , '' )
-Local _cFornIRRF	:= PADR( GetMv("MV_UNIAO") , 6 )
+Local _cFornIRRF	:= PadR( GetMv("MV_UNIAO") , 6 )
 Local _cVctoIRRF	:= GetMv( "MV_VENCIRF" ,, "" )
-Local _dVctoIRRF	:= StoD("")
+Local _dVctoIRRF	:= SToD("")
 Local _cParcela		:= "01"
 Local _cChave		:= " "
 Local _nI			:= 0
@@ -834,7 +802,7 @@ Local cModAnt		:= cModulo
 Private lMsErroAuto	:= .F.
 
 Begin Sequence	
-   DbSelectArea("ZZ2")
+   DBSelectArea("ZZ2")
    ZZ2->( DBSetOrder(1))  // ZZ2_FILIAL+ZZ2_RECIBO
    If ZZ2->( DBSeek( xFilial("ZZ2") + _cCodRecib ) )
 	  _cIRRFPri	:= ZZ2->ZZ2_IRRFPR
@@ -842,7 +810,7 @@ Begin Sequence
 	  _cRecibo	:= ZZ2->ZZ2_RECIBO
 	  _nIRRF		:= ZZ2->ZZ2_IRRF
 	  _cCodAuton	:= ZZ2->ZZ2_AUTONO
-	  _nDesconto	:= ZZ2->( ZZ2_PAMVLR + ZZ2_SEST + ZZ2_INSS ) + IIF( _lGravVl , ZZ2->ZZ2_IRRF , 0 )  //HEDER - Modificado para considerar o valor do IR qdo limite minimo ja tiver sido atingido
+	  _nDesconto	:= ZZ2->( ZZ2_PAMVLR + ZZ2_SEST + ZZ2_INSS ) + IIf( _lGravVl , ZZ2->ZZ2_IRRF , 0 )  //HEDER - Modificado para considerar o valor do IR qdo limite minimo ja tiver sido atingido
 	
 	  If _cIRRFPri == "S" .And. _nIRRF > _nVLRETIR
 	
@@ -852,7 +820,7 @@ Begin Sequence
 	
 		 _aParc := Condicao( ZZ2->ZZ2_TOTAL , ZZ2->ZZ2_COND ,, dDataBase )
 		
-	  ElseIf 	_cIRRFPri == "S" .and. _nIRRF < _nVLRETIR
+	  ElseIf 	_cIRRFPri == "S" .And. _nIRRF < _nVLRETIR
 	
 		 _aParc := Condicao( ZZ2->ZZ2_TOTAL , ZZ2->ZZ2_COND ,, dDataBase )
 		
@@ -882,13 +850,13 @@ Begin Sequence
 		 SA2->( DBOrderNickName( "IT_AUTAVUL" ) )
 		 If SA2->( DBSeek( xFilial("SA2") + _cCodAuton ) )
 		
-			_cCodFor	:=	ALLTRIM( SA2->A2_COD )
+			_cCodFor	:=	AllTrim( SA2->A2_COD )
 			_cLojaFor 	:= 	SA2->A2_LOJA
 			_cNomeFor 	:= 	SA2->A2_NOME
 		
 		 EndIf
 	  Else
-		 _cCodFor	:=	ALLTRIM( SA2->A2_COD )
+		 _cCodFor	:=	AllTrim( SA2->A2_COD )
 		 _cLojaFor 	:= 	SA2->A2_LOJA
 		 _cNomeFor 	:= 	SA2->A2_NOME
 	  EndIf
@@ -900,7 +868,7 @@ Begin Sequence
 	
 		 DBSelectArea("SE2")
 		 SE2->( DBSetOrder(1) ) //E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
-		 If !SE2->( DbSeek( xFilial("SE2") + "AUT" + ZZ2->ZZ2_RECIBO + "01" + "RPA" ) )
+		 If !SE2->( DBSeek( xFilial("SE2") + "AUT" + ZZ2->ZZ2_RECIBO + "01" + "RPA" ) )
 		
 			For _nI := 1 to Len( _aParc )
 			
@@ -910,7 +878,7 @@ Begin Sequence
 				
 				   aVetor := {	{ "E2_PREFIXO"	, "AUT"							, Nil } ,;
 								{ "E2_NUM"		, _cRecibo						, Nil } ,;
-								{ "E2_PARCELA"	, STRZERO( _nI , 2 )			, Nil } ,;
+								{ "E2_PARCELA"	, StrZero( _nI , 2 )			, Nil } ,;
 								{ "E2_TIPO"		, "RPA"							, Nil } ,;
 								{ "E2_NATUREZ"	, _cANaturez					, Nil } ,;
 								{ "E2_FORNECE"	, _cCodFor						, Nil } ,;
@@ -922,11 +890,11 @@ Begin Sequence
 								{ "E2_ORIGEM"	, "AOMS042"			 			, Nil }  }
 				Else
 				   //================================================================================
-				   //| Se for ultima parcela desconta valor do seguro e impostos                    | //Modificacao feita por Jeane
+				   //| Se For ultima parcela desconta valor do seguro e impostos                    | //Modificacao feita por Jeane
 				   //================================================================================
 				   aVetor := {	{ "E2_PREFIXO"	, "AUT"																							, Nil } ,;
 								{ "E2_NUM"		, _cRecibo																						, Nil } ,;
-								{ "E2_PARCELA"	, STRZERO( _nI , 2 )																			, Nil } ,;
+								{ "E2_PARCELA"	, StrZero( _nI , 2 )																			, Nil } ,;
 								{ "E2_TIPO"		, "RPA"																							, Nil } ,;
 								{ "E2_NATUREZ"	, _cANaturez																					, Nil } ,;
 								{ "E2_FORNECE"	, _cCodFor																						, Nil } ,;
@@ -937,7 +905,7 @@ Begin Sequence
 								{ "E2_VALOR"	, IIf( Len(_aParc) == _nI , _aParc[_nI][02] - _nDesconto + ZZ2->ZZ2_IRRF , _aParc[_nI][02] )	, Nil } ,;
 								{ "E2_IRRF"		, 0.00																							, Nil } ,; //Deve passar zerado para o ExecAuto e corrigir depois [Chamado-7155]
 								{ "E2_VRETIRF"	, IIf( Len(_aParc) == _nI , ZZ2->ZZ2_IRRF , 0 )						  							, Nil } ,;
-								{ "E2_PARCIR"	, IIf( Len(_aParc) == _nI .and. ZZ2->ZZ2_IRRF > 0 , _cParcela , "  " )							, Nil } ,;
+								{ "E2_PARCIR"	, IIf( Len(_aParc) == _nI .And. ZZ2->ZZ2_IRRF > 0 , _cParcela , "  " )							, Nil } ,;
 								{ "E2_ORIGEM"	, "AOMS042"															  							, Nil }  }
 				EndIf
 				
@@ -960,17 +928,17 @@ Begin Sequence
 				//================================================================================
 				If Len(_aParc) == _nI .And. ZZ2->ZZ2_IRRF > 0.00
 				
-					DbSelectArea("SE2")
-					SE2->( DbSetOrder(1) )//E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
-					If SE2->( DbSeek( xFilial("SE2") + "AUT" + _cRecibo + STRZERO( _nI , 2 ) ) )
+					DBSelectArea("SE2")
+					SE2->( DBSetOrder(1) )//E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
+					If SE2->( DBSeek( xFilial("SE2") + "AUT" + _cRecibo + StrZero( _nI , 2 ) ) )
 					
-						SE2->( Reclock("SE2", .F.) )
+						SE2->( RecLock("SE2", .F.) )
 							_nValSE2		:= SE2->E2_VALOR
 							SE2->E2_VALOR	:= _nValSE2 - ZZ2->ZZ2_IRRF
 							SE2->E2_SALDO	:= _nValSE2 - ZZ2->ZZ2_IRRF
 							SE2->E2_VLCRUZ	:= _nValSE2 - ZZ2->ZZ2_IRRF
 							SE2->E2_IRRF	:= ZZ2->ZZ2_IRRF
-						SE2->( MsUnlock() )
+						SE2->( MSUnLock() )
 					
 					EndIf
 				
@@ -992,7 +960,7 @@ Begin Sequence
 		    //| Titulo ja existente no financeiro                                            |
 		    //================================================================================
 		 Else
-			xmaghelpfis(	"Informação"																																	,;
+			xMagHelpFis(	"Informação"																																	,;
 							"Nao foi possível realizar a inclusão no financeiro do título referente ao RPA."																,;
 							"Favor comunicar o departamento de informática do problema ocorrido, dados do título: PREFIXO - AUT, TIPO - RPA, NUMERO - " + ZZ2->ZZ2_RECIBO	 )
 			_lRet := .F.
@@ -1000,7 +968,7 @@ Begin Sequence
 	  Else
 		 DBSelectArea("SE2")
 		 SE2->( DBSetOrder(1) ) //E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
-		 If !SE2->( DbSeek( xFilial("SE2") + "AUT" + ZZ2->ZZ2_RECIBO + "  " + "RPA" ) )
+		 If !SE2->( DBSeek( xFilial("SE2") + "AUT" + ZZ2->ZZ2_RECIBO + "  " + "RPA" ) )
 			//================================================================================
 			//| Parcela unica: desconta valor do seguro e impostos                           | //Modificacao feita por Jeane
 			//================================================================================
@@ -1019,7 +987,7 @@ Begin Sequence
 									{ "E2_VALOR"	, _aParc[_nI,2] - _nDesconto				  	, Nil },;
 									{ "E2_IRRF"		, 0.00											, Nil },; //Deve passar zerado para o ExecAuto e corrigir depois [Chamado-7155]
 									{ "E2_VRETIRF"	, ZZ2->ZZ2_IRRF									, Nil },;
-									{ "E2_PARCIR"	, IIF( ZZ2->ZZ2_IRRF > 0 , _cParcela , "  " )	, Nil },;
+									{ "E2_PARCIR"	, IIf( ZZ2->ZZ2_IRRF > 0 , _cParcela , "  " )	, Nil },;
 									{ "E2_ORIGEM"	, "AOMS042"             						, Nil } }
 				//================================================================================
 				//| Altera o modulo para Financeiro, senao o SigaAuto nao executa.               |
@@ -1051,19 +1019,19 @@ Begin Sequence
 				// enviado pelo ExecAuto - [Chamado-7155]
 				//================================================================================
 				If Len(_aParc) == _nI .And. ZZ2->ZZ2_IRRF > 0.00
-				   DbSelectArea("SE2")
-				   DbSetOrder (1)//E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
-				   DbSeek( xFilial("SE2") + "AUT" + _cRecibo + "  " )
-				   Reclock ("SE2", .F.)
+				   DBSelectArea("SE2")
+				   DBSetOrder (1)//E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
+				   DBSeek( xFilial("SE2") + "AUT" + _cRecibo + "  " )
+				   RecLock ("SE2", .F.)
 						SE2->E2_VALOR	:= ZZ2->ZZ2_TOTAL - ZZ2->ZZ2_SEST - ZZ2->ZZ2_INSS - ZZ2->ZZ2_IRRF - ZZ2->ZZ2_PAMVLR
 						SE2->E2_SALDO	:= ZZ2->ZZ2_TOTAL - ZZ2->ZZ2_SEST - ZZ2->ZZ2_INSS - ZZ2->ZZ2_IRRF - ZZ2->ZZ2_PAMVLR
 						SE2->E2_VLCRUZ	:= ZZ2->ZZ2_TOTAL - ZZ2->ZZ2_SEST - ZZ2->ZZ2_INSS - ZZ2->ZZ2_IRRF - ZZ2->ZZ2_PAMVLR
 						SE2->E2_IRRF	:= ZZ2->ZZ2_IRRF
-				   MsUnlock() 
+				   MSUnLock() 
 				EndIf
 			Next _nI
 		 Else
-			xmaghelpfis(	"Atenção!"																																		,;
+			xMagHelpFis(	"Atenção!"																																		,;
 							"Nao foi possível realizar a inclusão no financeiro do título referente ao RPA."																,;
 							"Favor comunicar o departamento de informática do problema ocorrido, dados do título: PREFIXO - AUT, TIPO - RPA, NUMERO - " + ZZ2->ZZ2_RECIBO	 )
 			_lRet:= .F.
@@ -1076,16 +1044,16 @@ Begin Sequence
        If _cVctoIRRF == "V"
          _dVctoIRRF := CtoD( "20/"+ StrZero( Month( _aParc[Len(_aParc)][01] ) , 2 ) +"/"+ StrZero( Year(_aParc[Len(_aParc)][01]) , 4 ) )
        Else
-         _dVctoIRRF := MonthSum( CtoD( "20/"+ StrZero( Month(dDatabase) , 2 ) +"/"+ Strzero( Year(dDatabase) , 4 ) ) , 1 )
+         _dVctoIRRF := MonthSum( CtoD( "20/"+ StrZero( Month(dDatabase) , 2 ) +"/"+ StrZero( Year(dDatabase) , 4 ) ) , 1 )
        EndIf
 		 
        DBSelectArea("SA2")
 		 SA2->( DBSetOrder(1) ) // A2_FILIAL+A2_AUTONOM
 		 SA2->( DBSeek( xFilial("SA2") + _cFornIRRF ) )
-		 _cChave := "AUT" + _cRecibo + IIF( len(_aParc) > 1 , StrZero( Len(_aParc) , 2 ) , "  " ) + "RPA" + _cCodFor + _cLojaFor
+		 _cChave := "AUT" + _cRecibo + IIf( Len(_aParc) > 1 , StrZero( Len(_aParc) , 2 ) , "  " ) + "RPA" + _cCodFor + _cLojaFor
  		 
- 		 DbSelectArea("SE2")
-		 SE2->(DbSetOrder(1)) //E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
+ 		 DBSelectArea("SE2")
+		 SE2->(DBSetOrder(1)) //E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
 		 If !SE2->( DBSeek( xFilial("SE2") + "AUT" + ZZ2->ZZ2_RECIBO + _cParcela + "TX " + SubStr(_cFornIRRF,1,6) ) )
 			lMsErroAuto	:= .F.
 			aVetor		:= {	{ "E2_PREFIXO"	, "AUT"						, Nil },;
@@ -1093,7 +1061,7 @@ Begin Sequence
 								{ "E2_PARCELA"	, _cParcela					, Nil },;
 								{ "E2_TIPO"		, "TX "						, Nil },;
 								{ "E2_NATUREZ"	, _cNatIRRF					, Nil },;
-								{ "E2_FORNECE"	, substr(_cFornIRRF,1,6)	, Nil },;
+								{ "E2_FORNECE"	, SubStr(_cFornIRRF,1,6)	, Nil },;
 								{ "E2_LOJA"		, "00  "					, Nil },;
 								{ "E2_EMISSAO"	, dDataBase					, Nil },;
 								{ "E2_VENCTO"	, _dVctoIRRF				, Nil },;
@@ -1112,7 +1080,7 @@ Begin Sequence
 			If lMsErroAuto
 				Mostraerro()
 				_lRet:= .F.
-			Endif
+			EndIf
 			
 			//================================================================================
 			//| Restaura o modulo em uso.                                                    |
@@ -1125,7 +1093,7 @@ Begin Sequence
       //| Nao encontrado registro na tabela ZZ2                                        |
       //================================================================================
    Else
-	  xmaghelpfis(	"Atenção!"																,;
+	  xMagHelpFis(	"Atenção!"																,;
 		            "Nao foi encontrado o registro da inserção do RPA na tabela ZZ2."		,;
                     "Favor comunicar o departamento de informática do problema ocorrido."	 )
 	  _lRet := .F.
@@ -1133,7 +1101,7 @@ Begin Sequence
 
 End Sequence
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return( _lRet )
 
@@ -1142,11 +1110,8 @@ Return( _lRet )
 Programa----------: ExcluiSE2
 Autor-------------: Fabiano Dias
 Data da Criacao---: 22/12/2010
-===============================================================================================================================
 Descrição---------: Rotina para gerar a exclusao dos dados do RPA no financeiro
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1162,10 +1127,10 @@ Begin Sequence
    //================================================================================
    //| Posicionando no título                                                       |
    //================================================================================
-   DbSelectArea("SE2")
+   DBSelectArea("SE2")
    SE2->( DBOrderNickName("IT_RPA") ) //E2_FILIAL+E2_PREFIXO+E2_TIPO+E2_NUM+E2_PARCELA+E2_FORNECE+E2_LOJA
    If SE2->( DBSeek( xFilial("SE2") + "AUT" + "RPA" + M->ZZA_RPA ) )
-	  While SE2->( !EOF() ) .And. SE2->( E2_FILIAL + E2_PREFIXO + E2_NUM ) == xFilial("SE2") + "AUT" + M->ZZA_RPA .And. AllTrim(SE2->E2_ORIGEM) == "AOMS042"
+	  While SE2->( !Eof() ) .And. SE2->( E2_FILIAL + E2_PREFIXO + E2_NUM ) == xFilial("SE2") + "AUT" + M->ZZA_RPA .And. AllTrim(SE2->E2_ORIGEM) == "AOMS042"
 	
 		 If SE2->E2_TIPO == "RPA"
 		
@@ -1194,7 +1159,7 @@ Begin Sequence
 				Mostraerro()
 				_lRet:= .F.
 				Exit
-			Endif
+			EndIf
 			
 			//================================================================================
 			//| Restaura o modulo em uso.                                                    |
@@ -1206,7 +1171,7 @@ Begin Sequence
 	     SE2->( DBSkip() )
 	  EndDo
    Else
-	  xmaghelpfis(	"ERRO"																									,;
+	  xMagHelpFis(	"ERRO"																									,;
 					"Não foi(ram) encontrado(s) título(s) no financeiro referente ao RPA: " + M->ZZA_RPA					,;
 					"Diante disso não será possível realizar a exclusão, favor contactar o departamento de informática."	 )
 	
@@ -1222,11 +1187,8 @@ Return( _lRet )
 Programa----------: RetCodRPA
 Autor-------------: Fabiano Dias
 Data da Criacao---: 22/12/2010
-===============================================================================================================================
 Descrição---------: Funcao utilizada para retornar o codigo do RPA.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1251,7 +1213,7 @@ Begin Sequence
    DBUseArea( .T. , "TOPCONN" , TcGenQry(,,_cQuery) , _cAliasZZA , .T. , .F. )
 
    DBSelectArea(_cAliasZZA)
-   (_cAliasZZA)->( DBGotop() )
+   (_cAliasZZA)->( DBGoTop() )
 
    If AllTrim( (_cAliasZZA)->CODIGO ) == '0'
 	  _cCodRPA := '000001'
@@ -1274,16 +1236,13 @@ Return( _cCodRPA )
 Programa----------: calcImpRPA
 Autor-------------: Tiago Correa Castro
 Data da Criacao---: 25/01/2009
-===============================================================================================================================
 Descrição---------: Chamada da função de Cálculo dos Impostos do RPA
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function calcImpRPA()
-Local _cCampo	:= UPPER(ALLTRIM(ReadVar()))
+Local _cCampo	:= Upper(AllTrim(ReadVar()))
 Local _aResAux	:= {}
 Local _aDadImp	:= {	M->ZZA_CODAUT	,; //01 -- Código do Autônomo
 						(M->ZZA_VLRBRT-M->ZZA_VRPEDA),; //02 -- Valor Bruto
@@ -1293,8 +1252,8 @@ Local _aDadImp	:= {	M->ZZA_CODAUT	,; //01 -- Código do Autônomo
 Local _lRet := .T.
 
 Begin Sequence
-   If "ZZA_VRPEDA" $ _cCampo .OR. "ZZA_VLRBRT" $ _cCampo
-      IF M->ZZA_VLRBRT < M->ZZA_VRPEDA
+   If "ZZA_VRPEDA" $ _cCampo .Or. "ZZA_VLRBRT" $ _cCampo
+      If M->ZZA_VLRBRT < M->ZZA_VRPEDA
 	     Aviso( 'Atenção!' , 'O valor bruto deve ser maior/igual que o valor de Pedágio!' , {'Voltar'} )
          _lRet := .F.
          Break
@@ -1325,11 +1284,8 @@ Return _lRet
 Programa----------: vldExcRPA
 Autor-------------: Fabiano Dias
 Data da Criacao---: 05/11/2010
-===============================================================================================================================
 Descrição---------: Funcao utilizada para validar a exclusao de um RPA.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1345,16 +1301,16 @@ Local _nI		:= 0
 
 Begin Sequence
    DBSelectArea("ZZ2")		// Posicionando no cabecalho do recibo
-   ZZ2->( DBSetORder(1) )	// ZZ2_FILIAL+ZZ2_RECIBO
+   ZZ2->( DBSetOrder(1) )	// ZZ2_FILIAL+ZZ2_RECIBO
    If ZZ2->( DBSeek( xFilial("ZZ2") + M->ZZA_RPA ) )
-	  cReg := alltrim( str( ZZ2->(Recno()) ) )
+	  cReg := AllTrim( Str( ZZ2->(Recno()) ) )
    EndIf
 
    _cCodAut	:= ZZ2->ZZ2_AUTONO
    _cNumRPA	:= ZZ2->ZZ2_RECIBO
    _cRegZZ2	:= cValToChar( ZZ2->( Recno() ) )
    _cRegSE2	:= U_ITSE2REG()
-   _cDtRef		:= SubStr( DtoS( ZZ2->ZZ2_DATA ) , 1 , 6 )
+   _cDtRef		:= SubStr( DToS( ZZ2->ZZ2_DATA ) , 1 , 6 )
 
    If ZZ2->ZZ2_INSS > 0 .Or. ZZ2->ZZ2_IRRF > 0
 	  //================================================================================
@@ -1369,7 +1325,7 @@ Begin Sequence
 	  _cQuery += " AND	SE2.E2_PREFIXO				= 'AUT' "
 	  _cQuery += " AND	SE2.E2_ORIGEM				IN ( 'AOMS042' , 'MGLT011' , 'GERAZZ3' ) "
 	  _cQuery += " AND	SE2.R_E_C_N_O_				> '"+ _cRegSE2	+"' "
-	  _cQuery += " AND	SUBSTR(SE2.E2_EMISSAO,1,6)	= '"+ _cDtRef	+"' "
+	  _cQuery += " AND	SubStr(SE2.E2_EMISSAO,1,6)	= '"+ _cDtRef	+"' "
 	  _cQuery += " AND	SE2.D_E_L_E_T_				= ' ' "
 	  _cQuery += " WHERE "
 	  _cQuery += " 		ZZ2.ZZ2_AUTONO				= '"+ _cCodAut	+"' "
@@ -1387,7 +1343,7 @@ Begin Sequence
 	  _cQuery += " AND	SE2.E2_PREFIXO				= 'AUT' "
 	  _cQuery += " AND	SE2.E2_ORIGEM				IN ( 'AOMS042' , 'MGLT011' , 'GERAZZ3' ) "
 	  _cQuery += " AND	SE2.R_E_C_N_O_				> '"+ _cRegSE2	+"' "
-	  _cQuery += " AND	SUBSTR(SE2.E2_EMISSAO,1,6)	= '"+ _cDtRef	+"' "
+	  _cQuery += " AND	SubStr(SE2.E2_EMISSAO,1,6)	= '"+ _cDtRef	+"' "
 	  _cQuery += " AND	SE2.D_E_L_E_T_				= ' ' "
 	  _cQuery += " WHERE "
 	  _cQuery += " 		ZZ2.ZZ2_AUTONO				= '"+ _cCodAut	+"' "
@@ -1472,11 +1428,8 @@ Return( _lRet )
 Programa----------: vldIncRPA
 Autor-------------: Fabiano Dias
 Data da Criacao---: 05/11/2010
-===============================================================================================================================
 Descrição---------: Funcao para informar se ja foi lançado um RPA para o autonomo corrente com um tipo de fornecedor diferente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1486,7 +1439,7 @@ Local _cQuery  := ""
 Local _cAlias  := GetNextAlias()  
 Local nCountRec:= 0     
 Local _lRet    := .T. 
-Local _cTipForn:= IIF(M->ZZA_TPFORN == "F","Fretista","Outros")
+Local _cTipForn:= IIf(M->ZZA_TPFORN == "F","Fretista","Outros")
 
 Begin Sequence
    _cQuery := "SELECT"  
@@ -1497,13 +1450,13 @@ Begin Sequence
    _cQuery += " AND ZZA.ZZA_FILIAL = '"  + xFilial("ZZA") + "'"
    _cQuery += " AND ZZA.ZZA_CODAUT = '"  + M->ZZA_CODAUT  + "'" 
    _cQuery += " AND ZZA.ZZA_TPFORN <> '" + M->ZZA_TPFORN  + "'"          
-   _cQuery += " AND SUBSTR(ZZA.ZZA_DTEMIS,1,6) = '" + SubStr(DtoS(M->ZZA_DTEMIS),1,6) + "'"		                                                   
+   _cQuery += " AND SubStr(ZZA.ZZA_DTEMIS,1,6) = '" + SubStr(DToS(M->ZZA_DTEMIS),1,6) + "'"		                                                   
 	
    dbUseArea( .T., "TOPCONN",TcGenQry(,,_cQuery),_cAlias,.T.,.T.)
    COUNT TO nCountRec //Contabiliza o numero de registros encontrados pela query   
 	
    If nCountRec > 0        
-      xmaghelpfis("INFORMAÇÃO","Já existe lançamento(s) de RPA para o Autonomo: " + M->ZZA_CODAUT +;
+      xMagHelpFis("INFORMAÇÃO","Já existe lançamento(s) de RPA para o Autonomo: " + M->ZZA_CODAUT +;
 		          " com o tipo do fornecedor diferente de: " + _cTipForn +; 
 				  " dentro do mesmo mês do RPA: " + M->ZZA_CODRPA + " a de se ressaltar que a forma de cálculo é diferenciada de acordo com o tipo do Fornecedor.",;
 		          "Favor verificar se o tipo do fornecedor foi fornecido corretamente.")   
@@ -1513,8 +1466,8 @@ Begin Sequence
 	  EndIf		                    
    EndIf    
 	
-   dbSelectArea(_cAlias) 
-   dbCloseArea()
+   DBSelectArea(_cAlias) 
+   DBCloseArea()
 
 End Sequence
 
@@ -1525,11 +1478,8 @@ Return _lRet
 Programa----------: vldAuton
 Autor-------------: Fabiano Dias
 Data da Criacao---: 10/03/2011
-===============================================================================================================================
 Descrição---------: Validacao para constatar se o autonomo indicado na geracao do RPA nao se encontra com a situacao demitido
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1547,7 +1497,7 @@ Begin Sequence
 	  SELECT
 	      RA_MAT
 	  FROM
-	      %table:SRA%
+	      %Table:SRA%
 	  WHERE
 	      D_E_L_E_T_ = ' '
 	      AND RA_FILIAL = '01'
@@ -1555,20 +1505,20 @@ Begin Sequence
 	      %exp:_cFiltro%
    EndSql         
 
-   dbSelectArea(_cAlias)
-   (_cAlias)->(dbGotop())
+   DBSelectArea(_cAlias)
+   (_cAlias)->(DBGoTop())
 
    If (_cAlias)->(!Eof()) 
 
 	  _lRet:= .F. 
 	
-	  xmaghelpfis("INFORMAÇÃO",;
+	  xMagHelpFis("INFORMAÇÃO",;
 				  "O Autonomo: " + _cCodAuton + " encontra-se com a situação demitido em seu cadastro de autonomo.",;	
 	              "Favor verificar se o código do autonomo foi fornecido corretamente, ou cheque junto ao departamento pessoal a situação do autonomo.")   
    EndIf     
 
-   dbSelectArea(_cAlias)
-   (_cAlias)->(dbCloseArea())
+   DBSelectArea(_cAlias)
+   (_cAlias)->(DBCloseArea())
 
 End Sequence
 
@@ -1579,11 +1529,8 @@ Return _lRet
 Programa----------: AOMS042SF2
 Autor-------------: Alexandre Villar
 Data da Criacao---: 06/08/2014
-===============================================================================================================================
 Descrição---------: Recupera os códigos da SF2 de acordo com a ZZ2 posicionada caso seja montagem de Carga
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1629,17 +1576,14 @@ Return( _aRet )
 Programa----------: AOMS042ORD
 Autor-------------: Alexandre Villar
 Data da Criacao---: 07/08/2014
-===============================================================================================================================
 Descrição---------: Ordena os registros de acordo com o Recno da SE2 gerados para o RPA
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS042ORD( _aRegPos )
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _aAux		:= {}
 Local _aRet		:= {}
 Local _cAlias	:= GetNextAlias()
@@ -1675,7 +1619,7 @@ Begin Sequence
 	   _cQuery += " AND	SE2.E2_NUM					= '"+ ZZ2->ZZ2_RECIBO +"' "
 	   _cQuery += " AND	SE2.E2_PREFIXO				= 'AUT' "
 	   _cQuery += " AND	SE2.E2_ORIGEM				IN ( 'AOMS042' , 'MGLT011' , 'GERAZZ3' ) "
-	   _cQuery += " AND	SUBSTR(SE2.E2_EMISSAO,1,6)	= '"+ SubStr( DtoS(ZZ2->ZZ2_DATA) , 1 , 6 ) +"' "
+	   _cQuery += " AND	SubStr(SE2.E2_EMISSAO,1,6)	= '"+ SubStr( DToS(ZZ2->ZZ2_DATA) , 1 , 6 ) +"' "
 	   _cQuery += " AND	SE2.D_E_L_E_T_				= ' ' "
 	
 	   If Select(_cAlias) > 0
@@ -1717,6 +1661,6 @@ Begin Sequence
 
 End Sequence
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _aRet )

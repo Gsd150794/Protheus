@@ -15,7 +15,7 @@
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 #Define _ENTER CHR(13) + CHR(10)
 
@@ -43,7 +43,7 @@ Private _cAlias1 :="ZZP"
 Private cTipoOPFor:= "9F"//Para TES dos forncedores
 
 
-Private AROTINA
+Private aRotina
 Private CCADASTRO
 Private CALIAS
 Private NOPCE
@@ -57,8 +57,8 @@ Private CFIELDOK
 Private NREG
 Private NOPC
 
-AADD( aObjects , { 100 , 050 , .T. , .F. , .F. } )
-AADD( aObjects , { 100 , 100 , .T. , .T. , .F. } )
+aAdd( aObjects , { 100 , 050 , .T. , .F. , .F. } )
+aAdd( aObjects , { 100 , 100 , .T. , .T. , .F. } )
 
 aPosObj := MsObjSize( aInfo , aObjects )
 
@@ -75,7 +75,7 @@ cCadastro := OemToAnsi( "TES INTELIGENTE" )
 
 MBrowse( ,,,, _cAlias1 )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -114,7 +114,7 @@ Private ACOLS		:= {}
 Private _oTotFatura
 Private _cTotFatura := 0
 Private oFont14b 
-Private _lTESimplesNac:=ZZP->(FIELDPOS("ZZP_SIMPNA")) # 0 .AND. ZZP->(FIELDPOS(" ZZP_CONTRI")) # 0//Tratamento da TES do Simples Nacional.
+Private _lTESimplesNac:=ZZP->(FIELDPOS("ZZP_SIMPNA")) # 0 .And. ZZP->(FIELDPOS(" ZZP_CONTRI")) # 0//Tratamento da TES do Simples Nacional.
 
 //Log de utilização
 U_ITLOGACS()
@@ -139,11 +139,11 @@ EndIf
 aCpoEnchoice  :={}
 _acampos := {"ZZP_CODIGO","ZZP_TIPO","ZZP_CLIENT","ZZP_LOJA","ZZP_DESCLI","ZZP_CLIZN","ZZP_SIMPNA","ZZP_CONTRI"}
 vcampos := {}
-aadd(vcampos,{"ZZP_DESCLI",'IIF(INCLUI,"",POSICIONE("SA1",1,XFILIAL("SA1")+M->ZZP_CLIENT+M->ZZP_LOJA,"SA1->A1_NOME"))'})
+aAdd(vcampos,{"ZZP_DESCLI",'IIf(INCLUI,"",Posicione("SA1",1,xFilial("SA1")+M->ZZP_CLIENT+M->ZZP_LOJA,"SA1->A1_NOME"))'})
 
-For _nnk := 1 to len(_acampos)
+For _nnk := 1 to Len(_acampos)
                                                   
-	AADD(aCpoEnchoice,_acampos[_nnk])
+	aAdd(aCpoEnchoice,_acampos[_nnk])
 	wVar := "M->" + _acampos[_nnk]
 	&wVar:= CriaVar(_acampos[_nnk])
 
@@ -153,11 +153,11 @@ Next
 //Para que somente os campos citados acima para o cabecalho sejam impressos e nao todos da tabela ZZN 
 //deve-se acrescentar a instrucao abaixo
 //====================================================================================================
-AADD( aCpoEnchoice , "NOUSER" )
+aAdd( aCpoEnchoice , "NOUSER" )
 
-If nOpc#3 // se nao for inclusao preenche os campos do cabecalho
+If nOpc#3 // se nao For inclusao preenche os campos do cabecalho
 
-	DbSelectArea(_cAlias1)
+	DBSelectArea(_cAlias1)
 	
 	For nCntFor := 1 TO FCount()      
 	
@@ -167,16 +167,16 @@ If nOpc#3 // se nao for inclusao preenche os campos do cabecalho
 		
 	Next nCntFor
 	
-	For v:=1 to len(vCampos) // CAMPOS DE VISUALIZACAO  
+	For v:=1 to Len(vCampos) // CAMPOS DE VISUALIZACAO  
 	
 		If AllTrim(vCampos[v,1]) $ "ZZP_CODIGO/ZZP_TIPO/ZZP_CLIENT/ZZP_LOJA/ZZP_DESCLI/ZZP_CLIZN/ZZP_SIMPNA/ZZP_CONTRI"
 			wVar  := "M->"+vCampos[v,1]
 			&wVar := &(vCampos[v,2])         
 		EndIf     
 		
-	next v
+	Next v
 	
-Endif
+EndIf
 
 //====================================================================================================
 // Cria aHeader e aCols da GetDados
@@ -184,13 +184,13 @@ Endif
 nUsado := 7
 _acampos := {}
 
-aadd(aheader,{"Item","ZZP_ITEM  ","@!                                           ",3,0," ","€€€€€€€€€€€€€€ ","C","ZZP","R"," ","þÀ"})
-aadd(aheader,{"Produto","ZZP_PRODUT","@!                                           ",15,0," ","€€€€€€€€€€€€€€ ","C","ZZP","R"," ","þÀ"})
-aadd(aheader,{"Descr. Prod.","ZZP_DESCRI","@!                                           ",100,0," ","€€€€€€€€€€€€€€ ","C","ZZP","V",'IIF(INCLUI,"",POSICIONE("SB1",1,XFILIAL("SB1") + ZZP->ZZP_PRODUT,"SB1->B1_I_DESCD" ))                                           ',"þÀ"})
-aadd(aheader,{"TES Interna","ZZP_TSIN  ","@!                                           ",3,0," ","€€€€€€€€€€€€€€ ","C","ZZP","R"," ","þÀ"})
-aadd(aheader,{"TES Externa","ZZP_TSOUT ","@!                                           ",3,0," ","€€€€€€€€€€€€€€ ","C","ZZP","R"," ","þÀ"})
-aadd(aheader,{"Estado","ZZP_ESTADO","@!                                           ",2,0," ","€€€€€€€€€€€€€€ ","C","ZZP","R"," ","þÀ"})
-aadd(aheader,{"Armazem","ZZP_LOCAL ","@99                                          ",2,0," ","€€€€€€€€€€€€€€ ","C","ZZP","R"," ","þA"})
+aAdd(aheader,{"Item","ZZP_ITEM  ","@!                                           ",3,0," ","€€€€€€€€€€€€€€ ","C","ZZP","R"," ","þÀ"})
+aAdd(aheader,{"Produto","ZZP_PRODUT","@!                                           ",15,0," ","€€€€€€€€€€€€€€ ","C","ZZP","R"," ","þÀ"})
+aAdd(aheader,{"Descr. Prod.","ZZP_DESCRI","@!                                           ",100,0," ","€€€€€€€€€€€IIf ","C","ZZP","V",'IIF(INCLUI,"",Posicione("SB1",1,xFilial("SB1") + ZZP->ZZP_PRODUT,"SB1->B1_I_DESCD" ))                                           ',"þÀ"})
+aAdd(aheader,{"TES Interna","ZZP_TSIN  ","@!                                           ",3,0," ","€€€€€€€€€€€€€€ ","C","ZZP","R"," ","þÀ"})
+aAdd(aheader,{"TES Externa","ZZP_TSOUT ","@!                                           ",3,0," ","€€€€€€€€€€€€€€ ","C","ZZP","R"," ","þÀ"})
+aAdd(aheader,{"Estado","ZZP_ESTADO","@!                                           ",2,0," ","€€€€€€€€€€€€€€ ","C","ZZP","R"," ","þÀ"})
+aAdd(aheader,{"Armazem","ZZP_LOCAL ","@99                                          ",2,0," ","€€€€€€€€€€€€€€ ","C","ZZP","R"," ","þA"})
 
 M->ZZP_ITEM 	:= 	CriaVar("ZZP_ITEM")	
 M->ZZP_PRODUT 	:= 	CriaVar("ZZP_PRODUT")
@@ -207,14 +207,14 @@ DBSelectArea(_cAlias1)
 //====================================================================================================
 If nOpc == 3 // Incluir
     
-    _nPosItem := aScan( aHeader , {|K| Upper( allTrim( K[2] ) ) == "ZZP_ITEM" } )
+    _nPosItem := aScan( aHeader , {|K| Upper( AllTrim( K[2] ) ) == "ZZP_ITEM" } )
 	
 	aCols := { Array( nUsado + 1 ) }
 	
 	aCols[1][nUsado+1] := .F.
 	
 	For _nI := 1 to nUsado
-		aCols[1][_ni]  := CriaVar( aHeader[_nI][2] )
+		aCols[1][_nI]  := CriaVar( aHeader[_nI][2] )
 	Next
 	
 	aCols[1][_nPosItem] := "001"
@@ -226,16 +226,16 @@ Else
 	DBSelectArea(_cAlias1)
 	(_cAlias1)->( DBSetOrder(1) )
 	
-	IF (_cAlias1)->( DBSeek( xFilial("ZZP") + ZZP->ZZP_CODIGO ) )
+	If (_cAlias1)->( DBSeek( xFilial("ZZP") + ZZP->ZZP_CODIGO ) )
 		
         nReg  := ZZP->(RECNO())//Guarda o recno
 		
 		While !ZZP->(Eof()) .And. ZZP->ZZP_FILIAL == xFilial("ZZP") .And. ZZP->ZZP_CODIGO == M->ZZP_CODIGO
 			
-			AADD(aCols,Array(nUsado+1))
+			aAdd(aCols,Array(nUsado+1))
 			
 			For _nI := 1 to nUsado
-				aCols[Len(aCols)][_ni] := IIf( aHeader[_ni][10] # "V" , FieldGet( FieldPos( aHeader[_ni][2] ) ) , CriaVar( aHeader[_ni][2] ) )
+				aCols[Len(aCols)][_nI] := IIf( aHeader[_nI][10] # "V" , FieldGet( FieldPos( aHeader[_nI][2] ) ) , CriaVar( aHeader[_nI][2] ) )
 			Next
 			
 			aCols[Len(aCols)][nUsado+1] := .F.
@@ -245,10 +245,10 @@ Else
 		
 	Else
 	
-		u_itmsg(	"Não foram encontrados registros de dados da linha posicionada"	,;
+		U_ITMsg(	"Não foram encontrados registros de dados da linha posicionada"	,;
 					"INFORMAÇÃO"													,;
 					"Favor comunicar ao suporte de tal problema encontrado",1		 )
-		Return()
+		Return
 		
 	EndIf
 	
@@ -276,20 +276,20 @@ If Len( aHeader ) > 0
     cTudOk			:= "AllwaysTrue()"
     cFieldOk		:= ""
 	nOpca			:= 0
-	IF _lTESimplesNac .AND. ( M->ZZP_TIPO $ cTipoOPFor )
-		aTrocaF3 := {{"ZZP_CLIENT","FOR"}}
+	If _lTESimplesNac .And. ( M->ZZP_TIPO $ cTipoOPFor )
+		aTrocaF3 := {{"ZZP_CLIENT","For"}}
 	Else
-		aTrocaF3 = {}//Variavel private usada para troca o F3 de um campo  no MsMGet
+		aTrocaF3 = {}//Variavel Private usada para troca o F3 de um campo  no MsMGet
 	EndIf
 
-	IF nReg # 0
-	   ZZP->( DBGOTO( nReg ) )//Reposiciona no ZZP por causa da descrição do forncedor/cliente que vinha errada
-	ENDIF
+	If nReg # 0
+	   ZZP->( DBGoTo( nReg ) )//Reposiciona no ZZP por causa da descrição do forncedor/cliente que vinha errada
+	EndIf
 
 	aSize    := MsAdvSize()
 	aObjects := {}
-	AAdd( aObjects, { 100, 100, .T., .T. } )
-	AAdd( aObjects, { 100, 100, .T., .T. } )
+	aAdd( aObjects, { 100, 100, .T., .T. } )
+	aAdd( aObjects, { 100, 100, .T., .T. } )
 	aInfo   := { aSize[ 1 ],aSize[ 2 ],aSize[ 3 ],aSize[ 4 ],03,03 }
 	aPosObj := MsObjSize( aInfo, aObjects )
 
@@ -301,17 +301,17 @@ If Len( aHeader ) > 0
 //                           [ cAlias], [ uPar2],  nOpc>,4,5,6,   [ aAcho]   , [ aPos]    , [ aCpos], [ nModelo], [ uPar11], [ uPar12], [ uPar13], [ oWnd], [ lF3], [ lMemoria], [ lColumn], [ caTela], [ lNoFolder], [ lProperty], [ aField], [ aFolder], [ lCreate], [ lNoMDIStretch]
 	oMsMGet:=MsMGet():New(cAliasEnchoice , nReg , nOpcE , , , , aCpoEnchoice , aPosObj[1] ,         , 3         ,          ,          ,          ,        ,       , .T. ) 
 
-	IF _lTESimplesNac .AND. ( M->ZZP_TIPO $ cTipoOPFor )
+	If _lTESimplesNac .And. ( M->ZZP_TIPO $ cTipoOPFor )
        U_AOMS56Val(.F.,"M->ZZP_TIPO")//Acerta o titutlo do codigo do cliente / fornecedor
-	ENDIF
+	EndIf
 	
 	oGetDados := MsGetDados():New( aPosObj[2,1],aPosObj[2,2],aPosObj[2,3],aPosObj[2,4] , nOpcG , cLinOk , cTudOk , "+ZZP_ITEM" , .T. ,,,, 9999 )
 	
-	ACTIVATE MSDIALOG oDlg ON INIT EnchoiceBar( oDlg , {|| IIf( obrigatorio( aGets , aTela ) .And. AOMS056E() , AOMS056G() .AND. oDlg:End() , .F. ) , nOpca := 1 } , {|| oDlg:End() } ,, aButtons )
+	ACTIVATE MSDIALOG oDlg ON INIT EnchoiceBar( oDlg , {|| IIf( obrigatorio( aGets , aTela ) .And. AOMS056E() , AOMS056G() .And. oDlg:End() , .F. ) , nOpca := 1 } , {|| oDlg:End() } ,, aButtons )
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -331,22 +331,22 @@ Static Function AOMS056G()
 
 Local wProcura , i            
                                                                              
-Local _nPosItem  := AsCan( aHeader , {|W| Upper(AllTrim(W[2])) == "ZZP_ITEM"   } )
-Local _nPosProd  := AsCan( aHeader , {|W| Upper(AllTrim(W[2])) == "ZZP_PRODUT" } )
-Local _nPosTESIn := AsCan( aHeader , {|W| Upper(AllTrim(W[2])) == "ZZP_TSIN"   } )
-Local _nPosTESOu := AsCan( aHeader , {|W| Upper(AllTrim(W[2])) == "ZZP_TSOUT"  } )
-Local _nPosEst   := AsCan( aHeader , {|W| Upper(AllTrim(W[2])) == "ZZP_ESTADO" } )
-Local _nPosLoc   := AsCan( aHeader , {|W| Upper(AllTrim(W[2])) == "ZZP_LOCAL" } )
+Local _nPosItem  := aScan( aHeader , {|W| Upper(AllTrim(W[2])) == "ZZP_ITEM"   } )
+Local _nPosProd  := aScan( aHeader , {|W| Upper(AllTrim(W[2])) == "ZZP_PRODUT" } )
+Local _nPosTESIn := aScan( aHeader , {|W| Upper(AllTrim(W[2])) == "ZZP_TSIN"   } )
+Local _nPosTESOu := aScan( aHeader , {|W| Upper(AllTrim(W[2])) == "ZZP_TSOUT"  } )
+Local _nPosEst   := aScan( aHeader , {|W| Upper(AllTrim(W[2])) == "ZZP_ESTADO" } )
+Local _nPosLoc   := aScan( aHeader , {|W| Upper(AllTrim(W[2])) == "ZZP_LOCAL" } )
 
 //====================================================================================================
-// Se nao for consulta
+// Se nao For consulta
 //====================================================================================================
 If nOpcG # 2
 
 	//====================================================================================================
 	// grava os itens
 	//====================================================================================================
-	For i:=1 to len(aCols)     
+	For i:=1 to Len(aCols)     
 	
 		DBSelectArea("ZZP")
 		ZZP->( DBSetOrder(1) )
@@ -356,7 +356,7 @@ If nOpcG # 2
 		//====================================================================================================
 		// A opcao nOpcG == 4 eh para o caso da copia, para efetuar a insercao dos dados
 		//====================================================================================================
-		If Inclui .or. Altera .Or. nOpcG == 4
+		If Inclui .Or. Altera .Or. nOpcG == 4
 		
 			//====================================================================================================
 			// Deleta a linha caso o registro exista no banco
@@ -365,7 +365,7 @@ If nOpcG # 2
 			
 				RecLock( "ZZP" , .F. )
 				ZZP->( DBDelete() )
-				ZZP->( MsUnlock() )
+				ZZP->( MSUnLock() )
 				
 				WriteSx2("ZZP")
 				
@@ -374,20 +374,20 @@ If nOpcG # 2
 				//====================================================================================================
 				// Se a linha nao estiver deletada efetua a insercao ou alteracao
 				//====================================================================================================
-				If !aCols[i][len(aCols[i])]
+				If !aCols[i][Len(aCols[i])]
 					
 					RecLock( "ZZP" , IIf( wProcura , .F. , .T.) )
 					
-					ZZP->ZZP_FILIAL  	:= XFILIAL("ZZP")
+					ZZP->ZZP_FILIAL  	:= xFilial("ZZP")
 					ZZP->ZZP_CODIGO  	:= M->ZZP_CODIGO
 					ZZP->ZZP_TIPO   	:= M->ZZP_TIPO
 					ZZP->ZZP_CLIENT 	:= M->ZZP_CLIENT
 					ZZP->ZZP_LOJA   	:= M->ZZP_LOJA
 					ZZP->ZZP_CLIZN  	:= M->ZZP_CLIZN
-					IF _lTESimplesNac
+					If _lTESimplesNac
 					   ZZP->ZZP_SIMPNA 	:= M->ZZP_SIMPNA
 					   ZZP->ZZP_CONTRI 	:= M->ZZP_CONTRI
-					ENDIF   
+					EndIf   
 					ZZP->ZZP_ITEM  	    := aCols[i,_nPosItem]
 					ZZP->ZZP_PRODUT  	:= aCols[i,_nPosProd]
 					ZZP->ZZP_TSIN    	:= aCols[i,_nPosTESIn]
@@ -395,7 +395,7 @@ If nOpcG # 2
 					ZZP->ZZP_ESTADO  	:= aCols[i,_nPosEst]
 					ZZP->ZZP_LOCAL	    := aCols[i,_nPosLoc]
 
-					ZZP->( MsUnlock() )
+					ZZP->( MSUnLock() )
 					
 					If Inclui
 						ConfirmSx8()
@@ -414,7 +414,7 @@ If nOpcG # 2
 			
 				RecLock("ZZP",.F.)
 				ZZP->( DBDelete() )
-				ZZP->( MsUnlock() )
+				ZZP->( MSUnLock() )
 				
 				WriteSx2("ZZP")
 			
@@ -444,12 +444,12 @@ Retorno---------: Nenhum
 
 User Function AOMS056V()
 
-Local _nPosItem		:= AsCan( aHeader , {|W| Upper(AllTrim(W[2]) ) == "ZZP_ITEM"   } )
-Local _nPosProd		:= AsCan( aHeader , {|W| Upper(AllTrim(W[2]) ) == "ZZP_PRODUT" } )
-Local _nPosTESIn	   	:= AsCan( aHeader , {|W| Upper(AllTrim(W[2]) ) == "ZZP_TSIN"   } )
-Local _nPosTESOu		:= AsCan( aHeader , {|W| Upper(AllTrim(W[2]) ) == "ZZP_TSOUT"  } )
-Local _nPosEst		:= AsCan( aHeader , {|W| Upper(AllTrim(W[2]) ) == "ZZP_ESTADO" } )
-Local _nPosLoc		:= AsCan( aHeader , {|W| Upper(AllTrim(W[2]) ) == "ZZP_LOCAL" } )
+Local _nPosItem		:= aScan( aHeader , {|W| Upper(AllTrim(W[2]) ) == "ZZP_ITEM"   } )
+Local _nPosProd		:= aScan( aHeader , {|W| Upper(AllTrim(W[2]) ) == "ZZP_PRODUT" } )
+Local _nPosTESIn	   	:= aScan( aHeader , {|W| Upper(AllTrim(W[2]) ) == "ZZP_TSIN"   } )
+Local _nPosTESOu		:= aScan( aHeader , {|W| Upper(AllTrim(W[2]) ) == "ZZP_TSOUT"  } )
+Local _nPosEst		:= aScan( aHeader , {|W| Upper(AllTrim(W[2]) ) == "ZZP_ESTADO" } )
+Local _nPosLoc		:= aScan( aHeader , {|W| Upper(AllTrim(W[2]) ) == "ZZP_LOCAL" } )
 Local _lRet			:= .T. , k
                              
 //====================================================================================================
@@ -469,7 +469,7 @@ If nOpcG == 3 .Or. nOpcG == 4
 		
 			If !aTail(aCols[k])
 			
-				If _lret 
+				If _lRet 
 				
 				   If aCols[k][_nPosProd] == aCols[n][_nPosProd]
 				   
@@ -481,7 +481,7 @@ If nOpcG == 3 .Or. nOpcG == 4
 				
 				   		 			_lRet := .F.
 					
-				   		 			u_itmsg( "O produto lançado na linha atual ja foi lançando para o mesmo estado e armazem fornecido anteriormente na linha: "+ aCols[k,_nPosItem]		,;
+				   		 			U_ITMsg( "O produto lançado na linha atual ja foi lançando para o mesmo estado e armazem fornecido anteriormente na linha: "+ aCols[k,_nPosItem]		,;
 				   		 					"INFORMAÇÃO"																												 		,;
 				   		 				"Favor checar se o codigo do produto ou o estado/armazem fornecidos estejam corretos, pois não sera possível realizar a inclusão de dois "	+;
 				   		 				"produtos com o mesmo código para o mesmo estado/armazem dentro do mesmo cadastro de TES inteligente.",1										 )	
@@ -492,13 +492,13 @@ If nOpcG == 3 .Or. nOpcG == 4
 				
 				   		 	EndIf
 				   		 	
-				   		Endif
+				   		EndIf
 				   		 
-				   	Endif
+				   	EndIf
 				   	
-				Endif
+				EndIf
 				
-			Endif
+			EndIf
 			
 		Next k
 		
@@ -507,7 +507,7 @@ If nOpcG == 3 .Or. nOpcG == 4
 		//====================================================================================================
 		If Len( AllTrim( aCols[n][_nPosTESIn] ) ) == 0 .And. Len( AllTrim( aCols[n][_nPosTESOu] ) ) == 0
 			
-			u_itmsg(		"Favor informar no mínimo um tipo de TES: interna ou externa para confirmar a inclusão da linha corrente."	,;
+			U_ITMsg(		"Favor informar no mínimo um tipo de TES: interna ou externa para confirmar a inclusão da linha corrente."	,;
 							"INFORMAÇÃO"	,,1)
 										
 			_lRet := .F.
@@ -538,12 +538,12 @@ Static Function AOMS056E()
 
 Local _lRet			:= .T.  , k , w
 Local _cAlias			:= ""
-Local _nPosItem		:= AsCan( aHeader , {|W| Upper( AllTrim( W[2] ) ) == "ZZP_ITEM"	} )
-Local _nPosProd		:= AsCan( aHeader , {|W| Upper( AllTrim( W[2] ) ) == "ZZP_PRODUT"	} )
-Local _nPosTESIn		:= AsCan( aHeader , {|W| Upper( AllTrim( W[2] ) ) == "ZZP_TSIN"	} )
-Local _nPosTESOu		:= AsCan( aHeader , {|W| Upper( AllTrim( W[2] ) ) == "ZZP_TSOUT"	} )
-Local _nPosEst		:= AsCan( aHeader , {|W| Upper( AllTrim( W[2] ) ) == "ZZP_ESTADO"	} )
-Local _nPosLoc		:= AsCan( aHeader , {|W| Upper( AllTrim( W[2] ) ) == "ZZP_LOCAL"	} )
+Local _nPosItem		:= aScan( aHeader , {|W| Upper( AllTrim( W[2] ) ) == "ZZP_ITEM"	} )
+Local _nPosProd		:= aScan( aHeader , {|W| Upper( AllTrim( W[2] ) ) == "ZZP_PRODUT"	} )
+Local _nPosTESIn		:= aScan( aHeader , {|W| Upper( AllTrim( W[2] ) ) == "ZZP_TSIN"	} )
+Local _nPosTESOu		:= aScan( aHeader , {|W| Upper( AllTrim( W[2] ) ) == "ZZP_TSOUT"	} )
+Local _nPosEst		:= aScan( aHeader , {|W| Upper( AllTrim( W[2] ) ) == "ZZP_ESTADO"	} )
+Local _nPosLoc		:= aScan( aHeader , {|W| Upper( AllTrim( W[2] ) ) == "ZZP_LOCAL"	} )
 
 //====================================================================================================
 // Caso esteja sendo realizada uma inclusao ou alteracao as validacoes abaixo serao efetuadas.
@@ -556,7 +556,7 @@ If nOpcG == 3 .Or. nOpcG == 4
 	//====================================================================================================
 	If Len( AllTrim( M->ZZP_CLIENT ) ) == 0 .And. Len( AllTrim( M->ZZP_LOJA ) ) > 0
 	
-		u_itmsg(		"Não será possivel realizar a inserção de uma regra de TES INTELIGENTE somente preenchendo a loja do cliente."					,;
+		U_ITMsg(		"Não será possivel realizar a inserção de uma regra de TES INTELIGENTE somente preenchendo a loja do cliente."					,;
 						"INFORMAÇÃO"																													,;
 						"Favor preencher o codigo do cliente ou deixar os campos cliente e loja vazios representando desta forma uma regra generica.",1	 )
 		_lRet := .F.
@@ -575,12 +575,12 @@ If nOpcG == 3 .Or. nOpcG == 4
 		AOMS056Q( 1 , _cAlias , nOpcG )
 		
 		DBSelectArea( _cAlias )
-		(_cAlias)->( DBGotop() )
+		(_cAlias)->( DBGoTop() )
 		If (_cAlias)->NUMREG > 0
 		
-			u_itmsg(		"Tipo de Operação já informado para esse Cliente/Loja nessa filial."															,;
+			U_ITMsg(		"Tipo de Operação já informado para esse Cliente/Loja nessa filial."															,;
 							"INFORMAÇÃO"																													,;
-							"Para incluir/alterar mais produtos, posicione em algum produto cadastrado para essa Operação e Cliente e clique em alterar.",1	 )
+							"Para incluir/alterar mais produtos, Posicione em algum produto cadastrado para essa Operação e Cliente e clique em alterar.",1	 )
 			_lRet := .F.
 		
 		EndIf
@@ -604,7 +604,7 @@ If nOpcG == 3 .Or. nOpcG == 4
 			
 			  If !aTail(aCols[k])
 			
-				If _lret 
+				If _lRet 
 				
 				   If aCols[k][_nPosProd] == aCols[n][_nPosProd]
 				   
@@ -616,7 +616,7 @@ If nOpcG == 3 .Or. nOpcG == 4
 				
 				   		 			_lRet := .F.
 					
-				   		 			u_itmsg("O produto lançado na linha atual ja foi lançando para o mesmo estado e armazem fornecido anteriormente na linha: "+ aCols[k,_nPosItem]		,;
+				   		 			U_ITMsg("O produto lançado na linha atual ja foi lançando para o mesmo estado e armazem fornecido anteriormente na linha: "+ aCols[k,_nPosItem]		,;
 				   		 					"INFORMAÇÃO"																												 		,;
 				   		 				"Favor checar se o codigo do produto ou o estado/armazem fornecidos estejam corretos, pois não sera possível realizar a inclusão de dois "	+;
 				   		 				"produtos com o mesmo código para o mesmo estado/armazem dentro do mesmo cadastro de TES inteligente.",1										 )	
@@ -627,13 +627,13 @@ If nOpcG == 3 .Or. nOpcG == 4
 				
 				   		 	EndIf
 				   		 	
-				   		Endif
+				   		EndIf
 				   		 
-				   	Endif
+				   	EndIf
 				   	
-				Endif
+				EndIf
 				
-			  Endif
+			  EndIf
 			
 			Next w
 			
@@ -657,7 +657,7 @@ If nOpcG == 3 .Or. nOpcG == 4
 			//====================================================================================================
 			If Len( AllTrim( aCols[k][_nPosTESIn] ) ) == 0 .And. Len( AllTrim( aCols[k][_nPosTESOu] ) ) == 0 .And. !aTail( aCols[k] )
 				
-				u_itmsg(		"Favor informar no mínimo um tipo de TES: interna ou externa para confirmar a inclusão da linha: "+ aCols[k,_nPosItem] +"."	,;
+				U_ITMsg(		"Favor informar no mínimo um tipo de TES: interna ou externa para confirmar a inclusão da linha: "+ aCols[k,_nPosItem] +"."	,;
 								"INFORMAÇÃO"																												,;
 								"Favor proceder como indicado acima."																						 )
 				_lRet:= .F.
@@ -708,12 +708,12 @@ If _nOpcao == 1
 	//====================================================================================================
 	// Regra geral considera Zona Franca / Simples Nacional / Contribuinte ICMS
 	//====================================================================================================
-	If EMPTY( M->ZZP_LOJA ) 
+	If Empty( M->ZZP_LOJA ) 
 		_cFiltro += " AND ZZP_CLIZN  = '"+ M->ZZP_CLIZN  +"' "
-		IF _lTESimplesNac
+		If _lTESimplesNac
 		   _cFiltro += " AND ZZP_SIMPNA = '"+ M->ZZP_SIMPNA +"' "
 		   _cFiltro += " AND ZZP_CONTRI = '"+ M->ZZP_CONTRI +"' "
-		ENDIF
+		EndIf
 	EndIf
 	
 	//====================================================================================================
@@ -729,7 +729,7 @@ If _nOpcao == 1
 	BeginSql alias _cAlias
 	
 		SELECT COUNT(*) NUMREG
-		FROM %table:ZZP%
+		FROM %Table:ZZP%
 		WHERE
 			D_E_L_E_T_ = ' '
 		%exp:_cFiltro%
@@ -738,7 +738,7 @@ If _nOpcao == 1
 
 EndIf
 
-Return()
+Return
       
 /*
 ===============================================================================================================================
@@ -754,10 +754,10 @@ Retorno---------: Nenhum
 ===============================================================================================================================
 */
 
-User function AOMS056N()
+User Function AOMS056N()
 
 Local _cRet    := ""
-Local _aArea   := GetArea()     
+Local _aArea   := FWGetArea()     
 
 Local _cAlias  := GetNextAlias()
 Local _cFiltro := "%"  
@@ -769,14 +769,14 @@ BeginSql alias _cAlias
 	SELECT
 	      TO_NUMBER(NVL(MAX(ZZP_CODIGO),'0')) AS CODIGO
 	FROM
-	      %table:ZZP%
+	      %Table:ZZP%
 	WHERE
 	      D_E_L_E_T_ = ' '
 	      %exp:_cFiltro%	      
 EndSql
 
-dbSelectArea(_cAlias)
-(_cAlias)->(dbGotop())    
+DBSelectArea(_cAlias)
+(_cAlias)->(DBGoTop())    
 
 _cRet:= StrZero((_cAlias)->CODIGO + 1,6)          
 
@@ -790,7 +790,7 @@ While !MayIUseCode( "ZZP_CODIGO_"+ xFilial("ZZP") + _cRet ) // verifica se esta 
 	_cRet := Soma1(_cRet)
 EndDo
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return( _cRet )
 
@@ -828,7 +828,7 @@ If Len(AllTrim(M->ZZP_TIPO)) > 0
 	
 		If M->ZZP_CLIENT <> '000001'
 		
-		   	u_itmsg(		"Para o tipo de operacao: "+ AllTrim(_cTpOper2) +", somente podera ser informado o cliente 000001(ITALAC)."	,;
+		   	U_ITMsg(		"Para o tipo de operacao: "+ AllTrim(_cTpOper2) +", somente podera ser informado o cliente 000001(ITALAC)."	,;
 		   					"INFORMAÇÃO"																								,;
 							"Favor verificar se o tipo de operacao indicado esta correto, ou alterar o codigo do cliente informado.",1	 )
 			_lRet := .F.
@@ -842,7 +842,7 @@ If Len(AllTrim(M->ZZP_TIPO)) > 0
 	
 	    If M->ZZP_CLIENT == '000001'
 	    
-	    	u_itmsg(		"Para o tipo de operacao diferente de:"+ AllTrim(_cTpOper2) +", nao podera ser informado o cliente 000001(ITALAC)."	,;
+	    	U_ITMsg(		"Para o tipo de operacao diferente de:"+ AllTrim(_cTpOper2) +", nao podera ser informado o cliente 000001(ITALAC)."	,;
 	    					"INFORMAÇÃO"																										,;
 							"Favor verificar se o tipo de operacao indicado esta correto, ou alterar o codigo do cliente informado.",1			 )
 			_lRet := .F.
@@ -869,7 +869,7 @@ If Len(AllTrim(M->ZZP_TIPO)) > 0
 			BeginSql Alias cAliasSRA
 			
 				SELECT COUNT(1) NUMREG
-				FROM %table:SRA%
+				FROM %Table:SRA%
 				WHERE
 					D_E_L_E_T_ = ' '
 				AND RA_SITFOLH IN (' ','F','A')
@@ -880,7 +880,7 @@ If Len(AllTrim(M->ZZP_TIPO)) > 0
 			
 			If (cAliasSRA)->NUMREG = 0
 			
-			   	u_itmsg(		"Para o tipo de operacao: "+ AllTrim(_cTpOper3) +", somente poderão ser informados clientes que também são funcionários."	,;
+			   	U_ITMsg(		"Para o tipo de operacao: "+ AllTrim(_cTpOper3) +", somente poderão ser informados clientes que também são funcionários."	,;
 			   					"INFORMAÇÃO"																												,;
 								"Favor verificar se o tipo de operacao indicado esta correto, ou alterar o codigo do cliente informado.",1					 )
 				_lRet := .F.
@@ -889,7 +889,7 @@ If Len(AllTrim(M->ZZP_TIPO)) > 0
 		
 		Else
 		
-		   	u_itmsg(	"O cliente informado: "+ M->ZZP_CLIENT +'-'+ M->ZZP_LOJA +" não foi encontrado no cadastro do Sistema!"		,;
+		   	U_ITMsg(	"O cliente informado: "+ M->ZZP_CLIENT +'-'+ M->ZZP_LOJA +" não foi encontrado no cadastro do Sistema!"		,;
 		   					"INFORMAÇÃO"																								,;
 							"Favor verificar se o código indicado esta correto, ou informar um codigo de cliente válido.",1				 )
 			_lRet := .F.
@@ -960,10 +960,10 @@ Retorno---------: Nenhum
 ===============================================================================================================================
 */
 
-User function getZZPNum()
+User Function getZZPNum()
 
 Local _cRet    := ""
-Local _aArea   := GetArea()     
+Local _aArea   := FWGetArea()     
 
 Local _cAlias  := GetNextAlias()
 Local _cFiltro := "%"  
@@ -975,14 +975,14 @@ BeginSql alias _cAlias
 	SELECT
 	      TO_NUMBER(NVL(MAX(ZZP_CODIGO),'0')) AS CODIGO
 	FROM
-	      %table:ZZP%
+	      %Table:ZZP%
 	WHERE
 	      D_E_L_E_T_ = ' '
 	      %exp:_cFiltro%	      
 EndSql
 
-dbSelectArea(_cAlias)
-(_cAlias)->(dbGotop())    
+DBSelectArea(_cAlias)
+(_cAlias)->(DBGoTop())    
 
 _cRet:= StrZero((_cAlias)->CODIGO + 1,6)          
 
@@ -996,7 +996,7 @@ While !MayIUseCode( "ZZP_CODIGO_"+ xFilial("ZZP") + _cRet ) // verifica se esta 
 	_cRet := Soma1(_cRet)
 EndDo
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return( _cRet )
 
@@ -1010,12 +1010,12 @@ Descrição-------: Funcao usada em valid e x3_relacao e rdmake
 ===============================================================================================================================
 Parametros------: lLimpa: Limpa os campos , cCampo:= campo que chamou
 ===============================================================================================================================
-Retorno---------: .T. OU .f. ou Descricao
+Retorno---------: .T. OU .F. ou Descricao
 ===============================================================================================================================
 */
-USER Function AOMS56Val(lLimpa,cCampo)
+User Function AOMS56Val(lLimpa,cCampo)
 
-Local aArea     := GetArea()
+Local aArea     := FWGetArea()
 Local IsEnchOld := GetMv("MV_ENCHOLD",,"2") == "1"
 Local nPosCpo   := 0
 Local nPos1     := 0
@@ -1023,73 +1023,73 @@ Local nPos2     := 0
 Local cText	    := ""	
 Local cVar      := ""
 Local _lRet     := .T.
-LOCAL _cAliasBusca:="SA1"
-LOCAL _cCampoBusca:="A1_NOME"
+Local _cAliasBusca:="SA1"
+Local _cCampoBusca:="A1_NOME"
 
 DEFAULT cCampo := ReadVar()
 DEFAULT lLimpa := .F.
 
-IF cCampo = "M->ZZP_CLIENT" //"X3_VLDUSER"
+If cCampo = "M->ZZP_CLIENT" //"X3_VLDUSER"
 
-  IF Empty(M->ZZP_CLIENT)
+  If Empty(M->ZZP_CLIENT)
      M->ZZP_DESCLI := " "
-     RETURN .T.
-  ENDIF
+     Return .T.
+  EndIf
 
   If M->ZZP_TIPO $ cTipoOPFor
      _cAliasBusca:="SA2"
      _cCampoBusca:="A2_NOME"
-  ENDIF
+  EndIf
 
-  IF !Empty(M->ZZP_LOJA)
+  If !Empty(M->ZZP_LOJA)
       _lRet:=EXISTCPO(_cAliasBusca,M->ZZP_CLIENT+M->ZZP_LOJA)
-  ELSE
+  Else
       _lRet:=EXISTCPO(_cAliasBusca,M->ZZP_CLIENT)
-  ENDIF
+  EndIf
 
-  IF _lRet
-     M->ZZP_DESCLI := POSICIONE(_cAliasBusca,1,XFILIAL(_cAliasBusca)+M->ZZP_CLIENT+M->ZZP_LOJA,_cCampoBusca)
-  ENDIF
+  If _lRet
+     M->ZZP_DESCLI := Posicione(_cAliasBusca,1,xFilial(_cAliasBusca)+M->ZZP_CLIENT+M->ZZP_LOJA,_cCampoBusca)
+  EndIf
 
-  RETURN _lRet
+  Return _lRet
   
-ELSEIF cCampo = "M->ZZP_LOJA" //"X3_VLDUSER"
+ElseIf cCampo = "M->ZZP_LOJA" //"X3_VLDUSER"
 
-  IF Empty(M->ZZP_LOJA)
+  If Empty(M->ZZP_LOJA)
      M->ZZP_DESCLI := " "
-     RETURN .T.
-  ENDIF
+     Return .T.
+  EndIf
 
   If M->ZZP_TIPO $ cTipoOPFor
      _cAliasBusca:="SA2"
      _cCampoBusca:="A2_NOME"
-  ENDIF
+  EndIf
 
-  IF ExistCpo(_cAliasBusca,M->ZZP_CLIENT+M->ZZP_LOJA)
-     M->ZZP_DESCLI := POSICIONE(_cAliasBusca,1,XFILIAL(_cAliasBusca)+M->ZZP_CLIENT+M->ZZP_LOJA,_cCampoBusca)
-     RETURN .T.
-  ELSE
-     RETURN .F.
-  ENDIF
+  If ExistCpo(_cAliasBusca,M->ZZP_CLIENT+M->ZZP_LOJA)
+     M->ZZP_DESCLI := Posicione(_cAliasBusca,1,xFilial(_cAliasBusca)+M->ZZP_CLIENT+M->ZZP_LOJA,_cCampoBusca)
+     Return .T.
+  Else
+     Return .F.
+  EndIf
 
-ELSEIF cCampo = "ZZP_DESCLI"//"X3_RELACAO" 
+ElseIf cCampo = "ZZP_DESCLI"//"X3_RELACAO" 
 
-  IF INCLUI
-     RETURN " "
-  ENDIF
+  If INCLUI
+     Return " "
+  EndIf
 
   If ZZP->ZZP_TIPO $ cTipoOPFor
      _cAliasBusca:="SA2"
      _cCampoBusca:="A2_NOME"
-  ENDIF
+  EndIf
 
-  RETURN  POSICIONE(_cAliasBusca,1,XFILIAL(_cAliasBusca)+ZZP->ZZP_CLIENT+ZZP->ZZP_LOJA,_cCampoBusca)
+  Return  Posicione(_cAliasBusca,1,xFilial(_cAliasBusca)+ZZP->ZZP_CLIENT+ZZP->ZZP_LOJA,_cCampoBusca)
 
-ELSEIF cCampo = "M->ZZP_TIPO" //"X3_VALID"  
+ElseIf cCampo = "M->ZZP_TIPO" //"X3_VALID"  
 
    cVar  := M->ZZP_TIPO
 
-ENDIF
+EndIf
 
 If IsEnchOld
    nPosCpo := aScan(oMsMGet:aGets, {|x| "ZZP_CLIENT" $ x })
@@ -1097,11 +1097,11 @@ If IsEnchOld
    nPos2   := Val(SubStr(oMsMGet:aGets[nPosCpo],3,1))
    If nPos2 = 2
       nPos2:= 3
-   Endif
+   EndIf
    cText:= aTela[nPos1][nPos2]
 Else
    cText:= oMsMGet:GetText("ZZP_CLIENT")
-Endif
+EndIf
 
 If cVar $ cTipoOPFor
    cText := "Cod. Fornece"
@@ -1113,12 +1113,12 @@ If IsEnchOld
    oMsMGet:aTela[nPos1][nPos2]:= cText
 Else
    oMsMGet:SetText("ZZP_CLIENT", cText )
-Endif
+EndIf
     
-If lLimpa .AND. _lTESimplesNac
-   //Array criado para trocar o F3 do cliente quando FOR O CODIGO 9F
-   IF ( cVar $ cTipoOPFor )
-      aTrocaF3 := {{"ZZP_CLIENT","FOR"}}
+If lLimpa .And. _lTESimplesNac
+   //Array criado para trocar o F3 do cliente quando For O CODIGO 9F
+   If ( cVar $ cTipoOPFor )
+      aTrocaF3 := {{"ZZP_CLIENT","For"}}
    Else
       aTrocaF3 = {}
    EndIf
@@ -1128,5 +1128,5 @@ If lLimpa .AND. _lTESimplesNac
 EndIf
 
 lRefresh := .T.
-RestArea(aArea)
+FWRestArea(aArea)
 Return .T.

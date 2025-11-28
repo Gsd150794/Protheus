@@ -10,8 +10,8 @@
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#include "protheus.ch"
-#include "topconn.ch" 
+#Include "TOTVS.ch"
+#Include "topconn.ch" 
 /*
 ===============================================================================================================================
 Programa----------: AOMS004 
@@ -22,31 +22,31 @@ Descrição---------: Validação contra produto duplicado na tabela de preços - Cha
 ===============================================================================================================================
 Parametros--------: Nenhum
 ===============================================================================================================================
-Retorno-----------: .t. ou .f.
+Retorno-----------: .T. ou .F.
 ===============================================================================================================================
 */
 User Function AOMS004()
 
-Local _aArea   := getarea()
+Local _aArea   := FWGetArea()
 Local _cRet	   := .T.
-Local _cPospro := aScan( aHeader , {|x| UPPER( Alltrim(x[2]) ) == "DA1_CODPRO" } )
-Local _cPosit  := aScan( aHeader , {|x| UPPER( Alltrim(x[2]) ) == "DA1_ITEM" } )
+Local _cPospro := aScan( aHeader , {|x| Upper( AllTrim(x[2]) ) == "DA1_CODPRO" } )
+Local _cPosit  := aScan( aHeader , {|x| Upper( AllTrim(x[2]) ) == "DA1_ITEM" } )
 
 
 //============================================
 //Procura se já tem produto na tabela atual
 //============================================
-If ascan( acols , {|x| UPPER( Alltrim(x[_cPospro]) ) ==  alltrim(M->DA1_CODPRO) .and. x[_cPosit] != acols[n][_cPosit]} ) > 0
+If aScan( acols , {|x| Upper( AllTrim(x[_cPospro]) ) ==  AllTrim(M->DA1_CODPRO) .And. x[_cPosit] != acols[n][_cPosit]} ) > 0
 
-	Help( ,, 'AOMS004',, "Já existe o produto " + alltrim(M->DA1_CODPRO) + " na tabela atual!", 1, 0 )
+	Help( ,, 'AOMS004',, "Já existe o produto " + AllTrim(M->DA1_CODPRO) + " na tabela atual!", 1, 0 )
 		
 	_cRet := .F.
 	
-Endif
+EndIf
 
 U_ITLOGACS()//Grava log de utilização da rotina
 
-restarea(_aArea)	
+FWRestArea(_aArea)	
 	
-return	_cRet
+Return	_cRet
 

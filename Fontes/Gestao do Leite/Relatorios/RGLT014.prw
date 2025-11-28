@@ -1,28 +1,22 @@
 /*
 ===============================================================================================================================
-                                    ATUALIZACOES SOFRIDAS DESDE A CONSTRUÇAO INICIAL
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                            
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT014
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 19/07/2019
-===============================================================================================================================
 Descrição---------: Relatório Recepções com KM Divergente. Lista tickets cujo KM informado estava divergente do 
 					que era permitido para a linha/rota. Chamado 29986
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -41,11 +35,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 19/07/2019
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -91,11 +82,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 19/07/2019
-===============================================================================================================================
 Descrição---------: Processa impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -116,10 +104,10 @@ Local _nCountRec	:= 0
 If MV_PAR08 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLD")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -199,8 +187,8 @@ BeginSql alias _cAlias
 SELECT ZLD.ZLD_FILIAL, SA2.A2_COD ||'-'|| SA2.A2_LOJA TRANSPORTADOR, SA2.A2_NOME, 
        ZL2.ZL2_COD, ZL2.ZL2_DESCRI, ZL3.ZL3_COD, ZL3.ZL3_DESCRI,
        ZLD.ZLD_DTCOLE, ZLD.ZLD_TICKET, SUM(ZLD.ZLD_QTDBOM) VOLUME, ZL3.ZL3_KM, ZLD.ZLD_KM, ZLD_KM-ZL3_KM DIF_KM,
-       UTL_RAW.CAST_TO_VARCHAR2(DBMS_LOB.SUBSTR(ZLD_KMJUST, 300, 1)) JUST
-    FROM %table:SA2% SA2, %table:ZL3% ZL3, %table:ZL2% ZL2, %table:ZLD% ZLD
+       UTL_RAW.CAST_TO_VARCHAR2(DBMS_LOB.SubStr(ZLD_KMJUST, 300, 1)) JUST
+    FROM %Table:SA2% SA2, %Table:ZL3% ZL3, %Table:ZL2% ZL2, %Table:ZLD% ZLD
     WHERE SA2.D_E_L_E_T_ = ' '
     AND ZL3.D_E_L_E_T_ = ' '
     AND ZL2.D_E_L_E_T_ = ' '
@@ -217,7 +205,7 @@ SELECT ZLD.ZLD_FILIAL, SA2.A2_COD ||'-'|| SA2.A2_LOJA TRANSPORTADOR, SA2.A2_NOME
     AND ZLD.ZLD_FRETIS BETWEEN %exp:MV_PAR02% AND %exp:MV_PAR03%
     AND ZLD.ZLD_LJFRET BETWEEN %exp:MV_PAR04% AND %exp:MV_PAR05%
 GROUP BY ZLD.ZLD_FILIAL, SA2.A2_COD ||'-'|| SA2.A2_LOJA, SA2.A2_NOME, ZL2.ZL2_COD, ZL2.ZL2_DESCRI, ZL3.ZL3_COD, ZL3.ZL3_DESCRI,
-		ZLD.ZLD_DTCOLE, ZLD.ZLD_TICKET, ZL3_KM, ZLD_KM, UTL_RAW.CAST_TO_VARCHAR2(DBMS_LOB.SUBSTR(ZLD_KMJUST, 300, 1))
+		ZLD.ZLD_DTCOLE, ZLD.ZLD_TICKET, ZL3_KM, ZLD_KM, UTL_RAW.CAST_TO_VARCHAR2(DBMS_LOB.SubStr(ZLD_KMJUST, 300, 1))
 ORDER BY ZLD.ZLD_FILIAL, %exp:_cOrder%, ZLD.ZLD_TICKET
 EndSql
 //==========================================================================
@@ -235,16 +223,16 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	_cFilial := (_cAlias)->ZLD_FILIAL
 	_cFret := (_cAlias)->TRANSPORTADOR
 	_dData := (_cAlias)->ZLD_DTCOLE
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()

@@ -4,6 +4,6 @@
 +' <wsit:OBSNFE>'+Eval({|| EncodeUTF8(AllTrim(SC5->C5_MENNOTA))})+'</wsit:OBSNFE>'
 +' <wsit:OBSPVE>'+Eval({|| EncodeUTF8(AllTrim(SC5->C5_I_OBPED))})+'</wsit:OBSPVE>'
 +' <wsit:PEDIDO>'+Eval({|| EncodeUTF8(AllTrim(SC5->C5_NUM))})+'</wsit:PEDIDO>'
-+' <wsit:RESEVA>'+Eval({|| EncodeUTF8(IIF(AllTrim(U_STPEDIDO())=='03',"2","1"))})+'</wsit:RESEVA>'
++' <wsit:RESEVA>'+Eval({|| EncodeUTF8(IIf(AllTrim(U_STPEDIDO())=='03',"2","1"))})+'</wsit:RESEVA>'
 +' <wsit:SITUAC>'+Eval({|| EncodeUTF8(AllTrim(U_STPEDIDO()))})+'</wsit:SITUAC>'
-+' <wsit:TPAGEN>'+Eval({|| EncodeUTF8(IIF(SC5->C5_TPFRETE == "F","F",AllTrim(SC5->C5_I_AGEND)))})+'</wsit:TPAGEN>' 
++' <wsit:TPAGEN>'+Eval({|| EncodeUTF8(IIf(SC5->C5_TPFRETE == "F","F",AllTrim(SC5->C5_I_AGEND)))})+'</wsit:TPAGEN>' 

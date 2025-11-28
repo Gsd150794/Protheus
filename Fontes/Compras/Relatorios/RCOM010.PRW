@@ -11,7 +11,7 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 */
 
 #Include "Matr120.ch"
-#Include "Protheus.ch"    
+#Include "TOTVS.ch"    
 
 /*
 ===============================================================================================================================
@@ -66,11 +66,11 @@ Local oSection2
 Local aOrdem	:= {}
 Local cAliasSC7 := GetNextAlias()
 //Local cAliasSB1 := GetNextAlias()
-PRIVATE cPerg := "RCOM010"
+Private cPerg := "RCOM010"
 
-IF !FWSX1Util():ExistPergunte(cPerg)
+If !FWSX1Util():ExistPergunte(cPerg)
    cPerg := "MTR120"
-ENDIF
+EndIf
 
 oReport:= TReport():New(cPerg,"Relacao de Pedidos de Compras",cPerg,;
  				{|oReport| RCOM010P(oReport,cAliasSC7)},;
@@ -78,10 +78,10 @@ oReport:= TReport():New(cPerg,"Relacao de Pedidos de Compras",cPerg,;
 oReport:SetLandscape()    
 oReport:SetTotalInLine(.F.)
 Pergunte(cPerg,.F.)
-Aadd( aOrdem, "Por Numero")  
-Aadd( aOrdem, "Por Produto" )  
-Aadd( aOrdem, "Por Fornecedor" )  
-Aadd( aOrdem, "Por Previsao de Entrega " )  
+aAdd( aOrdem, "Por Numero")  
+aAdd( aOrdem, "Por Produto" )  
+aAdd( aOrdem, "Por Fornecedor" )  
+aAdd( aOrdem, "Por Previsao de Entrega " )  
 
 oSection1 := TRSection():New(oReport,"Relacao de Pedidos de Compras",{"SC7","SA2","SB1"},aOrdem) 
 oSection1 :SetTotalInLine(.F.)
@@ -127,9 +127,9 @@ TRCell():New(oSection2,"nVlrIPI","   ",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPix
 oSection2:Cell("nVlrIPI"):GetFieldInfo("C7_VALIPI")
 TRCell():New(oSection2,"C7_TOTAL","SC7",/*Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,{|| RCOM010T(cAliasSC7) })
 TRCell():New(oSection2,"nQtdEnt1","   ","Qtd.Entreg UM" ,PesqPict('SC7','C7_QUJE') ,,,{||  (cAliasSC7)->C7_QUJE  })
-TRCell():New(oSection2,"nQtdEnt","    ","Qtd.Entr 2aUM" ,PesqPict('SC7','C7_QUJE') ,,,{|| If(Empty((cAliasSC7)->C7_RESIDUO),IIF((cAliasSC7)->C7_QUJE<0,0,(cAliasSC7)->C7_QUJE)/SB1->B1_CONV,0) })
+TRCell():New(oSection2,"nQtdEnt","    ","Qtd.Entr 2aUM" ,PesqPict('SC7','C7_QUJE') ,,,{|| If(Empty((cAliasSC7)->C7_RESIDUO),IIf((cAliasSC7)->C7_QUJE<0,0,(cAliasSC7)->C7_QUJE)/SB1->B1_CONV,0) })
 TRCell():New(oSection2,"nQtdRec1","   ","Qtd.Receber UM",PesqPict('SC7','C7_QUANT'),,,{|| (cAliasSC7)->C7_QUANT-(cAliasSC7)->C7_QUJE }) //Quant.Receber 1 um
-TRCell():New(oSection2,"nQtdRec","    ","Qtd.Receb 2aUM",PesqPict('SC7','C7_QUANT'),,,{|| If(Empty((cAliasSC7)->C7_RESIDUO),IIF((cAliasSC7)->C7_QUANT-(cAliasSC7)->C7_QUJE<0,0,(cAliasSC7)->C7_QUANT-(cAliasSC7)->C7_QUJE)/SB1->B1_CONV,0) }) 
+TRCell():New(oSection2,"nQtdRec","    ","Qtd.Receb 2aUM",PesqPict('SC7','C7_QUANT'),,,{|| If(Empty((cAliasSC7)->C7_RESIDUO),IIf((cAliasSC7)->C7_QUANT-(cAliasSC7)->C7_QUJE<0,0,(cAliasSC7)->C7_QUANT-(cAliasSC7)->C7_QUJE)/SB1->B1_CONV,0) }) 
 TRCell():New(oSection2,"nSalRec","    ",STR0061,PesqPict('SC7','C7_TOTAL'),TamSX3("C7_TOTAL")[1],/*lPixel*/,{|| RCOM010S(cAliasSC7) }) //Saldo Receber
 //TRCell():New(oSection2,"C7_RESIDUO","   ",STR0070+CRLF+STR0071/*Titulo*/,/*Picture*/,3,/*lPixel*/,{|| If(Empty((cAliasSC7)->C7_RESIDUO),STR0031,STR0032) }) //"Res."##"Elim."
 
@@ -173,17 +173,17 @@ Local lFilUsr	:= oSection1:GetAdvplExp() <> ""
 //GRAVA LOG DE USO
 U_ITLOGACS("U_RCOM010")
 
-dbSelectArea("SC7")
+DBSelectArea("SC7")
 If nOrdem == 4
-	dbSetOrder(16) 
+	DBSetOrder(16) 
 Else
-	dbSetOrder(nOrdem)
+	DBSetOrder(nOrdem)
 EndIf
 
 If nOrdem == 1
 	If ( cPaisLoc$"ARG|POR|EUA" )	//Ordena los pedidos de compra y luego la AE.
-		dbSetOrder(10)
-	Endif	
+		DBSetOrder(10)
+	EndIf	
 	oReport:SetTitle( oReport:Title()+STR0014) // " - POR NUMERO"
 	oSection1 :SetTotalText(STR0034) //"Total dos Itens: " 
 ElseIf nOrdem == 2
@@ -195,26 +195,26 @@ ElseIf nOrdem == 3
 ElseIf nOrdem == 4
 	oReport:SetTitle( oReport:Title()+STR0053) //" - POR PREVISAO DE ENTREGA"
 	oSection1 :SetTotalText(STR0043) //"Total da Previsao de Entrega"
-Endif
+EndIf
 
-IF VALTYPE(MV_PAR07) = "C"
-   MV_PAR07:=VAL(MV_PAR07)
-ENDIF
+If ValType(MV_PAR07) = "C"
+   MV_PAR07:=Val(MV_PAR07)
+EndIf
 
-If mv_par07==1
+If MV_PAR07==1
 	oReport:SetTitle( oReport:Title()+STR0025) //", Todos"
-Elseif mv_par07==2
+ElseIf MV_PAR07==2
 	oReport:SetTitle( oReport:Title()+STR0026) //", Em Abertos"
-Elseif mv_par07==3
+ElseIf MV_PAR07==3
 	oReport:SetTitle( oReport:Title()+STR0027) //", Residuos"
-Elseif mv_par07==4
+ElseIf MV_PAR07==4
 	oReport:SetTitle( oReport:Title()+STR0028) //", Atendidos"
-Elseif mv_par07==5
+ElseIf MV_PAR07==5
 	oReport:SetTitle( oReport:Title()+STR0059) //", Atendidos + Parcial entregue"
-Elseif mv_par07==6
+ElseIf MV_PAR07==6
 	oReport:SetTitle( oReport:Title()+"Parcialmente Atendidos") 
-Endif
-oReport:SetTitle( oReport:Title()+" - " + GetMv("MV_MOEDA"+STR(mv_par13,1))) //" MOEDA "
+EndIf
+oReport:SetTitle( oReport:Title()+" - " + GetMv("MV_MOEDA"+Str(MV_PAR13,1))) //" MOEDA "
 //==========================================================================
 //Filtragem do relatório                                                  
 //==========================================================================
@@ -229,39 +229,39 @@ oReport:SetTitle( oReport:Title()+" - " + GetMv("MV_MOEDA"+STR(mv_par13,1))) //"
 
 	cWhere :="%"
 
-	If mv_par11 == 1 
+	If MV_PAR11 == 1 
 		cWhere += "AND C7_CONAPRO <> 'B' "	
-	ElseIf mv_par11 == 2
+	ElseIf MV_PAR11 == 2
 		cWhere += "AND C7_CONAPRO = 'B' "	
-	Endif
+	EndIf
 
-	If mv_par07 == 2 
+	If MV_PAR07 == 2 
 		cWhere += "AND ( (C7_QUANT-C7_QUJE) > 0 ) "	
 		cWhere += "AND C7_RESIDUO = ' ' "
-	ElseIf mv_par07 == 3
+	ElseIf MV_PAR07 == 3
 		cWhere += "AND C7_RESIDUO <> ' ' "
-	ElseIf mv_par07 == 4
+	ElseIf MV_PAR07 == 4
 		cWhere += "AND C7_QUANT <= C7_QUJE "	
-	ElseIf mv_par07 == 5
+	ElseIf MV_PAR07 == 5
 		cWhere += "AND C7_QUJE > 0 "		
-	ElseIf mv_par07 == 6
+	ElseIf MV_PAR07 == 6
 		cWhere += "AND C7_QUJE > 0 AND C7_QUANT > C7_QUJE AND C7_RESIDUO <> 'S' AND C7_ENCER <> 'E' "		
-	Endif
+	EndIf
 	
-	If mv_par10 == 1 
+	If MV_PAR10 == 1 
 		cWhere += "AND C7_TIPO = 1 "	
-	ElseIf mv_par10 == 2
+	ElseIf MV_PAR10 == 2
 		cWhere += "AND C7_TIPO = 2 "	
-	Endif
+	EndIf
 	
-	If mv_par12 == 1 //Firmes
+	If MV_PAR12 == 1 //Firmes
 		cWhere += "AND (C7_TPOP = 'F' OR C7_TPOP = ' ') "	
-	ElseIf mv_par12 == 2 //Previstas
+	ElseIf MV_PAR12 == 2 //Previstas
 		cWhere += "AND C7_TPOP = 'P' "	
-	Endif
+	EndIf
 	
 	If lFilUsr
-		nFilters := len(oSection1:aUserFilter)
+		nFilters := Len(oSection1:aUserFilter)
 		
 		cFrom := "%"
 		
@@ -273,11 +273,11 @@ oReport:SetTitle( oReport:Title()+" - " + GetMv("MV_MOEDA"+STR(mv_par13,1))) //"
 			ElseIf	oSection1:aUserFilter[nI][1] == "SB1" .And. oSection1:aUserFilter[nI][2] <> ""
 				cFrom += "," + RetSqlName("SB1") + " SB1 "
 				cWhere += "AND C7_PRODUTO = B1_COD "
-			Endif	
+			EndIf	
 		Next nI
 		
 		cFrom += "%" 
-	Endif
+	EndIf
 
 	cWhere +="%"	
 
@@ -287,19 +287,19 @@ oReport:SetTitle( oReport:Title()+" - " + GetMv("MV_MOEDA"+STR(mv_par13,1))) //"
            C7_REAJUST,C7_MOEDA,C7_PRECO,C7_NUMSC,C7_UM,C7_SEGUM,C7_QUANT,C7_ITEM,C7_SEQUEN,
            C7_DESC1,C7_DESC2,C7_DESC3,C7_IPIBRUT,C7_IPI,C7_RESIDUO,C7_QUJE,C7_VLDESC
 	
-	FROM %table:SC7% SC7 %Exp:cFrom%
+	FROM %Table:SC7% SC7 %Exp:cFrom%
 	
 	WHERE C7_FILIAL = %xFilial:SC7% AND 
-		  C7_NUM >= %Exp:mv_par08% AND 
-		  C7_NUM <= %Exp:mv_par09% AND 	 	  
-		  C7_PRODUTO >= %Exp:mv_par01% AND 
-		  C7_PRODUTO <= %Exp:mv_par02% AND 
-  		  C7_EMISSAO >= %Exp:Dtos(mv_par03)% AND 
-		  C7_EMISSAO <= %Exp:Dtos(mv_par04)% AND 
-  		  C7_DATPRF >= %Exp:Dtos(mv_par05)% AND 
-		  C7_DATPRF <= %Exp:Dtos(mv_par06)% AND 		  
-	 	  C7_FORNECE >= %Exp:mv_par15% AND 
-		  C7_FORNECE <= %Exp:mv_par16% AND 
+		  C7_NUM >= %Exp:MV_PAR08% AND 
+		  C7_NUM <= %Exp:MV_PAR09% AND 	 	  
+		  C7_PRODUTO >= %Exp:MV_PAR01% AND 
+		  C7_PRODUTO <= %Exp:MV_PAR02% AND 
+  		  C7_EMISSAO >= %Exp:DToS(MV_PAR03)% AND 
+		  C7_EMISSAO <= %Exp:DToS(MV_PAR04)% AND 
+  		  C7_DATPRF >= %Exp:DToS(MV_PAR05)% AND 
+		  C7_DATPRF <= %Exp:DToS(MV_PAR06)% AND 		  
+	 	  C7_FORNECE >= %Exp:MV_PAR15% AND 
+		  C7_FORNECE <= %Exp:MV_PAR16% AND 
 		  SC7.%NotDel% 
 		  %Exp:cWhere%
 		  
@@ -329,11 +329,11 @@ TRPosition():New(oSection2,"SB1",1,{|| xFilial("SB1") + (cAliasSC7)->C7_PRODUTO}
 //==========================================================================
 //Inicio da impressao do fluxo do relatório                               
 //==========================================================================
-DBSELECTAREA(cAliasSC7)
-(cAliasSC7)->(DBGOTOP())
+DBSelectArea(cAliasSC7)
+(cAliasSC7)->(DBGoTop())
 nConta:=0
 COUNT TO nConta
-(cAliasSC7)->(DbGoTop())
+(cAliasSC7)->(DBGoTop())
 
 oReport:SetMeter(nConta)
 
@@ -422,7 +422,7 @@ Do Case
 			oSection1:Print()			
 EndCase			
 
-Return NIL
+Return
 
 /*
 ===============================================================================================================================
@@ -437,39 +437,39 @@ Retorno---------: CDESCRI - Descrição do produto
 
 Static Function RCOM010D(cAliasSC7)
 
-Local aArea   := GetArea()
+Local aArea   := FWGetArea()
 Local cDescri := ""
 
-If Empty(mv_par14)
-	mv_par14 := "B1_DESC"
+If Empty(MV_PAR14)
+	MV_PAR14 := "B1_DESC"
 EndIf
 
 //================================================================
 // Impressao da descricao generica do Produto.                  
 //================================================================
-If AllTrim(mv_par14) == "B1_DESC"
-	dbSelectArea("SB1")
-	dbSetOrder(1)
-	dbSeek( xFilial("SB1")+(cAliasSC7)->C7_PRODUTO )
-	cDescri := Alltrim(SB1->B1_DESC)
+If AllTrim(MV_PAR14) == "B1_DESC"
+	DBSelectArea("SB1")
+	DBSetOrder(1)
+	DBSeek( xFilial("SB1")+(cAliasSC7)->C7_PRODUTO )
+	cDescri := AllTrim(SB1->B1_DESC)
 EndIf
 //================================================================
 // Impressao da descricao cientifica do Produto.                
 //================================================================
-If AllTrim(mv_par14) == "B5_CEME"
-	dbSelectArea("SB5")
-	dbSetOrder(1)
-	If dbSeek( xFilial("SB5")+(cAliasSC7)->C7_PRODUTO )
-		cDescri := Alltrim(B5_CEME)
+If AllTrim(MV_PAR14) == "B5_CEME"
+	DBSelectArea("SB5")
+	DBSetOrder(1)
+	If DBSeek( xFilial("SB5")+(cAliasSC7)->C7_PRODUTO )
+		cDescri := AllTrim(B5_CEME)
 	EndIf
 EndIf
 
-dbSelectArea("SC7")
-If AllTrim(mv_par14) == "C7_DESCRI"
-	cDescri := Alltrim((cAliasSC7)->C7_DESCRI)
+DBSelectArea("SC7")
+If AllTrim(MV_PAR14) == "C7_DESCRI"
+	cDescri := AllTrim((cAliasSC7)->C7_DESCRI)
 EndIf
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return(cDescri)
 
@@ -486,18 +486,18 @@ Retorno---------: nVlrUnit - valor unitário do produto
 
 Static Function RCOM010U(cAliasSC7)
 
-Local aArea    := GetArea()
+Local aArea    := FWGetArea()
 Local nVlrUnit := 0
-Local aTam	   := TamSx3("C7_PRECO")
-Local nTxMoeda := IIF((cAliasSC7)->C7_TXMOEDA > 0,(cAliasSC7)->C7_TXMOEDA,Nil)
+Local aTam	   := TamSX3("C7_PRECO")
+Local nTxMoeda := IIf((cAliasSC7)->C7_TXMOEDA > 0,(cAliasSC7)->C7_TXMOEDA,Nil)
 
 If !Empty((cAliasSC7)->C7_REAJUST)
-	nVlrUnit := xMoeda(RCOM001F((cAliasSC7)->C7_REAJUST),(cAliasSC7)->C7_MOEDA,mv_par13,(cAliasSC7)->C7_DATPRF,aTam[2],nTxMoeda) 
+	nVlrUnit := xMoeda(RCOM001F((cAliasSC7)->C7_REAJUST),(cAliasSC7)->C7_MOEDA,MV_PAR13,(cAliasSC7)->C7_DATPRF,aTam[2],nTxMoeda) 
 Else
-	nVlrUnit := xMoeda((cAliasSC7)->C7_PRECO,(cAliasSC7)->C7_MOEDA,mv_par13,(cAliasSC7)->C7_DATPRF,aTam[2],nTxMoeda) 
-Endif
+	nVlrUnit := xMoeda((cAliasSC7)->C7_PRECO,(cAliasSC7)->C7_MOEDA,MV_PAR13,(cAliasSC7)->C7_DATPRF,aTam[2],nTxMoeda) 
+EndIf
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return(nVlrUnit)
 
@@ -514,14 +514,14 @@ Retorno---------: nVlrIPI - valor IPI do produto
 
 Static Function RCOM010M(cAliasSC7)
 
-Local aArea    := GetArea()
+Local aArea    := FWGetArea()
 Local nVlrIPI  := 0
 Local nToTIPI  := 0
 Local nTotal   := 0
 Local nItemIVA := 0 
 Local nValor   := ((cAliasSC7)->C7_QUANT) * IIf(Empty((cAliasSC7)->C7_REAJUST),(cAliasSC7)->C7_PRECO,Formula((cAliasSC7)->C7_REAJUST))
 Local nTotDesc := (cAliasSC7)->C7_VLDESC
-Local nTxMoeda := IIF((cAliasSC7)->C7_TXMOEDA > 0,(cAliasSC7)->C7_TXMOEDA,Nil)
+Local nTxMoeda := IIf((cAliasSC7)->C7_TXMOEDA > 0,(cAliasSC7)->C7_TXMOEDA,Nil)
 Local nI 
 
 If cPaisLoc <> "BRA"
@@ -531,18 +531,18 @@ If cPaisLoc <> "BRA"
 		For nI := 1 To Len( aValIVA )
 			nItemIVA += aValIVA[nI]
 		Next
-	Endif
-	nVlrIPI := xMoeda(nItemIVA,(cAliasSC7)->C7_MOEDA,mv_par13,(cAliasSC7)->C7_DATPRF,,nTxMoeda)  
+	EndIf
+	nVlrIPI := xMoeda(nItemIVA,(cAliasSC7)->C7_MOEDA,MV_PAR13,(cAliasSC7)->C7_DATPRF,,nTxMoeda)  
 Else
 	If nTotDesc == 0
 		nTotDesc := CalcDesc(nValor,(cAliasSC7)->C7_DESC1,(cAliasSC7)->C7_DESC2,(cAliasSC7)->C7_DESC3)
-	EndIF
+	EndIf
 	nTotal := nValor - nTotDesc
-	nTotIPI := IIF((cAliasSC7)->C7_IPIBRUT == "L",nTotal, nValor) * ( (cAliasSC7)->C7_IPI / 100 )
-	nVlrIPI := xMoeda(nTotIPI,(cAliasSC7)->C7_MOEDA,mv_par13,(cAliasSC7)->C7_DATPRF,,nTxMoeda)  
+	nTotIPI := IIf((cAliasSC7)->C7_IPIBRUT == "L",nTotal, nValor) * ( (cAliasSC7)->C7_IPI / 100 )
+	nVlrIPI := xMoeda(nTotIPI,(cAliasSC7)->C7_MOEDA,MV_PAR13,(cAliasSC7)->C7_DATPRF,,nTxMoeda)  
 EndIf
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return(nVlrIPI)
 
@@ -559,35 +559,35 @@ Retorno---------: nSalRec - saldo do pedido
 
 Static Function RCOM010S(cAliasSC7)
 
-Local aArea    := GetArea()
+Local aArea    := FWGetArea()
 Local nSalRec  := 0
 //Local nItemIVA := 0 
-Local nQuant   := If(Empty((cAliasSC7)->C7_RESIDUO),IIF((cAliasSC7)->C7_QUANT-(cAliasSC7)->C7_QUJE<0,0,(cAliasSC7)->C7_QUANT-(cAliasSC7)->C7_QUJE),0)
+Local nQuant   := If(Empty((cAliasSC7)->C7_RESIDUO),IIf((cAliasSC7)->C7_QUANT-(cAliasSC7)->C7_QUJE<0,0,(cAliasSC7)->C7_QUANT-(cAliasSC7)->C7_QUJE),0)
 Local nTotal   := 0
 Local nSalIPI  := 0
 Local nValor   := ((cAliasSC7)->C7_QUANT) * IIf(Empty((cAliasSC7)->C7_REAJUST),(cAliasSC7)->C7_PRECO,Formula((cAliasSC7)->C7_REAJUST))
 Local nSaldo   := ((cAliasSC7)->C7_QUANT-(cAliasSC7)->C7_QUJE) * IIf(Empty((cAliasSC7)->C7_REAJUST),(cAliasSC7)->C7_PRECO,Formula((cAliasSC7)->C7_REAJUST))
 Local nTotDesc := (cAliasSC7)->C7_VLDESC
-Local nTxMoeda := IIF((cAliasSC7)->C7_TXMOEDA > 0,(cAliasSC7)->C7_TXMOEDA,Nil)
+Local nTxMoeda := IIf((cAliasSC7)->C7_TXMOEDA > 0,(cAliasSC7)->C7_TXMOEDA,Nil)
 //Local nI 
 
 	If nTotDesc == 0
 		nTotDesc := CalcDesc(nValor,(cAliasSC7)->C7_DESC1,(cAliasSC7)->C7_DESC2,(cAliasSC7)->C7_DESC3)
-	EndIF
+	EndIf
 	nTotal := nValor - nTotDesc
 	If Empty((cAliasSC7)->C7_RESIDUO)
 		nTotal := nSaldo - nTotDesc
-		nSalIPI := IIF((cAliasSC7)->C7_IPIBRUT == "L",nTotal, nSaldo) * ( (cAliasSC7)->C7_IPI / 100 )
-	Endif
+		nSalIPI := IIf((cAliasSC7)->C7_IPIBRUT == "L",nTotal, nSaldo) * ( (cAliasSC7)->C7_IPI / 100 )
+	EndIf
 
 If Empty((cAliasSC7)->C7_REAJUST)
-	nSalRec := (nQuant * xMoeda((cAliasSC7)->C7_PRECO,(cAliasSC7)->C7_MOEDA,mv_par13,(cAliasSC7)->C7_DATPRF,,nTxMoeda)-xMoeda((cAliasSC7)->C7_VLDESC,(cAliasSC7)->C7_MOEDA,mv_par13,(cAliasSC7)->C7_DATPRF,,nTxMoeda)) + xMoeda(nSalIPI,(cAliasSC7)->C7_MOEDA,mv_par13,(cAliasSC7)->C7_DATPRF,,nTxMoeda)
+	nSalRec := (nQuant * xMoeda((cAliasSC7)->C7_PRECO,(cAliasSC7)->C7_MOEDA,MV_PAR13,(cAliasSC7)->C7_DATPRF,,nTxMoeda)-xMoeda((cAliasSC7)->C7_VLDESC,(cAliasSC7)->C7_MOEDA,MV_PAR13,(cAliasSC7)->C7_DATPRF,,nTxMoeda)) + xMoeda(nSalIPI,(cAliasSC7)->C7_MOEDA,MV_PAR13,(cAliasSC7)->C7_DATPRF,,nTxMoeda)
 Else
-	nSalRec  := (nQuant * xMoeda(Formula((cAliasSC7)->C7_REAJUST),(cAliasSC7)->C7_MOEDA,mv_par13,(cAliasSC7)->C7_DATPRF,,nTxMoeda)) + ;
-		xMoeda(nSalIPI,(cAliasSC7)->C7_MOEDA,mv_par13,(cAliasSC7)->C7_DATPRF,,nTxMoeda)
-Endif   
+	nSalRec  := (nQuant * xMoeda(Formula((cAliasSC7)->C7_REAJUST),(cAliasSC7)->C7_MOEDA,MV_PAR13,(cAliasSC7)->C7_DATPRF,,nTxMoeda)) + ;
+		xMoeda(nSalIPI,(cAliasSC7)->C7_MOEDA,MV_PAR13,(cAliasSC7)->C7_DATPRF,,nTxMoeda)
+EndIf   
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return(nSalRec)
 
@@ -604,15 +604,15 @@ Retorno---------: nVlrTot - total do pedido
 
 Static Function RCOM010T(cAliasSC7)
 
-Local aArea    := GetArea()
+Local aArea    := FWGetArea()
 Local nVlrTot  := 0
-Local nTxMoeda := IIF((cAliasSC7)->C7_TXMOEDA > 0,(cAliasSC7)->C7_TXMOEDA,Nil)
+Local nTxMoeda := IIf((cAliasSC7)->C7_TXMOEDA > 0,(cAliasSC7)->C7_TXMOEDA,Nil)
 
 RCOM010W((cAliasSC7)->C7_NUM,(cAliasSC7)->C7_ITEM,(cAliasSC7)->C7_SEQUEN)
 nTotal  := MaFisRet(,'NF_TOTAL')
-nVlrTot := xMoeda(nTotal,(cAliasSC7)->C7_MOEDA,mv_par13,(cAliasSC7)->C7_DATPRF,,nTxMoeda)		  		
+nVlrTot := xMoeda(nTotal,(cAliasSC7)->C7_MOEDA,MV_PAR13,(cAliasSC7)->C7_DATPRF,,nTxMoeda)		  		
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return(nVlrTot)
 
@@ -629,13 +629,13 @@ Retorno---------: nVlrDesc - desconto do pedido
 
 Static Function RCOM010E(cAliasSC7)
 
-Local aArea    := GetArea()
+Local aArea    := FWGetArea()
 Local nVlrDesc := 0
-Local nTxMoeda := IIF((cAliasSC7)->C7_TXMOEDA > 0,(cAliasSC7)->C7_TXMOEDA,Nil)
+Local nTxMoeda := IIf((cAliasSC7)->C7_TXMOEDA > 0,(cAliasSC7)->C7_TXMOEDA,Nil)
 
-nVlrDesc := xMoeda((cAliasSC7)->C7_VLDESC,(cAliasSC7)->C7_MOEDA,mv_par13,(cAliasSC7)->C7_DATPRF,,nTxMoeda)
+nVlrDesc := xMoeda((cAliasSC7)->C7_VLDESC,(cAliasSC7)->C7_MOEDA,MV_PAR13,(cAliasSC7)->C7_DATPRF,,nTxMoeda)
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return(nVlrDesc)
 
@@ -650,7 +650,7 @@ Parametros------: xExp1:= Retorna formula iterpretada
 Retorno---------: xalor - valor da formula	
 ===============================================================================================================================
 */
-Static FUNCTION RCOM001F(cFormula)
+Static Function RCOM001F(cFormula)
 Local xAlias 
 Local cForm		:= "" , xValor
 Local cString 	:= "SC7->"
@@ -661,17 +661,17 @@ Local cNewForm	:= ""
 //========================================================================
 xAlias := Alias()
 
-DbSelectArea("SM4")
-If DbSeek(cFilial+cFormula)
+DBSelectArea("SM4")
+If DBSeek(cFilial+cFormula)
 	cForm := AllTrim(M4_FORMULA)
 	cNewAlias := xAlias + "->"
 	cNewForm := StrTran(cForm,cString,cNewAlias)
-	DbSelectArea(xAlias)      
+	DBSelectArea(xAlias)      
 	xValor := &cNewForm
 Else
 	xValor := NIL
 EndIf
-DbSelectArea(xAlias)
+DBSelectArea(xAlias)
 Return xValor
 
 /*
@@ -688,7 +688,7 @@ Retorno---------: Nenhum
 
 Static Function RCOM010W(cPedido,cItem,cSequen,cFiltro)
 
-Local aArea		:= GetArea()
+Local aArea		:= FWGetArea()
 Local aAreaSC7	:= SC7->(GetArea())
 Local cValid		:= ""
 Local nPosRef		:= 0
@@ -700,25 +700,25 @@ Local _nX, _cX3Valid, _cCampo
 
 Private aHeader := {}, aCols := {}  
 
-DEFAULT cSequen	:= ""
-DEFAULT cFiltro	:= ""
+Default cSequen	:= ""
+Default cFiltro	:= ""
 
 //                          1                    2               3              4               5                6           7        8              9                 10 
-// AADD(aHeader, {Alltrim(SX3->X3_TITULO), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL,SX3->X3_VALID, USADO, SX3->X3_TIPO, SX3->X3_ARQUIVO, SX3->X3_CONTEXT})
+// aAdd(aHeader, {AllTrim(SX3->X3_TITULO), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL,SX3->X3_VALID, USADO, SX3->X3_TIPO, SX3->X3_ARQUIVO, SX3->X3_CONTEXT})
 FillGetDados(1,"SC7",1,,,{||.T.},,,,,,.T.) 
 
-dbSelectArea("SC7")
-dbSetOrder(1)
-If dbSeek(xFilial("SC7")+cPedido+cItemDe+Alltrim(cSequen))
+DBSelectArea("SC7")
+DBSetOrder(1)
+If DBSeek(xFilial("SC7")+cPedido+cItemDe+AllTrim(cSequen))
 	MaFisEnd()
 	MaFisIni(SC7->C7_FORNECE,SC7->C7_LOJA,"F","N","R",{})
-	While !Eof() .AND. SC7->C7_FILIAL+SC7->C7_NUM == xFilial("SC7")+cPedido .AND. ;
-			SC7->C7_ITEM <= cItemAte .AND. (Empty(cSequen) .OR. cSequen == SC7->C7_SEQUEN)
+	While !Eof() .And. SC7->C7_FILIAL+SC7->C7_NUM == xFilial("SC7")+cPedido .And. ;
+			SC7->C7_ITEM <= cItemAte .And. (Empty(cSequen) .Or. cSequen == SC7->C7_SEQUEN)
 
 		// Nao processar os Impostos se o item possuir residuo eliminado  
 		If &cFiltro
-			dbSelectArea('SC7')
-			dbSkip()
+			DBSelectArea('SC7')
+			DBSkip()
 			Loop
 		EndIf
             
@@ -733,24 +733,24 @@ If dbSeek(xFilial("SC7")+cPedido+cItemDe+Alltrim(cSequen))
 		       Loop
 		    EndIf
 		    
-			cValid	:= StrTran(UPPER(_cX3Valid)," ","") 
+			cValid	:= StrTran(Upper(_cX3Valid)," ","") 
 			cValid	:= StrTran(cValid,"'",'"')
 			If "MAFISREF" $ cValid
 				nPosRef  := AT('MAFISREF("',cValid) + 10
-				cRefCols := Substr(cValid,nPosRef,AT('","MT120",',cValid)-nPosRef )
+				cRefCols := SubStr(cValid,nPosRef,AT('","MT120",',cValid)-nPosRef )
 				// Carrega os valores direto do SC7.           
 				MaFisLoad(cRefCols,&("SC7->"+ _cCampo),nItem)
 			EndIf
 		Next	
 
 		MaFisEndLoad(nItem,2)
-		dbSelectArea('SC7')
-		dbSkip()
+		DBSelectArea('SC7')
+		DBSkip()
 	End
 EndIf
 
-RestArea(aAreaSC7)
-RestArea(aArea)
+FWRestArea(aAreaSC7)
+FWRestArea(aArea)
 
 Return .T.
 
@@ -758,10 +758,10 @@ Static Function SchedDef()
 
 Local aParam  := {}
 Local aOrd := {}
-Aadd( aOrd, STR0004 ) // "Por Numero"
-Aadd( aOrd, STR0005 ) // "Por Produto"
-Aadd( aOrd, STR0006 ) // "Por Fornecedor"
-Aadd( aOrd, STR0049 ) // "Por Previsao de Entrega "
+aAdd( aOrd, STR0004 ) // "Por Numero"
+aAdd( aOrd, STR0005 ) // "Por Produto"
+aAdd( aOrd, STR0006 ) // "Por Fornecedor"
+aAdd( aOrd, STR0049 ) // "Por Previsao de Entrega "
 
 aParam := { "R",;			//Tipo R para relatorio P para processo
             "RCOM010",;	//Pergunte do relatorio, caso nao use passar ParamDef

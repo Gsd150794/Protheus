@@ -21,8 +21,8 @@ Jerry       - Alex Wallauer - 03/02/25 - 03/02/25 - 49795   - Chamar os índices 
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#include "protheus.ch"
-#include "TopConn.ch"    
+#Include "TOTVS.ch"
+#Include "TopConn.ch"    
 #Define ENTER CHR(13)+CHR(10)
 
 /*
@@ -43,25 +43,25 @@ User Function FISTRFNFE()
 Local _lRet 	:= .T.
 
 
-If empty(alltrim(funname()))
+If Empty(AllTrim(funname()))
 
 	Return
 	
-Endif
+EndIf
 
 aAdd( aRotina,{'Canhot. NF'	         , 'U_VISCANHO( SF2->F2_FILIAL, SF2->F2_DOC )'	, 0 , 2 , 0 , NIL } )  // Adiciona no menu da rotina NFE SEFAZ uma opção para visualização do canhoto da Nota Fiscal.
 aAdd( aRotina,{'Trans Italac.'	      , 'U_ITTRANS()'	, 0 , 2 , 0 , NIL } )  
 aAdd( aRotina,{'Monit Italac'	         , 'U_ITMONIT()'	, 0 , 2 , 0 , NIL } )  
 aAdd( aRotina,{'Informar NF Adquirente', 'U_INFOADQ()'	, 0 , 2 , 0 , NIL } )  
-aAdd( aRotina,{'Ocorrências de frete'  , 'U_AOMS003("'+"ZF5->ZF5_FILIAL == SF2->F2_FILIAL .AND. ZF5->ZF5_DOCOC ==  SF2->F2_DOC .AND. ZF5->ZF5_SEROC ==  SF2->F2_SERIE"+'" )'  , 0 , 2 , 0 , NIL } )  
+aAdd( aRotina,{'Ocorrências de frete'  , 'U_AOMS003("'+"ZF5->ZF5_FILIAL == SF2->F2_FILIAL .And. ZF5->ZF5_DOCOC ==  SF2->F2_DOC .And. ZF5->ZF5_SEROC ==  SF2->F2_SERIE"+'" )'  , 0 , 2 , 0 , NIL } )  
 
-dbSelectArea("ZZL")                                                                                    	
-dbSetOrder(3) //ZZL_FILIAL + ZZL_CODUSU
-dbSeek(xFilial("ZZL") + __cUserId)
+DBSelectArea("ZZL")                                                                                    	
+DBSetOrder(3) //ZZL_FILIAL + ZZL_CODUSU
+DBSeek(xFilial("ZZL") + __cUserId)
 If ZZL->ZZL_PRMNFE <> "S"
    _lRet := .F.
    aRotina[3][2]:=  "Aviso( 'Atenção!' , 'Usuário sem permissão de acesso aos Parametros.' , {'Fechar'} )" 
-Endif		                     	
+EndIf		                     	
 
 ZZL->(DBCloseArea())
 
@@ -91,33 +91,33 @@ Local _MV_PAR05 := MV_PAR05
 Local _MV_PAR06 := MV_PAR06
 Local _MV_PAR07 := MV_PAR07
 Local _MV_PAR08 := MV_PAR08
-Local aarea := getarea()
+Local aarea := FWGetArea()
 Local oproc := nil
-Private _cserie := alltrim(SF2->F2_SERIE)
+Private _cserie := AllTrim(SF2->F2_SERIE)
 Private _cnotaini := SF2->F2_DOC
 Private _cnotafim := SF2->F2_DOC
 Private _otemp := nil
 Private nOpca		:= 0
 
-If pergunte(cperg) .and. !empty(MV_PAR01) .and. !empty(MV_PAR02)
+If Pergunte(cperg) .And. !Empty(MV_PAR01) .And. !Empty(MV_PAR02)
 
-	FWMSGRUN(,{|oproc| U_ITQRYPE(oproc)},"Aguarde...","Pesquisando notas das cargas selecionadas...")
+	FWMsgRun(,{|oproc| U_ITQRYPE(oproc)},"Aguarde...","Pesquisando notas das cargas selecionadas...")
 		
-	If empty(_cnotaini)
+	If Empty(_cnotaini)
 	
-		u_itmsg("Não foram localizadas notas fiscais para as cargas indicadas no filtro","Atenção",,1)
+		U_ITMsg("Não foram localizadas notas fiscais para as cargas indicadas no filtro","Atenção",,1)
 		Return
 		
-	Endif
+	EndIf
 	
 	If nopca == 2
 	
-		u_itmsg("Processo cancelado!","Atenção",,1)
+		U_ITMsg("Processo cancelado!","Atenção",,1)
 		Return
 		
-	Endif
+	EndIf
 	
-	cSerie := '1'+SPACE( LEN(SF2->F2_SERIE)-1 )
+	cSerie := '1'+Space( Len(SF2->F2_SERIE)-1 )
 	cNotaIni := _cnotaini
 	cNotaFim := _cnotafim
 	
@@ -127,7 +127,7 @@ Else
 	cNotaIni := SF2->F2_DOC
 	cNotaFim := SF2->F2_DOC
 	
-Endif
+EndIf
 
 //Reconstrói pergunte original da função
 MV_PAR01 := _MV_PAR01
@@ -140,16 +140,16 @@ MV_PAR07 := _MV_PAR07
 MV_PAR08 := _MV_PAR08
 
 //Função padrão de transmissão de nfe
-Restarea(aarea)
-FWMSGRUN(,{|| SpedNFeRe2(cSerie,cNotaIni,cNotaFim)},"Aguarde...","Pesquisando notas das cargas selecionadas...")
+FWRestArea(aarea)
+FWMsgRun(,{|| SpedNFeRe2(cSerie,cNotaIni,cNotaFim)},"Aguarde...","Pesquisando notas das cargas selecionadas...")
 
-If select ("IT_TRB") > 0
+If Select ("IT_TRB") > 0
 
-	dbSelectArea("IT_TRB")
-	IT_TRB->(Dbclosearea())
+	DBSelectArea("IT_TRB")
+	IT_TRB->(DBCloseArea())
 	_otemp:Delete()
 	
-Endif
+EndIf
 
 Return
 
@@ -171,20 +171,20 @@ User Function ITQRYPE(oproc)
 Private _ntot := 0
 Private acampos := {}
 
-If select ("IT_DAI") > 0
+If Select ("IT_DAI") > 0
 
-	dbSelectArea("IT_DAI")
-	IT_DAI->(Dbclosearea())
+	DBSelectArea("IT_DAI")
+	IT_DAI->(DBCloseArea())
 	
-Endif
+EndIf
 
 _cQuery := " SELECT DAI_NFISCA "
 _cQuery += " FROM " + RetSqlName("DAI")
-_cQuery += " WHERE D_E_L_E_T_ <> '*' AND DAI_NFISCA > ' '"
+_cQuery += " WHERE D_E_L_E_T_ = ' ' AND DAI_NFISCA > ' '"
 _cQuery += " AND DAI_FILIAL = '" + CFILANT + "' AND DAI_COD BETWEEN '" + MV_PAR01 + "' AND '" + MV_PAR02 + "'"
 	
 TcQuery _cQuery New Alias "IT_DAI"
-dbSelectArea("IT_DAI")
+DBSelectArea("IT_DAI")
 
 //Prepara parâmetros para a tela padrão do assistente de envio de nfe
 //Se tiver notas válidas abre tela para conferência e seleção de envio de notas
@@ -197,36 +197,36 @@ If IT_DAI->(Eof())
 Else
 
 	_cSerie := '  1'
-	_cNotaFim := alltrim(IT_DAI->DAI_NFISCA)
-	_cNotaini := alltrim(IT_DAI->DAI_NFISCA)
+	_cNotaFim := AllTrim(IT_DAI->DAI_NFISCA)
+	_cNotaini := AllTrim(IT_DAI->DAI_NFISCA)
 
-	Do while IT_DAI->(!Eof())
+	While IT_DAI->(!Eof())
 			
-		If alltrim(IT_DAI->DAI_NFISCA) > _cNotaFim
-			_cNotaFim := alltrim(IT_DAI->DAI_NFISCA)
-		Endif
-		If alltrim(IT_DAI->DAI_NFISCA) < _cNotaini
-			_cNotaini := alltrim(IT_DAI->DAI_NFISCA)
-		Endif
+		If AllTrim(IT_DAI->DAI_NFISCA) > _cNotaFim
+			_cNotaFim := AllTrim(IT_DAI->DAI_NFISCA)
+		EndIf
+		If AllTrim(IT_DAI->DAI_NFISCA) < _cNotaini
+			_cNotaini := AllTrim(IT_DAI->DAI_NFISCA)
+		EndIf
 		
 		_ntot++
-		IT_DAI->(Dbskip())
+		IT_DAI->(DBSkip())
 		
-	Enddo
+	EndDo
 	
 	//Monta tela de visualização e confirmação
-	IT_DAI->(Dbgotop())
-	FWMSGRUN(,{|oproc| U_ITPEARQ(oproc)},"Aguarde...","Carregando notas das cargas selecionadas...")
+	IT_DAI->(DBGoTop())
+	FWMsgRun(,{|oproc| U_ITPEARQ(oproc)},"Aguarde...","Carregando notas das cargas selecionadas...")
 	_nopc := IFNFETRS()
 		
-Endif
+EndIf
 
-If select ("IT_DAI") > 0
+If Select ("IT_DAI") > 0
 
-	dbSelectArea("IT_DAI")
-	IT_DAI->(Dbclosearea())
+	DBSelectArea("IT_DAI")
+	IT_DAI->(DBCloseArea())
 	
-Endif
+EndIf
 	
 Return
 
@@ -251,28 +251,28 @@ Local _npv          := 1
 //================================================================================
 // Armazena no array aEstru a estrutura dos campos da tabela.
 //================================================================================
-AADD( aEstru , { "TRBF_OK"		, 'C' , 02 , 0 } )
-AADD( aEstru , { "TRBF_CARGA"	, 'C' , 06 , 0 } )
-AADD( aEstru , { "TRBF_DOC"		, 'C' , 09 , 0 } )
-AADD( aEstru , { "TRBF_DTEMI"	, 'D' , 08 , 0 } )
-AADD( aEstru , { "TRBF_CODCL"	, 'C' , 06 , 0 } )
-AADD( aEstru , { "TRBF_LOJCL"	, 'C' , 04 , 0 } )
-AADD( aEstru , { "TRBF_DESCL"	, 'C' , 30 , 0 } )
-AADD( aEstru , { "TRBF_UF"   	, 'C' , 02 , 0 } )
-AADD( aEstru , { "TRBF_MUN"   	, 'C' , 12 , 0 } )
+aAdd( aEstru , { "TRBF_OK"		, 'C' , 02 , 0 } )
+aAdd( aEstru , { "TRBF_CARGA"	, 'C' , 06 , 0 } )
+aAdd( aEstru , { "TRBF_DOC"		, 'C' , 09 , 0 } )
+aAdd( aEstru , { "TRBF_DTEMI"	, 'D' , 08 , 0 } )
+aAdd( aEstru , { "TRBF_CODCL"	, 'C' , 06 , 0 } )
+aAdd( aEstru , { "TRBF_LOJCL"	, 'C' , 04 , 0 } )
+aAdd( aEstru , { "TRBF_DESCL"	, 'C' , 30 , 0 } )
+aAdd( aEstru , { "TRBF_UF"   	, 'C' , 02 , 0 } )
+aAdd( aEstru , { "TRBF_MUN"   	, 'C' , 12 , 0 } )
 
 //================================================================================
 // Armazena no array aCampos o nome, picture e descricao dos campos
 //================================================================================
-AADD( aCampos , { "TRBF_OK"		, "" , " "					, " "										} )
-AADD( aCampos , { "TRBF_CARGA"	, "" , "Carga"				, PesqPict( "DAI" , "DAI_COD"	 )	 		} )
-AADD( aCampos , { "TRBF_DOC"	, "" , "NF"					, PesqPict( "SF2" , "F2_DOC"	 )	 		} )
-AADD( aCampos , { "TRBF_DTEMI"	, "" , "Data Emissão"		, PesqPict( "SC5" , "C5_I_DTENT" )	  		} )
-AADD( aCampos , { "TRBF_UF"	    , "" , "UF"					, PesqPict( "SA1" , "A1_EST"     )	  		} )
-AADD( aCampos , { "TRBF_MUN"    , "" , "Cidade"				, PesqPict( "SA1" , "A1_MUN"     )	  		} )
-AADD( aCampos , { "TRBF_CODCL"	, "" , "Cliente"			, PesqPict( "SC5" , "C5_CLIENTE" )	  		} )
-AADD( aCampos , { "TRBF_LOJCL"	, "" , "Loja"				, PesqPict( "SC5" , "C5_LOJACLI" )	  		} )
-AADD( aCampos , { "TRBF_DESCL"	, "" , "Descricao Cliente"	, PesqPict( "SC5" , "C5_I_NOME"  )	  		} )
+aAdd( aCampos , { "TRBF_OK"		, "" , " "					, " "										} )
+aAdd( aCampos , { "TRBF_CARGA"	, "" , "Carga"				, PesqPict( "DAI" , "DAI_COD"	 )	 		} )
+aAdd( aCampos , { "TRBF_DOC"	, "" , "NF"					, PesqPict( "SF2" , "F2_DOC"	 )	 		} )
+aAdd( aCampos , { "TRBF_DTEMI"	, "" , "Data Emissão"		, PesqPict( "SC5" , "C5_I_DTENT" )	  		} )
+aAdd( aCampos , { "TRBF_UF"	    , "" , "UF"					, PesqPict( "SA1" , "A1_EST"     )	  		} )
+aAdd( aCampos , { "TRBF_MUN"    , "" , "Cidade"				, PesqPict( "SA1" , "A1_MUN"     )	  		} )
+aAdd( aCampos , { "TRBF_CODCL"	, "" , "Cliente"			, PesqPict( "SC5" , "C5_CLIENTE" )	  		} )
+aAdd( aCampos , { "TRBF_LOJCL"	, "" , "Loja"				, PesqPict( "SC5" , "C5_LOJACLI" )	  		} )
+aAdd( aCampos , { "TRBF_DESCL"	, "" , "Descricao Cliente"	, PesqPict( "SC5" , "C5_I_NOME"  )	  		} )
 
 
 //================================================================================
@@ -281,7 +281,7 @@ AADD( aCampos , { "TRBF_DESCL"	, "" , "Descricao Cliente"	, PesqPict( "SC5" , "C
 If Select("IT_TRB") > 0
 	oproc:cCaption := ("Apagando temporário...")
 	ProcessMessages()
-	IT_TRB->(Dbclosearea())
+	IT_TRB->(DBCloseArea())
 EndIf
 
 oproc:cCaption := ("Criando arquivo temporário...")
@@ -294,18 +294,18 @@ _otemp:AddIndex( "DC", {"TRBF_DOC"} )
 
 _otemp:Create()
 
-DO While IT_DAI->(!EOF())
+While IT_DAI->(!Eof())
 
 	//Atualiza régua
 	oproc:cCaption := ("Processando nota... ["+ StrZero(_npv,6) +"] de ["+ StrZero(_ntot,6) +"]")
 	ProcessMessages()
 	_npv++    
  
-	SF2->(Dbsetorder(1))
-	SA1->(Dbsetorder(1))
-	If SF2->(Dbseek(cfilant+alltrim(IT_DAI->DAI_NFISCA))) .AND. SA1->(Dbseek(xfilial("SA1")+SF2->F2_CLIENTE+SF2->F2_LOJA))
+	SF2->(DBSetOrder(1))
+	SA1->(DBSetOrder(1))
+	If SF2->(DBSeek(cfilant+AllTrim(IT_DAI->DAI_NFISCA))) .And. SA1->(DBSeek(xFilial("SA1")+SF2->F2_CLIENTE+SF2->F2_LOJA))
     		
-		Reclock("IT_TRB",.T.)
+		RecLock("IT_TRB",.T.)
 		IT_TRB->TRBF_DOC	:= SF2->F2_DOC
 		IT_TRB->TRBF_CARGA	:= SF2->F2_CARGA
 		IT_TRB->TRBF_DTEMI	:= SF2->F2_EMISSAO
@@ -315,7 +315,7 @@ DO While IT_DAI->(!EOF())
 		IT_TRB->TRBF_UF   	:= SF2->F2_EST
     	IT_TRB->TRBF_MUN	 := SA1->A1_MUN
     	
-    Endif
+    EndIf
 	
     IT_DAI->( DBSkip() )
 	
@@ -387,10 +387,10 @@ _ctitulo := "Notas selecionadas para transmissão"
 		nHeight	:= 143
 		nWidth	:= 315
 		
-	Endif
+	EndIf
 	
 	DBSelectArea("IT_TRB")
-	IT_TRB->(DbGotop()) 
+	IT_TRB->(DBGoTop()) 
 	
 	oMark					:= MsSelect():New( "IT_TRB" , "TRBF_OK" ,, aCampos , @lInverte , @_cMarkado , { 35 , 1 , nHeight , nWidth } )
 	oMark:bMark				:= {|| ITNFEINV( _cMarkado , lInverte  ) }
@@ -423,7 +423,7 @@ Static Function ITNFEINV( cMarca , lInverte  )
 
 IsMark( "TRBF_OK" , cMarca , lInverte )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -455,24 +455,24 @@ While IT_TRB->( !Eof() )
 	
 		IT_TRB->( RecLock( "IT_TRB" , .F. ) )
 		IT_TRB->TRBF_OK := Space(2)
-		IT_TRB->( MsUnLock() )
+		IT_TRB->( MSUnLock() )
 				
 	Else
 	
 		IT_TRB->( RecLock( "IT_TRB" , .F. ) )
 		IT_TRB->TRBF_OK := cMarca
-		IT_TRB->( MsUnLock() )
+		IT_TRB->( MSUnLock() )
 				
 	EndIf
 		
 IT_TRB->( DBSkip() )
 EndDo
 
-IT_TRB->( DBGoto(nReg) )
+IT_TRB->( DBGoTo(nReg) )
 
 oMark:oBrowse:Refresh(.T.)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -490,9 +490,9 @@ Retorno-----------: Nenhum
 User Function ITMONIT(cSerie,cNotaIni,cNotaFim, lCTe, lMDFe, cModel,lTMS, lAutoColab)
 
 Local cIdEnt   := GetIdEnt()//StaticCall(SPEDNFE, GetIdEnt)
-local cUrl	   := Padr( GetNewPar("MV_SPEDURL",""), 250 )
+Local cUrl	   := PadR( GetNewPar("MV_SPEDURL",""), 250 )
 Local aPerg    := {}
-Local aParam   := {Space(Len(SF2->F2_SERIE)),Space(Len(SF2->F2_DOC)),Space(Len(SF2->F2_DOC)),space(6),space(6)}
+Local aParam   := {Space(Len(SF2->F2_SERIE)),Space(Len(SF2->F2_DOC)),Space(Len(SF2->F2_DOC)),Space(6),Space(6)}
 Local aSize    := {}
 Local aObjects := {}
 Local aInfo    := {}
@@ -517,11 +517,11 @@ Private ccargaini := ""
 Private ccargafim := ""
 Private aListBox := {}
 
-aadd(aPerg,{1,Iif(lMDFe,"Serie da Nota Fiscal","Serie da Nota Fiscal"),aParam[01],"",".T.","",".T.",30,.F.}) //"Serie da Nota Fiscal"
-aadd(aPerg,{1,Iif(lMDFe,"Nota fiscal inicial" ,"Nota fiscal inicial"),aParam[02],"",".T.","",".T.",30,.F.}) //"Nota fiscal inicial"
-aadd(aPerg,{1,Iif(lMDFe,"Nota fiscal final"   ,"Nota fiscal final"),aParam[03],"",".T.","",".T.",30,.F.}) //"Nota fiscal final"
-aadd(aPerg,{1,Iif(lMDFe,"Carga inicial"       ,"Carga inicial"),aParam[04],"",".T.","",".T.",30,.F.}) //"Nota fiscal inicial"
-aadd(aPerg,{1,Iif(lMDFe,"Carga final"         ,"Carga final"),aParam[05],"",".T.","",".T.",30,.F.}) //"Nota fiscal final"
+aAdd(aPerg,{1,IIf(lMDFe,"Serie da Nota Fiscal","Serie da Nota Fiscal"),aParam[01],"",".T.","",".T.",30,.F.}) //"Serie da Nota Fiscal"
+aAdd(aPerg,{1,IIf(lMDFe,"Nota fiscal inicial" ,"Nota fiscal inicial"),aParam[02],"",".T.","",".T.",30,.F.}) //"Nota fiscal inicial"
+aAdd(aPerg,{1,IIf(lMDFe,"Nota fiscal final"   ,"Nota fiscal final"),aParam[03],"",".T.","",".T.",30,.F.}) //"Nota fiscal final"
+aAdd(aPerg,{1,IIf(lMDFe,"Carga inicial"       ,"Carga inicial"),aParam[04],"",".T.","",".T.",30,.F.}) //"Nota fiscal inicial"
+aAdd(aPerg,{1,IIf(lMDFe,"Carga final"         ,"Carga final"),aParam[05],"",".T.","",".T.",30,.F.}) //"Nota fiscal final"
 	
 
 aParam[01] := ParamLoad(cParNfeRem,aPerg,1,aParam[01])
@@ -532,62 +532,62 @@ aParam[05] := ParamLoad(cParNfeRem,aPerg,5,aParam[05])
 
 
 lOK      := ParamBox(aPerg,"SPED - NFe",@aParam,,,,,,,cParNfeRem,.T.,.T.)
-cSerie   := IF(EMPTY(aParam[01]),cSerie,aParam[01])
+cSerie   := If(Empty(aParam[01]),cSerie,aParam[01])
 cNotaIni := aParam[02] 
 cNotaFim :=	aParam[03] 	
 cCargaini := aParam[04]
 cCargaFim:= aParam[05]
 			
-If (empty(cnotaini) .or. empty(cnotafim)) .and. !empty(ccargaini) .and. !empty(ccargafim)
+If (Empty(cnotaini) .Or. Empty(cnotafim)) .And. !Empty(ccargaini) .And. !Empty(ccargafim)
 	
 	//Determina nota inicial e final baseado no filtro de carga para maximizar performance				
-	If select ("IT_DAI") > 0
+	If Select ("IT_DAI") > 0
 
-		dbSelectArea("IT_DAI")
-		IT_DAI->(Dbclosearea())
+		DBSelectArea("IT_DAI")
+		IT_DAI->(DBCloseArea())
 	
-	Endif
+	EndIf
 
 	_cQuery := " SELECT min(dai_nfisca) AS MINI, MAX(dai_nfisca) AS MAXI  "
 	_cQuery += " FROM " + RetSqlName("DAI")
-	_cQuery += " WHERE D_E_L_E_T_ <> '*' and dai_nfisca > ' ' "
-	_cQuery += " AND dai_filial = '" + CFILANT + "' AND dai_cod BETWEEN '" + alltrim(ccargaini) + "' AND '" + alltrim(ccargafim) + "'"
+	_cQuery += " WHERE D_E_L_E_T_ = ' ' and dai_nfisca > ' ' "
+	_cQuery += " AND dai_filial = '" + CFILANT + "' AND dai_cod BETWEEN '" + AllTrim(ccargaini) + "' AND '" + AllTrim(ccargafim) + "'"
 	
 	TcQuery _cQuery New Alias "IT_DAI"
-	dbSelectArea("IT_DAI")
+	DBSelectArea("IT_DAI")
 			
-	If empty(cnotaini)
+	If Empty(cnotaini)
 				
-		cnotaini := alltrim(IT_DAI->MINI)
+		cnotaini := AllTrim(IT_DAI->MINI)
 					
-	Endif
+	EndIf
 				
-	If empty(cnotafim)
+	If Empty(cnotafim)
 				
-		cnotafim := alltrim(IT_DAI->MAXI)
+		cnotafim := AllTrim(IT_DAI->MAXI)
 					
-	Endif
+	EndIf
 
-	dbSelectArea("IT_DAI")
-	IT_DAI->(Dbclosearea())
+	DBSelectArea("IT_DAI")
+	IT_DAI->(DBCloseArea())
 			
-Endif 			
+EndIf 			
 			
 aParam := {}
-aadd(aparam,cSerie)
-aadd(aparam,cNotaIni)
-aadd(aparam,cNotaFim)
+aAdd(aparam,cSerie)
+aAdd(aparam,cNotaIni)
+aAdd(aparam,cNotaFim)
 			
 If (lOK)
 
-	fwmsgrun(,{ || aListBox := getListBox(cIdEnt, cUrl, aParam, 1, cModel, lCte, .T., lMDFe, lTMS)},"Aguarde","Carregando notas...")
+	FWMsgRun(,{ || aListBox := getListBox(cIdEnt, cUrl, aParam, 1, cModel, lCte, .T., lMDFe, lTMS)},"Aguarde","Carregando notas...")
 	
 	If !Empty(aListBox) 
 	
 		aSize := MsAdvSize()
 		aObjects := {}
-		AAdd( aObjects, { 100, 100, .t., .t. } )
-		AAdd( aObjects, { 100, 015, .t., .f. } )
+		aAdd( aObjects, { 100, 100, .T., .T. } )
+		aAdd( aObjects, { 100, 015, .T., .F. } )
 				
 		aInfo := { aSize[ 1 ], aSize[ 2 ], aSize[ 3 ], aSize[ 4 ], 3, 3 }
 		aPosObj := MsObjSize( aInfo, aObjects )
@@ -600,17 +600,17 @@ If (lOK)
 		oListBox:bLine := { || { aListBox[ oListBox:nAT,1 ],aListBox[ oListBox:nAT,2 ],aListBox[ oListBox:nAT,3 ],aListBox[ oListBox:nAT,4 ],aListBox[ oListBox:nAT,5 ] } }
 		
 		@ aPosObj[2,1],aPosObj[2,4]-040 BUTTON oBtn1 PROMPT "OK"   		ACTION oDlg:End() OF oDlg PIXEL SIZE 035,011 //
-		@ aPosObj[2,1],aPosObj[2,4]-080 BUTTON oBtn4 PROMPT "Refresh" 	ACTION (fwmsgrun(,{ || aListBox := getListBox(cIdEnt, cUrl, aParam, 1, cModel, lCte, .T., lMDfe, lTMS)},"Aguarde...","Carregando notas..."),oListBox:nAt := 1,IIF(Empty(aListBox),oDlg:End(),oListBox:Refresh())) OF oDlg PIXEL SIZE 035,011 //"Refresh"
+		@ aPosObj[2,1],aPosObj[2,4]-080 BUTTON oBtn4 PROMPT "Refresh" 	ACTION (FWMsgRun(,{ || aListBox := getListBox(cIdEnt, cUrl, aParam, 1, cModel, lCte, .T., lMDfe, lTMS)},"Aguarde...","Carregando notas..."),oListBox:nAt := 1,IIf(Empty(aListBox),oDlg:End(),oListBox:Refresh())) OF oDlg PIXEL SIZE 035,011 //"Refresh"
 		
 		ACTIVATE MSDIALOG oDlg
 
 	Else
 	
-		u_itmsg("Não foram localizadas notas válidas!","Atenção",,1)
+		U_ITMsg("Não foram localizadas notas válidas!","Atenção",,1)
 	
-	Endif
+	EndIf
 				
-Endif
+EndIf
 
 Return
 
@@ -627,25 +627,25 @@ Parametros--------:
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static function getListBox(cIdEnt, cUrl, aParam, nTpMonitor, cModelo, lCte, lMsg, lMDfe, lTMS)
+Static Function getListBox(cIdEnt, cUrl, aParam, nTpMonitor, cModelo, lCte, lMsg, lMDfe, lTMS)
 	
-local aLote			:= {}
-local aListBox			:= {}
-local aRetorno			:= {}
-local cId				:= ""
-local cProtocolo		:= ""	
-local cRetCodNfe		:= ""
-local cAviso			:= ""
+Local aLote			:= {}
+Local aListBox			:= {}
+Local aRetorno			:= {}
+Local cId				:= ""
+Local cProtocolo		:= ""	
+Local cRetCodNfe		:= ""
+Local cAviso			:= ""
 	
-local nAmbiente		:= ""
-local nModalidade		:= ""
-local cRecomendacao	:= ""
-local cTempoDeEspera	:= ""
-local nTempomedioSef	:= ""
-local nX				:= 0
+Local nAmbiente		:= ""
+Local nModalidade		:= ""
+Local cRecomendacao	:= ""
+Local cTempoDeEspera	:= ""
+Local nTempomedioSef	:= ""
+Local nX				:= 0
 
-local oOk				:= LoadBitMap(GetResources(), "ENABLE")
-local oNo				:= LoadBitMap(GetResources(), "DISABLE")
+Local oOk				:= LoadBitMap(GetResources(), "ENABLE")
+Local oNo				:= LoadBitMap(GetResources(), "DISABLE")
 		
 default lMsg			:= .T.
 default lCte			:= .F.	
@@ -655,9 +655,9 @@ default lTMS			:= .F.
 	
 aRetorno := procMonitorDoc(cIdEnt, cUrl, aParam, nTpMonitor, cModelo, lCte, @cAviso)
 
-if empty(cAviso)
+If Empty(cAviso)
 	
-	for nX := 1 to len(aRetorno)
+	For nX := 1 to Len(aRetorno)
 			
 		cId				:= aRetorno[nX][1]
 		cProtocolo		:= aRetorno[nX][4]	
@@ -669,39 +669,39 @@ if empty(cAviso)
 		nTempomedioSef:= aRetorno[nX][11]
 		aLote			:= aRetorno[nX][12]
 			
-		SF2->(Dbsetorder(1))
-		If SF2->(Dbseek(xfilial("SF2")+SUBSTR(ALLTRIM(cId),4,9)))
+		SF2->(DBSetOrder(1))
+		If SF2->(DBSeek(xFilial("SF2")+SubStr(AllTrim(cId),4,9)))
 			
-			ccarga := alltrim(SF2->F2_CARGA)
+			ccarga := AllTrim(SF2->F2_CARGA)
 				
 		Else
 			
 			ccarga := " "
 				
-		Endif
+		EndIf
 			
-		If (empty(ccargaini) .and. empty(ccargafim)) .or. (ccarga >= ccargaini .and. ccarga <= ccargafim)
+		If (Empty(ccargaini) .And. Empty(ccargafim)) .Or. (ccarga >= ccargaini .And. ccarga <= ccargafim)
 							
-			aadd(aListBox,{	iif(empty(cProtocolo) .Or.  cRetCodNfe $ RetCodDene(),oNo,oOk),;
+			aAdd(aListBox,{	IIf(Empty(cProtocolo) .Or.  cRetCodNfe $ RetCodDene(),oNo,oOk),;
 							cId,;
 							ccarga,;
 							cProtocolo,;
-							substr(cRecomendacao,1,50);
+							SubStr(cRecomendacao,1,50);
 						})
 							
-		Endif
+		EndIf
 			
-	next	
+	Next	
     
-    if Empty(aListBox) .and. lMsg .and. !lCte
-    	//U_ITMSG("Não foram localizadas notas válidas","Atenção",,1)
-    endIf
+    If Empty(aListBox) .And. lMsg .And. !lCte
+    	//U_ITMsg("Não foram localizadas notas válidas","Atenção",,1)
+    EndIf
 
-elseif !lCTe .And. lMsg
-	u_itmsg(cAviso,"Atenção",,1)	
-endif
+ElseIf !lCTe .And. lMsg
+	U_ITMsg(cAviso,"Atenção",,1)	
+EndIf
     
-return aListBox
+Return aListBox
 
 
 /*
@@ -710,7 +710,7 @@ Programa----------: GetIdEnt
 Autor-------------: Alex Wallauer
 Data da Criacao---: 16/11/2021
 ===============================================================================================================================
-Descrição---------: Funcao Static GetIdEnt() copiada do programa SPEDNF.PRX
+Descrição---------: FunStaticatic GetIdEnt() copiada do programa SPEDNF.PRX
 ===============================================================================================================================
 Parametros--------: lUsaColab
 ===============================================================================================================================
@@ -719,8 +719,8 @@ Retorno-----------: Nenhum
 */
 Static Function GetIdEnt(lUsaColab)
 
-local cIdEnt := ""
-local cError := ""
+Local cIdEnt := ""
+Local cError := ""
 
 Default lUsaColab := .F.
 
@@ -728,17 +728,17 @@ If !lUsaColab
 
 	cIdEnt := getCfgEntidade(@cError)
 
-	if(empty(cIdEnt))
+	If(Empty(cIdEnt))
 		Aviso("SPED", cError, {"OK"}, 3) // STR0647 = "SPED"
-	endif
+	EndIf
 
-else
-	if !( ColCheckUpd() )
+Else
+	If !( ColCheckUpd() )
 		Aviso("SPED", "UPDATE do TOTVS Colaboracao 2.0 nao aplicado. Desativado o uso do TOTVS Colaboracao 2.0",{"OK"},3) //STR0647 = "SPED", // STR0810 =  "UPDATE do TOTVS ColaboraÃ§Ã£o 2.0 nÃ£o aplicado. Desativado o uso do TOTVS ColaboraÃ§Ã£o 2.0"
-	else
+	Else
 		cIdEnt := "000000"
-	endif
-endIf
+	EndIf
+EndIf
 
 Return(cIdEnt)
 
@@ -756,35 +756,35 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-USER Function INFOADQ()
+User Function INFOADQ()
 //================================================================================
 //Tratamento para operação Triangular
 //================================================================================
-LOCAL _cPedRemessa := ""
-LOCAL _cPedFaturam := ""
-LOCAL _nMenFat     := ""
-LOCAL _lEditaMens  := .T.
-LOCAL _lRet        := .T.
-LOCAL nLin    :=005
-LOCAL nSay2   :=125
-LOCAL nGet1   :=070
-LOCAL nGet2   :=nSay2+50
-LOCAL nPula   :=011
-LOCAL _nLinDlg:=345
-LOCAL _nLinFol:=060
-LOCAL _nLinBtn:=_nLinFol+95
-LOCAL _nRecOT := 0
-LOCAL _nRecSC5:= PosicSC5(SF2->F2_DOC , SF2->F2_SERIE , SF2->F2_FILIAL)  // Retorna o numero do recno da tabela SC5 correspontentes a nota fiscal, serie e filial passados como parâmetros.
-LOCAL _nRecSF2:= SF2->(RECNO())
-PRIVATE _nMenRemessa:=""
+Local _cPedRemessa := ""
+Local _cPedFaturam := ""
+Local _nMenFat     := ""
+Local _lEditaMens  := .T.
+Local _lRet        := .T.
+Local nLin    :=005
+Local nSay2   :=125
+Local nGet1   :=070
+Local nGet2   :=nSay2+50
+Local nPula   :=011
+Local _nLinDlg:=345
+Local _nLinFol:=060
+Local _nLinBtn:=_nLinFol+95
+Local _nRecOT := 0
+Local _nRecSC5:= PosicSC5(SF2->F2_DOC , SF2->F2_SERIE , SF2->F2_FILIAL)  // Retorna o numero do recno da tabela SC5 correspontentes a nota fiscal, serie e filial passados como parâmetros.
+Local _nRecSF2:= SF2->(RECNO())
+Private _nMenRemessa:=""
 
-BEGIN SEQUENCE// Essa lógica é para sempre pegar os dados das duas notas (venda e remessa) na geração da nota
+Begin Sequence// Essa lógica é para sempre pegar os dados das duas notas (venda e remessa) na geração da nota
 
     SC5->( DBGoTo( _nRecSC5 ))//Pedido atual Para saber o tipo atual
 
     If !SC5->C5_I_OPTRI $ "F,R" 
-	    U_ITMSG("Essa NF não é tipo Remessa, Pedido: "+SC5->C5_NUM,'ATENÇÃO! C5_I_OPTRI ='+SC5->C5_I_OPTRI,"Posicione em uma NF tipo Remessa",3) // ALERT
-        RETURN .F.//_lRet:=.F.//
+	    U_ITMsg("Essa NF não é tipo Remessa, Pedido: "+SC5->C5_NUM,'ATENÇÃO! C5_I_OPTRI ='+SC5->C5_I_OPTRI,"Posicione em uma NF tipo Remessa",3) // ALERT
+        Return .F.//_lRet:=.F.//
     EndIf
     _cPedRemessa := SC5->C5_I_PVREM
     _cPedFaturam := SC5->C5_I_PVFAT
@@ -795,14 +795,14 @@ BEGIN SEQUENCE// Essa lógica é para sempre pegar os dados das duas notas (venda 
     //Nota Fiscal de Venda - Início
     //================================================================================
     If SC5->C5_I_OPTRI = "F" // Estou no PV de VENDA e vou buscar o de Remessa
-	    U_ITMSG("Essa NF não é tipo Remessa, Pedido: "+SC5->C5_NUM,'Atenção! C5_I_OPTRI ='+SC5->C5_I_OPTRI,"Posicione em uma NF tipo Remessa",3) // ALERT
-        RETURN .F.//_lRet:=.F.//
+	    U_ITMsg("Essa NF não é tipo Remessa, Pedido: "+SC5->C5_NUM,'Atenção! C5_I_OPTRI ='+SC5->C5_I_OPTRI,"Posicione em uma NF tipo Remessa",3) // ALERT
+        Return .F.//_lRet:=.F.//
 /*      //Se estou na NF de venda, posiciono na REMESSA
-        If !SC5->(DBSeek(xFilial()+_cPedRemessa)) .OR. !SF2->(DBSEEK(xFilial()+_cPedRemessa))
+        If !SC5->(DBSeek(xFilial()+_cPedRemessa)) .Or. !SF2->(DBSeek(xFilial()+_cPedRemessa))
             _nMenRemessa:= "NOTA FISCAL DO PEDIDO DE REMESSA : "+_cPedRemessa+" PENDENTE"
 			_nMenFat:= "Apos gerar a Nota do Pedido de Remessa essa mensagem será preenchida automaticamente"
-	        U_ITMSG(_nMenRemessa,'Atenção!',_nMenFat,3) // ALERT
-            RETURN .F.
+	        U_ITMsg(_nMenRemessa,'Atenção!',_nMenFat,3) // ALERT
+            Return .F.
 			_lEditaMens  := .F.
         EndIf
         //Carrega os dados da Carga do Pedido de REMESSA
@@ -818,29 +818,29 @@ BEGIN SEQUENCE// Essa lógica é para sempre pegar os dados das duas notas (venda 
     //================================================================================
     //Nota Fiscal de Remessa - Início
     //================================================================================
-    If SC5->C5_I_OPTRI = "R" //Se o tipo atual for o PV de Remessa, busca a NF de Venda
+    If SC5->C5_I_OPTRI = "R" //Se o tipo atual For o PV de Remessa, busca a NF de Venda
 
         SA1->(DBSetOrder(1))
-        If SA1->( DBSeek( xFilial("SA1") + SC5->C5_CLIENTE + SC5->C5_LOJACLI ) ) .AND. SA1->A1_I_OBRAD = "S"
+        If SA1->( DBSeek( xFilial("SA1") + SC5->C5_CLIENTE + SC5->C5_LOJACLI ) ) .And. SA1->A1_I_OBRAD = "S"
             _nMenRemessa:= SF2->F2_I_MENOT//DADOS DA NOTA DE REMESSA
-        ELSE
-	        U_ITMSG("Essa Nota de Remessa não é obrigada a informar os dados de adquirente",'Atenção!',"Posicione em uma NF tipo remessa que obrigue informar os dados (SA1->A1_I_OBRAD = 'S')",3) // ALERT
-            RETURN .F.//_lRet:=.F.//
+        Else
+	        U_ITMsg("Essa Nota de Remessa não é obrigada a informar os dados de adquirente",'Atenção!',"Posicione em uma NF tipo remessa que obrigue informar os dados (SA1->A1_I_OBRAD = 'S')",3) // ALERT
+            Return .F.//_lRet:=.F.//
         EndIf
 
         //Se achou na de Remessa, posiciono na de venda
-        If !SC5->(DBSeek(xFilial()+_cPedFaturam)) .OR. !SF2->(DBSeek(xFilial()+_cPedFaturam))
+        If !SC5->(DBSeek(xFilial()+_cPedFaturam)) .Or. !SF2->(DBSeek(xFilial()+_cPedFaturam))
             _nMenRemessa:= "Nota Fiscal do Pedido de Venda : "+_cPedFaturam+" não gerada"
 			_nMenFat:= "Somente permitido informar os dados da Nota Fiscal do Adquirente após a Transmissão da Nota fiscal de Vendas (Oper.05)."
-	        U_ITMSG(_nMenRemessa,'Atenção!',_nMenFat,3) // ALERT
-            RETURN .F.//_lRet:=.F.//
+	        U_ITMsg(_nMenRemessa,'Atenção!',_nMenFat,3) // ALERT
+            Return .F.//_lRet:=.F.//
         EndIf
         //Se achou na de Remessa, posiciono na de venda
-        If SF2->(DBSeek(xFilial()+_cPedFaturam)) .AND. EMPTY(SF2->F2_CHVNFE)
+        If SF2->(DBSeek(xFilial()+_cPedFaturam)) .And. Empty(SF2->F2_CHVNFE)
             _nMenRemessa:= "Nota Fiscal do Pedido de Venda : "+_cPedFaturam+" não transmitida para SEFAZ"
 			_nMenFat:= "Somente permitido informar os dados da Nota Fiscal do Adquirente após a Transmissão da Nota fiscal de Vendas (Oper.05)."
-	        U_ITMSG(_nMenRemessa,'Atenção!',_nMenFat,3) // ALERT
-            RETURN .F.//_lRet:=.F.//
+	        U_ITMsg(_nMenRemessa,'Atenção!',_nMenFat,3) // ALERT
+            Return .F.//_lRet:=.F.//
         EndIf
 
         _nMenFat  := SF2->F2_I_MENOT//DADOS NA NF DE VENDA
@@ -851,42 +851,42 @@ BEGIN SEQUENCE// Essa lógica é para sempre pegar os dados das duas notas (venda 
     //Nota Fiscal de Remessa - Fim
     //================================================================================
    
-End SEQUENCE
+End Sequence
 //Volto para onde estava
 SF2->(DBSetOrder(1))
 SC5->( DBGoTo( _nRecSC5 ))
 SF2->( DBGoTo( _nRecSF2 ))
 
 lGrava:=.F.
-_cF2_I_NTRIA:=M->F2_I_NTRIA:=SPACE(10)//SF2->F2_I_NTRIA / POR CAUSA DA ALTERACAO NÃO POSSO TRAZER O TEXTO JÁ GRAVADO PQ NÃO O No. da NF
+_cF2_I_NTRIA:=M->F2_I_NTRIA:=Space(10)//SF2->F2_I_NTRIA / POR CAUSA DA ALTERACAO NÃO POSSO TRAZER O TEXTO JÁ GRAVADO PQ NÃO O No. da NF
 _cF2_I_STRIA:=M->F2_I_STRIA:=SF2->F2_I_STRIA
 _cF2_I_DTRIA:=M->F2_I_DTRIA:=SF2->F2_I_DTRIA
 _nMenAdquirente:=SF2->F2_I_NTRIA
 _nSMenRemessa  :=_nMenRemessa//SALVA O TESTO ORIGINAL
-_nMenRemessa   :=_nSMenRemessa+SF2->F2_I_NTRIA//ENTER+"CONFORME NOTA DE VENDA DO ADQUIRENTE ORIGINARIO "+M->F2_I_NTRIA+" SERIE "+M->F2_I_STRIA+" EMITIDA DIA "+DTOC(M->F2_I_DTRIA)
+_nMenRemessa   :=_nSMenRemessa+SF2->F2_I_NTRIA//ENTER+"CONFORME NOTA DE VENDA DO ADQUIRENTE ORIGINARIO "+M->F2_I_NTRIA+" SERIE "+M->F2_I_STRIA+" EMITIDA DIA "+DToC(M->F2_I_DTRIA)
 
 DEFINE MSDIALOG oDlg TITLE "Mensagem da Nota Fiscal" FROM 000,000 TO _nLinDlg,500 PIXEL
 
 	   oTPanel1 := TPanel():New( 0 , 0 , "" , oDlg , NIL , .T. , .F. , NIL , NIL , 600 , 200 , .T. , .F. )
 	
-	   @ nLin,010   SAY "NF/Serie : "+ SF2->F2_DOC +"/"+ SF2->F2_SERIE Of oTPanel1 Pixel 
-	   @ nLin,nSay2 SAY "Emissao : "+ DTOC(SF2->F2_EMISSAO)	           Of oTPanel1 Pixel 
+	   @ nLin,010   Say "NF/Serie : "+ SF2->F2_DOC +"/"+ SF2->F2_SERIE Of oTPanel1 Pixel 
+	   @ nLin,nSay2 Say "Emissao : "+ DToC(SF2->F2_EMISSAO)	           Of oTPanel1 Pixel 
          nLin+=nPula
 
-	   @ nLin,010   SAY "Pedido de Remessa : "+_cPedRemessa Of oTPanel1 Pixel 
-       @ nLin,nSay2 SAY "Pedido de Venda : "  +_cPedFaturam Of oTPanel1 Pixel 
+	   @ nLin,010   Say "Pedido de Remessa : "+_cPedRemessa Of oTPanel1 Pixel 
+       @ nLin,nSay2 Say "Pedido de Venda : "  +_cPedFaturam Of oTPanel1 Pixel 
          nLin+=nPula+1
 
-	   @ nLin+2,010 SAY "Nota Adquirente:"                 Of oTPanel1 Pixel 
+	   @ nLin+2,010 Say "Nota Adquirente:"                 Of oTPanel1 Pixel 
   	   @ nLin,nGet1 MSGET M->F2_I_NTRIA SIZE 35, 010       OF oDlg VALID U_VLDMen(_oMemoRMen)  PIXEL
-	   @ nLin+2,nSay2 SAY "Serie Adquirente:"              Of oTPanel1 Pixel 
+	   @ nLin+2,nSay2 Say "Serie Adquirente:"              Of oTPanel1 Pixel 
   	   @ nLin,nGet2 MSGET M->F2_I_STRIA SIZE 25, 010       OF oDlg VALID U_VLDMen(_oMemoRMen)  PIXEL
          nLin+=nPula+2
 
-	   @ nLin+2,010 SAY "Dt Emissao Adquirente:"           Of oTPanel1 Pixel 
+	   @ nLin+2,010 Say "Dt Emissao Adquirente:"           Of oTPanel1 Pixel 
   	   @ nLin,nGet1 MSGET M->F2_I_DTRIA SIZE 35, 010       OF oDlg VALID U_VLDMen(_oMemoRMen)  PIXEL
 	   
-	   aAbas:={};AADD(aAbas,"Mens. Adquirente");;AADD(aAbas,"Mens. Remessa");AADD(aAbas,"Mens. Fatur.")
+	   aAbas:={};aAdd(aAbas,"Mens. Adquirente");;aAdd(aAbas,"Mens. Remessa");aAdd(aAbas,"Mens. Fatur.")
 	   oTFolder1 := TFolder():New( _nLinFol , 005 , aAbas ,, oTPanel1 ,,,, .T. ,, 240 , 090 )
 	
        @005,005 Get _oMemoRMen VAR _nMenAdquirente MEMO Size 230,060 OF oTFolder1:aDialogs[1] PIXEL WHEN .T.//!_lEditaMens
@@ -899,23 +899,23 @@ DEFINE MSDIALOG oDlg TITLE "Mensagem da Nota Fiscal" FROM 000,000 TO _nLinDlg,50
 ACTIVATE MSDIALOG oDlg Centered
 
 SF2->( DBGoTo( _nRecSF2 ))
-IF lGrava .AND. !EMPTY(SF2->F2_CHVNFE)
+If lGrava .And. !Empty(SF2->F2_CHVNFE)
     _nMenRemessa:="DADOS NÃO GRAVADOS"+ENTER+"Nota Fiscal do Pedido de Remessa : "+_cPedFaturam+" transmitida para SEFAZ"
 	_nMenFat:= "Somente permitido informar os dados da Nota Fiscal do Adquirente antes da Transmissão."
-    U_ITMSG(_nMenRemessa,'Atenção!',_nMenFat,1) // ALERT
-    RETURN .F.
+    U_ITMsg(_nMenRemessa,'Atenção!',_nMenFat,1) // ALERT
+    Return .F.
 EndIf
 
-IF lGrava .AND. _lRet
+If lGrava .And. _lRet
    SF2->( RecLock( "SF2" , .F. ) )
-   //SF2->F2_I_MENOT := STRTRAN( _nMenRemessa , ENTER , "" )
+   //SF2->F2_I_MENOT := StrTran( _nMenRemessa , ENTER , "" )
    SF2->F2_I_NTRIA := _nMenAdquirente//M->F2_I_NTRIA
    SF2->F2_I_STRIA := M->F2_I_STRIA
    SF2->F2_I_DTRIA := M->F2_I_DTRIA
-   SF2->( MSUNLOCK() )
-ENDIF
+   SF2->( MSUnLock() )
+EndIf
 
-RETURN _lRet
+Return _lRet
 
 /*
 ===============================================================================================================================
@@ -930,18 +930,18 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-USER FUNCTION VLDMen(_oMemoRMen) 
+User Function VLDMen(_oMemoRMen) 
 
-IF EMPTY(_nMenAdquirente) .OR. (!EMPTY(M->F2_I_NTRIA) .AND. _cF2_I_NTRIA <> M->F2_I_NTRIA) .OR. _cF2_I_STRIA <> M->F2_I_STRIA .OR. _cF2_I_DTRIA <> M->F2_I_DTRIA 
-   _nMenAdquirente:="CONFORME NOTA DE VENDA DO ADQUIRENTE ORIGINARIO "+M->F2_I_NTRIA+" SERIE "+M->F2_I_STRIA+" EMITIDA DIA "+DTOC(M->F2_I_DTRIA)
+If Empty(_nMenAdquirente) .Or. (!Empty(M->F2_I_NTRIA) .And. _cF2_I_NTRIA <> M->F2_I_NTRIA) .Or. _cF2_I_STRIA <> M->F2_I_STRIA .Or. _cF2_I_DTRIA <> M->F2_I_DTRIA 
+   _nMenAdquirente:="CONFORME NOTA DE VENDA DO ADQUIRENTE ORIGINARIO "+M->F2_I_NTRIA+" SERIE "+M->F2_I_STRIA+" EMITIDA DIA "+DToC(M->F2_I_DTRIA)
    _cF2_I_NTRIA:=M->F2_I_NTRIA
    _cF2_I_STRIA:=M->F2_I_STRIA
    _cF2_I_DTRIA:=M->F2_I_DTRIA
-ENDIF
+EndIf
 _nMenRemessa:=_nSMenRemessa+ENTER+_nMenAdquirente
 _oMemoRMen:Refresh()
 oTFolder1:Refresh()
-RETURN .T.
+Return .T.
 /*
 ===============================================================================================================================
 Programa----------: PosicSC5
@@ -958,27 +958,27 @@ Parametros--------: _cNrNota = Numero da nota fiscal
 Retorno-----------: _nRet = Retorna o numero do recno da tabela SC5.
 ===============================================================================================================================
 */
-Static function PosicSC5(_cNrNota,_cSerie,_cCodFil)
+Static Function PosicSC5(_cNrNota,_cSerie,_cCodFil)
 Local _nRet := 0
 Local _aOrd := SaveOrd({"SC5"})
 Local _nRegAtu := SC5->(Recno())
 
 Begin Sequence
    SC5->(DbOrderNickName("IT_NOTA")) // C5_FILIAL+C5_NOTA+C5_LIBEROK+C5_BLQ+C5_I_BLPRC+C5_I_BLOQ // k = ordem 20
-   SC5->(DbSeek(U_ITKEY(_cCodFil,"C5_FILIAL")+U_ITKEY(_cNrNota,"C5_NOTA")))
+   SC5->(DBSeek(U_ITKEY(_cCodFil,"C5_FILIAL")+U_ITKEY(_cNrNota,"C5_NOTA")))
    
-   Do While ! SC5->(Eof()) .And. SC5->(C5_FILIAL+SC5->C5_NOTA) == U_ITKEY(_cCodFil,"C5_FILIAL")+U_ITKEY(_cNrNota,"C5_NOTA")
+   While ! SC5->(Eof()) .And. SC5->(C5_FILIAL+SC5->C5_NOTA) == U_ITKEY(_cCodFil,"C5_FILIAL")+U_ITKEY(_cNrNota,"C5_NOTA")
       If SC5->C5_SERIE == U_ITKEY(_cSerie,"C5_SERIE")
          _nRet := SC5->(Recno())
       EndIf
       
-      SC5->(DbSkip())
+      SC5->(DBSkip())
    EndDo
    
 End Sequence
 
 RestOrd(_aOrd)
 
-SC5->(DbGoTo(_nRegAtu))
+SC5->(DBGoTo(_nRegAtu))
 
 Return _nRet

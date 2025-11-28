@@ -1,5 +1,5 @@
-#include "protheus.ch"
-#include "rwmake.ch"
+#Include "TOTVS.ch"
+#Include "rwmake.ch"
 /*/
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -45,52 +45,52 @@
 /*/ 
 User Function AOMS008(nVal)
 
-	Local aArea 	:= GetArea()
+	Local aArea 	:= FWGetArea()
 	Local cRet	:= ""
 	
-	if (nVal == 1)
+	If (nVal == 1)
 
 		cRet := Posicione("CC2", 1, xFilial("CC2")+M->A1_EST+M->A1_COD_MUN, "CC2_MUN")
 	
-		if ( empty(M->A1_I_CMUNC) )
+		If ( Empty(M->A1_I_CMUNC) )
 			M->A1_I_CMUNC	:= Posicione("CC2", 1, xFilial("CC2")+M->A1_ESTC+M->A1_COD_MUN, "CC2_CODMUN")
 			M->A1_MUNC		:= Posicione("CC2", 1, xFilial("CC2")+M->A1_ESTC+M->A1_I_CMUNC, "CC2_MUN")
-		endif
+		EndIf
 
-	elseif (nVal == 2)
+	ElseIf (nVal == 2)
 
-		if ( empty(M->A1_CEPC) )
+		If ( Empty(M->A1_CEPC) )
 			cRet := Posicione("ZA5",3,xFilial("ZA5")+M->A1_ESTC+M->A1_CEP,"ZA5_CEP")
-		else
+		Else
 			cRet := M->A1_CEPC
-		endif
+		EndIf
 
-	elseif (nVal == 3)
+	ElseIf (nVal == 3)
 
-		if ( empty(M->A1_ENDCOB) )
-			if ( (M->A1_EST == M->A1_ESTC) .AND. (M->A1_COD_MUN == M->A1_I_CMUNC) )
+		If ( Empty(M->A1_ENDCOB) )
+			If ( (M->A1_EST == M->A1_ESTC) .And. (M->A1_COD_MUN == M->A1_I_CMUNC) )
 				cRet := M->A1_END
-			else
+			Else
 				cRet := M->A1_ENDCOB
-			endif
-		else
+			EndIf
+		Else
 			cRet := M->A1_ENDCOB
-		endif
+		EndIf
 
-	elseif (nVal == 4)
+	ElseIf (nVal == 4)
 
-		if ( empty(M->A1_BAIRROC) )
-			if ( (M->A1_EST == M->A1_ESTC) .AND. (M->A1_COD_MUN == M->A1_I_CMUNC) )
+		If ( Empty(M->A1_BAIRROC) )
+			If ( (M->A1_EST == M->A1_ESTC) .And. (M->A1_COD_MUN == M->A1_I_CMUNC) )
 				cRet := M->A1_BAIRRO
-			else
+			Else
 				cRet := M->A1_BAIRROC
-			endif
-		else
+			EndIf
+		Else
 			cRet := M->A1_BAIRROC
-		endif
+		EndIf
 
-	endif
+	EndIf
 
-	RestArea(aArea)
+	FWRestArea(aArea)
 
-return cRet
+Return cRet

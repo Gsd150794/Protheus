@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                           
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges     | 17/12/2021 | Corrigido o pergunte informado no relatório. Chamado 38660
--------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges     | 06/01/2022 | Criada mais duas ordens no relatório. Chamado 38846
- -------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges     | 08/08/2022 | Corrigido Filtro de Município. Chamado 40951
+Lucas Borges  |17/12/2021| Chamado 38660. Corrigido o pergunte informado no relatório.
+Lucas Borges  |06/01/2022| Chamado 38846. Criada mais duas ordens no relatório.
+Lucas Borges  |08/08/2022| Chamado 40951. Corrigido Filtro de Município.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT031
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Relação de Produtor por Classificação de Tanque
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -106,11 +95,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Processa impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -132,9 +118,9 @@ Local _cAux			:= ""
 If MV_PAR01 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZL2")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
+	aAdd(_aSelFil,cFilAnt)
 EndIf
 
 //=====================================================
@@ -231,7 +217,7 @@ oReport:SetMeter(0)
 
 BeginSql alias _cAlias
 	SELECT ZL2_FILIAL, A2_COD, A2_LOJA, A2_NOME, A2_END, A2_EST, A2_COD_MUN, CC2_MUN, A2_CGC, A2_INSCR, A2_L_SIGSI, A2_L_MARTQ, A2_L_CAPTQ, A2_L_FREQU, ZL2_COD, ZL2_DESCRI, ZL3_COD, ZL3_DESCRI,
-		A2_L_TXRES, A2_L_CLASS,	A2_L_TANQ, A2_L_TANLJ, NVL(SUM(ZLD.ZLD_QTDBOM),0) VOLUME, ROUND(NVL(SUM(ZLD.ZLD_QTDBOM),0)/%exp:_cDias%,2) MEDIA
+		A2_L_TXRES, A2_L_CLASS,	A2_L_TANQ, A2_L_TANLJ, NVL(SUM(ZLD.ZLD_QTDBOM),0) VOLUME, Round(NVL(SUM(ZLD.ZLD_QTDBOM),0)/%exp:_cDias%,2) MEDIA
 		FROM %Table:SA2% SA2, %Table:ZL3% ZL3, %Table:ZL2% ZL2, %Table:ZLD% ZLD, %Table:CC2% CC2
 		WHERE SA2.D_E_L_E_T_ = ' '
 		AND ZL3.D_E_L_E_T_ = ' '
@@ -269,11 +255,11 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->ZL2_FILIAL
@@ -285,7 +271,7 @@ While !oReport:Cancel() .And. (_cAlias)->(!EOF())
 			_cAux := (_cAlias)->(A2_L_TANQ+A2_L_TANLJ)
 		EndIf
 	EndIf
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()

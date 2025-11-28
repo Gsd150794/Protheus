@@ -22,11 +22,11 @@
 ===============================================================================================================================
 */
 
-#INCLUDE "FWMBROWSE.CH"
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "TOPCONN.CH"
-#INCLUDE "RWMAKE.CH"
+#Include "FWMBROWSE.CH"
+#Include "FWMVCDEF.CH"
+#Include "TOTVS.ch"
+#Include "TOPCONN.CH"
+#Include "RWMAKE.CH"
 
 Static _oModPM       := Nil
 Static _lAltOp       := .F.
@@ -48,7 +48,7 @@ Retorno-----------:
 */ 
 User Function AOMS127()
 Local _oBrowse := Nil
-Local _aArea   := GetArea()
+Local _aArea   := FWGetArea()
 
 _oBrowse := FWMBrowse():New()
 _oBrowse:SetAlias("Z25")
@@ -56,9 +56,9 @@ _oBrowse:SetMenuDef( 'AOMS127' )
 _oBrowse:SetDescription("Cadastro de Zona de Entrega")
 _oBrowse:Activate()
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -97,10 +97,10 @@ Retorno-----------: _oModel - Objeto do modelo de dados do MVC
 Static Function ModelDef()
 Local _oModel
 Local _oStruZ25P := FWFormStruct(1,'Z25')
-Local _oStruSX5F := FWFormStruct(1,'SX5',{|x| Alltrim(x) $ "|X5_FILIAL|X5_TABELA|X5_CHAVE|X5_DESCRI|"})
-Local _oStruZ21F := FWFormStruct(1,'Z21',{|x| Alltrim(x) $ "|Z21_FILIAL|Z21_EST|Z21_COD|Z21_NOME|"})
-Local _oStruZ22F := FWFormStruct(1,'Z22',{|x| Alltrim(x) $ "|Z22_FILIAL|Z22_EST|Z22_MESO|Z22_COD|Z22_NOME|"})
-Local _oStruCC2F := FWFormStruct(1,'CC2',{|x| Alltrim(x) $ "|CC2_FILIAL|CC2_EST|CC2_I_MESO|CC2_I_MICR|CC2_CODMUN|CC2_MUN|"})
+Local _oStruSX5F := FWFormStruct(1,'SX5',{|x| AllTrim(x) $ "|X5_FILIAL|X5_TABELA|X5_CHAVE|X5_DESCRI|"})
+Local _oStruZ21F := FWFormStruct(1,'Z21',{|x| AllTrim(x) $ "|Z21_FILIAL|Z21_EST|Z21_COD|Z21_NOME|"})
+Local _oStruZ22F := FWFormStruct(1,'Z22',{|x| AllTrim(x) $ "|Z22_FILIAL|Z22_EST|Z22_MESO|Z22_COD|Z22_NOME|"})
+Local _oStruCC2F := FWFormStruct(1,'CC2',{|x| AllTrim(x) $ "|CC2_FILIAL|CC2_EST|CC2_I_MESO|CC2_I_MICR|CC2_CODMUN|CC2_MUN|"})
 
 Local bVldPre    := {|| U_AOMS127G() }
 Local bVldPos    := {|| U_AOMS127V() }
@@ -191,7 +191,7 @@ _oStruZ21F:SetProperty("OK",	MODEL_FIELD_WHEN, 		{|| .T. })
 _oStruZ22F:SetProperty("OK",	MODEL_FIELD_WHEN, 		{|| .T. })
 _oStruCC2F:SetProperty("OK",	MODEL_FIELD_WHEN, 		{|| .T. })
 
-_oModel:SetActivate({|_oModel| FWMSGRUN( ,{||  U_AOMS127H(_oModel) } , "Carregando as grids de cadastro, Aguarde...",  ) })
+_oModel:SetActivate({|_oModel| FWMsgRun( ,{||  U_AOMS127H(_oModel) } , "Carregando as grids de cadastro, Aguarde...",  ) })
 
 
 Return _oModel
@@ -212,10 +212,10 @@ Retorno-----------: _oView - Objeto de exibição do MVC
 Static Function ViewDef()
 Local _oModel    := FWLoadModel("AOMS127")
 Local _oStruZ25P := FWFormStruct(2,"Z25")
-Local _oStruSX5F := FWFormStruct(2,'SX5',{|x| Alltrim(x) $ "|X5_FILIAL|X5_TABELA|X5_CHAVE|X5_DESCRI|"})
-Local _oStruZ21F := FWFormStruct(2,'Z21',{|x| Alltrim(x) $ "|Z21_FILIAL|Z21_EST|Z21_COD|Z21_NOME|"})
-Local _oStruZ22F := FWFormStruct(2,'Z22',{|x| Alltrim(x) $ "|Z22_FILIAL|Z22_EST|Z22_MESO|Z22_COD|Z22_NOME|"})
-Local _oStruCC2F := FWFormStruct(2,'CC2',{|x| Alltrim(x) $ "|CC2_FILIAL|CC2_EST|CC2_I_MESO|CC2_I_MICR|CC2_CODMUN|CC2_MUN|"})
+Local _oStruSX5F := FWFormStruct(2,'SX5',{|x| AllTrim(x) $ "|X5_FILIAL|X5_TABELA|X5_CHAVE|X5_DESCRI|"})
+Local _oStruZ21F := FWFormStruct(2,'Z21',{|x| AllTrim(x) $ "|Z21_FILIAL|Z21_EST|Z21_COD|Z21_NOME|"})
+Local _oStruZ22F := FWFormStruct(2,'Z22',{|x| AllTrim(x) $ "|Z22_FILIAL|Z22_EST|Z22_MESO|Z22_COD|Z22_NOME|"})
+Local _oStruCC2F := FWFormStruct(2,'CC2',{|x| AllTrim(x) $ "|CC2_FILIAL|CC2_EST|CC2_I_MESO|CC2_I_MICR|CC2_CODMUN|CC2_MUN|"})
 Local _oView     := Nil
 
 _oView := FWFormView():New()
@@ -384,7 +384,7 @@ If _nOperation <> MODEL_OPERATION_DELETE
 
     If !_lReturn
 
-    	U_ITMSG("Não há municípios selecionados! ",;
+    	U_ITMsg("Não há municípios selecionados! ",;
                 "Atenção",;
                 "Selecione pelo menos um município.  ",3 , , , .T.)	
               
@@ -425,41 +425,41 @@ Local _lInclui      := .F.
 
 If _nOperation == MODEL_OPERATION_INSERT
     _lInclui := .T.
-ElseIf _nOperation == MODEL_OPERATION_DELETE .OR. _lAltOp
+ElseIf _nOperation == MODEL_OPERATION_DELETE .Or. _lAltOp
     _lInclui := .F.
     _lAltOp  := .F.
-    Dbselectarea('Z25')
-    Dbsetorder(1)
-    If Dbseek(xFilial("Z25")+_cCod)
-        Do While xFilial("Z25")+_cCod == Z25->(Z25_FILIAL+Z25_COD)
+    DBSelectArea('Z25')
+    DBSetOrder(1)
+    If DBSeek(xFilial("Z25")+_cCod)
+        While xFilial("Z25")+_cCod == Z25->(Z25_FILIAL+Z25_COD)
             RecLock('Z25', .F.)
             DBDelete()
-            Z25->(MsUnlock())
-            Z25->(DbSkip())
+            Z25->(MSUnLock())
+            Z25->(DBSkip())
         EndDo
     EndIf
 ElseIf _nOperation == MODEL_OPERATION_UPDATE
     // Verfica os que foram desmarcados e exclui
-    DbselectArea('Z25')
-    Dbsetorder(1)
-    If Dbseek(xFilial('Z25')+_cCod)
-        Do While Z25->(Z25_FILIAL+Z25_COD) == xFilial('Z25')+_cCod
+    DBSelectArea('Z25')
+    DBSetOrder(1)
+    If DBSeek(xFilial('Z25')+_cCod)
+        While Z25->(Z25_FILIAL+Z25_COD) == xFilial('Z25')+_cCod
 
             lBusca := _oModel:aallsubmodels[2]:SeekLine({{"X5_CHAVE",Z25->Z25_EST},{"X5_TABELA","12"}})
 
-            If lBusca .AND. _oModel:aallsubmodels[2]:GetValue("OK")           
+            If lBusca .And. _oModel:aallsubmodels[2]:GetValue("OK")           
                 
                 lBusca := _oModel:aallsubmodels[3]:SeekLine({{"Z21_COD",Z25->Z25_MESO},{"Z21_EST",Z25->Z25_EST}})
                 
-                If lBusca .AND. _oModel:aallsubmodels[3]:GetValue("OK")   
+                If lBusca .And. _oModel:aallsubmodels[3]:GetValue("OK")   
 
                     lBusca := _oModel:aallsubmodels[4]:SeekLine({{"Z22_COD",Z25->Z25_MICRO},{"Z22_MESO",Z25->Z25_MESO},{"Z22_EST",Z25->Z25_EST}})  
 
-                    If lBusca .AND. _oModel:aallsubmodels[4]:GetValue("OK")  
+                    If lBusca .And. _oModel:aallsubmodels[4]:GetValue("OK")  
                         
                         lBusca := _oModel:aallsubmodels[5]:SeekLine({{"CC2_CODMUN",Z25->Z25_CODMUN},{"CC2_EST",Z25->Z25_EST}})    
                         
-                        If lBusca .AND. _oModel:aallsubmodels[5]:GetValue("OK")
+                        If lBusca .And. _oModel:aallsubmodels[5]:GetValue("OK")
                             //Desmarca os que já existem na tabela para não incluir novamente
                             _oModel:aallsubmodels[5]:LoadValue("OK",.F. )  
 
@@ -482,7 +482,7 @@ ElseIf _nOperation == MODEL_OPERATION_UPDATE
             If _lExclui
                 RecLock('Z25', .F.)
                 DBDelete()
-                Z25->(MsUnlock())   
+                Z25->(MSUnLock())   
             EndIf
             Z25->(DBSkip())
         EndDo
@@ -518,7 +518,7 @@ If _lInclui
                                     Z25->Z25_MICRO  := _oModel:aallsubmodels[5]:GetValue("CC2_I_MICR")
                                     Z25->Z25_CODMUN := _oModel:aallsubmodels[5]:GetValue("CC2_CODMUN")
                                     Z25->Z25_MUN    := _oModel:aallsubmodels[5]:GetValue("CC2_MUN")
-                                    Z25->(MsUnlock())
+                                    Z25->(MSUnLock())
                                 EndIf
                             Next
                         EndIf
@@ -602,7 +602,7 @@ If nSubmodel < 5
     _oModel:aallsubmodels[nSubmodel]:GoLine(_nLine)
 
     For i := nSubmodel To 4
-        _oModel:aallsubmodels[i]:LoadValue("LEGEND","NEXT")
+        _oModel:aallsubmodels[i]:LoadValue("LEGEND","Next")
         _aLinhaSub[i] := _oModel:aallsubmodels[i]:GetLine()
     Next
 
@@ -658,7 +658,7 @@ Static Function AOMS127F(nOpcao,oStruct, bValid)
                         NIL , ;                    // [08] B Code-block de validação When do campo
                         NIL , ;                    // [09] A Lista de valores permitido do campo
                         NIL , ;                    // [10] L Indica se o campo tem preenchimento obrigatório
-                        {|| iif(0 = 0, "","")} ,;                   // [11] B Code-block de inicializacao do campo
+                        {|| IIf(0 = 0, "","")} ,;                   // [11] B Code-block de inicializacao do campo
                         NIL , ;                    // [12] L Indica se trata de um campo chave
                         .T. , ;                    // [13] L Indica se o campo pode receber valor em uma operação de update.
                         .F. )                      // [14] L Indica se o campo é virtual
@@ -699,7 +699,7 @@ Static Function AOMS127F(nOpcao,oStruct, bValid)
                  NIL                                , ;     // [12] C   Agrupamento do campo
                  NIL                                , ;     // [13] A   Lista de valores permitido do campo (Combo)
                  NIL                                , ;     // [14] N   Tamanho maximo da maior opção do combo
-                 "Iif(0 = 0, '','')"                         , ;     // [15] C   Inicializador de Browse
+                 "IIf(0 = 0, '','')"                         , ;     // [15] C   Inicializador de Browse
                  .F.                                , ;     // [16] L   Indica se o campo é virtual
                  NIL                                , ;     // [17] C   Picture Variavel
                  NIL                                )       // [18] L   Indica pulo de linha após o campo
@@ -746,20 +746,20 @@ If _nOperation == MODEL_OPERATION_INSERT
     _oModel:aallsubmodels[5]:SetNoDeleteLine(.F.)
     _oModel:aallsubmodels[5]:SetNoInsertLine(.F.)    
 
-    DbSelectArea("SX5")
-    DbSetOrder(1)
+    DBSelectArea("SX5")
+    DBSetOrder(1)
     DBSeek(xFilial("SX5")+"12")
-    Do While SX5->X5_FILIAL + SX5->X5_TABELA == xFilial("SX5")+"12" .AND. !EOF()
+    While SX5->X5_FILIAL + SX5->X5_TABELA == xFilial("SX5")+"12" .And. !Eof()
 
-        If Alltrim(SX5->X5_CHAVE) == "EX"
-            SX5->(DbSkip())
+        If AllTrim(SX5->X5_CHAVE) == "EX"
+            SX5->(DBSkip())
             Loop
         EndIf 
 
-        If !Empty(Alltrim(_oModel:aallsubmodels[2]:GetValue('X5_CHAVE' )))
+        If !Empty(AllTrim(_oModel:aallsubmodels[2]:GetValue('X5_CHAVE' )))
             nLinha := _oModel:aallsubmodels[2]:GetLine()
             _oModel:aallsubmodels[2]:GoLine(nLinha+1)
-            If !Empty(Alltrim(_oModel:aallsubmodels[2]:GetValue('X5_CHAVE' )))
+            If !Empty(AllTrim(_oModel:aallsubmodels[2]:GetValue('X5_CHAVE' )))
                 _oModel:aallsubmodels[2]:AddLine()
             EndIf
         EndIf
@@ -767,11 +767,11 @@ If _nOperation == MODEL_OPERATION_INSERT
         _oModel:aallsubmodels[2]:LoadValue("X5_CHAVE",SX5->X5_CHAVE )  
         _oModel:aallsubmodels[2]:LoadValue("X5_DESCRI",SX5->X5_DESCRI )  
 
-        DbSelectArea("Z21")
-        DbSetOrder(4)
+        DBSelectArea("Z21")
+        DBSetOrder(4)
         If DBSeek(xFilial("Z21")+Rtrim(SX5->X5_CHAVE))
-            Do While Z21->Z21_FILIAL+Z21->Z21_EST == xFilial("Z21")+rtrim(SX5->X5_CHAVE) .AND. Z21->(!EOF())
-                If !Empty(Alltrim(_oModel:aallsubmodels[3]:GetValue('Z21_EST' )))
+            While Z21->Z21_FILIAL+Z21->Z21_EST == xFilial("Z21")+rtrim(SX5->X5_CHAVE) .And. Z21->(!Eof())
+                If !Empty(AllTrim(_oModel:aallsubmodels[3]:GetValue('Z21_EST' )))
                     _oModel:aallsubmodels[3]:AddLine()
                 Else
                     nLinhaZ21 := _oModel:aallsubmodels[3]:GetLine()
@@ -780,11 +780,11 @@ If _nOperation == MODEL_OPERATION_INSERT
                 _oModel:aallsubmodels[3]:LoadValue("Z21_COD", Z21->Z21_COD )  
                 _oModel:aallsubmodels[3]:LoadValue("Z21_NOME",Z21->Z21_NOME )  
 
-                DbSelectArea("Z22")
-                DbSetOrder(4)
+                DBSelectArea("Z22")
+                DBSetOrder(4)
                 If DBSeek(xFilial("Z22")+Z21->Z21_EST+Z21->Z21_COD)
-                    Do While Z22->Z22_FILIAL+Z22->Z22_EST+Z22->Z22_MESO == xFilial("Z22")+Z21->Z21_EST+Z21->Z21_COD .AND. Z22->(!EOF())
-                        If !Empty(Alltrim(_oModel:aallsubmodels[4]:GetValue('Z22_EST' )))
+                    While Z22->Z22_FILIAL+Z22->Z22_EST+Z22->Z22_MESO == xFilial("Z22")+Z21->Z21_EST+Z21->Z21_COD .And. Z22->(!Eof())
+                        If !Empty(AllTrim(_oModel:aallsubmodels[4]:GetValue('Z22_EST' )))
                             _oModel:aallsubmodels[4]:AddLine()
                         Else
                             nLinhaZ22 := _oModel:aallsubmodels[4]:GetLine()
@@ -794,11 +794,11 @@ If _nOperation == MODEL_OPERATION_INSERT
                         _oModel:aallsubmodels[4]:LoadValue("Z22_COD", Z22->Z22_COD )  
                         _oModel:aallsubmodels[4]:LoadValue("Z22_NOME",Z22->Z22_NOME )  
 
-                        DbSelectArea("CC2")
-                        DbSetOrder(6)
+                        DBSelectArea("CC2")
+                        DBSetOrder(6)
                         If DBSeek( xFilial("CC2") + Z22->Z22_EST + Z22->Z22_MESO + Z22->Z22_COD )
-                            Do While CC2->CC2_FILIAL + CC2->CC2_EST + CC2->CC2_I_MESO + CC2->CC2_I_MICR == xFilial("CC2") + Z22->Z22_EST + Z22->Z22_MESO + Z22->Z22_COD .AND. CC2->(!EOF())
-                                If !Empty(Alltrim(_oModel:aallsubmodels[5]:GetValue('CC2_EST' )))
+                            While CC2->CC2_FILIAL + CC2->CC2_EST + CC2->CC2_I_MESO + CC2->CC2_I_MICR == xFilial("CC2") + Z22->Z22_EST + Z22->Z22_MESO + Z22->Z22_COD .And. CC2->(!Eof())
+                                If !Empty(AllTrim(_oModel:aallsubmodels[5]:GetValue('CC2_EST' )))
                                     _oModel:aallsubmodels[5]:AddLine()
                                 Else
                                     nLinhaCC2 := _oModel:aallsubmodels[5]:GetLine()
@@ -809,22 +809,22 @@ If _nOperation == MODEL_OPERATION_INSERT
                                 _oModel:aallsubmodels[5]:LoadValue("CC2_CODMUN",CC2->CC2_CODMUN )  
                                 _oModel:aallsubmodels[5]:LoadValue("CC2_MUN"   ,CC2->CC2_MUN )  
 
-                                CC2->(DbSkip())
+                                CC2->(DBSkip())
                             EndDo
                             _oModel:aallsubmodels[5]:GoLine(nLinhaCC2)
                         EndIf
 
-                        Z22->(DbSkip())
+                        Z22->(DBSkip())
                     EndDo
                     _oModel:aallsubmodels[4]:GoLine(nLinhaZ22)
                 EndIf
 
-                Z21->(DbSkip())
+                Z21->(DBSkip())
             EndDo
             _oModel:aallsubmodels[3]:GoLine(nLinhaZ21)
         EndIf
 
-        SX5->(DbSkip())
+        SX5->(DBSkip())
     EndDo
     
     _oModel:aallsubmodels[2]:SetNoDeleteLine(.T.)
@@ -839,7 +839,7 @@ If _nOperation == MODEL_OPERATION_INSERT
     _oModel:aallsubmodels[5]:SetNoDeleteLine(.T.)
     _oModel:aallsubmodels[5]:SetNoInsertLine(.T.)    
 
-ElseIf _nOperation == MODEL_OPERATION_UPDATE  .OR. _nOperation ==  MODEL_OPERATION_VIEW .OR. _nOperation ==  MODEL_OPERATION_DELETE  
+ElseIf _nOperation == MODEL_OPERATION_UPDATE  .Or. _nOperation ==  MODEL_OPERATION_VIEW .Or. _nOperation ==  MODEL_OPERATION_DELETE  
     
     If  _nOperation ==  MODEL_OPERATION_DELETE
         _lAltOp := .T.
@@ -848,11 +848,11 @@ ElseIf _nOperation == MODEL_OPERATION_UPDATE  .OR. _nOperation ==  MODEL_OPERATI
     	_oModel:Activate()
     EndIf
 
-    DbselectArea('Z25')
-    Dbsetorder(1)
-    DbgoTop()
-    If Dbseek(xFilial('Z25')+cCodZ25)
-        Do While Z25->(Z25_FILIAL+Z25_COD) == xFilial('Z25')+cCodZ25
+    DBSelectArea('Z25')
+    DBSetOrder(1)
+    DBGoTop()
+    If DBSeek(xFilial('Z25')+cCodZ25)
+        While Z25->(Z25_FILIAL+Z25_COD) == xFilial('Z25')+cCodZ25
 
             lBusca := _oModel:aallsubmodels[2]:SeekLine({{"X5_CHAVE",Z25->Z25_EST},{"X5_TABELA","12"}})
 
@@ -892,9 +892,9 @@ EndIf
 
 _oModel:aallsubmodels[2]:GoLine(1)
 
-_oModel:aallsubmodels[2]:LoadValue("LEGEND","NEXT")
-_oModel:aallsubmodels[3]:LoadValue("LEGEND","NEXT")
-_oModel:aallsubmodels[4]:LoadValue("LEGEND","NEXT")
+_oModel:aallsubmodels[2]:LoadValue("LEGEND","Next")
+_oModel:aallsubmodels[3]:LoadValue("LEGEND","Next")
+_oModel:aallsubmodels[4]:LoadValue("LEGEND","Next")
 
 
 RestOrd(_aOrd)
@@ -914,10 +914,10 @@ Parametros--------: Nenhum
 Retorno-----------: _cRet
 ===============================================================================================================================
 */
-User function AOMS127N()
+User Function AOMS127N()
 
 Local _cRet    := ""
-Local _aArea   := GetArea()     
+Local _aArea   := FWGetArea()     
 
 Local _cAlias  := GetNextAlias()
 Local _cFiltro := "%"  
@@ -929,28 +929,28 @@ BeginSql alias _cAlias
 	SELECT
 	      TO_NUMBER(NVL(MAX(Z25_COD),'0')) AS COD
 	FROM
-	      %table:Z25%
+	      %Table:Z25%
 	WHERE
 	      D_E_L_E_T_ = ' '
 	      %exp:_cFiltro%	      
 EndSql
 
-dbSelectArea(_cAlias)
-(_cAlias)->(dbGotop())    
+DBSelectArea(_cAlias)
+(_cAlias)->(DBGoTop())    
 
 _cRet:= StrZero((_cAlias)->COD + 1,6)          
 
 //================================================================================
 // Finaliza a area criada anteriormente.
 //================================================================================
-dbSelectArea(_cAlias)
-(_cAlias)->(dbCloseArea())
+DBSelectArea(_cAlias)
+(_cAlias)->(DBCloseArea())
 
 While !MayIUseCode("Z25_COD" + xFilial("Z25") + _cRet)  //verifica se esta na memoria, sendo usado
 	_cRet := Soma1(_cRet)						           // busca o proximo numero disponivel 
 EndDo 
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return _cRet
 
@@ -978,7 +978,7 @@ Local k := 0
 Local j := 0
 Local n := 0
 
-IF _cAlias == "CC2"
+If _cAlias == "CC2"
     If !_oModel:aallsubmodels[4]:GetValue("OK") 
         _cMsg1 := "Não é possivel marcar este Município!"
         _cMsg2 := "Marque a Microrregião antes de marcar o Município. "
@@ -992,7 +992,7 @@ IF _cAlias == "CC2"
         _cMsg2 := "Marque o Estado antes de marcar a Mesorregião. "
         _lReturn := .F.
     EndIf
-ELSEIF _cAlias == "Z22"
+ElseIf _cAlias == "Z22"
     If !_oModel:aallsubmodels[3]:GetValue("OK") //Meso
         _cMsg1 := "Não é possivel marcar esta Microrregião!"
         _cMsg2 := "Marque a Mesorregião antes de marcar a Microrregião. "
@@ -1012,7 +1012,7 @@ ELSEIF _cAlias == "Z22"
         _oModel:aallsubmodels[5]:GoLine(1)
         _oView:Refresh('VIEW_CC2F')
     EndIf
-ELSEIF _cAlias == "Z21"
+ElseIf _cAlias == "Z21"
     If !_oModel:aallsubmodels[2]:GetValue("OK") //Estado
         _cMsg1 := "Não é possivel marcar esta Mesorregião!"
         _cMsg2 := "Marque o Estado antes de marcar a Mesorregião. "
@@ -1036,7 +1036,7 @@ ELSEIF _cAlias == "Z21"
                     
         _oView:Refresh('VIEW_CC2F')
     EndIf
-ELSEIF _cAlias == "SX5"
+ElseIf _cAlias == "SX5"
     
     _lReturn := .T.
 
@@ -1064,7 +1064,7 @@ ELSEIF _cAlias == "SX5"
         _oView:Refresh('VIEW_Z22F')            
         _oView:Refresh('VIEW_CC2F')
     EndIf
-ENDIF
+EndIf
 
 If !_lReturn
 

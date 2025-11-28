@@ -11,10 +11,10 @@
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#include 'rwmake.ch' 
-#include "APWEBSRV.CH"
-#Include 'Protheus.ch'  
-#INCLUDE "TBICONN.CH"   
+#Include 'rwmake.ch' 
+#Include "APWEBSRV.CH"
+#Include "TOTVS.ch"  
+#Include "TBICONN.CH"   
 
 /*
 ===============================================================================================================================
@@ -31,8 +31,8 @@ Retorno-----------: Nenhum
 */
 User Function MOMS035()
 
-LOCAL oDlg
-LOCAL _cCodBarra := SPACE(LEN(SF2->F2_FILIAL)+LEN(SF2->F2_DOC)+LEN(SF2->F2_SERIE))
+Local oDlg
+Local _cCodBarra := Space(Len(SF2->F2_FILIAL)+Len(SF2->F2_DOC)+Len(SF2->F2_SERIE))
 Local aTitulo    := {"Filial","No. Nota Fiscal","Serie","Contador"}
 Local aColsSize  := {20,45,20,30} //Tamanho das colunas
 Local nLinha:=012
@@ -45,22 +45,22 @@ Local nLinTl:=510
 Local nColTl:=460
 Local lGrava:=.F.
 
-PRIVATE _cFil := SUBSTR(_cCodBarra,01,2)
-PRIVATE _cNF  := SUBSTR(_cCodBarra,03,9)
-PRIVATE _cSer := SUBSTR(_cCodBarra,12,3)
-PRIVATE aLista:= {{"","","",0}}
+Private _cFil := SubStr(_cCodBarra,01,2)
+Private _cNF  := SubStr(_cCodBarra,03,9)
+Private _cSer := SubStr(_cCodBarra,12,3)
+Private aLista:= {{"","","",0}}
 
-DO WHILE .T.
+While .T.
 
-   nLinha:=012 //Reinicia por causa do LOOP
-   IF lGrava//Testa pora causa do LOOP da pergunta, não pode zerar
-      aLista:={{"","","",0}}//Reinicia por causa do LOOP
-   ENDIF
-   lGrava:=.F.//Reinicia por causa do LOOP
+   nLinha:=012 //Reinicia por causa do Loop
+   If lGrava//Testa pora causa do Loop da pergunta, não pode zerar
+      aLista:={{"","","",0}}//Reinicia por causa do Loop
+   EndIf
+   lGrava:=.F.//Reinicia por causa do Loop
 
    DEFINE MSDIALOG oDlg TITLE "REGISTRO DO CANHOTO" FROM 000, 000  TO nLinTl,nColTl PIXEL
 
-	@ nLinha, nCol1 SAY "Insira o Codigo de Barras"  SIZE 090, 007 PIXEL OF oDlg
+	@ nLinha, nCol1 Say "Insira o Codigo de Barras"  SIZE 090, 007 PIXEL OF oDlg
 
 	nLinha+=10
 	@ nLinha, nCol1 MSGET _cCodBarra                 SIZE 075, 010 PIXEL OF oDlg VALID MOMS035Val(@_cCodBarra)
@@ -77,16 +77,16 @@ DO WHILE .T.
 
    ACTIVATE MSDIALOG oDlg 
 
-   IF lGrava
-      FWMSGRUN( ,{|P| MOMS035Grava(P) },"Aguarde!","Gravando Canhotos..."  )
-      LOOP
-   ELSEIF !EMPTY(aLista[1,1]) .AND. !U_ITMSG("Confirma Sair",'Atenção!',,3,2,2)
-      LOOP
-   ENDIF
+   If lGrava
+      FWMsgRun( ,{|P| MOMS035Grava(P) },"Aguarde!","Gravando Canhotos..."  )
+      Loop
+   ElseIf !Empty(aLista[1,1]) .And. !U_ITMsg("Confirma Sair",'Atenção!',,3,2,2)
+      Loop
+   EndIf
 
-   EXIT
+   Exit
 
-ENDDO
+EndDo
 
 Return
 
@@ -103,40 +103,40 @@ Parametros--------: _cCodBarra,aLista
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC Function MOMS035Val(_cCodBarra)
-_cFil:=SUBSTR(_cCodBarra,01,2)
-_cNF :=SUBSTR(_cCodBarra,03,9)
-_cSer:=SUBSTR(_cCodBarra,12,3)
+Static Function MOMS035Val(_cCodBarra)
+_cFil:=SubStr(_cCodBarra,01,2)
+_cNF :=SubStr(_cCodBarra,03,9)
+_cSer:=SubStr(_cCodBarra,12,3)
 
-IF EMPTY(_cCodBarra)
-   RETURN .T.
-ENDIF
+If Empty(_cCodBarra)
+   Return .T.
+EndIf
 
-SF2->(Dbsetorder(1))
-If !SF2->(Dbseek(_cFil+_cNF+_cSer))
-   U_ITMSG("Nota não existe: Filial: "+_cFil+", Nota: "+_cNF+", Serie: "+_cSer,"Alteração","Verifique o numero inserido",3)
-   RETURN .F.
-ENDIF
+SF2->(DBSetOrder(1))
+If !SF2->(DBSeek(_cFil+_cNF+_cSer))
+   U_ITMsg("Nota não existe: Filial: "+_cFil+", Nota: "+_cNF+", Serie: "+_cSer,"Alteração","Verifique o numero inserido",3)
+   Return .F.
+EndIf
 
-ZGJ->(Dbsetorder(1))
-If ZGJ->(Dbseek(_cFil+_cNF+_cSer))
-   U_ITMSG("Canhoto já recepicionado: Filial: "+_cFil+", Nota: "+_cNF+", Serie: "+_cSer,"Alteração","Verifique o numero inserido",3)
-   RETURN .F.
-ENDIF
+ZGJ->(DBSetOrder(1))
+If ZGJ->(DBSeek(_cFil+_cNF+_cSer))
+   U_ITMsg("Canhoto já recepicionado: Filial: "+_cFil+", Nota: "+_cNF+", Serie: "+_cSer,"Alteração","Verifique o numero inserido",3)
+   Return .F.
+EndIf
 
-IF EMPTY(aLista[1,1])
+If Empty(aLista[1,1])
    aLista [1,1]:=_cFil
    aLista [1,2]:=_cNF
    aLista [1,3]:=_cSer
    aLista [1,4]:=1
-ELSEIF ASCAN(aLista, {|L| L[1]+L[2]+L[3] == _cFil+_cNF+_cSer } ) = 0
-   AADD(aLista,{_cFil,_cNF,_cSer, LEN(aLista)+1 })
-ENDIF
+ElseIf aScan(aLista, {|L| L[1]+L[2]+L[3] == _cFil+_cNF+_cSer } ) = 0
+   aAdd(aLista,{_cFil,_cNF,_cSer, Len(aLista)+1 })
+EndIf
 oList:Refresh()
 
-_cCodBarra := SPACE(LEN(SF2->F2_FILIAL)+LEN(SF2->F2_DOC)+LEN(SF2->F2_SERIE))
+_cCodBarra := Space(Len(SF2->F2_FILIAL)+Len(SF2->F2_DOC)+Len(SF2->F2_SERIE))
 
-RETURN .F.
+Return .F.
 
 /*
 ===============================================================================================================================
@@ -151,27 +151,27 @@ Parametros--------: aLista
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC Function MOMS035Grava(oProc)
-LOCAL L
+Static Function MOMS035Grava(oProc)
+Local L
 
-FOR L := 1 TO LEN(aLista)
+For L := 1 TO Len(aLista)
 	
 	oProc:cCaption := ("Gravando NF: "+aLista[L,2])
 	ProcessMessages()
-	If !ZGJ->(Dbseek(aLista[L,1]+aLista[L,2]+aLista[L,3]))  
-		ZGJ->(Reclock("ZGJ",.T.))
+	If !ZGJ->(DBSeek(aLista[L,1]+aLista[L,2]+aLista[L,3]))  
+		ZGJ->(RecLock("ZGJ",.T.))
 		ZGJ->ZGJ_FILIAL:= aLista[L,1]
 		ZGJ->ZGJ_NOTA  := aLista[L,2]
 		ZGJ->ZGJ_SERIE := aLista[L,3]
-		ZGJ->ZGJ_DATAI := DATE()
-		ZGJ->ZGJ_HORAI := TIME()
+		ZGJ->ZGJ_DATAI := Date()
+		ZGJ->ZGJ_HORAI := Time()
 		ZGJ->ZGJ_STATUS:= "Recepcionado"
-        IF ZGJ->(FIELDPOS("ZGJ_USERI")) # 0
-		   ZGJ->ZGJ_USERI := ALLTRIM(UsrFullName(__cUserId))
-		ENDIF
-		ZGJ->(Msunlock())  
-	ENDIF
+        If ZGJ->(FIELDPOS("ZGJ_USERI")) # 0
+		   ZGJ->ZGJ_USERI := AllTrim(UsrFullName(__cUserId))
+		EndIf
+		ZGJ->(MSUnLock())  
+	EndIf
 	
-NEXT
+Next
 
 Return .T.

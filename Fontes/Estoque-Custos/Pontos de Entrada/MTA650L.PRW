@@ -1,56 +1,53 @@
 /*
 ===============================================================================================================================
-                                            ATUALIZACOES SOFRIDAS DESDE A CONSTRUÇAO INICIAL
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-Autor         |    Data    |                              Motivo                       
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- 
 ===============================================================================================================================
 */
 
-#DEFINE CRLF CHR(13)+CHR(10)
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MTA650L 
 Autor-------------: Alex Wallauer
 Data da Criacao---: 18/01/2023
-===============================================================================================================================
 Descrição---------: P.E. Troca de linha e OK final NA TELA DE AJUSTE DE EMPEMHOS
 ------------------  Chamado 42590: Novo validacao para não deixar os aramzens sem preencher
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T. = Permite confirmar 
 ------------------: .F. = Nao Permite confirmar 
-===============================================================================================================================*/
+===============================================================================================================================
+*/
 User Function MTA650L()
-LOCAL nI, bBloco
-LOCAL _cItens:=""
-LOCAL _cSpcC :=13
-LOCAL _cSpcT :=15
+Local nI, bBloco
+Local _cItens:=""
+Local _cSpcC :=13
+Local _cSpcT :=15
 
-IF IsInCallStack("A650AETdOk")
+If IsInCallStack("A650AETdOk")
     
     _cItens:=""
 	_cSpcC:=13
 	_cSpcT:=15
 	For nI := 1 To Len(aCols)
-    	If !aCols[nI,Len(aCols[nI])]  .AND. EMPTY(aCols[nI,nPosLocal])
-   		   _cItens += ALLTRIM(aCols[nI,nPosCod])+SPACE(_cSpcT)+aCols[nI,nPosLocal]+CRLF
+    	If !aCols[nI,Len(aCols[nI])]  .And. Empty(aCols[nI,nPosLocal])
+   		   _cItens += AllTrim(aCols[nI,nPosCod])+Space(_cSpcT)+aCols[nI,nPosLocal]+CRLF
     	EndIf
     Next 
 
-    IF !EMPTY(_cItens)
-       bBloco:={|| AVISO("ATENCAO","  PRODUTO"+SPACE(_cSpcC)+"ARMAZEM"+CRLF+_cItens,{"Fechar"},3) }
-       U_ITMSG("Existem Produtos com o armazem não preenchido","ATENCAO","Clique em mais detalhes para ver os produtos",1,,,,,,bBloco)
-	   RETURN .F.
-	ENDIF
-ELSE
-  	If !aCols[N,Len(aCols[N])]  .AND. EMPTY(aCols[N,nPosLocal])
-       U_ITMSG("Produto "+aCols[N,nPosCod]+" com o armazem não preenchido","ATENCAO","Preencha o armazem",1)
-	   RETURN .F.
-    ENDIF
-ENDIF
+    If !Empty(_cItens)
+       bBloco:={|| AVISO("ATENCAO","  PRODUTO"+Space(_cSpcC)+"ARMAZEM"+CRLF+_cItens,{"Fechar"},3) }
+       U_ITMsg("Existem Produtos com o armazem não preenchido","ATENCAO","Clique em mais detalhes para ver os produtos",1,,,,,,bBloco)
+	   Return .F.
+	EndIf
+Else
+  	If !aCols[N,Len(aCols[N])]  .And. Empty(aCols[N,nPosLocal])
+       U_ITMsg("Produto "+aCols[N,nPosCod]+" com o armazem não preenchido","ATENCAO","Preencha o armazem",1)
+	   Return .F.
+    EndIf
+EndIf
 
-RETURN .T.
+Return .T.

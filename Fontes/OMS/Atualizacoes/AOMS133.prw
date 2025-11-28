@@ -6,7 +6,7 @@
                   |            | 
 =============================================================================================================================== 
 */
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 /*
 ===============================================================================================================================
 Programa----------: AOMS133
@@ -27,7 +27,7 @@ Begin Sequence
    AxCadastro("ZBL",_cTitulo)
 End Sequence
 
-Return Nil       
+Return       
 
 /*
 ===============================================================================================================================
@@ -54,7 +54,7 @@ Begin Sequence
 /*     
       _aFilial := FwLoadSM0() 
 
-      _nI := Ascan(_aFilial,{|x| x[5] = M->ZBL_CODFIL})   
+      _nI := aScan(_aFilial,{|x| x[5] = M->ZBL_CODFIL})   
       
       If _nI == 0
          MsgInfo("O código de filial informado não existe.","Atenção")

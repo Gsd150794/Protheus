@@ -2,18 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 01/03/2019 | Chamado 26404. Migração para tReport e incluída seleção de vários setores
-Lucas Borges  | 29/07/2019 | Chamado 28346. Corrigida a barra de progresso
-Lucas Borges  | 11/02/2025 | Chamado 49877. Removido tratamento sobre a versão do Mix
+Lucas Borges  |01/03/2019| Chamado 26404. Migração para tReport e incluída seleção de vários setores
+Lucas Borges  |29/07/2019| Chamado 28346. Corrigida a barra de progresso
+Lucas Borges  |11/02/2025| Chamado 49877. Removido tratamento sobre a versão do Mix
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -115,10 +112,10 @@ Local _nCountRec	:= 0
 If MV_PAR06 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLF")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -193,13 +190,13 @@ oReport:SetMeter(0)
 
 BeginSql alias _cAlias
 SELECT ZLF_FILIAL, CC2_EST, CC2_CODMUN, CC2_MUN, A2_COD, A2_LOJA,A2_NOME, ZL2_COD, ZL2_DESCRI, ZL3_COD, ZL3_DESCRI,
-       SUBSTR(ZLF_F1SEEK, 3, 9) DOCUMENTO, SUBSTR(ZLF_F1SEEK, 12, 3) SERIE,
+       SubStr(ZLF_F1SEEK, 3, 9) DOCUMENTO, SubStr(ZLF_F1SEEK, 12, 3) SERIE,
        ZL8_COD, ZL8_DESCRI,
-       SUM(CASE WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL ELSE 0 END) CREDITO,
-       SUM(CASE WHEN ZLF_DEBCRE = 'D' THEN ZLF_TOTAL ELSE 0 END) DEBITO,
-       SUM(CASE WHEN ZLF_DEBCRE = 'D' THEN ZLF_TOTAL * -1 ELSE ZLF_TOTAL END) LIQUIDO,
-       SUM(CASE WHEN ZL8_COD = '000001' THEN ZLF_QTDBOM ELSE 0 END) VOLUME
-  FROM %table:ZLF% ZLF, %table:SA2% A2, %table:ZL8% ZL8, %table:CC2% CC2, %table:ZL2% ZL2, %table:ZL3% ZL3
+       SUM(Case WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL Else 0 END) CREDITO,
+       SUM(Case WHEN ZLF_DEBCRE = 'D' THEN ZLF_TOTAL Else 0 END) DEBITO,
+       SUM(Case WHEN ZLF_DEBCRE = 'D' THEN ZLF_TOTAL * -1 Else ZLF_TOTAL END) LIQUIDO,
+       SUM(Case WHEN ZL8_COD = '000001' THEN ZLF_QTDBOM Else 0 END) VOLUME
+  FROM %Table:ZLF% ZLF, %Table:SA2% A2, %Table:ZL8% ZL8, %Table:CC2% CC2, %Table:ZL2% ZL2, %Table:ZL3% ZL3
  WHERE ZLF.D_E_L_E_T_ = ' '
    AND A2.D_E_L_E_T_ = ' '
    AND ZL8.D_E_L_E_T_ = ' '
@@ -222,7 +219,7 @@ SELECT ZLF_FILIAL, CC2_EST, CC2_CODMUN, CC2_MUN, A2_COD, A2_LOJA,A2_NOME, ZL2_CO
    AND ZLF.ZLF_F1SEEK != ' '
  GROUP BY ZLF_FILIAL, CC2_EST, CC2_CODMUN, CC2_MUN, A2_COD, A2_LOJA, A2_NOME, ZL2_COD, ZL2_DESCRI, ZL3_COD, ZL3_DESCRI, 
  			ZLF_F1SEEK, ZL8_COD, ZL8_DESCRI, ZLF_DTINI, ZLF_DTFIM
- ORDER BY ZLF_FILIAL, SUBSTR(ZLF_F1SEEK, 3, 9), A2_COD, A2_LOJA, ZL8_COD
+ ORDER BY ZLF_FILIAL, SubStr(ZLF_F1SEEK, 3, 9), A2_COD, A2_LOJA, ZL8_COD
 EndSql
 //==========================================================================
 // Metodo EndQuery ( Classe TRSection )                                     
@@ -239,18 +236,18 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	_cFilial := (_cAlias)->ZLF_FILIAL
 	_cDoc	:= (_cAlias)->DOCUMENTO + ' Série: ' + (_cAlias)->SERIE
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

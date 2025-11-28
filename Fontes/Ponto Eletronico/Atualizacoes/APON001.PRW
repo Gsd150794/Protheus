@@ -10,9 +10,9 @@ Lucas Borges  |26/06/2025| Chamado 50617. Revisões diversas visando padronizar o
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "PONCALEN.CH"
+#Include "TOTVS.ch"
+#Include "FWMVCDEF.CH"
+#Include "PONCALEN.CH"
 
 /*
 ===============================================================================================================================
@@ -220,14 +220,14 @@ Local _cTipo		:= ' ' As Character//notificacao
 Local _dDataIni     := _dDataFim - _nPeriodo As Date
 
 //procura total de notificações no periodo
-BeginSQL alias _cAlias
+BeginSql alias _cAlias
 	SELECT COUNT(1) TOT
 	FROM %Table:Z10%
 	WHERE D_E_L_E_T_ = ' '
 	AND Z10_FILIAL = %Table:Z10%
 	AND Z10_DATA BETWEEN %exp:_dDataIni% AND %exp:_dDataFim%
 	AND Z10_MATRIC = %exp:cMatric%
-EndSQL
+EndSql
 
 Do Case 
 	Case (_cAlias)->TOT < _nOcorr
@@ -240,7 +240,7 @@ Do Case
 		_cTipo := 'S'  //Suspensão
 EndCase
 
-(_cAlias)->(DbCloseArea())
+(_cAlias)->(DBCloseArea())
 FWRestArea(_aArea)
 
 Return _cTipo
@@ -258,9 +258,9 @@ Retorno-----------: Logico
 User Function APON001B(_dData As Date)
 
 Local _lRet		:= .T. As Logical
-Local _cData1	:= AllTrim(SubsTr(SuperGetMV("MV_PONMES",.T.,DToS(dDataBase)),1,8)) As Character
+Local _cData1	:= AllTrim(SubStr(SuperGetMV("MV_PONMES",.T.,DToS(dDataBase)),1,8)) As Character
 
-If Z10->(DbSeek(XFilial("Z10")+DToS(_dData)))
+If Z10->(DBSeek(xFilial("Z10")+DToS(_dData)))
 	_lRet := .F.
     Help(Nil,Nil,"APON00101",,"Data já existe na base de dados.",1,0, NIL, NIL, NIL, NIL, NIL, {"Utilize a opção de alterar ou informe outra data."})
 EndIf
@@ -290,10 +290,10 @@ Local _lRet	:= .T. As Logical
 Local _cData:= DToS(_dData) As Character
 Local _aArea:= FWGetArea()
 
-SP8->(DbSetOrder(3)) // P8_FILIAL+P8_MAT+DTOS(P8_DATAAPO)+DTOS(P8_DATA)+STR(P8_HORA,5,2) // MAT+DATAAPO+DATA+P8_HORA
-SPG->(DbSetOrder(3)) // PG_FILIAL+PG_MAT+DTOS(PG_DATAAPO)+DTOS(PG_DATA)+STR(PG_HORA,5,2)
+SP8->(DBSetOrder(3)) // P8_FILIAL+P8_MAT+DToS(P8_DATAAPO)+DToS(P8_DATA)+Str(P8_HORA,5,2) // MAT+DATAAPO+DATA+P8_HORA
+SPG->(DBSetOrder(3)) // PG_FILIAL+PG_MAT+DToS(PG_DATAAPO)+DToS(PG_DATA)+Str(PG_HORA,5,2)
 
-If ! SP8->(DbSeek(XFilial("SP8")+_cMatric+_cData)) .And. ! SPG->(DbSeek(XFilial("SPG")+_cMatric+_cData))
+If ! SP8->(DBSeek(xFilial("SP8")+_cMatric+_cData)) .And. ! SPG->(DBSeek(xFilial("SPG")+_cMatric+_cData))
 	_lRet := .F.
 	Help(Nil,Nil,"APON00103",Nil,"Funcionario "+_cMatric+" não realizou apontamento nesse dia "+DToC(_dData),1,0, NIL, NIL, NIL, NIL, NIL, {"Analise o apontamento desse funcionário."})
 EndIf
@@ -316,7 +316,7 @@ User Function APON001D
 
 Local _aArea	:= FWGetArea()
 Local _aAreaZ10	:= Z10->(GetArea())
-Local _cData1 	:= AllTrim(SubsTr(SuperGetMV("MV_PONMES",.T.,DToS(dDataBase)),1,8))
+Local _cData1 	:= AllTrim(SubStr(SuperGetMV("MV_PONMES",.T.,DToS(dDataBase)),1,8))
 
 If ( DToS(Z10->Z10_DATA) < _cData1  )
 	Help(NIL, NIL, "APON00104", NIL, "Data da ocorrência anterior ao período  de vigência do ponto eletrônico.", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Data da ocorrência anterior ao período  de vigência do ponto eletrônico."})
@@ -329,22 +329,22 @@ If Z10->Z10_TIPO == 'A'
 	DBSelectArea("ZZL")
 	ZZL->(DBSetOrder(3)) //ZZL_FILIAL + ZZL_CODUSU
 
-	If ZZL->(dbSeek(xFilial("ZZL") + __cUserId))
+	If ZZL->(DBSeek(xFilial("ZZL") + __cUserId))
 		If ZZL->ZZL_EXCADV == "S"
 			If FWAlertYesNo("Deseja realmente excluir o registro posicionado?","APON00105")
 				//exclui fato relevante
 				DBSelectArea("RAE")
-				DBSetOrder(1) //RAE_FILIAL + RAE_MAT + DTOS(RAE_DATA) + RAE_COD
+				DBSetOrder(1) //RAE_FILIAL + RAE_MAT + DToS(RAE_DATA) + RAE_COD
 				If DBSeek(Z10->Z10_FILIAL + Z10->Z10_MATRIC + DToS(Z10->Z10_DATA) + IIf(Z10->Z10_TIPO=='A','99','98'))   
 					RAE->(RecLock("RAE", .F.))
 					RAE->(DBDelete())
-					RAE->(MsUnLock())
+					RAE->(MSUnLock())
 				EndIf
 		
 				//exclui ocorrência		
 				Z10->(RecLock("Z10",.F.))
 				Z10->(DBDelete())
-				Z10->(MsUnLock())
+				Z10->(MSUnLock())
 			EndIf
 		Else
 	        Help(NIL, NIL, "APON00106", NIL, "Regra de processo da ITALAC. Não permite operação de exclusão de advertência.", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Informe ao gerente do Depto. de RH."})
@@ -356,18 +356,18 @@ Else
 	If FWAlertYesNo("Deseja realmente excluir o registro posicionado?","APON00108")
 		//exclui fato relevante
 		DBSelectArea("RAE")
-		RAE->(DBSetOrder(1)) //RAE_FILIAL + RAE_MAT + DTOS(RAE_DATA) + RAE_COD
+		RAE->(DBSetOrder(1)) //RAE_FILIAL + RAE_MAT + DToS(RAE_DATA) + RAE_COD
 
-		If RAE->(DBSeek(Z10->Z10_FILIAL + Z10->Z10_MATRIC + DTOS(Z10->Z10_DATA) + IIF(Z10->Z10_TIPO=='A','99','98')))
+		If RAE->(DBSeek(Z10->Z10_FILIAL + Z10->Z10_MATRIC + DToS(Z10->Z10_DATA) + IIf(Z10->Z10_TIPO=='A','99','98')))
 			RAE->(RecLock("RAE", .F.))
 			RAE->(DBDelete())
-			RAE->(MsUnLock())
+			RAE->(MSUnLock())
 		EndIf
 		
 		//exclui ocorrência
 		Z10->(RecLock("Z10", .F.))
 		Z10->(DBDelete())
-		Z10->(MsUnLock())
+		Z10->(MSUnLock())
 	EndIf
 EndIf
 
@@ -390,32 +390,32 @@ User Function APON001Z(_oModel As Object,_ddata As Date)
 
 Local _aArea	:= FWGetArea() As Array
 Local _aAreaZ10	:= Z10->(GetArea()) As Array
-Local _lret 	:= .T. As Logical
+Local _lRet 	:= .T. As Logical
 Local _nOper 	:= _oModel:GetOperation() As Numeric
 Local _cAlias	:= GetNextAlias() As Character
-Local _ni 		:= 1 As Numeric
+Local _nI 		:= 1 As Numeric
 Local _ncont    := 1 As Numeric
 Local _cdesc   	:= "" As Character
 Local _cMat		:= '' As Character
 //faz atualizações na tabela de fatos relevantes
 //inclusão e alteração
 
-If _lret .And. (_noper == 3 .or. _noper == 4)
-	For _ni := 1 To Len(_oModel:aModelStruct[1][4][1][3]:aCols)
-		_ctipo := U_APON001Y(_oModel:aModelStruct[1][4][1][3]:aCols[_ni][4])
+If _lRet .And. (_noper == 3 .Or. _noper == 4)
+	For _nI := 1 To Len(_oModel:aModelStruct[1][4][1][3]:aCols)
+		_ctipo := U_APON001Y(_oModel:aModelStruct[1][4][1][3]:aCols[_nI][4])
 	
 		//verifica se já tem o registro para incluir ou alterar
 		DBSelectArea("RAE")
-		RAE->(DBSetOrder(1)) //RAE_FILIAL + RAE_MAT + DTOS(RAE_DATA) + RAE_COD
+		RAE->(DBSetOrder(1)) //RAE_FILIAL + RAE_MAT + DToS(RAE_DATA) + RAE_COD
 		
-		If DBSeek(xFilial("RAE") + AllTrim(_oModel:aModelStruct[1][4][1][3]:aCols[_ni][2]) + DToS(_ddata);
-										 + IIf(_oModel:aModelStruct[1][4][1][3]:aCols[_ni][5]=='A','99','98'))   
+		If DBSeek(xFilial("RAE") + AllTrim(_oModel:aModelStruct[1][4][1][3]:aCols[_nI][2]) + DToS(_ddata);
+										 + IIf(_oModel:aModelStruct[1][4][1][3]:aCols[_nI][5]=='A','99','98'))   
 			_cdesc := ""
 			
 			//monta descrição de todas as ocorrências do registro
 			For _ncont := 1 To Len(_oModel:aModelStruct[1][4][1][3]:aCols)
-				If _oModel:aModelStruct[1][4][1][3]:aCols[_ni][2] == _oModel:aModelStruct[1][4][1][3]:aCols[_ncont][2];
-					.And. _oModel:aModelStruct[1][4][1][3]:aCols[_ni][5] == _oModel:aModelStruct[1][4][1][3]:aCols[_ncont][5]
+				If _oModel:aModelStruct[1][4][1][3]:aCols[_nI][2] == _oModel:aModelStruct[1][4][1][3]:aCols[_ncont][2];
+					.And. _oModel:aModelStruct[1][4][1][3]:aCols[_nI][5] == _oModel:aModelStruct[1][4][1][3]:aCols[_ncont][5]
 					_ctipo := U_APON001Y(_oModel:aModelStruct[1][4][1][3]:aCols[_ncont][4])
 					_cdesc += 	"Ocorrência de ponto - " + _ctipo + CHR(10) + CHR(13)
 				EndIf
@@ -423,42 +423,42 @@ If _lret .And. (_noper == 3 .or. _noper == 4)
 			
 			//já existe, então só altera
 			RAE->(RecLock("RAE", .F.))
-			RAE->RAE_FILIAL	:= xfilial("RAE")
-			RAE->RAE_MAT		:= _oModel:aModelStruct[1][4][1][3]:aCols[_ni][2]
+			RAE->RAE_FILIAL	:= xFilial("RAE")
+			RAE->RAE_MAT		:= _oModel:aModelStruct[1][4][1][3]:aCols[_nI][2]
 			RAE->RAE_DATA		:= _ddata
-			RAE->RAE_COD		:= IIf(_oModel:aModelStruct[1][4][1][3]:aCols[_ni][5]=='A','99','98')
+			RAE->RAE_COD		:= IIf(_oModel:aModelStruct[1][4][1][3]:aCols[_nI][5]=='A','99','98')
 			RAE->RAE_DESC		:=	_cdesc
-			RAE->(MsUnLock())
+			RAE->(MSUnLock())
 		Else
-			_cMat := AllTrim(_oModel:aModelStruct[1][4][1][3]:aCols[_ni][2])
+			_cMat := AllTrim(_oModel:aModelStruct[1][4][1][3]:aCols[_nI][2])
 			//novo registro
 			//identifica próxima sequência do RAE
-			BeginSQL alias _cAlias
+			BeginSql alias _cAlias
 				SELECT MAX(RAE_SEQ) MAXIMO
 				FROM %Table:RAE%
 				WHERE D_E_L_E_T_ = ' '
 				AND RAE_FILIAL = %xFilial:RAE%
 				AND RAE_MAT = %exp:_cMat%
-			EndSQL
+			EndSql
 	
 			RAE->(RecLock("RAE", .T.))
 			RAE->RAE_FILIAL	:= xFilial("RAE")
-			RAE->RAE_MAT	:= _oModel:aModelStruct[1][4][1][3]:aCols[_ni][2]
+			RAE->RAE_MAT	:= _oModel:aModelStruct[1][4][1][3]:aCols[_nI][2]
 			RAE->RAE_SEQ	:= StrZero(Val((_cAlias)->MAXIMO)+1,2)
 			RAE->RAE_DATA	:= _ddata
-			RAE->RAE_COD	:= IIf(_oModel:aModelStruct[1][4][1][3]:aCols[_ni][5]=='A','99','98')
+			RAE->RAE_COD	:= IIf(_oModel:aModelStruct[1][4][1][3]:aCols[_nI][5]=='A','99','98')
 			RAE->RAE_DESC	:=	"Ocorrência de ponto - " + _ctipo
-			RAE->(MsUnLock())
+			RAE->(MSUnLock())
 
 			(_cAlias)->(DBCloseArea())
 		EndIf	
-	Next _ni
+	Next _nI
 EndIf
 
 FWRestArea(_aAreaZ10)
 FWRestArea(_aArea)
 
-Return _lret
+Return _lRet
 
 /*
 ===============================================================================================================================
@@ -474,36 +474,36 @@ User Function APON001R(_oModel As Object)
 
 Local _aArea	:= FWGetArea() As Array
 Local _aAreaZ10	:= Z10->(GetArea()) As Array
-Local _cData1 	:= AllTrim(SubsTr(SuperGetMV("MV_PONMES",.T.,DToS(dDataBase)),1,8)) As Character
-Local _lret 	:= .T. As Logical
+Local _cData1 	:= AllTrim(SubStr(SuperGetMV("MV_PONMES",.T.,DToS(dDataBase)),1,8)) As Character
+Local _lRet 	:= .T. As Logical
 Local _nOper 	:= _oModel:GetOperation() As Numeric
 
 //verifica se a ocorrência está em período do ponto já fechado
 If (DToS(Z10->Z10_DATA) < _cData1 ) .And. _noper == 4
-	_lret := .F.
+	_lRet := .F.
 	Help(NIL, NIL, "APON00109", NIL, "Data da ocorrência anterior ao período de vigência do ponto eletrônico.", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Informe uma data correta após o ínicio do período válido."})
 EndIf
 
 //verifica se usuário tem permissão
-If Z10->Z10_TIPO == 'A' .and. _lret .and. _noper == 4
+If Z10->Z10_TIPO == 'A' .And. _lRet .And. _noper == 4
 	DBSelectArea("ZZL")
 	ZZL->(DBSetOrder(3)) //ZZL_FILIAL + ZZL_CODUSU
 	
 	If ZZL->(DBSeek(xFilial("ZZL") + __cUserId))
 		If !(ZZL->ZZL_EXCADV == "S")
 			Help(NIL, NIL, "APON00110", NIL, "Regra de processo da ITALAC. Não permite operação de alteração de advertência.", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Informe ao gerente do Depto. de RH."})
-			_lret := .F.
+			_lRet := .F.
 		EndIf
 	Else
 		Help(NIL, NIL, "APON00111", NIL, "Regra de processo da ITALAC. Usuário não possui regra configurada.", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Informe ao gerente do Depto. de RH."})
-		_lret := .F.
+		_lRet := .F.
 	EndIf
 EndIf
 
 FWRestArea(_aAreaZ10)
 FWRestArea(_aArea)
 
-Return _lret
+Return _lRet
 
 /*
 ===============================================================================================================================
@@ -520,46 +520,46 @@ User Function APON001W
 Local _cAlias	:= GetNextAlias() As Character
 Local _cAlias2	:= GetNextAlias() As Character
 
-BeginSQL alias _cAlias2
+BeginSql alias _cAlias2
 	SELECT Z10_FILIAL, Z10_DATA, Z10_MATRIC, Z10_TIPO, Z10_MOTIVO, Z10_IMPRES, Z10_ORIGEM
 	FROM %Table:Z10%
 	WHERE D_E_L_E_T_ = ' '
-EndSQL
+EndSql
 
 DBSelectArea("RAE")
-RAE->(DBSetOrder(1)) //RAE_FILIAL + RAE_MAT + DTOS(RAE_DATA) + RAE_COD
+RAE->(DBSetOrder(1)) //RAE_FILIAL + RAE_MAT + DToS(RAE_DATA) + RAE_COD
 
-Do While !(_cAlias2)->(Eof())
+While !(_cAlias2)->(Eof())
 	//faz atualizações na tabela de fatos relevantes
 	//identificação do tipo de ocorrência
 	_cTipo := APON001Y((_cAlias2)->Z10_ORIGEM)
 	//identifica próxima sequência do RAE
-	BeginSQL alias _cAlias		
+	BeginSql alias _cAlias		
 		SELECT MAX(RAE_SEQ) MAXIMO
 		FROM %Table:RAE%
 		WHERE D_E_L_E_T_ = ' '
 		AND RAE_FILIAL = %exp:AllTrim((_cAlias2)->Z10_FILIAL)%
 		AND RAE_MAT = %exp:AllTrim((_cAlias2)->Z10_MATRIC)%
-	EndSQL
+	EndSql
 
 	//só inclui se não tiver registro ainda
-	If !RAE->(DBSeek((_cAlias2)->Z10_FILIAL + AllTrim((_cAlias2)->Z10_MATRIC) + (_cAlias2)->Z10_DATA + IIF((_cAlias2)->Z10_TIPO=='A','99','98')))
+	If !RAE->(DBSeek((_cAlias2)->Z10_FILIAL + AllTrim((_cAlias2)->Z10_MATRIC) + (_cAlias2)->Z10_DATA + IIf((_cAlias2)->Z10_TIPO=='A','99','98')))
 		RAE->(RecLock("RAE", .T.))
 		RAE->RAE_FILIAL	:= (_cAlias2)->Z10_FILIAL
 		RAE->RAE_MAT		:= (_cAlias2)->Z10_MATRIC
-		RAE->RAE_SEQ		:= strzero(val((_cAlias)->MAXIMO)+1,2)
-		RAE->RAE_DATA		:= STOD((_cAlias2)->Z10_DATA)
-		RAE->RAE_COD		:= IIF((_cAlias2)->Z10_TIPO=='A','99','98')
+		RAE->RAE_SEQ		:= StrZero(Val((_cAlias)->MAXIMO)+1,2)
+		RAE->RAE_DATA		:= SToD((_cAlias2)->Z10_DATA)
+		RAE->RAE_COD		:= IIf((_cAlias2)->Z10_TIPO=='A','99','98')
 		RAE->RAE_DESC		:=	"Ocorrência de ponto - " + _ctipo
-		RAE->(MsUnLock())
+		RAE->(MSUnLock())
 	EndIf
 	
 	(_cAlias)->(DBCloseArea())
-	(_cAlias2)->(DBskip())
+	(_cAlias2)->(DBSkip())
 EndDo
 (_cAlias2)->(DBCloseArea())
 
-Return _lret
+Return _lRet
 
 /*
 ===============================================================================================================================
@@ -622,7 +622,7 @@ Local _aArea:= FWGetArea() As Array
 Local _cMat	:= aCols[n][aScan(aHeader,{|x|AllTrim(x[2])=="Z10_MATRIC"})] As Character
 Local _ctipo:= U_APON001A( _cMat, _dData ) As Character
 
-If _ctipo == "A" .and. M->Z10_TIPO != 'A'
+If _ctipo == "A" .And. M->Z10_TIPO != 'A'
 	Help(NIL, NIL, "APON00112", NIL, "Advertência obrigatória!", 1, 0, NIL, NIL, NIL, NIL, NIL, {""})
 	_lRet := .F. 
 EndIf
@@ -683,7 +683,7 @@ Begin Sequence                    //12345678
 		_cRetorno   := "A" 
 
 		_aHorarios  := {}
-		MsgRun("Lendo apontamentos da data "+DTOC(_dDataOcorr)+" da Matricula: "+_cMatricula, "Aguarde...",;
+		MsgRun("Lendo apontamentos da data "+DToC(_dDataOcorr)+" da Matricula: "+_cMatricula, "Aguarde...",;
 				{|| _aHorarios := U_APON001J(_dDataOcorr,_cMatricula,_cRetorno,_cOrigem)  } )
 		
 		_lRet := .F.
@@ -702,7 +702,7 @@ Begin Sequence                    //12345678
 		If _nNrMsg == 1 // Primeiro tipo de mensagem de validação.
 			Help(NIL, NIL, "APON00113", NIL, "A hora informada está inválida: (" + _cHora + ").", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Deve-se informar os valores de 0 a 23 para a hora, de 0 a 59 para os minutos."})
 		Else // Segundo tipo de mensagem de validação.
-			Help(NIL, NIL, "APON00114", NIL, "A hora informada está inválida: (" + _cHora + "). ", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Não existe a hora informada nos apontamentos realizados no dia: " + Dtoc(_dDataOcorr) + "."})
+			Help(NIL, NIL, "APON00114", NIL, "A hora informada está inválida: (" + _cHora + "). ", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Não existe a hora informada nos apontamentos realizados no dia: " + DToC(_dDataOcorr) + "."})
 		EndIf
 	EndIf
 
@@ -755,7 +755,7 @@ Begin Sequence
 	_cRetorno   := "A" 
 
 	_aHorarios  := {}
-	MsgRun("Lendo apontamentos da data "+DTOC(_dDataOcorr)+" da Matricula: "+_cMatricula, "Aguarde...",;
+	MsgRun("Lendo apontamentos da data "+DToC(_dDataOcorr)+" da Matricula: "+_cMatricula, "Aguarde...",;
 			{|| _aHorarios := U_APON001J(_dDataOcorr,_cMatricula,_cRetorno,_cOrigem)  } )
 
 	_cListaHoras := ""
@@ -826,13 +826,13 @@ Begin Sequence
    //===============================================================
    // Pesquisa datas na tabela SP8
    //===============================================================
-	BeginSQL alias _cAlias
+	BeginSql alias _cAlias
 		SELECT DISTINCT P8_FILIAL,P8_PAPONTA FROM %Table:SP8% SP8
 		WHERE SP8.D_E_L_E_T_ = ' '
 		AND P8_FILIAL = %exp:cFilAnt% 
 		AND P8_DATAAPO >= %exp:_dDataOcorr% 
 		AND P8_DATAAPO <= %exp:_dDataOcorr% 
-	EndSQL
+	EndSql
    
 	If !(_cAlias)->(Eof())
 		_cDtIni := SubStr((_cAlias)->P8_PAPONTA,1,8) // 2015102620151125
@@ -847,14 +847,14 @@ Begin Sequence
 	// Pesquisa datas na tabela SPG
 	//===============================================================
 	_cAlias	:= GetNextAlias()
-	BeginSQL alias _cAlias
+	BeginSql alias _cAlias
 		SELECT DISTINCT PG_FILIAL,PG_PAPONTA 
 		FROM %Table:SPG% SPG
 		WHERE SPG.D_E_L_E_T_ = ' ' 
 		AND PG_FILIAL = %exp:cFilAnt%
 		AND PG_DATAAPO >= %exp:_dDataOcorr% 
 		AND PG_DATAAPO <= %exp:_dDataOcorr%
-	EndSQL
+	EndSql
    
 	If !(_cAlias)->(Eof())
 		_cDtIni := SubStr((_cAlias)->PG_PAPONTA,1,8) // 2015102620151125
@@ -862,7 +862,7 @@ Begin Sequence
 	EndIf
    
 	(_cAlias)->(DBCloseArea())
-	_aRet := {Stod(_cDtIni), Stod(_cDtFin)}
+	_aRet := {SToD(_cDtIni), SToD(_cDtFin)}
 End Sequence
 
 Return _aRet
@@ -905,15 +905,15 @@ Private lSP9Exclu	:= .F. AS Logical
 Private aId			:= {} As array
 Private aFuncFunc  := {Space(1), Space(1), Space(1), Space(1), Space(1), Space(1)} As Array
 
-If Empty(_cMatricula) .OR. Empty(_dDataOcorr) .OR. Empty(_cOrigem)
+If Empty(_cMatricula) .Or. Empty(_dDataOcorr) .Or. Empty(_cOrigem)
 	Return {"","",""}
 EndIf
 
 Begin Sequence
-	SRA->(DbSetOrder(1) )
+	SRA->(DBSetOrder(1) )
 
 	//Posiciona no funcionário atual
-	If !SRA->(DbSeek(xFilial("SRA") + _cMatricula)) 
+	If !SRA->(DBSeek(xFilial("SRA") + _cMatricula)) 
 		Return  {"","",""}
 	EndIf
 	//====================================================================
@@ -954,7 +954,7 @@ Begin Sequence
 	//====================================================================
 	// Carrega TODOS os Eventos da Filial						  
 	//====================================================================
-	If ( Empty( aId ) .or. ( lSP9Exclu ) )
+	If ( Empty( aId ) .Or. ( lSP9Exclu ) )
 		aId := {}
 		CarId( fFilFunc("SP9") , @aId , "*" )
 	EndIf
@@ -962,8 +962,8 @@ Begin Sequence
 	//====================================================================
 	// Retorna Periodos de Apontamentos Selecionados				  
 	//====================================================================
-	dPerIni := _dDataOcorr // Stod(_dDataOcorr)
-	dPerFim := _dDataOcorr // Stod(_dDataOcorr)
+	dPerIni := _dDataOcorr // SToD(_dDataOcorr)
+	dPerFim := _dDataOcorr // SToD(_dDataOcorr)
 
 	_aDtCalend := U_APON001I(_dDataOcorr)    
 
@@ -1000,14 +1000,14 @@ Begin Sequence
 		// Retorna Turno/Sequencia das Marca‡”es Acumuladas			 
 		//====================================================================
 		If ( lImpAcum )
-			If SPF->( dbSeek( SRA->( RA_FILIAL + RA_MAT ) + Dtos( dPerIni) ) ) .and. !Empty(SPF->PF_SEQUEPA)
+			If SPF->( DBSeek( SRA->( RA_FILIAL + RA_MAT ) + DToS( dPerIni) ) ) .And. !Empty(SPF->PF_SEQUEPA)
 				cTurno	:= SPF->PF_TURNOPA
 				cSeq	:= SPF->PF_SEQUEPA
 			Else
 				//====================================================================
 				// Tenta Achar a Sequencia Inicial utilizando RetSeq()
 				//====================================================================
-				If !RetSeq(cSeq,@cTurno,dPerIni,dPerFim,dDataBase,aTabPadrao,@cSeq) .or. Empty( cSeq )
+				If !RetSeq(cSeq,@cTurno,dPerIni,dPerFim,dDataBase,aTabPadrao,@cSeq) .Or. Empty( cSeq )
 					//====================================================================
 					// Tenta Achar a Sequencia Inicial utilizando fQualSeq()		  
 					//====================================================================
@@ -1015,10 +1015,10 @@ Begin Sequence
 				EndIf
 			EndIf
 			If ( Empty(cTurno) )
-				SPF->( dbSeek( SRA->( RA_FILIAL + RA_MAT ) ) )
-				Do While SPF->(!EOF()) .AND.;
+				SPF->( DBSeek( SRA->( RA_FILIAL + RA_MAT ) ) )
+				While SPF->(!Eof()) .AND.;
 					( SRA->RA_FILIAL + SRA->RA_MAT == SPF->PF_FILIAL + SPF->PF_MAT )
-					If ( SPF->PF_DATA >= dPerIni .AND. SPF->PF_DATA <= dPerFim )						
+					If ( SPF->PF_DATA >= dPerIni .And. SPF->PF_DATA <= dPerFim )						
 						cTurno	:= SPF->PF_TURNOPA
 						cSeq	    := SPF->PF_SEQUEPA
 						Exit
@@ -1039,7 +1039,7 @@ Begin Sequence
 		// Obtem Codigo e Descricao da Funcao do Trabalhador na Epoca   
 		//====================================================================
 		fBuscaCC(dMarcFim, @aFuncFunc[1], @aFuncFunc[2], Nil, .F. , .T.  ) 
-		aFuncFunc[2]:= Substr(aFuncFunc[2], 1, 25)
+		aFuncFunc[2]:= SubStr(aFuncFunc[2], 1, 25)
 		fBuscaFunc(dMarcFim, @aFuncFunc[3], @aFuncFunc[4],@aFuncFunc[6],.T. )
 
 		If Empty(aFuncFunc[6])
@@ -1082,7 +1082,7 @@ Begin Sequence
 		EndIf
 
 		//======================================================================
-		// Se não for encontrado marcações na tabela SP8 pesquisar marcações na
+		// Se não For encontrado marcações na tabela SP8 pesquisar marcações na
 		// tabela SPG.
 		//======================================================================
 		If Len(aMarcacoes) == 0
@@ -1121,14 +1121,14 @@ Begin Sequence
 		_aDadosMkDia := {}
 		
 		For _nI := 1 To Len(aMarcacoes)   
-			If (DToS(aMarcacoes[_nI,25]) == Dtos(_dDataOcorr)) .Or. ;  
-				((DToS(aMarcacoes[_nI,25]) == Dtos(_dDataOcorr - 1) .And. DToS(aMarcacoes[_nI,1]) == DToS(aMarcacoes[_nI,25])) .And. (AllTrim(_cOrigem) == "E" .Or. _cRetorno == "A"))
+			If (DToS(aMarcacoes[_nI,25]) == DToS(_dDataOcorr)) .Or. ;  
+				((DToS(aMarcacoes[_nI,25]) == DToS(_dDataOcorr - 1) .And. DToS(aMarcacoes[_nI,1]) == DToS(aMarcacoes[_nI,25])) .And. (AllTrim(_cOrigem) == "E" .Or. _cRetorno == "A"))
 				_nJ += 1
-				Aadd(_aDadosMkDia, aClone(aMarcacoes[_nI]))
+				aAdd(_aDadosMkDia, aClone(aMarcacoes[_nI]))
 			EndIf
-			If DToS(aMarcacoes[_nI,25]) > Dtos(_dDataOcorr) .And. (AllTrim(_cOrigem) == "E" .Or. _cRetorno == "A") // Interjornada 
+			If DToS(aMarcacoes[_nI,25]) > DToS(_dDataOcorr) .And. (AllTrim(_cOrigem) == "E" .Or. _cRetorno == "A") // Interjornada 
 				_nJ += 1
-				Aadd(_aDadosMkDia, aClone(aMarcacoes[_nI]))
+				aAdd(_aDadosMkDia, aClone(aMarcacoes[_nI]))
 				Exit
 			EndIf
 		Next _nI
@@ -1185,7 +1185,7 @@ Begin Sequence
 			For _nI := 1 To Len(_aDadosMkDia)
 				_cHoraApon := StrZero(_aDadosMkDia[_nI,2],5,2)
 				_cHoraApon := StrTran(_cHoraApon,".",":")
-				Aadd(_aRet,{_cHoraApon, DToc(_aDadosMkDia[_nI,1])})
+				aAdd(_aRet,{_cHoraApon, DToC(_aDadosMkDia[_nI,1])})
 			Next 
 			Break
 		EndIf	
@@ -1203,7 +1203,7 @@ Begin Sequence
 			_cHoraFin := _cHoraFin + ":00"
 			If AllTrim(_cOrigem) == "H" // HE - Horas Extras
 				_cTempoD  := fGetApo(_dDataOcorr,_dDataOcorr)
-			ELSE
+			Else
 				_cTempoD  := ELAPTIME(_cHoraIni,_cHoraFin) 
 			EndIf
 		
@@ -1271,9 +1271,9 @@ Static Function CarId(cFil As Character,aId As Array,cAutoriza As Character)
 Local nPos	:= 0.00 As Numeric
 
 //-- Preenche o Array aCodAut com os Eventos (Menos DSR Mes Ant.)
-SP9->( dbSeek( cFil , .T. ) )
-While SP9->( !Eof() .and. cFil == P9_FILIAL ) 
-	If ( ( Right(SP9->P9_IDPON,1) == cAutoriza ) .or. ( cAutoriza == "*" ) )
+SP9->( DBSeek( cFil , .T. ) )
+While SP9->( !Eof() .And. cFil == P9_FILIAL ) 
+	If ( ( Right(SP9->P9_IDPON,1) == cAutoriza ) .Or. ( cAutoriza == "*" ) )
 		aAdd( aId , Array( 04 ) )
 		nPos := Len( aId )
 		aId[ nPos , 01 ] := SP9->P9_CODIGO	//-- Codigo do Evento 
@@ -1281,7 +1281,7 @@ While SP9->( !Eof() .and. cFil == P9_FILIAL )
 		aId[ nPos , 03 ] := SP9->P9_CODFOL	//-- Codigo do da Verba Folha
 		aId[ nPos , 04 ] := SP9->P9_BHORAS	//-- Evento para B.Horas
 	EndIf
-	SP9->( dbSkip() )
+	SP9->( DBSkip() )
 EndDo
 
 Return
@@ -1309,15 +1309,15 @@ Local dAdmissa	:= SRA->RA_ADMISSA As Date
 Local dPerIni   := Ctod("//") As Date
 Local dPerFim   := Ctod("//") As Date
 
-SPO->( dbSetOrder( 1 ) )
-SPO->( dbSeek( cFilSPO , .F. ) )
-While SPO->( !Eof() .and. PO_FILIAL == cFilSPO )
+SPO->( DBSetOrder( 1 ) )
+SPO->( DBSeek( cFilSPO , .F. ) )
+While SPO->( !Eof() .And. PO_FILIAL == cFilSPO )
     dPerIni := SPO->PO_DATAINI
     dPerFim := SPO->PO_DATAFIM  
 
     //-- Filtra Periodos de Apontamento a Serem considerados em funcao do Periodo Solicitado
-    If dPerFim < dDataIni .OR. dPerIni > dDataFim                                                      
-		SPO->( dbSkip() )  
+    If dPerFim < dDataIni .Or. dPerIni > dDataFim                                                      
+		SPO->( DBSkip() )  
 		Loop  
     EndIf
 
@@ -1328,13 +1328,13 @@ While SPO->( !Eof() .and. PO_FILIAL == cFilSPO )
 		Exit
 	EndIf
 
-	SPO->( dbSkip() )
+	SPO->( DBSkip() )
 EndDo
 
-If ( aScan( aPeriodos , { |x| x[1] == dIniAtu .and. x[2] == dFimAtu } ) == 0.00 )
+If ( aScan( aPeriodos , { |x| x[1] == dIniAtu .And. x[2] == dFimAtu } ) == 0.00 )
 	dPerIni := dIniAtu
 	dPerFim	:= dFimAtu 
-	If !(dPerFim < dDataIni .OR. dPerIni > dDataFim)
+	If !(dPerFim < dDataIni .Or. dPerIni > dDataFim)
 		If ( dPerFim >= dAdmissa )
 			aAdd(aPeriodos, { dPerIni, dPerFim, Max(dPerIni,dDataIni), Min(dPerFim,dDataFim) } )
 		EndIf
@@ -1396,7 +1396,7 @@ Begin Sequence
 			_cMatricula:= _oModelDet:GetValue('Z10_MATRIC')
 			_cOrigem   := _oModelDet:GetValue('Z10_ORIGEM')
 			_aHorarios := {}
-			MsgRun("Lendo apontamentos da data "+DTOC(_dDataOcorr)+" da Matricula: "+_cMatricula, "Aguarde...",;
+			MsgRun("Lendo apontamentos da data "+DToC(_dDataOcorr)+" da Matricula: "+_cMatricula, "Aguarde...",;
 					{|| _aHorarios := U_APON001J(_dDataOcorr,_cMatricula,_cRetorno,_cOrigem)  } )
 			If Len(_aHorarios) > 0 
 				_oModelDet:LoadValue( 'Z10_HORAIN', _aHorarios[1] )
@@ -1418,7 +1418,7 @@ Begin Sequence
 		_cMatricula := _oModelDet:GetValue('Z10_MATRIC')
 		_cRetorno   := "H"
 		_aHorarios  := {}
-		MsgRun("Lendo apontamentos da data "+DTOC(_dDataOcorr)+" da Matricula: "+_cMatricula, "Aguarde...",;
+		MsgRun("Lendo apontamentos da data "+DToC(_dDataOcorr)+" da Matricula: "+_cMatricula, "Aguarde...",;
 				{|| _aHorarios := U_APON001J(_dDataOcorr,_cMatricula,_cRetorno,_cOrigem)  } )
 
 		If Len(_aHorarios) > 0 
@@ -1430,7 +1430,7 @@ Begin Sequence
 			_oModelDet:LoadValue( 'Z10_HORAFI', "00:00" )
 			_oModelDet:LoadValue( 'Z10_TEMPOD', "00:00" )
 		EndIf
-	ElseIf AllTrim(_cOrigem) <> "H" // HE - Horas Extras // campos: Z10_HORAIN, Z10_HORAFI Recalculo o campo Z10_TEMPOD só se não for hora extra
+	ElseIf AllTrim(_cOrigem) <> "H" // HE - Horas Extras // campos: Z10_HORAIN, Z10_HORAFI Recalculo o campo Z10_TEMPOD só se não For hora extra
 		M->Z10_HORAIN := _oModelDet:GetValue('Z10_HORAIN')
 		M->Z10_HORAFI := _oModelDet:GetValue('Z10_HORAFI')
 
@@ -1481,7 +1481,7 @@ Begin Sequence
 	EndIf
 
 	If _nOperation == MODEL_OPERATION_UPDATE  
-		If (Valtype(_oModel:ldeleteline) == "L" .And. _oModel:ldeleteline) .Or. (ValType(_oModel:lupdateline) == "L" .And. _oModel:lupdateline)
+		If (ValType(_oModel:ldeleteline) == "L" .And. _oModel:ldeleteline) .Or. (ValType(_oModel:lupdateline) == "L" .And. _oModel:lupdateline)
 			If AllTrim(_cImprimiu) == "S"
 				Help(NIL, NIL, "APON00115", NIL, "A ocorrência de horário de ponto do funcionário: '+AllTrim(_cNrMatric)+"-"+AllTrim(_cNomeFunc)  +  ', já foi impressa e não pode ser modificada.", 1, 0, NIL, NIL, NIL, NIL, NIL, {""})
 				_lRet := .F.
@@ -1515,8 +1515,8 @@ Local xExtra    := 0 As Variant
 cWhere += "%"
 cWhere += cPrefixo + "FILIAL = '" + SRA->RA_FILIAL + "' AND "
 cWhere += cPrefixo + "MAT = '" + SRA->RA_MAT + "' AND "
-cWhere += cPrefixo + "DATA >= '" + DtoS(dInicio) + "' AND "
-cWhere += cPrefixo + "DATA <= '" + DtoS(dFim) + "' "
+cWhere += cPrefixo + "DATA >= '" + DToS(dInicio) + "' AND "
+cWhere += cPrefixo + "DATA <= '" + DToS(dFim) + "' "
 cWhere += "%"
 
 cJoinFil:= "%" + FWJoinFilial("SPC", "SP9") + "%"
@@ -1534,14 +1534,14 @@ BeginSql Alias cAliasQry
 	ORDER BY SPC.PC_DATA, SPC.PC_PD	
 EndSql 	
 
-DO While !(cAliasQry)->(Eof())
+While !(cAliasQry)->(Eof())
 	If (cAliasQry)->P9_CLASEV == "01" //Hora Extra
 		xExtra += (cAliasQry)->PC_QUANTC
 	EndIf	
-	(cAliasQry)->(DbSkip())
+	(cAliasQry)->(DBSkip())
 EndDo
 
-(cAliasQry)->(DbCloseArea())
+(cAliasQry)->(DBCloseArea())
 
 If xExtra >= 1
    nHora:=INT(xExtra) 
@@ -1551,14 +1551,14 @@ Else
    _nMinExtra:=xExtra//Soma os minutos divididos por 100
 EndIf
 
-nHoraExtra :=ROUND( (_nMinExtra*100)/60,2)//TOTAL DE HORAS GERAL  //***CENTESIMAL***
+nHoraExtra :=Round( (_nMinExtra*100)/60,2)//TOTAL DE HORAS GERAL  //***CENTESIMAL***
 nHora2Extra:=INT(nHoraExtra)//INTEIRO DA HORA
 nHora2Extra:=(nHora2Extra*60)//TOTAL DE MINUTOS HORA CHEIA
 nHora2Extra:=(_nMinExtra*100)-nHora2Extra//TOTAL DE MINUTOS - TOTAL DE MINUTOS DAS HORAS CHEIAS
 nHora2Extra:=INT(nHoraExtra)+(nHora2Extra/100)//SOMA OS RESTOS DOS MINUTOS
-nHora2Extra:=ROUND(nHora2Extra,2)//***SEXAGESIMAL***
+nHora2Extra:=Round(nHora2Extra,2)//***SEXAGESIMAL***
 
-nHora2Extra:=STRZERO(INT(nHora2Extra),2)+":"+STRZERO((nHora2Extra-INT(nHora2Extra))*100,2)//TRANSFORMA EM HORA COM ":"
+nHora2Extra:=StrZero(INT(nHora2Extra),2)+":"+StrZero((nHora2Extra-INT(nHora2Extra))*100,2)//TRANSFORMA EM HORA COM ":"
 
 FWRestArea(aArea)
 

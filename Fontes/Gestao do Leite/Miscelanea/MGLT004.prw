@@ -1,30 +1,25 @@
 /*
 ===============================================================================================================================
-                                    ATUALIZACOES SOFRIDAS DESDE A CONSTRUÇAO INICIAL
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                            
--------------------------------:-----------------------------------------------------------------------------------------------
- Alexandre Villar | 22/12/2015 | Tratativa na cláusula "ORDER BY" para remover a referência numérica. Chamado 13062            
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer    | 02/02/2018 | Filtrar filiais que tem no SmartQuestion e Ajustes de tela para a versão 12. Chamados: 23351
--------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges     | 28/09/2018 | Retirada validação do campo ZLU_DESPRO e transferida para o Privilégio. Rotina reescrita e 
- 				  |			   | alterada de AGLT026 para MGLT004. Chamados: 26404
+Alexandre V.  |22/12/2015| Chamado 13062. Tratativa na cláusula "ORDER BY" para remover a referência numérica.
+Alex Wallauer |02/02/2018| Chamados 23351. Filtrar filiais que tem no SmartQuestion e Ajustes de tela para a versão 12.
+Lucas Borges  |28/09/2018| Chamados 26404. Retirada validação do campo ZLU_DESPRO e transferida para o Privilégio. Rotina 
+ 			  |			 | reescrita e alterada de AGLT026 para MGLT004.
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MGLT004
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 28/09/2018
-===============================================================================================================================
 Descrição---------: Rotina para Inativação de Produtores que não tiveram coleta de leite no período informado
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -56,11 +51,8 @@ Return
 Programa----------: MGLT004P
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 28/09/2018
-===============================================================================================================================
 Descrição---------: Realiza o processamento da rotina.
-===============================================================================================================================
 Parametros--------: _oSelf
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -85,7 +77,7 @@ _cFiltro  += "%"
 //====================================================================================================
 // SQL para verificar os produtores dos Setores que nao movimentaram entrada de leite no periodo
 //====================================================================================================
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 SELECT A2.A2_COD, A2.A2_LOJA, A2.A2_NOME
   FROM %Table:SA2% A2, %Table:ZL3% ZL3
  WHERE A2.D_E_L_E_T_ = ' '
@@ -112,17 +104,17 @@ SELECT A2.A2_COD, A2.A2_LOJA, A2.A2_NOME
            AND ZLW.ZLW_RETIRO = A2.A2_COD
            AND ZLW.ZLW_RETILJ = A2.A2_LOJA)
  ORDER BY A2.A2_COD, A2.A2_LOJA
-EndSQL
+EndSql
 
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 _oSelf:IncRegua1("Montando janela de seleção...")
 
 //====================================================================================================
 // Verifica os dados selecionados e exibe tela para seleção dos produtores
 //====================================================================================================
 If _nCountRec > 0
-	Do While (_cAlias)->(!Eof())
+	While (_cAlias)->(!Eof())
 		aAdd( _aLstFor , { .F. , (_cAlias)->A2_COD , (_cAlias)->A2_LOJA , (_cAlias)->A2_NOME } )
 		(_cAlias)->( DBSkip() )
 	EndDo
@@ -133,7 +125,7 @@ If _nCountRec > 0
 	//====================================================================================================
 	// Exibe a tela e confirmação antes de processar a atualização de status
 	//====================================================================================================
-	Do While .T.
+	While .T.
 	
 		If U_ITListBox(	"Desativação de Fornecedores inativos",{ "X" , "Código" , "Loja" , "Nome" } , @_aLstFor , .T. , 2 ,;
 					AllTrim(Str(_nCountRec,9))+" registros encontrados no Período solicitado de "+ DToC(MV_PAR01) +" até "+ DToC(MV_PAR02)+" dos setores: "+AllTrim(MV_PAR03))
@@ -152,7 +144,7 @@ If _nCountRec > 0
 					MsgStop("Nenhum produtor marcado Marque pelo menos um produtor.","MGLT00402")
 					Loop
 				Else
-					MsgInfo("Foram inativados "+ALLTRIM(STR(_nProcessado))+" produtores com sucesso e "+ALLTRIM(STR(_nSQ))+" marcado(s) para envio para o SmartQuestion!","MGLT00403")
+					MsgInfo("Foram inativados "+AllTrim(Str(_nProcessado))+" produtores com sucesso e "+AllTrim(Str(_nSQ))+" marcado(s) para envio para o SmartQuestion!","MGLT00403")
 					Exit
 				EndIf
 			Else
@@ -166,7 +158,7 @@ If _nCountRec > 0
 
 Else
 	MsgAlert("Não foram encontrados registros para processar com os filtros informados! Verifique os parâmetros digitados.","MGLT00404")
-	Return()
+	Return
 EndIf
 
 Return
@@ -176,14 +168,11 @@ Return
 Programa----------: setAtivo
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 28/09/2018
-===============================================================================================================================
 Descrição---------: Inativa o produtor
-===============================================================================================================================
 Parametros--------: cpProd -> código que será inativado
 ------------------: cpLoja -> loja que será inativada
 ------------------: _cFiltroFilial -> filiais que possuem integração com SmartQuestion
 ------------------: _nSQ -> Contador de registros alterados para integração
-===============================================================================================================================
 Retorno-----------: _nSQ -> Incrementa o contador
 ===============================================================================================================================
 */
@@ -193,11 +182,11 @@ SA2->( DBSeek( xFilial("SA2") + cpProd + cpLoja ) )
 
 SA2->( RecLock( "SA2" , .F. ) )
 SA2->A2_L_ATIVO	:= 'N'
-SA2->A2_L_DTDES	:= SubStr( DtoS(MV_PAR01) , 5 , 2 ) + SubStr( DtoS( MV_PAR02 ) , 1 , 4 )
+SA2->A2_L_DTDES	:= SubStr( DToS(MV_PAR01) , 5 , 2 ) + SubStr( DToS( MV_PAR02 ) , 1 , 4 )
 If SubStr( SA2->A2_L_LI_RO,1,2) $ _cFiltroFilial
 	_nSQ++
 	SA2->A2_L_SMQST := 'P'
 EndIf
-SA2->( MsUnLock() )
+SA2->( MSUnLock() )
 
 Return

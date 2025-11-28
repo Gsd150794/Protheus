@@ -2,26 +2,21 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 18/09/2024 | Chamado 48569. Incluir a rotina de Desconto Tetra Pak nas exceções para validação de acesso
+Lucas Borges  |18/09/2024| Chamado 48569. Incluir a rotina de Desconto Tetra Pak nas exceções para validação de acesso
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
+
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MA260EST
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 29/08/2016
-===============================================================================================================================
 Descrição---------: Ponto de entrada para validar estorno o estorno da transferência simples.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: _lRet == Define se a transferência pode ser estornada
 ===============================================================================================================================
 */
@@ -34,8 +29,8 @@ Local _lRet	      := .T.
 //================================================================================
 // Valida o estorno de acordo com o cadastro de usuários Italac.
 //================================================================================
-ZZL->(DbSetOrder(3))
-If ZZL->(DbSeek(xFilial("ZZL")+RetCodUsr()))
+ZZL->(DBSetOrder(3))
+If ZZL->(DBSeek(xFilial("ZZL")+RetCodUsr()))
    If ZZL->ZZL_AUTSIM <> 'S' .And. !FWIsInCallStack("DESCTETRAE") .And. !FWIsInCallStack("DESCTETRAE")
       FWAlertWarning("Usuário sem permissão para realizar estorno de transferência simples. Não será possível realizar o estorno da transferência. Entre em contato com o suporte do TI.", "MA260EST01")
       _lRet := .F.

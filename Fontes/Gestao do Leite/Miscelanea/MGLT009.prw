@@ -4,13 +4,13 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |06/05/2025| Chamado 50618. Alterada mensagem para notas do RS
 Lucas Borges  |30/06/2025| Chamado 51183. Corrigida tipagem da verilável _nVlrNF
 Lucas Borges  |08/07/2025| Chamado 50617. Revisões diversas visando padronizar os fontes
+Lucas Borges  |05/10/2025| Chamado 52148. Permitido executar a previsão para Mix Aprovado além do Efetivado
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include 'FWEVENTVIEWCONSTS.CH'
 
 /*
@@ -57,7 +57,7 @@ Retorno---------: Nenhum
 Static Function MGLT009R(_oProces As Object)
 
 Local _aDados		:= {} As Array
-Local _cArqLog		:= "LOG_FECHAMENTO_LEITE_"+ DtoS(Date()) +"_"+ StrTran(Time(),":","") +"_"+ RetCodUsr() +".log" As Character
+Local _cArqLog		:= "LOG_FECHAMENTO_LEITE_"+ DToS(Date()) +"_"+ StrTran(Time(),":","") +"_"+ RetCodUsr() +".log" As Character
 Local _cPthLog		:= "\data\italac\MGLT009\" As Character
 Local _cFilMsg		:= SuperGetMV("LT_FILMSGN",.F.,"20/21/23/24/25") As Character
 Local _cDirTmp		:= GetTempPath() As Character
@@ -73,7 +73,7 @@ Local _nRegNFP		:= 0 As Numeric
 Local _nTotPrd		:= 0 As Numeric
 Local _nI			:= 0 As Numeric
 Local _aParam		:= {} As Array
-Local _dDtAux		:= StoD('//') As Date
+Local _dDtAux		:= SToD('//') As Date
 Local _lVldNfp		:= SuperGetMV("LT_VLDNFP",.F.,.F.) As Logical
 Local _lSemNota		:= .F. As Logical
 Local _cLoja2		:= "" As Character
@@ -99,9 +99,9 @@ Private _cSetores	:= "" As Character
 Private _lDefini	:= "" As Character
 Private _nSldPro	:= 0 As Numeric
 Private _cNroNota	:= '' As Character
-Private _cParc		:= StrZero(1 , TamSx3("E2_PARCELA")[1]) As Character // Parcela do titulo do evento(NDF)
-Private _cSerie		:= PadR(AllTrim(SuperGetMV('IT_SERDLEI',.F.,'')),TamSx3('F1_PREFIXO')[1]) As Character // Serie da NF
-Private _cPrefixo	:= PadR(AllTrim(SuperGetMV("LT_PRESER",.F.,"GLT")),TamSx3("E2_PREFIXO")[1]) As Character // Prefixo do titulo e serie da Nota do produtor
+Private _cParc		:= StrZero(1 , TamSX3("E2_PARCELA")[1]) As Character // Parcela do titulo do evento(NDF)
+Private _cSerie		:= PadR(AllTrim(SuperGetMV('IT_SERDLEI',.F.,'')),TamSX3('F1_PREFIXO')[1]) As Character // Serie da NF
+Private _cPrefixo	:= PadR(AllTrim(SuperGetMV("LT_PRESER",.F.,"GLT")),TamSX3("E2_PREFIXO")[1]) As Character // Prefixo do titulo e serie da Nota do produtor
 Private _cMotBaixa	:= AllTrim(SuperGetMV("LT_MOTBX",.F.,"GLT")) As Character// Motivo de baixa utilizado para a rotina do Leite
 Private _cNatureza	:= AllTrim(SuperGetMV("LT_NATGLT",.F.,"222001")) As Character// Natureza dos titulos do Produtor
 Private _cCODSA2	:= '' As Character
@@ -122,7 +122,7 @@ _cParam += "Linha: " + MV_PAR08 +"-"+MV_PAR09
 _cParam += "Pagamento: " + DToC(MV_PAR10)
 _cParam += "Vencto: " + DToC(MV_PAR11)
 _cParam += "Tipo Forn.: " + CValToChar(MV_PAR12)
-_cParam += "Usuario: " + UsrFullName(__cUserID)
+_cParam += "Usuario: " + UsrFullName(__cUserId)
 EventInsert(FW_EV_CHANEL_ENVIRONMENT, FW_EV_CATEGORY_MODULES, "Z00", FW_EV_LEVEL_INFO, "", "Início Fechamento do Leite",_cParam , .T.) //CHAMADA DO EVENTO
 
 _oProces:SaveLog("Thread:"+_cThread+" Iniciando a rotina. Parâmetros: "+CValToChar(MV_PAR01)+"-"+MV_PAR02+"-"+AllTrim(MV_PAR03)+"-"+MV_PAR04+"-"+MV_PAR05+"-"+MV_PAR06+"-"+MV_PAR07+"-"+MV_PAR08+"-"+MV_PAR09+"-"+DToC(MV_PAR10)+"-"+DToC(MV_PAR11)+"-"+CValToChar(MV_PAR01))
@@ -133,13 +133,13 @@ _oProces:SetRegua2(1)
 _oProces:IncRegua2('Verificando a configuração dos parâmetros no MIX...')
 
 //====================================================================================================
-// Verifica e processa as perguntas para parametrização da rotina
+// Verifica e Processa as perguntas para parametrização da rotina
 //====================================================================================================
 If MV_PAR01 <> 1
 	//====================================================================================================
 	// dDataBase deve ser maior que o MV_DATAFIS e maior ou igual a MV_DATAFIN no fechamento definitivo
 	//====================================================================================================
-	_dDtAux := GetMV('MV_DATAFIS' ,, StoD(''))
+	_dDtAux := GetMV('MV_DATAFIS' ,, SToD(''))
 	
 	If dDataBase <= _dDtAux
 		_cMenAux:= "Database do Sistema menor/igual ao bloqueio para operações Fiscais. Solicite o desbloqueio à Contabilidade."
@@ -148,7 +148,7 @@ If MV_PAR01 <> 1
 		Return
 	EndIf
 	
-	_dDtAux := GetMV('MV_DATAFIN' ,, StoD(''))
+	_dDtAux := GetMV('MV_DATAFIN' ,, SToD(''))
 		
 	If dDataBase < _dDtAux
 		_cMenAux := "Database do Sistema menor que bloqueio para operações Financeiras. Solicite o desbloqueio à Contabilidade."
@@ -209,7 +209,7 @@ If !_oFile:Create()
 	Return
 Else
 	_oFile:Write('====================================================================================================' + CRLF)
-	_oFile:Write(' Log de Processamento - Fechamento do Leite - Data: '+ DtoC(Date()) +' / Tipo: '+ _cAcao            + CRLF)
+	_oFile:Write(' Log de Processamento - Fechamento do Leite - Data: '+ DToC(Date()) +' / Tipo: '+ _cAcao            + CRLF)
 	_oFile:Write(' [ Para abrir o LOG no Excel, exclua os comentários do início e fim e salve o arquivo como ".CSV" ] ' + CRLF)
 	_oFile:Write(' [ Se não existirem registros, todos foram processados com sucesso ou nenhum foi processado ] '       + CRLF)
 	_oFile:Write('====================================================================================================' + CRLF)
@@ -221,7 +221,7 @@ EndIf
 //====================================================================================================
 DBSelectArea("ZLE")
 ZLE->(DBSetOrder(1))
-If ZLE->(DBSeek(xFILIAL("ZLE") + _cCodMix))
+If ZLE->(DBSeek(xFilial("ZLE") + _cCodMix))
 	If ZLE->ZLE_STATUS == 'F'
 		_cMenAux := "O MIX "+ _cCodMix +" não pode ser processado pois o mesmo já foi fechado!"
 		_oProces:SaveLog("Thread:"+_cThread+" MGLT00906 - Fim do processamento. " + _cMenAux)
@@ -294,13 +294,13 @@ If ZLE->(DBSeek(xFILIAL("ZLE") + _cCodMix))
 				//====================================================================================================
 				// Verifica se o processamento é uma Previsão ou se o Fornecedor já foi preparado para o Fechamento
 				//====================================================================================================
-				If !_lDefini .Or. ITVALPRP(_aDados[_nI][01],_aDados[_nI][02],_aDados[_nI][03],_aDados[_nI][04]) 
+				If !_lDefini .Or. ITVALPRP(_lDefini,_aDados[_nI][01],_aDados[_nI][02],_aDados[_nI][03],_aDados[_nI][04]) 
 					_oProces:IncRegua2('Processo [02] - Validando os dados do fechamento...')
 					//====================================================================================================
 					// Verifica se o Setor do Produtor exige o lançamento de CNF conforme legislação
 					//====================================================================================================
 					ZL2->(DBSetOrder(1))
-					If ZL2->(DBSeek(xFILIAL("ZL2") + _aDados[_nI][01]))
+					If ZL2->(DBSeek(xFilial("ZL2") + _aDados[_nI][01]))
 						//====================================================================================================
 						// Obtem parametrização no SETOR para gerar NF do produtor
 						//====================================================================================================
@@ -319,7 +319,7 @@ If ZLE->(DBSeek(xFILIAL("ZLE") + _cCodMix))
 							// Posiciona na Linha/Rota do Produtor.
 							//====================================================================================================
 							ZL3->(DBSetOrder(1))
-							If ZL3->(DBSeek(xFILIAL("ZL3") + _aDados[_nI][02]))
+							If ZL3->(DBSeek(xFilial("ZL3") + _aDados[_nI][02]))
 								_cCODZL3 := ZL3->ZL3_COD
 							Else
 								_cMenAux := _cCODSA2 +';'+ _cLOJSA2 +';'+ _cCODZL2 +';'+ _aDados[_nI][02] +';Posicionando registros;Falha ao posicionar no cadastro da Linha/Rota!'
@@ -401,7 +401,7 @@ If ZLE->(DBSeek(xFILIAL("ZLE") + _cCodMix))
 								//====================================================================================================
 								// O produtor PJ é quem emita a nota. Gero apenas o financeiro
 								//====================================================================================================
-								_lOk := ITINCSE2(_oProces,_nSldPro,_cPrefixo,_cNroNota,Padr(" ", TamSx3("E2_PARCELA")[1]),"NF ",xFILIAL("ZLF")+_cCodMix+_cVersao+_cCODSA2+_cLOJSA2,_cNatureza,_lSemNota,_aParam[11])
+								_lOk := ITINCSE2(_oProces,_nSldPro,_cPrefixo,_cNroNota,PadR(" ", TamSX3("E2_PARCELA")[1]),"NF ",xFilial("ZLF")+_cCodMix+_cVersao+_cCODSA2+_cLOJSA2,_cNatureza,_lSemNota,_aParam[11])
 							Else
 								//====================================================================================================
 								// Uma Nota por produtor - Acerto Fiscal(Gera NF produtor)
@@ -464,7 +464,7 @@ If ZLE->(DBSeek(xFILIAL("ZLE") + _cCodMix))
 								_cCmpMsg += AllTrim(SF1->F1_I_MENSA)
 								RecLock('SF1' , .F.)
 								SF1->F1_I_MENSA	:= _cDesMsg + _cMovMsg + _cCmpMsg
-								SF1->(MsUnlock())
+								SF1->(MSUnLock())
 							EndIf
 						EndIf
 						
@@ -474,7 +474,7 @@ If ZLE->(DBSeek(xFILIAL("ZLE") + _cCodMix))
 							// Apos processar todas as funcoes, marca flag na ZLF informando que os eventos foram processados.
 							//====================================================================================================
 							If _lDefini
-								_cUpdate := " UPDATE  "+ RetSqlName("ZLF") +" SET ZLF_ACERTO = 'S' , ZLF_STATUS = 'F', ZLF_DTFECH = '"+ DtoS(dDataBase) +"' "
+								_cUpdate := " UPDATE  "+ RetSqlName("ZLF") +" SET ZLF_ACERTO = 'S' , ZLF_STATUS = 'F', ZLF_DTFECH = '"+ DToS(dDataBase) +"' "
 								If _lSemNota
 									_cUpdate += ", ZLF_F1SEEK = '"+ cFilAnt + _cNroNota + _cSerie + _cCODSA2 + _cLoja2 + "N" +"' "
 								EndIf
@@ -497,13 +497,13 @@ If ZLE->(DBSeek(xFILIAL("ZLE") + _cCodMix))
 									_cUpdate += " AND ZLD_RETILJ = '"+ _cLOJSA2   +"' "
 									_cUpdate += " AND ZLD_SETOR  = '"+ _cCODZL2   +"' "
 									_cUpdate += " AND ZLD_LINROT = '"+ _cCODZL3   +"' "
-									_cUpdate += " AND ZLD_DTCOLE BETWEEN '"+ DTOS(ZLE->ZLE_DTINI) +"' AND '"+ DTOS(ZLE->ZLE_DTFIM) +"' "
+									_cUpdate += " AND ZLD_DTCOLE BETWEEN '"+ DToS(ZLE->ZLE_DTINI) +"' AND '"+ DToS(ZLE->ZLE_DTFIM) +"' "
 									_cUpdate += " AND D_E_L_E_T_ = ' ' "
 									
 									_lOk := !(TCSqlExec(_cUpdate) < 0)
 									
 									If !_lOk
-										_cMenAux := _cCODSA2 +';'+ _cLOJSA2 +';'+ _cCODZL2 +';'+ _cCODZL3 +';Atualização do Status na Recepção de Leite;Falhou ao rodar o UPDATE: ['+ DTOS(ZLE->ZLE_DTINI) +'/'+ DTOS(ZLE->ZLE_DTFIM) +']!'
+										_cMenAux := _cCODSA2 +';'+ _cLOJSA2 +';'+ _cCODZL2 +';'+ _cCODZL3 +';Atualização do Status na Recepção de Leite;Falhou ao rodar o UPDATE: ['+ DToS(ZLE->ZLE_DTINI) +'/'+ DToS(ZLE->ZLE_DTFIM) +']!'
 										_oProces:SaveLog("Thread:"+_cThread+" MGLT00918 - " + _cMenAux)
 										_oFile:Write(_cMenAux + ' - MGLT00918;'+LTrim(Str(Seconds()-_nTempM)) +' segundos'+ CRLF)
 									EndIf
@@ -531,7 +531,7 @@ If ZLE->(DBSeek(xFILIAL("ZLE") + _cCodMix))
 				
 				_oProces:IncRegua2('Processo [09] - Finalizando o processamento do Produtor...')
 				_nTotPrd++
-				MsUnLockAll()
+				MSUnLockAll()
 			Next _nI
 		EndIf
 		
@@ -546,7 +546,7 @@ If ZLE->(DBSeek(xFILIAL("ZLE") + _cCodMix))
 			If ZLE->(DBSeek(xFilial('ZLE') + _cCodMix))
 				RecLock("ZLE" , .F.)
 				ZLE->ZLE_STATUS := 'P'
-				ZLE->(MsUnLock())
+				ZLE->(MSUnLock())
 			EndIf
 		EndIf
 	EndIf
@@ -671,10 +671,10 @@ EndIf
 _cFilZLF+= '%'
 _cFilSE2+= '%'
 
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT A2_COD, A2_LOJA, ZLF_SETOR, ZLF_LINROT, REGSA2, SUM(CREDITO) CREDITO FROM (
 	SELECT A2_COD, A2_LOJA, A2_L_TANQ, A2_L_TANLJ, ZLF_SETOR, ZLF_LINROT, SA2.R_E_C_N_O_ REGSA2,
-			CASE WHEN ZL8_DEBCRE = 'C' THEN ZLF_TOTAL ELSE 0 END CREDITO
+			Case WHEN ZL8_DEBCRE = 'C' THEN ZLF_TOTAL Else 0 END CREDITO
 		FROM %Table:ZLF% ZLF, %Table:ZL8% ZL8, %Table:SA2% SA2
 	WHERE ZLF.ZLF_FILIAL = %xFilial:ZLF%
 		AND ZL8.ZL8_FILIAL = ZLF.ZLF_FILIAL
@@ -767,7 +767,7 @@ Parametros------: _cSetor  - Código do Setor do registro atual
 Retorno---------: _lRet    - Informa se o Fornecedor está com todos os registros efetivados
 ===============================================================================================================================
 */
-Static Function ITVALPRP(_cSetor As Character,_cLinha As Character,_cRetiro As Character,_cLoja As Character)
+Static Function ITVALPRP(_lDefini As Logical,_cSetor As Character,_cLinha As Character,_cRetiro As Character,_cLoja As Character)
 
 Local _lRet		:= .F. As Logical
 Local _cFiltro	:= '%' As Character
@@ -789,7 +789,7 @@ If !Empty(_cLoja)
 EndIf
 _cFiltro += '%'
 
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT ZLF_STATUS
 	  FROM %Table:ZLF%
 	 WHERE ZLF_FILIAL = %xFilial:ZLF%
@@ -801,7 +801,7 @@ BeginSQL Alias _cAlias
 EndSql
 
 While (_cAlias)->(!Eof())
-	If (_cAlias)->ZLF_STATUS == "E"
+	If (_lDefini .And. (_cAlias)->ZLF_STATUS == "E") .Or.(!_lDefini .And.((_cAlias)->ZLF_STATUS == "E" .Or. (_cAlias)->ZLF_STATUS == "A"))
 		_nEfet++
 	Else
 		_nOutros++
@@ -835,7 +835,7 @@ Local _cAlias	:= GetNextAlias() As Character
 Local _cFiltro	:= "% "+ IIf(_lSemNota,"","AND F1_LOJA = '"+_cLoja+"'") +" %" As Character
 Local _cCampo	:= "%" + IIf(_nTipo == 1," COUNT(1) QTDCNF "," F1_DOC, F1_SERIE, F1_LOJA ") + "%" As Character
 
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT %exp:_cCampo%
 	  FROM %Table:SF1%
 	 WHERE F1_FILIAL = %xFilial:SF1%
@@ -846,7 +846,7 @@ BeginSQL Alias _cAlias
 	   AND F1_L_MIX = %exp:_cMIX%
 	   AND D_E_L_E_T_ = ' '
 	   ORDER BY F1_DOC
-EndSQL
+EndSql
 
 If _nTipo == 2
 	//Para NFP já validou na primeira passagem e só vai haver 1 NFP. Para NF-e dos produtores que emitem a própria nota,
@@ -860,7 +860,7 @@ ElseIf (_cAlias)->QTDCNF == 1 //Achou uma NFP lançada para o produtor estando as
 	aAdd(_aRet , { .T. , "  " })
 ElseIf (_cAlias)->QTDCNF >= 2 //Achou mais de uma NFP lançada para o produtor avisando ao Usuario
 	aAdd(_aRet , { .T. , "M1" })
-Endif
+EndIf
 
 (_cAlias)->(DBCloseArea())
 
@@ -935,7 +935,7 @@ aAdd(_aCab , { "F1_L_LINHA"	, _cCODZL3				, NIL }) // Código da Linha/Rota
 aAdd(_aCab , { "F1_L_TPNF"		, 'P'					, NIL }) // Tipo de NF - P = Produtor
 
 If _lNf1Item
-	_cCampos := '% MAX(ZLF_QTDBOM) ZLF_QTDBOM, ROUND(SUM(ZLF_TOTAL)/MAX(ZLF_QTDBOM),8) ZLF_VLRLTR, SUM(ZLF_TOTAL) ZLF_TOTAL %'
+	_cCampos := '% MAX(ZLF_QTDBOM) ZLF_QTDBOM, Round(SUM(ZLF_TOTAL)/MAX(ZLF_QTDBOM),8) ZLF_VLRLTR, SUM(ZLF_TOTAL) ZLF_TOTAL %'
 	_cGroup := '%GROUP BY B1_COD, B1_LOCPAD, A2_COD, A2_LOJA, A2_TIPO, ZLF_SETOR, ZL8_TES, ZL8_TESSEN, ZL8_TESIP1, ZL8_TESSE2, A2_INDCP, ZL8_DEBCRE, A2_INCLTMG %'
 Else
 	_cCampos := '% ZLF_EVENTO, ZL8_COD, ZLF_SEQ, ZL8_DESCRI, ZL8_QTUNIC, ZLF_QTDBOM,'
@@ -945,7 +945,7 @@ EndIf
 //====================================================================================================
 // Verifica pagamento para ser efetuado no mesmo dia do fechamento
 //====================================================================================================
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT B1_COD, B1_LOCPAD, A2_COD, A2_LOJA, A2_TIPO, ZLF_SETOR, ZL8_TES, ZL8_TESSEN, ZL8_TESIP1, ZL8_TESSE2, A2_INDCP, ZL8_DEBCRE, A2_INCLTMG, %exp:_cCampos%
 	  FROM %Table:ZLF% ZLF, %Table:ZL8% ZL8, %Table:SB1% SB1, %Table:SA2% SA2
 	 WHERE ZLF.ZLF_FILIAL = %xFilial:ZLF%
@@ -977,7 +977,7 @@ While (_cAlias)->(!Eof())
 		_nVlrUnit := (_cAlias)->ZLF_VLRLTR
 	Else
 		If (_cAlias)->ZLF_QTDBOM > 0
-			If AllTrim(UPPER((_cAlias)->ZL8_QTUNIC)) == 'N'
+			If AllTrim(Upper((_cAlias)->ZL8_QTUNIC)) == 'N'
 				_nQtde := (_cAlias)->ZLF_QTDBOM
 				_nVlrUnit := (_cAlias)->ZLF_VLRLTR
 			Else
@@ -1005,9 +1005,9 @@ While (_cAlias)->(!Eof())
 		_lRet := .F.
 		Exit
 	EndIf
-	_cItem    := SOMA1(_cItem)
+	_cItem    := Soma1(_cItem)
 	If !_lNf1Item
-		_cSeekSD1 := xFILIAL("SD1") + _cNroNota + _cSerie + _cCODSA2 + _cLOJSA2 + (_cAlias)->B1_COD + _cItem
+		_cSeekSD1 := xFilial("SD1") + _cNroNota + _cSerie + _cCODSA2 + _cLOJSA2 + (_cAlias)->B1_COD + _cItem
 		_cSeekZLF := ITGRVZLF(_oProces,(_cAlias)->ZL8_COD,0,_cSeekSD1,.F./*_lGrvZLF*/,.T./*_lAltZLF*/,(_cAlias)->ZLF_SEQ,/*_cLinha*/,/*_cSetor*/,_aParam,@_nRegZLF,/*_lImp*/,(_cAlias)->ZL8_DEBCRE,@_lRet)
 	EndIf
 
@@ -1107,7 +1107,7 @@ Default _lAltZLF	:= .F.
 Default _cLinha		:= ''
 Default _cSetor		:= ''
 
-// Se for um imposto gerado pela NF-e, ele será "descontado" do saldo antes de qualquer coisa,
+// Se For um imposto gerado pela NF-e, ele será "descontado" do saldo antes de qualquer coisa,
 // garantindo que haja saldo suficiente, logo, já atualizo o valor pago para o evento
 Default _lImp		:= .F. 
 
@@ -1129,7 +1129,7 @@ If _lAltZLF
 	If 'NDF' $ _cSeek
 		RecLock("ZLF",.F.)
 	        ZLF->ZLF_L_SEEK := _cSeek
-        ZLF->(MsUnlock())
+        ZLF->(MSUnLock())
 	Else //Quando não houver, a chamada foi feita para gravar dados das notas fiscais.
 		_cUpdate := " UPDATE "+ RETSQLNAME('ZLF') +" SET ZLF_L_SEEK = '"+ _cSeek +"' "
 		_cUpdate += " WHERE ZLF_FILIAL = '"+ xFilial("ZLF")	+"' "
@@ -1155,13 +1155,13 @@ ElseIf _nValor > 0
     // variavel lGrvZLF estiver como .T., ele grava um novo registro para o mesmo evento.
     //====================================================================================================
     ZLF->(DBSetOrder(3))
-    _lAchou := ZLF->(DBSeek(xFILIAL("ZLF") + _cCodMix + _cVersao + _cCODZL2 + _cCODZL3 + _cEvento + _cCODSA2 + _cLOJSA2))
+    _lAchou := ZLF->(DBSeek(xFilial("ZLF") + _cCodMix + _cVersao + _cCODZL2 + _cCODZL3 + _cEvento + _cCODSA2 + _cLOJSA2))
     If _lAchou .And. !_lGrvZLF
         _lNovo := .F.//Não grava ZLF. Apenas usa o que está posicionado. Válido apenas para o índice 3
     EndIf
     If !_lAchou
-        ZLF->(DbSetOrder(8))
-        _lAchou := ZLF->(DBSeek(xFILIAL("ZLF") + _cCodMix + _cVersao + _cCODZL2 + _cCODZL3 + _cCODSA2 + _cLOJSA2))
+        ZLF->(DBSetOrder(8))
+        _lAchou := ZLF->(DBSeek(xFilial("ZLF") + _cCodMix + _cVersao + _cCODZL2 + _cCODZL3 + _cCODSA2 + _cLOJSA2))
     EndIf
     //Se posicionou pelo índice 3 e era para gravar (_lGrvZLF=.T.), grava. Se posicinou mas não é para gravar, não faz nada.
     //O posicionamento será usado apenas para montar a chave a ser referenciada no futuro
@@ -1171,8 +1171,8 @@ ElseIf _nValor > 0
                         { 'ZLF_VERSAO'	, ZLF->ZLF_VERSAO										} ,;
                         { 'ZLF_DTINI'	, ZLF->ZLF_DTINI										} ,;
                         { 'ZLF_DTFIM'	, ZLF->ZLF_DTFIM										} ,;
-                        { 'ZLF_SETOR'	, IIF(Empty(_cSetor) , ZLF->ZLF_SETOR  , _cSetor )	} ,;
-                        { 'ZLF_LINROT'	, IIF(Empty(_cLinha) , ZLF->ZLF_LINROT , _cLinha )	} ,;
+                        { 'ZLF_SETOR'	, IIf(Empty(_cSetor) , ZLF->ZLF_SETOR  , _cSetor )	} ,;
+                        { 'ZLF_LINROT'	, IIf(Empty(_cLinha) , ZLF->ZLF_LINROT , _cLinha )	} ,;
                         { 'ZLF_A2COD'	, ZLF->ZLF_A2COD										} ,;
                         { 'ZLF_A2LOJA'	, ZLF->ZLF_A2LOJA										} ,;
                         { 'ZLF_EVENTO'	, _cEvento												} ,;
@@ -1209,8 +1209,8 @@ ElseIf _nValor > 0
                 ZLF->ZLF_VERSAO := _aDadZLF[03][02] // ZLF->ZLF_VERSAO
                 ZLF->ZLF_DTINI  := _aDadZLF[04][02] // ZLF->ZLF_DTINI
                 ZLF->ZLF_DTFIM  := _aDadZLF[05][02] // ZLF->ZLF_DTFIM
-                ZLF->ZLF_SETOR  := _aDadZLF[06][02] // IIF(Empty(_cSetor) , ZLF->ZLF_SETOR  , _cSetor )
-                ZLF->ZLF_LINROT := _aDadZLF[07][02] // IIF(Empty(_cLinha) , ZLF->ZLF_LINROT , _cLinha )
+                ZLF->ZLF_SETOR  := _aDadZLF[06][02] // IIf(Empty(_cSetor) , ZLF->ZLF_SETOR  , _cSetor )
+                ZLF->ZLF_LINROT := _aDadZLF[07][02] // IIf(Empty(_cLinha) , ZLF->ZLF_LINROT , _cLinha )
                 ZLF->ZLF_A2COD  := _aDadZLF[08][02] // ZLF->ZLF_A2COD
                 ZLF->ZLF_A2LOJA := _aDadZLF[09][02] // ZLF->ZLF_A2LOJA
                 ZLF->ZLF_EVENTO := _aDadZLF[10][02] // ZL8->ZL8_COD
@@ -1232,7 +1232,7 @@ ElseIf _nValor > 0
                 ZLF->ZLF_F1SEEK := _aDadZLF[26][02] // ZLF->ZLF_F1SEEK
                 ZLF->ZLF_DTCALC	:= _aDadZLF[27][02] //ZLF->ZLF_DTCALC
                 ZLF->ZLF_DTFECH := _aDadZLF[28][02] // ZLF->ZLF_DTFECH
-            ZLF->(MsUnlock())
+            ZLF->(MSUnLock())
         EndIf
     EndIf
 EndIf
@@ -1261,7 +1261,7 @@ Static Function ITNEWZLF(_cCodMix As Character,_cCodFor As Character,_cLojFor As
 Local _cRet		:= "" As Character
 Local _cAlias	:= GetNextAlias() As Character
 
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT MAX(ZLF_SEQ) COD
 	  FROM %Table:ZLF%
 	 WHERE ZLF_FILIAL = %xFilial:ZLF%
@@ -1269,10 +1269,10 @@ BeginSQL Alias _cAlias
 	   AND ZLF_A2COD = %exp:_cCodFor%
 	   AND ZLF_A2LOJA = %exp:_cLojFor%
 	   AND D_E_L_E_T_ = ' '
-EndSQL
+EndSql
 
 If !Empty((_cAlias)->COD)
-	_cRet := SOMA1((_cAlias)->COD)
+	_cRet := Soma1((_cAlias)->COD)
 Else
 	_cRet := StrZero(1 , TamSX3('ZLF_SEQ')[01])
 EndIf
@@ -1293,7 +1293,7 @@ Parametros------: _cFilial - Filial do Fornecedor
 Retorno---------: _aRet    - Retorna array com os dados da NFP se existir
 ===============================================================================================================================
 */
-Static function ITRETNFP(_cCodMix As Character,_cCodFor As Character,_cLojFor As Character)
+Static Function ITRETNFP(_cCodMix As Character,_cCodFor As Character,_cLojFor As Character)
 
 Local _aRet		:= {} As Array
 Local _cAlias	:= GetNextAlias() As Character
@@ -1301,7 +1301,7 @@ Local _cAlias	:= GetNextAlias() As Character
 //====================================================================================================
 // Obtem se teve Contra Nota(NFP) lançada via Documento de Entrada no mês de emissão da NF
 //====================================================================================================
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 SELECT F1_DOC, F1_SERIE
   FROM %Table:SF1%
  WHERE F1_FILIAL = %xFilial:SF1%
@@ -1311,9 +1311,9 @@ SELECT F1_DOC, F1_SERIE
    AND F1_STATUS = 'A'
    AND F1_L_MIX = %exp:_cCodMix%
    AND D_E_L_E_T_ = ' '
-EndSQL
+EndSql
 
-IF (_cAlias)->(!Eof())
+If (_cAlias)->(!Eof())
 	aAdd(_aRet , { (_cAlias)->F1_DOC , (_cAlias)->F1_SERIE , "0001" })
 EndIf
 
@@ -1359,7 +1359,7 @@ Local _cHist	:= "GLT"+ StrZero(Month(ZLE->ZLE_DTINI),2) +"/"+ StrZero(Year(ZLE->
 //====================================================================================================
 // Verifica se o titulo ja existe na base, para nao duplicar.
 //====================================================================================================
-BeginSQL alias _cAlias
+BeginSql alias _cAlias
 	SELECT COUNT(1) QTD
 	FROM %Table:SE2%
 	WHERE E2_FILIAL = %xFilial:SE2%
@@ -1373,7 +1373,7 @@ BeginSQL alias _cAlias
 	AND E2_L_SETOR = %exp:_cCODZL2%
 	AND E2_L_LINRO = %exp:_cCODZL3%
 	AND D_E_L_E_T_ = ' '
-EndSQL
+EndSql
 
 If (_cAlias)->QTD == 1
 	_cMenAux := _cCODSA2 +';'+ _cLOJSA2 +';'+ _cCODZL2 +';'+ _cCODZL3 +';Geração dos Itens do MIX;Já existe um título com a chave atual para o Produtor ['+ _cChvAux +']!'
@@ -1385,7 +1385,7 @@ EndIf
 
 If _lRet .And. _lSemNota
 	_cAlias	:= GetNextAlias()
-	BeginSQL alias _cAlias
+	BeginSql alias _cAlias
 		SELECT MAX(E2_PARCELA) PARC, COUNT(1) QTD
 		FROM %Table:SE2%
 		WHERE E2_FILIAL = %xFilial:SE2%
@@ -1396,9 +1396,9 @@ If _lRet .And. _lSemNota
 		AND E2_LOJA = %exp:_cLOJSA2%
 		AND E2_L_MIX = %exp:_cCodMIX%
 		AND D_E_L_E_T_ = ' '
-	EndSQL
+	EndSql
 	If (_cAlias)->QTD > 0 
-		_cParcel := SOMA1(Substr((_cAlias)->PARC,1,Len(_cParcel)))
+		_cParcel := Soma1(SubStr((_cAlias)->PARC,1,Len(_cParcel)))
 	EndIf
 	(_cAlias)->(DBCloseArea())
 EndIf
@@ -1472,11 +1472,11 @@ Local _cAlias		:= GetNextAlias() As Character
 Local _cNroTit		:= '' As Character
 Local _cSeekZLF		:= '' As Character
 Local _cSeekSE2		:= '' As Character
-Local _cParAux		:= StrZero(1,TamSx3("E2_PARCELA")[1]) As Character//Parcela do titulo do evento
+Local _cParAux		:= StrZero(1,TamSX3("E2_PARCELA")[1]) As Character//Parcela do titulo do evento
 Local _nVlrEve		:= 0 As Numeric
 Local _nRegZLF		:= 0 As Numeric
 
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT ZLF.R_E_C_N_O_ REGZLF, ZL8.R_E_C_N_O_ REGZL8
 	  FROM %Table:ZLF% ZLF, %Table:ZL8% ZL8
 	 WHERE ZLF.ZLF_FILIAL = %xFilial:ZLF%
@@ -1508,7 +1508,7 @@ While (_cAlias)->(!Eof()) .And. _lOk
 		//====================================================================================================
 		// Altera o registro na ZLF de Debito referente ao valor do evento lido.
 		//====================================================================================================
-		_cSeekSE2 := xFILIAL("SE2") + ZL8->ZL8_PREFIX + _cNroTit + _cParAux + "NDF" + _cCODSA2 + _cLOJSA2
+		_cSeekSE2 := xFilial("SE2") + ZL8->ZL8_PREFIX + _cNroTit + _cParAux + "NDF" + _cCODSA2 + _cLOJSA2
 		_cSeekZLF := ITGRVZLF(_oProces,ZL8->ZL8_COD,0,_cSeekSE2,.F./*_lGrvZLF*/,.T./*_lAltZLF*/,ZLF->ZLF_SEQ,_cCODZL3,_cCODZL2,_aParam,@_nRegZLF,/*_lImp*/,ZL8->ZL8_DEBCRE,@_lOk)
 
 		//====================================================================================================
@@ -1527,7 +1527,7 @@ While (_cAlias)->(!Eof()) .And. _lOk
 				// Baixa no titulo de valor bruto do produtor o valor da baixa do evento.
 				//====================================================================================================
 				If _lOk
-					_lOk := ITBXASE2(_oProces,_nVlrEve,_cPrefixo,_cNroNota,Padr(" ", TamSx3("E2_PARCELA")[1]), "NF ", "" ,/*_cSeekZLF*/,.F./*_lVlPago*/,0/*_nRegZLF*/,_aParam,_cMotBaixa,ZL8->ZL8_COD,_cCODSA2,_cLOJSA2)
+					_lOk := ITBXASE2(_oProces,_nVlrEve,_cPrefixo,_cNroNota,PadR(" ", TamSX3("E2_PARCELA")[1]), "NF ", "" ,/*_cSeekZLF*/,.F./*_lVlPago*/,0/*_nRegZLF*/,_aParam,_cMotBaixa,ZL8->ZL8_COD,_cCODSA2,_cLOJSA2)
 				Else
 					Exit
 				EndIf
@@ -1535,7 +1535,7 @@ While (_cAlias)->(!Eof()) .And. _lOk
 				// Incrementa a parcela para o proximo titulo de evento e abate o saldo do produtor.
 				//====================================================================================================
 				If _lOk
-					_cParAux := SOMA1(_cParAux)
+					_cParAux := Soma1(_cParAux)
 					_nSldPro -= _nVlrEve
 				Else
 					Exit
@@ -1554,7 +1554,7 @@ While (_cAlias)->(!Eof()) .And. _lOk
 				// Baixa no titulo de valor bruto do produtor o saldo do produtor
 				//====================================================================================================
 				If _lOk
-					_lOk := ITBXASE2(_oProces,_nSldPro,_cPrefixo,_cNroNota,Padr(" ", TamSx3("E2_PARCELA")[1]),"NF ", "",/*_cSeekZLF*/,.F./*_lVlPago*/,0/*_nRegZLF*/,_aParam,_cMotBaixa,ZL8->ZL8_COD,_cCODSA2,_cLOJSA2)
+					_lOk := ITBXASE2(_oProces,_nSldPro,_cPrefixo,_cNroNota,PadR(" ", TamSX3("E2_PARCELA")[1]),"NF ", "",/*_cSeekZLF*/,.F./*_lVlPago*/,0/*_nRegZLF*/,_aParam,_cMotBaixa,ZL8->ZL8_COD,_cCODSA2,_cLOJSA2)
 				Else
 					Exit
 				EndIf
@@ -1568,7 +1568,7 @@ While (_cAlias)->(!Eof()) .And. _lOk
 					// Incrementa a parcela para o proximo titulo de evento e abate o saldo do produtor
 					//====================================================================================================
 					If _lOk
-						_cParAux	:= SOMA1(_cParAux)
+						_cParAux	:= Soma1(_cParAux)
 						_nSldPro	-= _nSldPro
 					Else
 						Exit
@@ -1589,7 +1589,7 @@ EndDo
 (_cAlias)->(DBCloseArea())
 FWRestArea(_aArea)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1632,7 +1632,7 @@ Default _nRegZLF	:= 0
 // Tratamento para liberar o titulo para baixa no Financeiro
 //====================================================================================================
 SE2->(DBSetOrder(1))
-If SE2->(DBSeek(xFILIAL("SE2") + _cPrefix + _cNroTit + _cParcel + _cTipo + _cFornece + _cLoja))
+If SE2->(DBSeek(xFilial("SE2") + _cPrefix + _cNroTit + _cParcel + _cTipo + _cFornece + _cLoja))
 
 	_cOrigem := SE2->E2_ORIGEM
 	
@@ -1647,7 +1647,7 @@ If SE2->(DBSeek(xFILIAL("SE2") + _cPrefix + _cNroTit + _cParcel + _cTipo + _cFor
 		If !Empty(_cSeek)
 			SE2->E2_L_SEEK	:= _cSeek
 		EndIf
-	SE2->(MsUnLock())
+	SE2->(MSUnLock())
 Else
 	_lRet := .F.
 	_cMenAux := _cCODSA2 +';'+ _cLOJSA2 +';'+ _cCODZL2 +';'+ _cCODZL3 +';Atualização do Título;Falha no Update do Título ['+ _cPrefix+_cNroTit+_cParcel+_cTipo+_cFornece+_cLoja +'/'+ _cSeek +']!'
@@ -1672,7 +1672,7 @@ If _lRet
 					{ "AUTMOTBX"		, _cMotBx											, Nil },;
 					{ "AUTDTBAIXA"		, dDataBase											, Nil },;
 					{ "AUTDTCREDITO"	, dDataBase											, Nil },;
-					{ "AUTBENEF"		, _cCODSA2 +" - "+ ALLTRIM(SA2->A2_NOME)			, Nil },;
+					{ "AUTBENEF"		, _cCODSA2 +" - "+ AllTrim(SA2->A2_NOME)			, Nil },;
 					{ "AUTHIST"			, _cHist											, Nil },;
 					{ "AUTVLRPG"		, _nVlrBx											, Nil } }
 	
@@ -1735,16 +1735,16 @@ If _lRet
 		// As baixas parciais existem qdo o produtor nao possui credito suficiente.
 		//====================================================================================================
 		If _lVlPago
-			If _nRegZLF == ZLF->(RECNO()) //A ZLF já deveria estar posicionada, logo, apenas confiro. Não realizar nenhum Seek ou DBGoto para não forçar um flush dos dados pois o recno irá se alterar
+			If _nRegZLF == ZLF->(RECNO()) //A ZLF já deveria estar posicionada, logo, apenas confiro. Não realizar nenhum Seek ou DBGoTo para não forçar um flush dos dados pois o recno irá se alterar
 				//Preciso identificar a sequencia de baixa para que no cancelamento eu possa localizar a baixa correta a ser estornada, uma vez que agora eu posso compensar títulos de lojas diferentes.
-				Sel080Baixa("VL /BA /CP /",Substr(ZLF->ZLF_L_SEEK,3,3),SUBSTR(ZLF->ZLF_L_SEEK,6,9),SUBSTR(ZLF->ZLF_L_SEEK,15,2),SUBSTR(ZLF->ZLF_L_SEEK,17,3),0,0,SUBSTR(ZLF->ZLF_L_SEEK,20,6),SUBSTR(ZLF->ZLF_L_SEEK,26,4),.F.,.F.,.F.,0,.F.,.T.)
+				Sel080Baixa("VL /BA /CP /",SubStr(ZLF->ZLF_L_SEEK,3,3),SubStr(ZLF->ZLF_L_SEEK,6,9),SubStr(ZLF->ZLF_L_SEEK,15,2),SubStr(ZLF->ZLF_L_SEEK,17,3),0,0,SubStr(ZLF->ZLF_L_SEEK,20,6),SubStr(ZLF->ZLF_L_SEEK,26,4),.F.,.F.,.F.,0,.F.,.T.)
 				aSort(aBaixaSE5,,, {|x,y| x[9] < y[9] }) //Ordena por sequencia
 				_cSequencia := aBaixaSE5[Len(aBaixaSE5),09]
 
 				RecLock("ZLF" , .F.)
 				ZLF->ZLF_VLRPAG := _nVlrBx
 				ZLF->ZLF_SEQBX := _cSequencia
-				ZLF->(MsUnlock())
+				ZLF->(MSUnLock())
 			Else
 				_lRet := .F.
 				_cMenAux := _cCODSA2 +';'+ _cLOJSA2 +';'+ _cCODZL2 +';'+ _cCODZL3 +';Atualização do Item do MIX (ZLF_VLRPAG);Não encontrou o ítem do MIX ['+xFilial("SE2")+_cPrefix+_cNroTit+_cParcel+_cTipo+_cFornece+_cLoja+_cCodZL8+']!'
@@ -1785,7 +1785,7 @@ Else
 	RecLock("ZLF" , .F.)
 		ZLF->ZLF_TOTAL	:= _nValor
 		ZLF->ZLF_VLRLTR	:= _nValor / ZLF->ZLF_QTDBOM
-	ZLF->(MsUnlock())
+	ZLF->(MSUnLock())
 EndIf
 
 Return _lRet
@@ -1804,14 +1804,14 @@ Static Function ITACTEVE(_oProces As Object,_lOk As Logical,_aParam As Array,_lS
 
 Local _aArea	:= FWGetArea() As Character
 Local _cAlias	:= GetNextAlias() As Character
-Local _cNroTit	:= StrZero(Day(dDataBase) , 2) + StrZero(Month(dDataBase) , 2) + Substr(Dtos(dDataBase) , 3 , 2) + SubStr(_cCodMix , 4 , 3) As Character
+Local _cNroTit	:= StrZero(Day(dDataBase) , 2) + StrZero(Month(dDataBase) , 2) + SubStr(DToS(dDataBase) , 3 , 2) + SubStr(_cCodMix , 4 , 3) As Character
 Local _cSeekZLF	:= "" As Character
-Local _cParAux	:= StrZero(1 , TamSx3("E2_PARCELA")[1]) As Character//Parcela do titulo do evento
+Local _cParAux	:= StrZero(1 , TamSX3("E2_PARCELA")[1]) As Character//Parcela do titulo do evento
 Local _nCont    := 0 As Numeric
 Local _nVlrEve	:= 0 As Numeric
 Local _nRegZLF	:= 0 As Numeric
 
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT ZL8_CONDIC CONDIC, R_E_C_N_O_ REGZL8
 	  FROM %Table:ZL8%
 	 WHERE ZL8_FILIAL = %xFilial:ZL8%
@@ -1820,7 +1820,7 @@ BeginSQL Alias _cAlias
 	   AND ZL8_MSBLQL <> '1'
 	   AND D_E_L_E_T_ = ' '
 	 ORDER BY ZL8_PRIORI
-EndSQL
+EndSql
 
 While (_cAlias)->(!Eof())
 	_nCont ++
@@ -1851,7 +1851,7 @@ While (_cAlias)->(!Eof())
 					//====================================================================================================
 					// Inclui um registro na ZLF de Debito referente ao valor do evento lido.
 					//====================================================================================================
-					_cSeekSE2 := xFILIAL("SE2")+ZL8->ZL8_PREFIX+_cNroTit+_cParAux+"NDF"+_cCODSA2+_cLOJSA2
+					_cSeekSE2 := xFilial("SE2")+ZL8->ZL8_PREFIX+_cNroTit+_cParAux+"NDF"+_cCODSA2+_cLOJSA2
 					_cSeekZLF := ITGRVZLF(_oProces,ZL8->ZL8_COD,_nVlrEve,_cSeekSE2,.T./*_lGrvZLF*/,/*_lAltZLF*/,/*_cSeq*/,_cCODZL3,_cCODZL2,_aParam,@_nRegZLF,/*_lImp*/,ZL8->ZL8_DEBCRE,@_lOk)
 
                     //====================================================================================================
@@ -1867,7 +1867,7 @@ While (_cAlias)->(!Eof())
 							// Baixa no titulo de valor bruto do produtor o valor da baixa do evento.
 							//====================================================================================================
 							If _lOk
-								_lOk := ITBXASE2(_oProces,_nVlrEve,_cPrefixo,_cNroNota,Padr(" ", TamSx3("E2_PARCELA")[1]),"NF ","",/*_cSeekZLF*/,.F./*_lVlPago*/,0/*_nRegZLF*/,_aParam,_cMotBaixa,ZL8->ZL8_COD,_cCODSA2,_cLOJSA2)
+								_lOk := ITBXASE2(_oProces,_nVlrEve,_cPrefixo,_cNroNota,PadR(" ", TamSX3("E2_PARCELA")[1]),"NF ","",/*_cSeekZLF*/,.F./*_lVlPago*/,0/*_nRegZLF*/,_aParam,_cMotBaixa,ZL8->ZL8_COD,_cCODSA2,_cLOJSA2)
 							Else
 								Exit
 							EndIf
@@ -1889,7 +1889,7 @@ While (_cAlias)->(!Eof())
 							// Baixa no titulo de valor bruto do produtor o valor da baixa do evento.
 							//====================================================================================================
 							If _lOk
-								_lOk := ITBXASE2(_oProces,_nSldPro,_cPrefixo,_cNroNota,Padr(" ", TamSx3("E2_PARCELA")[1]),"NF ","",/*_cSeekZLF*/,.F./*_lVlPago*/,0/*_nRegZLF*/,_aParam,_cMotBaixa,ZL8->ZL8_COD,_cCODSA2,_cLOJSA2)
+								_lOk := ITBXASE2(_oProces,_nSldPro,_cPrefixo,_cNroNota,PadR(" ", TamSX3("E2_PARCELA")[1]),"NF ","",/*_cSeekZLF*/,.F./*_lVlPago*/,0/*_nRegZLF*/,_aParam,_cMotBaixa,ZL8->ZL8_COD,_cCODSA2,_cLOJSA2)
 							Else
 								Exit
 							EndIf
@@ -1944,7 +1944,7 @@ Data da Criacao-: 19/01/2015
 Descrição-------: Rotina para efetuar acerto de Eventos referentes ao MIX
 				  Não é possível filtrar a linha nesse trecho, uma vez que todas as rotinas que geram as informações na SE2, 
 				  não informam a linha, consequentemente não é possível filtrar isso. Logo, todas as débitos serão retornados e
-				  descontados na primeira linha que for fechada. As linhas podem ser alteradas e ser informado um setor dife-
+				  descontados na primeira linha que For fechada. As linhas podem ser alteradas e ser informado um setor dife-
 				  rente do original, logo, não é possível vincular com a ZL3.
 Parametros------: Nenhum
 Retorno---------: Nenhum
@@ -1962,6 +1962,7 @@ Local _cSeekZLF	:= "" As Character
 Local _nRegZLF	:= 0 As Numeric
 Local _cMenAux	:= "" As Character
 Local _cFiltro	:= "%%" As Character
+Local _cFilStat	:= "% " As Character
 
 //===================================================================================================================================
 //Diferente das antecipações, os convênios precisam ser descontados em sua totalidade. Na hierarquia do que deve ser descontado 
@@ -1979,32 +1980,35 @@ Local _cFiltro	:= "%%" As Character
 //====================================================================================================================================
 If !_lDefini
 	_cFiltro := "% AND SE2.E2_LOJA = '"+_cLOJSA2+"' %"
+	_cFilStat += "IN ('E','A', 'P') %"
+Else
+	_cFilStat += "= 'E' %"
 EndIf
 
-BeginSQL Alias _cAlias
-	SELECT CASE 
-      WHEN ZL8_SITUAC = 'B' THEN 'PROCESSA'
+BeginSql Alias _cAlias
+	SELECT Case 
+      WHEN ZL8_SITUAC = 'B' THEN 'Processa'
       WHEN ZL8_SITUAC = 'D' AND SALDO_ZLF > SALDO_SE2 AND SALDO_LOJA - SUM(SALDO) OVER (ORDER BY ORDEM, E2_VENCTO ROWS UNBOUNDED PRECEDING) < 0 THEN 'IGNORA'
-      ELSE 'PROCESSA'
-      END PROCESSA,
+      Else 'Processa'
+      END Processa,
     SALDO_LOJA - SUM(SALDO) OVER (ORDER BY ORDEM, E2_VENCTO ROWS UNBOUNDED PRECEDING) PARCIAL,
     BASE.*
 	FROM (SELECT E2_VENCTO, ZL8_SITUAC, CONDIC, SALDO, E2_LOJA, REGSE2, REGZL8, SALDO_ZLF, SALDO_LOJA, SALDO_SE2,
-		CASE WHEN SALDO_ZLF > SALDO_SE2 AND ZL8_SITUAC = 'D' THEN 1
+		Case WHEN SALDO_ZLF > SALDO_SE2 AND ZL8_SITUAC = 'D' THEN 1
 		WHEN SALDO_ZLF > SALDO_SE2 AND ZL8_SITUAC <> 'D' THEN 2
 		WHEN SALDO_ZLF < SALDO_SE2 AND ZL8_SITUAC = 'D' THEN 2 
-		ELSE 1 END ORDEM
+		Else 1 END ORDEM
 	FROM (SELECT ZL8.ZL8_SITUAC, ZL8.ZL8_CONDIC CONDIC, SE2.E2_SALDO + SE2.E2_SDACRES - SE2.E2_SDDECRE SALDO,
 					SE2.E2_LOJA, SE2.E2_VENCTO, SE2.R_E_C_N_O_ REGSE2, ZL8.R_E_C_N_O_ REGZL8,
-					(SELECT NVL(SUM(CASE WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL ELSE ZLF.ZLF_TOTAL * -1 END),0)
+					(SELECT NVL(SUM(Case WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL Else ZLF.ZLF_TOTAL * -1 END),0)
 					FROM %Table:ZLF% ZLF
 					WHERE ZLF.D_E_L_E_T_ = ' '
 						AND ZLF_FILIAL = ZL8_FILIAL
 						AND ZLF_CODZLE = %exp:_cCodMix%
 						AND ZLF_A2COD = E2_FORNECE
 						AND ZLF_SETOR = E2_L_SETOR
-						AND ZLF_STATUS = 'E') SALDO_ZLF,
-					(SELECT NVL(SUM(CASE WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL ELSE ZLF.ZLF_TOTAL * -1 END), 0)
+						AND ZLF_STATUS %exp:_cFilStat%) SALDO_ZLF,
+					(SELECT NVL(SUM(Case WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL Else ZLF.ZLF_TOTAL * -1 END), 0)
 					FROM %Table:ZLF% ZLF
 					WHERE ZLF.D_E_L_E_T_ = ' '
 						AND ZLF_FILIAL = ZL8_FILIAL
@@ -2012,7 +2016,7 @@ BeginSQL Alias _cAlias
 						AND ZLF_A2COD = E2_FORNECE
 						AND ZLF_A2LOJA = %exp:_cLOJSA2%
 						AND ZLF_SETOR = E2_L_SETOR
-						AND ZLF_STATUS = 'E') SALDO_LOJA,
+						AND ZLF_STATUS %exp:_cFilStat%) SALDO_LOJA,
 					(SELECT SUM(E2_SALDO + E2_SDACRES - E2_SDDECRE)
 					FROM %Table:SE2% SE22, %Table:ZL8% ZL88
 						WHERE SE22.E2_FILIAL = %xFilial:SE2%
@@ -2050,10 +2054,10 @@ BeginSQL Alias _cAlias
 				AND ZL8.D_E_L_E_T_ = ' ')
 	ORDER BY ORDEM, E2_VENCTO) BASE
 		ORDER BY ORDEM, E2_VENCTO
-EndSQL
+EndSql
 
 While (_cAlias)->(!Eof()) 
-	If &(AllTrim((_cAlias)->CONDIC)) .And. (_cAlias)->PROCESSA == 'PROCESSA'
+	If &(AllTrim((_cAlias)->CONDIC)) .And. (_cAlias)->Processa == 'Processa'
 		ZL8->(DBGoTo((_cAlias)->REGZL8))
 		SE2->(DBGoTo((_cAlias)->REGSE2))
 		
@@ -2064,11 +2068,11 @@ While (_cAlias)->(!Eof())
 		//====================================================================================================
 		_nVlrBx := _nSldTit + _nJurTit
 		//====================================================================================================
-		// Se o saldo do produtor for maior que zero, baixa os titulos no SE2.
+		// Se o saldo do produtor For maior que zero, baixa os titulos no SE2.
 		//====================================================================================================
 		If _nSldPro > 0
 			//====================================================================================================
-			// Se o saldo do produtor menos o saldo do titulo for maior ou igual a zero, baixa o SE2.
+			// Se o saldo do produtor menos o saldo do titulo For maior ou igual a zero, baixa o SE2.
 			//====================================================================================================
 			If (_nSldPro - _nVlrBx) >= 0
 				//====================================================================================================
@@ -2090,7 +2094,7 @@ While (_cAlias)->(!Eof())
 					// diferente da NDF que pode ser de uma loja diferente.
 					//====================================================================================================
 					If _lOk
-						_lOk := ITBXASE2(_oProces,_nVlrBx,_cPrefixo,_cNroNota,Padr(" ", TamSx3("E2_PARCELA")[1]),"NF ","",/*_cSeekZLF*/,.F./*_lVlPago*/,0/*_nRegZLF*/,_aParam,_cMotBaixa,ZL8->ZL8_COD,_cCODSA2,_cLOJSA2)
+						_lOk := ITBXASE2(_oProces,_nVlrBx,_cPrefixo,_cNroNota,PadR(" ", TamSX3("E2_PARCELA")[1]),"NF ","",/*_cSeekZLF*/,.F./*_lVlPago*/,0/*_nRegZLF*/,_aParam,_cMotBaixa,ZL8->ZL8_COD,_cCODSA2,_cLOJSA2)
 					Else
 						Exit
 					EndIf
@@ -2137,7 +2141,7 @@ While (_cAlias)->(!Eof())
 						// diferente da NDF que pode ser de uma loja diferente.
 						//====================================================================================================
 						If _lOk
-							_lOk := ITBXASE2(_oProces,_nSldPro,_cPrefixo,_cNroNota,Padr(" ", TamSx3("E2_PARCELA")[1]),"NF ","",/*_cSeekZLF*/,.F./*_lVlPago*/,0/*_nRegZLF*/,_aParam,_cMotBaixa,ZL8->ZL8_COD,_cCODSA2,_cLOJSA2)
+							_lOk := ITBXASE2(_oProces,_nSldPro,_cPrefixo,_cNroNota,PadR(" ", TamSX3("E2_PARCELA")[1]),"NF ","",/*_cSeekZLF*/,.F./*_lVlPago*/,0/*_nRegZLF*/,_aParam,_cMotBaixa,ZL8->ZL8_COD,_cCODSA2,_cLOJSA2)
 						Else
 							Exit
 						EndIf
@@ -2162,7 +2166,7 @@ While (_cAlias)->(!Eof())
 					//====================================================================================================
 					ElseIf ZL8->ZL8_SITUAC == 'D'
 						//====================================================================================================
-						// Não processa o fechamento de produtores com convênio se não existir saldo a baixar
+						// Não Processa o fechamento de produtores com convênio se não existir saldo a baixar
 						//====================================================================================================
 						_cMenAux := _cCODSA2 +';'+ _cLOJSA2 +';'+ _cCODZL2 +';'+ _cCODZL3 +';Atualização de Convênio;O Produtor não tem saldo para baixar o convênio! O Fornecedor não terá o Fechamento realizado até que o convênio seja regularizado.'
 						_oProces:SaveLog("Thread:"+_cThread+" MGLT00933 - " + _cMenAux)
@@ -2243,7 +2247,7 @@ Static Function ITVLDEVE(_cCodMix As Character,_cCodSetor As Character,_cCodProd
 Local _cAlias	:= GetNextAlias() As Character
 Local _lRet		:= .T.
 
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT COUNT(1) NUMREG
 	  FROM %Table:ZLF%
 	 WHERE ZLF_FILIAL = %xFilial:ZLF%
@@ -2275,7 +2279,7 @@ Parametros------: Nenhum
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-Static function ITGETDES(_cMix As Character,_cCodProd As Character,_cLoja As Character,_nVlrNF As Numeric,_cLinha As Character,_cSetor As Character)
+Static Function ITGETDES(_cMix As Character,_cCodProd As Character,_cLoja As Character,_nVlrNF As Numeric,_cLinha As Character,_cSetor As Character)
 
 Local _cAlias	:= GetNextAlias() As Character
 Local _cRet		:= "Produtor: "+_cCodProd+"-"+_cLoja+"; Relacao de Descontos:; " As Character
@@ -2284,20 +2288,20 @@ Local _nTotDesc	:= 0 As Numeric
 //====================================================================================================
 // Obtendo Eventos de Desconto
 //====================================================================================================
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT ZLF_TOTAL,
-		CASE WHEN ZL8_PREFIX = 'GLE' THEN  ZLF_EVENTO || '-' || RTRIM(ZL8_DESCRI) || ' PARC. ' ||
-			(SELECT SUBSTR(E2_HIST, 24, 5)
+		Case WHEN ZL8_PREFIX = 'GLE' THEN  ZLF_EVENTO || '-' || RTRIM(ZL8_DESCRI) || ' PARC. ' ||
+			(SELECT SubStr(E2_HIST, 24, 5)
 				FROM %Table:SE2% SE2
 				WHERE E2_FILIAL = ZLF_FILIAL
-				AND E2_PREFIXO = SUBSTR(ZLF_L_SEEK, 3, 3)
-				AND E2_NUM = SUBSTR(ZLF_L_SEEK, 6, 9)
-				AND E2_PARCELA = SUBSTR(ZLF_L_SEEK, 15, 2)
-				AND E2_TIPO = SUBSTR(ZLF_L_SEEK, 17, 3)
-				AND E2_FORNECE = SUBSTR(ZLF_L_SEEK, 20, 6)
-				AND E2_LOJA = SUBSTR(ZLF_L_SEEK, 26, 4)
+				AND E2_PREFIXO = SubStr(ZLF_L_SEEK, 3, 3)
+				AND E2_NUM = SubStr(ZLF_L_SEEK, 6, 9)
+				AND E2_PARCELA = SubStr(ZLF_L_SEEK, 15, 2)
+				AND E2_TIPO = SubStr(ZLF_L_SEEK, 17, 3)
+				AND E2_FORNECE = SubStr(ZLF_L_SEEK, 20, 6)
+				AND E2_LOJA = SubStr(ZLF_L_SEEK, 26, 4)
 				AND SE2.D_E_L_E_T_ = ' ')
-			ELSE ZLF_EVENTO || '-' || ZL8_DESCRI END DESCRI
+			Else ZLF_EVENTO || '-' || ZL8_DESCRI END DESCRI
 	FROM %Table:ZLF% ZLF, %Table:ZL8% ZL8
 	WHERE ZLF_FILIAL = ZL8_FILIAL
 	AND ZLF_EVENTO = ZL8_COD
@@ -2310,7 +2314,7 @@ BeginSQL Alias _cAlias
 	AND ZLF_DEBCRE = 'D'
 	AND ZLF.D_E_L_E_T_ = ' '
 	AND ZL8.D_E_L_E_T_ = ' '
-EndSQL
+EndSql
 
 While (_cAlias)->(!Eof())
 	_cRet		+= PadR(Left((_cAlias)->DESCRI,40),39) +":"+ Transform((_cAlias)->ZLF_TOTAL , "@E 9,999,999.99") +";"
@@ -2335,12 +2339,12 @@ Parametros------: Nenhum
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-Static function ITGETMOV(_cMix As Character,_cCodProd As Character,_cLoja As Character,_nVlrNF As Numeric,_cLinha As Character,_cSetor As Character)
+Static Function ITGETMOV(_cMix As Character,_cCodProd As Character,_cLoja As Character,_nVlrNF As Numeric,_cLinha As Character,_cSetor As Character)
 
 Local _aArea	:= FWGetArea() As Array
 Local _aTemp	:= {} As Array
 Local _cRet		:= "" As Character
-Local _dDtAtual	:= StoD('') As Date
+Local _dDtAtual	:= SToD('') As Date
 
 //====================================================================================================
 // Obtendo movimentacao Diaria
@@ -2349,7 +2353,7 @@ _dDtAtual	:= ZLE->ZLE_DTINI
 _aTemp		:= {}
 
 While _dDtAtual <= ZLE->ZLE_DTFIM
-	aAdd(_aTemp , { SubStr(DtoS(_dDtAtual) , 7 , 2) , Transform(U_GetVolDay(_cCodProd , _cLoja , DtoS(_dDtAtual)) , "@E 99999") })
+	aAdd(_aTemp , { SubStr(DToS(_dDtAtual) , 7 , 2) , Transform(U_GetVolDay(_cCodProd , _cLoja , DToS(_dDtAtual)) , "@E 99999") })
 	_dDtAtual++
 EndDo
 
@@ -2416,7 +2420,7 @@ Static Function ValTotNF(_oProces As Object,_cCodMix As Character,_cCODSA2 As Ch
 Local _cAlias	:= GetNextAlias() As Character
 Local _lRet		:= .T. As Logical
 
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT SUM(ZLF_TOTAL) CREDITO,
        (SELECT SUM(F1_VALMERC) FROM %Table:SF1% WHERE D_E_L_E_T_ = ' '
            AND F1_FILIAL = ZLF_FILIAL

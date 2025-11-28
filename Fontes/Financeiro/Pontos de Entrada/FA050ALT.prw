@@ -1,27 +1,25 @@
 /*
-=========================================================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-=============================================================================================================================== 
-Analista        - Programador     - Inicio     - Envio      - Chamado - Motivo de Alteração
 ===============================================================================================================================
-Antonio Ramos   - Igor Melgaço    - 18/12/2025 - 23/01/2025 - 49056   - Ajustes para gravação de historico de alterações de campo da SE2
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+===============================================================================================================================
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+Igor Melgaço  |23/01/2025| Chamado 49056. Ajustes para gravação de historico de alterações de campo da SE2
 =============================================================================================================================== 
 */
+
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: FA050ALT
 Autor-------------: Igor Melgaço
 Data da Criacao---: 02/01/2025	
-===============================================================================================================================
 Descrição---------: O ponto de entrada FA050ALT sera executado na validacao da alteracao dos dados do contas a pagar
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T.
 ===============================================================================================================================
 */
-
 User Function FA050ALT() As Logical
 
 Local lRet As Logical
@@ -41,21 +39,21 @@ _cAlt  := ""
 For _nI := 1 to Len(_a2Struct)
    If SE2->&(_a2Struct[_nI,1]) <> M->&(_a2Struct[_nI,1]) 
       
-      If Alltrim(_a2Struct[_nI,2]) == "N"
+      If AllTrim(_a2Struct[_nI,2]) == "N"
 
          _cPict := PesqPict( "SE2",_a2Struct[_nI,1])
          _cOrig := Transform(SE2->&(_a2Struct[_nI,1]),_cPict) 
          _cAlt  := Transform(M->&(_a2Struct[_nI,1]),_cPict) 
 
-      ElseIf Alltrim(_a2Struct[_nI,2]) == "D"
+      ElseIf AllTrim(_a2Struct[_nI,2]) == "D"
 
-         _cOrig := DTOC(SE2->&(_a2Struct[_nI,1]))
-         _cAlt  := DTOC(M->&(_a2Struct[_nI,1]))
+         _cOrig := DToC(SE2->&(_a2Struct[_nI,1]))
+         _cAlt  := DToC(M->&(_a2Struct[_nI,1]))
 
-      ElseIf Alltrim(_a2Struct[_nI,2]) == "L"
+      ElseIf AllTrim(_a2Struct[_nI,2]) == "L"
 
-         _cOrig := Iif(SE2->&(_a2Struct[_nI,1]),".T.",".F.")
-         _cAlt  := Iif(M->&(_a2Struct[_nI,1]),".T.",".F.")
+         _cOrig := IIf(SE2->&(_a2Struct[_nI,1]),".T.",".F.")
+         _cAlt  := IIf(M->&(_a2Struct[_nI,1]),".T.",".F.")
 
       Else
 

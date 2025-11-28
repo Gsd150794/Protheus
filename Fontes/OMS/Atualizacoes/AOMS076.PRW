@@ -2,120 +2,105 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor       |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Julio Paz    | 07/12/2018 | Chamado 27291. Alterar a rotina para enviar mensagem de rejeição mas gravar flag envio com N. 
--------------------------------------------------------------------------------------------------------------------------------  
-Julio Paz    | 14/03/2019 | Chamado 28398. Ajustar e padronizar fonte para funcionar com o novo servidor Totvs Loboguará.  
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges | 16/10/2019 | Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer| 16/10/2023 | Chamado 45259. Correção do error.log: array out of bounds.
--------------------------------------------------------------------------------------------------------------------------------
-Julio Paz    | 08/03/2024 | Chamado 45006. Ajustar variável __cUserId em ambiente Scheduller p/ Protheus criar e preencher.
+Alex Wallauer |16/10/2023| Chamado 45259. Correção do error.log: array out of bounds.
+Julio Paz     |08/03/2024| Chamado 45006. Ajustar variável __cUserId em ambiente Scheduller p/ Protheus criar e preencher.
+Lucas Borges  |17/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes e Defines da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
-#INCLUDE "APWEBSRV.CH"
+
+#Include "TOTVS.ch"
+#Include "APWEBSRV.CH"
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS076
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 13/09/2016
-===============================================================================================================================
 Descrição---------: Rotina de integração e envio de dados dos clientes via webservice para empresa RDC.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS076()
+
 Local _aCores := {}
 Private aRotina := {}
 Private cCadastro 
 Private _lScheduler:= ( Select("SM0") <= 0 )
 
-IF _lScheduler
+If _lScheduler
 
-   u_itconout( '[AOMS076] - '+ DtoC(Date()) +' - '+ Time() +'] - Abrindo o ambiente...' )
+   u_itconout( '[AOMS076] - '+ DToC(Date()) +' - '+ Time() +'] - Abrindo o ambiente...' )
 
    RPCSetType(3)
    RpcSetEnv( "01" , "01" ,,,"COM", "SCHEDULE_INT_CLI_RDC" , {'SC5','SC6','ZFH','SA1','ZP1'} )
    Sleep( 5000 ) //Aguarda 5 segundos para subam as configurações do ambiente.
 
-   cUSUARIO := SPACE(06)+"Administrador  " // Quando o ambiente é iniciado. O Protheus já está criando estas variáveis com usuário.
-   cUsername:= "Schedure"                  // Quando o ambiente é iniciado. O Protheus já está criando estas variáveis com usuário.
-   //__CUSERID:= "SCHEDULE"                  // Quando o ambiente é iniciado. O Protheus já está criando estas variáveis com usuário.
-   
+   cUSUARIO := Space(06)+"Administrador  " // Quando o ambiente é iniciado. O Protheus já está criando estas variáveis com usuário.
+   cUserName:= "Schedure"                  // Quando o ambiente é iniciado. O Protheus já está criando estas variáveis com usuário.
+  
    U_AOMS076I()
 
-ELSE
+Else
 
    cCadastro := "Integração dos Dados dos Clientes Via Webservice: Italac <---> RDC"
-   Aadd(aRotina,{"Pesquisar" ,"AxPesqui" ,0,1})
-   Aadd(aRotina,{"Visualizar","AxVisual",0,2})
-   Aadd(aRotina,{"Integracao Webservice" ,"U_AOMS076I",0,4})
-   Aadd(aRotina,{"Legenda"   ,"U_AOMS076L" ,0,3})
+   aAdd(aRotina,{"Pesquisar" ,"AxPesqui" ,0,1})
+   aAdd(aRotina,{"Visualizar","AxVisual",0,2})
+   aAdd(aRotina,{"Integracao Webservice" ,"U_AOMS076I",0,4})
+   aAdd(aRotina,{"Legenda"   ,"U_AOMS076L" ,0,3})
    
-   Aadd(_aCores,{"ZFH_SITUAC == 'N'" ,"BR_VERDE" })
-   Aadd(_aCores,{"ZFH_SITUAC == 'P'" ,"BR_VERMELHO" })
-   Aadd(_aCores,{"ZFH_SITUAC == 'R'" ,"BR_AMARELO" })
+   aAdd(_aCores,{"ZFH_SITUAC == 'N'" ,"BR_VERDE" })
+   aAdd(_aCores,{"ZFH_SITUAC == 'P'" ,"BR_VERMELHO" })
+   aAdd(_aCores,{"ZFH_SITUAC == 'R'" ,"BR_AMARELO" })
 
-   DbSelectArea("ZFH")
-   ZFH->(DbSetOrder(1)) 
-   ZFH->(DbGoTop())
+   DBSelectArea("ZFH")
+   ZFH->(DBSetOrder(1)) 
+   ZFH->(DBGoTop())
    MBrowse(6,1,22,75,"ZFH", , , , , , _aCores)
    
-ENDIF
+EndIf
 
-Return Nil    
+Return    
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS076L
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 13/09/2016
-===============================================================================================================================
 Descrição---------: Rotina de Exibição da Legenda do MBrowse.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS076L       
+
 Local _aLegenda := {}
 
 Begin Sequence
-   Aadd(_aLegenda,{"BR_VERDE"    ,"Não Processado" })
-   Aadd(_aLegenda,{"BR_AMARELO"  ,"Rejeitada" })
-   Aadd(_aLegenda,{"BR_VERMELHO" ,"Processado" })
+   aAdd(_aLegenda,{"BR_VERDE"    ,"Não Processado" })
+   aAdd(_aLegenda,{"BR_AMARELO"  ,"Rejeitada" })
+   aAdd(_aLegenda,{"BR_VERMELHO" ,"Processado" })
 
    BrwLegenda(cCadastro, "Legenda", _aLegenda)
 
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS076I
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 13/09/2016
-===============================================================================================================================
 Descrição---------: Rotina de integração e envio de dados dos clientes via webservice para empresa RDC.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS076I()
+
 Local _lRet := .F.
 Local _aStrucZFH
 Local _aOrd := SaveOrd({"ZFH"})
@@ -140,26 +125,26 @@ Begin Sequence  
    FillGetDados(1,"ZFH",1,,,{||.T.},,,,,,.T.)
    
    //                          1                    2               3              4               5                6             7        8              9                 10 
-   // AADD(aHeader, {Alltrim(SX3->X3_TITULO), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL,"AllwaysTrue()", USADO, SX3->X3_TIPO, SX3->X3_ARQUIVO, SX3->X3_CONTEXT})
+   // aAdd(aHeader, {AllTrim(SX3->X3_TITULO), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL,"AllwaysTrue()", USADO, SX3->X3_TIPO, SX3->X3_ARQUIVO, SX3->X3_CONTEXT})
    
    //================================================================================
    // Cria as estruturas das tabelas temporárias
    //================================================================================
    _aStrucZFH := ZFH->(DbStruct())
-   Aadd(_aStrucZFH,{"WK_OK"  , "C", 2 ,0})
-   Aadd(_aStrucZFH,{"WKRECNO", "N", 10,0})
+   aAdd(_aStrucZFH,{"WK_OK"  , "C", 2 ,0})
+   aAdd(_aStrucZFH,{"WKRECNO", "N", 10,0})
          
    //================================================================================
    // Monta as colunas do MSSELECT para a tabela temporária TRBZFH 
    //================================================================================
-   Aadd( _aCmpZFH , { "WK_OK"		,    , "Marca"                                          ,"@!"})
+   aAdd( _aCmpZFH , { "WK_OK"		,    , "Marca"                                          ,"@!"})
    
    For _nI := 1 To Len(aHeader)
        If AllTrim(aHeader[_nI,2]) $ "ZFH_FILIAL/ZFH_ALI_WT/ZFH_REC_WT"
           Loop
        EndIf
                           // X3_CAMPO             X3_TITULO          X3_PICTURE
-       Aadd( _aCmpZFH , { aHeader[_nI,2], "" , aHeader[_nI,1]  , aHeader[_nI,3] } )
+       aAdd( _aCmpZFH , { aHeader[_nI,2], "" , aHeader[_nI,1]  , aHeader[_nI,3] } )
    Next
 
    //================================================================================
@@ -176,30 +161,30 @@ Begin Sequence  
    //================================================================================
    // Tratamento para Schedule
    //================================================================================
-   IF _lScheduler
+   If _lScheduler
 
-       u_itconout( '[AOMS076] - '+ DtoC(Date()) +' - '+ Time() +'] - Consultando os dados para o processamento...' )
+       u_itconout( '[AOMS076] - '+ DToC(Date()) +' - '+ Time() +'] - Consultando os dados para o processamento...' )
 
        _nTot := 0
        U_AOMS076D()//'Lendo dados a serem integrados...'
 
        If _nTot = 0
 
-          u_itconout( '[AOMS076] - '+ DtoC(Date()) +' - '+ Time() +'] - Não foram encontrados registros para processar.' )
+          u_itconout( '[AOMS076] - '+ DToC(Date()) +' - '+ Time() +'] - Não foram encontrados registros para processar.' )
 
-       ELSE
+       Else
 
-          u_itconout( '[AOMS076] - '+ DtoC(Date()) +' - '+ Time() +'] - Processando '+ ALLTRIM(Str( _nTot , 6 )) +' registros...' )
+          u_itconout( '[AOMS076] - '+ DToC(Date()) +' - '+ Time() +'] - Processando '+ AllTrim(Str( _nTot , 6 )) +' registros...' )
 
           U_AOMS076W()//'Integrando Dados do Cliente...' )
 
-       ENDIF
+       EndIf
        
-       BREAK
+       Break
 
-   ENDIF
+   EndIf
                                         
-   AADD(_aButtons,{"RESPONSA",{|| U_AOMS076M("T") },"Marc/Des","Marca/Desmarca Todos"})
+   aAdd(_aButtons,{"RESPONSA",{|| U_AOMS076M("T") },"Marc/Des","Marca/Desmarca Todos"})
 
    //================================================================================
    // Carrega os dados da tabela ZFH
@@ -232,29 +217,26 @@ End Sequence
 // Fecha e exclui as tabelas temporárias
 //================================================================================                    
 If Select("TRBZFH") > 0
-   TRBZFH->(DbCloseArea())
+   TRBZFH->(DBCloseArea())
 EndIf
 
 RestOrd(_aOrd)
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: AOMS076M
 Autor-----------: Julio de Paula Paz
 Data da Criacao-: 13/09/2016
-===============================================================================================================================
 Descrição-------: Função para marcar e desmarcar todos clientes que serão integrados via Webservice.
-===============================================================================================================================
 Parametros------: _cTipoMarca = "T" = Marca e desmarca todos os registros.
                   _cTipoMarca = "P" = Marca e desmarca apena o registro posisionado.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
-
 */
 User Function AOMS076M(_cTipoMarca)
+
 Local _cSimboloMarca := Space(2)
 Local _nRegAtu := TRBZFH->(Recno()) 
 
@@ -268,40 +250,38 @@ Begin Sequence
    If _cTipoMarca == "P"
       TRBZFH->(RecLock("TRBZFH",.F.))
       TRBZFH->WK_OK := _cSimboloMarca 
-      TRBZFH->(MsUnlock())
+      TRBZFH->(MSUnLock())
    Else
-      TRBZFH->(DbGoTop())
-      Do While ! TRBZFH->(Eof())
+      TRBZFH->(DBGoTop())
+      While ! TRBZFH->(Eof())
          TRBZFH->(RecLock("TRBZFH",.F.))
          TRBZFH->WK_OK := _cSimboloMarca 
-         TRBZFH->(MsUnlock()) 
+         TRBZFH->(MSUnLock()) 
          
-         TRBZFH->(DbSkip())
+         TRBZFH->(DBSkip())
       EndDo
    
    EndIf
            
 End Sequence
 
-TRBZFH->(DbGoTo(_nRegAtu)) 
+TRBZFH->(DBGoTo(_nRegAtu)) 
 _oMarkZFH:oBrowse:Refresh()
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS076W
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 13/09/2016
-===============================================================================================================================
 Descrição---------: Gera os dados XML com base nos clientes selecionados e integra via webservice.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
-User Function AOMS076W()             
+User Function AOMS076W
+
 Local _cDirXML := ""
 Local _cLink   := ""
 Local _cCabXML := ""
@@ -318,61 +298,61 @@ Begin Sequence
    //================================================================================
    // Verifica se há itens selecionados e lê o código da empresa de WebService.
    //================================================================================                    
-IF !_lScheduler
+If !_lScheduler
 
    ProcRegua(8)
    IncProc("Verificando itens selecionados...")
-   TRBZFH->(DbGoTop())                                                                   
-   Do While ! TRBZFH->(Eof())
+   TRBZFH->(DBGoTop())                                                                   
+   While ! TRBZFH->(Eof())
       If ! Empty(TRBZFH->WK_OK)   
          _cEmpWebService := TRBZFH->ZFH_CODEMP                         
          _lItemSelect := .T. 
          Exit
       EndIf                 
       
-      TRBZFH->(DbSkip())
+      TRBZFH->(DBSkip())
    EndDo 
    
    If ! _lItemSelect
-      u_itmsg("Nenhum item foi selecionado para integração Webservice. Não será possível realizar a integração Italac <---> RDC.","Atenção",,1)
+      U_ITMsg("Nenhum item foi selecionado para integração Webservice. Não será possível realizar a integração Italac <---> RDC.","Atenção",,1)
       Break   
    EndIf              
 
    IncProc("Identificando diretório dos XML...")                    
 
-ELSE
+Else
 
-   TRBZFH->(DbGoTop())//Todos estão marcados
+   TRBZFH->(DBGoTop())//Todos estão marcados
   _cEmpWebService := TRBZFH->ZFH_CODEMP                         
 
-ENDIF
+EndIf
    
    //================================================================================
    // Lê o diretório dos arquivos XML modelos e o link de envio dos dados.
    //================================================================================
-   ZFM->(DbSetOrder(1))
-   If ZFM->(DbSeek(xFilial("ZFM")+_cEmpWebService))
+   ZFM->(DBSetOrder(1))
+   If ZFM->(DBSeek(xFilial("ZFM")+_cEmpWebService))
       _cDirXML := ZFM->ZFM_LOCXML 
       _cLink   := AllTrim(ZFM->ZFM_LINK01)
    Else
-      IF _lScheduler
+      If _lScheduler
          u_itconout( "[AOMS076] - Empresa WebService para envio dos dados não localizada.")
-      ELSE
-         u_itmsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
-      ENDIF
+      Else
+         U_ITMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
+      EndIf
       Break   
    EndIf                        
    
    If Empty(_cDirXML) .Or. Empty(_cLink)
-      IF _lScheduler
+      If _lScheduler
          u_itconout("[AOMS076] - Diretório dos arquivos XML modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".")
-      ELSE
-         u_itmsg("Diretório dos arquivos XML modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)
-      ENDIF
+      Else
+         U_ITMsg("Diretório dos arquivos XML modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)
+      EndIf
       Break                                     
    EndIf
       
-   _cDirXML := Alltrim(_cDirXML)
+   _cDirXML := AllTrim(_cDirXML)
    If Right(_cDirXML,1) <> "\"
       _cDirXML := _cDirXML + "\"
    EndIf
@@ -380,57 +360,57 @@ ENDIF
    //================================================================================
    // Lê os arquivos modelo XML e os transforma em String.
    //================================================================================
-   IF !_lScheduler
+   If !_lScheduler
       IncProc("Lendo arquivo XML Modelo de Cabeçalho...")    
    Else
       u_itconout("[AOMS076] - Lendo arquivo XML Modelo de Cabeçalho.")                  
-   ENDIF
+   EndIf
    _cCabXML := U_AOMS076X(_cDirXML+"Cab_EntradaCliente.txt") 
    If Empty(_cCabXML)
-      IF _lScheduler
+      If _lScheduler
          u_itconout("[AOMS076] - Erro na leitura do arquivo XML modelo do cabeçalho de entrada cliente.")
-      ELSE
-         u_itmsg("Erro na leitura do arquivo XML modelo do cabeçalho de entrada cliente. ","Atenção",,1)
-      ENDIF
+      Else
+         U_ITMsg("Erro na leitura do arquivo XML modelo do cabeçalho de entrada cliente. ","Atenção",,1)
+      EndIf
       Break
    EndIf
    
-   IF !_lScheduler
+   If !_lScheduler
       IncProc("Lendo arquivo XML Modelo de Detalhe...")
    Else
       u_itconout("[AOMS076] - Lendo arquivo XML Modelo de Detalhe.")
-   ENDIF
+   EndIf
    
    _cDetXML := U_AOMS076X(_cDirXML+"Det_EntradaCliente.txt")
    If Empty(_cDetXML)
-      IF _lScheduler
+      If _lScheduler
          u_itconout("[AOMS076] - Erro na leitura do arquivo XML modelo do detalhe de entrada cliente.")
-      ELSE
-          u_itmsg("Erro na leitura do arquivo XML modelo do detalhe de entrada cliente.","Atenção",,1)
-      ENDIF
+      Else
+          U_ITMsg("Erro na leitura do arquivo XML modelo do detalhe de entrada cliente.","Atenção",,1)
+      EndIf
       Break
    EndIf            
    
-   IF !_lScheduler
+   If !_lScheduler
       IncProc("Lendo arquivo XML Modelo de Rodapé...")
    Else
       u_itconout("[AOMS076] - Lendo arquivo XML Modelo de Rodapé.")
-   ENDIF
+   EndIf
    
    _cRodXML := U_AOMS076X(_cDirXML+"Rodape_EntradaCliente.txt")
    If Empty(_cRodXML)
-      IF _lScheduler
+      If _lScheduler
          u_itconout("[AOMS076] - Erro na leitura do arquivo XML modelo do rodapé de entrada cliente.")
-      ELSE
-         u_itmsg("Erro na leitura do arquivo XML modelo do rodapé de entrada cliente.","Atenção",,1)
-      ENDIF
+      Else
+         U_ITMsg("Erro na leitura do arquivo XML modelo do rodapé de entrada cliente.","Atenção",,1)
+      EndIf
       Break
    EndIf
    
    //================================================================================
    // Concatena os clientes selecionados e monta array de XML com os dados.
    //================================================================================                       
-   IF !_lScheduler
+   If !_lScheduler
       IncProc("Montando dados de envio...")
    Else
       u_itconout("[AOMS076] - Montando dados de envio.")
@@ -446,23 +426,23 @@ ENDIF
    
    _aresult := {}
                   
-   TRBZFH->(DbGoTop())                                                                   
-   Do While ! TRBZFH->(Eof())
+   TRBZFH->(DBGoTop())                                                                   
+   While ! TRBZFH->(Eof())
           
       If ! Empty(TRBZFH->WK_OK)   
-         ZFH->(DbGoto(TRBZFH->WKRECNO))
+         ZFH->(DBGoTo(TRBZFH->WKRECNO))
          
          If Empty(ZFH->ZFH_COD)
             If ZFH->ZFH_RECSA1 > 0
-               SA1->(DbGoto(ZFH->ZFH_RECSA1))
+               SA1->(DBGoTo(ZFH->ZFH_RECSA1))
                If Empty(SA1->A1_I_DNRDC)
                   SA1->(RecLock("SA1",.F.)) 
                   SA1->A1_I_DNRDC := U_AOMS076E() // Grava o próximo codigo DNRDC na tabala SA1.
-                  SA1->(MsUnlock()) 
+                  SA1->(MSUnLock()) 
                                         
                   ZFH->(RecLock("ZFH",.F.))
                   ZFH->ZFH_COD := SA1->A1_I_DNRDC // Grava o código DN da tabela SA1 na tabela ZFH. 
-                  ZFH->(MsUnlock())                  
+                  ZFH->(MSUnLock())                  
                EndIf   
             EndIf
          EndIf
@@ -472,7 +452,7 @@ ENDIF
  		    _cXML := _cCabXML + &(_cDetXML) + _cRodXML  // Monta o XML de envio.   
  		    
  		    //Limpa & da string
- 		    _cXML := strtran(_cXML,"&"," ")
+ 		    _cXML := StrTran(_cXML,"&"," ")
          
 
 		    // Envia para o servidor
@@ -498,67 +478,65 @@ ENDIF
  		
  		    //grava resultado // sempre como processado
             ZFH->(RecLock("ZFH",.F.))
-            ZFH->ZFH_SITUAC  := _cSituacao // iif(_cok, "P", "N")
-            If Type("__CUSERID") = "C" .And. ! Empty(__CUSERID)
-               ZFH->ZFH_USUARI  := __CUSERID
+            ZFH->ZFH_SITUAC  := _cSituacao // IIf(_cok, "P", "N")
+            If Type("__cUserId") = "C" .And. ! Empty(__cUserId)
+               ZFH->ZFH_USUARI  := __cUserId
             EndIf 
             ZFH->ZFH_DATAAL  := Date()
-            ZFH->ZFH_RETORN  := strtran(_cResult,Chr(10)," ") // grava o resultado da integração na tabela ZFH,dizendo que deu certo ou não.
+            ZFH->ZFH_RETORN  := StrTran(_cResult,Chr(10)," ") // grava o resultado da integração na tabela ZFH,dizendo que deu certo ou não.
             ZFH->ZFH_XML     := _cXML
-            ZFH->(MsUnlock())
+            ZFH->(MSUnLock())
         
-            Aadd(_aresult,{ZFH->ZFH_CGC,ZFH->ZFH_NOME,ZFH->ZFH_RETORN}) // adicona em um array para fazer um item list, exibir os resultados.
+            aAdd(_aresult,{ZFH->ZFH_CGC,ZFH->ZFH_NOME,ZFH->ZFH_RETORN}) // adicona em um array para fazer um item list, exibir os resultados.
             Sleep(100) //Espera para não travar a comunicação com o webservice da RDC
-            IF !_lScheduler
+            If !_lScheduler
                IncProc(ZFH->ZFH_CGC + " - "  + ZFH->ZFH_RETORN)
             Else
                u_itconout("[AOMS076] - Integrado: " + ZFH->ZFH_CGC + " - "  + ZFH->ZFH_RETORN)
-            ENDIF
+            EndIf
 
          End Transaction
       EndIf       
                 
-      TRBZFH->(DbSkip())
+      TRBZFH->(DBSkip())
          
    EndDo 
    
-   IF _lScheduler
+   If _lScheduler
       u_itconout("[AOMS076] - Integração finalizada. ")
    Else
       _aCabecalho := {}
-      Aadd(_aCabecalho,"CGC" ) 
-      Aadd(_aCabecalho,"NOME") 
-      Aadd(_aCabecalho,"RETORNO") 
+      aAdd(_aCabecalho,"CGC" ) 
+      aAdd(_aCabecalho,"NOME") 
+      aAdd(_aCabecalho,"RETORNO") 
              
       _cTitulo := "Resultados da integração"
       
-      If len(_aresult) > 0 // .AND. !_lScheduler
+      If Len(_aresult) > 0 // .And. !_lScheduler
       
   	     u_ITListBox( _cTitulo , _aCabecalho , _aresult , /*_lMaxSiz*/ , /*_nTipo*/ ,  ) // Exibe uma tela de resultado.
   	  
-  	  Endif
+  	  EndIf
    EndIf 
    
 End Sequence
 
 RestOrd(_aOrd)
 
-Return Nil   
+Return   
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS076X
 Aut2or-------------: Julio de Paula Paz
 Data da Criacao---: 13/09/2016
-===============================================================================================================================
 Descrição---------: Lê o arquivo XML modelo no diretório informado e retorna os dados no formato de String.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS076X(_cArq)
+
 Local _cRet := ""
 Local _nStatusArq 
 Local _cLine 
@@ -569,13 +547,11 @@ Begin Sequence
    // Se houver erro de abertura abandona processamento
    If _nStatusArq = -1  
       Break
-   Endif
+   EndIf
    
    // Posiciona na primeria linha
-   FT_FGoTop()
-
-  
-   While !FT_FEOF()   
+   FT_FGoTop()  
+   While !FT_FEof()   
       _cLine  := FT_FReadLn() 
       
       _cRet +=  _cLine
@@ -595,45 +571,43 @@ Return _cRet
 Programa----------: AOMS076W
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 13/09/2016
-===============================================================================================================================
 Descrição---------: Grava em tabela temporária os dados a serem integrados via webservice.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS076D()
+
 Local _lRet := .F.,_nI
 _nTot := 0
 
 Begin Sequence
    
-   IF !_lScheduler
+   If !_lScheduler
       ProcRegua(0)
-   ENDIF
-   ZFH->(DbSetOrder(2))  // ZFF_FILIAL+ZFF_SITUAC
-   ZFH->(DbSeek(xFilial("ZFH")+"N"))
-   Do While ! ZFH->(Eof()) .And. ZFH->(ZFH_FILIAL+ZFH_SITUAC) == xFilial("ZFH")+"N"
-      IF !_lScheduler
+   EndIf
+   ZFH->(DBSetOrder(2))  // ZFF_FILIAL+ZFF_SITUAC
+   ZFH->(DBSeek(xFilial("ZFH")+"N"))
+   While ! ZFH->(Eof()) .And. ZFH->(ZFH_FILIAL+ZFH_SITUAC) == xFilial("ZFH")+"N"
+      If !_lScheduler
          IncProc("Lendo Cliente: "+ZFH->ZFH_COD)
-      ENDIF
+      EndIf
       TRBZFH->(DBAPPEND())
       For _nI := 1 To ZFH->(FCount())                  
           nPos:=TRBZFH->(FieldPos( ZFH->( FieldName(_nI)) ))
-          IF nPos # 0
+          If nPos # 0
              TRBZFH->(FieldPut(nPos,  ZFH->( FieldGet(_nI) ) )) 
-          ENDIF
+          EndIf
       Next
-      IF _lScheduler
+      If _lScheduler
          TRBZFH->WK_OK := _cMarcaZFH
-      ENDIF
+      EndIf
       TRBZFH->WKRECNO := ZFH->(Recno())
       _nTot++
       _lRet := .T.
-      ZFH->(DbSkip())
+      ZFH->(DBSkip())
    EndDo
-   TRBZFH->(DbGoTop())
+   TRBZFH->(DBGoTop())
 
 End Sequence
 
@@ -644,17 +618,15 @@ Return _lRet
 Programa----------: AOMS076G
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 15/09/2016
-===============================================================================================================================
 Descrição---------: Chamada da rotina de inclusão e alteração dos dados do cadastro de clientes, grava os dados do cliente(SA1) 
                     na tabela de integração webservice (ZFH).                    
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
-User Function AOMS076G()
-Local _cCodEmpWS := U_ITGETMV( 'IT_EMPWEBSE' , '000001' )
+User Function AOMS076G
+
+Local _cCodEmpWS := SuperGetMV('IT_EMPWEBS',.F.,'000001')
 Local _aOrd := SaveOrd({"SX3","ZFH"})
 Local _aUF , _nI  , nPosUF
 Local _cEndereco, _cNumero, _cComplemento
@@ -665,43 +637,43 @@ Begin Sequence
 
    If SA1->A1_PESSOA = "F"
       SRA->( DBSetOrder(20) ) //RA_CIC+RA_FILIAL+RA_MAT
-	  IF SRA->( DBSeek( ALLTRIM(SA1->A1_CGC) ) ) .AND. SRA->RA_SITFOLH <> "D"
-         BREAK//não envia funcionarios que não foram demitidos
-      ENDIF
-   ENDIF
+	  If SRA->( DBSeek( AllTrim(SA1->A1_CGC) ) ) .And. SRA->RA_SITFOLH <> "D"
+         Break//não envia funcionarios que não foram demitidos
+      EndIf
+   EndIf
 
    //================================================================================
    // Monta array dos estados
    //================================================================================
    _aUF := {}
-   aadd(_aUF,{"RO","11"})
-   aadd(_aUF,{"AC","12"})
-   aadd(_aUF,{"AM","13"})
-   aadd(_aUF,{"RR","14"})
-   aadd(_aUF,{"PA","15"})
-   aadd(_aUF,{"AP","16"})
-   aadd(_aUF,{"TO","17"})
-   aadd(_aUF,{"MA","21"})
-   aadd(_aUF,{"PI","22"})
-   aadd(_aUF,{"CE","23"})
-   aadd(_aUF,{"RN","24"})
-   aadd(_aUF,{"PB","25"})
-   aadd(_aUF,{"PE","26"})
-   aadd(_aUF,{"AL","27"})	
-   aadd(_aUF,{"MG","31"})
-   aadd(_aUF,{"ES","32"})
-   aadd(_aUF,{"RJ","33"})
-   aadd(_aUF,{"SP","35"})
-   aadd(_aUF,{"PR","41"})
-   aadd(_aUF,{"SC","42"})
-   aadd(_aUF,{"RS","43"})
-   aadd(_aUF,{"MS","50"})
-   aadd(_aUF,{"MT","51"})
-   aadd(_aUF,{"GO","52"})
-   aadd(_aUF,{"DF","53"})
-   aadd(_aUF,{"SE","28"})
-   aadd(_aUF,{"BA","29"})
-   aadd(_aUF,{"EX","99"})
+   aAdd(_aUF,{"RO","11"})
+   aAdd(_aUF,{"AC","12"})
+   aAdd(_aUF,{"AM","13"})
+   aAdd(_aUF,{"RR","14"})
+   aAdd(_aUF,{"PA","15"})
+   aAdd(_aUF,{"AP","16"})
+   aAdd(_aUF,{"TO","17"})
+   aAdd(_aUF,{"MA","21"})
+   aAdd(_aUF,{"PI","22"})
+   aAdd(_aUF,{"CE","23"})
+   aAdd(_aUF,{"RN","24"})
+   aAdd(_aUF,{"PB","25"})
+   aAdd(_aUF,{"PE","26"})
+   aAdd(_aUF,{"AL","27"})	
+   aAdd(_aUF,{"MG","31"})
+   aAdd(_aUF,{"ES","32"})
+   aAdd(_aUF,{"RJ","33"})
+   aAdd(_aUF,{"SP","35"})
+   aAdd(_aUF,{"PR","41"})
+   aAdd(_aUF,{"SC","42"})
+   aAdd(_aUF,{"RS","43"})
+   aAdd(_aUF,{"MS","50"})
+   aAdd(_aUF,{"MT","51"})
+   aAdd(_aUF,{"GO","52"})
+   aAdd(_aUF,{"DF","53"})
+   aAdd(_aUF,{"SE","28"})
+   aAdd(_aUF,{"BA","29"})
+   aAdd(_aUF,{"EX","99"})
 
    //============================================================================
    //Montagem do aheader                                                        
@@ -711,7 +683,7 @@ Begin Sequence
    FillGetDados(1,"ZFH",1,,,{||.T.},,,,,,.T.)
    
    //                          1                    2               3              4               5                6             7        8              9                 10 
-   // AADD(aHeader, {Alltrim(SX3->X3_TITULO), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL,"AllwaysTrue()", USADO, SX3->X3_TIPO, SX3->X3_ARQUIVO, SX3->X3_CONTEXT})
+   // aAdd(aHeader, {AllTrim(SX3->X3_TITULO), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL,"AllwaysTrue()", USADO, SX3->X3_TIPO, SX3->X3_ARQUIVO, SX3->X3_CONTEXT})
     
    For _nI := 1 To Len(aHeader)
        If AllTrim(aHeader[_nI,2]) $ "ZFH_ALI_WT/ZFH_REC_WT"
@@ -722,8 +694,8 @@ Begin Sequence
    
    Next 
    
-   ZFH->(DbSetOrder(3)) 
-   If ZFH->(DbSeek(xFilial("ZFH")+SA1->A1_CGC+"N"))
+   ZFH->(DBSetOrder(3)) 
+   If ZFH->(DBSeek(xFilial("ZFH")+SA1->A1_CGC+"N"))
       //================================================================================
       // Se já existir um registro do cliente na tabela ZFH que ainda não foi processado
       // apenas altera.
@@ -768,20 +740,20 @@ Begin Sequence
    ZFH->ZFH_END	  := _cEndereco // SA1->A1_END
    ZFH->ZFH_NUMERO  := _cNumero   // U_AOMS076N(SA1->A1_END)
    ZFH->ZFH_BAIRRO  := SA1->A1_BAIRRO
-   IF (nPosUF:=aScan(_aUF,{|x| x[1] == SA1->A1_EST})) > 0  .OR. (nPosUF:=aScan(_aUF,{|x| x[1] == SA1->A1_ESTC})) > 0 
+   If (nPosUF:=aScan(_aUF,{|x| x[1] == SA1->A1_EST})) > 0  .Or. (nPosUF:=aScan(_aUF,{|x| x[1] == SA1->A1_ESTC})) > 0 
       ZFH->ZFH_CMUNC:=_aUF[nPosUF][02] + SA1->A1_COD_MUN  // SA1->A1_I_CMUNC
-   ELSE
+   Else
       ZFH->ZFH_CMUNC:=SA1->A1_I_CMUNC
-   ENDIF
+   EndIf
    ZFH->ZFH_CEP	 := SA1->A1_CEP    
    ZFH->ZFH_ENDENT := _cEndereco
    ZFH->ZFH_NUMENT := _cNumero
    ZFH->ZFH_BAIRRE := SA1->A1_BAIRRO  // SA1->A1_BAIRROE // NAO USADO
-   IF nPosUF > 0 
+   If nPosUF > 0 
       ZFH->ZFH_CMUEN  := _aUF[nPosUF][02]  + SA1->A1_COD_MUN //SA1->A1_CODMUNE // SA1->A1_I_CMUEN // NAO USADO
-   ELSE
+   Else
       ZFH->ZFH_CMUEN:=SA1->A1_I_CMUNC
-   ENDIF
+   EndIf
    ZFH->ZFH_CEPE   := SA1->A1_CEP     // SA1->A1_CEPE    // NAO USADO   
    ZFH->ZFH_INSCR	 := SA1->A1_INSCR  
    ZFH->ZFH_PESSOA := SA1->A1_PESSOA
@@ -813,13 +785,13 @@ Begin Sequence
    EndIf
    
    ZFH->ZFH_RECSA1  := SA1->(Recno())
-   ZFH->ZFH_TXDIF	  := SA1->A1_I_TXDIF  
+   ZFH->ZFH_TXDIF	  := SA1->A1_I_TXDIf  
    ZFH->ZFH_CODEMP  := _cCodEmpWS  
-   If Type("__CUSERID") = "C" .And. ! Empty(__CUSERID)
-      ZFH->ZFH_USUARI  := __CUSERID
+   If Type("__cUserId") = "C" .And. ! Empty(__cUserId)
+      ZFH->ZFH_USUARI  := __cUserId
    EndIf 
    ZFH->ZFH_DATAAL  := Date()
-   ZFH->(MsUnlock())
+   ZFH->(MSUnLock())
 
 End Sequence  
 
@@ -827,22 +799,20 @@ SRA->( DBSetOrder(1) ) //RA_FILIAL+RA_MAT
 
 RestOrd(_aOrd)
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS076N
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 19/09/2016
-===============================================================================================================================
 Descrição---------: Com base em um endereço passado como parâmetro, retorna o numero deste endereço.
-===============================================================================================================================
 Parametros--------: _cEndereco = Endereço a ser lido e retornado o número.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS076N(_cEndereco)
+
 Local _cRet := "000000"
 Local _nPos
 Local _nI
@@ -883,11 +853,11 @@ Begin Sequence
    
 End Sequence
 
-If empty(alltrim(_cret))
+If Empty(AllTrim(_cret))
 
   _cret := "00000"
   
- Endif
+ EndIf
 
 Return _cRet
 
@@ -896,42 +866,28 @@ Return _cRet
 Programa----------: AOMS076E
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 18/04/2017
-===============================================================================================================================
 Descrição---------: Retorna o maior numero sequencial disponível para o código de cliente RDC mais 1.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: _nRet = Maior numero sequencial para codigo cliente RDC + 1.
 ===============================================================================================================================
 */  
-User Function AOMS076E()
+User Function AOMS076E
+
 Local _cRet 
-Local _cQry
-Local _nDnMax := 0
+Local _cAlias := GetNextAlias()
 
-Begin Sequence
-   _cQry := " SELECT Max(A1_I_DNRDC) AS DNRDC FROM "+RetSqlName("SA1")+" SA1 "
-   _cQry += " WHERE SA1.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR(A1_I_DNRDC,1,1) IN ('0','1','2','3','4','5','6','7','8','9') "
-   _cQry += " AND SUBSTR(A1_I_DNRDC,2,1) IN ('0','1','2','3','4','5','6','7','8','9') "
-   _cQry += " AND SUBSTR(A1_I_DNRDC,3,1) IN ('0','1','2','3','4','5','6','7','8','9') "
-   _cQry += " AND SUBSTR(A1_I_DNRDC,4,1) IN ('0','1','2','3','4','5','6','7','8','9') "
-   _cQry += " AND SUBSTR(A1_I_DNRDC,5,1) IN ('0','1','2','3','4','5','6','7','8','9') "
-   _cQry += " AND SUBSTR(A1_I_DNRDC,6,1) IN ('0','1','2','3','4','5','6','7','8','9') "
- 
-   If Select("TRBSA1DN") > 0
-      TRBSA1DN->(DbCloseArea())
-   EndIf                     
-             
-   DbUseArea(.T., "TOPCONN", TcGenQry(,,_cQry), "TRBSA1DN", .T., .F.)  
+BeginSql alias _cAlias
+   SELECT Max(A1_I_DNRDC) DNRDC FROM %Table:SA1%
+   WHERE D_E_L_E_T_ = ' '
+   AND SubStr(A1_I_DNRDC,1,1) IN ('0','1','2','3','4','5','6','7','8','9')
+   AND SubStr(A1_I_DNRDC,2,1) IN ('0','1','2','3','4','5','6','7','8','9')
+   AND SubStr(A1_I_DNRDC,3,1) IN ('0','1','2','3','4','5','6','7','8','9')
+   AND SubStr(A1_I_DNRDC,4,1) IN ('0','1','2','3','4','5','6','7','8','9')
+   AND SubStr(A1_I_DNRDC,5,1) IN ('0','1','2','3','4','5','6','7','8','9')
+   AND SubStr(A1_I_DNRDC,6,1) IN ('0','1','2','3','4','5','6','7','8','9')
+ EndSql
     
-   _nDnMax := Val(TRBSA1DN->DNRDC) + 1
-   _cRet := StrZero(_nDnMax,6)
-
-End Sequence
-
-If Select("TRBSA1DN") > 0
-   TRBSA1DN->(DbCloseArea())
-EndIf
+_cRet := StrZero(Val((_cAlias)->DNRDC)+1,6)
+(_cAlias)->(DBCloseArea())
 
 Return _cRet

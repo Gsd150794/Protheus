@@ -2,15 +2,13 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor      |   Data   |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE 'PROTHEUS.CH'
-#INCLUDE 'FWMVCDEF.CH'
+
+#Include "TOTVS.ch"
+#Include 'FWMVCDEF.CH'
 
 /*
 ===============================================================================================================================
@@ -40,7 +38,7 @@ Definição de Menu - MVC
 
 @author  Lucas Borges Ferreira
 @since  24/03/2025
-@return array, opções do menu
+@Return array, opções do menu
 /*/
 //-------------------------------------------------------------------------------------------------------------
 Static Function MenuDef() As Array
@@ -60,7 +58,7 @@ Define o model padrão para o cadastro
 
 @author  Lucas Borges Ferreira
 @since  24/03/2025
-@return object, objeto do modelo de dados
+@Return object, objeto do modelo de dados
 /*/
 //-------------------------------------------------------------------------------------------------------------
 Static Function ModelDef() as Object
@@ -99,7 +97,7 @@ Definição de View para o cadastro
 
 @author  Lucas Borges Ferreira
 @since  24/03/2025
-@return object, objeto da view
+@Return object, objeto da view
 /*/
 //-------------------------------------------------------------------------------------------------------------
 Static Function ViewDef()
@@ -140,7 +138,7 @@ Verifica se campo pode ser incluído na estrutura do Model/Grid
 @author  Lucas Borges Ferreira
 @since  24/03/2025
 @param cCampo, cacarcter, Campo que está sendo analisado
-@return logical, indica se o campo pode ser incluído na estrutura
+@Return logical, indica se o campo pode ser incluído na estrutura
 /*/
 //-------------------------------------------------------------------------------------------------------------
 Static Function AGLT059CPO(cCampo as String,nOpc as Number)
@@ -161,7 +159,7 @@ Pós-Validação do Modelo
 @author  Lucas Borges Ferreira
 @since  24/03/2025
 @param oModel, object, objeto do modelo de dados
-@return logical, indica o status das validações
+@Return logical, indica o status das validações
 /*/
 //-------------------------------------------------------------------------------------------------------------
 Static Function AGLT59POS(oModel as Object)
@@ -172,7 +170,7 @@ Local _cFLogId := oModel:GetValue("ZBQMASTER",'ZBQ_FLOGID') as String
 Local _cAlias  := GetNextAlias() as String
 
 If oModel:GetOperation() == MODEL_OPERATION_DELETE
-   BeginSQL alias _cAlias
+   BeginSql alias _cAlias
       SELECT COUNT(1) QTD FROM %Table:ZZX%
       WHERE D_E_L_E_T_ = ' '
       AND ZZX_FILIAL = %xFilial:ZZX%
@@ -181,7 +179,7 @@ If oModel:GetOperation() == MODEL_OPERATION_DELETE
       WHERE D_E_L_E_T_ = ' '
       AND ZLX_FILIAL = ZZX_FILIAL
       AND ZLX_CODANA = ZZX_CODIGO)
-   EndSQL
+   EndSql
    If (_cAlias)->QTD > 0
          lRet := .F.
       Help(,,"AGLT05901",,"Esse registro possui uma análise vinculada.",1,0,,,,,,{"Exclua a análise antes."})
@@ -201,7 +199,7 @@ Commit do Modelo
 @author  Lucas Borges Ferreira
 @since  24/03/2025
 @param oModel, object, objeto do modelo de dados
-@return logical, indica o status das validações
+@Return logical, indica o status das validações
 /*/
 //-------------------------------------------------------------------------------------------------------------
 Static Function AGLT59COM(oModel as Object)

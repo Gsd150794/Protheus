@@ -10,7 +10,7 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#include "protheus.ch"
+#Include "TOTVS.ch"
  
 #DEFINE CRLF Chr(13)+Chr(10)
 
@@ -35,9 +35,9 @@ Begin Sequence
    _aItalac_F3 :={}
 
    _cSelectSA1:="SELECT DISTINCT A1_COD, A1_NOME, A1_LOJA   FROM "+RETSQLNAME("SA1")+" SA1 WHERE A1_MSBLQL <> '1' AND D_E_L_E_T_ = ' ' ORDER BY A1_COD, A1_LOJA " 
-   _bCondSA1  := NIL//{|| IF(MV_PAR07="2",(A1_MSBLQL = "1"),(A1_MSBLQL <> "1")) }
-   //AADD(_aItalac_F3,{"MV_PAR01","SA1",SA1->(FIELDPOS("A1_COD")),{|| SA1->A1_LOJA+"-"+SA1->A1_NOME } ,_bCondSA1 ,"Clientes",,,} )
-   AADD(_aItalac_F3,{"MV_PAR05",_cSelectSA1,{|Tab| (Tab)->A1_COD + (Tab)->A1_LOJA }, {|Tab| (Tab)->A1_NOME } ,_bCondSA1 ,"Clientes",,,30,.F.        ,       , } )
+   _bCondSA1  := NIL//{|| If(MV_PAR07="2",(A1_MSBLQL = "1"),(A1_MSBLQL <> "1")) }
+   //aAdd(_aItalac_F3,{"MV_PAR01","SA1",SA1->(FIELDPOS("A1_COD")),{|| SA1->A1_LOJA+"-"+SA1->A1_NOME } ,_bCondSA1 ,"Clientes",,,} )
+   aAdd(_aItalac_F3,{"MV_PAR05",_cSelectSA1,{|Tab| (Tab)->A1_COD + (Tab)->A1_LOJA }, {|Tab| (Tab)->A1_NOME } ,_bCondSA1 ,"Clientes",,,30,.F.        ,       , } )
 
    Pergunte(_cPerg,.T.,"Tela de Filtro do Relatório NFs Canceladas/Excluidas de Pallet Chep")
 
@@ -46,7 +46,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -78,7 +78,7 @@ _oSection1:SetTotalInLine(.F.)
 
 TRCell():New(_oSection1,"NOTA"		,/*Tabela*/,"Nota Fiscal"		,/*Picture*/			,15		,/*lPixel*/	,{||NOTA	}        /*Block*/)
 TRCell():New(_oSection1,"SERIE"		,/*Tabela*/,"Serie"				,/*Picture*/			,03		,/*lPixel*/	,{||SERIE	}     /*Block*/)
-TRCell():New(_oSection1,"EMISSAO"	,/*Tabela*/,"Emissao"			,/*Picture*/			,15		,/*lPixel*/	,{||stod(EMISSAO)}/*Block*/)
+TRCell():New(_oSection1,"EMISSAO"	,/*Tabela*/,"Emissao"			,/*Picture*/			,15		,/*lPixel*/	,{||SToD(EMISSAO)}/*Block*/)
 TRCell():New(_oSection1,"TIPO_NF"	,/*Tabela*/,"Tipo NF"			,/*Picture*/			,15		,/*lPixel*/	,{||TIPO_NF}      /*Block*/)
 TRCell():New(_oSection1,"CLIENTE"	,/*Tabela*/,"Cliente"			,/*Picture*/			,06		,/*lPixel*/	,{||CLIENTE}      /*Block*/)
 TRCell():New(_oSection1,"LOJA"		,/*Tabela*/,"Loja"	  			,/*Picture*/			,04		,/*lPixel*/	,{||LOJA	}        /*Block*/)
@@ -95,7 +95,7 @@ Return _oReport
 Programa--------: ROMS071P
 Autor-----------: Julio de Paula Paz
 Data da Criacao-: 26/09/2022
-Descrição-------: Função que processa a impressão do relatório
+Descrição-------: Função que Processa a impressão do relatório
 Parametros------: Nenhum
 Retorno---------: Nenhum
 ===============================================================================================================================
@@ -113,11 +113,11 @@ Begin Sequence
    EndIf
 
    If ! Empty(MV_PAR02) // De Emissao  
-      _cFiltro += " AND D2_EMISSAO >= '"+Dtos(MV_PAR02)+"' "
+      _cFiltro += " AND D2_EMISSAO >= '"+DToS(MV_PAR02)+"' "
    EndIf
    
    If ! Empty(MV_PAR03) // Até Emissao 
-      _cFiltro += " AND D2_EMISSAO <= '"+Dtos(MV_PAR03)+"' "
+      _cFiltro += " AND D2_EMISSAO <= '"+DToS(MV_PAR03)+"' "
    EndIf
 
    If MV_PAR04 == 1
@@ -156,8 +156,8 @@ Begin Sequence
          F2.F2_TIPO TIPO_NF,
     	   SUM(D2.D2_QUANT-D2.D2_QTDEDEV) QUANT
 
-	  FROM %table:SD2% D2   // LEFT JOIN %table:SA1% A1 ON (D2.D2_CLIENTE = A1.A1_COD AND D2_LOJA = A1.A1_LOJA AND A1.%notDel% )
-	       LEFT JOIN %table:SF2% F2 ON (F2.F2_FILIAL = D2.D2_FILIAL AND F2.F2_DOC = D2.D2_DOC AND F2.F2_SERIE = D2.D2_SERIE AND F2.F2_CLIENTE = D2.D2_CLIENTE AND F2.F2_LOJA = D2.D2_LOJA)
+	  FROM %Table:SD2% D2   // LEFT JOIN %Table:SA1% A1 ON (D2.D2_CLIENTE = A1.A1_COD AND D2_LOJA = A1.A1_LOJA AND A1.%notDel% )
+	       LEFT JOIN %Table:SF2% F2 ON (F2.F2_FILIAL = D2.D2_FILIAL AND F2.F2_DOC = D2.D2_DOC AND F2.F2_SERIE = D2.D2_SERIE AND F2.F2_CLIENTE = D2.D2_CLIENTE AND F2.F2_LOJA = D2.D2_LOJA)
 	  WHERE D2.D2_COD = '08130000002'
            %exp:_cFiltro%
      GROUP BY D2.D2_FILIAL, D2.D2_DOC, D2.D2_SERIE, D2.D2_EMISSAO, D2.D2_CLIENTE, D2.D2_LOJA, D2.D2_PEDIDO, F2.F2_VALBRUT, F2.F2_CHVNFE, F2.F2_TIPO // A1.A1_NOME,
@@ -176,7 +176,7 @@ Begin Sequence
    _oReport:Section(1):ShowParamPage()
    _oReport:Section(1):lParamPage := .T.
 
-   Do While (_cAliasQRY)->(!EoF())
+   While (_cAliasQRY)->(!Eof())
     
 	  If _oReport:Cancel()
 	     Exit
@@ -205,7 +205,7 @@ Begin Sequence
 
       _oReport:Section(1):Section(1):PrintLine() 
 	  
-	  (_cAliasQRY)->(dbSkip())
+	  (_cAliasQRY)->(DBSkip())
    
    EndDo
 
@@ -215,4 +215,4 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil
+Return

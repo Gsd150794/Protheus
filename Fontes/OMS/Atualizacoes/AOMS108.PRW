@@ -1,44 +1,29 @@
 /*
-==============================================================================================================================
-                         ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-==============================================================================================================================
-Autor         |    Data    |                                             Motivo                                          
-------------------------------------------------------------------------------------------------------------------------------
-Josué Danich | 20/02/2019 | Chamado 28160. Ajuste de rebloqueio de cliente para evitar falhas.
-Josué Danich | 29/04/2019 | Chamado 28694. Validação de bloqueio logístico.  
-Lucas Borges | 16/10/2019 | Chamado 28346. Removidos os Warning na compilação da release 12.1.25. 
-Alex Wallauer| 26/10/2020 | Chamado 34262. Remoção de bugs apontados pelo Totvs CodeAnalysis. 
-Igor Melgaço | 08/08/2022 | Chamado 40566. Inclusão de filtro por Gerente e Preço Net. 
-Igor Melgaço | 09/08/2022 | Chamado 40566. Alteração de filtro do Gerente. 
-Julio Paz    | 29/09/2023 | Chamado 45043. Alterar rotina e exibir erro log da função MSExecAuto quando ocorrer erro exclusão.
-Julio Paz    | 12/03/2024 | Chamado 45229. Incluir parâmetro p/determinar se a integração WebS.será TMS Multiembarcador ou RDC
-Igor Melgaço | 12/07/2024 | Chamado 47714. Ajustes para adição de filtro.
-============================================================================================================================================================
-Analista         - Programador     - Inicio     - Envio    - Chamado - Motivo da Alteração
-------------------------------------------------------------------------------------------------------------------------------------------------------------
-Vanderlei Alves  - Igor Melgaço    - 06/06/25   - 10/06/25 - 45229   - Ajuste do parâmetro p/determinar se a integração WebS.será TMS Multiembarcador ou RDC
-============================================================================================================================================================
+===============================================================================================================================
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+===============================================================================================================================
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+Igor Melgaço  |12/07/2024| Chamado 47714. Ajustes para adição de filtro.
+Igor Melgaço  |10/06/2025| Chamado 45229. Ajuste do parâmetro p/determinar se a integração WebS.será TMS Multiembarcador ou RDC
+Lucas Borges  |17/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
+==============================================================================================================================================================
+Analista - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
+========================================================================================================================================================================================================
+Jerry    - Julio Paz     - 27/10/25 - 05/11/25 - 51789   - Alterar a query que lista os pedidos de vendas para permitir visualizar e selecionar pedidos de remessa.
+========================================================================================================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "PROTHEUS.CH"  
-#Include "RWMAKE.CH"             
-#Include "TopConn.ch"  
-#Include "vkey.ch"
 
-#DEFINE _ENTER CHR(13)+CHR(10)         
+#Include "TOTVS.ch"  
+#Include "vkey.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS108
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 23/04/2018
-===============================================================================================================================
 Descrição---------: Funcao utilizada para realizar a exclusão multipla de pedidos de vendas - Chamado 24028
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -49,30 +34,25 @@ Private _alista := {}
 
 AOMS108INI()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS108INI
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 23/04/2018
-===============================================================================================================================
 Descrição---------: Funcao que controla o processamento da exclusão
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-
 Static Function AOMS108INI()
+
 Local _lRet := .T.
 
 Private cMarkado	:= GetMark()
 Private lInverte	:= .F.
-
 Private cPerg		:= 'AOMS108'
-
 Private cArqTRB1	:= ''
 Private cArqTRB2	:= ''
 Private cArqTRB3	:= ''
@@ -95,28 +75,28 @@ Begin Sequence
    EndIf
 
    //Validação de campos de produto e grupo
-   If !empty(MV_PAR15) .AND. !EMPTY(MV_PAR16)
+   If !Empty(MV_PAR15) .And. !Empty(MV_PAR16)
 
-      u_itmsg("Só é possível selecionar produto ou grupo de produto para exclusão!","Atenção","Selecione somente produto ou somente grupo de produto para exclusão",1)
-	  _lret := .F.
+      U_ITMsg("Só é possível selecionar produto ou grupo de produto para exclusão!","Atenção","Selecione somente produto ou somente grupo de produto para exclusão",1)
+	  _lRet := .F.
 	
-   Endif
+   EndIf
 
    //Validação de campos de produto e subgrupo
-   If !empty(MV_PAR15) .AND. !EMPTY(MV_PAR17)
+   If !Empty(MV_PAR15) .And. !Empty(MV_PAR17)
 
-      u_itmsg("Só é possível selecionar produto ou subgrupo de produto para exclusão!","Atenção","Selecione somente produto ou somente subgrupo de produto para exclusão",1)
-	  _lret := .F.
+      U_ITMsg("Só é possível selecionar produto ou subgrupo de produto para exclusão!","Atenção","Selecione somente produto ou somente subgrupo de produto para exclusão",1)
+	  _lRet := .F.
 	
-   Endif
+   EndIf
 
    //Validação de campos de grupo e subgrupo
-   If !empty(MV_PAR16) .AND. !EMPTY(MV_PAR17)
+   If !Empty(MV_PAR16) .And. !Empty(MV_PAR17)
 
-      u_itmsg("Só é possível selecionar grupo ou subgrupo de produto para exclusão!","Atenção","Selecione somente grupo ou somente subgrupo de produto para exclusão",1)
-	  _lret := .F.
+      U_ITMsg("Só é possível selecionar grupo ou subgrupo de produto para exclusão!","Atenção","Selecione somente grupo ou somente subgrupo de produto para exclusão",1)
+	  _lRet := .F.
 	
-   Endif
+   EndIf
 	
    _mvpar15 := MV_PAR15
    _mvpar16 := MV_PAR16	
@@ -138,15 +118,11 @@ Return _lRet
 Programa----------: AOMS108PRC
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 23/04/2018
-===============================================================================================================================
-Descrição---------: Função que processa os pedidos de venda
-===============================================================================================================================
+Descrição---------: Função que Processa os pedidos de venda
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-
 Static Function AOMS108PRC()
 
 Local _nControle := 0 
@@ -161,7 +137,7 @@ Begin Sequence
    //================================================================================
    // Cria o arquivo Temporario para insercao dos dados selecionados.
    //================================================================================
-   FWMSGRUN( , {|| _nControle := AOMS108ARQ() }, "Aguarde!" , 'Lendo Dados dos pedidos...' )
+   FWMsgRun( , {|| _nControle := AOMS108ARQ() }, "Aguarde!" , 'Lendo Dados dos pedidos...' )
 
    If ! Empty(_alista)
       U_ITListBox( 'Pedidos que não podem ser excluidos' , {"Numero","Situacao"} , _alista , .T. , 1 )
@@ -170,7 +146,7 @@ Begin Sequence
   
    If _nControle == 1
 
-	  U_ITmsg("Nao foram encontrados pedidos para realizar a exclusão multipla."					,;
+	  U_ITMsg("Nao foram encontrados pedidos para realizar a exclusão multipla."					,;
 				"Atenção!"																						,;
 				"Favor verificar os parâmetros informados e se possue(m) pedido(s) de venda em aberto(status verde) "+;
 				"para a filial corrente. Pedidos de PALLET CHEP não podem ser excluidos por essa função.",1)
@@ -192,15 +168,11 @@ Return _lRet
 Programa----------: AOMS108TRS
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 23/04/2018
-===============================================================================================================================
 Descrição---------: Função que monta a tela para processar as exclusoes
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-
 Static Function AOMS108TRS()
 
 Local oPanel		:= Nil
@@ -241,8 +213,8 @@ DEFINE FONT oFontLbl NAME "Arial" SIZE 6, 15 BOLD
 //================================================================================
 // Botoes da tela.
 //================================================================================
-Aadd( aBotoes , { "PESQUISA" , {|| AOMS108PSQ(oMark,"TRBF") }	, "Pesquisar..."         , "Pesquisar"		} )
-Aadd( aBotoes , { "S4WB005N" , {|| AOMS108PPV()           }		, "Visualizar Pedido..." , "Visualizar Pedido"	} ) // "Pedido"
+aAdd( aBotoes , { "PESQUISA" , {|| AOMS108PSQ(oMark,"TRBF") }	, "Pesquisar..."         , "Pesquisar"		} )
+aAdd( aBotoes , { "S4WB005N" , {|| AOMS108PPV()           }		, "Visualizar Pedido..." , "Visualizar Pedido"	} ) // "Pedido"
 
 //================================================================================
 // Faz o calculo automatico de dimensoes de objetos
@@ -253,60 +225,60 @@ aSize := MSADVSIZE()
 //================================================================================
 // Cria a tela para selecao dos pedidos
 //================================================================================
-		_ctitulo := "EXCLUSAO MULTIPLA DE PEDIDO(S) DE VENDA (EXCLUSAO COMPLETA)"
-		
-		If !EMPTY(MV_PAR15)
-		
-			_ctitulo := "EXCLUSAO MULTIPLA DE PEDIDO(S) DE VENDA (SOMENTE PRODUTO " + ALLTRIM(MV_PAR15) + ")"
-			
-		Endif
-		
-		If !EMPTY(MV_PAR16)
-		
-			_ctitulo := "EXCLUSAO MULTIPLA DE PEDIDO(S) DE VENDA (SOMENTE GRUPO " + ALLTRIM(MV_PAR16) + ")"
-			
-		Endif
+_ctitulo := "EXCLUSAO MULTIPLA DE PEDIDO(S) DE VENDA (EXCLUSAO COMPLETA)"
 
-		If !EMPTY(MV_PAR17)
-		
-			_ctitulo := "EXCLUSAO MULTIPLA DE PEDIDO(S) DE VENDA (SOMENTE SUBGRUPO " + ALLTRIM(MV_PAR17) + ")"
-			
-		Endif
+If !Empty(MV_PAR15)
 
-
- DEFINE MSDIALOG oDlg1 TITLE OemToAnsi(_ctitulo) From 0,0 To aSize[6],aSize[5] OF oMainWnd PIXEL
-
-	oPanel       := TPanel():New(30,0,'',oDlg1,, .T., .T.,, ,315,20,.T.,.T. )
-	@0.8,00.8 Say OemToAnsi("Quantidade:")						OF oPanel
-	@0.8,0005 Say oQtda		VAR nQtdTit		Picture "@E 99999"	OF oPanel SIZE 60,8
+	_ctitulo := "EXCLUSAO MULTIPLA DE PEDIDO(S) DE VENDA (SOMENTE PRODUTO " + AllTrim(MV_PAR15) + ")"
 	
-	
-	If FlatMode()
-	
-		aCoors	:= GetScreenRes()
-		nHeight	:= aCoors[2]
-		nWidth	:= aCoors[1]
-		
-	Else
-	
-		nHeight	:= 143
-		nWidth	:= 315
-		
-	Endif
-	
-	DBSelectArea("TRBF")
-	TRBF->(DbGotop()) 
-	
-	oMark					:= MsSelect():New( "TRBF" , "TRBF_OK" , "" , aCampos , @lInverte , @cMarkado , { 35 , 1 , nHeight , nWidth } )
-	oMark:bMark				:= {|| AOMS108INV( cMarkado , lInverte , oQtda ) }
-	oMark:oBrowse:bAllMark	:= {|| AOMS108ALL( cMarkado , oQtda ) }
+EndIf
 
-	oDlg1:lMaximized:=.T.
+If !Empty(MV_PAR16)
 
-ACTIVATE MSDIALOG oDlg1 ON INIT ( EnchoiceBar(oDlg1,{|| IIF(AOMS108VLD(nQtdTit),(nOpca := 1,oDlg1:End()),) },{|| nOpca := 2,oDlg1:End()},,aBotoes),;
-                                  oPanel:Align:=CONTROL_ALIGN_TOP , oMark:oBrowse:Align:=CONTROL_ALIGN_ALLCLIENT , oMark:oBrowse:Refresh())
+	_ctitulo := "EXCLUSAO MULTIPLA DE PEDIDO(S) DE VENDA (SOMENTE GRUPO " + AllTrim(MV_PAR16) + ")"
+	
+EndIf
 
-IF nOpca = 1
+If !Empty(MV_PAR17)
+
+	_ctitulo := "EXCLUSAO MULTIPLA DE PEDIDO(S) DE VENDA (SOMENTE SUBGRUPO " + AllTrim(MV_PAR17) + ")"
+	
+EndIf
+
+
+DEFINE MSDIALOG oDlg1 TITLE OemToAnsi(_ctitulo) From 0,0 To aSize[6],aSize[5] OF oMainWnd PIXEL
+
+oPanel       := TPanel():New(30,0,'',oDlg1,, .T., .T.,, ,315,20,.T.,.T. )
+@0.8,00.8 Say OemToAnsi("Quantidade:")						OF oPanel
+@0.8,0005 Say oQtda		VAR nQtdTit		Picture "@E 99999"	OF oPanel SIZE 60,8
+
+
+If FlatMode()
+
+	aCoors	:= GetScreenRes()
+	nHeight	:= aCoors[2]
+	nWidth	:= aCoors[1]
+	
+Else
+
+	nHeight	:= 143
+	nWidth	:= 315
+	
+EndIf
+
+DBSelectArea("TRBF")
+TRBF->(DBGoTop()) 
+
+oMark					:= MsSelect():New( "TRBF" , "TRBF_OK" , "" , aCampos , @lInverte , @cMarkado , { 35 , 1 , nHeight , nWidth } )
+oMark:bMark				:= {|| AOMS108INV( cMarkado , lInverte , oQtda ) }
+oMark:oBrowse:bAllMark	:= {|| AOMS108ALL( cMarkado , oQtda ) }
+
+oDlg1:lMaximized:=.T.
+
+ACTIVATE MSDIALOG oDlg1 ON INIT ( EnchoiceBar(oDlg1,{|| IIf(AOMS108VLD(nQtdTit),(nOpca := 1,oDlg1:End()),) },{|| nOpca := 2,oDlg1:End()},,aBotoes),;
+								oPanel:Align:=CONTROL_ALIGN_TOP , oMark:oBrowse:Align:=CONTROL_ALIGN_ALLCLIENT , oMark:oBrowse:Refresh())
+
+If nOpca = 1
 
 	_cQuery := " SELECT "
 	_cQuery += " DISTINCT X5_CHAVE CHAVE,X5_DESCRI DESCRI "
@@ -320,7 +292,8 @@ IF nOpca = 1
 		("TMPCF")->( DBCloseArea() )
 	EndIf
 
-	DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQuery ) , 'TMPCF' , .F. , .T. )
+	_cQuery := ChangeQuery(_cQuery)
+	MPSysOpenQuery(_cQuery,'TMPCF')
 
 	_amotivs := {}
 
@@ -333,26 +306,25 @@ IF nOpca = 1
 
 	("TMPCF")->( DBCloseArea() )
 
-	public _cmotivs := _AMOTIVS[1]
+	Public _cmotivs := _AMOTIVS[1]
 
 	DEFINE MSDIALOG _oDlg2 TITLE ("Corte por exclusão de PVs") From 0,0 To 325, 650 OF oMainWnd PIXEL
                                                                        
 	@ nLinha,_nCol Say OemToAnsi("Selecione o motivo para corte:")
 	nLinha+=12
 
-	_omotiv := TComboBox():New(nLinha,_nCol,{|u|if(PCount()>0,_cmotivs:=u,_cmotivs)}, _amotivs,250,20,_oDlg2,,;
+	_omotiv := TComboBox():New(nLinha,_nCol,{|u|If(PCount()>0,_cmotivs:=u,_cmotivs)}, _amotivs,250,20,_oDlg2,,;
 							,,,,.T.,,,,,,,,,'') //40
 
 	nLinha+=38
 
-	@ nLinha,_nCol    Button "OK" SIZE 41,15 ACTION ( _oDlg2:End(), FWMSGRUN( , {|oproc| AOMS108EXE(oproc) }, "Aguarde!" , 'PROCESSANDO EXCLUSAO DOS PEDIDOS DE VENDAS...' )) Pixel 
+	@ nLinha,_nCol    Button "OK" SIZE 41,15 ACTION ( _oDlg2:End(), FWMsgRun( , {|oproc| AOMS108EXE(oproc) }, "Aguarde!" , 'PROCESSANDO EXCLUSAO DOS PEDIDOS DE VENDAS...' )) Pixel 
 	@ nLinha,_nCol+57 Button "Cancela"     SIZE 41,15 ACTION ( _oDlg2:End() ) Pixel 
 
 	ACTIVATE MSDIALOG _oDlg2 
 
      
- ENDIF
-
+ EndIf
 
 Return nOpca
 
@@ -361,24 +333,20 @@ Return nOpca
 Programa----------: AOMS108EXE
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 23/04/2018
-===============================================================================================================================
-Descrição---------: Função que processa as exclusoes
-===============================================================================================================================
+Descrição---------: Função que Processa as exclusoes
 Parametros--------: oproc - objeto da regua de processamento
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 
 Static Function AOMS108EXE(oproc)
 
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local _lOK_RDC      := .T.
 
 Local _cFilRem, _cPedRemessa
 Local _cMsg, _cCodOper, _dDataOper, _cEncer
 Local _bPergunte    := {|| Pergunte( cPerg , .F. ) }
-//Local _lWsTms := U_ITGETMV( 'IT_WEBSTMS' , .F.) // Indica se rotina de integração WebService é TMS Multi-Embarcador ou RDC.
 Local _cTextoMsg := ""
 
 Private lMsErroAuto	:= .F.                        
@@ -394,7 +362,7 @@ If nOpca == 1
 	//================================================================================
 	// Armazena todos os pedidos selecionados pelo usuario
 	//================================================================================
-	While TRBF->(!EOF())
+	While TRBF->(!Eof())
 	
 		//================================================================================
 		// Somente pedidos selecionados pelo usuario
@@ -444,14 +412,11 @@ If nOpca == 1
 				C5_I_DTENT,C5_I_OPER,C5_I_BLPRC,C5_I_IDPED,C5_I_MOTLB,C5_I_VLIBB,C5_I_QLIBB,C5_I_LLIBB,C5_I_CLILB,C5_I_ULIBB,C5_I_MOTBL,
 				C5_I_DTLIC,	C5_I_BLCRE,C5_I_LIBCV,C5_I_LIBL,C5_I_LIBCT,C5_I_LIBCD,C5_I_LIBCA,C5_I_TRCNF,C5_I_FILFT,C5_I_AGEND, C5_I_PEVIN,C5_I_ENVRD,C5_I_LIBC
 					  
-		FROM	%table:SC5% C5
+		FROM	%Table:SC5% C5
 		WHERE	D_E_L_E_T_ = ' '
 				%exp:cFiltro%
 		
 	EndSql
-	
-	DBSelectArea("QRYCABEC")
-	QRYCABEC->( DBGoTop() )
 	
 	//================================================================================
 	// Percorre os pedidos selecionados e monta o cabecalho e itens do pedido de venda
@@ -462,9 +427,9 @@ If nOpca == 1
 	
 	While QRYCABEC->( !Eof() )
 	
-		Dbselectarea("SC5")
-		SC5->( Dbsetorder(1) )
-		SC5->( Dbseek( QRYCABEC->C5_FILIAL + QRYCABEC->C5_NUM) )
+		DBSelectArea("SC5")
+		SC5->( DBSetOrder(1) )
+		SC5->( DBSeek( QRYCABEC->C5_FILIAL + QRYCABEC->C5_NUM) )
 				
 		_cFilPed := QRYCABEC->C5_FILIAL
 		_cNumPed := QRYCABEC->C5_NUM         
@@ -511,16 +476,16 @@ If nOpca == 1
 		// Na exclusão por produto ou grupo, filtra os itens do pedido de vendas que possuem o
 		// produto/grupo/SUBGRUPO informado no parâmetro MV_PAR15/MV_PAR16/MV_PAR17.
 		//================================================================================
-		If !Empty(mv_par15)
-		   cFiltro += " AND C6_PRODUTO = '" + mv_par15 + "' "
+		If !Empty(MV_PAR15)
+		   cFiltro += " AND C6_PRODUTO = '" + MV_PAR15 + "' "
 		EndIf
 		
-		If !Empty(mv_par16)
-		   cFiltro += " AND (SELECT B1_GRUPO FROM " + Retsqlname("SB1")  + " B1  WHERE B1.D_E_L_E_T_ <> '*' AND B1_COD = C6.C6_PRODUTO) = '" + mv_par16 + "' "
+		If !Empty(MV_PAR16)
+		   cFiltro += " AND (SELECT B1_GRUPO FROM " + Retsqlname("SB1")  + " B1  WHERE B1.D_E_L_E_T_ = ' ' AND B1_COD = C6.C6_PRODUTO) = '" + MV_PAR16 + "' "
 		EndIf
 
-		If !Empty(mv_par17)
-		   cFiltro += " AND (SELECT B1_I_SUBGR FROM " + Retsqlname("SB1")  + " B1  WHERE B1.D_E_L_E_T_ <> '*' AND B1_COD = C6.C6_PRODUTO) = '" + mv_par17 + "' "
+		If !Empty(MV_PAR17)
+		   cFiltro += " AND (SELECT B1_I_SUBGR FROM " + Retsqlname("SB1")  + " B1  WHERE B1.D_E_L_E_T_ = ' ' AND B1_COD = C6.C6_PRODUTO) = '" + MV_PAR17 + "' "
 		EndIf
 		
 		
@@ -536,7 +501,7 @@ If nOpca == 1
 					C6_CF,C6_LOCAL,C6_PRUNIT,C6_UNSVEN,C6_I_QESP,C6_I_LIBPR,C6_I_BLPRC,
 					C6_I_PLIBB,C6_I_LIBPR,C6_I_LLIBB,C6_I_VLIBB,C6_I_QLIBB,C6_I_DLIBB,
 					C6_I_MOTLB,C6_I_LIBPC
-			FROM	%table:SC6% C6
+			FROM	%Table:SC6% C6
 			WHERE	D_E_L_E_T_ = ' '
 					%exp:cFiltro%
 		
@@ -547,8 +512,8 @@ If nOpca == 1
 		
 		While QRYITENS->( !Eof() )
 		
-			SA1->(Dbsetorder(1))
-			SA1->(Dbseek(xfilial("SA1") + QRYCABEC->C5_CLIENTE + QRYCABEC->C5_LOJACLI))
+			SA1->(DBSetOrder(1))
+			SA1->(DBSeek(xFilial("SA1") + QRYCABEC->C5_CLIENTE + QRYCABEC->C5_LOJACLI))
 			
 			_cfilg := cfilant
 			cfilant := SubStr(_cFilTran,1,2)
@@ -562,9 +527,9 @@ If nOpca == 1
 			SM0->( DBSeek( SubStr( cNumEmp , 1 , 2 ) + cFilAnt ) )
 			
 			
-			If !Empty(mv_par15) .OR. !Empty(mv_par16) .OR. !Empty(mv_par17)
+			If !Empty(MV_PAR15) .Or. !Empty(MV_PAR16) .Or. !Empty(MV_PAR17)
 			   //================================================================================
-			   // Realiza a exclusão do item informado no parâmetro mv_par15/mv_par16/MV_PAR17 já 
+			   // Realiza a exclusão do item informado no parâmetro MV_PAR15/MV_PAR16/MV_PAR17 já 
 			   // filtrado na query.
 			   //================================================================================
 			   aAdd( _aItenPVEx , { { "LINPOS"     ,"C6_ITEM", QRYITENS->C6_ITEM},; 
@@ -615,7 +580,7 @@ If nOpca == 1
 							{ "C5_TIPOCLI" , QRYCABEC->C5_TIPOCLI 			,Nil},;
 							{ "C5_CONDPAG" , QRYCABEC->C5_CONDPAG 			,Nil},;
 							{ "C5_VEND1"   , QRYCABEC->C5_VEND1   			,Nil},;
-							{ "C5_EMISSAO" , StoD(QRYCABEC->C5_EMISSAO) 	,Nil},;
+							{ "C5_EMISSAO" , SToD(QRYCABEC->C5_EMISSAO) 	,Nil},;
 							{ "C5_TPFRETE" , QRYCABEC->C5_TPFRETE 			,Nil},;
 							{ "C5_VOLUME1" , QRYCABEC->C5_VOLUME1 			,Nil},;
 							{ "C5_ESPECI1" , QRYCABEC->C5_ESPECI1 			,Nil},;
@@ -624,7 +589,7 @@ If nOpca == 1
 							{ "C5_I_ENVRD" , "N"                			,Nil},;							
 					  		{ "C5_I_IDPED" , QRYCABEC->C5_I_IDPED			,Nil} }  
 		
-		_aAreaCabec := QRYCABEC->( GetArea() )
+		_aAreaCabec := QRYCABEC->( FWGetArea() )
 		
 		
 		DBSelectArea("SC5")
@@ -635,14 +600,14 @@ If nOpca == 1
 		// Caso outro usuario exclua, libere, fature ou bloqueie o Pedido de Venda posteriormente ao usuario ter 
 		// clicado no botao ok da exclusao
 		//=======================================================================================================
-		If SC5->( DBSeek( xFilial("SC5") + _cNumPed ) ) .and. EMPTY(SC5->C5_LIBEROK) .AND. EMPTY(SC5->C5_NOTA) .AND. EMPTY(SC5->C5_BLQ) 
+		If SC5->( DBSeek( xFilial("SC5") + _cNumPed ) ) .And. Empty(SC5->C5_LIBEROK) .And. Empty(SC5->C5_NOTA) .And. Empty(SC5->C5_BLQ) 
 					
 			//Verifica pedido vinculado
-			If !empty(SC5->C5_I_PEVIN)
+			If !Empty(SC5->C5_I_PEVIN)
 			
-			  If (Empty(mv_par15) .and. Empty(mv_par16) .and. Empty(mv_par17)) .or. AOMS108N(_cNumPed) == 1	
+			  If (Empty(MV_PAR15) .And. Empty(MV_PAR16) .And. Empty(MV_PAR17)) .Or. AOMS108N(_cNumPed) == 1	
 				
-				If !u_itmsg("Existe pedido vinculado (" + SC5->C5_I_PEVIN +  "). Desvincular e excluir o pedido principal?","Atenção","O pedido vinculado continuará inalterado.",2,2,2)
+				If !U_ITMsg("Existe pedido vinculado (" + SC5->C5_I_PEVIN +  "). Desvincular e excluir o pedido principal?","Atenção","O pedido vinculado continuará inalterado.",2,2,2)
 				
 					QRYCABEC->( DBSkip() )
 					Loop
@@ -651,68 +616,68 @@ If nOpca == 1
 				
 					_nc5ori := SC5->(Recno())
 					
-					If ((Empty(mv_par15) .and. Empty(mv_par16) .and. Empty(mv_par17)) .or. AOMS108N(_cNumPed) == 1 ) .and. SC5->( DBSeek( xFilial("SC5") + SC5->C5_I_PEVIN ) )
+					If ((Empty(MV_PAR15) .And. Empty(MV_PAR16) .And. Empty(MV_PAR17)) .Or. AOMS108N(_cNumPed) == 1 ) .And. SC5->( DBSeek( xFilial("SC5") + SC5->C5_I_PEVIN ) )
 					
-						Reclock("SC5",.F.)
+						RecLock("SC5",.F.)
 						SC5->C5_I_PEVIN := " "
-						SC5->(Msunlock())
+						SC5->(MSUnLock())
 						
-					Endif
+					EndIf
 					
-					SC5->(Dbgoto(_nc5ori)) 
+					SC5->(DBGoTo(_nc5ori)) 
 					
-					Reclock("SC5",.F.)
+					RecLock("SC5",.F.)
 					SC5->C5_I_PEVIN := " "
-					SC5->(Msunlock())
+					SC5->(MSUnLock())
 				
-				Endif
+				EndIf
 				
-			  Endif
+			  EndIf
 				
-			Endif
+			EndIf
 			
 			//Se o cliente estiver bloqueado 
-			SA1->(Dbsetorder(1))
+			SA1->(DBSetOrder(1))
 			_lbloqcli := .F.
-			If SA1->(Dbseek(xfilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI)) .AND. SA1->A1_MSBLQL == '1'
+			If SA1->(DBSeek(xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI)) .And. SA1->A1_MSBLQL == '1'
 			
 				_lbloqcli := .T.
 				_ccliente := SC5->C5_CLIENTE
 				_clojacli := SC5->C5_LOJACLI
 				_cobs := SA1->A1_I_ACRED
-				Reclock("SA1",.F.)
+				RecLock("SA1",.F.)
 				SA1->A1_MSBLQL := "2"
-				SA1->A1_I_ACRED := _cobs + CHR(13)+CHR(10) + "Desbloqueado pela rotina AOMS108 em " + dtoc(date())
-				SA1->(Msunlock())
+				SA1->A1_I_ACRED := _cobs + CHR(13)+CHR(10) + "Desbloqueado pela rotina AOMS108 em " + DToC(Date())
+				SA1->(MSUnLock())
 				
-			Endif
+			EndIf
             
 			_lOK_RDC := .T.
 
 			_clocmot := _cmotivs
-			IF SC5->C5_I_ENVRD = "S"
+			If SC5->C5_I_ENVRD = "S"
 			   If !u_IT_TMS(SC5->C5_I_LOCEM)  //! _lWsTms 
-				  FWMSGRUN( ,{|P| _lOK_RDC:=U_AOMS094E(P)} , 'Aguarde!' , 'Enviando para o RDC o cancelamento do Pedido...') 
-			   Else 
-                  FWMSGRUN( ,{|P| _lOK_RDC:=U_AOMS140E(P, .T.)} , 'Aguarde!' , 'Enviando para o TMS Multi-Embarcador o cancelamento do Pedido...') 
+				  FWMsgRun( ,{|P| _lOK_RDC:=U_AOMS094E(P)} , 'Aguarde!' , 'Enviando para o RDC o cancelamento do Pedido...') 
+			   Else
+                  FWMsgRun( ,{|P| _lOK_RDC:=U_AOMS140E(P, .T.)} , 'Aguarde!' , 'Enviando para o TMS Multi-Embarcador o cancelamento do Pedido...') 
 			   EndIf 
-            ENDIF
+            EndIf
  
             _lExclParcial:= .T.
 		    _cAOMS074    := "AOMS108"  	 //Não mostra mensagens do mata410
 		    _cAOMS074Vld := " " //Zera para cada pedido
 
 			If _lOK_RDC
-			   	If !Empty(mv_par15) .or. !Empty(mv_par16) .or. !Empty(mv_par17)
+			   	If !Empty(MV_PAR15) .Or. !Empty(MV_PAR16) .Or. !Empty(MV_PAR17)
 					//================================================================================
-					// Realiza a exclusão do item informado no parâmetro mv_par15/mv_par16/mv_par17 já 
+					// Realiza a exclusão do item informado no parâmetro MV_PAR15/MV_PAR16/MV_PAR17 já 
 					// filtrado na query.
 					//================================================================================
 					If AOMS108N(_cNumPed) == 1 // Indica que só existe um item/grupo no pedido de vendas. Todo o Pedido de vendas deve ser excluido. 
 						SC5->(RecLock("SC5"),.F.)	
 						lMsErroAuto := .F.
 						MSExecAuto( {|x,y,z| Mata410(x,y,z) } , _aCabcPVEx , _aItenPVEx , 5 ) // Exclui todo o pedido de vendas.
-						SC5->(Msunlock())
+						SC5->(MSUnLock())
 						_lExclParcial := .F.
 					Else
 						lMsErroAuto := .F.
@@ -730,7 +695,7 @@ If nOpca == 1
 					SC5->(RecLock("SC5"),.F.)
 					lMsErroAuto := .F.
 					MSExecAuto( {|x,y,z| Mata410(x,y,z) } , _aCabcPVEx , _aItenPVEx , 5 )
-					SC5->(Msunlock())
+					SC5->(MSUnLock())
 					_lExclParcial := .F.
 					//Recarrega parâmetros
 					EVAL(_bPergunte)
@@ -740,53 +705,53 @@ If nOpca == 1
             EndIf
             
 
-			SC5->( MSUnlock() )
+			SC5->( MSUnLock() )
 			_cmotivs := _clocmot
 			
 			//Se cliente foi desbloqueado para ajustes dos pedidos volta a bloquear
-			SA1->(Dbsetorder(1))
-			If _lbloqcli .and. SA1->(Dbseek(xfilial("SA1")+_ccliente+_clojacli)) 
+			SA1->(DBSetOrder(1))
+			If _lbloqcli .And. SA1->(DBSeek(xFilial("SA1")+_ccliente+_clojacli)) 
 			
-				Reclock("SA1",.F.)
+				RecLock("SA1",.F.)
 				SA1->A1_MSBLQL := "1"
 				SA1->A1_I_ACRED := _cobs 
-				SA1->(Msunlock())
+				SA1->(MSUnLock())
 				
-			Endif
+			EndIf
 			
-			If lMsErroAuto .OR. !_lOK_RDC
+			If lMsErroAuto .Or. !_lOK_RDC
                If !u_IT_TMS(SC5->C5_I_LOCEM)  //! _lWsTms
 			      _cTextoMsg := "Erro ao excluir no RDC."
-               Else 
+               Else
                   _cTextoMsg := "Erro ao excluir no TMS Multi-Embarcador."
 			   EndIf 
 
-               aadd(_alista,{_cNumPed, iif(_lOK_RDC,"Erro ao excluir no Protheus: " + _cAOMS074Vld + CRLF + "["+MostraErro("\data\Italac\AOMS108\","AOMS108_MostraErro_"+ALLTRIM(QRYCABEC->C5_NUM)+".LOG")+"]",_cTextoMsg)})
+               aAdd(_alista,{_cNumPed, IIf(_lOK_RDC,"Erro ao excluir no Protheus: " + _cAOMS074Vld + CRLF + "["+MostraErro("\data\Italac\AOMS108\","AOMS108_MostraErro_"+AllTrim(QRYCABEC->C5_NUM)+".LOG")+"]",_cTextoMsg)})
 
-			Else  
+			Else
 				
 				_ctitulo := " (EXCLUSAO COMPLETA)"
 
-				If !EMPTY(_MVPAR15)
+				If !Empty(_MVPAR15)
 		
-					_ctitulo := " (SOMENTE PRODUTO " + ALLTRIM(_MVPAR15) + ")"
+					_ctitulo := " (SOMENTE PRODUTO " + AllTrim(_MVPAR15) + ")"
 			
-				Endif
+				EndIf
 
-				If !EMPTY(_MVPAR16)
+				If !Empty(_MVPAR16)
 		
-					_ctitulo := " (SOMENTE GRUPO " + ALLTRIM(_MVPAR16) + ")"
+					_ctitulo := " (SOMENTE GRUPO " + AllTrim(_MVPAR16) + ")"
 			
-				Endif
+				EndIf
 
-				If !EMPTY(_MVPAR17)
+				If !Empty(_MVPAR17)
 		
-					_ctitulo := " (SOMENTE SUBGRUPO " + ALLTRIM(_MVPAR17) + ")"
+					_ctitulo := " (SOMENTE SUBGRUPO " + AllTrim(_MVPAR17) + ")"
 			
-				Endif
+				EndIf
 				
 
-				aadd(_alista,{_cNumPed, "Excluido com sucesso " + _ctitulo})
+				aAdd(_alista,{_cNumPed, "Excluido com sucesso " + _ctitulo})
 
                 If _lExclParcial
                    _cMsg      := "Monitor exclusão parcial do pedido de vendas, " + _ctitulo
@@ -805,47 +770,47 @@ If nOpca == 1
 				//================================================================================
 				//Encerra tabela de muro do RDC do pedido excluido
 				//================================================================================
-				ZFQ->(Dbsetorder(3))
-				ZFQ->(Dbgotop())
+				ZFQ->(DBSetOrder(3))
+				ZFQ->(DBGoTop())
 				
-				If ZFQ->(Dbseek(xFilial("SC5")+_cNumPed))
+				If ZFQ->(DBSeek(xFilial("SC5")+_cNumPed))
 		
-					Do while ZFQ->ZFQ_FILIAL == xFilial("SC5") .AND. ZFQ->ZFQ_PEDIDO == _cNumPed
+					While ZFQ->ZFQ_FILIAL == xFilial("SC5") .And. ZFQ->ZFQ_PEDIDO == _cNumPed
 			
-						IF ZFQ->ZFQ_SITUAC == 'N'
+						If ZFQ->ZFQ_SITUAC == 'N'
 						
-							Reclock("ZFQ",.F.)
+							RecLock("ZFQ",.F.)
 							ZFQ->ZFQ_SITUAC := 'P'
-							ZFQ->(Msunlock())
+							ZFQ->(MSUnLock())
 							
-						Endif
+						EndIf
 				
-						ZFQ->(DbSkip())
+						ZFQ->(DBSkip())
 				
-					Enddo
+					EndDo
 			
-				Endif
+				EndIf
 		
-				ZFR->(Dbsetorder(3))
-				ZFR->(Dbgotop())
+				ZFR->(DBSetOrder(3))
+				ZFR->(DBGoTop())
 				
-				If ZFR->(Dbseek(xFilial("SC5")+_cNumPed))
+				If ZFR->(DBSeek(xFilial("SC5")+_cNumPed))
 		
-					Do while ZFR->ZFR_FILIAL == xFilial("SC5") .AND. ZFR->ZFR_NUMPED == _cNumPed
+					While ZFR->ZFR_FILIAL == xFilial("SC5") .And. ZFR->ZFR_NUMPED == _cNumPed
 			
 						If ZFR->ZFR_SITUAC == 'N'
 						
-							Reclock("ZFR",.F.)
-							ZFR->(DbDelete())
-							ZFR->(Msunlock())
+							RecLock("ZFR",.F.)
+							ZFR->(DBDelete())
+							ZFR->(MSUnLock())
 							
-						Endif
+						EndIf
 				
-						ZFR->(DbSkip())
+						ZFR->(DBSkip())
 				
-					Enddo
+					EndDo
 			
-				Endif
+				EndIf
 				
 			EndIf
 		
@@ -854,21 +819,21 @@ If nOpca == 1
 			//Registra problema com pedido
 			If !SC5->( DBSeek( xFilial("SC5") + _cNumPed ) )
 			
-				aadd(_alista,{_cNumPed, "Pedido foi excluido antes do processamento"})
+				aAdd(_alista,{_cNumPed, "Pedido foi excluido antes do processamento"})
 			
-			elseIf !EMPTY(SC5->C5_LIBEROK) 
+			ElseIf !Empty(SC5->C5_LIBEROK) 
 			
-				aadd(_alista,{_cNumPed, "Pedido foi liberado antes do processamento"})
+				aAdd(_alista,{_cNumPed, "Pedido foi liberado antes do processamento"})
 			
-			elseIf !EMPTY(SC5->C5_NOTA) 
+			ElseIf !Empty(SC5->C5_NOTA) 
 			
-				aadd(_alista,{_cNumPed, "Pedido foi faturado antes do processamento"})
+				aAdd(_alista,{_cNumPed, "Pedido foi faturado antes do processamento"})
 			
-			elseIf !EMPTY(SC5->C5_BLQ)
+			ElseIf !Empty(SC5->C5_BLQ)
 			
-				aadd(_alista,{_cNumPed, "Pedido foi bloqueado antes do processamento"})
+				aAdd(_alista,{_cNumPed, "Pedido foi bloqueado antes do processamento"})
 			
-			Endif
+			EndIf
 			 
 		EndIf
 		
@@ -884,7 +849,7 @@ If nOpca == 1
 		   EndIf
 		EndIf
 				
-		RestArea(_aAreaCabec)
+		FWRestArea(_aAreaCabec)
 		
 	    QRYCABEC->( DBSkip() )
 	    
@@ -892,32 +857,32 @@ If nOpca == 1
 
 	End Transaction
 
-	If len(_alista) > 0
+	If Len(_alista) > 0
 
 		_ctitulo := "Pedidos excluidos (EXCLUSAO COMPLETA)"
 		
-		If !EMPTY(_MVPAR15)
+		If !Empty(_MVPAR15)
 		
-			_ctitulo := "Pedidos excluidos (SOMENTE PRODUTO " + ALLTRIM(_MVPAR15) + ")"
+			_ctitulo := "Pedidos excluidos (SOMENTE PRODUTO " + AllTrim(_MVPAR15) + ")"
 			
-		Endif
+		EndIf
 		
-		If !EMPTY(_MVPAR16)
+		If !Empty(_MVPAR16)
 		
-			_ctitulo := "Pedidos excluidos (SOMENTE GRUPO " + ALLTRIM(_MVPAR16) + ")"
+			_ctitulo := "Pedidos excluidos (SOMENTE GRUPO " + AllTrim(_MVPAR16) + ")"
 			
-		Endif
+		EndIf
 
-		If !EMPTY(_MVPAR17)
+		If !Empty(_MVPAR17)
 		
-			_ctitulo := "Pedidos excluidos (SOMENTE SUBGRUPO " + ALLTRIM(_MVPAR17) + ")"
+			_ctitulo := "Pedidos excluidos (SOMENTE SUBGRUPO " + AllTrim(_MVPAR17) + ")"
 			
-		Endif
+		EndIf
 		
 
 		U_ITListBox( _ctitulo , {"Numero","Situacao"} , _alista , .T. , 1 )
 			
-	Endif
+	EndIf
 	
 	_alista := {}
 	
@@ -932,28 +897,21 @@ Else
 	
 EndIf
 
-//================================================================================
-// Restaura a area
-//================================================================================
-RestArea( _aArea )
+FWRestArea( _aArea )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS108PSQ
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 23/04/2018
-===============================================================================================================================
 Descrição---------: Funcao para pesquisa no arquivo temporario.
-===============================================================================================================================
 Parametros--------: oMark  - Objeto de dados
 ------------------: cAlias - Alias temporário
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-
 Static Function AOMS108PSQ( oMark , cAlias )
 
 Local oGet1		:= Nil
@@ -964,13 +922,13 @@ Local aComboBx1	:= { "Pedido" , "Cliente+Loja" , "Descricao Cliente" , "Descrica
 Local nOpca		:= 0
 Local nI		:= 0
 
-DEFINE MSDIALOG oDlg TITLE "Pesquisar" FROM 178,181 TO 259,697 PIXEL
+DEFINE MSDIALOG oDlg TITLE "Pesquisar" FROM 178,181 To 259,697 PIXEL
 
 	@004,003 ComboBox	cComboBx1	Items aComboBx1 Size 213,010 OF oDlg PIXEL
 	@020,003 MsGet		oGet1		Var cGet1		Size 212,009 OF oDlg PIXEL COLOR CLR_BLACK Picture "@!"
 	
-	DEFINE SBUTTON FROM 004,227 TYPE 1 ENABLE ACTION ( nOpca := 1 , oDlg:End() ) OF oDlg
-	DEFINE SBUTTON FROM 021,227 TYPE 2 ENABLE ACTION ( nOpca := 0 , oDlg:End() ) OF oDlg
+	DEFINE SBUTTON FROM 004,227 Type 1 ENABLE ACTION ( nOpca := 1 , oDlg:End() ) OF oDlg
+	DEFINE SBUTTON FROM 021,227 Type 2 ENABLE ACTION ( nOpca := 0 , oDlg:End() ) OF oDlg
 
 ACTIVATE MSDIALOG oDlg CENTERED
 
@@ -993,23 +951,19 @@ If nOpca == 1
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS108INV
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 23/04/2018
-===============================================================================================================================
 Descrição---------: Rotina para inverter a marcacao do registro posicionado.
-===============================================================================================================================
 Parametros--------: oMark  - Objeto de dados
 ------------------: cAlias - Alias temporário
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-
 Static Function AOMS108INV( cMarca , lInverte , oQtda )
 
 Local lMarcado := IsMark( "TRBF_OK" , cMarca , lInverte )
@@ -1022,23 +976,19 @@ EndIf
 
 oQtda:Refresh()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS108ALL
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 23/04/2018
-===============================================================================================================================
 Descrição---------: Rotina para inverter a marcacao de todos os registros.
-===============================================================================================================================
 Parametros--------: oMark  - Objeto de dados
 ------------------: cAlias - Alias temporário
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-
 Static Function AOMS108ALL( cMarca , oQtda )
 
 Local nReg     := TRBF->( Recno() )
@@ -1055,7 +1005,7 @@ While TRBF->( !Eof() )
 	
 		TRBF->( RecLock( "TRBF" , .F. ) )
 		TRBF->TRBF_OK := Space(2)
-		TRBF->( MsUnLock() )
+		TRBF->( MSUnLock() )
 		
 		nQtdTit--
 		
@@ -1063,7 +1013,7 @@ While TRBF->( !Eof() )
 	
 		TRBF->( RecLock( "TRBF" , .F. ) )
 		TRBF->TRBF_OK := cMarca
-		TRBF->( MsUnLock() )
+		TRBF->( MSUnLock() )
 		
 		nQtdTit++
 		
@@ -1074,27 +1024,23 @@ While TRBF->( !Eof() )
 	TRBF->( DBSkip() )
 EndDo
 
-TRBF->( DBGoto(nReg) )
+TRBF->( DBGoTo(nReg) )
 
 oQtda:Refresh()
 oMark:oBrowse:Refresh(.T.)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS108ARQ
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 23/04/2018
-===============================================================================================================================
 Descrição---------: Rotina para criação do arquivo temporário
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-
 Static Function AOMS108ARQ()
 
 Local aEstru		:= {}
@@ -1105,49 +1051,49 @@ Local _nNumReg		:= 0
 //================================================================================
 // Armazena no array aEstru a estrutura dos campos da tabela.
 //================================================================================
-AADD( aEstru , { "TRBF_OK"		, 'C' , 02 , 0 } )
-AADD( aEstru , { "TRBF_FILIA"	, 'C' , 02 , 0 } )    
-AADD( aEstru , { "TRBF_NUM"		, 'C' , 06 , 0 } )
-AADD( aEstru , { "TRBF_OPER"    , 'C' , 02 , 0 } )
-AADD( aEstru , { "TRBF_DTEMI"	, 'D' , 08 , 0 } )
-AADD( aEstru , { "TRBF_DTENT"	, 'D' , 08 , 0 } )
-AADD( aEstru , { "TRBF_CODCL"	, 'C' , 06 , 0 } )
-AADD( aEstru , { "TRBF_LOJCL"	, 'C' , 04 , 0 } )
-AADD( aEstru , { "TRBF_DESCL"	, 'C' , 30 , 0 } )
-AADD( aEstru , { "TRBF_CODRE"	, 'C' , 06 , 0 } )
-AADD( aEstru , { "TRBF_DESCR"	, 'C' , 20 , 0 } )
-AADD( aEstru , { "TRBF_CODVE"	, 'C' , 06 , 0 } )
-AADD( aEstru , { "TRBF_DESVE"	, 'C' , 25 , 0 } )
-AADD( aEstru , { "TRBF_UF"   	, 'C' , 02 , 0 } )
-AADD( aEstru , { "TRBF_VALOR"	, 'N' , 14 , 2 } )
-AADD( aEstru , { "TRBF_FILCR"	, 'C' , 02 , 0 } ) 
-AADD( aEstru , { "TRBF_FILFT"	, 'C' , 02 , 0 } ) 
-AADD( aEstru , { "TRBF_AGEND"	, 'C' , 01 , 0 } )
-AADD( aEstru , { "C5_I_PEVIN"	, 'C' , LEN(SC5->C5_I_PEVIN),0}) 
-AADD( aEstru , { "C5_I_ENVRD"	, 'C' , LEN(SC5->C5_I_ENVRD),0}) 
+aAdd( aEstru , { "TRBF_OK"		, 'C' , 02 , 0 } )
+aAdd( aEstru , { "TRBF_FILIA"	, 'C' , 02 , 0 } )    
+aAdd( aEstru , { "TRBF_NUM"		, 'C' , 06 , 0 } )
+aAdd( aEstru , { "TRBF_OPER"    , 'C' , 02 , 0 } )
+aAdd( aEstru , { "TRBF_DTEMI"	, 'D' , 08 , 0 } )
+aAdd( aEstru , { "TRBF_DTENT"	, 'D' , 08 , 0 } )
+aAdd( aEstru , { "TRBF_CODCL"	, 'C' , 06 , 0 } )
+aAdd( aEstru , { "TRBF_LOJCL"	, 'C' , 04 , 0 } )
+aAdd( aEstru , { "TRBF_DESCL"	, 'C' , 30 , 0 } )
+aAdd( aEstru , { "TRBF_CODRE"	, 'C' , 06 , 0 } )
+aAdd( aEstru , { "TRBF_DESCR"	, 'C' , 20 , 0 } )
+aAdd( aEstru , { "TRBF_CODVE"	, 'C' , 06 , 0 } )
+aAdd( aEstru , { "TRBF_DESVE"	, 'C' , 25 , 0 } )
+aAdd( aEstru , { "TRBF_UF"   	, 'C' , 02 , 0 } )
+aAdd( aEstru , { "TRBF_VALOR"	, 'N' , 14 , 2 } )
+aAdd( aEstru , { "TRBF_FILCR"	, 'C' , 02 , 0 } ) 
+aAdd( aEstru , { "TRBF_FILFT"	, 'C' , 02 , 0 } ) 
+aAdd( aEstru , { "TRBF_AGEND"	, 'C' , 01 , 0 } )
+aAdd( aEstru , { "C5_I_PEVIN"	, 'C' , Len(SC5->C5_I_PEVIN),0}) 
+aAdd( aEstru , { "C5_I_ENVRD"	, 'C' , Len(SC5->C5_I_ENVRD),0}) 
 
 //================================================================================
 // Armazena no array aCampos o nome, picture e descricao dos campos
 //================================================================================
-AADD( aCampos , { "TRBF_OK"		, "" , " "					, " "										} )
-AADD( aCampos , { "TRBF_FILIA"	, "" , "Filial"				, PesqPict( "SC5" , "C5_FILIAL"	 )			} )    
-AADD( aCampos , { "TRBF_NUM"	, "" , "Pedido"				, PesqPict( "SC5" , "C5_NUM"	 )	 		} )
-AADD( aCampos , { "C5_I_PEVIN"	, "" , "PV Vinculado"       , "@!"	} )
-AADD( aCampos , { "TRBF_OPER"	, "" , "Operação"			, PesqPict( "SC5" , "C5_I_OPER"	 )	 		} )
-AADD( aCampos , { "TRBF_DTEMI"	, "" , "Data Emissao"		, PesqPict( "SC5" , "C5_EMISSAO" )	  		} )
-AADD( aCampos , { "TRBF_DTENT"	, "" , "Data Entrega"		, PesqPict( "SC5" , "C5_I_DTENT" )	  		} )
-AADD( aCampos , { "TRBF_CODCL"	, "" , "Cliente"			, PesqPict( "SC5" , "C5_CLIENTE" )	  		} )
-AADD( aCampos , { "TRBF_LOJCL"	, "" , "Loja"				, PesqPict( "SC5" , "C5_LOJACLI" )	  		} )
-AADD( aCampos , { "TRBF_DESCL"	, "" , "Descricao Cliente"	, PesqPict( "SC5" , "C5_I_NOME"  )	  		} )
-AADD( aCampos , { "TRBF_CODRE"	, "" , "Rede"				, PesqPict( "SC5" , "C5_I_GRPVE" )	  		} )
-AADD( aCampos , { "TRBF_DESCR"	, "" , "Descricao Rede"		, PesqPict( "SC5" , "C5_I_NOMRD" )	  		} ) 
-AADD( aCampos , { "TRBF_UF"	    , "" , "UF"					, PesqPict( "SA1" , "A1_EST"     )	  		} )
-AADD( aCampos , { "TRBF_CODVE"	, "" , "Vendedor"			, PesqPict( "SC5" , "C5_VEND1"   )	  		} )
-AADD( aCampos , { "TRBF_DESVE"	, "" , "Descricao Vendedor"	, PesqPict( "SC5" , "C5_I_V1NOM" )	  		} )
-AADD( aCampos , { "TRBF_FILCR"	, "" , "Filial Carregamento", "@!"	} )
-AADD( aCampos , { "TRBF_FILFT"	, "" , "Filial Faturamento" , "@!"	} )
-AADD( aCampos , { "TRBF_AGEND"	, "" , "Tipo de Entrega"    , "@!"	} ) 
-AADD( aCampos , { {||IF(TRBF->C5_I_ENVRD="S","Sim","Não")},"","Envio RDC?",""} )
+aAdd( aCampos , { "TRBF_OK"		, "" , " "					, " "										} )
+aAdd( aCampos , { "TRBF_FILIA"	, "" , "Filial"				, PesqPict( "SC5" , "C5_FILIAL"	 )			} )    
+aAdd( aCampos , { "TRBF_NUM"	, "" , "Pedido"				, PesqPict( "SC5" , "C5_NUM"	 )	 		} )
+aAdd( aCampos , { "C5_I_PEVIN"	, "" , "PV Vinculado"       , "@!"	} )
+aAdd( aCampos , { "TRBF_OPER"	, "" , "Operação"			, PesqPict( "SC5" , "C5_I_OPER"	 )	 		} )
+aAdd( aCampos , { "TRBF_DTEMI"	, "" , "Data Emissao"		, PesqPict( "SC5" , "C5_EMISSAO" )	  		} )
+aAdd( aCampos , { "TRBF_DTENT"	, "" , "Data Entrega"		, PesqPict( "SC5" , "C5_I_DTENT" )	  		} )
+aAdd( aCampos , { "TRBF_CODCL"	, "" , "Cliente"			, PesqPict( "SC5" , "C5_CLIENTE" )	  		} )
+aAdd( aCampos , { "TRBF_LOJCL"	, "" , "Loja"				, PesqPict( "SC5" , "C5_LOJACLI" )	  		} )
+aAdd( aCampos , { "TRBF_DESCL"	, "" , "Descricao Cliente"	, PesqPict( "SC5" , "C5_I_NOME"  )	  		} )
+aAdd( aCampos , { "TRBF_CODRE"	, "" , "Rede"				, PesqPict( "SC5" , "C5_I_GRPVE" )	  		} )
+aAdd( aCampos , { "TRBF_DESCR"	, "" , "Descricao Rede"		, PesqPict( "SC5" , "C5_I_NOMRD" )	  		} ) 
+aAdd( aCampos , { "TRBF_UF"	    , "" , "UF"					, PesqPict( "SA1" , "A1_EST"     )	  		} )
+aAdd( aCampos , { "TRBF_CODVE"	, "" , "Vendedor"			, PesqPict( "SC5" , "C5_VEND1"   )	  		} )
+aAdd( aCampos , { "TRBF_DESVE"	, "" , "Descricao Vendedor"	, PesqPict( "SC5" , "C5_I_V1NOM" )	  		} )
+aAdd( aCampos , { "TRBF_FILCR"	, "" , "Filial Carregamento", "@!"	} )
+aAdd( aCampos , { "TRBF_FILFT"	, "" , "Filial Faturamento" , "@!"	} )
+aAdd( aCampos , { "TRBF_AGEND"	, "" , "Tipo de Entrega"    , "@!"	} ) 
+aAdd( aCampos , { {||If(TRBF->C5_I_ENVRD="S","Sim","Não")},"","Envio RDC?",""} )
 
 //================================================================================
 // Verifica se ja existe um arquivo com mesmo nome, se sim deleta.
@@ -1178,7 +1124,7 @@ EndIf
 
 If !Empty( xFilial("SA1") )
 	cFiltro += " AND A1.A1_FILIAL	= '"+ xFilial("SA1") +"' "
-endIf
+EndIf
 
 If !Empty( xFilial("SA3") )
 	cFiltro += " AND SA3.A3_FILIAL	= '"+ xFilial("SA3") +"' "
@@ -1188,14 +1134,14 @@ EndIf
 // Emissao de - Ate
 //================================================================================
 If !Empty( MV_PAR01 ) .And. !Empty( MV_PAR02 )
-		cFiltro += " AND C5.C5_EMISSAO	BETWEEN '"+ dtos(MV_PAR01)	+"' AND '"+ dtos(MV_PAR02)	+"' "
+		cFiltro += " AND C5.C5_EMISSAO	BETWEEN '"+ DToS(MV_PAR01)	+"' AND '"+ DToS(MV_PAR02)	+"' "
 EndIf
 	
 //================================================================================
 // Data Entrega De - Ate
 //================================================================================
 If !Empty( MV_PAR03 ) .And. !Empty( MV_PAR04 )
-	cFiltro += " AND C5.C5_I_DTENT	BETWEEN '"+ dtos(MV_PAR03)	+"' AND '"+ dtos(MV_PAR04)	+"' "
+	cFiltro += " AND C5.C5_I_DTENT	BETWEEN '"+ DToS(MV_PAR03)	+"' AND '"+ DToS(MV_PAR04)	+"' "
 EndIf
 	
 //================================================================================
@@ -1216,8 +1162,8 @@ EndIf
 // Rede
 //================================================================================
 If !Empty( MV_PAR09 )                                                   
-	If Len(Alltrim(MV_PAR09)) <= 6
-		cFiltro += " AND C5.C5_I_GRPVE	= '" + Alltrim(MV_PAR09) + "' "
+	If Len(AllTrim(MV_PAR09)) <= 6
+		cFiltro += " AND C5.C5_I_GRPVE	= '" + AllTrim(MV_PAR09) + "' "
 	Else
 		cFiltro += " AND C5.C5_I_GRPVE	IN " + FormatIn( MV_PAR09 , ";" )
 	EndIf
@@ -1227,8 +1173,8 @@ EndIf
 // Estado
 //================================================================================
 If !Empty( MV_PAR10 )     
-	If Len(Alltrim(MV_PAR10)) <= 2
-		cFiltro  += " AND A1.A1_EST = '"+ Alltrim(MV_PAR10) + "' "
+	If Len(AllTrim(MV_PAR10)) <= 2
+		cFiltro  += " AND A1.A1_EST = '"+ AllTrim(MV_PAR10) + "' "
 	Else
 		cFiltro  += " AND A1.A1_EST IN "+ FormatIn( MV_PAR10 , ";" )
 	EndIf
@@ -1238,8 +1184,8 @@ EndIf
 // Municipio
 //================================================================================
 If !Empty( MV_PAR11 )             
-	If Len(Alltrim(MV_PAR11)) <= 6
-		cFiltro  += " AND A1.A1_COD_MUN = '"+ Alltrim(MV_PAR11) + "' "
+	If Len(AllTrim(MV_PAR11)) <= 6
+		cFiltro  += " AND A1.A1_COD_MUN = '"+ AllTrim(MV_PAR11) + "' "
 	Else
 		cFiltro  += " AND A1.A1_COD_MUN	IN "+ FormatIn( MV_PAR11 , ";" )
 	EndIf
@@ -1249,8 +1195,8 @@ EndIf
 // Filtra Supervisor
 //================================================================================
 If !Empty( MV_PAR12 )             
-	If Len(Alltrim(MV_PAR12)) <= 6
-		cFiltro += " AND A3.A3_SUPER = '"+ Alltrim(MV_PAR12) + "' "
+	If Len(AllTrim(MV_PAR12)) <= 6
+		cFiltro += " AND A3.A3_SUPER = '"+ AllTrim(MV_PAR12) + "' "
 	Else
 		cFiltro += " AND A3.A3_SUPER IN "+ FormatIn( MV_PAR12 , ";" )
 	EndIf
@@ -1260,8 +1206,8 @@ EndIf
 // Filtra Vendedor
 //================================================================================
 If !Empty( MV_PAR13 )      
-	If Len(Alltrim(MV_PAR13)) <= 6
-		cFiltro += " AND A3.A3_COD = '"+ Alltrim(MV_PAR13) + "' "
+	If Len(AllTrim(MV_PAR13)) <= 6
+		cFiltro += " AND A3.A3_COD = '"+ AllTrim(MV_PAR13) + "' "
 	Else
 		cFiltro += " AND A3.A3_COD IN "+ FormatIn( MV_PAR13 , ";" )
 	EndIf
@@ -1273,7 +1219,7 @@ EndIf
 If !Empty( MV_PAR14 )
 
 	cFiltro += " AND EXISTS (SELECT 'Y' FROM " +RetSqlName("SC6")+ " C6 "
-	cFiltro += " WHERE C6.D_E_L_E_T_ <> '*' AND C6.C6_FILIAL = C5.C5_FILIAL AND C6.C6_NUM = C5.C5_NUM "
+	cFiltro += " WHERE C6.D_E_L_E_T_ = ' ' AND C6.C6_FILIAL = C5.C5_FILIAL AND C6.C6_NUM = C5.C5_NUM "
 	cFiltro += " AND C6.C6_PRODUTO	IN "+ FormatIn( MV_PAR14 , ";" ) + " )" 	
 	
 EndIf
@@ -1284,7 +1230,7 @@ EndIf
 If !Empty( MV_PAR15 )
 
 	cFiltro += " AND EXISTS (SELECT 'Y' FROM " +RetSqlName("SC6")+ " C62 "
-	cFiltro += " WHERE C62.D_E_L_E_T_ <> '*' AND C62.C6_FILIAL = C5.C5_FILIAL AND C62.C6_NUM = C5.C5_NUM "
+	cFiltro += " WHERE C62.D_E_L_E_T_ = ' ' AND C62.C6_FILIAL = C5.C5_FILIAL AND C62.C6_NUM = C5.C5_NUM "
 	cFiltro += " AND C62.C6_PRODUTO	= '"+ MV_PAR15 + "') "         
 		
 EndIf
@@ -1295,8 +1241,8 @@ EndIf
 If !Empty( MV_PAR16 )
 
 	cFiltro += " AND EXISTS (SELECT 'Y' FROM " +RetSqlName("SC6")+ " C62 "
-	cFiltro += " WHERE C62.D_E_L_E_T_ <> '*' AND C62.C6_FILIAL = C5.C5_FILIAL AND C62.C6_NUM = C5.C5_NUM "
-	cFiltro += " AND (SELECT B1_GRUPO FROM " +RetSqlName("SB1")+ " B12 WHERE B12.D_E_L_E_T_ <> '*' AND B12.B1_COD = C62.C6_PRODUTO)	= '"+ MV_PAR16 + "') "         
+	cFiltro += " WHERE C62.D_E_L_E_T_ = ' ' AND C62.C6_FILIAL = C5.C5_FILIAL AND C62.C6_NUM = C5.C5_NUM "
+	cFiltro += " AND (SELECT B1_GRUPO FROM " +RetSqlName("SB1")+ " B12 WHERE B12.D_E_L_E_T_ = ' ' AND B12.B1_COD = C62.C6_PRODUTO)	= '"+ MV_PAR16 + "') "         
 		
 EndIf
 
@@ -1306,8 +1252,8 @@ EndIf
 If !Empty( MV_PAR17 )
 
 	cFiltro += " AND EXISTS (SELECT 'Y' FROM " +RetSqlName("SC6")+ " C62 "
-	cFiltro += " WHERE C62.D_E_L_E_T_ <> '*' AND C62.C6_FILIAL = C5.C5_FILIAL AND C62.C6_NUM = C5.C5_NUM "
-	cFiltro += " AND (SELECT B1_I_SUBGR FROM " +RetSqlName("SB1")+ " B12 WHERE B12.D_E_L_E_T_ <> '*' AND B12.B1_COD = C62.C6_PRODUTO)	= '"+ MV_PAR17 + "') "         
+	cFiltro += " WHERE C62.D_E_L_E_T_ = ' ' AND C62.C6_FILIAL = C5.C5_FILIAL AND C62.C6_NUM = C5.C5_NUM "
+	cFiltro += " AND (SELECT B1_I_SUBGR FROM " +RetSqlName("SB1")+ " B12 WHERE B12.D_E_L_E_T_ = ' ' AND B12.B1_COD = C62.C6_PRODUTO)	= '"+ MV_PAR17 + "') "         
 		
 EndIf
 
@@ -1320,18 +1266,18 @@ If !Empty( MV_PAR18 )
 EndIf
 
 
-If  MV_PAR19 > 0 .OR. MV_PAR20 > 0
+If  MV_PAR19 > 0 .Or. MV_PAR20 > 0
 
 	cFiltro += " AND EXISTS (SELECT 'Y' FROM " +RetSqlName("SC6")+ " C63 "
-	cFiltro += " WHERE C63.D_E_L_E_T_ <> '*' AND C63.C6_FILIAL = C5.C5_FILIAL AND C63.C6_NUM = C5.C5_NUM "
-	cFiltro += " AND (C63.C6_PRCVEN - (C63.C6_PRCVEN * C63.C6_I_PDESC)/100) BETWEEN "+ STR(MV_PAR19,15,2) + " AND "+ STR(MV_PAR20,15,2) + ") "   
+	cFiltro += " WHERE C63.D_E_L_E_T_ = ' ' AND C63.C6_FILIAL = C5.C5_FILIAL AND C63.C6_NUM = C5.C5_NUM "
+	cFiltro += " AND (C63.C6_PRCVEN - (C63.C6_PRCVEN * C63.C6_I_PDESC)/100) BETWEEN "+ Str(MV_PAR19,15,2) + " AND "+ Str(MV_PAR20,15,2) + ") "   
 
 EndIf
 
 
-If  MV_PAR21 > 0 .OR. MV_PAR22 > 0
+If  MV_PAR21 > 0 .Or. MV_PAR22 > 0
 
-	cFiltro += " AND C5.C5_I_PESBR BETWEEN "+ STR(MV_PAR21,15,3) + " AND "+ STR(MV_PAR22,15,3) 
+	cFiltro += " AND C5.C5_I_PESBR BETWEEN "+ Str(MV_PAR21,15,3) + " AND "+ Str(MV_PAR22,15,3) 
 
 EndIf
 
@@ -1344,7 +1290,7 @@ EndIf
 //================================================================================
 // Filtra Pedidos de Remessa da Operação Triangular.
 //================================================================================
-cFiltro += " AND C5.C5_I_OPTRI <> 'R' "
+//cFiltro += " AND C5.C5_I_OPTRI <> 'R' "  // Removendo este filtro para permitir exibir e selecionar pedidos de remessa.
 
 //================================================================================
 // Filtra Pedidos de Vendas Normais. Apenas os Pedidos de Tipo Normal podem ser
@@ -1372,10 +1318,10 @@ BeginSql alias "QRYPED"
 				C5.C5_I_FILFT	, C5.C5_I_FLFNC , C5_I_AGEND    , C5_I_PEVIN        , C5_I_ENVRD,
 				C5_I_TRCNF      , C5_I_PDFT     , C5_I_OPER     , A1_EST            , C5_I_DTENT
 	
-	FROM		%table:SC5% C5
+	FROM		%Table:SC5% C5
 	
-	JOIN		%table:SA1% A1  ON C5.C5_CLIENTE = A1.A1_COD    AND C5.C5_LOJACLI = A1.A1_LOJA
-	JOIN		%table:SA3% A3  ON C5.C5_VEND1   = A3.A3_COD
+	JOIN		%Table:SA1% A1  ON C5.C5_CLIENTE = A1.A1_COD    AND C5.C5_LOJACLI = A1.A1_LOJA
+	JOIN		%Table:SA3% A3  ON C5.C5_VEND1   = A3.A3_COD
 	
 	WHERE			C5.D_E_L_E_T_ = ' '
 				AND A1.D_E_L_E_T_ = ' '
@@ -1399,33 +1345,33 @@ QRYPED->( DBGoTop() )
 _nRet := 1
 _cUserAux:=RetCodUsr()
 
-While QRYPED->(!EOF())
+While QRYPED->(!Eof())
     _nRet := 0
     
  	//================================================================================
     // Filtra pedidos em planejamento logístico
     //================================================================================ 
-	ZZL->(Dbsetorder(3))
-	If !(ZZL->(Dbseek(xFilial("ZZL") + _cUserAux))) .OR. ZZL->ZZL_PVLOG != "S"	
+	ZZL->(DBSetOrder(3))
+	If !(ZZL->(DBSeek(xFilial("ZZL") + _cUserAux))) .Or. ZZL->ZZL_PVLOG != "S"	
 
 		If QRYPED->C5_I_BLOG = 'S' 
-   			Aadd(_alista,{QRYPED->C5_NUM, "Pedido em planejamento logístico. Não pode ser excluido."})
+   			aAdd(_alista,{QRYPED->C5_NUM, "Pedido em planejamento logístico. Não pode ser excluido."})
 	    	QRYPED->( DBSkip() )
 	    	Loop
-		Endif
+		EndIf
 
-	ENDIF
+	EndIf
 
    	//================================================================================
     // Filtra pedidos troca nota que não podem ser excluidos.
     //================================================================================ 
 	If QRYPED->C5_I_TRCNF = 'S' 
 	   If (QRYPED->C5_FILIAL == QRYPED->C5_I_FLFNC .And. ! Empty(QRYPED->C5_I_PDFT))
-	      Aadd(_alista,{QRYPED->C5_NUM, "Este é um pedido de vendas troca nota e já possui um pedido de faturamento. Não pode ser excluido."})
+	      aAdd(_alista,{QRYPED->C5_NUM, "Este é um pedido de vendas troca nota e já possui um pedido de faturamento. Não pode ser excluido."})
 	      QRYPED->( DBSkip() )
 	      Loop
 	   ElseIf (QRYPED->C5_FILIAL <> QRYPED->C5_I_FLFNC)
-	      Aadd(_alista,{QRYPED->C5_NUM, "Este não é um pedido de vendas troca nota da filial de origem. Não pode ser excluido."})
+	      aAdd(_alista,{QRYPED->C5_NUM, "Este não é um pedido de vendas troca nota da filial de origem. Não pode ser excluido."})
 	      QRYPED->( DBSkip() )
 	      Loop
 	   EndIf
@@ -1434,18 +1380,18 @@ While QRYPED->(!EOF())
    	//================================================================================
     // Filtra pedidos de operação triangular que não podem ser excluidos
     //================================================================================ 
-    If ALLTRIM(QRYPED->C5_I_OPER) == '05' .AND. !EMPTY(QRYPED->C5_I_PVREM)
+    If AllTrim(QRYPED->C5_I_OPER) == '05' .And. !Empty(QRYPED->C5_I_PVREM)
     
-    	SC5->(Dbsetorder(1))
-    	If SC5->(Dbseek(QRYPED->C5_FILIAL+QRYPED->C5_I_PVREM)) .AND. SC5->C5_LIBEROK = 'S'
+    	SC5->(DBSetOrder(1))
+    	If SC5->(DBSeek(QRYPED->C5_FILIAL+QRYPED->C5_I_PVREM)) .And. SC5->C5_LIBEROK = 'S'
     	  
-    	  Aadd(_alista,{QRYPED->C5_NUM, "Pedido de vendas atrelado a operação triangular com estoque já liberado."})
+    	  aAdd(_alista,{QRYPED->C5_NUM, "Pedido de vendas atrelado a operação triangular com estoque já liberado."})
 	      QRYPED->( DBSkip() )
 	      Loop
 	   
 	   EndIf
  	
-	Endif
+	EndIf
 		
 	//================================================================================
 	// Armazena o numero de registros encontrados.
@@ -1458,8 +1404,8 @@ While QRYPED->(!EOF())
 			TRBF->TRBF_FILIA	:= QRYPED->C5_FILIAL
 			TRBF->TRBF_NUM		:= QRYPED->C5_NUM
 	        TRBF->TRBF_OPER     := QRYPED->C5_I_OPER 
-			TRBF->TRBF_DTEMI	:= STOD(QRYPED->C5_EMISSAO)
-			TRBF->TRBF_DTENT	:= STOD(QRYPED->C5_I_DTENT)
+			TRBF->TRBF_DTEMI	:= SToD(QRYPED->C5_EMISSAO)
+			TRBF->TRBF_DTENT	:= SToD(QRYPED->C5_I_DTENT)
 			TRBF->TRBF_CODCL	:= QRYPED->C5_CLIENTE
 			TRBF->TRBF_LOJCL	:= QRYPED->C5_LOJACLI
 			TRBF->TRBF_DESCL	:= QRYPED->A1_NOME
@@ -1490,15 +1436,11 @@ Return( _nRet )
 Programa----------: AOMS108PPV
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 23/04/2018
-===============================================================================================================================
 Descrição---------: Função para Pesquisar Pedidos de Vendas
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-
 Static Function AOMS108PPV()   
                               
 DBSelectArea("SC5")
@@ -1507,18 +1449,15 @@ If SC5->( DBSeek( TRBF->( TRBF_FILIA + TRBF_NUM ) ) )
 	MatA410(Nil, Nil, Nil, Nil, "A410Visual") 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS108VLD
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 23/04/2018
-===============================================================================================================================
 Descrição---------: Verifica a seleção dos pedidos 
-===============================================================================================================================
 Parametros--------: nQtdTit   - Quantidade de Títulos Selecionados
-===============================================================================================================================
 Retorno-----------: _lRet     - Define se os dados foram validados com sucesso
 ===============================================================================================================================
 */
@@ -1531,7 +1470,7 @@ Local _lRet		:= .T.
 //================================================================================
 If nQtdTit == 0 
 
-	U_ITmsg("Para executar a rotina de exclusao multipla de Pedidos de venda deve-se "+;
+	U_ITMsg("Para executar a rotina de exclusao multipla de Pedidos de venda deve-se "+;
 			"primeiramente selecionar pelo menos um pedido de venda ."		,;
 			"Atenção"																	,;
 			"Favor informar os dados citados acima para executar a rotina de exclusao.",1)
@@ -1548,37 +1487,34 @@ Return( _lRet )
 Programa----------: AOMS108R
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 03/05/2018
-===============================================================================================================================
 Descrição---------: Exclusão dos pedidos de remessa da operação triangular e pedido vinculado.
-===============================================================================================================================
 Parametros--------: _cFilRem = Filial do Pedido de Remessa.
                     _cNumPedRem = Numero do Pedido de Remessa.
                     _ntipo - 1 pedido de remessa, 2 pedido vinculado
-===============================================================================================================================
 Retorno-----------: _lRet = .T. = Exclusão realizada com sucesso.
                             .F. = Falha na exclusão do pedido de remessa.
 ===============================================================================================================================
 */
 Static Function AOMS108R(_cFilRem, _cNumPedRem,_ntipo)
+
 Local _lRet	:= .T.
 Local _aCabecPV
 Local _aItensPV
 Local _aCabcPVEx
 Local _aItenPVEx
 Local _lblqprc
-Local _aArea := GetArea()
+Local _aArea := FWGetArea()
 Local _lExclParcial
 Local _cMsg, _cCodOper, _dDataOper, _cEncer
-Local _ctpped := iif(_ntipo==1,"remessa","vinculado")
-//Local _lWsTms := U_ITGETMV( 'IT_WEBSTMS' , .F.) // Indica se rotina de integração WebService é TMS Multi-Embarcador ou RDC.
+Local _ctpped := IIf(_ntipo==1,"remessa","vinculado")
 
 Private lAutoErrNoFile := .T.  
 Private _cAOMS074Vld   := " "  
 
 Begin Sequence
-   SC5->( Dbsetorder(1) )
-   If !	SC5->( Dbseek( _cFilRem + _cNumPedRem) )
-      Aadd(_aLista,{_cNumPedRem, "Pedido " + _ctpped + " não localizado."})
+   SC5->( DBSetOrder(1) )
+   If !	SC5->( DBSeek( _cFilRem + _cNumPedRem) )
+      aAdd(_aLista,{_cNumPedRem, "Pedido " + _ctpped + " não localizado."})
       _lRet := .F.
       Break
    EndIf
@@ -1592,32 +1528,32 @@ Begin Sequence
    _aItenPVEx	:= {}
    _lblqprc    := .F.
 		
-   SC6->(DbSetOrder(1)) // C6_FILIAL+C6_NUM+C6_ITEM+C6_PRODUTO
-   SC6->(DbSeek(_cFilRem + _cNumPedRem))
+   SC6->(DBSetOrder(1)) // C6_FILIAL+C6_NUM+C6_ITEM+C6_PRODUTO
+   SC6->(DBSeek(_cFilRem + _cNumPedRem))
 		
-   Do While ! SC6->(Eof()) .And. SC6->(C6_FILIAL+C6_NUM) == _cFilRem + _cNumPedRem 
-		If !Empty(mv_par15) .OR. !Empty(mv_par16) .or. !Empty(mv_par17)
+   While ! SC6->(Eof()) .And. SC6->(C6_FILIAL+C6_NUM) == _cFilRem + _cNumPedRem 
+		If !Empty(MV_PAR15) .Or. !Empty(MV_PAR16) .Or. !Empty(MV_PAR17)
 			//=============================================================================
-			// Realiza a exclusão do item informado no parâmetro mv_par15/MV_PAR16 já filtrado 
+			// Realiza a exclusão do item informado no parâmetro MV_PAR15/MV_PAR16 já filtrado 
 			// na query.
 			//=============================================================================
-			If !Empty(mv_par15) .AND. AllTrim(SC6->C6_PRODUTO) <> AllTrim(mv_par15)
-				SC6->(DbSkip())
+			If !Empty(MV_PAR15) .And. AllTrim(SC6->C6_PRODUTO) <> AllTrim(MV_PAR15)
+				SC6->(DBSkip())
 				Loop
 			EndIf
 			
-			If !Empty(mv_par16) .AND. AllTrim(POSICIONE("SB1",1,xfilial("SB1")+SC6->C6_PRODUTO,"B1_GRUPO")) <> AllTrim(mv_par16)
-				SC6->(DbSkip())
+			If !Empty(MV_PAR16) .And. AllTrim(Posicione("SB1",1,xFilial("SB1")+SC6->C6_PRODUTO,"B1_GRUPO")) <> AllTrim(MV_PAR16)
+				SC6->(DBSkip())
 				Loop
 			EndIf
 
-			If !Empty(mv_par17) .AND. AllTrim(POSICIONE("SB1",1,xfilial("SB1")+SC6->C6_PRODUTO,"B1_I_SUBGR")) <> AllTrim(mv_par17)
-				SC6->(DbSkip())
+			If !Empty(MV_PAR17) .And. AllTrim(Posicione("SB1",1,xFilial("SB1")+SC6->C6_PRODUTO,"B1_I_SUBGR")) <> AllTrim(MV_PAR17)
+				SC6->(DBSkip())
 				Loop
 			EndIf
 			
-			If mv_par19 > 0 .OR. mv_par20 > 0 .AND. (SC6->C6_PRCVEN - (SC6->C6_PRCVEN * SC6->C6_I_PDESC)/100) >= mv_par19 .AND. (SC6->C6_PRCVEN - (SC6->C6_PRCVEN * SC6->C6_I_PDESC)/100) <= mv_par20
-				SC6->(DbSkip())
+			If MV_PAR19 > 0 .Or. MV_PAR20 > 0 .And. (SC6->C6_PRCVEN - (SC6->C6_PRCVEN * SC6->C6_I_PDESC)/100) >= MV_PAR19 .And. (SC6->C6_PRCVEN - (SC6->C6_PRCVEN * SC6->C6_I_PDESC)/100) <= MV_PAR20
+				SC6->(DBSkip())
 				Loop
 			EndIf
 
@@ -1687,9 +1623,9 @@ Begin Sequence
 		_lOK_RDC := .T.
 		If SC5->C5_I_ENVRD = "S"
 		   If !u_IT_TMS(SC5->C5_I_LOCEM)  //! _lWsTms
-			  FWMSGRUN( ,{|P| _lOK_RDC:=U_AOMS094E(P)} , 'Aguarde!' , 'Enviando para o RDC o cancelamento do Pedido Remessa...') 
-		   Else 
-              FWMSGRUN( ,{|P| _lOK_RDC:=U_AOMS140E(P,.T.)} , 'Aguarde!' , 'Enviando para o TMS Multi-Embarcador o cancelamento do Pedido Remessa...') 
+			  FWMsgRun( ,{|P| _lOK_RDC:=U_AOMS094E(P)} , 'Aguarde!' , 'Enviando para o RDC o cancelamento do Pedido Remessa...') 
+		   Else
+              FWMsgRun( ,{|P| _lOK_RDC:=U_AOMS140E(P,.T.)} , 'Aguarde!' , 'Enviando para o TMS Multi-Embarcador o cancelamento do Pedido Remessa...') 
 		   EndIf 
 		EndIf
    					   
@@ -1699,16 +1635,16 @@ Begin Sequence
 		
 		If _lOK_RDC
 			//Efetua a exclusao do Pedido de venda que foi efetuada a importacao para a filial de destino
-			If !Empty(mv_par15) .or. !Empty(mv_par16) .or. !Empty(mv_par17)
+			If !Empty(MV_PAR15) .Or. !Empty(MV_PAR16) .Or. !Empty(MV_PAR17)
 				//=============================================================================
-				// Realiza a exclusão do item informado no parâmetro mv_par15/mv_par16/MV_PAR17 já filtrado na
+				// Realiza a exclusão do item informado no parâmetro MV_PAR15/MV_PAR16/MV_PAR17 já filtrado na
 				// query.
 				//=============================================================================
 				If AOMS108N(SC5->C5_NUM) == 1 // Indica que só existe um item ou grupo no pedido de vendas. Todo o Pedido de vendas deve ser excluido. 
 					lMsErroAuto := .F.
 					MSExecAuto( {|x,y,z| Mata410(x,y,z) } , _aCabcPVEx , _aItenPVEx , 5 ) // Exclui todo o pedido de vendas.
 					_lExclParcial := .F.
-				Else   
+				Else
 					lMsErroAuto := .F.
 					MSExecAuto( {|x,y,z| Mata410(x,y,z) } , _aCabcPVEx , _aItenPVEx , 4 )  
 					_lExclParcial := .T.
@@ -1727,25 +1663,25 @@ Begin Sequence
 			EndIf
 		EndIf
 				
-		SC5->( MSUnlock() )
+		SC5->( MSUnLock() )
 				
-		If lMsErroAuto .OR. !_lOK_RDC 
+		If lMsErroAuto .Or. !_lOK_RDC 
            
 		   If !u_IT_TMS(SC5->C5_I_LOCEM)  //! _lWsTms
 		      _cTextoMsg := "Erro ao excluir Pedido " + _ctpped + " no RDC!" 
-           Else 
+           Else
               _cTextoMsg := "Erro ao excluir Pedido " + _ctpped + " no TMS Multi-Embarcador!"
 		   EndIf  
 		
-			//Aadd(_alista,{_cNumPedRem, iif(_lOK_RDC,"Erro ao excluir Pedido " + _ctpped + " no Protheus","Erro ao excluir Pedido " + _ctpped + " no RDC!")})
-			Aadd(_alista,{_cNumPedRem, iif(_lOK_RDC,"Erro ao excluir Pedido " + _ctpped + " no Protheus: " + _cAOMS074Vld + CRLF + "["+MostraErro("\data\Italac\AOMS108\","AOMS108_MostraErro_"+ALLTRIM(_ctpped)+".LOG")+"]",_cTextoMsg)})
+			//aAdd(_alista,{_cNumPedRem, IIf(_lOK_RDC,"Erro ao excluir Pedido " + _ctpped + " no Protheus","Erro ao excluir Pedido " + _ctpped + " no RDC!")})
+			aAdd(_alista,{_cNumPedRem, IIf(_lOK_RDC,"Erro ao excluir Pedido " + _ctpped + " no Protheus: " + _cAOMS074Vld + CRLF + "["+MostraErro("\data\Italac\AOMS108\","AOMS108_MostraErro_"+AllTrim(_ctpped)+".LOG")+"]",_cTextoMsg)})
 
 		Else
 		
-			Aadd(_alista,{_cNumPedRem, "Pedido " + _ctpped + " Excluido com sucesso!"})
+			aAdd(_alista,{_cNumPedRem, "Pedido " + _ctpped + " Excluido com sucesso!"})
 			
 			If _lExclParcial
-				_cMsg      := "Monitor exclusão parcial do pedido de vendas, " + iif(empty(mv_par16),IIF(empty(mv_par17)," item: " + AllTrim(mv_par15)," subgrupo: " + AllTrim(mv_par17))," grupo: " + AllTrim(mv_par16))
+				_cMsg      := "Monitor exclusão parcial do pedido de vendas, " + IIf(Empty(MV_PAR16),IIf(Empty(MV_PAR17)," item: " + AllTrim(MV_PAR15)," subgrupo: " + AllTrim(MV_PAR17))," grupo: " + AllTrim(MV_PAR16))
 				_cCodOper  := "007"
 				_dDataOper := Date()
 				_cEncer    := "N"
@@ -1759,50 +1695,50 @@ Begin Sequence
 			U_GrvMonitor(_cFilPed,_cNumPedRem,_cCodOper,_cMsg,_cEncer,_dDataOper,_dDataOper,_dDataOper) 
 			//================================================================================
 			// Encerra tabela de muro do RDC do pedido excluido
-			ZFQ->(Dbsetorder(3))
-			ZFQ->(Dbgotop())
+			ZFQ->(DBSetOrder(3))
+			ZFQ->(DBGoTop())
 				
-			If ZFQ->(Dbseek(xFilial("SC5")+_cNumPedRem))
-				Do while ZFQ->ZFQ_FILIAL == xFilial("SC5") .AND. ZFQ->ZFQ_PEDIDO == _cNumPedRem
-					IF ZFQ->ZFQ_SITUAC == 'N'
-					ZFQ->(Reclock("ZFQ",.F.))
+			If ZFQ->(DBSeek(xFilial("SC5")+_cNumPedRem))
+				While ZFQ->ZFQ_FILIAL == xFilial("SC5") .And. ZFQ->ZFQ_PEDIDO == _cNumPedRem
+					If ZFQ->ZFQ_SITUAC == 'N'
+					ZFQ->(RecLock("ZFQ",.F.))
 					ZFQ->ZFQ_SITUAC := 'P'
-					ZFQ->(Msunlock())
+					ZFQ->(MSUnLock())
 					EndIf
 					
-					ZFQ->(DbSkip())
+					ZFQ->(DBSkip())
 					
-				Enddo
+				EndDo
 			EndIf
 		
-			ZFR->(Dbsetorder(3))
-			ZFR->(Dbgotop())
+			ZFR->(DBSetOrder(3))
+			ZFR->(DBGoTop())
 					
-			If ZFR->(Dbseek(xFilial("SC5")+_cNumPedRem))
-				Do while ZFR->ZFR_FILIAL == xFilial("SC5") .AND. ZFR->ZFR_NUMPED == _cNumPedRem
+			If ZFR->(DBSeek(xFilial("SC5")+_cNumPedRem))
+				While ZFR->ZFR_FILIAL == xFilial("SC5") .And. ZFR->ZFR_NUMPED == _cNumPedRem
 					If ZFR->ZFR_SITUAC == 'N'
-					ZFR->(Reclock("ZFR",.F.))
-					ZFR->(DbDelete())
-					ZFR->(Msunlock())
+					ZFR->(RecLock("ZFR",.F.))
+					ZFR->(DBDelete())
+					ZFR->(MSUnLock())
 					EndIf
-					ZFR->(DbSkip())
-				Enddo
+					ZFR->(DBSkip())
+				EndDo
 			EndIf
 		EndIf
 	Else
 	   //Registra problema com pedido
 	   If !SC5->( DBSeek( xFilial("SC5") + _cNumPedRem ) )
-		  Aadd(_alista,{_cNumPedRem, "Pedido " + _ctpped + " foi excluido antes do processamento"})
-	   ElseIf !EMPTY(SC5->C5_LIBEROK) 
-		  Aadd(_alista,{_cNumPedRem, "Pedido " + _ctpped + " foi liberado antes do processamento"})
-	   ElseIf !EMPTY(SC5->C5_NOTA) 
-		  Aadd(_alista,{_cNumPedRem, "Pedido " + _ctpped + " foi faturado antes do processamento"})
-	   ElseIf !EMPTY(SC5->C5_BLQ)
-		  Aadd(_alista,{_cNumPedRem, "Pedido " + _ctpped + " foi bloqueado antes do processamento"})
+		  aAdd(_alista,{_cNumPedRem, "Pedido " + _ctpped + " foi excluido antes do processamento"})
+	   ElseIf !Empty(SC5->C5_LIBEROK) 
+		  aAdd(_alista,{_cNumPedRem, "Pedido " + _ctpped + " foi liberado antes do processamento"})
+	   ElseIf !Empty(SC5->C5_NOTA) 
+		  aAdd(_alista,{_cNumPedRem, "Pedido " + _ctpped + " foi faturado antes do processamento"})
+	   ElseIf !Empty(SC5->C5_BLQ)
+		  aAdd(_alista,{_cNumPedRem, "Pedido " + _ctpped + " foi bloqueado antes do processamento"})
 	   EndIf
 	EndIf
 
-	RestArea(_aArea)
+	FWRestArea(_aArea)
 
 End Sequence
 
@@ -1813,45 +1749,43 @@ Return( _lRet )
 Programa----------: AOMS108N
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 29/05/2018
-===============================================================================================================================
 Descrição---------: Retorna a quantidade de itens ou grupos do pedido de vendas.
-===============================================================================================================================
 Parametros--------: _cNumPed = Numero do pedido de vendas.
-===============================================================================================================================
 Retorno-----------: _nItens = Quantidade de itens do pedido de vendas
 ===============================================================================================================================
 */
 Static Function AOMS108N(_cNumPed)
+
 Local _aOrd := SaveOrd({"SC6"})
 Local _nRegAtu := SC6->(Recno())
 Local _nItens := 0
 Local _agrupos := {}
 
 Begin Sequence
-   SC6->(DbSetorder(1))
-   SC6->(DbSeek(xFilial("SC6")+_cNumPed))
-   Do While !SC6->(Eof()) .And. SC6->(C6_FILIAL+C6_NUM) == xFilial("SC6")+_cNumPed
+   SC6->(DBSetOrder(1))
+   SC6->(DBSeek(xFilial("SC6")+_cNumPed))
+   While !SC6->(Eof()) .And. SC6->(C6_FILIAL+C6_NUM) == xFilial("SC6")+_cNumPed
  
-   	  If !EMPTY(MV_PAR15)
+   	  If !Empty(MV_PAR15)
       
    	  	_nItens += 1
    	  	
    	  Else
    	  
-   	  	if ascan(_agrupos,posicione("SB1",1,xfilial("SB1")+SC6->C6_PRODUTO,"B1_GRUPO")) == 0
+   	  	If aScan(_agrupos,Posicione("SB1",1,xFilial("SB1")+SC6->C6_PRODUTO,"B1_GRUPO")) == 0
    	  	
-   	  		aadd(_agrupos,SB1->B1_GRUPO)
+   	  		aAdd(_agrupos,SB1->B1_GRUPO)
    	  		_nItens +=1
    	  		
-   	  	Endif
+   	  	EndIf
    	  
-   	  Endif
+   	  EndIf
       
-      SC6->(DbSkip())
+      SC6->(DBSkip())
    EndDo
 End Sequence
 
 RestOrd(_aOrd)
-SC6->(DbGoto(_nRegAtu))
+SC6->(DBGoTo(_nRegAtu))
 
 Return _nItens

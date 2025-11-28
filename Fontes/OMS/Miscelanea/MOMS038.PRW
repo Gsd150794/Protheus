@@ -9,9 +9,9 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "TBICONN.CH"
+#Include "TOTVS.ch"
+#Include "FWMVCDEF.CH"
+#Include "TBICONN.CH"
 
 /*
 ===============================================================================================================================
@@ -23,12 +23,12 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User function MOMS038()
+User Function MOMS038()
 
 If Pergunte( 'MOMS038' )
 	//Log de acesso
 	u_itlogacs()
-	fwmsgrun( ,{|| _aAlias := MOMS038P() } , 'Aguarde!' , 'Verificando os registros...' )
+	FWMsgRun( ,{|| _aAlias := MOMS038P() } , 'Aguarde!' , 'Verificando os registros...' )
 EndIf
 
 Return
@@ -50,19 +50,19 @@ Local calias  := GetNextAlias()
 Local _alista := {}
 Local _cStatus := ""
 
-If empty(MV_PAR01) .and. empty(MV_PAR02)
+If Empty(MV_PAR01) .And. Empty(MV_PAR02)
 
   MV_PAR01 := "   "
   MV_PAR02 := "ZZZ"
 
-Endif
+EndIf
 
-If empty(MV_PAR03) .and. empty(MV_PAR04)
+If Empty(MV_PAR03) .And. Empty(MV_PAR04)
 
-  MV_PAR03 := SPACE(15)
+  MV_PAR03 := Space(15)
   MV_PAR04 := "ZZZZZZZZZZZZZZZ"
 
-Endif
+EndIf
 
 
 //-- Busca histórico na ZGS--//
@@ -77,17 +77,17 @@ _cQuery += " AND    ZGS.ZGS_CODTAB	<= '"+ MV_PAR02 +"' "
 _cQuery += " AND    (ZGS.ZGS_CODPRO	>= '"+ MV_PAR03 +"' OR  ZGS.ZGS_OCODPR	>= '"+ MV_PAR03 +"') "
 _cQuery += " AND    (ZGS.ZGS_CODPRO	<= '"+ MV_PAR04 +"' OR  ZGS.ZGS_OCODPR	<= '"+ MV_PAR04 +"') "
 
-If !empty(DTOS(MV_PAR05)) .and. !Empty(DTOS(MV_PAR06))
+If !Empty(DToS(MV_PAR05)) .And. !Empty(DToS(MV_PAR06))
 
-	_cQuery += " AND	ZGS.ZGS_DATA	>= '"+ DTOS(MV_PAR05) +"' "
-	_cQuery += " AND	ZGS.ZGS_DATA	<= '"+ DTOS(MV_PAR06) +"' "
+	_cQuery += " AND	ZGS.ZGS_DATA	>= '"+ DToS(MV_PAR05) +"' "
+	_cQuery += " AND	ZGS.ZGS_DATA	<= '"+ DToS(MV_PAR06) +"' "
 	
 Else
 
-	MV_PAR05 := STOD("20010101")
-	MV_PAR06 := STOD("20300101")
+	MV_PAR05 := SToD("20010101")
+	MV_PAR06 := SToD("20300101")
 
-Endif
+EndIf
 
 _cQuery += " AND ZGS.D_E_L_E_T_	= ' ' "
 _cQuery += " ORDER BY ZGS_CODTAB,ZGS_ITEM,ZGS_DATA,ZGS_HORA"
@@ -101,7 +101,7 @@ DBUseArea( .T. , "TOPCONN" , TcGenQry(,,_cQuery) , cAlias , .T. , .F. )
 DBSelectArea(cAlias)
 (cAlias)->( DBGoTop() )
 
-Do while  (cAlias)->(!Eof()) 
+While  (cAlias)->(!Eof()) 
 
    If (cAlias)->ZGS_STATUS == "I"
       _cStatus := "INCLUSÃO"
@@ -113,29 +113,29 @@ Do while  (cAlias)->(!Eof())
       _cStatus := ""
    EndIf 
 
-	aadd(_alista,{  sTOd((cAlias)->ZGS_DATA),;
-					ALLTRIM((cAlias)->ZGS_HORA),;
-					ALLTRIM((cAlias)->ZGS_USER),;
+	aAdd(_alista,{  SToD((cAlias)->ZGS_DATA),;
+					AllTrim((cAlias)->ZGS_HORA),;
+					AllTrim((cAlias)->ZGS_USER),;
 					(cAlias)->ZGS_CODTAB,;
-					ALLTRIM((cAlias)->ZGS_ITEM),;
-					stod((cAlias)->ZGS_DATDE),;
-					stod((cAlias)->ZGS_ODATDE),;
-					ALLTRIM((cAlias)->ZGS_HORADE),;
-					ALLTRIM((cAlias)->ZGS_OHORAD),;
-					stod((cAlias)->ZGS_DATATE),;
-					stod((cAlias)->ZGS_ODATAT),;
-					ALLTRIM((cAlias)->ZGS_HORATE),;
-					ALLTRIM((cAlias)->ZGS_OHORAT),;
-					ALLTRIM((cAlias)->ZGS_CONDPG),;
-					ALLTRIM((cAlias)->ZGS_OCONDP),;
-					If(ALLTRIM((cAlias)->ZGS_TPHORA)=='1',"UNICO","RECURSIVO"),;
-					If(ALLTRIM((cAlias)->ZGS_OTPHOR)=='1',"UNICO","RECURSIVO"),;
-					If(ALLTRIM((cAlias)->ZGS_ATIVO)=='1',"SIM","NAO"),;
-					If(ALLTRIM((cAlias)->ZGS_OATIVO)=='1',"SIM","NAO"),;
-					ALLTRIM((cAlias)->ZGS_CODPRO),;
-					ALLTRIM((cAlias)->ZGS_OCODPR ),;
-					ALLTRIM((cAlias)->ZGS_GRUPO ),;
-					ALLTRIM((cAlias)->ZGS_OGRUPO ),;
+					AllTrim((cAlias)->ZGS_ITEM),;
+					SToD((cAlias)->ZGS_DATDE),;
+					SToD((cAlias)->ZGS_ODATDE),;
+					AllTrim((cAlias)->ZGS_HORADE),;
+					AllTrim((cAlias)->ZGS_OHORAD),;
+					SToD((cAlias)->ZGS_DATATE),;
+					SToD((cAlias)->ZGS_ODATAT),;
+					AllTrim((cAlias)->ZGS_HORATE),;
+					AllTrim((cAlias)->ZGS_OHORAT),;
+					AllTrim((cAlias)->ZGS_CONDPG),;
+					AllTrim((cAlias)->ZGS_OCONDP),;
+					If(AllTrim((cAlias)->ZGS_TPHORA)=='1',"UNICO","RECURSIVO"),;
+					If(AllTrim((cAlias)->ZGS_OTPHOR)=='1',"UNICO","RECURSIVO"),;
+					If(AllTrim((cAlias)->ZGS_ATIVO)=='1',"SIM","NAO"),;
+					If(AllTrim((cAlias)->ZGS_OATIVO)=='1',"SIM","NAO"),;
+					AllTrim((cAlias)->ZGS_CODPRO),;
+					AllTrim((cAlias)->ZGS_OCODPR ),;
+					AllTrim((cAlias)->ZGS_GRUPO ),;
+					AllTrim((cAlias)->ZGS_OGRUPO ),;
 					transform((cAlias)->ZGS_PRCBAS, "@E 999,999,999.99" ),;
 					transform((cAlias)->ZGS_OPRCBA, "@E 999,999,999.99" ),;
 					transform((cAlias)->ZGS_PRCVEN, "@E 999,999,999.99" ),;
@@ -148,15 +148,15 @@ Do while  (cAlias)->(!Eof())
 					transform((cAlias)->ZGS_I_OPRM, "@E 999,999,999.99" ),;
 					transform((cAlias)->ZGS_I_PTBN, "@E 999,999,999.99" ),;
 					transform((cAlias)->ZGS_I_OPTB, "@E 999,999,999.99" ),;
-					stod((cAlias)->ZGS_I_VIGI ),;
-					stod((cAlias)->ZGS_I_OVII ),;
-					stod((cAlias)->ZGS_I_VIGF ),;
-					stod((cAlias)->ZGS_I_OVIF ),;
-			        _cStatus }) // 		If(!EMPTY((cAlias)->ZGS_STATUS),"DELETADO","ATIVO")
+					SToD((cAlias)->ZGS_I_VIGI ),;
+					SToD((cAlias)->ZGS_I_OVII ),;
+					SToD((cAlias)->ZGS_I_VIGF ),;
+					SToD((cAlias)->ZGS_I_OVIF ),;
+			        _cStatus }) // 		If(!Empty((cAlias)->ZGS_STATUS),"DELETADO","ATIVO")
               
-	(cAlias)->( Dbskip() )
+	(cAlias)->( DBSkip() )
 	
-Enddo
+EndDo
 
 _ahead := {	"Data",;
 			"Hora",;
@@ -199,15 +199,15 @@ _ahead := {	"Data",;
 			"Vig Neg Fin Ant",;
 			"Status"	}
 
-If len(_alista) > 0
+If Len(_alista) > 0
 
- U_ITListBox( "Histórico",	_ahead,	 _alista , .F. , 1,"Histórico para tabelas/produtos " + ALLTRIM(MV_PAR01)+"/"+ ALLTRIM(MV_PAR03) + " até " + ALLTRIM(MV_PAR02) +"/"+;
-  			ALLTRIM(MV_PAR04) +	" da data " + dtoc(MV_PAR05) + " até " + dtoc(MV_PAR06) + ":"  )
+ U_ITListBox( "Histórico",	_ahead,	 _alista , .F. , 1,"Histórico para tabelas/produtos " + AllTrim(MV_PAR01)+"/"+ AllTrim(MV_PAR03) + " até " + AllTrim(MV_PAR02) +"/"+;
+  			AllTrim(MV_PAR04) +	" da data " + DToC(MV_PAR05) + " até " + DToC(MV_PAR06) + ":"  )
 
 Else
 
-	u_itmsg("Não foram localizados históricos com os parâmetros indicados","Atenção",,1)
+	U_ITMsg("Não foram localizados históricos com os parâmetros indicados","Atenção",,1)
 	
-Endif
+EndIf
 	
 Return

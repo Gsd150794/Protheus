@@ -8,12 +8,8 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
-#Include "report.ch"
-#INCLUDE 'TOPCONN.CH'
+#Include "TOTVS.ch"
+#Include 'TOPCONN.CH'
 
 /*
 ===============================================================================================================================
@@ -43,7 +39,7 @@ Begin Sequence
 
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -146,22 +142,22 @@ Begin Sequence
    _cQry += " ORDER BY RA_CARGO, RA_FILIAL "
 
    If Select("TRBSRA") <> 0
-	   TRBSRA->(DbCloseArea())
+	   TRBSRA->(DBCloseArea())
    EndIf
 	
    TCQUERY _cQry NEW ALIAS "TRBSRA"	
       	
-   DbSelectArea("TRBSRA")
-   TRBSRA->(dbGoTop())
+   DBSelectArea("TRBSRA")
+   TRBSRA->(DBGoTop())
 
    Count to _nTotRegs	
 
-   IF _ntotRegs = 0
-      U_ITMSG("Não existe dados para emissão do relatório.",'Atenção!',"Altere os filtros do relatório e tente novamente",3) 
+   If _ntotRegs = 0
+      U_ITMsg("Não existe dados para emissão do relatório.",'Atenção!',"Altere os filtros do relatório e tente novamente",3) 
       BREAK
-   ENDIF
+   EndIf
 
-   TRBSRA->(dbGoTop())
+   TRBSRA->(DBGoTop())
 
    //====================================================================================================
    // Ativa a seção do relatório conforme a ordem de emissão do relatório.
@@ -171,23 +167,23 @@ Begin Sequence
 
    _oReport:SetMeter(_nTotRegs)	
 
-   SQ3->(DbSetOrder(1)) // 1=Q3_FILIAL+Q3_CARGO+Q3_CC // Cargos
-   SQB->(DbSetOrder(1)) // 1=QB_FILIAL+QB_DEPTO+QB_DESCRIC // Departamentos
+   SQ3->(DBSetOrder(1)) // 1=Q3_FILIAL+Q3_CARGO+Q3_CC // Cargos
+   SQB->(DBSetOrder(1)) // 1=QB_FILIAL+QB_DEPTO+QB_DESCRIC // Departamentos
 
    //====================================================================================================
    // Inicia a emissão do relatório 
    //====================================================================================================		
-   TRBSRA->(dbGoTop())
+   TRBSRA->(DBGoTop())
    _cCargo := Space(6)
    _lFirstPag := .T.
 
-   Do While !TRBSRA->(Eof())
+   While !TRBSRA->(Eof())
 
       If _oReport:Cancel()
          Exit
       EndIf
 
-      SQ3->(DbGoTo(TRBSRA->NRRECNO))
+      SQ3->(DBGoTo(TRBSRA->NRRECNO))
       //====================================================================================================
       // Inicializando a primeira seção
       //====================================================================================================		 
@@ -200,7 +196,7 @@ Begin Sequence
 	                  
          _oSect1_A:Cell("RA_CARGO"):SetValue(TRBSRA->RA_CARGO)
 		   _oSect1_A:Cell("RA_DCARGO"):SetValue(SQ3->Q3_DESCSUM)
-		   _oSect1_A:Printline()
+		   _oSect1_A:PrintLine()
          
          _oSect1_B:Init()
 
@@ -229,9 +225,9 @@ Begin Sequence
       _oSect1_B:Cell("RA_CODFUNC"):SetValue(TRBSRA->RA_CODFUNC)
       _oSect1_B:Cell("RA_DESCFUN"):SetValue(_cDesRedFu)
       _oSect1_B:Cell("Q3_MEMO1"):SetValue(_cDescFunc)
-      _oSect1_B:Printline()
+      _oSect1_B:PrintLine()
       
-      TRBSRA->(dbSkip())
+      TRBSRA->(DBSkip())
    EndDo		
    
    //====================================================================================================
@@ -252,7 +248,7 @@ Begin Sequence
 End Sequence
 
 If Select("TRBSRA") <> 0
-   TRBSRA->(DbCloseArea())
+   TRBSRA->(DBCloseArea())
 EndIf
 
-Return Nil
+Return

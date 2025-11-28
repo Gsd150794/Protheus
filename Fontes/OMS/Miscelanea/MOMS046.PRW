@@ -4,7 +4,7 @@
 ===============================================================================================================================
  Autor        |    Data    |                              Motivo                      										 
 -------------------------------------------------------------------------------------------------------------------------------
-André Lisboa  | 07/01/2020 | Chamado 31640. Na query da tabela SC9 tratar quando retorno for NULL                     
+André Lisboa  | 07/01/2020 | Chamado 31640. Na query da tabela SC9 tratar quando retorno For NULL                     
 -------------------------------------------------------------------------------------------------------------------------------
 Igor Melgaço  | 24/10/2022 | Chamado 41426. Ajuste para execução via Schedule
 -------------------------------------------------------------------------------------------------------------------------------
@@ -12,12 +12,12 @@ Igor Melgaço  | 01/11/2022 | Chamado 41426. Ajuste para Filtros de Armazens e Fi
 -------------------------------------------------------------------------------------------------------------------------------
 */
 
-#Include "PROTHEUS.CH"  
+#Include "TOTVS.ch"  
 #Include "RWMAKE.CH"             
 #Include "TopConn.ch"                                                         
 #Include "vkey.ch"                    
 
-Static _lScheduler := FWGetRunSchedule() .OR. SELECT("SX3") <= 0
+Static _lScheduler := FWGetRunSchedule() .Or. SELECT("SX3") <= 0
                                                  
 /*                                                    
 ===============================================================================================================================
@@ -37,7 +37,7 @@ Private _aLista := {}
 
 MOMS046INI()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -80,7 +80,7 @@ If _lScheduler
 
 	MOMS046PRC()
 
-ELSE
+Else
 	cMarkado	:= GetMark()
 
 	cPerg := 'MOMS046'	
@@ -100,7 +100,7 @@ Return _lRet
 ===============================================================================================================================
 Programa----------: MOMS046PRC
 ===============================================================================================================================
-Descrição---------: Função que processa 
+Descrição---------: Função que Processa 
 ===============================================================================================================================
 Parametros--------: Nenhum
 ===============================================================================================================================
@@ -127,7 +127,7 @@ Begin Sequence
    If _lScheduler
       _nControle := MOMS046ARQ() 
    Else
-      FWMSGRUN( , {|| _nControle := MOMS046ARQ() }, "Aguarde!" , 'Lendo Dados ...' )
+      FWMsgRun( , {|| _nControle := MOMS046ARQ() }, "Aguarde!" , 'Lendo Dados ...' )
    EndIf
 
    If !Empty(_aLista)
@@ -213,10 +213,10 @@ If !_lScheduler
 			nHeight	:= 143
 			nWidth	:= 315           
 			
-		Endif                             
+		EndIf                             
 		
 		DBSelectArea("TRBF")
-		TRBF->(DbGotop()) 
+		TRBF->(DBGoTop()) 
 		
 		oMark					:= MsSelect():New( "TRBF" , "TRBF_OK" , "" , aCampos , @lInverte , @cMarkado , { 35 , 1 , nHeight , nWidth } )
 		oMark:bMark				:= {|| MOMS046INV( cMarkado , lInverte , oQtda ) }
@@ -224,19 +224,19 @@ If !_lScheduler
 
 		oDlg1:lMaximized:=.T.
 
-	ACTIVATE MSDIALOG oDlg1 ON INIT ( EnchoiceBar(oDlg1,{|| IIF(MOMS046VLD(nQtdProd),(nOpca := 1,oDlg1:End()),) },{|| nOpca := 2,oDlg1:End()},,aRotina),;
+	ACTIVATE MSDIALOG oDlg1 ON INIT ( EnchoiceBar(oDlg1,{|| IIf(MOMS046VLD(nQtdProd),(nOpca := 1,oDlg1:End()),) },{|| nOpca := 2,oDlg1:End()},,aRotina),;
 									oPanel:Align:=CONTROL_ALIGN_TOP , oMark:oBrowse:Align:=CONTROL_ALIGN_ALLCLIENT , oMark:oBrowse:Refresh())
 Else
 	MOMS046ALL( cMarkado , oQtda ) 
 	nOpca := 1
-Endif
+EndIf
 
-IF nOpca = 1
+If nOpca = 1
 
 	MOMS046EXE()
 
      
-ENDIF
+EndIf
  
 Return nOpca   
 
@@ -244,12 +244,12 @@ Return nOpca
 ===============================================================================================================================
 Programa----------: MOMS046EXE
 ===============================================================================================================================
-Descrição---------: Função que processa a Geração
+Descrição---------: Função que Processa a Geração
 ===============================================================================================================================
 */
 
 Static Function MOMS046EXE(oproc)
-Local _aArea := GetArea()
+Local _aArea := FWGetArea()
 Local _nI := 0
 Local _nC := 0
 Local _cResult := ""
@@ -262,24 +262,24 @@ TRBF->( DBGoTop() )
 //================================================================================
 // Armazena todos os Dados selecionados
 //================================================================================
-While TRBF->(!EOF())  
+While TRBF->(!Eof())  
 
 	If TRBF->TRBF_OK = cMarkado 
 		DBSelectArea("SB2")                     
-	    SB2->(DBGOTO( TRBF->TRBF_REC ) )          
+	    SB2->(DBGoTo( TRBF->TRBF_REC ) )          
 		
 		 If SB2->(RECNO()) = TRBF->TRBF_REC
-	   		aadd(_aresults, {LoadBitmap(GetResources(),"BR_VERDE"),TRBF->TRBF_FIL,TRBF->TRBF_COD,TRBF->TRBF_DES,TRBF->TRBF_LOC,"Corrigido"})
+	   		aAdd(_aresults, {LoadBitmap(GetResources(),"BR_VERDE"),TRBF->TRBF_FIL,TRBF->TRBF_COD,TRBF->TRBF_DES,TRBF->TRBF_LOC,"Corrigido"})
 			SB2->(RecLock("SB2",.F.))
 			SB2->B2_RESERVA := TRBF->TRBF_SC9
-			SB2->(MsUnLock())          
+			SB2->(MSUnLock())          
 	   	 EndIf
 	EndIf
 		                                        
 	TRBF->( DBSkip() )                                                           
 EndDo                                
 
-If len(_aresults) > 0
+If Len(_aresults) > 0
 	If _lScheduler
 		U_ITConout( "Resultado do processamento")
 		U_ITConout( "Correção da Qtd Reservada")
@@ -300,7 +300,7 @@ Else
 	Else
 		Alert("Nenhum registro Alterado !")
 	EndIf
-Endif
+EndIf
 
 //================================================================================
 // Fecha a area de uso do arquivo temporario no Protheus.
@@ -310,9 +310,9 @@ TRBF->( DBCloseArea() )
 //================================================================================
 // Restaura a area
 //================================================================================
-RestArea( _aArea )
+FWRestArea( _aArea )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -341,7 +341,7 @@ If !_lScheduler
 	oQtda:Refresh()
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -372,7 +372,7 @@ While TRBF->( !Eof() )
 	
 		TRBF->( RecLock( "TRBF" , .F. ) )
 		TRBF->TRBF_OK := Space(2)
-		TRBF->( MsUnLock() )
+		TRBF->( MSUnLock() )
 		
 		nQtdProd--
 		
@@ -380,7 +380,7 @@ While TRBF->( !Eof() )
 	
 		TRBF->( RecLock( "TRBF" , .F. ) )
 		TRBF->TRBF_OK := cMarca
-		TRBF->( MsUnLock() )
+		TRBF->( MSUnLock() )
 		
 		nQtdProd++
 		
@@ -391,14 +391,14 @@ While TRBF->( !Eof() )
 TRBF->( DBSkip() )
 EndDo
 
-TRBF->( DBGoto(nReg) )
+TRBF->( DBGoTo(nReg) )
 
 If !_lScheduler
 	oQtda:Refresh()
 	oMark:oBrowse:Refresh(.T.)
 EndIf
 
-Return()
+Return
                                                
 /*
 ===============================================================================================================================
@@ -423,26 +423,26 @@ Local _cITARMM036   := U_ItGetMV("ITARMM036","")
 // Armazena no array aEstru a estrutura dos campos da tabela.
 //================================================================================    
 
-AADD( aEstru , { "TRBF_OK"	, 'C' , 02 , 0 } )
-AADD( aEstru , { "TRBF_FIL"	, 'C' , 02 , 0 } )
-AADD( aEstru , { "TRBF_COD"	, 'C' , 15 , 0 } )
-AADD( aEstru , { "TRBF_DES"	, 'C' , 100 , 0 } )
-AADD( aEstru , { "TRBF_LOC"	, 'C' , 02 , 0 } )    
-AADD( aEstru , { "TRBF_RES"	, 'N' , 12 , 4 } )
-AADD( aEstru , { "TRBF_SC9"	, 'N' , 12 , 4 } ) 
-AADD( aEstru , { "TRBF_REC" , 'N' , 08 , 0 } ) 
+aAdd( aEstru , { "TRBF_OK"	, 'C' , 02 , 0 } )
+aAdd( aEstru , { "TRBF_FIL"	, 'C' , 02 , 0 } )
+aAdd( aEstru , { "TRBF_COD"	, 'C' , 15 , 0 } )
+aAdd( aEstru , { "TRBF_DES"	, 'C' , 100 , 0 } )
+aAdd( aEstru , { "TRBF_LOC"	, 'C' , 02 , 0 } )    
+aAdd( aEstru , { "TRBF_RES"	, 'N' , 12 , 4 } )
+aAdd( aEstru , { "TRBF_SC9"	, 'N' , 12 , 4 } ) 
+aAdd( aEstru , { "TRBF_REC" , 'N' , 08 , 0 } ) 
  
 //================================================================================
 // Armazena no array aCampos o nome, picture e descricao dos campos
 //================================================================================
-AADD( aCampos , { "TRBF_OK"		, "" , " "			, " "										} )
-AADD( aCampos , { "TRBF_FIL"	, "" , "Filial"		, PesqPict( "SB2" , "B2_FILIAL"	 )			} )    
-AADD( aCampos , { "TRBF_COD"	, "" , "Produto"	, PesqPict( "SB1" , "B1_COD"	 )	 		} )
-AADD( aCampos , { "TRBF_DES"	, "" , "Descricao"	, PesqPict( "SB1" , "B1_DESC"	 )	 		} )
-AADD( aCampos , { "TRBF_LOC"	, "" , "Local"		, PesqPict( "SB1" , "B1_LOCAL" )	  		} ) 
-AADD( aCampos , { "TRBF_RES"	, "" , "Qtd Reservada"	, PesqPict( "SB2" , "B2_RESERVA" )	  		} ) 
-AADD( aCampos , { "TRBF_SC9"	, "" , "Qtd Pedido Reservado"	, PesqPict( "SC9" , "C9_QTDLIB" )	  		} )
-AADD( aCampos , { "TRBF_REC"	, "" , "Recno"  , PesqPict( "SB1" , "B1_FATOR" )	  		} )  
+aAdd( aCampos , { "TRBF_OK"		, "" , " "			, " "										} )
+aAdd( aCampos , { "TRBF_FIL"	, "" , "Filial"		, PesqPict( "SB2" , "B2_FILIAL"	 )			} )    
+aAdd( aCampos , { "TRBF_COD"	, "" , "Produto"	, PesqPict( "SB1" , "B1_COD"	 )	 		} )
+aAdd( aCampos , { "TRBF_DES"	, "" , "Descricao"	, PesqPict( "SB1" , "B1_DESC"	 )	 		} )
+aAdd( aCampos , { "TRBF_LOC"	, "" , "Local"		, PesqPict( "SB1" , "B1_LOCAL" )	  		} ) 
+aAdd( aCampos , { "TRBF_RES"	, "" , "Qtd Reservada"	, PesqPict( "SB2" , "B2_RESERVA" )	  		} ) 
+aAdd( aCampos , { "TRBF_SC9"	, "" , "Qtd Pedido Reservado"	, PesqPict( "SC9" , "C9_QTDLIB" )	  		} )
+aAdd( aCampos , { "TRBF_REC"	, "" , "Recno"  , PesqPict( "SB1" , "B1_FATOR" )	  		} )  
 
 //================================================================================
 // Verifica se ja existe um arquivo com mesmo nome, se sim deleta.
@@ -494,7 +494,7 @@ EndIf
 If !_lScheduler
 	_cQuery += " AND B2_FILIAL = '" + xFilial("SB2") + "' "  
 	If !Empty(MV_PAR02)
-		_cQuery += " AND B2_LOCAL = '" + Alltrim(MV_PAR02) + "' "
+		_cQuery += " AND B2_LOCAL = '" + AllTrim(MV_PAR02) + "' "
 	EndIf
 Else
 	If !Empty(_cITFILM036)
@@ -524,7 +524,7 @@ QRYSB2->( DBGoTop() )
 //================================================================================
 _nRet := 1
 
-While QRYSB2->(!EOF())
+While QRYSB2->(!Eof())
     _nRet := 0
     
 	//================================================================================

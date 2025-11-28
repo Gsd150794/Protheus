@@ -1,6 +1,6 @@
-#INCLUDE "RWMAKE.CH"
-#INCLUDE "TopConn.ch"
-//#INCLUDE "vKey.ch"
+#Include "RWMAKE.CH"
+#Include "TopConn.ch"
+//#Include "vKey.ch"
 
 /*/
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
@@ -58,17 +58,17 @@ cQuery := ChangeQuery(cQuery)
 //ณ Fecha Alias se estiver em Uso ณ
 //ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
 If Select("TRB") >0
-	dbSelectArea("TRB")
-	dbCloseArea()
-Endif
+	DBSelectArea("TRB")
+	DBCloseArea()
+EndIf
 
 TCQUERY cQuery New Alias "TRB"
-dbSelectArea("TRB")
+DBSelectArea("TRB")
 
-dbGoTop()
+DBGoTop()
 
-If TRB->NUMCLI > 0 .AND. cBlq == "1" 
-		xmaghelpfis("Informa็ใo",;
+If TRB->NUMCLI > 0 .And. cBlq == "1" 
+		xMagHelpFis("Informa็ใo",;
 					"O vendedor: " + cVend + '-' + SA3->A3_NOME + " Tem "+TRANSFORM(TRB->NUMCLI, "@E 9999")+" Clientes Amarrados a ele. " ,;
 		           	"Favor alterar os clientes para outro vendedor antes de realizar o bloqueio. ")
 		_lRet:= .F.  
@@ -87,7 +87,7 @@ Return _lRet
 ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
 ฑฑบPrograma  ณ CtrlArea บ Autor ณ Microsiga          บ Data ณ  00/00/00   บฑฑ
 ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
-ฑฑบDescricao ณ Static Function auxiliar no GetArea e ResArea retornando   บฑฑ
+ฑฑบDescriStaticStatic Function auxiliar no GetArea e ResArea retornando   บฑฑ
 ฑฑบ          ณ o ponteiro nos Aliases descritos na chamada da Funcao.     บฑฑ
 ฑฑบ          ณ Exemplo:                                                   บฑฑ
 ฑฑบ          ณ Local _aArea  := {} // Array que contera o GetArea         บฑฑ
@@ -97,10 +97,10 @@ Return _lRet
 ฑฑบ          ณ // Chama a Funcao como GetArea                             บฑฑ
 ฑฑบ          ณ P_CtrlArea(1,@_aArea,@_aAlias,{"SL1","SL2","SL4"})         บฑฑ
 ฑฑบ          ณ                                                            บฑฑ
-ฑฑบ          ณ // Chama a Funcao como RestArea                            บฑฑ
+ฑฑบ          ณ // Chama a Funcao como FWRestArea                            บฑฑ
 ฑฑบ          ณ P_CtrlArea(2,_aArea,_aAlias)                               บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบParametrosณ nTipo   = 1=GetArea / 2=RestArea                           บฑฑ
+ฑฑบParametrosณ nTipo   = 1=GetArea / 2=FWRestArea                           บฑฑ
 ฑฑบ          ณ _aArea  = Array passado por referencia que contera GetArea บฑฑ
 ฑฑบ          ณ _aAlias = Array passado por referencia que contera         บฑฑ
 ฑฑบ          ณ           {Alias(), IndexOrd(), Recno()}                   บฑฑ
@@ -115,21 +115,21 @@ Static Function CtrlArea(_nTipo,_aArea,_aAlias,_aArqs)
 
 Local _nN := 0
 
-// Tipo 1 = GetArea()
+// Tipo 1 = FWGetArea()
 If _nTipo == 1
-	_aArea := GetArea()
+	_aArea := FWGetArea()
 	For _nN := 1 To Len(_aArqs)
-		DbSelectArea(_aArqs[_nN])
-		AAdd(_aAlias,{ _aArqs[_nN], IndexOrd(), Recno() })
+		DBSelectArea(_aArqs[_nN])
+		aAdd(_aAlias,{ _aArqs[_nN], IndexOrd(), Recno() })
 	Next
-	// Tipo 2 = RestArea()
+	// Tipo 2 = FWRestArea()
 Else
 	For _nN := 1 To Len(_aAlias)
-		DbSelectArea(_aAlias[_nN,1])
-		DbSetOrder(_aAlias[_nN,2])
-		DbGoto(_aAlias[_nN,3])
+		DBSelectArea(_aAlias[_nN,1])
+		DBSetOrder(_aAlias[_nN,2])
+		DBGoTo(_aAlias[_nN,3])
 	Next
-	RestArea(_aArea)
-Endif
+	FWRestArea(_aArea)
+EndIf
 
 Return

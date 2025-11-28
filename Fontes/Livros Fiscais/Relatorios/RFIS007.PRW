@@ -9,10 +9,7 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -40,7 +37,7 @@ Begin Sequence
    EndIf 
    
    If MV_PAR03 <> 3
-      U_ITMSG("Por enquanto este relatório é apenas para o evento R-2055.","Atenção",1)
+      U_ITMsg("Por enquanto este relatório é apenas para o evento R-2055.","Atenção",1)
       Break
    EndIf 
 
@@ -48,13 +45,13 @@ Begin Sequence
    // Criando Tabela Temporária.
    //=============================================
    _aStruct := {}
-   Aadd(_aStruct,{"WK_RECIBO" ,"C",30 ,0})  // Recibo Sped
-   Aadd(_aStruct,{"WK_DATA"   ,"D",8  ,0})  // Data Sped
-   Aadd(_aStruct,{"WK_HORA"   ,"C",8  ,0})  // Hora Sped
-   Aadd(_aStruct,{"WK_RECNO"  ,"N",10 ,0})  // Recno Sped500
+   aAdd(_aStruct,{"WK_RECIBO" ,"C",30 ,0})  // Recibo Sped
+   aAdd(_aStruct,{"WK_DATA"   ,"D",8  ,0})  // Data Sped
+   aAdd(_aStruct,{"WK_HORA"   ,"C",8  ,0})  // Hora Sped
+   aAdd(_aStruct,{"WK_RECNO"  ,"N",10 ,0})  // Recno Sped500
       
    If Select("SPEDTRB") > 0
-      SPEDTRB->(DbCloseArea())
+      SPEDTRB->(DBCloseArea())
    EndIf
 
    //================================================================================
@@ -76,7 +73,7 @@ Begin Sequence
    Processa( {|| RFIS007D()} , 'Lendo Dados do Relatório...' , 'Aguarde!' )
   
    If Len(_aDados) == 0
-      U_ITMSG("Não existem dados para emissão do relatório.","Atenção",1)
+      U_ITMsg("Não existem dados para emissão do relatório.","Atenção",1)
       Break
    EndIf
 
@@ -109,10 +106,10 @@ Begin Sequence
 End Sequence 
 
 If Select("SPEDTRB") > 0
-   SPEDTRB->(DbCloseArea())
+   SPEDTRB->(DBCloseArea())
 EndIf
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -137,11 +134,11 @@ Begin Sequence
    _cQry += " WHERE  SPED.D_E_L_E_T_ = ' ' "
 
    If ! Empty(MV_PAR01)        
-      _cQry +=  " AND DTENTRADA >= '"+Dtos(MV_PAR01)+"' "
+      _cQry +=  " AND DTENTRADA >= '"+DToS(MV_PAR01)+"' "
    EndIf
    
    If ! Empty(MV_PAR02)        
-      _cQry +=  " AND DTENTRADA <= '"+Dtos(MV_PAR02)+"' "
+      _cQry +=  " AND DTENTRADA <= '"+DToS(MV_PAR02)+"' "
    EndIf
    
    If MV_PAR03 == 1
@@ -155,7 +152,7 @@ Begin Sequence
    _cQry += " ORDER BY DTENTRADA "
      
    If Select("QRYSPED") > 0
-      QRYSPED->(DbCloseArea())
+      QRYSPED->(DBCloseArea())
    EndIf
    
    _cQry := ChangeQuery(_cQry) 
@@ -184,16 +181,16 @@ Begin Sequence
    ProcRegua(_nTOTREGS)
 
    If MV_PAR04 ==  2 // Exibe recibos repetidos
-      QRYSPED->(DbGoTop())
+      QRYSPED->(DBGoTop())
    
       _nI := 1
 
-      Do While ! QRYSPED->(Eof()) 
-         IncProc( "Favor Aguardar... Processando registro: " + AllTrim( Str(_nI,5) ) +"/"+Alltrim(Str(_nTOTREGS,5)))
+      While ! QRYSPED->(Eof()) 
+         IncProc( "Favor Aguardar... Processando registro: " + AllTrim( Str(_nI,5) ) +"/"+AllTrim(Str(_nTOTREGS,5)))
       
          _nI += 1
 
-         SPED500->(DbGoto(QRYSPED->NRREC))
+         SPED500->(DBGoTo(QRYSPED->NRREC))
       
          _cXmlEnvio := AllTrim(SPED500->XMLEVENTO) 
       
@@ -205,18 +202,18 @@ Begin Sequence
          _cXmlRetorno := Nil
          DelClassIntf()  // Remove da memória da Thread todos os objetos.
 
-         QRYSPED->(DbSkip())
+         QRYSPED->(DBSkip())
       EndDo
 
    Else // Exibe apena o último recibo quando registrado mais de uma vez.
 
-      QRYSPED->(DbGoTop())
+      QRYSPED->(DBGoTop())
    
       _nI := 1
       _nReglidos := 0
 
-      Do While ! QRYSPED->(Eof()) 
-         IncProc( "Favor Aguardar... Processando registro: " + AllTrim( Str(_nI,5) ) +"/"+Alltrim(Str(_nTOTREGS,5)))
+      While ! QRYSPED->(Eof()) 
+         IncProc( "Favor Aguardar... Processando registro: " + AllTrim( Str(_nI,5) ) +"/"+AllTrim(Str(_nTOTREGS,5)))
          _nI += 1
          _nReglidos += 1
 
@@ -226,14 +223,14 @@ Begin Sequence
          EndIf 
          
          If ! _lNovoReg
-            If DTos(SPEDTRB->WK_DATA) < QRYSPED->DTPROC .Or. (DTos(SPEDTRB->WK_DATA) == QRYSPED->DTPROC .And. SPEDTRB->WK_HORA < QRYSPED->HRPROC)
+            If DToS(SPEDTRB->WK_DATA) < QRYSPED->DTPROC .Or. (DToS(SPEDTRB->WK_DATA) == QRYSPED->DTPROC .And. SPEDTRB->WK_HORA < QRYSPED->HRPROC)
                _lAtualiza := .T.
             Else 
                _lAtualiza := .F.
             EndIf  
              
             If ! _lAtualiza
-               QRYSPED->(DbSkip())
+               QRYSPED->(DBSkip())
                Loop
             EndIf  
          EndIf 
@@ -245,26 +242,26 @@ Begin Sequence
          EndIf    
 
          SPEDTRB->WK_RECIBO := QRYSPED->RECIBO       // Recibo Sped
-         SPEDTRB->WK_DATA   := StoD(QRYSPED->DTPROC) // Data Sped
+         SPEDTRB->WK_DATA   := SToD(QRYSPED->DTPROC) // Data Sped
          SPEDTRB->WK_HORA   := QRYSPED->HRPROC       // Hora Sped
          SPEDTRB->WK_RECNO  := QRYSPED->NRREC        // Recno Sped500
-         SPEDTRB->(MsUnLock())
+         SPEDTRB->(MSUnLock())
 
-         QRYSPED->(DbSkip())
+         QRYSPED->(DBSkip())
       EndDo
  
       ProcRegua(_nReglidos)
       
-      SPEDTRB->(DbGoTop())
+      SPEDTRB->(DBGoTop())
    
       _nI := 1
  
-      Do While ! SPEDTRB->(Eof()) 
+      While ! SPEDTRB->(Eof()) 
          
-         IncProc( "Favor Aguardar... Processando XMLs (Sped): " + AllTrim( Str(_nI,10) ) + "/" + Alltrim(Str(_nReglidos,10)))
+         IncProc( "Favor Aguardar... Processando XMLs (Sped): " + AllTrim( Str(_nI,10) ) + "/" + AllTrim(Str(_nReglidos,10)))
          _nI += 1
 
-         SPED500->(DbGoto(SPEDTRB->WK_RECNO))
+         SPED500->(DBGoTo(SPEDTRB->WK_RECNO))
       
          _cXmlEnvio := AllTrim(SPED500->XMLEVENTO) 
       
@@ -276,7 +273,7 @@ Begin Sequence
          _cXmlRetorno := Nil
          DelClassIntf()  // Remove da memória da Thread todos os objetos.
 
-         SPEDTRB->(DbSkip())
+         SPEDTRB->(DBSkip())
       EndDo
 
    EndIf  
@@ -295,7 +292,7 @@ If Select("SPEDTRB") > 0
    SPEDTRB->( DBCloseArea() )
 EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -374,7 +371,7 @@ Begin Sequence
       If ValType( XmlChildEx( _oXmlE:_REINF:_EVTAQPROD:_INFOAQUISPROD:_IDEESTABADQUIR:_IDEPRODUTOR,"_NRINSCPROD")) <> "U"
          _cNrInscrP:= _oXmlE:_REINF:_EVTAQPROD:_INFOAQUISPROD:_IDEESTABADQUIR:_IDEPRODUTOR:_NRINSCPROD:TEXT
       EndIf
-   If Valtype(XmlChildEx( _oXmlE:_REINF:_EVTAQPROD:_INFOAQUISPROD:_IDEESTABADQUIR:_IDEPRODUTOR,"_DETAQUIS")) <> "U"
+   If ValType(XmlChildEx( _oXmlE:_REINF:_EVTAQPROD:_INFOAQUISPROD:_IDEESTABADQUIR:_IDEPRODUTOR,"_DETAQUIS")) <> "U"
       //REINF->EVTAQPROD->INFOAQUISPROD->IDEESTABADQUIR->IDEPRODUTOR->DETAQUIS->INDAQUIS->TEXT
       If ValType( XmlChildEx( _oXmlE:_REINF:_EVTAQPROD:_INFOAQUISPROD:_IDEESTABADQUIR:_IDEPRODUTOR:_DETAQUIS,"_INDAQUIS")) <> "U"
          _cIndAquis := _oXmlE:_REINF:_EVTAQPROD:_INFOAQUISPROD:_IDEESTABADQUIR:_IDEPRODUTOR:_DETAQUIS:_INDAQUIS:TEXT
@@ -462,7 +459,7 @@ EndIf
    _cNrInscr       := _cNrInscrA
    _cEvento        := "R-2055"
    _cCPFProdutor   := _cNrInscrP
-   _cNomeProdutor  := POSICIONE("SA2",3,xfilial("SA2")+_cNrInscrP,"A2_NOME")
+   _cNomeProdutor  := Posicione("SA2",3,xFilial("SA2")+_cNrInscrP,"A2_NOME")
    _cIndIsencao    := AllTrim(_cIndAquis)
 
    If AllTrim(_cIndAquis) == "1"
@@ -520,7 +517,7 @@ EndIf
    _cDescStatus      := SPED500->DETSTATUS
    _cRecibo          := SPED500->RECIBO
     
-   Aadd(_aDados,{_cFilial,;
+   aAdd(_aDados,{_cFilial,;
                  _cEvento,; 
                  _cCPFProdutor,;
                  _cNomeProdutor,;
@@ -551,7 +548,7 @@ EndIf
 
 End Sequence
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -575,7 +572,7 @@ Begin Sequence
    _cQry += " AND ZZM_CGC = '" + AllTrim(_cCnp) + "' "
 
    If Select("QRYZZM") > 0
-      QRYZZM->(DbCloseArea())
+      QRYZZM->(DBCloseArea())
    EndIf
    
    _cQry := ChangeQuery(_cQry) 

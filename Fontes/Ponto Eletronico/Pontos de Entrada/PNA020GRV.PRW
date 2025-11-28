@@ -9,7 +9,7 @@ Lucas Borges  |27/06/2025| Chamado 50617. Revisões diversas visando padronizar o
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -30,13 +30,13 @@ Local oDlg		:= Nil As Object
 Local cAt		:= "MUNICIPAL" As Character
 	
 //================================================================================
-//Se for inclusao ou alteracao pergunta o tipo de feriado
+//Se For inclusao ou alteracao pergunta o tipo de feriado
 //Garante que o campo fixo será sempre gravado como não
 //================================================================================
 	
-If paramixb[4] == 1 .OR. paramixb[4] == 2
+If ParamIXB[4] == 1 .Or. ParamIXB[4] == 2
 	//Se é alteração já traz o combobox posicionado no valor atual
-	If paramixb[4] == 2
+	If ParamIXB[4] == 2
 		If SP3->P3_I_TPFER == 'N'
 			cAt := "NACIONAL"
 		ElseIf SP3->P3_I_TPFER == 'E'
@@ -47,17 +47,17 @@ If paramixb[4] == 1 .OR. paramixb[4] == 2
 	EndIf
 
 	DEFINE MSDIALOG oDlg TITLE "TIPO DE FERIADO" FROM 0,0 TO 150,230 PIXEL		
-	@ 10,10 SAY "Escolha o tipo de feriado:"
+	@ 10,10 Say "Escolha o tipo de feriado:"
 	@ 30,10 MSCOMBOBOX oComboBo1 VAR cAt ITEMS aExist SIZE 90, 95 OF oDlg  PIXEL   
 		
-	DEFINE SBUTTON FROM 50,50 TYPE 1 ACTION oDlg:End() ENABLE OF oDlg
+	DEFINE SBUTTON FROM 50,50 Type 1 ACTION oDlg:End() ENABLE OF oDlg
 	ACTIVATE MSDIALOG oDlg CENTER
 	
-	SP3->(Reclock("SP3",.F.))
-		SP3->P3_I_TPFER := SUBSTR(cAt,1,1)
+	SP3->(RecLock("SP3",.F.))
+		SP3->P3_I_TPFER := SubStr(cAt,1,1)
 		SP3->P3_FIXO := 'N'
 		SP3->P3_MESDIA := ''
-	SP3->(Msunlock())
+	SP3->(MSUnLock())
 EndIf
 
 FWRestArea(aArea)

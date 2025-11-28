@@ -19,7 +19,7 @@
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include "Protheus.Ch"
+#Include "TOTVS.ch"
 
 #Define TITULO "Log de Alterações - Pedido de Venda"
 
@@ -39,7 +39,7 @@ Retorno-----------: Nenhum
 
 User Function COMS001( _cAlias , _cChave )
 
-Local aArea	        := GetArea()
+Local aArea	        := FWGetArea()
 Local oDlg			:= Nil
 Local oLbxCAB		:= Nil
 Local oLbxHIS		:= Nil
@@ -75,14 +75,14 @@ Private	cCadastro	:= ''
 Default _cAlias		:= "SC5" //jjs
 Default _cChave     :=  SC5->C5_FILIAL+SC5->C5_NUM //jjs
 
-bSelDados:= {|| fwmsgrun(,{|lEnd| COMS001HIS( @oLbxCAB , _cAlias , _cChave ) },"Aguarde...","Carregando histórico..." ) }
-bMontaHIS:= {|| IIF( !Empty(oLbxCAB:aArray) , COMS001ITH( @oLbxHIS , _cAlias , oLbxCAB:aArray[oLbxCAB:nAt] ) , ) }
+bSelDados:= {|| FWMsgRun(,{|lEnd| COMS001HIS( @oLbxCAB , _cAlias , _cChave ) },"Aguarde...","Carregando histórico..." ) }
+bMontaHIS:= {|| IIf( !Empty(oLbxCAB:aArray) , COMS001ITH( @oLbxHIS , _cAlias , oLbxCAB:aArray[oLbxCAB:nAt] ) , ) }
 
 
 If Empty( _cChave )
-   u_itmsg( 'Não foi informada uma chave válida para a consulta do Pedido!',  'Atenção!' ,  , 1 )
-   RestArea(aArea)
-   Return()
+   U_ITMsg( 'Não foi informada uma chave válida para a consulta do Pedido!',  'Atenção!' ,  , 1 )
+   FWRestArea(aArea)
+   Return
 EndIf
 
 cCadastro := "Consulta Histórico ["+ _cChave +"] - "+ TITULO            
@@ -93,10 +93,10 @@ cCadastro := "Consulta Histórico ["+ _cChave +"] - "+ TITULO
 DBSelectArea("SC5")
 SC5->( DBSetOrder(1) )
 If !SC5->( DBSeek( _cChave ) )
-   u_itmsg( 'O pedido referente à chave ['+ _cChave +'] não foi encontrado!' , 'Atenção!' ,, 1 )
-   RestArea(aArea)
-   Return()
-EndIF
+   U_ITMsg( 'O pedido referente à chave ['+ _cChave +'] não foi encontrado!' , 'Atenção!' ,, 1 )
+   FWRestArea(aArea)
+   Return
+EndIf
 
 aAdd( aObjects, { 100, 025, .T. , .F. , .T. } )
 aAdd( aObjects, { 100, 100, .T. , .F. } )
@@ -124,19 +124,19 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Pixel
     oScrPanel:=oDlg
 	@ aPosObj[01][01],aPosObj[01][02] To aPosObj[02][01]-2,aPosObj[02][04] LABEL "Dados do Pedido:" COLOR CLR_HBLUE OF oScrPanel PIXEL
 
-	@ _n1Linha , 010 SAY "Filial:"					SIZE 025,07 OF oScrPanel PIXEL
-	@ _n2Linha , 010 SAY SC5->C5_FILIAL			 	SIZE 060,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ _n1Linha , 010 Say "Filial:"					SIZE 025,07 OF oScrPanel PIXEL
+	@ _n2Linha , 010 Say SC5->C5_FILIAL			 	SIZE 060,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
 
-	@ _n1Linha , 040 SAY "Número:"					SIZE 035,07 OF oScrPanel PIXEL
-	@ _n2Linha , 040 SAY SC5->C5_NUM				SIZE 035,09	OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ _n1Linha , 040 Say "Número:"					SIZE 035,07 OF oScrPanel PIXEL
+	@ _n2Linha , 040 Say SC5->C5_NUM				SIZE 035,09	OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
 	
 	_cNomCli := SC5->C5_CLIENTE +'/'+ SC5->C5_LOJACLI +': '+ AllTrim( Posicione('SA1',1,xFilial('SA1')+SC5->( C5_CLIENTE + C5_LOJACLI ),'A1_NOME') )
 	
-	@ _n1Linha , 075 SAY "Cliente/Loja:"			SIZE 165,07 OF oScrPanel PIXEL
-	@ _n2Linha , 075 SAY _cNomCli					SIZE 165,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ _n1Linha , 075 Say "Cliente/Loja:"			SIZE 165,07 OF oScrPanel PIXEL
+	@ _n2Linha , 075 Say _cNomCli					SIZE 165,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
 	
-	@ _n1Linha , 320 SAY "Emissão:"			  		SIZE 040,07 OF oScrPanel PIXEL
-	@ _n2Linha , 320 SAY DtoC( SC5->C5_EMISSAO )	SIZE 040,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ _n1Linha , 320 Say "Emissão:"			  		SIZE 040,07 OF oScrPanel PIXEL
+	@ _n2Linha , 320 Say DToC( SC5->C5_EMISSAO )	SIZE 040,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
 	
 	//================================================================================
 	// Parte 02 - Titulos Processados.
@@ -182,11 +182,11 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Pixel
 	
 	oDlg:lMaximized := .T.
 	
-ACTIVATE MSDIALOG oDlg CENTERED ON INIT IIf( Empty(oLbxCAB:aArray) , ( u_itmsg( "O Pedido ["+ SC5->C5_FILIAL +"/"+ SC5->C5_NUM +"] não possui histórico de alterações." , 'Atenção!' ,, 1 ) , oDlg:End() ) , )
+ACTIVATE MSDIALOG oDlg CENTERED ON INIT IIf( Empty(oLbxCAB:aArray) , ( U_ITMsg( "O Pedido ["+ SC5->C5_FILIAL +"/"+ SC5->C5_NUM +"] não possui histórico de alterações." , 'Atenção!' ,, 1 ) , oDlg:End() ) , )
 
-RestArea(aArea)
+FWRestArea(aArea)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -242,20 +242,20 @@ COUNT TO nTotReg
 
 ProcRegua( nTotReg )
 
-DO WHILE (_cAliAux)->( !Eof() )
+While (_cAliAux)->( !Eof() )
 
 	_amots   := COMS001S( (_cAliAux)->Z07_OPCAO, (_cAliAux)->Z07_IITEM )
 	_cdesc := _amots[1]
 	_cmotivo := _amots[2] 	
 	
-   aAdd( aLbxAux ,	{	IIF((_cAliAux)->Z07_ALIAS=='SC5',"Cabeçalho","Item " + substr((_cAliAux)->Z07_CHAVE,9,2)),;
+   aAdd( aLbxAux ,	{	IIf((_cAliAux)->Z07_ALIAS=='SC5',"Cabeçalho","Item " + SubStr((_cAliAux)->Z07_CHAVE,9,2)),;
    						_cdesc													,; //02
-						DtoC( StoD( (_cAliAux)->Z07_DATA ) )						,; //03
+						DToC( SToD( (_cAliAux)->Z07_DATA ) )						,; //03
 						(_cAliAux)->Z07_HORA										,; //04
 						(_cAliAux)->Z07_CODUSU										,; //05
 						U_COMS001U((_cAliAux)->Z07_CODUSU)							,; //06
 						(_cAliAux)->Z07_CHAVE										,; //07
-						IIF(EMPTY((_cAliAux)->Z07_FILIAM),(_cAliAux)->Z07_IFILIA,(_cAliAux)->Z07_FILIAM)  ,; //08
+						IIf(Empty((_cAliAux)->Z07_FILIAM),(_cAliAux)->Z07_IFILIA,(_cAliAux)->Z07_FILIAM)  ,; //08
 						(_cAliAux)->Z07_INUM                                        ,; //09
 						(_cAliAux)->Z07_ORIGEM                                      ,; //10
 						_cmotivo													}) //11
@@ -263,7 +263,7 @@ DO WHILE (_cAliAux)->( !Eof() )
 
    (_cAliAux)->( DBSkip() )
 
-ENDDO
+EndDo
 
 (_cAliAux)->( DBCloseArea() )
 
@@ -284,7 +284,7 @@ If Len(aLbxAux) > 0 .And. ValType(oLbxAux) == "O"
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -326,7 +326,7 @@ _cQuery	+= " AND Z07.Z07_CHAVE	= '"+ _aChave[07] +"' "
 _cQuery	+= " AND Z07.Z07_CODUSU	= '"+ _aChave[05] +"' "
 _cQuery += " AND Z07.Z07_IFILIA = '" + _aChave[08] + "'
 _cQuery += " AND Z07.Z07_INUM = '" + _aChave[09] + "'
-_cQuery	+= " AND Z07.Z07_DATA	= '"+ DtoS(CtoD(_aChave[03])) +"' "
+_cQuery	+= " AND Z07.Z07_DATA	= '"+ DToS(CtoD(_aChave[03])) +"' "
 _cQuery	+= " AND Z07.Z07_HORA	= '"+ _aChave[04] +"' "
 _cQuery	+= " ORDER BY Z07.Z07_CHAVE "
 _cQuery	:= ChangeQuery(_cQuery)
@@ -366,7 +366,7 @@ If	Len(aLbxAux) > 0 .And. ValType(oLbxAux) == "O"
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -374,7 +374,7 @@ Programa----------: COMS001U
 Autor-------------: Josué Danich
 Data da Criacao---: 30/11/2018
 ===============================================================================================================================
-Descrição---------: Retorna nome de usuário fora do loop
+Descrição---------: Retorna nome de usuário fora do Loop
 ===============================================================================================================================
 Parametros--------: _ncod - Código do usuário
 ===============================================================================================================================
@@ -384,7 +384,7 @@ Retorno-----------: _csname - Nome do usuário
 
 User Function COMS001U(_ncod)
 
-Local _csname := space(40)
+Local _csname := Space(40)
 
 _csname := Capital( AllTrim( UsrFullName( _ncod ) ) )	
 	
@@ -419,10 +419,10 @@ ElseIf _ccodigo == "B"
 
 	_cdesc := "Bloqueio Log"
 	
-Elseif _ccodigo == "E"
+ElseIf _ccodigo == "E"
 
 	_cdesc := "Exclusão"
-	If !empty(_citem)
+	If !Empty(_citem)
 	
 		_cQuery := " SELECT "
 		_cQuery += " DISTINCT X5_CHAVE CHAVE,X5_DESCRI DESCRI "
@@ -442,19 +442,19 @@ Elseif _ccodigo == "E"
 
 		If TMPCF->( !Eof() )
 		
-			_cmotivo := alltrim(TMPCF->DESCRI)
+			_cmotivo := AllTrim(TMPCF->DESCRI)
 		
-		Endif	
+		EndIf	
 	
 		("TMPCF")->( DBCloseArea() )
 	
-	Endif
+	EndIf
 	
-Elseif _ccodigo == "A"
+ElseIf _ccodigo == "A"
 
 	_cdesc := "Alteração"	
 	
-	If !empty(_citem)
+	If !Empty(_citem)
 	
 		_cdesc := "Corte"
 		
@@ -474,19 +474,19 @@ Elseif _ccodigo == "A"
 
 		If TMPCF->( !Eof() )
 		
-			_cmotivo := alltrim(TMPCF->DESCRI)
+			_cmotivo := AllTrim(TMPCF->DESCRI)
 		
-		Endif	
+		EndIf	
 	
 		("TMPCF")->( DBCloseArea() )
 		
-	Endif
+	EndIf
 
 ElseIf _ccodigo == "T"
 
 	_cdesc := "Transferência"	
 
-Endif
+EndIf
 
 _aretorno[1] := _cdesc
 _aretorno[2] := _cmotivo

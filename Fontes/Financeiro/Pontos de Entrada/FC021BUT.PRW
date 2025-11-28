@@ -2,35 +2,29 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges | 09/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+ Lucas Borges |09/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: FC021BUT
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 07/06/2019
-===============================================================================================================================
 Descrição---------: PE Inclusao de botao na tela de consulta de fluxo de caixa - Chamado 29347
 					Ponto de entrada que permite ao usuário criar novos botões na EnchoiceBar da tela de detalhamento (Fluxo 
 					Analitico) do fluxo de caixa.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: uRet -> A -> array com os dados da opção
 ===============================================================================================================================
 */
 User Function FC021BUT()
 
-Local _abut := {{"Exporta",	{|| fwmsgrun(,{|| U_FC021EXP()},"Aguarde...","Gerando arquivo...") }, "Exporta Excel"}}
+Local _abut := {{"Exporta",	{|| FWMsgRun(,{|| U_FC021EXP()},"Aguarde...","Gerando arquivo...") }, "Exporta Excel"}}
 
 Return _abut
 
@@ -39,11 +33,8 @@ Return _abut
 Programa----------: FC021EXP
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 07/06/2019
-===============================================================================================================================
 Descrição---------: Exportacao de fluxo de caixa para excel
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum.
 ===============================================================================================================================
 */
@@ -58,39 +49,39 @@ If file(cArquivo)
     
     If _nap < 0 
 
-        u_itmsg(cArquivo + " não pode ser atualizado!","Atenção",,1)
+        U_ITMsg(cArquivo + " não pode ser atualizado!","Atenção",,1)
         Return
 
-    Endif
+    EndIf
 
-Endif
+EndIf
 
 _atables := {}
 
-aadd(_atables,"A Pagar")
-aadd(_atables,"A Receber")
-aadd(_atables,"Pedido de Compra")
-aadd(_atables,"Pedido de Venda")
-aadd(_atables,"Comissões")
-aadd(_atables,"Emprestimos")
-aadd(_atables,"Aplicações")
-aadd(_atables,"Cheques pendentes")
-aadd(_atables,"Doctos. de Transporte")
-aadd(_atables,"Solicitações de Fundo")
-aadd(_atables,"Ped. Compra de Máquinas")
-aadd(_atables,"Ped. Venda de Máquinas")
+aAdd(_atables,"A Pagar")
+aAdd(_atables,"A Receber")
+aAdd(_atables,"Pedido de Compra")
+aAdd(_atables,"Pedido de Venda")
+aAdd(_atables,"Comissões")
+aAdd(_atables,"Emprestimos")
+aAdd(_atables,"Aplicações")
+aAdd(_atables,"Cheques pendentes")
+aAdd(_atables,"Doctos. de Transporte")
+aAdd(_atables,"Solicitações de Fundo")
+aAdd(_atables,"Ped. Compra de Máquinas")
+aAdd(_atables,"Ped. Venda de Máquinas")
 
-For _nt := 1 to len(_atables)
+For _nt := 1 to Len(_atables)
 
     If _atables[_nt] == "A Pagar"
 
         _caliaspc := "cArqAnaP"
 
-        If select(_caliaspc)  = 0
+        If Select(_caliaspc)  = 0
 
             Loop
 
-        Endif
+        EndIf
 
         oExcel:AddworkSheet(_atables[_nt])
         oExcel:AddTable (_atables[_nt],_atables[_nt])
@@ -107,9 +98,9 @@ For _nt := 1 to len(_atables)
 
         _npos := (_caliaspc)->(Recno())
 
-        (_caliaspc)->(Dbgotop())
+        (_caliaspc)->(DBGoTop())
 
-        Do while !((_caliaspc)->(Eof()))
+        While !((_caliaspc)->(Eof()))
 
              oExcel:AddRow(_atables[_nt],_atables[_nt],{(_caliaspc)->FILIAL,;
                                                         (_caliaspc)->PREFIXO,;
@@ -121,24 +112,24 @@ For _nt := 1 to len(_atables)
                                                         (_caliaspc)->LOJA,;
                                                         (_caliaspc)->SALDO})
 
-            (_caliaspc)->(Dbskip())
+            (_caliaspc)->(DBSkip())
 
-        Enddo
+        EndDo
 
-        (_caliaspc)->(Dbgoto(_npos))
+        (_caliaspc)->(DBGoTo(_npos))
 
-    Endif
+    EndIf
 
 
     If _atables[_nt] == "A Receber"
 
          _caliaspc := "cArqAnaR"
 
-         If select(_caliaspc)  = 0
+         If Select(_caliaspc)  = 0
 
             Loop
 
-        Endif
+        EndIf
 
 
         oExcel:AddworkSheet(_atables[_nt])
@@ -156,9 +147,9 @@ For _nt := 1 to len(_atables)
      
         _npos := (_caliaspc)->(Recno())
 
-        (_caliaspc)->(Dbgotop())
+        (_caliaspc)->(DBGoTop())
 
-        Do while !((_caliaspc)->(Eof()))
+        While !((_caliaspc)->(Eof()))
 
              oExcel:AddRow(_atables[_nt],_atables[_nt],{(_caliaspc)->FILIAL,;
                                                         (_caliaspc)->PREFIXO,;
@@ -170,23 +161,23 @@ For _nt := 1 to len(_atables)
                                                         (_caliaspc)->LOJA,;
                                                         (_caliaspc)->SALDO})
 
-            (_caliaspc)->(Dbskip())
+            (_caliaspc)->(DBSkip())
 
-        Enddo
+        EndDo
 
-        (_caliaspc)->(Dbgoto(_npos))
+        (_caliaspc)->(DBGoTo(_npos))
 
-    Endif
+    EndIf
    
     If _atables[_nt] == "Pedido de Compra"
 
         _caliaspc := "cArqAnaPc"
 
-        If select(_caliaspc)  = 0
+        If Select(_caliaspc)  = 0
 
             Loop
 
-        Endif
+        EndIf
 
 
         oExcel:AddworkSheet(_atables[_nt])
@@ -204,12 +195,12 @@ For _nt := 1 to len(_atables)
 
         _npos := (_caliaspc)->(Recno())
 
-        (_caliaspc)->(Dbgotop())
+        (_caliaspc)->(DBGoTop())
 
-        Do while !((_caliaspc)->(Eof()))
+        While !((_caliaspc)->(Eof()))
 
              oExcel:AddRow(_atables[_nt],_atables[_nt],{(_caliaspc)->NUMERO,;
-                                                        DTOC((_caliaspc)->EMISSAO),;
+                                                        DToC((_caliaspc)->EMISSAO),;
                                                         (_caliaspc)->CLIFOR,;
                                                         (_caliaspc)->NOMCLIFOR,;
                                                         (_caliaspc)->TIPO,;
@@ -218,23 +209,23 @@ For _nt := 1 to len(_atables)
                                                         (_caliaspc)->SALDO,;
                                                         (_caliaspc)->VALPAGANT})
 
-            (_caliaspc)->(Dbskip())
+            (_caliaspc)->(DBSkip())
 
-        Enddo
+        EndDo
 
-        (_caliaspc)->(Dbgoto(_npos))
+        (_caliaspc)->(DBGoTo(_npos))
 
-    Endif
+    EndIf
 
     If _atables[_nt] == "Pedido de Venda"
 
         _caliaspc := "cArqAnaPv"
 
-        If select(_caliaspc)  = 0
+        If Select(_caliaspc)  = 0
 
             Loop
 
-        Endif
+        EndIf
 
         oExcel:AddworkSheet(_atables[_nt])
         oExcel:AddTable (_atables[_nt],_atables[_nt])
@@ -251,13 +242,13 @@ For _nt := 1 to len(_atables)
 
         _npos := (_caliaspc)->(Recno())
 
-        (_caliaspc)->(Dbgotop())
+        (_caliaspc)->(DBGoTop())
 
-        Do while !((_caliaspc)->(Eof()))
+        While !((_caliaspc)->(Eof()))
 
              oExcel:AddRow(_atables[_nt],_atables[_nt],{(_caliaspc)->NUMERO,;
                                                         (_caliaspc)->TIPO,;
-                                                        DTOC((_caliaspc)->EMISSAO),;
+                                                        DToC((_caliaspc)->EMISSAO),;
                                                         (_caliaspc)->CLIFOR,;
                                                         (_caliaspc)->NOMCLIFOR,;
                                                         (_caliaspc)->LOJACLI,;
@@ -265,23 +256,23 @@ For _nt := 1 to len(_atables)
                                                         (_caliaspc)->SALDO,;
                                                         (_caliaspc)->VALRECANT})
 
-            (_caliaspc)->(Dbskip())
+            (_caliaspc)->(DBSkip())
 
-        Enddo
+        EndDo
 
-        (_caliaspc)->(Dbgoto(_npos))
+        (_caliaspc)->(DBGoTo(_npos))
 
-    Endif
+    EndIf
 
     If _atables[_nt] == "Comissões"
 
         _caliaspc := "cArqAnaCo"
 
-        If select(_caliaspc)  = 0
+        If Select(_caliaspc)  = 0
 
             Loop
 
-        Endif
+        EndIf
         
         oExcel:AddworkSheet(_atables[_nt])
         oExcel:AddTable (_atables[_nt],_atables[_nt])
@@ -296,9 +287,9 @@ For _nt := 1 to len(_atables)
   
         _npos := (_caliaspc)->(Recno())
 
-        (_caliaspc)->(Dbgotop())
+        (_caliaspc)->(DBGoTop())
 
-        Do while !((_caliaspc)->(Eof()))
+        While !((_caliaspc)->(Eof()))
 
              oExcel:AddRow(_atables[_nt],_atables[_nt],{(_caliaspc)->FILIAL,;
                                                         (_caliaspc)->PREFIXO,;
@@ -308,23 +299,23 @@ For _nt := 1 to len(_atables)
                                                         (_caliaspc)->NOMEVEND,;
                                                         (_caliaspc)->VALOR})
 
-            (_caliaspc)->(Dbskip())
+            (_caliaspc)->(DBSkip())
 
-        Enddo
+        EndDo
 
-        (_caliaspc)->(Dbgoto(_npos))
+        (_caliaspc)->(DBGoTo(_npos))
 
-    Endif
+    EndIf
 
     If _atables[_nt] == "Emprestimos"
 
         _caliaspc := "cArqAnaEmp"
 
-        If select(_caliaspc)  = 0
+        If Select(_caliaspc)  = 0
 
             Loop
 
-        Endif
+        EndIf
         
         oExcel:AddworkSheet(_atables[_nt])
         oExcel:AddTable (_atables[_nt],_atables[_nt])
@@ -338,35 +329,35 @@ For _nt := 1 to len(_atables)
   
         _npos := (_caliaspc)->(Recno())
 
-        (_caliaspc)->(Dbgotop())
+        (_caliaspc)->(DBGoTop())
 
-        Do while !((_caliaspc)->(Eof()))
+        While !((_caliaspc)->(Eof()))
 
              oExcel:AddRow(_atables[_nt],_atables[_nt],{(_caliaspc)->NUMERO,;
                                                         (_caliaspc)->BANCO,;
                                                         (_caliaspc)->AGENCIA,;
                                                         (_caliaspc)->CONTA,;
-                                                        DTOC((_caliaspc)->AGENCIA),;
+                                                        DToC((_caliaspc)->AGENCIA),;
                                                         (_caliaspc)->VALOR})
 
-            (_caliaspc)->(Dbskip())
+            (_caliaspc)->(DBSkip())
 
-        Enddo
+        EndDo
 
-        (_caliaspc)->(Dbgoto(_npos))
+        (_caliaspc)->(DBGoTo(_npos))
 
 
-    Endif
+    EndIf
 
     If _atables[_nt] == "Aplicações"
 
         _caliaspc := "cArqAnaApl"
 
-        If select(_caliaspc)  = 0
+        If Select(_caliaspc)  = 0
 
             Loop
 
-        Endif
+        EndIf
         
         oExcel:AddworkSheet(_atables[_nt])
         oExcel:AddTable (_atables[_nt],_atables[_nt])
@@ -380,34 +371,34 @@ For _nt := 1 to len(_atables)
   
         _npos := (_caliaspc)->(Recno())
 
-        (_caliaspc)->(Dbgotop())
+        (_caliaspc)->(DBGoTop())
 
-        Do while !((_caliaspc)->(Eof()))
+        While !((_caliaspc)->(Eof()))
 
              oExcel:AddRow(_atables[_nt],_atables[_nt],{(_caliaspc)->NUMERO,;
                                                         (_caliaspc)->BANCO,;
                                                         (_caliaspc)->AGENCIA,;
                                                         (_caliaspc)->CONTA,;
-                                                        DTOC((_caliaspc)->AGENCIA),;
+                                                        DToC((_caliaspc)->AGENCIA),;
                                                         (_caliaspc)->VALOR})
 
-            (_caliaspc)->(Dbskip())
+            (_caliaspc)->(DBSkip())
 
-        Enddo
+        EndDo
 
-        (_caliaspc)->(Dbgoto(_npos))
+        (_caliaspc)->(DBGoTo(_npos))
 
-    Endif
+    EndIf
 
     If _atables[_nt] == "Cheques pendentes"
 
         _caliaspc := "cArqAnaChq"
 
-        If select(_caliaspc)  = 0
+        If Select(_caliaspc)  = 0
 
             Loop
 
-        Endif
+        EndIf
         
         oExcel:AddworkSheet(_atables[_nt])
         oExcel:AddTable (_atables[_nt],_atables[_nt])
@@ -420,9 +411,9 @@ For _nt := 1 to len(_atables)
   
         _npos := (_caliaspc)->(Recno())
 
-        (_caliaspc)->(Dbgotop())
+        (_caliaspc)->(DBGoTop())
 
-        Do while !((_caliaspc)->(Eof()))
+        While !((_caliaspc)->(Eof()))
 
              oExcel:AddRow(_atables[_nt],_atables[_nt],{(_caliaspc)->NUMERO,;
                                                         (_caliaspc)->BANCO,;
@@ -430,24 +421,24 @@ For _nt := 1 to len(_atables)
                                                         (_caliaspc)->CONTA,;
                                                         (_caliaspc)->SALDO})
 
-            (_caliaspc)->(Dbskip())
+            (_caliaspc)->(DBSkip())
 
-        Enddo
+        EndDo
 
-        (_caliaspc)->(Dbgoto(_npos))
+        (_caliaspc)->(DBGoTo(_npos))
 
 
-    Endif
+    EndIf
 
     If _atables[_nt] == "Doctos. de Transporte"
 
         _caliaspc := "cArqAnaCo"
 
-        If select(_caliaspc)  = 0
+        If Select(_caliaspc)  = 0
 
             Loop
 
-        Endif
+        EndIf
         
         oExcel:AddworkSheet(_atables[_nt])
         oExcel:AddTable (_atables[_nt],_atables[_nt])
@@ -461,35 +452,35 @@ For _nt := 1 to len(_atables)
   
         _npos := (_caliaspc)->(Recno())
 
-        (_caliaspc)->(Dbgotop())
+        (_caliaspc)->(DBGoTop())
 
-        Do while !((_caliaspc)->(Eof()))
+        While !((_caliaspc)->(Eof()))
 
              oExcel:AddRow(_atables[_nt],_atables[_nt],{(_caliaspc)->FILDEB,;
                                                         (_caliaspc)->FILDOC,;
                                                         (_caliaspc)->DOC,;
                                                         (_caliaspc)->SERIE,;
-                                                        DTOC((_caliaspc)->EMISSAO),;
+                                                        DToC((_caliaspc)->EMISSAO),;
                                                         (_caliaspc)->VALOR})
 
-            (_caliaspc)->(Dbskip())
+            (_caliaspc)->(DBSkip())
 
-        Enddo
+        EndDo
 
-        (_caliaspc)->(Dbgoto(_npos))
+        (_caliaspc)->(DBGoTo(_npos))
 
 
-    Endif
+    EndIf
 
     If _atables[_nt] == "Solicitações de Fundo"
 
         _caliaspc := "cArqAnaCo"
 
-        If select(_caliaspc)  = 0
+        If Select(_caliaspc)  = 0
 
             Loop
 
-        Endif
+        EndIf
         
         oExcel:AddworkSheet(_atables[_nt])
         oExcel:AddTable (_atables[_nt],_atables[_nt])
@@ -503,25 +494,25 @@ For _nt := 1 to len(_atables)
   
         _npos := (_caliaspc)->(Recno())
 
-        (_caliaspc)->(Dbgotop())
+        (_caliaspc)->(DBGoTop())
 
-        Do while !((_caliaspc)->(Eof()))
+        While !((_caliaspc)->(Eof()))
 
              oExcel:AddRow(_atables[_nt],_atables[_nt],{(_caliaspc)->FILIAL,;
                                                         (_caliaspc)->SOLFUN,;
                                                         (_caliaspc)->FORNEC,;
                                                         (_caliaspc)->LOJA,;
-                                                        DTOC((_caliaspc)->DATAPR),;
+                                                        DToC((_caliaspc)->DATAPR),;
                                                         (_caliaspc)->VALOR})
 
-            (_caliaspc)->(Dbskip())
+            (_caliaspc)->(DBSkip())
 
-        Enddo
+        EndDo
 
-        (_caliaspc)->(Dbgoto(_npos))
+        (_caliaspc)->(DBGoTo(_npos))
 
 
-    Endif
+    EndIf
 
     
 Next

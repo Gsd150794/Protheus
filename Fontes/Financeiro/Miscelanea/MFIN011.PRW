@@ -6,17 +6,12 @@
 -------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 Lucas Borges  |09/05/2025| Chamado 50617. Corrigir chamada estática no nome das tabelas do sistema
-===============================================================================================================================
-Analista       - Programador     - Inicio     - Envio    - Chamado - Motivo de Alteração
-===============================================================================================================================
-Lucas          - Alex Wallauer   - 02/05/2025 - 06/05/25 - 50525   - Ajuste para remoção de diretório local C:\SMARTCLIENT\.
+Alex Wallauer |06/05/2025| Chamado 50525. Ajuste para remoção de diretório Local C:\SMARTCLIENT\.
 ===============================================================================================================================
 */
 
 #Include	"Protheus.Ch"
 #Include	"FWMVCDef.Ch"
-
-#Define		TITULO	"Análise de Pagamentos previstos"
 
 /*
 ===============================================================================================================================
@@ -40,9 +35,9 @@ SET DATE FORMAT TO "DD/MM/YYYY"
 //Grava Log de execução da rotina
 U_ITLOGACS( "MFIN011" )
 
-fwmsgrun( ,{|oproc| MFIN011INI(oproc) } , "Processando..." , "Iniciando o processamento..." )
+FWMsgRun( ,{|oproc| MFIN011INI(oproc) } , "Processando..." , "Iniciando o processamento..." )
 	
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -61,10 +56,10 @@ Local _aParRet	:= {}
 Local _aCpos		:= MFIN011CPS()
 Local _aFields		:= {}
 Local _nreg		:= 0
-Local _adados		:= {}
+Local _aDados		:= {}
 Local _apesqui	:= {}
 Local _nHandle	:= 0
-Local _ni			:= 0
+Local _nI			:= 0
 Local _nlayout	:= 0 //Layout em uso - 1 Pao de acucar, 2 Atacadao, 3 Wall Mart
 Local _carq		:= ""
 Local _llibof		:= .F.
@@ -84,23 +79,23 @@ For nI := 1 To Len( _aParAux )
 	aAdd( _aParRet , _aParAux[nI][03] )
 Next nI
 
-IF !ParamBox( _aParAux , "Análise de pagamentos previstos" , @_aParRet )
-	u_itmsg( "Operação cancelada pelo usuário!" , "Atenção!",,1 )
-	Return()
+If !ParamBox( _aParAux , "Análise de pagamentos previstos" , @_aParRet )
+	U_ITMsg( "Operação cancelada pelo usuário!" , "Atenção!",,1 )
+	Return
 EndIf
 
 ProcRegua(0)
 IncProc( "Abrindo arquivo..." )
 
-MV_PAR01:=ALLTRIM(MV_PAR01)
+MV_PAR01:=AllTrim(MV_PAR01)
 
-//Se for arquivo excel vai converte primeiro para csv para poder trabalhar
-If upper(right(alltrim(MV_PAR01),3)) == "XLS" .OR. upper(right(alltrim(MV_PAR01),4)) == "XLSX" 
+//Se For arquivo excel vai converte primeiro para csv para poder trabalhar
+If Upper(right(AllTrim(MV_PAR01),3)) == "XLS" .Or. Upper(right(AllTrim(MV_PAR01),4)) == "XLSX" 
 
-     IF valtype(oproc2) = "O"
+     If ValType(oproc2) = "O"
       	oproc2:cCaption := ("Detectado arquivo XLS convertendo para CSV...")
    		ProcessMessages()
-    ENDIF
+    EndIf
 	
 	//detecta se é excel ou libreoffice e cria script de conversão
 	ferase(_cDirLocal+"converzz.vbs")
@@ -125,10 +120,10 @@ If upper(right(alltrim(MV_PAR01),3)) == "XLS" .OR. upper(right(alltrim(MV_PAR01)
 	
 	If _cDados == "HKEY_CLASSES_ROOT\Excel.Application\CurVer"  //Tem Excel
 		
-		IF valtype(oproc2) = "O"
+		If ValType(oproc2) = "O"
       	  oproc2:cCaption := ("Usando Excel para converter para CSV...")
    		  ProcessMessages()
-        ENDIF
+        EndIf
 		
 		_nHandle := FCreate(_cDirLocal+"converzz.vbs")
 		FWrite(_nHandle, "Dim oExcel" + CHR(13))
@@ -143,27 +138,27 @@ If upper(right(alltrim(MV_PAR01),3)) == "XLS" .OR. upper(right(alltrim(MV_PAR01)
 
 		ShellExecute("open", _cDirLocal+"converzz.vbs", MV_PAR01+" "+_cDirLocal+"csvtemp.csv", "", 0)
 	Else
-		u_itmsg("Falha ao converter o arquivo excel para .csv","Erro","Instale o Excel. pois não foi encontrado.",1)
+		U_ITMsg("Falha ao converter o arquivo excel para .csv","Erro","Instale o Excel. pois não foi encontrado.",1)
 		ferase(_cDirLocal+"testa.bat")
         ferase(_cDirLocal+"resp.txt")
 		Return
-	Endif
+	EndIf
 	    
 	//tempo de espera para garantir que arquivo foi finalizado
 	Sleep(5000)
 	
 	If FT_FUSE(_cDirLocal+"csvtemp.csv") == -1
-		u_itmsg("Falha ao converter o arquivo excel","Erro",,1)
+		U_ITMsg("Falha ao converter o arquivo excel","Erro",,1)
 		Return
-	Endif 
+	EndIf 
 			
 	//Detecta layout de client
 	FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
 	_cDados := FT_FREADLN()
 	
-	If alltrim(_cDados) == "ORIGEM,CGC_CPF,RAZAO_SOCIAL,FILIAL,COD_PORTADOR,PARCELA,NR_DOCTO,DT_VECTO,DT_RECEBE,VALOR_EFETIVO,DESCRM,DESCCOPAG,VLR_ABATIMENTO,VALOR_PAGAR"
+	If AllTrim(_cDados) == "ORIGEM,CGC_CPF,RAZAO_SOCIAL,FILIAL,COD_PORTADOR,PARCELA,NR_DOCTO,DT_VECTO,DT_RECEBE,VALOR_EFETIVO,DESCRM,DESCCOPAG,VLR_ABATIMENTO,VALOR_PAGAR"
 		_nlayout := 2 //Atacadao
-	Endif
+	EndIf
 	
 	If _cDados == "Remetente,Wal-Mart Brasil,,,,,,,,,,,"
 	
@@ -180,26 +175,26 @@ If upper(right(alltrim(MV_PAR01),3)) == "XLS" .OR. upper(right(alltrim(MV_PAR01)
 		
 		If _cDados == "Empresa,Nota Fiscal,Loja,Tipo Doc.,Nro.Doc.SAP,Valor NF,Vencimento,Situação,Data Compensação,CPF / CNPJ Fornecedor ,,,"
 			_nlayout := 3 //Wall Mart
-		Endif
+		EndIf
 		
-	Endif
+	EndIf
 	
 	If _cDados == "Empresa,Descrição da Empresa,Divisão,Descrição da Divisão,Exercício,Nome,Nº ID fiscal 1,Texto de cabeçalho de documento,Documento da Fatura,Origem da Fatura,Tipo de Documento de Compensação,Referência da fatura,Data do Documento,Data do Lançamento,Data de Vencimento,Data de Compensação,Montante em moeda interna,Valor da Fatura,Valor Compensado,Status,Boleto Vinculado,Denominação Forma Pagamento,Chave para o bloqueio de Pagamento,Denominação Bloqueio Pagamento,Nº documento de estorno,Documento de Compensação,Nº atribuição,Tipo de Documento,Nota Fiscal ou Documento de Referencia,Texto do item"
 		_nlayout := 4 //Carrefour
-	Endif
+	EndIf
 	
 	//Fecha arquivo e prepara parâmetro com arquivo convertido
 	FT_FUSE()
 	_carq := _cDirLocal+"csvtemp.csv"
 	
-ElseIf (upper(right(alltrim(MV_PAR01),3)) == "TXT" .or. upper(right(alltrim(MV_PAR01),3)) == "SCP")
+ElseIf (Upper(right(AllTrim(MV_PAR01),3)) == "TXT" .Or. Upper(right(AllTrim(MV_PAR01),3)) == "SCP")
 	_nlayout := 1 //Pao de Acucar, unico layout em arquivo texto até agora
 	_carq := MV_PAR01
-ElseIf (upper(right(alltrim(MV_PAR01),3))) == "CSV" 
+ElseIf (Upper(right(AllTrim(MV_PAR01),3))) == "CSV" 
 	If FT_FUSE(MV_PAR01) == -1
-		u_itmsg("Falha ao abrir o arquivo","Erro",,1)
+		U_ITMsg("Falha ao abrir o arquivo","Erro",,1)
 		Return
-	Endif 
+	EndIf 
 	          
 	_carq := MV_PAR01
 			
@@ -207,22 +202,22 @@ ElseIf (upper(right(alltrim(MV_PAR01),3))) == "CSV"
 	FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
 	_cDados := FT_FREADLN()
 	
-	If substr(strtran(_cDados,',',';'),1,50) == "CnpjFornecedor;NumeroNota;TipoDocumento;Loja;CnpjL"
+	If SubStr(StrTran(_cDados,',',';'),1,50) == "CnpjFornecedor;NumeroNota;TipoDocumento;Loja;CnpjL"
 		_nlayout := 5 //Cencosud
-	Endif
-	If substr(strtran(_cdados,'"',''),1,49) == "CNPJ Pagador,Fornecedor,(R$) Valor do Documento,N"
+	EndIf
+	If SubStr(StrTran(_cdados,'"',''),1,49) == "CNPJ Pagador,Fornecedor,(R$) Valor do Documento,N"
 		_nlayout := 6 //Assai
-	Endif
-	If substr(strtran(_cdados,'"',''),1,49) == "Nro Doc,Loja,Nro Pedido,Nro Forn,Nro Filial,Tipo,"
+	EndIf
+	If SubStr(StrTran(_cdados,'"',''),1,49) == "Nro Doc,Loja,Nro Pedido,Nro Forn,Nro Filial,Tipo,"
 		_nlayout := 7 //Makro
-	Endif    
-	If substr(Upper(_cdados),1,17) == "TITULOS A RECEBER"
+	EndIf    
+	If SubStr(Upper(_cdados),1,17) == "TITULOS A RECEBER"
 	   _nlayout := 8 // IRMAOS MUFFATO & CIA LTDA.
-	Endif
+	EndIf
 	
-ElseIf (Upper(right(alltrim(MV_PAR01),3)) == "HTM" .or. Upper(right(alltrim(MV_PAR01),3)) == "HTML")  
+ElseIf (Upper(right(AllTrim(MV_PAR01),3)) == "HTM" .Or. Upper(right(AllTrim(MV_PAR01),3)) == "HTML")  
 	If FT_FUSE(MV_PAR01) == -1
-	   u_itmsg("Falha ao abrir o arquivo","Erro",,1)
+	   U_ITMsg("Falha ao abrir o arquivo","Erro",,1)
 	   Return
 	EndIf 
 	          
@@ -243,7 +238,7 @@ EndIf
 If _nlayout > 0
 
 	If FT_FUSE(_carq) == -1
-		u_itmsg("Não foi possível abrir o arquivo informado.",;
+		U_ITMsg("Não foi possível abrir o arquivo informado.",;
 		"Arquivo inválido","Favor verificar se o arquivo informado esta correto.",1)
 		Return
 	EndIf
@@ -257,49 +252,49 @@ If _nlayout > 0
 	FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
 	
 	If _nReg == 0 //O arquivo informado nao possui nenhuma linha de dados
-		u_itmsg(	"O arquivo informado para relizar a importação não possui dados.",;
+		U_ITMsg(	"O arquivo informado para relizar a importação não possui dados.",;
 		"Arquivo inválido","Favor verificar se o arquivo informado esta correto.",1)
 		Return
 	EndIf
 
 	If _nlayout == 1
-		_adados := MFIN011L1(_nreg,oproc2) //Faz leitura dos dados no layout do Pao de Acucar
-	Elseif _nlayout == 2
-		_adados := MFIN011L2(_nreg,_llibof,oproc2) //Faz leitura dos dados no layout do Atacadao
-	Elseif _nlayout == 3
-		_adados := MFIN011L3(_nreg,oproc2) //Faz leitura dos dados no layout do Wall Mart
-	Elseif _nlayout == 4
-		_adados := MFIN011L4(_nreg,oproc2) //Faz leitura dos dados no layout do Carrefour
-	Elseif _nlayout == 5
-		_adados := MFIN011L5(_nreg,oproc2) //Faz leitura dos dados no layout do Cencosud
-	Elseif _nlayout == 6
-		_adados := MFIN011L6(_nreg,oproc2) //Faz leitura dos dados no layout do Assai
-	Elseif _nlayout == 7
-		_adados := MFIN011L7(_nreg,oproc2) //Faz leitura dos dados no layout do Makro
-	Elseif _nlayout == 8
-		_adados := MFIN011L8(_nreg,oproc2) //Faz leitura dos dados no layout dos IRMAOS MUFFATO & CIA LTDA.
-	Elseif _nlayout == 9
-		_adados := MFIN011L9(_nreg,oproc2) //Faz leitura dos dados no layout do Atacadão S/A
-	Endif
+		_aDados := MFIN011L1(_nreg,oproc2) //Faz leitura dos dados no layout do Pao de Acucar
+	ElseIf _nlayout == 2
+		_aDados := MFIN011L2(_nreg,_llibof,oproc2) //Faz leitura dos dados no layout do Atacadao
+	ElseIf _nlayout == 3
+		_aDados := MFIN011L3(_nreg,oproc2) //Faz leitura dos dados no layout do Wall Mart
+	ElseIf _nlayout == 4
+		_aDados := MFIN011L4(_nreg,oproc2) //Faz leitura dos dados no layout do Carrefour
+	ElseIf _nlayout == 5
+		_aDados := MFIN011L5(_nreg,oproc2) //Faz leitura dos dados no layout do Cencosud
+	ElseIf _nlayout == 6
+		_aDados := MFIN011L6(_nreg,oproc2) //Faz leitura dos dados no layout do Assai
+	ElseIf _nlayout == 7
+		_aDados := MFIN011L7(_nreg,oproc2) //Faz leitura dos dados no layout do Makro
+	ElseIf _nlayout == 8
+		_aDados := MFIN011L8(_nreg,oproc2) //Faz leitura dos dados no layout dos IRMAOS MUFFATO & CIA LTDA.
+	ElseIf _nlayout == 9
+		_aDados := MFIN011L9(_nreg,oproc2) //Faz leitura dos dados no layout do Atacadão S/A
+	EndIf
 
-	If len(_adados) <= 0
-		u_itmsg(  "Não foram encontrados registros válidos no arquivo!" ,"Atenção!",,1 )
-		Return()
+	If Len(_aDados) <= 0
+		U_ITMsg(  "Não foram encontrados registros válidos no arquivo!" ,"Atenção!",,1 )
+		Return
 	EndIf
 
 Else
-	u_itmsg("O arquivo informado para relizar a importação não tem layout conhecido.",;
+	U_ITMsg("O arquivo informado para relizar a importação não tem layout conhecido.",;
   		    "Arquivo inválido","Favor verificar se o arquivo informado esta correto.",1)
 		Return
-Endif
+EndIf
 
 
 //=========================================
 //ordena titulos no browse
 //=========================================
-_adados := asort( _adados,,, { |x,y| x[06]+x[03]+x[04]+x[01]+x[02] < y[06]+y[03]+y[04]+y[01]+y[02] } )
+_aDados := aSort( _aDados,,, { |x,y| x[06]+x[03]+x[04]+x[01]+x[02] < y[06]+y[03]+y[04]+y[01]+y[02] } )
 
-ProcRegua(len(_adados))
+ProcRegua(Len(_aDados))
 
 //================================================================================
 // Verifica se ja existe um arquivo com mesmo nome, se sim deleta.
@@ -317,48 +312,48 @@ _otemp:AddIndex( "01",{"FILIAL","TITU"} )
 
 _otemp:Create()
 
-_ni := 0
+_nI := 0
 
-While _ni < len(_adados)
+While _nI < Len(_aDados)
 	
-	_ni++
-	IncProc( "Analisando... ["+ StrZero( _ni , 6 ) +"] de ["+ StrZero( _ni , 6 ) +"]" )
+	_nI++
+	IncProc( "Analisando... ["+ StrZero( _nI , 6 ) +"] de ["+ StrZero( _nI , 6 ) +"]" )
 	
 	//=========================================================================================
 	//localiza título
-	// se não achar e for parcela 001 procura com parcela em branco
+	// se não achar e For parcela 001 procura com parcela em branco
 	// se não achar não mostra na tela
 	//==========================================================================================
 	
-	Dbselectarea("SE1")
-	SE1->(Dbsetorder(2))
+	DBSelectArea("SE1")
+	SE1->(DBSetOrder(2))
 	
-	If .not. SE1->(dBSEEK(_adados[_ni][06]+_adados[_ni][03]+_adados[_ni][04]+"1  "+_adados[_ni][01]+_adados[_ni][02]))
-		If .not. (_adados[_ni][02] == "001" .or. _adados[_ni][02] == "01")
-			_ni++
-			loop
-		Elseif .not. 	SE1->(dBSEEK(_adados[_ni][06]+_adados[_ni][03]+_adados[_ni][04]+"1  "+_adados[_ni][01]))
-			_ni++
-			loop
-		Endif
-	Endif
+	If .not. SE1->(DBSeek(_aDados[_nI][06]+_aDados[_nI][03]+_aDados[_nI][04]+"1  "+_aDados[_nI][01]+_aDados[_nI][02]))
+		If .not. (_aDados[_nI][02] == "001" .Or. _aDados[_nI][02] == "01")
+			_nI++
+			Loop
+		ElseIf .not. 	SE1->(DBSeek(_aDados[_nI][06]+_aDados[_nI][03]+_aDados[_nI][04]+"1  "+_aDados[_nI][01]))
+			_nI++
+			Loop
+		EndIf
+	EndIf
 	
 	(cAliasAux)->( RecLock( cAliasAux , .T. ) )
 
-		(cAliasAux)->FILIAL		:= _adados[_ni][06]
-		(cAliasAux)->CLIENTE		:= _adados[_ni][03]
-		(cAliasAux)->LOJA			:= _adados[_ni][04]
-		(cAliasAux)->NOME 		:= posicione("SA1",1,xfilial("SA1")+_adados[_ni][03]+_adados[_ni][04],"A1_NOME")
-		(cAliasAux)->REDE			:= Capital( AllTrim( Posicione("ACY",1, xFilial("ACY")+posicione("SA1",1,xfilial("SA1")+_adados[_ni][03]+_adados[_ni][04],"A1_GRPVEN"),"ACY_DESCRI")))
-		(cAliasAux)->CGC			:= MFIN011CGC( _adados[_ni][07] )
-		(cAliasAux)->TITU			:= _adados[_ni][01]
-		(cAliasAux)->PARCELA		:= _adados[_ni][02]
-		(cAliasAux)->CONDI		:= posicione("SA1",1,xfilial("SA1")+_adados[_ni][03]+_adados[_ni][04],"A1_COND")
-		(cAliasAux)->DCONDI		:= posicione("SE4",1,xfilial("SE4")+(cAliasAux)->CONDI,"E4_DESCRI")
+		(cAliasAux)->FILIAL		:= _aDados[_nI][06]
+		(cAliasAux)->CLIENTE		:= _aDados[_nI][03]
+		(cAliasAux)->LOJA			:= _aDados[_nI][04]
+		(cAliasAux)->NOME 		:= Posicione("SA1",1,xFilial("SA1")+_aDados[_nI][03]+_aDados[_nI][04],"A1_NOME")
+		(cAliasAux)->REDE			:= Capital( AllTrim( Posicione("ACY",1, xFilial("ACY")+Posicione("SA1",1,xFilial("SA1")+_aDados[_nI][03]+_aDados[_nI][04],"A1_GRPVEN"),"ACY_DESCRI")))
+		(cAliasAux)->CGC			:= MFIN011CGC( _aDados[_nI][07] )
+		(cAliasAux)->TITU			:= _aDados[_nI][01]
+		(cAliasAux)->PARCELA		:= _aDados[_nI][02]
+		(cAliasAux)->CONDI		:= Posicione("SA1",1,xFilial("SA1")+_aDados[_nI][03]+_aDados[_nI][04],"A1_COND")
+		(cAliasAux)->DCONDI		:= Posicione("SE4",1,xFilial("SE4")+(cAliasAux)->CONDI,"E4_DESCRI")
 		(cAliasAux)->VALOR		:= SE1->E1_VALOR
 		(cAliasAux)->VENCTO		:= SE1->E1_VENCTO
 		(cAliasAux)->VENCREA		:= SE1->E1_VENCREA
-		(cAliasAux)->VENCNVO		:= _adados[_ni][05]
+		(cAliasAux)->VENCNVO		:= _aDados[_nI][05]
 		(cAliasAux)->REGSE1		:= SE1->( Recno() )
 
 	(cAliasAux)->( MSUnLock() )
@@ -367,13 +362,13 @@ EndDo
 
 aAdd( _aFields , { "Filial"	 		   	, {|| (cAliasAux)->FILIAL + " - " +  AllTrim(FWFilialName(cEmpAnt,(cAliasAux)->FILIAL,1))}  	, "C" , "@!" , 0 , 12, 0 } )
 aAdd( _aFields , { "Cliente"			, {|| (cAliasAux)->CLIENTE + " - " + (cAliasAux)->LOJA }  											, "C" , "@!" , 0 , 08		, 0 } )
-aAdd( _aFields , { "Nome"				, {|| alltrim((cAliasAux)->NOME) + " - " + alltrim((cAliasAux)->REDE)}							, "C" , "@!" , 0 , 30		, 0 } )
+aAdd( _aFields , { "Nome"				, {|| AllTrim((cAliasAux)->NOME) + " - " + AllTrim((cAliasAux)->REDE)}							, "C" , "@!" , 0 , 30		, 0 } )
 aAdd( _aFields , { "CNPJ"				, {|| (cAliasAux)->CGC }	  											, "C" , "@!" , 0 , 12		, 0 } )
 aAdd( _aFields , { "Titulo"				, {|| (cAliasAux)->TITU + " - " + (cAliasAux)->PARCELA }		, "C" , "@!" , 0 , 9			, 0 } )
 aAdd( _aFields , { "Condição"			, {|| (cAliasAux)->CONDI + " - " + (cAliasAux)->DCONDI }		, "C" , "@!" , 0 , 9			, 0 } )
 aAdd( _aFields , { "Valor"				, {|| (cAliasAux)->VALOR }											, "N" , "@E 999,999,999.99" , 0 , 7, 2 } )
-aAdd( _aFields , { "Venc. Real"			, {|| DtoC((cAliasAux)->VENCREA) }									, "C" , "@!" , 0 , 5			, 0 } )
-aAdd( _aFields , { "Venc. Arq."			, {|| DtoC((cAliasAux)->VENCNVO)}									, "C" , "@!" , 0 , 5			, 0 } )
+aAdd( _aFields , { "Venc. Real"			, {|| DToC((cAliasAux)->VENCREA) }									, "C" , "@!" , 0 , 5			, 0 } )
+aAdd( _aFields , { "Venc. Arq."			, {|| DToC((cAliasAux)->VENCNVO)}									, "C" , "@!" , 0 , 5			, 0 } )
 aAdd( _aFields , { "Venc. Novo"			, {|| MFIN011AV((cAliasAux)->VENCNVO,(cAliasAux)->CONDI)}	, "C" , "@!" , 0 , 5			, 0 } )
 
 oMarkBRW := FWMarkBrowse():New()		   												// Inicializa o Browse
@@ -385,11 +380,11 @@ oMarkBRW:SetAllMark( {|| oMarkBRW:AllMark() } )											// Ação do Clique no H
 oMarkBRW:SetFields( _aFields )													 		// Campos para exibição
 
 _apesqui := {}
-aadd(_apesqui,{"Titulo",{{"Filial","C",2,0,"Filial",,}, {"Titulo","C",9,0,"Titulo",,}},1})
+aAdd(_apesqui,{"Titulo",{{"Filial","C",2,0,"Filial",,}, {"Titulo","C",9,0,"Titulo",,}},1})
 
 oMarkBRW:SetSeek(.T., _apesqui)
 
-oMarkBRW:AddButton( "Confirmar" , {|| fwmsgrun( ,{|oproc| U_MFIN011B(oproc) } , "Ajustando títulos..." , "Aguarde!" ) } ,, 4 )
+oMarkBRW:AddButton( "Confirmar" , {|| FWMsgRun( ,{|oproc| U_MFIN011B(oproc) } , "Ajustando títulos..." , "Aguarde!" ) } ,, 4 )
 
 oMarkBRW:DisableConfig()
 oMarkBRW:Activate()																		// Ativacao da classe
@@ -401,7 +396,7 @@ ferase(_cDirLocal+"csvtemp.csv")
 ferase(_cDirLocal+"testa.bat")
 ferase(_cDirLocal+"resp.txt")
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -441,7 +436,7 @@ DBSelectArea("SE1")
 SE1->( DBGoTo(nRegSE1) )
 AxVisual( "SE1" , nRegSE1 , 2 )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -458,21 +453,21 @@ Static Function MFIN011CPS( _nTotReg )
 Local _aCpos := {}
 
 aAdd( _aCpos , { "MARCA"			, "C" , 1								, 0 } )
-AAdd( _aCpos , { "FILIAL"		, "C" , TamSX3("A1_FILIAL")[01]		, 0 } )
-AAdd( _aCpos , { "CLIENTE"		, "C" , TamSX3("A1_COD")[01]		, 0 } )
-AAdd( _aCpos , { "LOJA"			, "C" , TamSX3("A1_LOJA")[01]		, 0 } )
-AAdd( _aCpos , { "NOME"			, "C" , TamSX3("A1_NOME")[01]		, 0 } )
-AAdd( _aCpos , { "REDE"			, "C" , TamSX3("ACY_DESCRI")[01]	, 0 } )
-AAdd( _aCpos , { "CGC"			, "C" , 20							, 0 } )
-AAdd( _aCpos , { "TITU"		, "C" , 9								, 0 } )
-AAdd( _aCpos , { "PARCELA"		, "C" , 3								, 0 } )
-AAdd( _aCpos , { "CONDI"			, "C" , 5 								, 0 } )
-AAdd( _aCpos , { "DCONDI"		, "C" , 20								, 0 } )
-AAdd( _aCpos , { "VALOR"			, "N" , 18								, 2 } )
-AAdd( _aCpos , { "VENCTO"		, "D" , 8								, 0 } )
-AAdd( _aCpos , { "VENCREA"		, "D" , 8								, 0 } )
-AAdd( _aCpos , { "VENCNVO"		, "D" , 8								, 0 } )
-AAdd( _aCpos , { "REGSE1"		, "N" , 18								, 0 } )
+aAdd( _aCpos , { "FILIAL"		, "C" , TamSX3("A1_FILIAL")[01]		, 0 } )
+aAdd( _aCpos , { "CLIENTE"		, "C" , TamSX3("A1_COD")[01]		, 0 } )
+aAdd( _aCpos , { "LOJA"			, "C" , TamSX3("A1_LOJA")[01]		, 0 } )
+aAdd( _aCpos , { "NOME"			, "C" , TamSX3("A1_NOME")[01]		, 0 } )
+aAdd( _aCpos , { "REDE"			, "C" , TamSX3("ACY_DESCRI")[01]	, 0 } )
+aAdd( _aCpos , { "CGC"			, "C" , 20							, 0 } )
+aAdd( _aCpos , { "TITU"		, "C" , 9								, 0 } )
+aAdd( _aCpos , { "PARCELA"		, "C" , 3								, 0 } )
+aAdd( _aCpos , { "CONDI"			, "C" , 5 								, 0 } )
+aAdd( _aCpos , { "DCONDI"		, "C" , 20								, 0 } )
+aAdd( _aCpos , { "VALOR"			, "N" , 18								, 2 } )
+aAdd( _aCpos , { "VENCTO"		, "D" , 8								, 0 } )
+aAdd( _aCpos , { "VENCREA"		, "D" , 8								, 0 } )
+aAdd( _aCpos , { "VENCNVO"		, "D" , 8								, 0 } )
+aAdd( _aCpos , { "REGSE1"		, "N" , 18								, 0 } )
 
 Return( _aCpos )
 
@@ -511,10 +506,10 @@ While _nRegAtu < _nTotReg
 	
 	_nRegAtu++
 	
-	IF valtype(oproc) = "O"
+	If ValType(oproc) = "O"
 		oproc:cCaption := ("Processando... ["+ StrZero(_nRegAtu,6) +"] de ["+ StrZero(_nTotReg,6) +"]")
 		ProcessMessages()
-    ENDIF
+    EndIf
 	
 	oMarkBRW:GoTo( _nRegAtu , .F. )
 	
@@ -527,14 +522,14 @@ While _nRegAtu < _nTotReg
 		DBSelectArea("SE1")
 		SE1->( DBSetOrder(2) )
 		
-		If  SE1->(dBSEEK((cAliasAux)->FILIAL+(cAliasAux)->CLIENTE+(cAliasAux)->LOJA+"1  "+(cAliasAux)->TITU	+ALLTRIM((cAliasAux)->PARCELA)))	
+		If  SE1->(DBSeek((cAliasAux)->FILIAL+(cAliasAux)->CLIENTE+(cAliasAux)->LOJA+"1  "+(cAliasAux)->TITU	+AllTrim((cAliasAux)->PARCELA)))	
 	
 			SE1->( RecLock( "SE1" , .F. ) )
 	 
 			SE1->E1_VENCREA	:= ctod(MFIN011AV((cAliasAux)->VENCNVO,(cAliasAux)->CONDI))
 			SE1->E1_I_VCPOR	:= ctod(MFIN011AV((cAliasAux)->VENCNVO,(cAliasAux)->CONDI))
 			SE1->E1_I_VCFLU	:= ctod(MFIN011AV((cAliasAux)->VENCNVO,(cAliasAux)->CONDI))
-			SE1->( MsUnLock() )
+			SE1->( MSUnLock() )
 			
 			(cAliasAux)->( RecLock( cAliasAux , .F. ) )
 			(cAliasAux)->VENCREA  := ctod(MFIN011AV((cAliasAux)->VENCNVO,(cAliasAux)->CONDI))
@@ -545,17 +540,17 @@ While _nRegAtu < _nTotReg
 			//===========================================================================
 			//| Grava o Item processado no Lote                                         |
 			//===========================================================================
-			U_ITGrLote( "Z03" , _cNumLote , { { SE1->E1_FILIAL + SE1->E1_NUM + SE1->E1_PARCELA , StoD( cDtIni ) , Date() , "1" } } , "1" )
+			U_ITGrLote( "Z03" , _cNumLote , { { SE1->E1_FILIAL + SE1->E1_NUM + SE1->E1_PARCELA , SToD( cDtIni ) , Date() , "1" } } , "1" )
 	
 			
 			
-		Elseif ((cAliasAux)->PARCELA = '001' .or. (cAliasAux)->PARCELA = '01') .and. SE1->(dBSEEK((cAliasAux)->FILIAL+(cAliasAux)->CLIENTE+(cAliasAux)->LOJA+"1  "+(cAliasAux)->TITU ))
+		ElseIf ((cAliasAux)->PARCELA = '001' .Or. (cAliasAux)->PARCELA = '01') .And. SE1->(DBSeek((cAliasAux)->FILIAL+(cAliasAux)->CLIENTE+(cAliasAux)->LOJA+"1  "+(cAliasAux)->TITU ))
 		
 			SE1->( RecLock( "SE1" , .F. ) )
 			SE1->E1_VENCREA	:= ctod(MFIN011AV((cAliasAux)->VENCNVO,(cAliasAux)->CONDI))
 			SE1->E1_I_VCPOR	:= ctod(MFIN011AV((cAliasAux)->VENCNVO,(cAliasAux)->CONDI))
 			SE1->E1_I_VCFLU	:= ctod(MFIN011AV((cAliasAux)->VENCNVO,(cAliasAux)->CONDI))
-			SE1->( MsUnLock() )
+			SE1->( MSUnLock() )
 			
 			(cAliasAux)->( RecLock( cAliasAux , .F. ) )
 			(cAliasAux)->VENCREA		:= ctod(MFIN011AV((cAliasAux)->VENCNVO,(cAliasAux)->CONDI))
@@ -567,17 +562,17 @@ While _nRegAtu < _nTotReg
 			//===========================================================================
 			//| Grava o Item processado no Lote                                         |
 			//===========================================================================
-			U_ITGrLote( "Z03" , _cNumLote , { { SE1->E1_FILIAL + SE1->E1_NUM + SE1->E1_PARCELA , StoD( cDtIni ) , Date() , "1" } } , "1" )
+			U_ITGrLote( "Z03" , _cNumLote , { { SE1->E1_FILIAL + SE1->E1_NUM + SE1->E1_PARCELA , SToD( cDtIni ) , Date() , "1" } } , "1" )
 		
 		Else
 		
-			U_ITGrLote( "Z03" , _cNumLote , { { SE1->E1_FILIAL + SE1->E1_NUM + SE1->E1_PARCELA , StoD( cDtIni ) , Date() , "1" } } , "2" )
+			U_ITGrLote( "Z03" , _cNumLote , { { SE1->E1_FILIAL + SE1->E1_NUM + SE1->E1_PARCELA , SToD( cDtIni ) , Date() , "1" } } , "2" )
 			
-		Endif			
+		EndIf			
 		
 	EndIf
 	
-	(cAliasAux)->( DbSkip() )
+	(cAliasAux)->( DBSkip() )
 	
 EndDo
 
@@ -591,29 +586,29 @@ End Transaction
 //| Verifica o Status geral do processamento.                               |
 //===========================================================================
 If _nRegSel > 0
-	u_itmsg( "Registros processados com sucesso!" , "Concluído!" ,,2)
+	U_ITMsg( "Registros processados com sucesso!" , "Concluído!" ,,2)
 Else
 
 	//===========================================================================
 	//| Exclui o Lote que não teve registros processados.                       |
 	//===========================================================================
 	DBSelectArea("Z00")
-	IF Z00->( DBSeek( xFilial("Z00") + _cNumLote ) )
+	If Z00->( DBSeek( xFilial("Z00") + _cNumLote ) )
 		
 		Z00->( RecLock( "Z00" , .F. ) )
 		Z00->( DBDelete() )
-		Z00->( MsUnlock() )
+		Z00->( MSUnLock() )
 		
-	EndIF
+	EndIf
 	
-	u_itmsg( "O processamento foi concluído porém nenhum registro foi selecionado para o atualização!" , "Concluído!",,3 )
+	U_ITMsg( "O processamento foi concluído porém nenhum registro foi selecionado para o atualização!" , "Concluído!",,3 )
 
 EndIf
 
 oMarkBRW:Refresh()
 oMarkBRW:GoTop()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -630,13 +625,13 @@ Static Function MFIN011CGC( _cCGCAux )
 Local _cRet	:= ""
 Local _cAux	:= AllTrim( _cCGCAux )
 
-IF Len( _cAux	 ) > 11
+If Len( _cAux	 ) > 11
 	_cAux	 := PadL( _cAux	 , 14 , "0" )
 	_cRet := Transform( _cAux	 , "@R! NN.NNN.NNN/NNNN-99" )
 Else
 	_cAux	 := PadL( _cAux	 , 11 , "0" )
 	_cRet := Transform( _cAux	 , "@R 999.999.999-99" )
-EndIF
+EndIf
 
 Return( _cRet )
 
@@ -654,56 +649,56 @@ Retorno-----------: _dret - data de vencimento ajustada
 
 Static Function MFIN011AV( _dvenc, _ccond )
 
-Local _ctipo 	:= posicione("SE4",1,xfilial("SE4")+_ccond,"E4_TIPO")
-Local _cdet	:= posicione("SE4",1,xfilial("SE4")+_ccond,"E4_COND")
+Local _ctipo 	:= Posicione("SE4",1,xFilial("SE4")+_ccond,"E4_TIPO")
+Local _cdet	:= Posicione("SE4",1,xFilial("SE4")+_ccond,"E4_COND")
 Local _adias	:= {}
-Local _ni 		:= 0
+Local _nI 		:= 0
 Local _lsai	:= .F.
 
-If _ctipo == "4" .or. _ctipo == "6" //tipos de condição de pagamento que tem dia determinado da semana
+If _ctipo == "4" .Or. _ctipo == "6" //tipos de condição de pagamento que tem dia determinado da semana
 
 	_adias := StrTokArr(_cdet,",")
 	
-	Do while !( dow(_dvenc) == val(_adias[3]) )
+	While !( dow(_dvenc) == Val(_adias[3]) )
 		_dvenc++
-	Enddo
+	EndDo
 	
 	_dvenc := datavalida(_dvenc)
 
-Elseif _ctipo == "3"  //tipo de condição que determina dias fixos do mes para pagamento
+ElseIf _ctipo == "3"  //tipo de condição que determina dias fixos do mes para pagamento
 
 	_adias := StrTokArr(_cdet,",")
 	
 	_lsai := .F.
 	
-	Do while len(_adias) > 2 .and. !_lsai
+	While Len(_adias) > 2 .And. !_lsai
 	
-		_ni := 3 
+		_nI := 3 
 		
-		Do while _ni <= len(_adias)
-			if strzero(day(_dvenc),2) == strzero(val(_adias[_ni]),2)
+		While _nI <= Len(_adias)
+			If StrZero(day(_dvenc),2) == StrZero(Val(_adias[_nI]),2)
 				_lsai := .T.
-				_ni := len(_adias) + 1
+				_nI := Len(_adias) + 1
 			Else
-				_ni++
-			Endif
-		Enddo
+				_nI++
+			EndIf
+		EndDo
 		
 		If !_lsai
 			_dvenc++
 		Else
 			_dvenc := datavalida(_dvenc)
-		Endif
+		EndIf
 		
-	Enddo			 
+	EndDo			 
 
 Else
 
 	_dvenc := datavalida(_dvenc)
 
-Endif
+EndIf
 
-Return dtoc(_dvenc)
+Return DToC(_dvenc)
 
 /*
 ===============================================================================================================================
@@ -713,73 +708,73 @@ Data da Criacao---: 09/03/2016
 Descrição---------: Faz a leitura de dados no layout do Pao de Acucar
 Parametros--------: _nreg - número de linhas do arquivo
 					oproc2 - objeto da barra de processamento
-Retorno-----------: _adados - array com dados carregados do arquivo
+Retorno-----------: _aDados - array com dados carregados do arquivo
 ===============================================================================================================================
 */
 
-Static function MFIN011L1(_nreg,oproc2)
+Static Function MFIN011L1(_nreg,oproc2)
 
 Local	_nCont 	:= 0
 Local	_lheader 	:= .F.	
 Local _cdados		:= ""
 Local _ddtcred	:= ddatabase
-Local _adados 	:= {}
+Local _aDados 	:= {}
 Local _aSM0 		:= FWLoadSM0()  //carrega array com dados de filiais
 Default oproc2 := nil
 
-While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
+While !FT_FEOF()  //FACA ENQUANTO NAO For FIM DE ARQUIVO
 	
 	_nCont++
 	
-	IF valtype(oproc2) = "O"
+	If ValType(oproc2) = "O"
 
-      	  oproc2:cCaption := ("Detectado arquivo Pao de Acucar, Lendo linha " + strzero(_nCont,5) + " de " + strzero(_nreg,5) + ".")
+      	  oproc2:cCaption := ("Detectado arquivo Pao de Acucar, Lendo linha " + StrZero(_nCont,5) + " de " + StrZero(_nreg,5) + ".")
    		  ProcessMessages()
  
-    ENDIF
+    EndIf
 			
 	_cDados := FT_FREADLN()
 	
 	//Se não estiver dentro de registro detalhe testa se a linha é header
 	If .not. _lheader
 	
-		If substr(_cDados,1,2) == "01" .and. substr(_cDados,9,1) == "0"
+		If SubStr(_cDados,1,2) == "01" .And. SubStr(_cDados,9,1) == "0"
 		
 			_lheader := .T.
-			_ddtcred := stod(substr(_cdados,217,8))
+			_ddtcred := SToD(SubStr(_cdados,217,8))
 			
-		Endif
+		EndIf
 		
 	//Se está dentro do registro de detalhe análise e carrega os dados
 	Else
 	
-		If substr(_cDados,1,2) = "15"  // Registro detalhe de nota de crédito
+		If SubStr(_cDados,1,2) = "15"  // Registro detalhe de nota de crédito
 		
-			aadd(_adados, {substr(_cdados,3,9),;  																	//01 - num titulo
-							 substr(_cdados,12,3),;																	//02 - parcela
-							 posicione("SA1",3,xfilial("SA1")+ alltrim(substr(_cdados,254,14)),"A1_COD"),;	//03 - codigo do cliente
-							 posicione("SA1",3,xfilial("SA1")+ alltrim(substr(_cdados,254,14)),"A1_LOJA"),;	//04 - loja do cliente
+			aAdd(_aDados, {SubStr(_cdados,3,9),;  																	//01 - num titulo
+							 SubStr(_cdados,12,3),;																	//02 - parcela
+							 Posicione("SA1",3,xFilial("SA1")+ AllTrim(SubStr(_cdados,254,14)),"A1_COD"),;	//03 - codigo do cliente
+							 Posicione("SA1",3,xFilial("SA1")+ AllTrim(SubStr(_cdados,254,14)),"A1_LOJA"),;	//04 - loja do cliente
 							 _ddtcred,;																				//05 - data de pagamento prevista
-							 _aSm0[ascan( _aSm0, { |x| x[18] = substr(_cdados,213,14)})][2],;					//06 - filial Italac
-							 alltrim(substr(_cdados,254,14))})														//07 - CNPJ cliente
+							 _aSm0[aScan( _aSm0, { |x| x[18] = SubStr(_cdados,213,14)})][2],;					//06 - filial Italac
+							 AllTrim(SubStr(_cdados,254,14))})														//07 - CNPJ cliente
 								                     
 		Else
 		
-			If substr(_cdados,1,2) == "90" //Trailer do trecho de detalhes
+			If SubStr(_cdados,1,2) == "90" //Trailer do trecho de detalhes
 			
 				_lheader := .F.
 				
-			Endif			
+			EndIf			
 		
-		Endif	
+		EndIf	
 	
-	Endif
+	EndIf
 
 	FT_FSKIP()
 	
-Enddo
+EndDo
 	
-Return _adados
+Return _aDados
 
 
 /*
@@ -791,15 +786,15 @@ Descrição---------: Faz a leitura de dados no layout do Atacadao
 Parametros--------: _nreg - número de linhas do arquivo
 					  _llibof - se foi convertido pelo libreoffice
 					oproc2 - objeto da barra de processamento					  
-Retorno-----------: _adados - array com dados carregados do arquivo
+Retorno-----------: _aDados - array com dados carregados do arquivo
 ===============================================================================================================================
 */
-Static function MFIN011L2(_nreg,_llibof,oproc2)
+Static Function MFIN011L2(_nreg,_llibof,oproc2)
 
 Local	_nCont 	:= 0
 Local _cdados		:= ""
 Local _alinha		:= {}
-Local _adados 	:= {}
+Local _aDados 	:= {}
 Local _cQuery		:= ""
 Default oproc2 := nil
 
@@ -807,63 +802,63 @@ FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
 FT_FSKIP()
 FT_FSKIP()
 
-While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
+While !FT_FEOF()  //FACA ENQUANTO NAO For FIM DE ARQUIVO
 	
 	_nCont++ 
 	
-	IF valtype(oproc2) = "O"
+	If ValType(oproc2) = "O"
 
-      	  oproc2:cCaption := ("Detectado arquivo Atacadao, Lendo linha " + strzero(_nCont,5) + " de " + strzero(_nreg,5) + ".")
+      	  oproc2:cCaption := ("Detectado arquivo Atacadao, Lendo linha " + StrZero(_nCont,5) + " de " + StrZero(_nreg,5) + ".")
    		  ProcessMessages()
  
-    ENDIF
+    EndIf
 			
 	_cDados := FT_FREADLN()
 	_alinha := StrTokArr(_cDados,",")
 	
 	//Verifica se é final de arquivo
-	If alltrim(_cdados) == ',,,,,,,,,,,,' .and. _ncont > 5
+	If AllTrim(_cdados) == ',,,,,,,,,,,,' .And. _ncont > 5
 	
 		Exit
 	
-	Endif 	
+	EndIf 	
 	
 	//Verifica se é linha válida
-	If len(_alinha) < 13  
+	If Len(_alinha) < 13  
 	
 		FT_FSKIP()
 		Loop
 		
-	Endif
+	EndIf
 			
 	
 	//identifica filial do título
-	_cquery := "SELECT E1_FILIAL FROM " +retsqlname("SE1") + " SE1 WHERE D_E_L_E_T_ = ' '"
-	_cquery += " AND E1_NUM = '" + strzero(val(_alinha[7]),9) + "'"
-	_cquery += " AND E1_CLIENTE = '000039' AND E1_LOJA = '" + strzero(val(_alinha[4]),4) + "'
+	_cQuery := "SELECT E1_FILIAL FROM " +retsqlname("SE1") + " SE1 WHERE D_E_L_E_T_ = ' '"
+	_cQuery += " AND E1_NUM = '" + StrZero(Val(_alinha[7]),9) + "'"
+	_cQuery += " AND E1_CLIENTE = '000039' AND E1_LOJA = '" + StrZero(Val(_alinha[4]),4) + "'
 	
-	_cquery := ChangeQuery(_cquery)
-	MPSysOpenQuery(_cquery,"SE1T")
+	_cQuery := ChangeQuery(_cQuery)
+	MPSysOpenQuery(_cQuery,"SE1T")
 	
 	If SE1T->(!Eof())
   
-		aadd(_adados, {strzero(val(_alinha[7]),9),;  															//01 - num titulo
+		aAdd(_aDados, {StrZero(Val(_alinha[7]),9),;  															//01 - num titulo
 					 "01",;					   																//02 - parcela
 					 '000039',;																				//03 - codigo do cliente
-					 strzero(val(_alinha[4]),4),;															//04 - loja do cliente
+					 StrZero(Val(_alinha[4]),4),;															//04 - loja do cliente
 					 ctod(_alinha[8]),;																//05 - data de pagamento prevista
 					 SE1T->E1_FILIAL,;		   																//06 - filial Italac
-					 "7531533300" + 	strzero(val(_alinha[4]),4)})										//07 - CNPJ cliente
+					 "7531533300" + 	StrZero(Val(_alinha[4]),4)})										//07 - CNPJ cliente
 								                     
-	Endif
+	EndIf
 	
-	SE1T->( Dbclosearea() )
+	SE1T->( DBCloseArea() )
 	
 	FT_FSKIP()
 	
-Enddo
+EndDo
 	
-Return _adados
+Return _aDados
 
 /*
 ===============================================================================================================================
@@ -873,16 +868,16 @@ Data da Criacao---: 09/03/2016
 Descrição---------: Faz a leitura de dados no layout do Wall Mart
 Parametros--------: _nreg - número de linhas do arquivo
 					oproc2 - objeto da barra de processamento
-Retorno-----------: _adados - array com dados carregados do arquivo
+Retorno-----------: _aDados - array com dados carregados do arquivo
 ===============================================================================================================================
 */
 
-Static function MFIN011L3(_nreg,oproc2)
+Static Function MFIN011L3(_nreg,oproc2)
 
 Local	_nCont 	:= 0
 Local _cdados		:= ""
 Local _alinha		:= {}
-Local _adados 	:= {}
+Local _aDados 	:= {}
 Local _aSM0 		:= FWLoadSM0()  //carrega array com dados de filiais
 Default oproc2 := nil
 
@@ -890,16 +885,16 @@ FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
 FT_FSKIP()
 FT_FSKIP()
 
-While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
+While !FT_FEOF()  //FACA ENQUANTO NAO For FIM DE ARQUIVO
 	
 	_nCont++ 
 
-	IF valtype(oproc2) = "O"
+	If ValType(oproc2) = "O"
 
-      	  oproc2:cCaption := ("Detectado arquivo Wall Mart, Lendo linha " + strzero(_nCont,5) + " de " + strzero(_nreg,5) + ".")
+      	  oproc2:cCaption := ("Detectado arquivo Wall Mart, Lendo linha " + StrZero(_nCont,5) + " de " + StrZero(_nreg,5) + ".")
    		  ProcessMessages()
  
-    ENDIF
+    EndIf
 			
 	_cDados := FT_FREADLN()
 	_cDados := StrTran(_cDados,'"','') 
@@ -907,61 +902,61 @@ While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
 
 	
 	//Verifica se é final de arquivo
-	If alltrim(_cdados) == ',,,,,,,,,,,,' .and. _ncont > 20
+	If AllTrim(_cdados) == ',,,,,,,,,,,,' .And. _ncont > 20
 	
 		Exit
 	
-	Endif 	
+	EndIf 	
 		
 	//Verifica se é linha válida
-	If len(_alinha) < 9 .or. ( _alinha[8] != 'Aberto' .and. _alinha[9] != 'Aberto' )
+	If Len(_alinha) < 9 .Or. ( _alinha[8] != 'Aberto' .And. _alinha[9] != 'Aberto' )
 	
 		FT_FSKIP()
 		Loop
 		
-	Endif	
+	EndIf	
 	
 	//Ajusta matriz
-	If len(_alinha) == 10
+	If Len(_alinha) == 10
 	
-		_alinha[6] := alltrim(str(val(_alinha[6]) + ( Val(_alinha[7]) /100 )))
+		_alinha[6] := AllTrim(Str(Val(_alinha[6]) + ( Val(_alinha[7]) /100 )))
 		_alinha[7] := _alinha[8]
 		_alinha[8] := _alinha[9]
 		_alinha[9] := _alinha[10]
 		
-	Endif
+	EndIf
 		
 	
 	//Ajusta CGC só com numeros 
-	_alinha[9] := substr(_alinha[9],1,2) + substr(_alinha[9],4,3) + substr(_alinha[9],8,3) + substr(_alinha[9],12,4) + substr(_alinha[9],17,2)
+	_alinha[9] := SubStr(_alinha[9],1,2) + SubStr(_alinha[9],4,3) + SubStr(_alinha[9],8,3) + SubStr(_alinha[9],12,4) + SubStr(_alinha[9],17,2)
 		
-	If ascan( _aSm0, { |x| x[18] = (alltrim(_alinha[9]))}) > 0	
+	If aScan( _aSm0, { |x| x[18] = (AllTrim(_alinha[9]))}) > 0	
 	
 		//Identifica filial
-		_cfilial :=  _aSm0[ascan( _aSm0, { |x| x[18] = (alltrim(_alinha[9]))})][2]
+		_cfilial :=  _aSm0[aScan( _aSm0, { |x| x[18] = (AllTrim(_alinha[9]))})][2]
 		
 		//Usa número do título para identificar o cliente e loja
-		DBselectarea("SE1")
-		SE1->( Dbsetorder(1) )
-		If SE1->( Dbseek( _cfilial + '1  ' + strzero(val(_alinha[2]),9) + '  NF') )
+		DBSelectArea("SE1")
+		SE1->( DBSetOrder(1) )
+		If SE1->( DBSeek( _cfilial + '1  ' + StrZero(Val(_alinha[2]),9) + '  NF') )
 			
-			aadd(_adados, {strzero(val(_alinha[2]),9),;  															//01 - num titulo
+			aAdd(_aDados, {StrZero(Val(_alinha[2]),9),;  															//01 - num titulo
 					 '01',;																							//02 - parcela
 					 SE1->E1_CLIENTE,;																				//03 - codigo do cliente
 					 SE1->E1_LOJA,;																					//04 - loja do cliente
 					 ctod(_alinha[7]),;																				//05 - data de pagamento prevista
-					 _aSm0[ascan( _aSm0, { |x| x[18] = (alltrim(_alinha[9]))})][2],;			  				//06 - filial Italac
-					 POSICIONE("SA1",1,xfilial("SA1") + SE1->E1_CLIENTE + SE1->E1_LOJA,"A1_CGC")})			//07 - CNPJ cliente
+					 _aSm0[aScan( _aSm0, { |x| x[18] = (AllTrim(_alinha[9]))})][2],;			  				//06 - filial Italac
+					 Posicione("SA1",1,xFilial("SA1") + SE1->E1_CLIENTE + SE1->E1_LOJA,"A1_CGC")})			//07 - CNPJ cliente
 		
-		Endif
+		EndIf
 		
-	Endif
+	EndIf
 								                     
 	FT_FSKIP()
 	
-Enddo
+EndDo
 	
-Return _adados
+Return _aDados
 
 /*
 ===============================================================================================================================
@@ -971,16 +966,16 @@ Data da Criacao---: 09/03/2016
 Descrição---------: Faz a leitura de dados no layout do Carrefour
 Parametros--------: _nreg - número de linhas do arquivo
 					oproc2 - objeto da barra de processamento
-Retorno-----------: _adados - array com dados carregados do arquivo
+Retorno-----------: _aDados - array com dados carregados do arquivo
 ===============================================================================================================================
 */
 
-Static function MFIN011L4(_nreg,oproc2)
+Static Function MFIN011L4(_nreg,oproc2)
 
 Local	_nCont 	:= 0
 Local _cdados		:= ""
 Local _alinha		:= {}
-Local _adados 	:= {}
+Local _aDados 	:= {}
 Local _aSM0 		:= FWLoadSM0()  //carrega array com dados de filiais
 Default oproc2 := nil
 
@@ -988,67 +983,67 @@ FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
 FT_FSKIP()
 FT_FSKIP()
 
-While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
+While !FT_FEOF()  //FACA ENQUANTO NAO For FIM DE ARQUIVO
 	
 	_nCont++ 
 
-	IF valtype(oproc2) = "O"
+	If ValType(oproc2) = "O"
 
-      	  oproc2:cCaption := ("Detectado arquivo Carrefour, Lendo linha " + strzero(_nCont,5) + " de " + strzero(_nreg,5) + ".")
+      	  oproc2:cCaption := ("Detectado arquivo Carrefour, Lendo linha " + StrZero(_nCont,5) + " de " + StrZero(_nreg,5) + ".")
    		  ProcessMessages()
  
-    ENDIF
+    EndIf
 			
 	_cDados := FT_FREADLN()
 	
 	If _cDados == ",,,,,,,,,,,,,,,,,,,,,,,,,,,,," //Descarta linhas finais para agilizar processo
 		Exit
-	Endif
+	EndIf
 	
-	_cDados := strtran(_cDados,",",";")
+	_cDados := StrTran(_cDados,",",";")
 	_alinha := StrTokArr(_cDados,";")
 	
-	If len(_alinha) < 24
+	If Len(_alinha) < 24
 			
 		FT_FSKIP()
-		LOOP
+		Loop
 		
-	Endif
+	EndIf
 	
-	_alinha[7] := strtran(_alinha[7],".","")
-	_alinha[7] := strtran(_alinha[7],"/","")
-	_alinha[7] := strtran(_alinha[7],"-","")
+	_alinha[7] := StrTran(_alinha[7],".","")
+	_alinha[7] := StrTran(_alinha[7],"/","")
+	_alinha[7] := StrTran(_alinha[7],"-","")
 	
-	_alinha[24] := strtran(_alinha[23],"-","")
-	_alinha[24] := substr(_alinha[23],1,len(_alinha[23])-1)
+	_alinha[24] := StrTran(_alinha[23],"-","")
+	_alinha[24] := SubStr(_alinha[23],1,Len(_alinha[23])-1)
 	 		
-	If ascan( _aSm0, { |x| x[18] = (alltrim(_alinha[7]))}) > 0	
+	If aScan( _aSm0, { |x| x[18] = (AllTrim(_alinha[7]))}) > 0	
 	
 		//Identifica filial
-		_cfilial :=  _aSm0[ascan( _aSm0, { |x| x[18] = (alltrim(_alinha[7]))})][2]
+		_cfilial :=  _aSm0[aScan( _aSm0, { |x| x[18] = (AllTrim(_alinha[7]))})][2]
 		
 		//Usa número do título para identificar o cliente e loja
-		DBselectarea("SE1")
-		SE1->( Dbsetorder(1) )
-		If SE1->( Dbseek( _cfilial + '1  ' + strzero(val(strtran(_alinha[23],'"',"")),9) + '  NF') ) .AND. SE1->E1_CLIENTE == '000578'
+		DBSelectArea("SE1")
+		SE1->( DBSetOrder(1) )
+		If SE1->( DBSeek( _cfilial + '1  ' + StrZero(Val(StrTran(_alinha[23],'"',"")),9) + '  NF') ) .And. SE1->E1_CLIENTE == '000578'
 			
-			aadd(_adados, {strzero(val(strtran(_alinha[23],'"',"")),9),;  															//01 - num titulo
+			aAdd(_aDados, {StrZero(Val(StrTran(_alinha[23],'"',"")),9),;  															//01 - num titulo
 					 '01',;																							//02 - parcela
 					 SE1->E1_CLIENTE,;																				//03 - codigo do cliente
 					 SE1->E1_LOJA,;																					//04 - loja do cliente
 					 mfin011z(_alinha[13]),;																			//05 - data de pagamento prevista
-					 _aSm0[ascan( _aSm0, { |x| x[18] = (alltrim(_alinha[7]))})][2],;			  				//06 - filial Italac
-					 POSICIONE("SA1",1,xfilial("SA1") + SE1->E1_CLIENTE + SE1->E1_LOJA,"A1_CGC")})			//07 - CNPJ cliente
+					 _aSm0[aScan( _aSm0, { |x| x[18] = (AllTrim(_alinha[7]))})][2],;			  				//06 - filial Italac
+					 Posicione("SA1",1,xFilial("SA1") + SE1->E1_CLIENTE + SE1->E1_LOJA,"A1_CGC")})			//07 - CNPJ cliente
 		
-		Endif
+		EndIf
 		
-	Endif
+	EndIf
 								                     
 	FT_FSKIP()
 	
-Enddo
+EndDo
 	
-Return _adados
+Return _aDados
 
 /*
 ===============================================================================================================================
@@ -1058,84 +1053,84 @@ Data da Criacao---: 09/03/2016
 Descrição---------: Faz a leitura de dados no layout do Cencosud
 Parametros--------: _nreg - número de linhas do arquivo
 					oproc2 - objeto da barra de processamento
-Retorno-----------: _adados - array com dados carregados do arquivo
+Retorno-----------: _aDados - array com dados carregados do arquivo
 ===============================================================================================================================
 */
 
-Static function MFIN011L5(_nreg,oproc2)
+Static Function MFIN011L5(_nreg,oproc2)
 
 Local	_nCont 	:= 0
 Local _cdados		:= ""
 Local _alinha		:= {}
-Local _adados 	:= {}
+Local _aDados 	:= {}
 Local _aSM0 		:= FWLoadSM0()  //carrega array com dados de filiais
 Default oproc2 := nil
 
 FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
 FT_FSKIP()
 
-While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
+While !FT_FEOF()  //FACA ENQUANTO NAO For FIM DE ARQUIVO
 	
 	_nCont++ 
 
-	IF valtype(oproc2) = "O"
+	If ValType(oproc2) = "O"
 
-      	  oproc2:cCaption := ("Detectado arquivo Cencosud, Lendo linha " + strzero(_nCont,5) + " de " + strzero(_nreg,5) + ".")
+      	  oproc2:cCaption := ("Detectado arquivo Cencosud, Lendo linha " + StrZero(_nCont,5) + " de " + StrZero(_nreg,5) + ".")
    		  ProcessMessages()
  
-    ENDIF
+    EndIf
 			
 	_cDados := FT_FREADLN() 
-	_cDados := strtran(_cdados,";",",")
-	_cDados := strtran(_cdados,'"','')
+	_cDados := StrTran(_cdados,";",",")
+	_cDados := StrTran(_cdados,'"','')
 	_alinha := StrTokArr(_cDados,",")
 
 			
 	//Verifica se é linha válida
-	If len(_alinha) < 10
+	If Len(_alinha) < 10
 	
 		FT_FSKIP()
 		Loop
 		
-	Endif			
+	EndIf			
 	
-	If len(_alinha[1]) == 13 
+	If Len(_alinha[1]) == 13 
 	
 		_alinha[1] := "0" + _alinha[1]
 		
-	Endif
+	EndIf
 	
-	If ascan( _aSm0, { |x| x[18] = (alltrim(_alinha[1]))}) > 0	
+	If aScan( _aSm0, { |x| x[18] = (AllTrim(_alinha[1]))}) > 0	
 	
 		//Identifica filial
-		_cfilial :=  _aSm0[ascan( _aSm0, { |x| x[18] = (alltrim(_alinha[1]))})][2]
+		_cfilial :=  _aSm0[aScan( _aSm0, { |x| x[18] = (AllTrim(_alinha[1]))})][2]
 		
 		//Usa número do título para identificar o cliente e loja
-		DBselectarea("SE1")
-		SE1->( Dbsetorder(1) )
-		If SE1->( Dbseek( _cfilial + '1  ' + strzero(val(substr(_alinha[2],1,len(_alinha[2])-2)),9) + '  NF') ) 
+		DBSelectArea("SE1")
+		SE1->( DBSetOrder(1) )
+		If SE1->( DBSeek( _cfilial + '1  ' + StrZero(Val(SubStr(_alinha[2],1,Len(_alinha[2])-2)),9) + '  NF') ) 
 		
-			IF Alltrim(SE1->E1_CLIENTE) == "001322" //Só adiciona títulos do cliente Cencosud 
+			If AllTrim(SE1->E1_CLIENTE) == "001322" //Só adiciona títulos do cliente Cencosud 
 			
-				aadd(_adados, {strzero(val(substr(_alinha[2],1,len(_alinha[2])-2)),9),;  									//01 - num titulo
+				aAdd(_aDados, {StrZero(Val(SubStr(_alinha[2],1,Len(_alinha[2])-2)),9),;  									//01 - num titulo
 					 '01',;																							//02 - parcela
 					 SE1->E1_CLIENTE,;																				//03 - codigo do cliente
 					 SE1->E1_LOJA,;																					//04 - loja do cliente
 					 ctod(_alinha[8]),;																				//05 - data de pagamento prevista
-					 _aSm0[ascan( _aSm0, { |x| x[18] = (alltrim(_alinha[1]))})][2],;			  				//06 - filial Italac
-					 POSICIONE("SA1",1,xfilial("SA1") + SE1->E1_CLIENTE + SE1->E1_LOJA,"A1_CGC")})			//07 - CNPJ cliente
+					 _aSm0[aScan( _aSm0, { |x| x[18] = (AllTrim(_alinha[1]))})][2],;			  				//06 - filial Italac
+					 Posicione("SA1",1,xFilial("SA1") + SE1->E1_CLIENTE + SE1->E1_LOJA,"A1_CGC")})			//07 - CNPJ cliente
 		
-			Endif
+			EndIf
 		
-		Endif
+		EndIf
 		
-	Endif
+	EndIf
 								                     
 	FT_FSKIP()
 	
-Enddo
+EndDo
 	
-Return _adados
+Return _aDados
 
 /*
 ===============================================================================================================================
@@ -1145,16 +1140,16 @@ Data da Criacao---: 09/03/2016
 Descrição---------: Faz a leitura de dados no layout do Assai
 Parametros--------: _nreg - número de linhas do arquivo
 					oproc2 - objeto da barra de processamento
-Retorno-----------: _adados - array com dados carregados do arquivo
+Retorno-----------: _aDados - array com dados carregados do arquivo
 ===============================================================================================================================
 */
 
-Static function MFIN011L6(_nreg,oproc2)
+Static Function MFIN011L6(_nreg,oproc2)
 
 Local	_nCont 	:= 0
 Local _cdados		:= ""
 Local _alinha		:= {}
-Local _adados 	:= {}
+Local _aDados 	:= {}
 Local _aSM0 		:= FWLoadSM0()  //carrega array com dados de filiais
 Default oproc2 := nil
 
@@ -1162,16 +1157,16 @@ FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
 FT_FSKIP()
 
 
-While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
+While !FT_FEOF()  //FACA ENQUANTO NAO For FIM DE ARQUIVO
 	
 	_nCont++ 
 
-	IF valtype(oproc2) = "O"
+	If ValType(oproc2) = "O"
 
-      	  oproc2:cCaption := ("Detectado arquivo Assai, Lendo linha " + strzero(_nCont,5) + " de " + strzero(_nreg,5) + ".")
+      	  oproc2:cCaption := ("Detectado arquivo Assai, Lendo linha " + StrZero(_nCont,5) + " de " + StrZero(_nreg,5) + ".")
    		  ProcessMessages()
  
-    ENDIF
+    EndIf
 			
 	_cDados := FT_FREADLN()    
 	_cDados := StrTran(_cDados,'"','')
@@ -1180,56 +1175,56 @@ While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
 
 			
 	//Verifica se é linha válida
-	If len(_alinha) < 7
+	If Len(_alinha) < 7
 	
 		FT_FSKIP()
 		Loop
 		
-	Endif	 
+	EndIf	 
 	
 	//Ajusta matriz
-	If len(_alinha) == 8
+	If Len(_alinha) == 8
 	
-		_alinha[3] := alltrim(str(val(_alinha[3]) + ( Val(_alinha[4]) /100 )))
+		_alinha[3] := AllTrim(Str(Val(_alinha[3]) + ( Val(_alinha[4]) /100 )))
 		_alinha[4] := _alinha[5]
 		_alinha[5] := _alinha[6]
 		_alinha[6] := _alinha[7]    
 		_alinha[7] := _alinha[8]
 		
-	Endif
+	EndIf
 
 	
 	//Ajusta CGC só com numeros 
-	_alinha[1] := substr(_alinha[1],1,2) + substr(_alinha[1],4,3) + substr(_alinha[1],8,3) + substr(_alinha[1],12,4) + substr(_alinha[1],17,2)
+	_alinha[1] := SubStr(_alinha[1],1,2) + SubStr(_alinha[1],4,3) + SubStr(_alinha[1],8,3) + SubStr(_alinha[1],12,4) + SubStr(_alinha[1],17,2)
 			
 	
-	If ascan( _aSm0, { |x| x[18] = (alltrim(_alinha[1]))}) > 0	
+	If aScan( _aSm0, { |x| x[18] = (AllTrim(_alinha[1]))}) > 0	
 	
 		//Identifica filial
-		_cfilial :=  _aSm0[ascan( _aSm0, { |x| x[18] = (alltrim(_alinha[1]))})][2]
+		_cfilial :=  _aSm0[aScan( _aSm0, { |x| x[18] = (AllTrim(_alinha[1]))})][2]
 		
 		//Usa número do título para identificar o cliente e loja
-		DBselectarea("SE1")
-		SE1->( Dbsetorder(1) )
-		If SE1->( Dbseek( _cfilial + '1  ' + strzero(val(substr(_alinha[4],1,len(_alinha[4])-2)),9) + '  NF') ) .AND. (posicione("SA1",1,xfilial("SA1")+SE1->E1_CLIENTE+SE1->E1_LOJA,"A1_GRPVEN") == '000008' .OR. SA1->A1_GRPVEN = '000010')
+		DBSelectArea("SE1")
+		SE1->( DBSetOrder(1) )
+		If SE1->( DBSeek( _cfilial + '1  ' + StrZero(Val(SubStr(_alinha[4],1,Len(_alinha[4])-2)),9) + '  NF') ) .And. (Posicione("SA1",1,xFilial("SA1")+SE1->E1_CLIENTE+SE1->E1_LOJA,"A1_GRPVEN") == '000008' .Or. SA1->A1_GRPVEN = '000010')
 			
-			aadd(_adados, {strzero(val(substr(_alinha[4],1,len(_alinha[4])-2)),9),;  										//01 - num titulo
+			aAdd(_aDados, {StrZero(Val(SubStr(_alinha[4],1,Len(_alinha[4])-2)),9),;  										//01 - num titulo
 					 '01',;																							//02 - parcela
 					 SE1->E1_CLIENTE,;																				//03 - codigo do cliente
 					 SE1->E1_LOJA,;																					//04 - loja do cliente
 					 ctod(_alinha[6]),;																				//05 - data de pagamento prevista
-					 _aSm0[ascan( _aSm0, { |x| x[18] = (alltrim(_alinha[1]))})][2],;			  				//06 - filial Italac
-					 POSICIONE("SA1",1,xfilial("SA1") + SE1->E1_CLIENTE + SE1->E1_LOJA,"A1_CGC")})			//07 - CNPJ cliente
+					 _aSm0[aScan( _aSm0, { |x| x[18] = (AllTrim(_alinha[1]))})][2],;			  				//06 - filial Italac
+					 Posicione("SA1",1,xFilial("SA1") + SE1->E1_CLIENTE + SE1->E1_LOJA,"A1_CGC")})			//07 - CNPJ cliente
 		
-		Endif
+		EndIf
 		
-	Endif
+	EndIf
 								                     
 	FT_FSKIP()
 	
-Enddo
+EndDo
 	
-Return _adados
+Return _aDados
 
 /*
 ===============================================================================================================================
@@ -1239,32 +1234,32 @@ Data da Criacao---: 09/03/2016
 Descrição---------: Faz a leitura de dados no layout do Makro
 Parametros--------: _nreg - número de linhas do arquivo
 					oproc2 - objeto da barra de processamento
-Retorno-----------: _adados - array com dados carregados do arquivo
+Retorno-----------: _aDados - array com dados carregados do arquivo
 ===============================================================================================================================
 */
 
-Static function MFIN011L7(_nreg,oproc2)
+Static Function MFIN011L7(_nreg,oproc2)
 
 Local	_nCont 	:= 0
 Local _cdados		:= ""
 Local _alinha		:= {}
-Local _adados 	:= {}
+Local _aDados 	:= {}
 Default oproc2 := nil
 
 FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
 FT_FSKIP()
 
 
-While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
+While !FT_FEOF()  //FACA ENQUANTO NAO For FIM DE ARQUIVO
 	
 	_nCont++ 
 
-	IF valtype(oproc2) = "O"
+	If ValType(oproc2) = "O"
 
-      	  oproc2:cCaption := ("Detectado arquivo Makro, Lendo linha " + strzero(_nCont,5) + " de " + strzero(_nreg,5) + ".")
+      	  oproc2:cCaption := ("Detectado arquivo Makro, Lendo linha " + StrZero(_nCont,5) + " de " + StrZero(_nreg,5) + ".")
    		  ProcessMessages()
  
-    ENDIF
+    EndIf
 			
 	_cDados := FT_FREADLN()    
 	_cDados := StrTran(_cDados,'"','')
@@ -1273,41 +1268,41 @@ While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
 
 	
 	//Verifica se é linha válida
-	If len(_alinha) < 7 .or. alltrim(_alinha[3]) == '20334'
+	If Len(_alinha) < 7 .Or. AllTrim(_alinha[3]) == '20334'
 	
 		FT_FSKIP()
 		Loop
 		
 		
-	Endif	 
+	EndIf	 
 	
 	
 	//identifica filial do título
-	_cquery := "SELECT E1_FILIAL, E1_CLIENTE, E1_LOJA FROM " +retsqlname("SE1") + " SE1 WHERE D_E_L_E_T_ = ' '"
-	_cquery += " AND E1_NUM = '" + strzero(val(_alinha[1]),9) + "'"
-	_cquery += " AND E1_CLIENTE = '000444' AND E1_VALOR = '" + _alinha[9] + "'"
-	_cquery := ChangeQuery(_cquery)
-	MPSysOpenQuery(_cquery,"SE1T")
+	_cQuery := "SELECT E1_FILIAL, E1_CLIENTE, E1_LOJA FROM " +retsqlname("SE1") + " SE1 WHERE D_E_L_E_T_ = ' '"
+	_cQuery += " AND E1_NUM = '" + StrZero(Val(_alinha[1]),9) + "'"
+	_cQuery += " AND E1_CLIENTE = '000444' AND E1_VALOR = '" + _alinha[9] + "'"
+	_cQuery := ChangeQuery(_cQuery)
+	MPSysOpenQuery(_cQuery,"SE1T")
 	
 	If SE1T->(!Eof())
 			
-			aadd(_adados, {strzero(val(_alinha[1]),9),;  															// 01 - num titulo
+			aAdd(_aDados, {StrZero(Val(_alinha[1]),9),;  															// 01 - num titulo
 					 '01',;																							// 02 - parcela
 					 SE1T->E1_CLIENTE,;																				// 03 - codigo do cliente
 					 SE1T->E1_LOJA,;																				// 04 - loja do cliente
 					 ctod(_alinha[11]),;																			// 05 - data de pagamento prevista
 					 SE1T->E1_FILIAL,;			  																	// 06 - filial Italac
-					 POSICIONE("SA1",1,xfilial("SA1") + SE1T->E1_CLIENTE + SE1T->E1_LOJA,"A1_CGC")})			    // 07 - CNPJ cliente
+					 Posicione("SA1",1,xFilial("SA1") + SE1T->E1_CLIENTE + SE1T->E1_LOJA,"A1_CGC")})			    // 07 - CNPJ cliente
 		
-	Endif
+	EndIf
 	
-	SE1T->( Dbclosearea() )
+	SE1T->( DBCloseArea() )
 								                     
 	FT_FSKIP()
 	
-Enddo
+EndDo
 	
-Return _adados
+Return _aDados
 
 /*
 ===============================================================================================================================
@@ -1317,29 +1312,29 @@ Data da Criacao---: 11/08/2016
 Descrição---------: Faz a leitura de dados no layout dos IRMAOS MUFFATO & CIA LTDA.
 Parametros--------: _nreg - número de linhas do arquivo
 					oproc2 - objeto da barra de processamento
-Retorno-----------: _adados - array com dados carregados do arquivo
+Retorno-----------: _aDados - array com dados carregados do arquivo
 ===============================================================================================================================
 */
-Static function MFIN011L8(_nreg,oproc2)
+Static Function MFIN011L8(_nreg,oproc2)
 Local _nCont 	:= 0
 Local _cdados	:= ""
 Local _alinha	:= {}
-Local _adados 	:= {}
+Local _aDados 	:= {}
 Default oproc2 := nil
 
 FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
 FT_FSKIP()
 
-While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
+While !FT_FEOF()  //FACA ENQUANTO NAO For FIM DE ARQUIVO
 	
 	_nCont++ 
 
-	IF valtype(oproc2) = "O"
+	If ValType(oproc2) = "O"
 
-      	  oproc2:cCaption := ("Detectado arquivo Irmãos Muffato & Cia Ltda. Lendo linha " + strzero(_nCont,5) + " de " + strzero(_nreg,5) + ".")
+      	  oproc2:cCaption := ("Detectado arquivo Irmãos Muffato & Cia Ltda. Lendo linha " + StrZero(_nCont,5) + " de " + StrZero(_nreg,5) + ".")
    		  ProcessMessages()
  
-    ENDIF
+    EndIf
 			
 	_cDados := FT_FREADLN()    
 	_cDados := StrTran(_cDados,'.','')
@@ -1350,37 +1345,37 @@ While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
 	_alinha := StrTokArr(_cDados,",")
 
 	//Verifica se é linha válida
-	If len(_alinha) < 8 
+	If Len(_alinha) < 8 
 	   FT_FSKIP()
 	   Loop
 	EndIf	 
 	
 	//identifica filial do título
-	_cquery := "SELECT E1_FILIAL, E1_CLIENTE, E1_LOJA, E1_PARCELA FROM " +retsqlname("SE1") + " SE1 WHERE D_E_L_E_T_ = ' '"
-	_cquery += " AND E1_NUM = '" + strzero(val(_alinha[5]),9) + "'"
-	_cquery += " AND E1_CLIENTE = '004799' AND E1_VALOR = '" + _alinha[6] + "'"                // IRMAOS MUFFATO & CIA LTDA.
-	_cquery := ChangeQuery(_cquery)
-	MPSysOpenQuery(_cquery,"SE1T")
+	_cQuery := "SELECT E1_FILIAL, E1_CLIENTE, E1_LOJA, E1_PARCELA FROM " +retsqlname("SE1") + " SE1 WHERE D_E_L_E_T_ = ' '"
+	_cQuery += " AND E1_NUM = '" + StrZero(Val(_alinha[5]),9) + "'"
+	_cQuery += " AND E1_CLIENTE = '004799' AND E1_VALOR = '" + _alinha[6] + "'"                // IRMAOS MUFFATO & CIA LTDA.
+	_cQuery := ChangeQuery(_cQuery)
+	MPSysOpenQuery(_cQuery,"SE1T")
 	
 	If SE1T->(!Eof())
 			
-			aadd(_adados, {strzero(val(_alinha[5]),9),;  															//01 - num titulo
+			aAdd(_aDados, {StrZero(Val(_alinha[5]),9),;  															//01 - num titulo
 					 SE1T->E1_PARCELA,;																				//02 - parcela
 					 SE1T->E1_CLIENTE,;																				//03 - codigo do cliente
 					 SE1T->E1_LOJA,;																				//04 - loja do cliente
 					 ctod(_alinha[02]),;																			//05 - data de pagamento prevista
 					 SE1T->E1_FILIAL,;			  																	//06 - filial Italac
-					 POSICIONE("SA1",1,xfilial("SA1") + SE1T->E1_CLIENTE + SE1T->E1_LOJA,"A1_CGC")})		        //07 - CNPJ cliente
+					 Posicione("SA1",1,xFilial("SA1") + SE1T->E1_CLIENTE + SE1T->E1_LOJA,"A1_CGC")})		        //07 - CNPJ cliente
 		
-	Endif
+	EndIf
 	
-	SE1T->( Dbclosearea() )
+	SE1T->( DBCloseArea() )
 								                     
 	FT_FSKIP()
 	
-Enddo
+EndDo
 	
-Return _adados
+Return _aDados
 
 /*
 ===============================================================================================================================
@@ -1390,10 +1385,10 @@ Data da Criacao---: 12/08/2016
 Descrição---------: Faz a leitura de dados no layout do Atacadão S/A
 Parametros--------: _nreg - número de linhas do arquivo
 					oproc2 - objeto da barra de processamento
-Retorno-----------: _adados - array com dados carregados do arquivo
+Retorno-----------: _aDados - array com dados carregados do arquivo
 ===============================================================================================================================
 */
-Static function MFIN011L9(_nreg,oproc2)
+Static Function MFIN011L9(_nreg,oproc2)
 
 Local _nCont 	:= 0
 Local _cDados	:= ""
@@ -1419,7 +1414,7 @@ Local _cLinha := ""
 Local _cTabela := ""
 Default oproc2 := nil
 
-Private _adados 	:= {}
+Private _aDados 	:= {}
 
 //===========================================================================
 // Lê o arquivo HTML e monta uma variável do tipo String contendo apenas o 
@@ -1427,7 +1422,7 @@ Private _adados 	:= {}
 //===========================================================================
 FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
 
-Do While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO      
+While !FT_FEOF()  //FACA ENQUANTO NAO For FIM DE ARQUIVO      
     /*  Colunas da Tabela de dados do Atacadão S/A
     1) N Fiscal = Nr do Titulo
     2) Parc
@@ -1443,12 +1438,12 @@ Do While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
 	
 	_nCont++ 
 	
-	IF valtype(oproc2) = "O"
+	If ValType(oproc2) = "O"
 
-      	  oproc2:cCaption := ("Detectado arquivo Atacadão S/A. Lendo linha " + strzero(_nCont,5) + " de " + strzero(_nreg,5) + ".")
+      	  oproc2:cCaption := ("Detectado arquivo Atacadão S/A. Lendo linha " + StrZero(_nCont,5) + " de " + StrZero(_nreg,5) + ".")
    		  ProcessMessages()
  
-    ENDIF
+    EndIf
 			
 	_cDados := FT_FREADLN()    
     
@@ -1505,7 +1500,7 @@ For _nI := _nPosInc To Len(_cDados)
     
     If _nPosFinal > 0 .And. _nI >= _nPosFinal // Se a variável _nI ultrapassar a posição da tag de termino da tabela, encerra o processo de separação de dados e tags.
        Exit
-    EndIF
+    EndIf
                               
     If ! _lIniciaCopy // Se não iniciou a separação dos dados das tags html
        _nIniColum := At("<td bgColor" ,_cDados, _nI)  // localiza a posição inicial da proxima tag de dados.
@@ -1619,7 +1614,7 @@ For _nI := _nPosInc To Len(_cDados)
 Next _nI
 
 //===========================================================================
-// Se a ultima linha não for gravada no array _aDados, força a gravação 
+// Se a ultima linha não For gravada no array _aDados, força a gravação 
 // no array 
 //===========================================================================
 If _nItemDado > 1 .And. _nItemDado <= 11
@@ -1633,7 +1628,7 @@ If _nItemDado > 1 .And. _nItemDado <= 11
    MFIN011L9D(_alinha)
 EndIf
 	
-Return _adados
+Return _aDados
 
 /*
 ===============================================================================================================================
@@ -1647,36 +1642,36 @@ Parametros--------: _alinha - Array montado a partir da leitura do arquivo html.
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static function MFIN011L9D(_alinha,oproc2)
-Local _cquery
+Static Function MFIN011L9D(_alinha,oproc2)
+Local _cQuery
 Default oproc2 := nil
 
 Begin Sequence
 
    //identifica filial do título
-   _cquery := "SELECT E1_FILIAL, E1_CLIENTE, E1_LOJA, E1_PARCELA FROM " +retsqlname("SE1") + " SE1 WHERE D_E_L_E_T_ = ' '"
-   _cquery += " AND E1_NUM = '" + strzero(val(_alinha[1]),9) + "'"
-   _cquery += " AND E1_CLIENTE = '000039' AND E1_VALOR = '" + _alinha[4] + "'"                // ATACADÃO S/A.
-	_cquery := ChangeQuery(_cquery)
-	MPSysOpenQuery(_cquery,"SE1T")
+   _cQuery := "SELECT E1_FILIAL, E1_CLIENTE, E1_LOJA, E1_PARCELA FROM " +retsqlname("SE1") + " SE1 WHERE D_E_L_E_T_ = ' '"
+   _cQuery += " AND E1_NUM = '" + StrZero(Val(_alinha[1]),9) + "'"
+   _cQuery += " AND E1_CLIENTE = '000039' AND E1_VALOR = '" + _alinha[4] + "'"                // ATACADÃO S/A.
+	_cQuery := ChangeQuery(_cQuery)
+	MPSysOpenQuery(_cQuery,"SE1T")
 
    If SE1T->(!Eof())
 			
-      aadd(_adados, {strzero(val(_alinha[1]),9),;  															//01 - num titulo
+      aAdd(_aDados, {StrZero(Val(_alinha[1]),9),;  															//01 - num titulo
 					 SE1T->E1_PARCELA,;																		//02 - parcela
 					 SE1T->E1_CLIENTE,;																		//03 - codigo do cliente
 					 SE1T->E1_LOJA,;																		//04 - loja do cliente
 					 ctod(_alinha[11]),;																	//05 - data de pagamento prevista
 					 SE1T->E1_FILIAL,;			  															//06 - filial Italac
-					 POSICIONE("SA1",1,xfilial("SA1") + SE1T->E1_CLIENTE + SE1T->E1_LOJA,"A1_CGC")})		//07 - CNPJ cliente
+					 Posicione("SA1",1,xFilial("SA1") + SE1T->E1_CLIENTE + SE1T->E1_LOJA,"A1_CGC")})		//07 - CNPJ cliente
 		
-	Endif
+	EndIf
 	
-	SE1T->( Dbclosearea() )
+	SE1T->( DBCloseArea() )
 								                     
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -1689,45 +1684,45 @@ Parametros--------: _cdata - string com data
 Retorno-----------: _ddata - data convertida
 ===============================================================================================================================
 */
-Static function MFIN011Z(_cdata,oproc2)
+Static Function MFIN011Z(_cdata,oproc2)
 
 Local _ddata
-Local _ni := 1
+Local _nI := 1
 Local _cano := ""
 Local _cmes := ""
 Local _cdia := ""
 Local _netapa := 1
 Default oproc2 := nil
 
-_cdata := alltrim(_cdata)
+_cdata := AllTrim(_cdata)
 
-Do while _ni <= len(_cdata)
+While _nI <= Len(_cdata)
 
-  If substr(_cdata,_ni,1) = "/"
+  If SubStr(_cdata,_nI,1) = "/"
     _netapa++
-    _ni++
-  Endif
+    _nI++
+  EndIf
   
-  If _ni > len(_cdata)
-    exit
-  Endif
+  If _nI > Len(_cdata)
+    Exit
+  EndIf
 
   If _netapa == 1
-    _cdia := _cdia + substr(_cdata,_ni,1)
-  Endif
+    _cdia := _cdia + SubStr(_cdata,_nI,1)
+  EndIf
 
   If _netapa == 2
-    _cmes := _cmes + substr(_cdata,_ni,1)
-  Endif
+    _cmes := _cmes + SubStr(_cdata,_nI,1)
+  EndIf
   
   If _netapa == 3
-    _cano := _cano + substr(_cdata,_ni,1)
-  Endif
+    _cano := _cano + SubStr(_cdata,_nI,1)
+  EndIf
   
-  _ni++  
+  _nI++  
 
-Enddo
+EndDo
 
-_ddata := ctod(strzero(val(_cdia),2)+"/"+strzero(val(_cmes),2)+"/"+_cano)
+_ddata := ctod(StrZero(Val(_cdia),2)+"/"+StrZero(Val(_cmes),2)+"/"+_cano)
 
 Return _ddata

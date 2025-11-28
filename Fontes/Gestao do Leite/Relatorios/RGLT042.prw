@@ -2,29 +2,22 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 02/07/2019 | Migração para tReport e incluída seleção de vários setores. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 27/08/2019 | Corrigida a barra de progresso. Chamado 28346
+Lucas Borges  |02/07/2019| Chamado 28346. Migração para tReport e incluída seleção de vários setores.
+Lucas Borges  |27/08/2019| Chamado 28346. Corrigida a barra de progresso.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT042
 Autor-------------: Fabiano Dias Silva
 Data da Criacao---: 21/01/2010
-===============================================================================================================================
 Descrição---------: Resumo de Litragem e rendimentos de um fretista quebrando por municipio dentro de um determinado período
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -43,11 +36,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 26/06/2019
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -91,11 +81,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 26/06/2019
-===============================================================================================================================
 Descrição---------: Realiza a impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -117,10 +104,10 @@ Local _nCountRec	:= 0
 If MV_PAR05 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLD")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -216,7 +203,7 @@ BeginSql alias _cAlias
 	           AND ZLF_STATUS = 'F'
 	           AND ZLF_TP_MIX = 'F'
 	           AND ZLF_DEBCRE = 'C'
-	           AND SUBSTR(ZLF_A2COD, 1, 1) = 'G'
+	           AND SubStr(ZLF_A2COD, 1, 1) = 'G'
 	           %exp:_cFiltro2%
 	           AND ZLF_DTINI BETWEEN %exp:MV_PAR02% AND %exp:MV_PAR03%
 	           AND ZLF_A2COD BETWEEN %exp:MV_PAR06% AND %exp:MV_PAR07%
@@ -262,19 +249,19 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->ZLD_FILIAL
 	_cTrans	:= (_cAlias)->TRANS + ' - ' + (_cAlias)->A2_NOME
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

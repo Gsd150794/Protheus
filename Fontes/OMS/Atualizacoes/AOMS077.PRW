@@ -15,7 +15,7 @@ Lucas Borges      | 14/10/2019 | Removidos os Warning na compilação da release 1
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -37,7 +37,7 @@ Local _nnj := 0
 Local _cEndereco, _cNumero, _cComplemento
 
 Begin Sequence
-   If ! u_itmsg("Confirma a gravação dos dados do clientes tabela SA1, na tabela ZFH de envio de dados da integração Webservice?","Atenção",,2,2,2)
+   If ! U_ITMsg("Confirma a gravação dos dados do clientes tabela SA1, na tabela ZFH de envio de dados da integração Webservice?","Atenção",,2,2,2)
       Break
    EndIf
    
@@ -46,10 +46,10 @@ Begin Sequence
    //================================================================================   
    _cQry := " SELECT SA1.R_E_C_N_O_ AS NRECNO "
    _cQry += " FROM "+RetSqlName("SA1")+" SA1" 
-   _cQry += " WHERE SA1.D_E_L_E_T_ <> '*' AND A1_MSBLQL = '2' "    // Não deletado e nõa bloqueado.
+   _cQry += " WHERE SA1.D_E_L_E_T_ = ' ' AND A1_MSBLQL = '2' "    // Não deletado e nõa bloqueado.
    
    If Select("QRYSA1") > 0
-      QRYSA1->( DbCloseArea())
+      QRYSA1->( DBCloseArea())
    EndIf
            
    _cQry := ChangeQuery(_cQry) 
@@ -63,8 +63,8 @@ Begin Sequence
    // Cria as variáveis de memória com seus respectivos incializadores padrão
    //================================================================================
    _acamps := ZFH->(Dbstruct())
-   For _nnj := 1 to len(_acamps)
-      &("M->"+alltrim(_acamps[_nnj,1])) := CriaVar(alltrim(_acamps[_nnj,1]))
+   For _nnj := 1 to Len(_acamps)
+      &("M->"+AllTrim(_acamps[_nnj,1])) := CriaVar(AllTrim(_acamps[_nnj,1]))
    Next
 
    //================================================================================
@@ -72,43 +72,43 @@ Begin Sequence
    //================================================================================
  
    aUF := {}
-   aadd(aUF,{"RO","11"})
-   aadd(aUF,{"AC","12"})
-   aadd(aUF,{"AM","13"})
-   aadd(aUF,{"RR","14"})
-   aadd(aUF,{"PA","15"})
-   aadd(aUF,{"AP","16"})
-   aadd(aUF,{"TO","17"})
-   aadd(aUF,{"MA","21"})
-   aadd(aUF,{"PI","22"})
-   aadd(aUF,{"CE","23"})
-   aadd(aUF,{"RN","24"})
-   aadd(aUF,{"PB","25"})
-   aadd(aUF,{"PE","26"})
-   aadd(aUF,{"AL","27"})	
-   aadd(aUF,{"MG","31"})
-   aadd(aUF,{"ES","32"})
-   aadd(aUF,{"RJ","33"})
-   aadd(aUF,{"SP","35"})
-   aadd(aUF,{"PR","41"})
-   aadd(aUF,{"SC","42"})
-   aadd(aUF,{"RS","43"})
-   aadd(aUF,{"MS","50"})
-   aadd(aUF,{"MT","51"})
-   aadd(aUF,{"GO","52"})
-   aadd(aUF,{"DF","53"})
-   aadd(aUF,{"SE","28"})
-   aadd(aUF,{"BA","29"})
-   aadd(aUF,{"EX","99"})
+   aAdd(aUF,{"RO","11"})
+   aAdd(aUF,{"AC","12"})
+   aAdd(aUF,{"AM","13"})
+   aAdd(aUF,{"RR","14"})
+   aAdd(aUF,{"PA","15"})
+   aAdd(aUF,{"AP","16"})
+   aAdd(aUF,{"TO","17"})
+   aAdd(aUF,{"MA","21"})
+   aAdd(aUF,{"PI","22"})
+   aAdd(aUF,{"CE","23"})
+   aAdd(aUF,{"RN","24"})
+   aAdd(aUF,{"PB","25"})
+   aAdd(aUF,{"PE","26"})
+   aAdd(aUF,{"AL","27"})	
+   aAdd(aUF,{"MG","31"})
+   aAdd(aUF,{"ES","32"})
+   aAdd(aUF,{"RJ","33"})
+   aAdd(aUF,{"SP","35"})
+   aAdd(aUF,{"PR","41"})
+   aAdd(aUF,{"SC","42"})
+   aAdd(aUF,{"RS","43"})
+   aAdd(aUF,{"MS","50"})
+   aAdd(aUF,{"MT","51"})
+   aAdd(aUF,{"GO","52"})
+   aAdd(aUF,{"DF","53"})
+   aAdd(aUF,{"SE","28"})
+   aAdd(aUF,{"BA","29"})
+   aAdd(aUF,{"EX","99"})
 	   
 
    //================================================================================
    // Grava os dados da tabela SA1 de clientes ativos na tabela ZFH
    //================================================================================
-   QRYSA1->( DbGotop() )
+   QRYSA1->( DBGoTop() )
    
-   Do While ! QRYSA1->(Eof())  
-      SA1->(DbGoTo(QRYSA1->NRECNO))
+   While ! QRYSA1->(Eof())  
+      SA1->(DBGoTo(QRYSA1->NRECNO))
                              
       //================================================================================                     
       // Os endereços de clientes abaixo estão com o nome da rua separada do numero,
@@ -177,17 +177,17 @@ Begin Sequence
       ZFH->ZFH_RECSA1  :=   SA1->(Recno())
       ZFH->ZFH_TXDIF   :=	SA1->A1_I_TXDIF  
       ZFH->ZFH_CODEMP  :=  '000001'
-      ZFH->ZFH_USUARI  := __CUSERID
+      ZFH->ZFH_USUARI  := __cUserId
       ZFH->ZFH_DATAAL  := Date()
-      ZFH->(MsUnlock())
+      ZFH->(MSUnLock())
                              
-      QRYSA1->(DbSkip())
+      QRYSA1->(DBSkip())
    EndDo                
       
 End Sequence
 
 If Select("QRYSA1") > 0
-   QRYSA1->(DbCloseArea())
+   QRYSA1->(DBCloseArea())
 EndIf             
 
 Return

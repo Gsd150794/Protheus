@@ -2,12 +2,12 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Igor Melgaço  | 09/04/2024 | Chamado 46400 - Ajuste para Instução bancária dos registros marcados na janela de compensação
+Igor Melgaço  |09/04/2024| Chamado 46400. Ajuste para Instução bancária dos registros marcados na janela de compensação
+Igor Melgaço  |26/08/2025| Chamado 50731. Ajuste para gravação correta da instrução bancária.
 ===============================================================================================================================
 */
-
 
 #Include "Totvs.ch"
 
@@ -16,18 +16,14 @@ Igor Melgaço  | 09/04/2024 | Chamado 46400 - Ajuste para Instução bancária dos r
 Programa----------: F330CMP
 Autor-------------: Antonio Neves
 Data da Criacao---: 26/02/2024
-===============================================================================================================================
 Descrição---------: P.E. Para geração a Instrução Bancária de Abatimento. O padrão não gera quando Compensação
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-
 User Function FA330CMP()
 
-	Local _aAreaSE1   := GetArea()
+	Local _aAreaSE1   := FWGetArea()
 	Local _nValTrs 	:= 0   //06/02/2024
 	Local _cFilInst	:= 0
 	Local _cNumTit		:= ""
@@ -63,10 +59,12 @@ User Function FA330CMP()
 
 	If _cPortado $ _lBcoInst
 
-		_cEnvBol    := POSICIONE("SA1",1,xFilial("SA1")+_cCliente+_cLoja,"A1_I_IBOLE")
+		_cEnvBol    := Posicione("SA1",1,xFilial("SA1")+_cCliente+_cLoja,"A1_I_IBOLE")
 
 		For _nX := 1 To Len( aTitulos )
-			_nValTrs += Val(StrTran(StrTran(aTitulos[_nX][7],".",""),",","."))
+			If aTitulos[_nX,8]
+				_nValTrs += Val(StrTran(StrTran(aTitulos[_nX][7],".",""),",","."))
+			EndIf
 		Next _nX
 
 		If !Empty(_cNumBco) .And. !Empty(_cPortado) //.And. _cEnvBol == "S"
@@ -74,7 +72,7 @@ User Function FA330CMP()
 
 			If lInstruBanc
 				//ADICAO DA INCLUSÃO DA INSTRUCAO BANCARIA
-				FI2->(Reclock("FI2",.T.))
+				FI2->(RecLock("FI2",.T.))
 
 				FI2->FI2_FILIAL := _cFilInst
 				FI2->FI2_OCORR  := "04"
@@ -89,19 +87,19 @@ User Function FA330CMP()
 				FI2->FI2_NUMBOR := _cNumbor
 				FI2->FI2_CARTEI := "1"
 				FI2->FI2_DTOCOR := dDataBase
-				FI2->FI2_VALANT := STR(_nSaldo,30,2)
-				FI2->FI2_VALNOV := STR(_nValTrs,30,2)
+				FI2->FI2_VALANT := Str(_nSaldo,30,2)
+				FI2->FI2_VALNOV := Str(_nValTrs,30,2)
 				FI2->FI2_CAMPO  := "FI2_VALNOV"
 				FI2->FI2_TIPCPO := "C"
 
-				FI2->(MsUnlock())
+				FI2->(MSUnLock())
 
 			EndIf
 		EndIf
 	EndIf
 
 	If lInstruBanc
-		For _nI := 1 TO LEN(aTitulos)
+		For _nI := 1 TO Len(aTitulos)
 			If aTitulos[_nI,8]
 
 				If MV_PAR02 <> 2
@@ -110,9 +108,9 @@ User Function FA330CMP()
 					_nPosFilial := 16
 				EndIf
 
-				DbSelectArea("SE1")
-				DbSetOrder(1)
-				If Dbseek(aTitulos[_nI,_nPosFilial]+aTitulos[_nI,1]+aTitulos[_nI,2]+aTitulos[_nI,3]+aTitulos[_nI,4])   
+				DBSelectArea("SE1")
+				DBSetOrder(1)
+				If DBSeek(aTitulos[_nI,_nPosFilial]+aTitulos[_nI,1]+aTitulos[_nI,2]+aTitulos[_nI,3]+aTitulos[_nI,4])   
 			
 					_cNumBor	 := SE1->E1_NUMBOR
 					_cPortado := SE1->E1_PORTADO
@@ -121,9 +119,9 @@ User Function FA330CMP()
 					_nSaldo   := SE1->E1_SALDO
 					_nValTrs  := Val(StrTran(StrTran(aTitulos[_nI][7],".",""),",","."))
 					
-					If _cPortado $ _lBcoInst .AND. !Empty(_cNumBco) .And. !Empty(_cPortado) //.And. _cEnvBol == "S"
+					If _cPortado $ _lBcoInst .And. !Empty(_cNumBco) .And. !Empty(_cPortado) //.And. _cEnvBol == "S"
 
-						FI2->(Reclock("FI2",.T.))
+						FI2->(RecLock("FI2",.T.))
 
 						FI2->FI2_FILIAL := aTitulos[_nI,_nPosFilial]
 						FI2->FI2_OCORR  := "04"
@@ -138,12 +136,12 @@ User Function FA330CMP()
 						FI2->FI2_NUMBOR := _cNumbor
 						FI2->FI2_CARTEI := "1"
 						FI2->FI2_DTOCOR := dDataBase
-						FI2->FI2_VALANT := STR(_nSaldo,30,2)
-						FI2->FI2_VALNOV := STR(_nValTrs,30,2)						
+						FI2->FI2_VALANT := Str(_nSaldo,30,2)
+						FI2->FI2_VALNOV := Str(_nValTrs,30,2)						
 						FI2->FI2_CAMPO  := "FI2_VALNOV"
 						FI2->FI2_TIPCPO := "C"
 
-						FI2->(MsUnlock())
+						FI2->(MSUnLock())
 
 					EndIf
 				EndIf
@@ -152,6 +150,6 @@ User Function FA330CMP()
 	EndIf
 
 	//FIM DA ADICAO DA INSTRUCAO BANCARIA
-	RestArea(_aAreaSE1)
+	FWRestArea(_aAreaSE1)
 
 Return

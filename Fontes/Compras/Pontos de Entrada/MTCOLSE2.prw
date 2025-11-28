@@ -2,41 +2,33 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges  | 23/07/2021 | Implementado tratamento para o vencimento das devoluções. Chamado 37255
--------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges  | 02/08/2021 | Corrigida a validação para o PE não ser chamado indevidamente. Chamado 37339
--------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges  | 29/08/2024 | Retirada a validação do l103Auto. Chamado 48274
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MTCOLSE2
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 29/12/2020
-===============================================================================================================================
 Descrição---------: Ponto de entrada para manipular os dados do aCols de títulos a pagar
-===============================================================================================================================
-Parametros--------: PARAMIXB[1] -> A -> aCols das duplicatas
-					PARAMIXB[2] -> N -> 0 - Visualização do documento / 1 - Inclusão ou Classificação do documento
-===============================================================================================================================
+Parametros--------: ParamIXB[1] -> A -> aCols das duplicatas
+					ParamIXB[2] -> N -> 0 - Visualização do documento / 1 - Inclusão ou Classificação do documento
 Retorno-----------: aColsE2 -> A -> aCols manipulado pelo usuário.
 ===============================================================================================================================
 */
 User Function MTCOLSE2
 
-Local _aArea    := GetArea()
+Local _aArea    := FWGetArea()
 Local _aAreaSDS := SDS->(GetArea())
-Local _aColsE2  := PARAMIXB[1] //aCols de duplicatas
-Local _nOpc     := PARAMIXB[2] //0-Tela de visualização / 1-Inclusão ou Classificação
+Local _aColsE2  := ParamIXB[1] //aCols de duplicatas
+Local _nOpc     := ParamIXB[2] //0-Tela de visualização / 1-Inclusão ou Classificação
 Local _cXML     := ""
 Local _oXML     := Nil
 Local _cError	:= ''
@@ -64,7 +56,7 @@ If _nOpc == 1 .And. cFormul == "N" .And. cTipo == "D" .And. l103GAuto .And. lRef
                 If ValType(XmlChildEx(_oXml,"_NFEPROC")) == "O"
                     If ValType(XmlChildEx(_oXML:_NFeProc:_NFe:_InfNfe,"_COBR")) != "U"
                         If ValType(XmlChildEx(_oXML:_NFeProc:_NFe:_InfNfe:_cobr,"_DUP")) != "U"
-                            _dVencto := StoD(StrTran(AllTrim(IIf(ValType(XmlChildEx(_oXML:_NFeProc:_NFe:_InfNfe:_cobr,"_DUP"))=="O",_oXML:_NFeProc:_NFe:_InfNfe:_cobr:_dup:_dVenc:Text,_oXML:_NFeProc:_NFe:_InfNfe:_cobr:_dup[1]:_dVenc:Text)),"-",""))
+                            _dVencto := SToD(StrTran(AllTrim(IIf(ValType(XmlChildEx(_oXML:_NFeProc:_NFe:_InfNfe:_cobr,"_DUP"))=="O",_oXML:_NFeProc:_NFe:_InfNfe:_cobr:_dup:_dVenc:Text,_oXML:_NFeProc:_NFe:_InfNfe:_cobr:_dup[1]:_dVenc:Text)),"-",""))
                             If _dVencto < dDataBase
                                 _aColsE2[1][2] := dDataBase//Se já está vencida, usa a data atual
                                 _lRet := .T.
@@ -85,7 +77,7 @@ If _nOpc == 1 .And. cFormul == "N" .And. cTipo == "D" .And. l103GAuto .And. lRef
     DelClassIntF()
 EndIf
 
-RestArea(_aAreaSDS)
-RestArea(_aArea)
+FWRestArea(_aAreaSDS)
+FWRestArea(_aArea)
 
 Return (_aColsE2)

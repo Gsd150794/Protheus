@@ -1,24 +1,17 @@
 /*
-===============================================================================================================================
+F===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
---------------------------------------------------------------------------------------------------------------------------------
-Josué Prestes | 10/06/2019 | Chamado 29593. Ajuste para loboguara
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 21/06/2019 | Chamado 28886. Ajustes do fonte para o novo servidor Totvs Lobo Guara
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 12/09/2024 | Chamado 48465. Removendo warning de compilação.
+Josué Prestes |10/06/2019| Chamado 29593. Ajuste para loboguara
+Julio Paz     |21/06/2019| Chamado 28886. Ajustes do fonte para o novo servidor Totvs Lobo Guara
+Lucas Borges  |12/09/2024| Chamado 48465. Removendo warning de compilação.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "FINR610.CH"
-#INCLUDE "PROTHEUS.CH"
-
-#DEFINE CRLF CHR(13)+CHR(10)
+#Include "FINR610.CH"
+#Include "TOTVS.ch"
 
 #DEFINE PREFIXO		1
 #DEFINE TITULO		2
@@ -45,11 +38,8 @@ Static lF440VEND
 Programa----------: RFIN017
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 02/08/2018                            .
-===============================================================================================================================
 Descrição---------: Relatório Previsão de Comissões baseado no FIN610 - Chamado 25644.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -59,7 +49,7 @@ Local oReport
 If TRepInUse()
 	oReport := RFIN017R()
 	oReport:PrintDialog()
-Endif
+EndIf
 
 Return
 
@@ -68,11 +58,8 @@ Return
 Programa----------: RFIN017R()
 Autor-------------: Daniel Batori
 Data da Criacao---: 28.08.06
-===============================================================================================================================
 Descrição---------: Definicao do layout do Relatorio
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -87,19 +74,19 @@ oReport := TReport():New("RFIN017",STR0003,"FIN610", {|oReport| RFIN017P(oReport
 
 //================================================================
 // Variaveis utilizadas para parametros                          |
-// mv_par01         // Do Vendedor                               |
-// mv_par02         // At‚ o Vendedor                            |
-// mv_par03         // Vencto de                                 |
-// mv_par04         // Vencto At‚                                |
-// mv_par05         // Qual Moeda                                |
-// mv_par06         // Da emiss„o                                |
-// mv_par07         // At‚ a emiss„o                             |
-// mv_par08         // Comiss„o Zero                             |
-// mv_par09         // Considera P.Venda                         |
-// mv_par10         // Abate IR Comiss                           |
-// mv_par11         // Outras Moedas                             |
-// mv_par12         // Salta Pagina por Vendedor                 |
-// mv_par13         // Nome cliente							     |
+// MV_PAR01         // Do Vendedor                               |
+// MV_PAR02         // At‚ o Vendedor                            |
+// MV_PAR03         // Vencto de                                 |
+// MV_PAR04         // Vencto At‚                                |
+// MV_PAR05         // Qual Moeda                                |
+// MV_PAR06         // Da emiss„o                                |
+// MV_PAR07         // At‚ a emiss„o                             |
+// MV_PAR08         // Comiss„o Zero                             |
+// MV_PAR09         // Considera P.Venda                         |
+// MV_PAR10         // Abate IR Comiss                           |
+// MV_PAR11         // Outras Moedas                             |
+// MV_PAR12         // Salta Pagina por Vendedor                 |
+// MV_PAR13         // Nome cliente							     |
 //================================================================
 
 cPictVal	:= PesqPict("SE1","E1_VLCRUZ")
@@ -140,11 +127,8 @@ Return oReport
 Programa----------: RFIN017P(oReport)
 Autor-------------: Daniel Batori
 Data da Criacao---: 28.08.06
-===============================================================================================================================
 Descrição---------: Emite o relatório.
-===============================================================================================================================
 Parametros--------: oReport = objeto do relatório
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -154,45 +138,45 @@ Local aDados[16]
 
 Local cTitulo
 
-LOCAL aCampos :={}
-LOCAL cVendAnt:=Space(6)
-LOCAL nComissao:=0.00
-LOCAL nValTit :=0.00
-LOCAL nComEnt :=0.00
-LOCAL nComVen :=0.00
-LOCAL nValBas :=0.00
-LOCAL nPorc   :=0.00
-LOCAL nVendComis :=0.00
-LOCAL nTotTit :=0.00
-LOCAL nTotEnt :=0.00
-LOCAL nTotVen :=0.00
-LOCAL nTotBas :=0.00
-LOCAL nTotComis :=0.00
-LOCAL lFirst:=.T.
-LOCAL aParcelas := {}	// Array das comissoes (geral)
-LOCAL aParcItem := {}	// Array das comissoes (item)
-LOCAL nVendSC5 := 0		// Codigo do vendedor no pedido
-LOCAL nComiSC5 := 0		// Percentual Comissao no pedido
-LOCAL nComiSC6 := 0		// Percentual comissao no item do pedido
-LOCAL nPerComE := 0		// Percentual comissao na emissao vendedor
-LOCAL nPerComB	:= 0	// Percentual comissao na Baixa vendedor
-LOCAL nRegSC6	:= 0	// Registro do item de pedido
-LOCAL nQtdItem := 0		// Quantidade de produtos nao entregues
-LOCAL nPercItem:= 0		// Percentual a ser usado (pedido ou item)
-LOCAL nVlTotPed:= 0		// Valor total do pedido nao entregue
-LOCAL nIrEnt	:= 0	// Ir na Emissao
-LOCAL nIrVen	:= 0	// Ir na Baixa
-LOCAL nVendIr	:= 0	// total de Ir do vendedor
-LOCAL nTotIrE	:= 0	// Total geral de IR na emissao
-LOCAL nTotIrB	:= 0	// Total geral de IR na Baixa
-LOCAL nTotIrVen:= 0		// Total geral de IR do relatorio
-LOCAL nTotPorc := 0	    // Percentual medio de comissoes do relatorio
-LOCAL nTotCount:= 0
-LOCAL nCount	:= 0
+Local aCampos :={}
+Local cVendAnt:=Space(6)
+Local nComissao:=0.00
+Local nValTit :=0.00
+Local nComEnt :=0.00
+Local nComVen :=0.00
+Local nValBas :=0.00
+Local nPorc   :=0.00
+Local nVendComis :=0.00
+Local nTotTit :=0.00
+Local nTotEnt :=0.00
+Local nTotVen :=0.00
+Local nTotBas :=0.00
+Local nTotComis :=0.00
+Local lFirst:=.T.
+Local aParcelas := {}	// Array das comissoes (geral)
+Local aParcItem := {}	// Array das comissoes (item)
+Local nVendSC5 := 0		// Codigo do vendedor no pedido
+Local nComiSC5 := 0		// Percentual Comissao no pedido
+Local nComiSC6 := 0		// Percentual comissao no item do pedido
+Local nPerComE := 0		// Percentual comissao na emissao vendedor
+Local nPerComB	:= 0	// Percentual comissao na Baixa vendedor
+Local nRegSC6	:= 0	// Registro do item de pedido
+Local nQtdItem := 0		// Quantidade de produtos nao entregues
+Local nPercItem:= 0		// Percentual a ser usado (pedido ou item)
+Local nVlTotPed:= 0		// Valor total do pedido nao entregue
+Local nIrEnt	:= 0	// Ir na Emissao
+Local nIrVen	:= 0	// Ir na Baixa
+Local nVendIr	:= 0	// total de Ir do vendedor
+Local nTotIrE	:= 0	// Total geral de IR na emissao
+Local nTotIrB	:= 0	// Total geral de IR na Baixa
+Local nTotIrVen:= 0		// Total geral de IR do relatorio
+Local nTotPorc := 0	    // Percentual medio de comissoes do relatorio
+Local nTotCount:= 0
+Local nCount	:= 0
 Local aLiquid	:= {}
 Local aSeqCont	:= {}   // Controle de calculo de comissoes (Sequencia no SE5)
-LOCAL aTam		:= {}
-LOCAL nValMinRet	:= SuperGetMv( "MV_VLRETIR" ,,0) // Valor minimo para retencao do IR
+Local aTam		:= {}
+Local nValMinRet	:= SuperGetMv( "MV_VLRETIR" ,,0) // Valor minimo para retencao do IR
 Local nMoedaBco :=1, dDataConv
 Local cTipo
 Local cParcela
@@ -236,52 +220,52 @@ Local lTroca	:= .F.
 Local cSeq		:= "00"
 Local lGetParAut	:= FindFunction("GetParAuto")
 
-Private nDecs   := MsDecimais(mv_par05)
+Private nDecs   := MsDecimais(MV_PAR05)
 Private nIndexSE5
 Private aVendedor
 
 //ESSA VALIDACAO É NECESSARIO APENAS PARA 
 //RELEASE 12.1.7
-If VALTYPE(MV_PAR16) != "C" 
+If ValType(MV_PAR16) != "C" 
 	If MV_PAR16 == 1	// Considera Juros?
 		lJuros := .T.
-	Endif
-Endif
+	EndIf
+EndIf
 
-If VALTYPE(MV_PAR17) != "C"
+If ValType(MV_PAR17) != "C"
 	If MV_PAR17 == 1	// Considera Desconto?
 		lDescont := .T.
-	Endif
-Endif
+	EndIf
+EndIf
 //FIM VALIDACAO
 
-If mv_par15 == 1 .And. !IsBlind()
+If MV_PAR15 == 1 .And. !IsBlind()
 	aAreaSM0 := SM0->(GetArea())
 	_cEmp    :=FWSM0LayOut() //Funcao de Framework que retorna a configuracao da empresa no sigamat 
-	If "E" $ _cEmP .OR. "U" $ _cEmP //Verifica se na configuracao Possui E - Empresa ou
+	If "E" $ _cEmP .Or. "U" $ _cEmP //Verifica se na configuracao Possui E - Empresa ou
 	   aSelFil := FwSelectGC()		//U - Unidade de negocio.
 	Else
 		aSelFil := AdmGetFil(.F.,.F.,"SE5")
 		If Empty(aSelFil)
-			Aadd(aSelFil,cFilAnt)
-		Endif
-	Endif
+			aAdd(aSelFil,cFilAnt)
+		EndIf
+	EndIf
 ElseIf lGetParAut
 	aRetAuto	:= GetParAuto("RFIN017TestCase")
-	aSelFil:= Iif(ValType(aRetAuto) == "A", aRetAuto, aSelFil)
+	aSelFil:= IIf(ValType(aRetAuto) == "A", aRetAuto, aSelFil)
 	nRegSM0 := SM0->(Recno())
-	SM0->(DbGoTo(nRegSM0))
-Endif
+	SM0->(DBGoTo(nRegSM0))
+EndIf
 
 If Empty(aSelFil)
-	Aadd(aSelFil,cFilAnt)
+	aAdd(aSelFil,cFilAnt)
 EndIf
 
 //===============================================================
 // criação do indice temporario pra busca do numero da fatura
 //===============================================================
-SE5->(DbSetOrder(10))
-SE5->(DbGoTop())
+SE5->(DBSetOrder(10))
+SE5->(DBGoTop())
 
 oSection1:Cell("E1_PREFIXO"):SetBlock( { || aDados[PREFIXO] })
 oSection1:Cell("E1_NUM"):SetBlock( { || aDados[TITULO] })
@@ -307,14 +291,14 @@ oReport:OnPageBreak({ ||	oSection1:SetHeaderSection(.T.), ;
 // Define array para arquivo de trabalho                        
 //===================================================================
 aTam:=TamSX3("E1_FILORIG")
-AADD(aCampos,{ "FILIAL" ,"C",aTam[1],aTam[2] } )
+aAdd(aCampos,{ "FILIAL" ,"C",aTam[1],aTam[2] } )
 aTam:=TamSX3("E1_VEND1")
-AADD(aCampos,{ "CODIGO" ,"C",aTam[1],aTam[2] } )
-AADD(aCampos,{ "CHAVE"  ,"C",10,0 } )
-AADD(aCampos,{ "NVEND"  ,"N",01,0 } )
-AADD(aCampos,{ "PVEND"  ,"C",01,0 } )
-AADD(aCampos,{ "CHVFAT" ,"N",10,0 } )
-AADD(aCampos,{ "RECPRINC","N",10,0 } )
+aAdd(aCampos,{ "CODIGO" ,"C",aTam[1],aTam[2] } )
+aAdd(aCampos,{ "CHAVE"  ,"C",10,0 } )
+aAdd(aCampos,{ "NVEND"  ,"N",01,0 } )
+aAdd(aCampos,{ "PVEND"  ,"C",01,0 } )
+aAdd(aCampos,{ "CHVFAT" ,"N",10,0 } )
+aAdd(aCampos,{ "RECPRINC","N",10,0 } )
 
 aTam := TamSX3("E1_CLIENTE")
 
@@ -342,35 +326,35 @@ _otemp:Create()
 // Cria arquivo de Trabalho                                     
 //===================================================================
 cNomArq := CriaTrab(aCampos)
-dbUseArea( .T.,, cNomArq, "Trb", if(.F. .OR. .F., !.F., NIL), .F. )
+dbUseArea( .T.,, cNomArq, "Trb", If(.F. .Or. .F., !.F., NIL), .F. )
 IndRegua("TRB",cNomArq,"CODIGO+FILIAL+CHAVE",,,OemToAnsi(STR0023))
 */
 
 //===================================================================
 // Defini‡„o dos cabe‡alhos                                     
 //===================================================================
-cTitulo := oReport:Title() + STR0022 + GetMV("MV_MOEDA"+Str(mv_par05,1))
+cTitulo := oReport:Title() + STR0022 + GetMV("MV_MOEDA"+Str(MV_PAR05,1))
 oReport:SetTitle(cTitulo)
 
-dbSelectarea("TRB")
-dbSetOrder(1)
-dbGoTop()
+DBSelectArea("TRB")
+DBSetOrder(1)
+DBGoTop()
 
-dbSelectarea("SE1")
-dbsetOrder(7)
+DBSelectArea("SE1")
+DBSetOrder(7)
 
-oReport:SetMeter(SE1->(Reccount()))
+oReport:SetMeter(SE1->(RecCount()))
 
 If MV_PAR14 == 1
 	Fr610ProcP(@oReport, ,aSelFil)
 Else
 	Fr610ProcF(@oReport, ,aSelFil)
-Endif
+EndIf
 
-dbSelectarea("TRB")
-dbGotop()
+DBSelectArea("TRB")
+DBGoTop()
 
-oReport:SetMeter(TRB->(Reccount()))
+oReport:SetMeter(TRB->(RecCount()))
 
 oSection1:Init()
 aFill(aDados,nil)
@@ -381,7 +365,7 @@ While TRB->(!Eof())
 	cVendAnt:= CODIGO
 	nCount	:= 0
 	
-		While TRB->(!Eof()) .and. cVendAnt == CODIGO
+		While TRB->(!Eof()) .And. cVendAnt == CODIGO
 					// Muda para a filial do título que irá tratar
 					cFilAnt	:= TRB->FILIAL
 					
@@ -399,14 +383,14 @@ While TRB->(!Eof())
 					// ou pedido de vendas.                                         
 					//===================================================================
 					If TRB->PVEND == "N"
-						dbSelectArea("SE1")
-						dbSetOrder(1)
+						DBSelectArea("SE1")
+						DBSetOrder(1)
 						If TRB->CHVFAT > 0 .And. TRB->CHVFAT <> TRB->RECPRINC
-							dbGOTO(TRB->CHVFAT)
+							DBGoTo(TRB->CHVFAT)
 						Else
-							dbGoTo(Val(TRB->CHAVE))
+							DBGoTo(Val(TRB->CHAVE))
 							lTroca	:= .T.
-						Endif
+						EndIf
 						//===================================================================		
 						// Títulos renegociados LIQUIDAÇÃO
 						//===================================================================
@@ -419,18 +403,18 @@ While TRB->(!Eof())
 								cNumLiq	:= SE1->E1_NUMLIQ
 							EndIf
 							
-							aAreaSE1 := GetArea()
+							aAreaSE1 := FWGetArea()
 							For nX := 1 To Len(aLiquid)
-								SE1->(DbGoTo(aLiquid[nX]))
+								SE1->(DBGoTo(aLiquid[nX]))
 								nJurLiq += F440JurLiq(SE1->(Recno()))
 								nDescLiq += F440DesLiq(SE1->(Recno()))
 								nVlrLiq  += SE1->E1_VLCRUZ
 							Next nX
-							RestArea(aAreaSE1)
+							FWRestArea(aAreaSE1)
 							
 							nVlrLiq := nVlrLiq + nJurLiq - nDescLiq
-							nPerJur	:= IF( !lJuros, ((nJurLiq*1000)/nVlrLiq)/1000, 0)
-							nPerDesc := IF( !lDescont, ((nDescLiq*1000)/nVlrLiq)/1000, 0)
+							nPerJur	:= If( !lJuros, ((nJurLiq*1000)/nVlrLiq)/1000, 0)
+							nPerDesc := If( !lDescont, ((nDescLiq*1000)/nVlrLiq)/1000, 0)
 							
 						EndIf
 			
@@ -452,33 +436,33 @@ While TRB->(!Eof())
 						lReneg		:= .F.
 						
 						If lTroca
-							dbGOTO(TRB->CHVFAT)
+							DBGoTo(TRB->CHVFAT)
 						EndIf
-						If mv_par14 == 1
+						If MV_PAR14 == 1
 							If !Empty(SE1->E1_NUMLIQ) .Or. !Empty(E1_FATURA)
 								lReneg	:= .T.
 							EndIf 
-						ElseIf	mv_par14 == 2 		
+						ElseIf	MV_PAR14 == 2 		
 							If !Empty(SE1->E1_BAIXA)		
-								SE5->(DbSetOrder(7))		//E5_FILIAL+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA+E5_SEQ
+								SE5->(DBSetOrder(7))		//E5_FILIAL+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA+E5_SEQ
 								cSeq	:=	MaxSeqSe5(SE1->(E1_FILIAL + E1_PREFIXO + E1_NUM + E1_PARCELA + E1_TIPO + E1_CLIENTE + E1_LOJA))
 								If SE5->(MSSeek(FWxFilial('SE5') + SE1->(E1_PREFIXO + E1_NUM + E1_PARCELA + E1_TIPO + E1_CLIENTE + E1_LOJA + cSeq)))
-									If SE5->E5_MOTBX == 'LIQ' .OR. SE5->E5_MOTBX ==	'FAT' 
+									If SE5->E5_MOTBX == 'LIQ' .Or. SE5->E5_MOTBX ==	'FAT' 
 										lBxReneg	:= .T.
 									EndIf
 								EndIf
 							EndIf
 						EndIf
 						If lTroca
-							dbGoTo(Val(TRB->CHAVE))
+							DBGoTo(Val(TRB->CHAVE))
 						EndIf
 					
 						If	!lBxReneg .And. !lReneg
 						
-							SE3->( dbSetOrder(3) )
+							SE3->( DBSetOrder(3) )
 							
 							If Len(aBases) > 0
-								If 	TRB->CHVFAT > 0 .And. (aBases[nBases][7] == 0 .or. IsFatura()) .And.;	// Existe mais de um percentual de comissao (comissao por produto)
+								If 	TRB->CHVFAT > 0 .And. (aBases[nBases][7] == 0 .Or. IsFatura()) .And.;	// Existe mais de um percentual de comissao (comissao por produto)
 									!SE3->( MsSeek( xFilial("SE3") + aBases[nBases,1]+SE1->(E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA) ) ) // Nao eh comissao realizada
 									
 									// Recalcula bases pelo total da nota de saida, sem considerar parcelas geradas.
@@ -512,26 +496,26 @@ While TRB->(!Eof())
 							EndIf
 				
 							If TRB->CHVFAT > 0
-								dbGoTo(Val(TRB->CHAVE))
-							Endif
+								DBGoTo(Val(TRB->CHAVE))
+							EndIf
 							If nBases = 0
 								//===================================================================
 								// Caso vendedor n„o seja encontrado...           
 								//===================================================================
-								dbSelectArea("TRB")
-								dbSkip()
-								LOOP
-							Endif
+								DBSelectArea("TRB")
+								DBSkip()
+								Loop
+							EndIf
 							cChaveSE3 := aBases[nBases,1]+SE1->(E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM)
 							cTipo 	 := SE1->E1_TIPO
 							cParcela	 := SE1->E1_PARCELA
 				
-							dbSelectArea("SE1")
-							aAreaSE1 := GetArea()
-							dbGoto(TRB->RECPRINC)
+							DBSelectArea("SE1")
+							aAreaSE1 := FWGetArea()
+							DBGoTo(TRB->RECPRINC)
 							nBaseCom	 := SE1->&("E1_BASCOM"+Str(TRB->NVEND,1)) // Utilizado para estornar a base de comissao do titulo
 							nComissao := (SE1->&("E1_COMIS"+Str(TRB->NVEND,1))/100)*nBaseCom // Utilizado para estornar o valor da comissao do titulo
-							RestArea(aAreaSE1)
+							FWRestArea(aAreaSE1)
 				
 							If !Empty(SE1->E1_FATURA) .And. AllTrim(SE1->E1_FATURA) != "NOTFAT"
 								cTipoFat	:= SE1->E1_TIPOFAT
@@ -557,15 +541,15 @@ While TRB->(!Eof())
 										cParcela	 := SE1->E1_PARCELA
 										nValorFat := SE1->E1_VLCRUZ
 										FA610ComPg(@aBases,cChaveSE3,nBases,cTipo,cParcela,nValorFat,nBaseCom,nComissao)
-									Endif
-									SE1->(DbSkip())
+									EndIf
+									SE1->(DBSkip())
 								End
-								dbSelectArea("SE1")
-								dbSetOrder(1)
-								dbGOTO(Val(TRB->CHAVE))
+								DBSelectArea("SE1")
+								DBSetOrder(1)
+								DBGoTo(Val(TRB->CHAVE))
 							Else
 								FA610ComPg(@aBases,cChaveSE3,nBases,cTipo,cParcela,SE1->E1_VLCRUZ,nBaseCom,nComissao)
-							Endif
+							EndIf
 				
 							//===================================================================
 							// Caso percentual de comissao seja retornado == a zero, devo   
@@ -574,26 +558,26 @@ While TRB->(!Eof())
 							//===================================================================
 							If aBases[nBases,7] == 0
 								aBases[nBases,7] := (((aBases[nBases,5]+aBases[nBases,6])*100)/aBases[nBases,2])
-							Endif
+							EndIf
 				
 							//===================================================================
 							// Imprime o Vendedor caso possa imprimir Comiss„o Zero ou      
 							// exista alguma comiss„o para o Vendedor                       
 							//===================================================================
-							If mv_par08 == 1 .or. aBases[nBases,6] != 0 .Or. aBases[nBases,5] != 0
+							If MV_PAR08 == 1 .Or. aBases[nBases,6] != 0 .Or. aBases[nBases,5] != 0
 								If lFirst
-									dbSelectArea("SA3")
-									dbSeek(cFilial+TRB->CODIGO)
+									DBSelectArea("SA3")
+									DBSeek(cFilial+TRB->CODIGO)
 				
 									oReport:PrintText( PadR(STR0009 + TRB->CODIGO,16) + STR0010 + SA3->A3_NOME ) //"CODIGO : ""NOME : "
 									oReport:SkipLine()
 				
-									dbSelectArea("TRB")
+									DBSelectArea("TRB")
 									lFirst := .F.
-								Endif
-								dbSelectArea("SE1")
-								dbSetOrder(1)
-								dbGOTO(Val(TRB->CHAVE))
+								EndIf
+								DBSelectArea("SE1")
+								DBSetOrder(1)
+								DBGoTo(Val(TRB->CHAVE))
 								If cPaisLoc == "BRA"
 								   nMoedaBco := 1
 								   dDataConv := dDataBase
@@ -602,10 +586,10 @@ While TRB->(!Eof())
 								   dDataConv := SE1->E1_EMISSAO
 								EndIf
 				
-								aBases[nBases,2] := xMoeda(aBases[nBases,2],nMoedaBco,mv_par05,dDataConv,nDecs+1)
-								aBases[nBases,4] := xMoeda(aBases[nBases,4],nMoedaBco,mv_par05,dDataConv,nDecs+1)
-								aBases[nBases,5] := xMoeda(aBases[nBases,5],nMoedaBco,mv_par05,dDataConv,nDecs+1)
-								aBases[nBases,6] := xMoeda(aBases[nBases,6],nMoedaBco,mv_par05,dDataConv,nDecs+1)
+								aBases[nBases,2] := xMoeda(aBases[nBases,2],nMoedaBco,MV_PAR05,dDataConv,nDecs+1)
+								aBases[nBases,4] := xMoeda(aBases[nBases,4],nMoedaBco,MV_PAR05,dDataConv,nDecs+1)
+								aBases[nBases,5] := xMoeda(aBases[nBases,5],nMoedaBco,MV_PAR05,dDataConv,nDecs+1)
+								aBases[nBases,6] := xMoeda(aBases[nBases,6],nMoedaBco,MV_PAR05,dDataConv,nDecs+1)
 				
 								aDados[PREFIXO]	:= E1_PREFIXO
 								aDados[TITULO]	:= E1_NUM
@@ -614,10 +598,10 @@ While TRB->(!Eof())
 								aDados[LOJA]		:= E1_LOJA
 								aDados[CODFIL]	:= E1_FILORIG
 								
-								dbSelectArea("SA1")
-								dbSeek(cFilial+SE1->E1_CLIENTE+SE1->E1_LOJA)
-								aDados[NOME_CLI]	:= IF(mv_par13 == 1,SA1->A1_NREDUZ,SA1->A1_NOME)
-								dbSelectArea("SE1")
+								DBSelectArea("SA1")
+								DBSeek(cFilial+SE1->E1_CLIENTE+SE1->E1_LOJA)
+								aDados[NOME_CLI]	:= If(MV_PAR13 == 1,SA1->A1_NREDUZ,SA1->A1_NOME)
+								DBSelectArea("SE1")
 								
 								For nX := 1 To Len(aBases[nBases])
 									If Str(nX,1) $ "2|4|5|6"
@@ -626,7 +610,7 @@ While TRB->(!Eof())
 									EndIf
 								Next nX
 								
-								nComissao := xMoeda(aBases[nBases,5] + aBases[nBases,6],nMoedaBco,mv_par05,dDataConv,nDecs+1)
+								nComissao := xMoeda(aBases[nBases,5] + aBases[nBases,6],nMoedaBco,MV_PAR05,dDataConv,nDecs+1)
 				
 								aDados[DT_EMIS]	:= E1_EMISSAO
 								aDados[DT_VENC]	:= E1_VENCREA
@@ -643,13 +627,13 @@ While TRB->(!Eof())
 				
 							   	nValTit		+= aBases[nBases,2]
 								nComEnt		+= aBases[nBases,5]
-								nIrEnt		+= If(aBases[nBases,2] > nValMinRet,aBases[nBases,5] * (mv_par10/100),0)
+								nIrEnt		+= If(aBases[nBases,2] > nValMinRet,aBases[nBases,5] * (MV_PAR10/100),0)
 								nComVen		+= aBases[nBases,6]
-								nIrVen		+= If(aBases[nBases,2] > nValMinRet, aBases[nBases,6] * (mv_par10/100),0)
+								nIrVen		+= If(aBases[nBases,2] > nValMinRet, aBases[nBases,6] * (MV_PAR10/100),0)
 								nValBas		+= aBases[nBases,4]
 								nPorc			+= aBases[nBases,7]
 								nVendComis	+= nComissao
-								nVendIr		+= If(aBases[nBases,2] > nValMinRet,(aBases[nBases,5]+aBases[nBases,6])* (mv_par10/100),0)
+								nVendIr		+= If(aBases[nBases,2] > nValMinRet,(aBases[nBases,5]+aBases[nBases,6])* (MV_PAR10/100),0)
 								nCount++
 							Else
 								lImpSub := .F.
@@ -660,9 +644,9 @@ While TRB->(!Eof())
 					   //===================================================================
 					   // calculo das comissoes p/ pedido venda
 					   //===================================================================	
-						dbSelectArea("SC5")
-						dbSetOrder(1)
-						DbGoto(Val(TRB->CHAVE))
+						DBSelectArea("SC5")
+						DBSetOrder(1)
+						DBGoTo(Val(TRB->CHAVE))
 						//======================================================================
 						// Fecho os dados fiscais de um pedido antes de carregar um novo pedido
 						//======================================================================
@@ -681,17 +665,17 @@ While TRB->(!Eof())
 									Nil,;
 									"MATA461")
 			
-						dbSelectArea("SC6")
-						dbSetOrder(1)
-						If dbSeek(xFilial("SC6")+SC5->C5_NUM)
-							While !Eof() .and. SC6->C6_NUM == SC5->C5_NUM
+						DBSelectArea("SC6")
+						DBSetOrder(1)
+						If DBSeek(xFilial("SC6")+SC5->C5_NUM)
+							While !Eof() .And. SC6->C6_NUM == SC5->C5_NUM
 								nRecOri := 0
 								If !Empty(SC6->C6_NFORI) .And. !Empty(SC6->C6_ITEMORI)
-									SD1->(dbSetOrder(1))
+									SD1->(DBSetOrder(1))
 									If SD1->(MSSeek(xFilial("SD1")+SC6->C6_NFORI+SC6->C6_SERIORI+SC5->C5_CLIENTE+SC5->C5_LOJACLI+SC6->C6_PRODUTO+SC6->C6_ITEMORI))
 										nRecOri := SD1->(Recno())
-									Endif
-								Endif
+									EndIf
+								EndIf
 			
 								MaFisAdd(C6_PRODUTO,;   	// 1-Codigo do Produto ( Obrigatorio )
 									C6_TES,;	   	// 2-Codigo do TES ( Opcional )
@@ -709,29 +693,29 @@ While TRB->(!Eof())
 									0)					// 14-Valor da Embalagem ( Opiconal )
 			
 								SC6->(DBSkip())
-							Enddo
-						Endif
+							EndDo
+						EndIf
 						nComissao	:= 0
 						nVlTotPed	:= 0
-						dbSelectArea("SC6")
-						dbSetOrder(1)
-						If dbSeek(xFilial("SC6")+SC5->C5_NUM)
+						DBSelectArea("SC6")
+						DBSetOrder(1)
+						If DBSeek(xFilial("SC6")+SC5->C5_NUM)
 							aParcelas	:= {}
-							nVendSC5		:= SC5->(FieldPos("C5_VEND"+STR(TRB->NVEND,1)))
-							nComiSC5		:= SC5->(FieldPos("C5_COMIS"+STR(TRB->NVEND,1)))
-							nComiSC6		:= SC6->(FieldPos("C6_COMIS"+STR(TRB->NVEND,1)))
-							dbSelectArea("SA3")
-							dbSeek(xFilial("SA3")+SC5->(FieldGet(nVendsc5)))
+							nVendSC5		:= SC5->(FieldPos("C5_VEND"+Str(TRB->NVEND,1)))
+							nComiSC5		:= SC5->(FieldPos("C5_COMIS"+Str(TRB->NVEND,1)))
+							nComiSC6		:= SC6->(FieldPos("C6_COMIS"+Str(TRB->NVEND,1)))
+							DBSelectArea("SA3")
+							DBSeek(xFilial("SA3")+SC5->(FieldGet(nVendsc5)))
 							nPerComE		:= (SA3->A3_ALEMISS/100)
 							nPerComB		:= (SA3->A3_ALBAIXA/100)
-							dbSelectArea("SC6")
+							DBSelectArea("SC6")
 							nRegSC6 := Recno()
 							//===================================================================
 							// valor de nao entregues total no pedido
 							//===================================================================
 							bAcao:= {|| nVlTotPed += SC6->(C6_PRCVEN * (C6_QTDVEN - C6_QTDENT))}
-							dbEval(bAcao,,{||!Eof() .and. SC6->C6_NUM == SC5->C5_NUM},,,.T.)
-							dbGoto(nRegSC6)
+							DBEval(bAcao,,{||!Eof() .And. SC6->C6_NUM == SC5->C5_NUM},,,.T.)
+							DBGoTo(nRegSC6)
 							//===================================================================
 							// Constituicao de aParcelas{}				                        |    
 							// Coluna 01    Data Vencto da Parcela			                    |
@@ -742,18 +726,18 @@ While TRB->(!Eof())
 							// Coluna 06    % Total da comissao                                 |
 							//===================================================================
 							aParcelas := Condicao (nVlTotPed,SC5->C5_CONDPAG,,SC5->C5_EMISSAO)
-							aEval(aParcelas,{|elem| aadd(elem,0),aadd(elem,0),aadd(elem,0),aadd(elem,0),aadd(elem,0)})
-							dbSelectArea("SC6")
+							aEval(aParcelas,{|elem| aAdd(elem,0),aAdd(elem,0),aAdd(elem,0),aAdd(elem,0),aAdd(elem,0)})
+							DBSelectArea("SC6")
 							nItem		:= 0
 							nTotImp	:= 0
-							While !Eof() .and. SC6->C6_NUM == SC5->C5_NUM
+							While !Eof() .And. SC6->C6_NUM == SC5->C5_NUM
 								nItem++
 								If SC6->C6_QTDENT >= SC6->C6_QTDVEN .Or.;
 									!Empty(SC6->C6_BLOQUEI)          .Or.;
 									Left(SC6->C6_BLQ,1) $ "RS"
-									dbskip()
+									DBSkip()
 									Loop
-								Endif
+								EndIf
 								nQtdItem := SC6->(C6_QTDVEN - C6_QTDENT)  // Qtde nao entregue
 								nBasItem := SC6->(C6_PRCVEN * nQtdItem) 	// Valor ref. nao entregue
 			
@@ -769,7 +753,7 @@ While TRB->(!Eof())
 								If SuperGetMv("MV_COMISIR") == "N"
 									nIrrItem := MafisRet(nItem, "IT_VALIRR")
 									nBasItem -= nIrrItem
-								Endif
+								EndIf
 								If GetNewPar("MV_COMIINS","N") == "N"
 									nInsItem := MafisRet(nItem, "IT_VALINS")
 									nBasItem -= nInsItem
@@ -789,7 +773,7 @@ While TRB->(!Eof())
 			                    //=================================================================== 
 								// Calcula abatimento de ISS e ICMS da base da comissao do vendedor
 								//===================================================================
-								SF4->(dbSetOrder(1))
+								SF4->(DBSetOrder(1))
 								SF4->(MsSeek(xFilial("SF4")+SC6->C6_TES))
 								If !(SF4->F4_ISS == "S")
 									If ( SA3->A3_ICM == "N" )
@@ -807,7 +791,7 @@ While TRB->(!Eof())
 									nBasItem -= nSolItem
 								EndIf
 			
-								nPercItem:= IIF(SC6->(FieldGet(nComiSC6))== 0,;
+								nPercItem:= IIf(SC6->(FieldGet(nComiSC6))== 0,;
 													 SC5->(FieldGet(nComiSC5)),	 ;	// Percentual no Pedido
 													 SC6->(FieldGet(nComiSC6)))		// Percentual no Item
 								aParcItem:= Condicao(nBasItem,SC5->C5_CONDPAG,,SC5->C5_EMISSAO)
@@ -817,15 +801,15 @@ While TRB->(!Eof())
 								//===================================================================
 								nTotImp := nIrrItem + nInsItem + nPisItem + nCofItem + nCslItem + nIcmItem + nIssItem + nSolItem
 			
-								dbSelectArea("SC6")
+								DBSelectArea("SC6")
 								For nCond := 1 to Len(aParcItem)
 									aParcelas[nCond,3] += ((aParcItem[nCond,2] * (nPercItem/100)) * nPerComE)
 									aParcelas[nCond,4] += ((aParcItem[nCond,2] * (nPercItem/100)) * nPerComB)
 									aParcelas[nCond,5] += (aParcItem[nCond,2] * nPerComB)
 									aParcelas[nCond,7] += (nTotImp / Len(aParcItem))
 								Next
-								dbskip()
-							Enddo
+								DBSkip()
+							EndDo
 							For nCond := 1 to	Len(aParcelas)
 								aParcelas[nCond,6] += (((aParcelas[nCond,3]+aParcelas[nCond,4]) * 100) / (aParcelas[nCond,2] - aParcelas[nCond,7]))
 								nComissao += (aParcelas[nCond,3]+aParcelas[nCond,4])
@@ -838,13 +822,13 @@ While TRB->(!Eof())
 								If lFirst
 									oReport:PrintText( PadR(STR0009 + TRB->CODIGO,16) + STR0010 + SA3->A3_NOME )
 									oReport:SkipLine()
-									dbSelectArea("TRB")
+									DBSelectArea("TRB")
 									lFirst := .F.
-								Endif
+								EndIf
 			
-								dbSelectArea("SC5")
-								dbSetOrder(1)
-								dbGOTO(Val(TRB->CHAVE))
+								DBSelectArea("SC5")
+								DBSetOrder(1)
+								DBGoTo(Val(TRB->CHAVE))
 			
 								If cPaisLoc == "BRA"
 								   nMoedaBco := 1
@@ -852,26 +836,26 @@ While TRB->(!Eof())
 								Else
 								   nMoedaBco := SC5->C5_MOEDA
 								   dDataConv := SC5->C5_EMISSAO
-								Endif
+								EndIf
 			
 								For nCond := 1 to Len(aParcelas)
-									If aParcelas[nCond,1] > mv_par03 .and.  ;
-										aParcelas[nCond,1] < mv_par04
+									If aParcelas[nCond,1] > MV_PAR03 .And.  ;
+										aParcelas[nCond,1] < MV_PAR04
 			
-										aParcelas[nCond,2] := xMoeda(aParcelas[nCond,2],nMoedaBco,mv_par05,dDataConv,nDecs+1)
-										aParcelas[nCond,3] := xMoeda(aParcelas[nCond,3],nMoedaBco,mv_par05,dDataConv,nDecs+1)
-										aParcelas[nCond,4] := xMoeda(aParcelas[nCond,4],nMoedaBco,mv_par05,dDataConv,nDecs+1)
-										aParcelas[nCond,5] := xMoeda(aParcelas[nCond,5],nMoedaBco,mv_par05,dDataConv,nDecs+1)
+										aParcelas[nCond,2] := xMoeda(aParcelas[nCond,2],nMoedaBco,MV_PAR05,dDataConv,nDecs+1)
+										aParcelas[nCond,3] := xMoeda(aParcelas[nCond,3],nMoedaBco,MV_PAR05,dDataConv,nDecs+1)
+										aParcelas[nCond,4] := xMoeda(aParcelas[nCond,4],nMoedaBco,MV_PAR05,dDataConv,nDecs+1)
+										aParcelas[nCond,5] := xMoeda(aParcelas[nCond,5],nMoedaBco,MV_PAR05,dDataConv,nDecs+1)
 			
 										aDados[TITULO]		:= C5_NUM
 										aDados[PARCELA]	:= Str(nCond,3)
 										aDados[COD_CLI]	:= C5_CLIENTE
 										aDados[LOJA]		:= C5_LOJACLI
 			
-										dbSelectArea("SA1")
-										dbSeek(cFilial+SC5->C5_CLIENTE+SC5->C5_LOJACLI)
-										aDados[NOME_CLI]	:= IF(mv_par13 == 1,SA1->A1_NREDUZ,SA1->A1_NOME)
-										dbSelectArea("SC5")
+										DBSelectArea("SA1")
+										DBSeek(cFilial+SC5->C5_CLIENTE+SC5->C5_LOJACLI)
+										aDados[NOME_CLI]	:= If(MV_PAR13 == 1,SA1->A1_NREDUZ,SA1->A1_NOME)
+										DBSelectArea("SC5")
 			
 										aDados[DT_EMIS]	:= C5_EMISSAO
 										aDados[DT_VENC]	:= aParcelas[nCond,1]   //Vencto
@@ -888,21 +872,21 @@ While TRB->(!Eof())
 			
 										nValTit		+= aParcelas[nCond,2]
 										nComEnt		+= aParcelas[nCond,3]
-										nIrEnt		+= If(aParcelas[nCond,2] > nValMinRet, aParcelas[nCond,3] * (mv_par10/100),0)
+										nIrEnt		+= If(aParcelas[nCond,2] > nValMinRet, aParcelas[nCond,3] * (MV_PAR10/100),0)
 										nComVen		+= aParcelas[nCond,4]
-										nIrVen		+= If(aParcelas[nCond,2] > nValMinRet, aParcelas[nCond,4] * (mv_par10/100),0)
+										nIrVen		+= If(aParcelas[nCond,2] > nValMinRet, aParcelas[nCond,4] * (MV_PAR10/100),0)
 										nValBas		+= aParcelas[nCond,5]
 										nPorc			+= aParcelas[nCond,6]
 										nVendComis	+= aParcelas[nCond,3]+aParcelas[nCond,4]
-										nVendIr		+= If(aParcelas[nCond,2] > nValMinRet, aParcelas[nCond,3]+aParcelas[nCond,4] * (mv_par10/100),0)
+										nVendIr		+= If(aParcelas[nCond,2] > nValMinRet, aParcelas[nCond,3]+aParcelas[nCond,4] * (MV_PAR10/100),0)
 										nCount++
-									Endif
+									EndIf
 								Next
-							Endif
-						Endif
+							EndIf
+						EndIf
 					EndIf
-			dbSelectArea("TRB")
-			dbSkip()
+			DBSelectArea("TRB")
+			DBSkip()
 		End
 		nTotTit  +=nValTit
 		nTotEnt  +=nComEnt
@@ -915,9 +899,9 @@ While TRB->(!Eof())
 		nTotPorc += nPorc
 		nTotCount+= nCount
 	
-		If ((nVendComis <> 0 .or. nTotCount > 0) .or. mv_par08 == 1 ) .And. lImpSub
+		If ((nVendComis <> 0 .Or. nTotCount > 0) .Or. MV_PAR08 == 1 ) .And. lImpSub
 			RFIN0174(nValTit,nComEnt,nComVen,nValBas,nPorc,nVendComis,nIrEnt,nIrVen,nVendIr,nCount,oReport,aDados)
-		Endif
+		EndIf
 	
 		nValTit		:= 0.00
 		nComEnt		:= 0.00
@@ -929,14 +913,14 @@ While TRB->(!Eof())
 		nVendComis 	:= 0.00
 		nVendIr		:= 0.00
 	
-		If mv_par12 == 1 // Salta Pagina por Vendedor? SIM/NAO
+		If MV_PAR12 == 1 // Salta Pagina por Vendedor? SIM/NAO
 			oReport:EndPage()
-		Endif
-Enddo
+		EndIf
+EndDo
 
 If nTotComis <> 0
 	RFIN017T(nTotTit,nTotEnt,nTotVen,nTotBas,nTotComis,nTotIrE,nTotIrB,nTotIrVen,nTotPorc,nTotCount,oReport,aDados)
-Endif
+EndIf
 
 //===================================================================
 // Fecho os dados fiscais de um pedido
@@ -945,13 +929,13 @@ MaFisEnd()
 
 oSection1:Finish()
 
-dbSelectarea("Trb")
-TRB->(dbCloseArea())
+DBSelectArea("Trb")
+TRB->(DBCloseArea())
 
-dbSelectArea("SE3")
-dbSetOrder(1)
-DbSelectarea("SE1")
-DbsetOrder(1)
+DBSelectArea("SE3")
+DBSetOrder(1)
+DBSelectArea("SE1")
+DBSetOrder(1)
 dbClearFilter()
 cFilAnt	:= cFilBack
 
@@ -962,9 +946,7 @@ Return
 Programa----------: RFIN0174()
 Autor-------------: Daniel Batori
 Data da Criacao---: 28.08.06
-===============================================================================================================================
 Descrição---------: Imprime Sub-Total
-===============================================================================================================================
 Parametros--------: nValTit
                     nComEnt
                     nComVen
@@ -977,16 +959,15 @@ Parametros--------: nValTit
                     nCount
                     oReport
                     aDados
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC Function RFIN0174(nValTit,nComEnt,nComVen,nValBas,nPorc,nVendComis,nIrEnt,nIrVen,nVendIr,nCount,oReport,aDados)
+Static Function RFIN0174(nValTit,nComEnt,nComVen,nValBas,nPorc,nVendComis,nIrEnt,nIrVen,nVendIr,nCount,oReport,aDados)
 Local oSection1 := oReport:Section(1)
 
 oReport:SkipLine()
 
-If mv_par10 > 0  // Aliquota IRRF
+If MV_PAR10 > 0  // Aliquota IRRF
 	aDados[NOME_CLI]	:= STR0013  //"SUBTOTAL DO VENDEDOR --->"
 	aDados[VAL_TIT]	:= nValTit
 	aDados[COM_EMISS]	:= nComEnt
@@ -1041,20 +1022,17 @@ Return .T.
 Programa----------: RFIN017T()
 Autor-------------: Paulo Boschetti
 Data da Criacao---: 30.08.06
-===============================================================================================================================
 Descrição---------: Imprime Total de comissões.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC Function RFIN017T(nTotTit,nTotEnt,nTotVen,nTotBas,nTotComis,nTotIrE,nTotIrB,nTotIrVen,nTotPorc,nTotCount,oReport,aDados)
+Static Function RFIN017T(nTotTit,nTotEnt,nTotVen,nTotBas,nTotComis,nTotIrE,nTotIrB,nTotIrVen,nTotPorc,nTotCount,oReport,aDados)
 Local oSection1 := oReport:Section(1)
 
 oReport:SkipLine()
 
-If mv_par10 > 0  // Aliquota IRRF
+If MV_PAR10 > 0  // Aliquota IRRF
 
 	aDados[NOME_CLI]	:= STR0015   //"SUBTOTAL GERAL    --->"
 	aDados[VAL_TIT]	:= nTotTit
@@ -1110,9 +1088,7 @@ Return .T.
 Programa----------: FA610ComPg()
 Autor-------------: Mauricio Pequim jr 
 Data da Criacao---: 30.08.06
-===============================================================================================================================
 Descrição---------: Verifica comissoes já pagas.
-===============================================================================================================================
 Parametros--------: aBases
                     cChaveSE3
                     nBases
@@ -1121,7 +1097,6 @@ Parametros--------: aBases
                     nValorFat
                     nBaseCom
                     nComissao
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1138,39 +1113,39 @@ DEFAULT cParcela := SE1->E1_PARCELA
 //===================================================================
 If aBases[nBases,7] == 0
 	aBases[nBases,7] := (((aBases[nBases,5]+aBases[nBases,6])*100)/aBases[nBases,2])
-Endif
+EndIf
 
-dbSelectArea("SE3")
-dbSetOrder(3)
-If dbSeek(xFilial("SE3")+cChaveSE3)
-	While !Eof() .and. xFilial("SE3")== SE3->E3_FILIAL .and.;
+DBSelectArea("SE3")
+DBSetOrder(3)
+If DBSeek(xFilial("SE3")+cChaveSE3)
+	While !Eof() .And. xFilial("SE3")== SE3->E3_FILIAL .and.;
 		SE3->E3_VEND+SE3->E3_CODCLI+SE3->E3_LOJA+SE3->E3_PREFIXO+SE3->E3_NUM == cChaveSE3
 
 		nPercEst	:= Abs(SE3->E3_BASE / nValorFat)
 		   
-	   If SE3->E3_BAIEMI == "E" .AND. EMPTY(SE3->E3_DATA) 
+	   If SE3->E3_BAIEMI == "E" .And. Empty(SE3->E3_DATA) 
            If SE3->E3_COMIS < 0
 				aBases[nBases,3] += SE3->E3_BASE
 				aBases[nBases,5] += SE3->E3_COMIS
 			Else
-				If aBases[nBases,3] > 0 .and. SE3->E3_BASE <> aBases[nBases,3]
+				If aBases[nBases,3] > 0 .And. SE3->E3_BASE <> aBases[nBases,3]
 					nPercBase:= Round(NoRound((aBases[nBases,3] * 100) / SE3->E3_BASE, 3),2)
 				Else
 					nPercBase:= 100
-				Endif
+				EndIf
 				aBases[nBases,3] -= Round(NoRound(SE3->E3_BASE  * (nPercBase/100) ,3),2)
 				aBases[nBases,5] += Round(NoRound(SE3->E3_COMIS * (nPercBase/100) ,3),2)
-			Endif
-  		ElseIf !EMPTY(SE3->E3_DATA)
-			If SE3->E3_BAIEMI == "B" .and. cTIPO+cPARCELA == SE3->E3_TIPO+SE3->E3_PARCELA .and. SE3->E3_COMIS > 0
+			EndIf
+  		ElseIf !Empty(SE3->E3_DATA)
+			If SE3->E3_BAIEMI == "B" .And. cTIPO+cPARCELA == SE3->E3_TIPO+SE3->E3_PARCELA .And. SE3->E3_COMIS > 0
 				aBases[nBases,4] -= (nBaseCom*nPercEst)
 				aBases[nBases,6] -= (nComissao*nPercEst)
-			ElseIf SE3->E3_BAIEMI == "B" .and. cTIPO+cPARCELA == SE3->E3_TIPO+SE3->E3_PARCELA .and. SE3->E3_COMIS < 0
+			ElseIf SE3->E3_BAIEMI == "B" .And. cTIPO+cPARCELA == SE3->E3_TIPO+SE3->E3_PARCELA .And. SE3->E3_COMIS < 0
 				aBases[nBases,4] += (nBaseCom*nPercEst)
 				aBases[nBases,6] += (nComissao*nPercEst)
-			Endif
-		Endif
-		SE3->(dbSkip())
+			EndIf
+		EndIf
+		SE3->(DBSkip())
 	EndDo
 EndIf
 Return
@@ -1180,23 +1155,20 @@ Return
 Programa----------: Vendedor610()
 Autor-------------: Marcelo Celi Marques
 Data da Criacao---: 18/03/09
-===============================================================================================================================
 Descrição---------: Complemento a função TitPrinc para retorno da array de vendedores com dados de comissão de 
                     titulos principais.
-===============================================================================================================================
 Parametros--------: cAliasSe1
                     nIndexSE5
-===============================================================================================================================
 Retorno-----------: aVend610
 ===============================================================================================================================
 */
 Static Function Vendedor610(cAliasSe1,nIndexSE5)
-Local aAreaSe1 := GetArea()
+Local aAreaSe1 := FWGetArea()
 Local aVend610	:= {{},{},{},{}}
 
 TitPrinc(xFilial(cAliasSe1),(cAliasSe1)->e1_PREFIXO,(cAliasSe1)->e1_NUM,(cAliasSe1)->e1_PARCELA,(cAliasSe1)->e1_TIPO,"SE1",@aVend610,nIndexSE5)
 
-RestArea(aAreaSe1)
+FWRestArea(aAreaSe1)
 
 Return aVend610
 
@@ -1205,13 +1177,10 @@ Return aVend610
 Programa----------: Fr610ProcF()
 Autor-------------: Marcelo Celi Marques
 Data da Criacao---: 23/03/09
-===============================================================================================================================
 Descrição---------: Trata o abastecimento do TRB a partir dos títulos filhos.
-===============================================================================================================================
 Parametros--------: oReport
                     lEnd
                     aSelFil
-===============================================================================================================================
 Retorno-----------: Nenhum.
 ===============================================================================================================================
 */
@@ -1228,7 +1197,7 @@ Local lFirstSE1	:= .T.
 Local _cFilProc
 Local _nRegSM0 := SM0->(Recno())
 Local _cCodEmp := FWCodEmp()
-LOCAL lPVen := .F.		// Flag diferenciador de pedido de venda
+Local lPVen := .F.		// Flag diferenciador de pedido de venda
 
 Default oReport := .F.
 Default lEnd := .F.
@@ -1239,20 +1208,20 @@ For nFilial := 1 to Len(aSelFil)
 	cFilSE1	:= cFilAnt // xFilial('SE1')
     _cFilProc :=  aSelFil[nFilial]
     
-    SM0->(DbSeek( _cCodEmp + _cFilProc))
+    SM0->(DBSeek( _cCodEmp + _cFilProc))
     
-	If Empty(cFilSE1) .and. !lFirstSE1
+	If Empty(cFilSE1) .And. !lFirstSE1
 		Loop	
 	ElseIf Empty(cFilSE1)
 		lFirstSE1	:= .F.	
 	EndIf
 	
-	dbSeek(_cFilProc+DtoS(mv_par03),.T.) // dbSeek(xFilial("SE1")+DtoS(mv_par03),.T.)	
+	DBSeek(_cFilProc+DToS(MV_PAR03),.T.) // DBSeek(xFilial("SE1")+DToS(MV_PAR03),.T.)	
 		
-	While SE1->(!Eof()) .and. _cFilProc == SE1->E1_FILIAL .and. SE1->E1_VENCREA <= mv_par04  //  While SE1->(!Eof()) .and. xFilial("SE1") == SE1->E1_FILIAL .and. SE1->E1_VENCREA <= mv_par04
+	While SE1->(!Eof()) .And. _cFilProc == SE1->E1_FILIAL .And. SE1->E1_VENCREA <= MV_PAR04  //  While SE1->(!Eof()) .And. xFilial("SE1") == SE1->E1_FILIAL .And. SE1->E1_VENCREA <= MV_PAR04
 		lPVen := .F.
 	
-		If Valtype(oReport) <> "L"
+		If ValType(oReport) <> "L"
 		   //===================================================================
 		   // chamado pelo r4
 		   //===================================================================
@@ -1261,118 +1230,118 @@ For nFilial := 1 to Len(aSelFil)
 		   //===================================================================
 		   // chamado pelo r3
 		   //===================================================================
-			IF lEnd
+			If lEnd
 				@PROW()+1,001 PSAY STR0008 // "CANCELADO PELO OPERADOR"
 				Exit
-			Endif
+			EndIf
 			IncRegua()
-		Endif
+		EndIf
 	
 		If E1_TIPO $ MVABATIM
-			dbSkip()
+			DBSkip()
 			Loop
-		Endif
+		EndIf
 	
-		If E1_EMISSAO < mv_par06 .or. E1_EMISSAO > mv_par07
-			dbSkip()
+		If E1_EMISSAO < MV_PAR06 .Or. E1_EMISSAO > MV_PAR07
+			DBSkip()
 			Loop
-		Endif
+		EndIf
 	    //===================================================================
 		// Despreza registros de outra moeda se escolhido nao imprimir
 		//===================================================================
-		If mv_par11 == 2 .AND. E1_MOEDA != mv_par05
-			dbSkip()
+		If MV_PAR11 == 2 .And. E1_MOEDA != MV_PAR05
+			DBSkip()
 			Loop
-		Endif
+		EndIf
 	    
 	    //=====================================================================
-		// Se título for uma liquidação e a comissão será gerada na liquidação
+		// Se título For uma liquidação e a comissão será gerada na liquidação
 		//=====================================================================
 		If !Empty(E1_NUMLIQ) .And. !lComiLiq
-			dbSkip()
+			DBSkip()
 			Loop
-		Endif
+		EndIf
 	
 		aVendedor := Vendedor610("SE1",nIndexSE5)
 	
-		For nVendTit := 1 to len(aVendedor[1])
+		For nVendTit := 1 to Len(aVendedor[1])
 			For JX:=1 TO 5
 				nx := Str(JX,1)
 				cVendedor := aVendedor[1][nVendTit][JX]
 				If !Empty(cVendedor)
 	
-					// Descobrir o recno() do titulo principal
+					// Descobrir o Recno() do titulo principal
 					For nx1 := 1 to Len(aVendedor[1])
 						nPos := aScan(aVendedor[1],{|x| x[nx1] == cVendedor})
 						If nPos > 0
 						   nx1 := Len(aVendedor[1])+1
-						   dbSelectArea("SE1")
-						   aAreaSE1 := GetArea()
-						   dbSetOrder(1)
-						   If dbSeek(aVendedor[4][nPos])
+						   DBSelectArea("SE1")
+						   aAreaSE1 := FWGetArea()
+						   DBSetOrder(1)
+						   If DBSeek(aVendedor[4][nPos])
 						      nRecPrinc := 0
 						      For ny1 := 1 to 5
 						      	If aVendedor[1][nPos][ny1] == cVendedor
 						      	   nRecPrinc := SE1->(Recno())
-						      	Endif
+						      	EndIf
 						      Next
-						   Endif
-						   RestArea(aAreaSE1)
-						Endif
+						   EndIf
+						   FWRestArea(aAreaSE1)
+						EndIf
 					Next
 	
-					If cVendedor >= mv_par01 .And. cVendedor <= mv_par02
+					If cVendedor >= MV_PAR01 .And. cVendedor <= MV_PAR02
 						If !Empty(SE1->E1_FATURA) .And. (AllTrim(SE1->E1_FATURA) <> "NOTFAT")
-							aAreaSE1 := GetArea()
+							aAreaSE1 := FWGetArea()
 							cCliente := E1_CLIENTE  //Declarar variaveis
 							cLoja    := E1_LOJA
 							cFatura  := E1_FATURA
 							cFatPref := E1_FATPREF
 							nChvFat  := SE1->(Recno())
-							SE1->(dbSetOrder(1))
-							SE1->(dbGotop())
+							SE1->(DBSetOrder(1))
+							SE1->(DBGoTop())
 							
 							cChaveSE1 := _cFilProc + cFatPref + cFatura  // cChaveSE1 := xFilial("SE1") + cFatPref + cFatura
 							
-							SE1->(dbSeek(cChaveSE1))
+							SE1->(DBSeek(cChaveSE1))
 							While(cChaveSE1 == SE1->(E1_FILIAL + E1_PREFIXO + E1_NUM)) // While(cChaveSE1 == xFilial("SE1") + E1_PREFIXO + E1_NUM)
-								If SE1->E1_VENCREA >= mv_par03 .And. SE1->E1_VENCREA <= mv_par04
+								If SE1->E1_VENCREA >= MV_PAR03 .And. SE1->E1_VENCREA <= MV_PAR04
 									If AllTrim(E1_FATURA) == "NOTFAT" .And. E1_SALDO > 0
 										GravaCom(nX,lPVen,nChvFat,cVendedor,nRecPrinc, _cFilProc)
-				  					Endif
-				  				Endif
-				  				DbSkip()
+				  					EndIf
+				  				EndIf
+				  				DBSkip()
 							EndDo
-							RestArea(aAreaSE1)
+							FWRestArea(aAreaSE1)
 						Else
 							GravaCom(nX,lPVen,,cVendedor,nRecPrinc, _cFilProc)
-						Endif
-					Endif
-				Endif
+						EndIf
+					EndIf
+				EndIf
 			Next
 		Next
-		SE1->(dbSkip())
-	Enddo
+		SE1->(DBSkip())
+	EndDo
 	
 	//===================================================================
 	// Verifica se considera pedidos de venda                       
 	//===================================================================
-	If mv_par09 == 1  // Considera Ped. Venda
+	If MV_PAR09 == 1  // Considera Ped. Venda
 		
 		cFilAnt	:= aSelFil[nFilial]
 		
 		lPVen := .T.
-		dbSelectarea("SC5")
-		dbsetOrder(2)
+		DBSelectArea("SC5")
+		DBSetOrder(2)
 	
-		If Valtype(oReport) <> "L"
-			oReport:SetMeter(SC5->(Reccount()))
-		Endif
+		If ValType(oReport) <> "L"
+			oReport:SetMeter(SC5->(RecCount()))
+		EndIf
 	
-		dbSeek(_cFilProc + DtoS(mv_par03),.T.)  // cFilial
-		While !Eof() .and. _cFilProc == C5_FILIAL .and. C5_EMISSAO <= mv_par04 // While !Eof() .and. cFilial == C5_FILIAL .and. C5_EMISSAO <= mv_par04
+		DBSeek(_cFilProc + DToS(MV_PAR03),.T.)  // cFilial
+		While !Eof() .And. _cFilProc == C5_FILIAL .And. C5_EMISSAO <= MV_PAR04 // While !Eof() .And. cFilial == C5_FILIAL .And. C5_EMISSAO <= MV_PAR04
 	
-			If Valtype(oReport) <> "L"
+			If ValType(oReport) <> "L"
 			   //=================================================================== 
 			   // chamado pelo r4
 			   //===================================================================	
@@ -1381,44 +1350,44 @@ For nFilial := 1 to Len(aSelFil)
 			   //===================================================================
 			   // chamado pelo R3
 			   //===================================================================	
-				IF lEnd
+				If lEnd
 					@PROW()+1,001 PSAY STR0008 // "CANCELADO PELO OPERADOR"
 					Exit
-				Endif
+				EndIf
 				IncRegua()
-			Endif
+			EndIf
 	
-			If C5_EMISSAO < mv_par06 .or. C5_EMISSAO > mv_par07
-				dbSkip()
+			If C5_EMISSAO < MV_PAR06 .Or. C5_EMISSAO > MV_PAR07
+				DBSkip()
 				Loop
-			Endif
+			EndIf
 		
-			If C5_VEND1 >= mv_par01 .and. C5_VEND1 <= mv_par02
+			If C5_VEND1 >= MV_PAR01 .And. C5_VEND1 <= MV_PAR02
 				GravaCom("1",lPVen,  ,  ,  , _cFilProc)
-			Endif
+			EndIf
 
-			If C5_VEND2 >= mv_par01 .and. C5_VEND2 <= mv_par02
+			If C5_VEND2 >= MV_PAR01 .And. C5_VEND2 <= MV_PAR02
 				GravaCom("2",lPVen,  ,  ,  , _cFilProc)
-			Endif
+			EndIf
 
-			If C5_VEND3 >= mv_par01 .and. C5_VEND3 <= mv_par02
+			If C5_VEND3 >= MV_PAR01 .And. C5_VEND3 <= MV_PAR02
 				GravaCom("3",lPVen,  ,  ,  , _cFilProc)
-			Endif
+			EndIf
 
-			If C5_VEND4 >= mv_par01 .and. C5_VEND4 <= mv_par02
+			If C5_VEND4 >= MV_PAR01 .And. C5_VEND4 <= MV_PAR02
 				GravaCom("4",lPVen,  ,  ,  , _cFilProc)
-			Endif
+			EndIf
 
-			If C5_VEND5 >= mv_par01 .and. C5_VEND5 <= mv_par02
+			If C5_VEND5 >= MV_PAR01 .And. C5_VEND5 <= MV_PAR02
 				GravaCom("5",lPVen,  ,  ,  , _cFilProc)
-			Endif
+			EndIf
 
-			dbSkip()
-		Enddo
-	Endif
+			DBSkip()
+		EndDo
+	EndIf
 Next
 
-SM0->(DbGoTo(_nRegSM0))
+SM0->(DBGoTo(_nRegSM0))
 cFilAnt	:= cFilBack
 
 Return
@@ -1428,13 +1397,10 @@ Return
 Programa----------: Fr610ProcP()
 Autor-------------: Marcelo Celi Marques
 Data da Criacao---: 23/03/09
-===============================================================================================================================
 Descrição---------: Trata o abastecimento do TRB a partir dos títulos filhos.
-===============================================================================================================================
 Parametros--------: oReport
                     lEnd
                     aSelFil
-===============================================================================================================================
 Retorno-----------: Nenhum.
 ===============================================================================================================================
 */
@@ -1465,268 +1431,268 @@ For nFilial := 1 to Len(aSelFil)
 	cFilSE1	:= cFilAnt //xFilial('SE1')
 	_cFilProc := aSelFil[nFilial]
 	
-	SM0->(DbSeek( _cCodEmp + _cFilProc))
+	SM0->(DBSeek( _cCodEmp + _cFilProc))
 	
-	If (Empty(cFilSE1) .and. lFirstSE1) .or. !Empty(cFilSE1)
+	If (Empty(cFilSE1) .And. lFirstSE1) .Or. !Empty(cFilSE1)
 		lFirstSE1	:= .F.	
-		//dbSeek(xFilial("SE1")+DtoS(mv_par03),.T.)
-		dbSeek(_cFilProc+DtoS(mv_par03),.T.)
+		//DBSeek(xFilial("SE1")+DToS(MV_PAR03),.T.)
+		DBSeek(_cFilProc+DToS(MV_PAR03),.T.)
 		
-		While SE1->(!Eof()) .and. _cFilProc == SE1->E1_FILIAL .and. SE1->E1_VENCREA <= mv_par04 // While SE1->(!Eof()) .and. xFilial("SE1") == SE1->E1_FILIAL .and. SE1->E1_VENCREA <= mv_par04		
+		While SE1->(!Eof()) .And. _cFilProc == SE1->E1_FILIAL .And. SE1->E1_VENCREA <= MV_PAR04 // While SE1->(!Eof()) .And. xFilial("SE1") == SE1->E1_FILIAL .And. SE1->E1_VENCREA <= MV_PAR04		
 		    //===================================================================
 			// Reposiciona filial para casos de compartilhamento do SE1
 			//===================================================================
 			cFilAnt	:= If(!Empty(SE1->E1_FILORIG),SE1->E1_FILORIG,cFilAnt)
 					
-			dbSelectArea("SE1")
+			DBSelectArea("SE1")
 			lPVen := .F.
 			lLiqui := .F.
 			aTitulos := {}
 		
-			If Valtype(oReport) <> "L"
+			If ValType(oReport) <> "L"
 				// chamado pelo r4
 				oReport:IncMeter()
 			Else
 				// chamado pelo r3
-				IF lEnd
+				If lEnd
 					@PROW()+1,001 PSAY STR0008 // "CANCELADO PELO OPERADOR"
 					Exit
-				Endif
+				EndIf
 				IncRegua()
-			Endif
+			EndIf
 		
 			If E1_TIPO $ MVABATIM
-				dbSkip()
+				DBSkip()
 				Loop
-			Endif
+			EndIf
 		
 			nRecSe1 	:= SE1->(Recno())
 
-			dbSelectArea("SE1")
+			DBSelectArea("SE1")
 		
-			If SE1->E1_EMISSAO < mv_par06 .or. SE1->E1_EMISSAO > mv_par07
-				SE1->(dbSkip())
+			If SE1->E1_EMISSAO < MV_PAR06 .Or. SE1->E1_EMISSAO > MV_PAR07
+				SE1->(DBSkip())
 				Loop
-			Endif
+			EndIf
 	        
 	        //===================================================================	
 			// Despreza registros de outra moeda se escolhido nao imprimir
 			//===================================================================
-			If mv_par11 == 2 .AND. SE1->E1_MOEDA != mv_par05
-				SE1->(dbSkip())
+			If MV_PAR11 == 2 .And. SE1->E1_MOEDA != MV_PAR05
+				SE1->(DBSkip())
 				Loop
-			Endif
+			EndIf
 		
 			nRecSe1 	:= SE1->(Recno())
-			aArea       := GetArea()
+			aArea       := FWGetArea()
 			If SE1->E1_SALDO > 0
-				dbSelectArea("SE5")
-				dbSetOrder(10)
-				If !Empty(SE1->E1_NUMLIQ) .AND. dbSeek(_cFilProc+SE1->E1_NUMLIQ) // dbSeek(xFilial("SE5")+SE1->E1_NUMLIQ)
+				DBSelectArea("SE5")
+				DBSetOrder(10)
+				If !Empty(SE1->E1_NUMLIQ) .And. DBSeek(_cFilProc+SE1->E1_NUMLIQ) // DBSeek(xFilial("SE5")+SE1->E1_NUMLIQ)
 					lLiqui := .T.
 					cNumLiq := SE1->E1_NUMLIQ
-					dbSelectArea("SE1")
-					SE1->(dbSetOrder(1))
+					DBSelectArea("SE1")
+					SE1->(DBSetOrder(1))
 					//===================================================================
 					// Busca os titulos origens da liquidacao
 					//===================================================================
-					While SE5->(!Eof()) .And. _cFilProc == SE5->E5_FILIAL .and. SubStr(SE5->E5_DOCUMEN,1,Len(cNumLiq)) == cNumLiq // While SE5->(!Eof()) .And. xFilial("SE5") == SE5->E5_FILIAL .and. SubStr(SE5->E5_DOCUMEN,1,Len(cNumLiq)) == cNumLiq
-						If SE5->E5_MOTBX = 'LIQ' .AND. SE5->E5_SITUACA != "C" .AND.  SE5->E5_TIPODOC == "BA"
-							If ! SE1->(dbSeek(_cFilProc+SE5->E5_PREFIXO+SE5->E5_NUMERO+SE5->E5_PARCELA+SE5->E5_TIPO)) // If ! SE1->(dbSeek(xFilial("SE1")+SE5->E5_PREFIXO+SE5->E5_NUMERO+SE5->E5_PARCELA+SE5->E5_TIPO))
-							   SE1->(dbGoto(nRecSe1))
+					While SE5->(!Eof()) .And. _cFilProc == SE5->E5_FILIAL .And. SubStr(SE5->E5_DOCUMEN,1,Len(cNumLiq)) == cNumLiq // While SE5->(!Eof()) .And. xFilial("SE5") == SE5->E5_FILIAL .And. SubStr(SE5->E5_DOCUMEN,1,Len(cNumLiq)) == cNumLiq
+						If SE5->E5_MOTBX = 'LIQ' .And. SE5->E5_SITUACA != "C" .And.  SE5->E5_TIPODOC == "BA"
+							If ! SE1->(DBSeek(_cFilProc+SE5->E5_PREFIXO+SE5->E5_NUMERO+SE5->E5_PARCELA+SE5->E5_TIPO)) // If ! SE1->(DBSeek(xFilial("SE1")+SE5->E5_PREFIXO+SE5->E5_NUMERO+SE5->E5_PARCELA+SE5->E5_TIPO))
+							   SE1->(DBGoTo(nRecSe1))
 							   aAdd(aTitulos, nRecSe1)
 							Else
 								aAdd(aTitulos, SE1->(Recno()))
-							Endif
+							EndIf
 						EndIf
 						SE5->(DBSkip())
 					EndDo
-				Endif
-			Endif
-			dbSelectArea("SE1")
+				EndIf
+			EndIf
+			DBSelectArea("SE1")
 			nRecSe1Pr	:= SE1->(Recno())
 		
-			SE1->(dbGoto(nRecSe1Pr))
-			If "NOTFAT" $ SE1->E1_FATURA .And. Empty(Alltrim((E1_VEND1+E1_VEND2+E1_VEND3+E1_VEND4+E1_VEND5))) .And. SE1->E1_SALDO == 0
+			SE1->(DBGoTo(nRecSe1Pr))
+			If "NOTFAT" $ SE1->E1_FATURA .And. Empty(AllTrim((E1_VEND1+E1_VEND2+E1_VEND3+E1_VEND4+E1_VEND5))) .And. SE1->E1_SALDO == 0
 			   cQuery := "SELECT * FROM " + RetSqlName("SE5") + " WHERE E5_FILIAL = '" + SE1->E1_FILIAL + "' AND "
 			   cQuery += "E5_FATURA = '" + SE1->E1_NUM + "' AND "
 			   cQuery += "D_E_L_E_T_=' ' "
 			   cQuery := ChangeQuery(cQuery)
-			   dbSelectArea("SE5")
-			   dbCloseArea()
+			   DBSelectArea("SE5")
+			   DBCloseArea()
 			   dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery),"SE5",.F., .T.)
 		
-			   dbSelectArea("SE1")
-			   dbSetOrder(1)
-			   If (!Empty(SE5->E5_FATURA) .And. !("NOTFAT" $ SE5->E5_FATURA)) .And. dbSeek(_cFilProc+SE5->E5_PREFIXO+SE5->E5_NUMERO+SE5->E5_PARCELA+SE5->E5_TIPO) // dbSeek(xFilial("SE1")+SE5->E5_PREFIXO+SE5->E5_NUMERO+SE5->E5_PARCELA+SE5->E5_TIPO)
+			   DBSelectArea("SE1")
+			   DBSetOrder(1)
+			   If (!Empty(SE5->E5_FATURA) .And. !("NOTFAT" $ SE5->E5_FATURA)) .And. DBSeek(_cFilProc+SE5->E5_PREFIXO+SE5->E5_NUMERO+SE5->E5_PARCELA+SE5->E5_TIPO) // DBSeek(xFilial("SE1")+SE5->E5_PREFIXO+SE5->E5_NUMERO+SE5->E5_PARCELA+SE5->E5_TIPO)
 				  nRecSe1Pr := Recno()
 			   Else
 				  nRecSe1Pr := nRecSe1
-			   Endif
+			   EndIf
 			   
-			   dbSelectArea("SE5")
-			   dbCloseArea()
+			   DBSelectArea("SE5")
+			   DBCloseArea()
 			   ChKFile("SE5")
-			   dbSelectArea("SE5")
-			   dbSetOrder(1)
+			   DBSelectArea("SE5")
+			   DBSetOrder(1)
 
-			ElseIf !Empty(SE1->E1_FATURA) .And. Empty(Alltrim((E1_VEND1+E1_VEND2+E1_VEND3+E1_VEND4+E1_VEND5))) .And. SE1->E1_SALDO == 0
+			ElseIf !Empty(SE1->E1_FATURA) .And. Empty(AllTrim((E1_VEND1+E1_VEND2+E1_VEND3+E1_VEND4+E1_VEND5))) .And. SE1->E1_SALDO == 0
 		
-			    dbSelectArea("SE3")
-			    dbSetOrder(1)
-			    If dbSeek(_cFilProc+SE1->E1_PREFIXO+SE1->E1_NUM+SE1->E1_PARCELA) // dbSeek(xFilial("SE3")+SE1->E1_PREFIXO+SE1->E1_NUM+SE1->E1_PARCELA)
-					dbSelectArea("SE1")
-					RestArea(aArea)
-					SE1->(dbSkip())
+			    DBSelectArea("SE3")
+			    DBSetOrder(1)
+			    If DBSeek(_cFilProc+SE1->E1_PREFIXO+SE1->E1_NUM+SE1->E1_PARCELA) // DBSeek(xFilial("SE3")+SE1->E1_PREFIXO+SE1->E1_NUM+SE1->E1_PARCELA)
+					DBSelectArea("SE1")
+					FWRestArea(aArea)
+					SE1->(DBSkip())
 			    	Loop
-			    Endif
+			    EndIf
 		
-			    dbSelectArea("SE5")
-			    dbSetOrder(10)
-				If !Empty(SE1->E1_NUMLIQ) .AND. dbSeek(_cFilProc+SE1->E1_NUMLIQ) // dbSeek(xFilial("SE5")+SE1->E1_NUMLIQ)
-			    	dbSelectarea("SE1")
-			    	dbSetOrder(1)
-				    If ! dbSeek(_cFilProc+SE5->E5_PREFIXO+SE5->E5_NUMERO+SE5->E5_PARCELA+SE5->E5_TIPO) // dbSeek(xFilial("SE1")+SE5->E5_PREFIXO+SE5->E5_NUMERO+SE5->E5_PARCELA+SE5->E5_TIPO)
-					   SE1->(dbGoto(nRecSe1))
-					Endif
-				Endif
-				dbSelectArea("SE1")
+			    DBSelectArea("SE5")
+			    DBSetOrder(10)
+				If !Empty(SE1->E1_NUMLIQ) .And. DBSeek(_cFilProc+SE1->E1_NUMLIQ) // DBSeek(xFilial("SE5")+SE1->E1_NUMLIQ)
+			    	DBSelectArea("SE1")
+			    	DBSetOrder(1)
+				    If ! DBSeek(_cFilProc+SE5->E5_PREFIXO+SE5->E5_NUMERO+SE5->E5_PARCELA+SE5->E5_TIPO) // DBSeek(xFilial("SE1")+SE5->E5_PREFIXO+SE5->E5_NUMERO+SE5->E5_PARCELA+SE5->E5_TIPO)
+					   SE1->(DBGoTo(nRecSe1))
+					EndIf
+				EndIf
+				DBSelectArea("SE1")
 				nRecSe1Pr	:= SE1->(Recno())
-			Endif
+			EndIf
 			If !lLiqui
-				aadd(aTitulos, nRecSe1Pr)
+				aAdd(aTitulos, nRecSe1Pr)
 			EndIf
 		
-			RestArea(aArea)
+			FWRestArea(aArea)
 		
 			For nJ := 1 To Len(aTitulos)
 		
 				For JX:=1 TO 5
 					nx := Str(JX,1)
 		
-					dbSelectArea("SE1")
-					SE1->(dbGoto(aTitulos[nJ]))
+					DBSelectArea("SE1")
+					SE1->(DBGoTo(aTitulos[nJ]))
 		
-					IF  (Jx==1 .and. !EMPTY(E1_VEND1)) .OR.;
-						(Jx==2 .and. !EMPTY(E1_VEND2)) .OR.;
-						(Jx==3 .and. !EMPTY(E1_VEND3)) .OR.;
-						(Jx==4 .and. !EMPTY(E1_VEND4)) .OR.;
-						(Jx==5 .and. !EMPTY(E1_VEND5)) 
+					If  (Jx==1 .And. !Empty(E1_VEND1)) .OR.;
+						(Jx==2 .And. !Empty(E1_VEND2)) .OR.;
+						(Jx==3 .And. !Empty(E1_VEND3)) .OR.;
+						(Jx==4 .And. !Empty(E1_VEND4)) .OR.;
+						(Jx==5 .And. !Empty(E1_VEND5)) 
 					
-						If (Jx==1 .and. E1_VEND1 >= mv_par01 .and. E1_VEND1 <= mv_par02) .OR.;
-							(Jx==2 .and. E1_VEND2 >= mv_par02 .and. E1_VEND2 <= mv_par03) .OR.;
-							(Jx==3 .and. E1_VEND3 >= mv_par02 .and. E1_VEND3 <= mv_par03) .OR.;
-							(Jx==4 .and. E1_VEND4 >= mv_par02 .and. E1_VEND4 <= mv_par03) .OR.;
-							(Jx==5 .and. E1_VEND5 >= mv_par02 .and. E1_VEND5 <= mv_par03)
+						If (Jx==1 .And. E1_VEND1 >= MV_PAR01 .And. E1_VEND1 <= MV_PAR02) .OR.;
+							(Jx==2 .And. E1_VEND2 >= MV_PAR02 .And. E1_VEND2 <= MV_PAR03) .OR.;
+							(Jx==3 .And. E1_VEND3 >= MV_PAR02 .And. E1_VEND3 <= MV_PAR03) .OR.;
+							(Jx==4 .And. E1_VEND4 >= MV_PAR02 .And. E1_VEND4 <= MV_PAR03) .OR.;
+							(Jx==5 .And. E1_VEND5 >= MV_PAR02 .And. E1_VEND5 <= MV_PAR03)
 		
 							cVend    := E1_VEND&nx
 							If !lLiqui
-								RestArea(aArea)
-							Endif
+								FWRestArea(aArea)
+							EndIf
 		
 							If !Empty(SE1->E1_FATURA) .And. (AllTrim(SE1->E1_FATURA) <> "NOTFAT")
-								aAreaSE1 := GetArea()
+								aAreaSE1 := FWGetArea()
 								cCliente := E1_CLIENTE  //Declarar variaveis
 								cLoja    := E1_LOJA
 								cFatura  := E1_FATURA
 								cFatPref := E1_FATPREF
 								cLiquid  := "/"
 								nChvFat  := SE1->(Recno())
-								SE1->(dbSetOrder(1))
-								SE1->(dbGotop())
+								SE1->(DBSetOrder(1))
+								SE1->(DBGoTop())
 								cChaveSE1 := _cFilProc + cFatPref + cFatura // xFilial("SE1") + cFatPref + cFatura
-								SE1->(dbSeek(cChaveSE1))
+								SE1->(DBSeek(cChaveSE1))
 		
 								While((cChaveSE1 == _cFilProc + E1_PREFIXO + E1_NUM))  // xFilial("SE1") + E1_PREFIXO + E1_NUM))
 		
 										If AllTrim(E1_FATURA) == "NOTFAT" .And. SE1->E1_SALDO > 0 .And. (If(!lComiLiq,If(Empty(E1_NUMLIQ),.T.,.F.),.T.))
 										   	GravaCom(nX,lPVen,nChvFat,cVend,nRecSe1Pr, _cFilProc)
 					  					ElseIf AllTrim(E1_FATURA) == "NOTFAT" .And. SE1->E1_SALDO == 0 .And. !Empty(SE1->E1_TIPOLIQ)
-					  						dbSelectArea("SE5")
-					  						dbSetOrder(7)
-					  						If dbSeek(_cFilProc+SE1->E1_PREFIXO+SE1->E1_NUM+SE1->E1_PARCELA+SE1->E1_TIPO+SE1->E1_CLIENTE) // dbSeek(xFilial("SE5")+SE1->E1_PREFIXO+SE1->E1_NUM+SE1->E1_PARCELA+SE1->E1_TIPO+SE1->E1_CLIENTE)
+					  						DBSelectArea("SE5")
+					  						DBSetOrder(7)
+					  						If DBSeek(_cFilProc+SE1->E1_PREFIXO+SE1->E1_NUM+SE1->E1_PARCELA+SE1->E1_TIPO+SE1->E1_CLIENTE) // DBSeek(xFilial("SE5")+SE1->E1_PREFIXO+SE1->E1_NUM+SE1->E1_PARCELA+SE1->E1_TIPO+SE1->E1_CLIENTE)
 					  							nRegSE1 := SE1->(Recno())
-					  							dbSelectarea("SE1")
-					  							dbSetOrder(15)
-					  							dbSeek(_cFilProc+SE5->E5_DOCUMEN) // dbSeek(xFilial("SE1")+SE5->E5_DOCUMEN)
+					  							DBSelectArea("SE1")
+					  							DBSetOrder(15)
+					  							DBSeek(_cFilProc+SE5->E5_DOCUMEN) // DBSeek(xFilial("SE1")+SE5->E5_DOCUMEN)
 					  							cChaveLiq := SE1->E1_FILIAL+SE1->E1_NUMLIQ
-					  							Do While cChaveLiq == SE1->E1_FILIAL+SE1->E1_NUMLIQ .And. !Eof()
+					  							While cChaveLiq == SE1->E1_FILIAL+SE1->E1_NUMLIQ .And. !Eof()
 					  								If SE1->E1_SALDO > 0 .And. (If(!lComiLiq,If(Empty(E1_NUMLIQ),.T.,.F.),.T.))
 					  									GravaCom(nX,lPVen,nChvFat,cVend,nRecSe1Pr,_cFilProc)
-					  								Endif
-					  								dbSkip()
-					  							Enddo
-					  							SE1->(dbGoto(nRegSE1))
-					  							dbSetOrder(1)
-					  						Endif
-					  						dbSelectArea("SE1")
-					  					Endif
+					  								EndIf
+					  								DBSkip()
+					  							EndDo
+					  							SE1->(DBGoTo(nRegSE1))
+					  							DBSetOrder(1)
+					  						EndIf
+					  						DBSelectArea("SE1")
+					  					EndIf
 		
-					  				DbSkip()
+					  				DBSkip()
 								EndDo
 		
-								RestArea(aAreaSE1)
+								FWRestArea(aAreaSE1)
 							Else
-								If (lComiLiq .OR. ( !lComiLiq .And. Empty(E1_NUMLIQ) ))
-									If ( Alltrim(SE1->E1_FATURA) <> "NOTFAT"   .and. SE1->E1_SALDO > 0) .or. (lLiqui .and. SE1->E1_SALDO == 0)
+								If (lComiLiq .Or. ( !lComiLiq .And. Empty(E1_NUMLIQ) ))
+									If ( AllTrim(SE1->E1_FATURA) <> "NOTFAT"   .And. SE1->E1_SALDO > 0) .Or. (lLiqui .And. SE1->E1_SALDO == 0)
 									    //===================================================================
 										// VERIFICAR SE DATA VENCTO ESTA NO RANGE DE/ATE
 										//===================================================================
-										If SE1->E1_VENCREA >= mv_par03 .And. SE1->E1_VENCREA <= mv_par04
+										If SE1->E1_VENCREA >= MV_PAR03 .And. SE1->E1_VENCREA <= MV_PAR04
 											GravaCom(nX,lPVen,,cVend,nRecSe1Pr, _cFilProc)
 										EndIf
 									Else
-										aAreaSE1 := GetArea()
-										dbSelectArea("SE3")
-										dbSetOrder(1)
-										If dbSeek(_cFilProc+SE1->(E1_PREFIXO+E1_NUM+E1_PARCELA))  // dbSeek(xFilial("SE1")+SE1->(E1_PREFIXO+E1_NUM+E1_PARCELA))
+										aAreaSE1 := FWGetArea()
+										DBSelectArea("SE3")
+										DBSetOrder(1)
+										If DBSeek(_cFilProc+SE1->(E1_PREFIXO+E1_NUM+E1_PARCELA))  // DBSeek(xFilial("SE1")+SE1->(E1_PREFIXO+E1_NUM+E1_PARCELA))
 											While SE3->(E3_FILIAL+E3_PREFIXO+E3_NUM+E3_PARCELA) == _cFilProc+SE1->(E1_PREFIXO+E1_NUM+E1_PARCELA) // xFilial("SE1")+SE1->(E1_PREFIXO+E1_NUM+E1_PARCELA)
 											    //===================================================================
 												// VERIFICAR SE DATA VENCTO ESTA NO RANGE DE/ATE
 												//===================================================================
-												If SE1->E1_VENCREA >= mv_par03 .And. SE1->E1_VENCREA <= mv_par04
+												If SE1->E1_VENCREA >= MV_PAR03 .And. SE1->E1_VENCREA <= MV_PAR04
 												   //=================================================================== 
 												   // VERIFICAR SE E3_DATA ESTA PREENCHIDO
 												   //===================================================================	
 											       	If Empty(E3_DATA)
-											       		RestArea(aAreaSE1)
+											       		FWRestArea(aAreaSE1)
 														GravaCom(nX,lPVen,,cVend,nRecSe1Pr, _cFilProc)
 													EndIf
 												EndIf
-												SE3->(DbSkip())
+												SE3->(DBSkip())
 											EndDo
 										EndIf
 									EndIf
-								Endif
-							Endif
-						Endif
-					Endif
+								EndIf
+							EndIf
+						EndIf
+					EndIf
 				Next nX
 			Next nJ
-			RestArea(aArea)
-			SE1->(dbSkip())
-		Enddo
+			FWRestArea(aArea)
+			SE1->(DBSkip())
+		EndDo
 	EndIf
 	
 	//===================================================================
 	// Verifica se considera pedidos de venda                       
 	//===================================================================
-	If mv_par09 == 1  // Considera Ped. Venda
+	If MV_PAR09 == 1  // Considera Ped. Venda
 		
 		cFilAnt	:= aSelFil[nFilial]
 		
 		lPVen := .T.
-		dbSelectarea("SC5")
-		dbsetOrder(2)
+		DBSelectArea("SC5")
+		DBSetOrder(2)
 	
-		If Valtype(oReport) <> "L"
-			oReport:SetMeter(SC5->(Reccount()))
-		Endif
+		If ValType(oReport) <> "L"
+			oReport:SetMeter(SC5->(RecCount()))
+		EndIf
 	
-		dbSeek(_cFilProc+DtoS(mv_par03),.T.)  // cFilial
-		While !Eof() .and. _cFilProc == C5_FILIAL .and. C5_EMISSAO <= mv_par04 // While !Eof() .and. cFilial == C5_FILIAL .and. C5_EMISSAO <= mv_par04
+		DBSeek(_cFilProc+DToS(MV_PAR03),.T.)  // cFilial
+		While !Eof() .And. _cFilProc == C5_FILIAL .And. C5_EMISSAO <= MV_PAR04 // While !Eof() .And. cFilial == C5_FILIAL .And. C5_EMISSAO <= MV_PAR04
 	
-			If Valtype(oReport) <> "L"
+			If ValType(oReport) <> "L"
 			   //===================================================================
 			   // chamado pelo r4
 			   //===================================================================
@@ -1735,50 +1701,50 @@ For nFilial := 1 to Len(aSelFil)
 			   //===================================================================
 			   // chamado pelo R3
 			   //===================================================================
-				IF lEnd
+				If lEnd
 					@PROW()+1,001 PSAY STR0008 // "CANCELADO PELO OPERADOR"
 					Exit
-				Endif
+				EndIf
 				IncRegua()
-			Endif
+			EndIf
 	
-			If C5_EMISSAO < mv_par06 .or. C5_EMISSAO > mv_par07
-				dbSkip()
+			If C5_EMISSAO < MV_PAR06 .Or. C5_EMISSAO > MV_PAR07
+				DBSkip()
 				Loop
-			Endif
+			EndIf
 		
-			IF !EMPTY(C5_VEND1)
-				If C5_VEND1 >= mv_par01 .and. C5_VEND1 <= mv_par02
+			If !Empty(C5_VEND1)
+				If C5_VEND1 >= MV_PAR01 .And. C5_VEND1 <= MV_PAR02
 					GravaCom('1',lPVen,   ,   ,  , _cFilProc)
 				End
 			End
-			IF !EMPTY(C5_VEND2)
-				If C5_VEND2 >= mv_par01 .and. C5_VEND2 <= mv_par02
+			If !Empty(C5_VEND2)
+				If C5_VEND2 >= MV_PAR01 .And. C5_VEND2 <= MV_PAR02
 					GravaCom('2',lPVen,   ,   ,  , _cFilProc)
 				End
 			End
-			IF !EMPTY(C5_VEND3)
-				If C5_VEND3 >= mv_par01 .and. C5_VEND3 <= mv_par02
+			If !Empty(C5_VEND3)
+				If C5_VEND3 >= MV_PAR01 .And. C5_VEND3 <= MV_PAR02
 					GravaCom('3',lPVen,   ,   ,  , _cFilProc)
 				End
 			End
-			IF !EMPTY(C5_VEND4)
-				If C5_VEND4 >= mv_par01 .and. C5_VEND4 <= mv_par02
+			If !Empty(C5_VEND4)
+				If C5_VEND4 >= MV_PAR01 .And. C5_VEND4 <= MV_PAR02
 					GravaCom('4',lPVen,   ,   ,  , _cFilProc)
 				End
 			End
-			IF !EMPTY(C5_VEND5)
-				If C5_VEND5 >= mv_par01 .and. C5_VEND5 <= mv_par02
+			If !Empty(C5_VEND5)
+				If C5_VEND5 >= MV_PAR01 .And. C5_VEND5 <= MV_PAR02
 					GravaCom('5',lPVen,   ,   ,  , _cFilProc)
 				End
 			End
 			
-			dbSkip()
-		Enddo
-	Endif
+			DBSkip()
+		EndDo
+	EndIf
 Next
 
-SM0->(DbGoTo(_nRegSM0))
+SM0->(DBGoTo(_nRegSM0))
 cFilAnt := cFilBack
 
 Return
@@ -1788,16 +1754,13 @@ Return
 Programa----------: IsFatura()
 Autor-------------: Totvs
 Data da Criacao---: 23/03/09
-===============================================================================================================================
 Descrição---------: Retorna se o titulo posicionado é fatura.
-===============================================================================================================================
 Parametros--------: Nenhum.
-===============================================================================================================================
 Retorno-----------: .T. / .F.
 ===============================================================================================================================
 */
 Static Function IsFatura()
-Local lFatura	 := ( alltrim(SE1->E1_FATURA)=="NOTFAT")
+Local lFatura	 := ( AllTrim(SE1->E1_FATURA)=="NOTFAT")
 
 Return(lFatura)
 
@@ -1806,13 +1769,10 @@ Return(lFatura)
 Programa----------: ComissFat()
 Autor-------------: Totvs
 Data da Criacao---: 03/08/12 
-===============================================================================================================================
 Descrição---------: Retorna um array com 2 elementeos com as comissoes e valor da fatura Estrutura do Array :
                     Posicao 1 := array contendo as comissoes de todos os titulos constante na fatura - Fa440Comis().
                             2 := Valor da Fatura.
-===============================================================================================================================
 Parametros--------: cFatura
-===============================================================================================================================
 Retorno-----------: { aBases, nVlrFatur } = Posicao 1 := array contendo as comissoes de todos os titulos constante na fatura - Fa440Comis().
                                                     2 := Valor da Fatura.
 ===============================================================================================================================
@@ -1822,33 +1782,33 @@ Local nVlrFatur := 0
 Local aFatura   := {}
 Local nQtdVend, cVend, nPosVend, nCntFor
 Local nDecimal  	:= TamSX3("E1_BASCOM1")[2]
-Local aArea 	:= GetArea()
+Local aArea 	:= FWGetArea()
 Local aAreaSE1 	:= SE1->(GetArea())
 Local aBases 	:= {}
-dbSelectArea("SE1")
-dbSetOrder(10)
+DBSelectArea("SE1")
+DBSetOrder(10)
 MsSeek(xFilial("SE1")+cFatura,.F.)
 
 nRegSE1Orig := SE1->(Recno())
 If Empty(SE1->(E1_VEND1+E1_VEND2+E1_VEND3+E1_VEND4+E1_VEND5))
 	If !Empty(SE1->E1_NUMLIQ)
-		dbSelectArea("SE5")
-		dbSetOrder(10)
-		If dbSeek(xFilial("SE5")+SE1->E1_NUMLIQ)
-			dbSelectArea("SE1")
-			dbSetOrder(1)
-			If dbSeek(xFilial("SE1")+SE5->E5_PREFIXO+SE5->E5_NUMERO+SE5->E5_PARCELA+SE5->E5_TIPO)
+		DBSelectArea("SE5")
+		DBSetOrder(10)
+		If DBSeek(xFilial("SE5")+SE1->E1_NUMLIQ)
+			DBSelectArea("SE1")
+			DBSetOrder(1)
+			If DBSeek(xFilial("SE1")+SE5->E5_PREFIXO+SE5->E5_NUMERO+SE5->E5_PARCELA+SE5->E5_TIPO)
 				nRegSE1Orig := SE1->(Recno())
-			Endif
-			SE1->(dbGoto(nRegSE1))
-	    Endif
-	Endif
-Endif
+			EndIf
+			SE1->(DBGoTo(nRegSE1))
+	    EndIf
+	EndIf
+EndIf
 
 While ( !Eof() .And. xFilial("SE1") == SE1->E1_FILIAL .And.;
 						SE1->(E1_CLIENTE+E1_LOJA+E1_FATPREF+E1_FATURA) == cFatura )
 
-	dbSelectArea("SE1")
+	DBSelectArea("SE1")
 	aFatura := Fa440Comis(SE1->(Recno()),.F.,.F.,,,nRegSE1Orig)  //calculo da comissao
 
 	nQtdVend := Len(aFatura)
@@ -1858,32 +1818,32 @@ While ( !Eof() .And. xFilial("SE1") == SE1->E1_FILIAL .And.;
 
 		cKeySe1 := SE1->(E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO+E1_CLIENTE+E1_LOJA)
 
-		SE5->(dbSetOrder(7))
+		SE5->(DBSetOrder(7))
 		If SE5->(MsSeek(xFilial("SE5")+cKeySe1))  //se encontrou baixas
-			While !SE5->(Eof()) .and. SE5->E5_FILIAL == xFilial("SE5") .and. ;
+			While !SE5->(Eof()) .And. SE5->E5_FILIAL == xFilial("SE5") .And. ;
 										SE5->(E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA == cKeySe1 )
                 //===================================================================
 				// Ignora a NCC pois já foi feito o abatimento na geração da fatura.
 				//===================================================================
-				If SE5->E5_MOTBX == "FAT" .and. SE5->E5_SITUACA != "C" .And. SE5->E5_TIPO != MV_CRNEG
+				If SE5->E5_MOTBX == "FAT" .And. SE5->E5_SITUACA != "C" .And. SE5->E5_TIPO != MV_CRNEG
 					nVlrFatur += SE5->E5_VALOR
 					nVlrProp := ((SE5->E5_VALOR*1000)/SE1->E1_VLCRUZ)/1000
 
 					If nVlrProp+0.01 >= 1
 						nVlrProp := 1
 					EndIf
-					Exit   //sai do loop do SE5
-				Endif
+					Exit   //sai do Loop do SE5
+				EndIf
 
-				SE5->(dbSkip())
-			Enddo
+				SE5->(DBSkip())
+			EndDo
 
 		Else
 
 			nVlrFatur += SE1->E1_VLCRUZ
 			nVlrProp   := 1
 
-		Endif
+		EndIf
 
 		For nCntFor := 1 To Len(aFatura)
 			aFatura[nCntFor,2]:= Round(NoRound(aFatura[nCntFor,2]*nVlrProp,nDecimal+1),nDecimal)
@@ -1906,7 +1866,7 @@ While ( !Eof() .And. xFilial("SE1") == SE1->E1_FILIAL .And.;
 		Else
 			nPerComis := aFatura[nCntFor,7]
 		EndIf
-		aadd(abases,{	aFatura[nCntFor,1],;
+		aAdd(abases,{	aFatura[nCntFor,1],;
 						aFatura[nCntFor,2],;
 						aFatura[nCntFor,3],;
 						aFatura[nCntFor,4],;
@@ -1915,13 +1875,13 @@ While ( !Eof() .And. xFilial("SE1") == SE1->E1_FILIAL .And.;
 						Max(0,nPerComis)})
 	Next nCntFor
 
-	dbSelectArea("SE1")
-	dbSkip()
+	DBSelectArea("SE1")
+	DBSkip()
 
 EndDo
 
-RestArea(aAreaSE1)
-RestArea(aArea)
+FWRestArea(aAreaSE1)
+FWRestArea(aArea)
 
 Return( { aBases, nVlrFatur } )
 
@@ -1930,11 +1890,8 @@ Return( { aBases, nVlrFatur } )
 Programa----------: MaxSeqSe5()
 Autor-------------: Rodrigo Oliveira
 Data da Criacao---: 21/08/2017
-===============================================================================================================================
 Descrição---------: Função para verificação dda maior sequencia de baixa do título.
-===============================================================================================================================
 Parametros--------: cChave
-===============================================================================================================================
 Retorno-----------: cSeq - retorna a maior sequencia de baixa do título 
 ===============================================================================================================================
 */
@@ -1942,20 +1899,20 @@ Static Function MaxSeqSe5(cChave)
 Local cSeq		:= "01"
 Local aAreaSE5	:= SE5->(GetArea())
 
-SE5->(DbSetOrder(7))
+SE5->(DBSetOrder(7))
 
-If SE5->(DbSeek(cChave))
+If SE5->(DBSeek(cChave))
 
 	While SE5->(!Eof()) .And. ;
 		cChave == SE5->E5_FILIAL + SE5->E5_PREFIXO + SE5->E5_NUMERO + SE5->E5_PARCELA + SE5->E5_TIPO + SE5->E5_CLIENTE + SE5->E5_LOJA
 		If cSeq < SE5->E5_SEQ
 			cSeq	:= SE5->E5_SEQ
 		EndIf
-		SE5->(DbSkip())
+		SE5->(DBSkip())
 	EndDo			
 EndIf
 
-RestArea(aAreaSE5)
+FWRestArea(aAreaSE5)
 
 Return cSeq
 
@@ -1964,20 +1921,17 @@ Return cSeq
 Programa----------: GRAVACOM(nX,lPVen,nChvFat,cVend, nRecPrinc,_cFilProc)
 Autor-------------: Paulo Boschetti
 Data da Criacao---: 13.07.93
-===============================================================================================================================
 Descrição---------: Grava Arquivo de Trabalho 
-===============================================================================================================================
 Parametros--------: nX
                     lPVen
                     nChvFat
                     cVend
                     nRecPrinc
                     _cFilProc
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC Function GRAVACOM(nX,lPVen,nChvFat,cVend, nRecPrinc,_cFilProc)
+Static Function GRAVACOM(nX,lPVen,nChvFat,cVend, nRecPrinc,_cFilProc)
 Local cAlias := Alias()
 
 Default nChvFat := 0
@@ -1988,29 +1942,29 @@ If Empty(_cFilProc)
    _cFilProc := cFilAnt
 EndIf
 
-dbSelectarea("TRB")
+DBSelectArea("TRB")
 If Empty(cVend)
 	cVend := IIf(lPVen,"SC5->C5_VEND","SE1->E1_VEND")+nX
 	cVend := &cVend
-Endif
+EndIf
 
 nChave := AllTrim(Str(&(cAlias+"->(RECNO())")))
 
-//If TRB->(!DbSeek(cVend+cFilAnt+nChave))  
-If TRB->(!DbSeek(cVend+_cFilProc+nChave))  
+//If TRB->(!DBSeek(cVend+cFilAnt+nChave))  
+If TRB->(!DBSeek(cVend+_cFilProc+nChave))  
 	RecLock("TRB",.T.)
 	Replace FILIAL With _cFilProc // cFilAnt  
 	Replace CODIGO With cVend
 	Replace CHAVE  With AllTrim(Str(&(cAlias+"->(RECNO())")))
-	Replace NVEND  With VAL(nX)
-	Replace PVEND  With IIF(lPVen,"S","N")
+	Replace NVEND  With Val(nX)
+	Replace PVEND  With IIf(lPVen,"S","N")
 	Replace RECPRINC With nRecPrinc
 	If nChvFat > 0
 		Replace CHVFAT With nChvFat
-	Endif
-	MsUnlock()
-Endif
-DbSelectarea(cAlias)
+	EndIf
+	MSUnLock()
+EndIf
+DBSelectArea(cAlias)
 
 Return .T.
 
@@ -2019,16 +1973,13 @@ Return .T.
 Programa----------: Fa440Comis(nRegistro,lGrava,lRefaz,nRegDevol,lCalcParc,nRecnoOrig)
 Autor-------------: Eduardo Riera
 Data da Criacao---: 16/12/97
-===============================================================================================================================
 Descrição---------: Efetua o calculo das bases da comissao de um determinado titulo financeiro.
-===============================================================================================================================
 Parametros--------: nRegistro = Numero do Registro do SE1 ( Contas a Receber ) 
                     lGrava    = .T. : Atualiza baseS da comissao do SE1.		
                     lRefaz    = .F. : Retorna bases do SE1 ou (.T.) recalcula(Defa)
                     nRegDevol = Numero do Registro do SD2 para Devol.de Vendas
                     lCalcParc = .F. : Nao calcula array de bases por parcela da NF
                     nRecnoOrig
-===============================================================================================================================
 Retorno-----------: Retorna um Array com as bases da comissao. na seguinte   
                     estrutura [C¢digo do Vendedor] 
                               [Base da Comissao] 
@@ -2040,7 +1991,7 @@ Retorno-----------: Retorna um Array com as bases da comissao. na seguinte
 ===============================================================================================================================
 */
 Static Function Fa440Comis(nRegistro,lGrava,lRefaz,nRegDevol,lCalcParc,nRecnoOrig)
-Local aArea 	 := GetArea()
+Local aArea 	 := FWGetArea()
 Local aAreaSE4  := {}
 Local aAreaSF2  := {}
 Local aAreaSF4  := {}
@@ -2096,7 +2047,7 @@ Local nFreteAux 	:= 0
 Local nPis 			:= 0
 Local nCofins 		:= 0
 Local nCsll 		:= 0
-Local nTamParc  	:= TamSx3("E1_PARCELA")[1]
+Local nTamParc  	:= TamSX3("E1_PARCELA")[1]
 Local nDecimal  	:= TamSX3("E1_BASCOM1")[2] // N@ de decimais considerados no calculo
 Local cVend     	:= "1"
 Local cVendedor 	:= ""
@@ -2124,9 +2075,9 @@ Local lQuery    	:= .F.
 Local lContinua 	:= .T.
 Local cPrimParc 	:= " "
 Local lRecIRRF  	:= .F.
-Local lMata460  	:= Alltrim(SE1->E1_ORIGEM) == "MATA460"
+Local lMata460  	:= AllTrim(SE1->E1_ORIGEM) == "MATA460"
 //Controla o Pis Cofins e Csll na baixa  (1-Retem PCC na Baixa ou 2-Retem PCC na Emissão(default) )
-Local lPccBxCr		:= .f. //If (lFindPccBx,FPccBxCr(),.F.) 
+Local lPccBxCr		:= .F. //If (lFindPccBx,FPccBxCr(),.F.) 
 Local lPEPerCom 	:= ExistBlock("FIN440PE")
 Local lCalEmis		:= IsInCallStack("FA440CALCE")
 Local lMultVend := SuperGetMv("MV_LJTPCOM",,"1" ) == "2"
@@ -2138,7 +2089,7 @@ Local nIrrf     	:= 0
 
 #IFDEF TOP
 	Local cQuery    := ""
-#ENDIF
+#EndIf
 Static aStruSD1
 Static aStruSD2
 Static aStruSF4
@@ -2148,7 +2099,7 @@ Default lCalcParc := .T.
 DEFAULT nRecnoOrig := nRegistro
 //DEFAULT cMV_1DUP	:= SuperGetMv("MV_1DUP",,"01") 
 //DEFAULT cComiLiq 	:= SuperGetMv("MV_COMILIQ",,"2") 
-//DEFAULT lComiLiq	:= ComisBx("LIQ") .AND. cComiLiq == "1" 
+//DEFAULT lComiLiq	:= ComisBx("LIQ") .And. cComiLiq == "1" 
 
 If Type("cMV_1DUP") == "U"
    cMV_1DUP	:= SuperGetMv("MV_1DUP",,"01") 
@@ -2159,51 +2110,51 @@ If Type("cComiLiq") == "U"
 EndIf
 
 If Type("lComiLiq") == "U"
-   lComiLiq	:= ComisBx("LIQ") .AND. cComiLiq == "1" 
+   lComiLiq	:= ComisBx("LIQ") .And. cComiLiq == "1" 
 EndIf
 
 //===================================================================
 // Abertura dos arquivos pois no Loja alguns nao sao utilizados
 //===================================================================
 
-dbSelectArea("SE4")
+DBSelectArea("SE4")
 aAreaSE4  := SE4->(GetArea())
 cFilialSE4:= xFilial("SE4")
 
-dbSelectArea("SF2")
+DBSelectArea("SF2")
 aAreaSF2  := SF2->(GetArea())
 cFilialSF2:= xFilial("SF2")
 
-dbSelectArea("SF4")
+DBSelectArea("SF4")
 aAreaSF4  := SF4->(GetArea())
 cFilialSF4:= xFilial("SF4")
 
-dbSelectArea("SD2")
+DBSelectArea("SD2")
 aAreaSD2  := SD2->(GetArea())
 cFilialSD2:= xFilial("SD2")
 
-dbSelectArea("SA1")
+DBSelectArea("SA1")
 aAreaSA1  := SA1->(GetArea())
 
-dbSelectArea("SA3")
+DBSelectArea("SA3")
 aAreaSA3  := SA3->(GetArea())
 
-dbSelectArea("SD1")
+DBSelectArea("SD1")
 aAreaSD1  := SD1->(GetArea())
 cFilialSD1:= xFilial("SD1")
 
-dbSelectArea("SF1")
+DBSelectArea("SF1")
 aAreaSF1  := SF1->(GetArea())
 cFilialSF1:= xFilial("SF1")
 
-dbSelectArea("SE1")
+DBSelectArea("SE1")
 aAreaSE1  := SE1->(GetArea())
 cFilialSE1:= xFilial("SE1")
 
-dbSelectArea("SE2")
+DBSelectArea("SE2")
 cFilialSE2:= xFilial("SE2")
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 //===================================================================
 // Verifica se é a primeira parcela de uma fatura               
@@ -2216,11 +2167,11 @@ ElseIf nTamparc == 2
 Else
 	cPrimParc := cMV_1DUP+Space(3-Len(cMV_1DUP))
 	cPrimParc += "#1  #A  #   #001"
-Endif
+EndIf
 
-if cPaisLoc<>"BRA"
+If cPaisLoc<>"BRA"
 	cEspSes	:= GetSesNew("NDC","1")
-Endif
+EndIf
 
 //===================================================================
 // Tratamento de Parametros Default da funcao                   
@@ -2229,12 +2180,12 @@ lRefaz := If( lRefaz == Nil , .T. , lRefaz )
 lGrava := If( lGrava == Nil , .T. , lGrava )
 If ( aStruSD1 == Nil )
 	aStruSD1 := {}
-	dbSelectArea("SD1")
+	DBSelectArea("SD1")
 	aAux := dbStruct()
 	For nCntFor := 1 To Len(aAux)
 		If ( FieldName(nCntFor)$"D1_FILIAL#D1_DOC#D1_SERIE#D1_FORNECE#D1_LOJA" .Or.;
 				FieldName(nCntFor)$"D1_NFORI#D1_SERIORI#D1_COD#D1_ITEMORI#D1_TOTAL#D1_VALDESC#D1_ITEM" )
-			aadd(aStruSD1,{aAux[nCntFor,1],aAux[nCntFor,2],aAux[nCntFor,3],aAux[nCntFor,4]})
+			aAdd(aStruSD1,{aAux[nCntFor,1],aAux[nCntFor,2],aAux[nCntFor,3],aAux[nCntFor,4]})
 		EndIf
 	Next nCntFor
 EndIf
@@ -2255,24 +2206,24 @@ If ( aStruSD2 == Nil )
 	EndIf
 
 	aStruSD2 := {}
-	dbSelectArea("SD2")
+	DBSelectArea("SD2")
 	aAux := dbStruct()
 	For nCntFor := 1 To Len(aAux)
 		If ( FieldName(nCntFor)$cCposSD2 .Or.;
 			FieldName(nCntFor)$cFieldPis .Or.;
 			FieldName(nCntFor)$cFieldCof .Or.;
 			"D2_COMIS"$FieldName(nCntFor) )
-			aadd(aStruSD2,{aAux[nCntFor,1],aAux[nCntFor,2],aAux[nCntFor,3],aAux[nCntFor,4]})
+			aAdd(aStruSD2,{aAux[nCntFor,1],aAux[nCntFor,2],aAux[nCntFor,3],aAux[nCntFor,4]})
 		EndIf
 	Next nCntFor
 EndIf
 If ( aStruSF4 == Nil )
 	aStruSF4 := {}
-	dbSelectArea("SF4")
+	DBSelectArea("SF4")
 	aAux := dbStruct()
 	For nCntFor := 1 To Len(aAux)
 		If ( FieldName(nCntFor)$"F4_DUPLIC#F4_INCIDE#F4_IPIFRET#F4_INCSOL#F4_ISS" )
-			aadd(aStruSF4,{aAux[nCntFor,1],aAux[nCntFor,2],aAux[nCntFor,3],aAux[nCntFor,4]})
+			aAdd(aStruSF4,{aAux[nCntFor,1],aAux[nCntFor,2],aAux[nCntFor,3],aAux[nCntFor,4]})
 		EndIf
 	Next nCntFor
 EndIf
@@ -2280,25 +2231,25 @@ EndIf
 //===================================================================
 // Posiciona no Registro do SE1 a ser calculado                 
 //===================================================================
-dbSelectArea("SE1")
+DBSelectArea("SE1")
 MsGoto(nRegistro)
 
 //====================================================================
 // Verifica se o cliente e responsavel pelo recolhimento do IR ou nao.
 //====================================================================
 If cPaisLoc == "BRA"
-	dbSelectArea("SA1")
-	SA1->(dbSetOrder(1))
-	If SA1->(dbSeek(xFilial("SA1")+SE1->(E1_CLIENTE+E1_LOJA))) .And. SA1->A1_RECIRRF == "1"
+	DBSelectArea("SA1")
+	SA1->(DBSetOrder(1))
+	If SA1->(DBSeek(xFilial("SA1")+SE1->(E1_CLIENTE+E1_LOJA))) .And. SA1->A1_RECIRRF == "1"
 		lRecIRRF := .T.
-	Endif
-Endif
+	EndIf
+EndIf
 
 //===================================================================
-// Verifica se o titulo foi gerado pelo faturamento e for neces-
+// Verifica se o titulo foi gerado pelo faturamento e For neces-
 // sario recalcular suas bases.                                 
 //===================================================================
-If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes ) .and. !lSF2460I
+If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes ) .And. !lSF2460I
 	For nCntFor := 1 To nVend
 		cVendedor := SE1->(FieldGet(SE1->(FieldPos("E1_VEND"+cVend))))
 		nPerComis := SE1->(FieldGet(SE1->(FieldPos("E1_COMIS"+cVend))))
@@ -2318,30 +2269,30 @@ EndIf
 // origem para quando se tem SE1 compartilhado e SF2, SE4 ou SD2
 // exclusivos                                                   
 //===================================================================
-If !Empty(SE1->E1_MSFIL) .and. !(Empty(cFilialSf1)) .And. FWModeAccess("SE1",3)=="C" .And. FWModeAccess("SF1",3)=="E"
+If !Empty(SE1->E1_MSFIL) .And. !(Empty(cFilialSf1)) .And. FWModeAccess("SE1",3)=="C" .And. FWModeAccess("SF1",3)=="E"
 	cFilialSf1 := SE1->E1_MSFIL
-Endif
-If !Empty(SE1->E1_MSFIL) .and. !(Empty(cFilialSf2)) .And. FWModeAccess("SE1",3)=="C" .And. FWModeAccess("SF2",3)=="E"
+EndIf
+If !Empty(SE1->E1_MSFIL) .And. !(Empty(cFilialSf2)) .And. FWModeAccess("SE1",3)=="C" .And. FWModeAccess("SF2",3)=="E"
 	cFilialSf2 := SE1->E1_MSFIL
-Endif
-If !Empty(SE1->E1_MSFIL) .and. !(Empty(cFilialSf4)) .And. FWModeAccess("SE1",3)=="C" .And. FWModeAccess("SF4",3)=="E"
+EndIf
+If !Empty(SE1->E1_MSFIL) .And. !(Empty(cFilialSf4)) .And. FWModeAccess("SE1",3)=="C" .And. FWModeAccess("SF4",3)=="E"
 	cFilialSf4 := SE1->E1_MSFIL
-Endif
-If !Empty(SE1->E1_MSFIL) .and. !(Empty(cFilialSe1)) .And. FWModeAccess("SE1",3)=="C" .And. FWModeAccess("SE1",3)=="E"
+EndIf
+If !Empty(SE1->E1_MSFIL) .And. !(Empty(cFilialSe1)) .And. FWModeAccess("SE1",3)=="C" .And. FWModeAccess("SE1",3)=="E"
 	cFilialSe1 := SE1->E1_MSFIL
-Endif
-If !Empty(SE1->E1_MSFIL) .and. !(Empty(cFilialSe2)) .And. FWModeAccess("SE1",3)=="C" .And. FWModeAccess("SE2",3)=="E"
+EndIf
+If !Empty(SE1->E1_MSFIL) .And. !(Empty(cFilialSe2)) .And. FWModeAccess("SE1",3)=="C" .And. FWModeAccess("SE2",3)=="E"
 	cFilialSe2 := SE1->E1_MSFIL
-Endif
-If !Empty(SE1->E1_MSFIL) .and. !(Empty(cFilialSe4)) .And. FWModeAccess("SE1",3)=="C" .And. FWModeAccess("SE4",3)=="E"
+EndIf
+If !Empty(SE1->E1_MSFIL) .And. !(Empty(cFilialSe4)) .And. FWModeAccess("SE1",3)=="C" .And. FWModeAccess("SE4",3)=="E"
 	cFilialSe4 := SE1->E1_MSFIL
-Endif
-If !Empty(SE1->E1_MSFIL) .and. !(Empty(cFilialSd1)) .And. FWModeAccess("SE1",3)=="C" .And. FWModeAccess("SD1",3)=="E"
+EndIf
+If !Empty(SE1->E1_MSFIL) .And. !(Empty(cFilialSd1)) .And. FWModeAccess("SE1",3)=="C" .And. FWModeAccess("SD1",3)=="E"
 	cFilialSd1 := SE1->E1_MSFIL
-Endif
-If !Empty(SE1->E1_MSFIL) .and. !(Empty(cFilialSd2)) .And. FWModeAccess("SE1",3)=="C" .And. FWModeAccess("SD2",3)=="E"
+EndIf
+If !Empty(SE1->E1_MSFIL) .And. !(Empty(cFilialSd2)) .And. FWModeAccess("SE1",3)=="C" .And. FWModeAccess("SD2",3)=="E"
 	cFilialSd2 := SE1->E1_MSFIL
-Endif
+EndIf
 
 If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 	If Year(SE1->E1_EMISSAO)<2001
@@ -2349,18 +2300,18 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 	Else
 		cSerie := SE1->E1_SERIE
 	EndIf
-	dbSelectArea("SF2")
-	dbSetOrder(1)
+	DBSelectArea("SF2")
+	DBSetOrder(1)
 	If (!MsSeek(cFilialSF2+SE1->E1_NUM+cSerie+SE1->E1_CLIENTE+SE1->E1_LOJA,.F.))
 		lContinua := .F.
 	EndIf
-	dbSelectArea("SE4")
-	dbSetOrder(1)
+	DBSelectArea("SE4")
+	DBSetOrder(1)
 	If (!MsSeek(cFilialSE4+SF2->F2_COND))
 		lContinua := .F.
 	EndIf
-	dbSelectArea("SD2")
-	dbSetOrder(3)
+	DBSelectArea("SD2")
+	DBSetOrder(3)
 	#IFDEF TOP
 		If ( TcSrvType()!="AS/400" )
 			SD2->(dbCommit())
@@ -2394,22 +2345,22 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 			lContinua := !(cAliasSD2)->(Eof())
 			For nCntFor := 1 To Len(aStruSD2)
 				If ( aStruSD2[nCntFor][2]!= "C" )
-					TcSetField(cAliasSD2,aStruSD2[nCntFor][1],aStruSD2[nCntFor][2],aStruSD2[nCntFor][3],aStruSD2[nCntFor][4])
+					TCSetField(cAliasSD2,aStruSD2[nCntFor][1],aStruSD2[nCntFor][2],aStruSD2[nCntFor][3],aStruSD2[nCntFor][4])
 				EndIf
 			Next nCntFor
 			For nCntFor := 1 To Len(aStruSF4)
 				If ( aStruSF4[nCntFor][2]!="C" )
-					TcSetField(cAliasSF4,aStruSF4[nCntFor][1],aStruSF4[nCntFor][2],aStruSD2[nCntFor][3],aStruSF4[nCntFor][4])
+					TCSetField(cAliasSF4,aStruSF4[nCntFor][1],aStruSF4[nCntFor][2],aStruSD2[nCntFor][3],aStruSF4[nCntFor][4])
 				EndIf
 			Next nCntFor
 		Else
-	#ENDIF
+	#EndIf
 		If (!MsSeek(cFilialSD2+SE1->E1_NUM+cSerie+SE1->E1_CLIENTE+SE1->E1_LOJA,.F.))
 			lContinua := .F.
 		EndIf
 		#IFDEF TOP
 		EndIf
-		#ENDIF
+		#EndIf
 	If ( lContinua )
 		//===================================================================
 		// Calculo da comissao por item de nota fiscal                      |
@@ -2447,7 +2398,7 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 			cFieldCof := aRelImp[nScanCof,2]
 		EndIf
 
-		If  lPccBxCr .and. !lCalEmis
+		If  lPccBxCr .And. !lCalEmis
 
 			 If !(SE5->E5_PRETPIS	$	"1;2")
 			 	nPis	:= SE5->E5_VRETPIS
@@ -2464,7 +2415,7 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 			 Else
 			 	nCofins	:= 0
 			 EndIf
-		Endif
+		EndIf
 
 		While ( !Eof() .And. (cAliasSD2)->D2_FILIAL == cFilialSD2 .And.;
 				(cAliasSD2)->D2_DOC 	 == SE1->E1_NUM .And.;
@@ -2473,13 +2424,13 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 				(cAliasSD2)->D2_LOJA	 == SE1->E1_LOJA	)
 
 			If ( !lQuery )
-				dbSelectArea("SF4")
-				dbSetOrder(1)
+				DBSelectArea("SF4")
+				DBSetOrder(1)
 				MsSeek(cFilialSF4+(cAliasSD2)->D2_TES)
 			Else
 				If cPaisLoc<>"BRA"
-					SD2->(DbGoto((cAliasSD2)->SD2RECNO))
-				Endif
+					SD2->(DBGoTo((cAliasSD2)->SD2RECNO))
+				EndIf
 			EndIf
 
 			cVend := "1"
@@ -2489,8 +2440,8 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 				nImp     := 0
 				nDescImp := 0
 				If cPaisLoc <> "BRA"
-					SA3->(DbSetOrder(1))
-					SA3->(DbSeek(xFilial()+cVendedor))
+					SA3->(DBSetOrder(1))
+					SA3->(DBSeek(xFilial()+cVendedor))
 					aImp := TesImpInf(	(cAliasSD2)->D2_TES)
 					cImp := SA3->A3_COMIMP
 					For nX :=1 to Len(aImp)
@@ -2509,14 +2460,14 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 					EndIf
 				EndIf
 				If ( !Empty(cVendedor) .And. (cAliasSF4)->F4_DUPLIC == "S" )
-					aadd(aSD2Vend,{ cVendedor,;
+					aAdd(aSD2Vend,{ cVendedor,;
 						(cAliasSD2)->D2_TOTAL+nImp+nDescImp,;
 						(cAliasSD2)->D2_VALICM+nDescImp,;
 						(cAliasSD2)->D2_VALIPI,;
 						(cAliasSD2)->D2_IPI,;
 						(cAliasSF4)->F4_INCIDE,;
 						(cAliasSF4)->F4_IPIFRET,;
-						Iif(cPaisLoc<>"BRA".Or.(cAliasSF4)->F4_INCSOL=="N",0,(cAliasSD2)->D2_ICMSRET),;
+						IIf(cPaisLoc<>"BRA".Or.(cAliasSF4)->F4_INCSOL=="N",0,(cAliasSD2)->D2_ICMSRET),;
 						nPerComis,;
 						(cAliasSD2)->D2_VALACRS,;
 						If(lQuery,(cAliasSD2)->SD2RECNO,(cAliasSD2)->(RecNo())),;
@@ -2524,14 +2475,14 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 						cVend,;
 						nPis,;
 						nCofins,;
-						Iif(!Empty(cFieldPis), (cAliasSD2)-> D2_VALIMP5,0) ,; // pis apuração
-						Iif(!Empty(cFieldCof), (cAliasSD2)-> D2_VALIMP6,0) }) // cofins apuração
+						IIf(!Empty(cFieldPis), (cAliasSD2)-> D2_VALIMP5,0) ,; // pis apuração
+						IIf(!Empty(cFieldCof), (cAliasSD2)-> D2_VALIMP6,0) }) // cofins apuração
 						If cPaisLoc == "PTG"
-							Aadd(aSD2Vend[Len(aSD2Vend)],(cAliasSD2)->D2_TOTAL+nImpComis+nDescImp)
+							aAdd(aSD2Vend[Len(aSD2Vend)],(cAliasSD2)->D2_TOTAL+nImpComis+nDescImp)
 						EndIf
 					If aScan(aVendPed, cVendedor) == 0	  // Monta um array com os vendedores para rateio do frete
-					   aadd(aVendPed, cVendedor)
-					Endif
+					   aAdd(aVendPed, cVendedor)
+					EndIf
 					//===================================================================
 					// Ajusta a base da comissao da nota para a Moeda 01  
 					//===================================================================
@@ -2542,17 +2493,17 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 				cVend := Soma1(cVend,1)
 			Next nCntFor
 			If ( (cAliasSF4)->F4_ISS != "S" )
-				nSF2IcmRet += Iif((cAliasSF4)->F4_INCSOL=="N",0,(cAliasSD2)->D2_ICMSRET)
+				nSF2IcmRet += IIf((cAliasSF4)->F4_INCSOL=="N",0,(cAliasSD2)->D2_ICMSRET)
 				nIcmFrete  += (cAliasSD2)->D2_ICMFRET
 			EndIf
 			nTotal	  += (cAliasSD2)->D2_TOTAL
-			dbSelectArea(cAliasSD2)
-			dbSkip()
+			DBSelectArea(cAliasSD2)
+			DBSkip()
 		EndDo
 		If ( lQuery )
-			dbSelectArea(cAliasSD2)
-			dbCloseArea()
-			dbSelectArea("SD2")
+			DBSelectArea(cAliasSD2)
+			DBCloseArea()
+			DBSelectArea("SD2")
 		EndIf
 		//===================================================================
 		// Calculo da comissao pela nota.                                   |
@@ -2604,7 +2555,7 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 					nRatINSS := NoRound(SF2->F2_VALINSS*aSD2Vend[nCntFor,2]/nTotal,nDecimal+1)
 				EndIf
 
-				If  lPccBxCr .and. !lCalEmis
+				If  lPccBxCr .And. !lCalEmis
 			 		If !(SE5->E5_PRETPIS	$	"1;2")
 						nPis	:= SE5->E5_VRETPIS
 					Else
@@ -2638,7 +2589,7 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 						nRatCOF := NoRound(nCofins*aSD2Vend[nCntFor,2]/nTotal,nDecimal)
 					EndIf
 
-				Elseif !lPccBxCr
+				ElseIf !lPccBxCr
 
 					If ( SE1->E1_PARCELA $ cPrimParc )
 						nBaseDif  := NoRound(SF2->F2_VALCSLL*(1-(aSD2Vend[nCntFor,2]/nTotal)),nDecimal)
@@ -2663,7 +2614,7 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 					Else
 						nRatCOF := NoRound(SF2->F2_VALCOFI*aSD2Vend[nCntFor,2]/nTotal,nDecimal)
 					EndIf
-				Endif
+				EndIf
 
 				If ( SE1->E1_PARCELA $ cPrimParc )
 			  		nBaseDif  := NoRound(SF2->F2_VALIRRF*(1-(aSD2Vend[nCntFor,2]/nTotal)),nDecimal)
@@ -2679,9 +2630,9 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 			nBaseSE1  := 0
 			nPos      := 0
 			nRatIcmFre:= NoRound(nIcmFrete*aSD2Vend[nCntFor,2]/nTotal,nDecimal)
-			nBaseSE1  := aSD2Vend[nCntFor,2]+IIF(SF2->F2_TIPO=='P',0,aSD2Vend[nCntFor,4])+aSD2Vend[nCntFor,8]+nRatFrete //soma-se IPI e ICM Retido
-			dbSelectArea("SA3")
-			dbSetOrder(1)
+			nBaseSE1  := aSD2Vend[nCntFor,2]+IIf(SF2->F2_TIPO=='P',0,aSD2Vend[nCntFor,4])+aSD2Vend[nCntFor,8]+nRatFrete //soma-se IPI e ICM Retido
+			DBSelectArea("SA3")
+			DBSetOrder(1)
 			MsSeek(xFilial()+aSD2Vend[nCntFor,1])
 
 			If SE1->(FieldPos("E1_ALEMIS"+aSD2Vend[nCntFor,13]))<>0 //Nao criar no dicionario padrao
@@ -2698,7 +2649,7 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 			If ( SA3->A3_FRETE == "N" )
 				nBaseSE1 -=  nRatFrete
 				nBaseSE1 +=  nRatIcmFre
-			Endif
+			EndIf
 			If ( SA3->A3_IPI   == "N" )
 				nBaseSE1 -= ( aSD2Vend[nCntFor,4] )
 			EndIf
@@ -2715,7 +2666,7 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 			If ( SA3->A3_ICMSRET == "N" )
 				nBaseSE1 -= ( aSD2Vend[nCntFor,8] )
 			EndIf
-			If ( SA3->A3_ACREFIN == "N" ) .and. aSD2Vend[nCntFor,10] > 0
+			If ( SA3->A3_ACREFIN == "N" ) .And. aSD2Vend[nCntFor,10] > 0
 				nBaseSE1 -= ( aSD2Vend[nCntFor,10] )
 			EndIf
 
@@ -2731,7 +2682,7 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 
 			If SuperGetMv("MV_COMISIR") == "N" .And. lRecIRRF
 				nBaseSE1 -= nRatIRRF
-			Endif
+			EndIf
 			If GetNewPar("MV_COMIINS","N") == "N"
 				nBaseSE1 -= nRatINSS
 			EndIf
@@ -2756,20 +2707,20 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 				If GetNewPar("MV_COMICSL","N") == "S"
 					nCsll := 0
 				EndIf
-			Endif
+			EndIf
 
 			nPos := aScan(aBaseSE1,{|x| x[1] == aSD2Vend[nCntFor,1]})
-			If Alltrim(SE1->E1_Hist) <> "VENDA EM DINHEIRO"
+			If AllTrim(SE1->E1_Hist) <> "VENDA EM DINHEIRO"
 				nBaseBaix := Round(nBaseSE1*nAlBaixa/100,nDecimal+1)	 	// Base da Comissao na Baixa
-			ELSE
+			Else
 				nBaseBaix:= 0
-			Endif
+			EndIf
 			nBaseEmis := nBaseSE1-nBaseBaix                           		// Base da Comissao na Emissao
-			If ( nAlEmissao==0 .AND.  Alltrim(SE1->E1_Hist) <> "VENDA EM DINHEIRO" )
+			If ( nAlEmissao==0 .And.  AllTrim(SE1->E1_Hist) <> "VENDA EM DINHEIRO" )
 				nBaseEmis := 0
 			EndIf
 
-			If (IsInCallStack("FINA070") .or. IsInCallStack("FINA110")) .And. MV_PAR05 == 1
+			If (IsInCallStack("FINA070") .Or. IsInCallStack("FINA110")) .And. MV_PAR05 == 1
 				nBaseBaix += nJuros
 			EndIf
 
@@ -2777,7 +2728,7 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 			nVlrBaix  := nBaseBaix*aSD2Vend[nCntFor,9]/100	// Valor da Comissao na Baixa
 			If ( Empty(nRegDevol) .Or. nRegDevol == aSD2Vend[nCntFor,11] )
 				If ( nPos == 0 )
-					aadd(aBaseSE1,{ aSD2Vend[nCntFor,1] ,;
+					aAdd(aBaseSE1,{ aSD2Vend[nCntFor,1] ,;
 						nBaseSE1  				,;
 						nBaseEmis 				,;
 						nBaseBaix 				,;
@@ -2788,8 +2739,8 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 						nCsll						,;
 						nCofins})
 						If cPaisLoc == "PTG"
-							Aadd(aBaseSE1[Len(aBaseSE1)],Round((aSD2Vend[nCntFor,18]*aSD2Vend[nCntFor,9]/100)*SA3->A3_ALEMISS/100,nDecimal))
-							Aadd(aBaseSE1[Len(aBaseSE1)],aSD2Vend[nCntFor,18]*SA3->A3_ALEMISS/100)
+							aAdd(aBaseSE1[Len(aBaseSE1)],Round((aSD2Vend[nCntFor,18]*aSD2Vend[nCntFor,9]/100)*SA3->A3_ALEMISS/100,nDecimal))
+							aAdd(aBaseSE1[Len(aBaseSE1)],aSD2Vend[nCntFor,18]*SA3->A3_ALEMISS/100)
 						EndIf
 				Else
 					aBaseSE1[nPos,2] += nBaseSE1
@@ -2813,7 +2764,7 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 		// sario calcular a base da comissao para a parcela em questao.     |
 		//                                                                  |
 		// 2)Aqui deve-se tomar o maximo cuidado com a Condi‡Æo de pagto    |
-		// pois se o Icms Solidario ou o Ipi for separado de alguma par-    | 
+		// pois se o Icms Solidario ou o Ipi For separado de alguma par-    | 
 		// cela deve-se considera esta separacao para calcular-se a me-     | 
 		// lhor propor‡ao possivel para a base da parcela.                  |
 		//===================================================================
@@ -2823,8 +2774,8 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 				nProp   := 0
 				nVlrFat := xMoeda(SF2->F2_VALFAT,SE1->E1_MOEDA,1,SE1->E1_EMISSAO)
 				nVlrTit := SE1->E1_VLCRUZ
-				dbSelectArea("SA3")
-				dbSetOrder(1)
+				DBSelectArea("SA3")
+				DBSetOrder(1)
 				MsSeek(xFilial()+aBaseSE1[nCntFor,1])
 				If ( SA3->A3_IPI == "N" .Or. SA3->A3_ICMSRET == "N" )
 					If ( (SE4->E4_IPI == "S" .And. SF2->F2_VALIPI <> 0) .Or. ( SE4->E4_SOLID=="S" .And. SF2->F2_ICMSRET <> 0) ) .And. (SE1->E1_PARCELA $ cPrimParc)
@@ -2928,9 +2879,9 @@ If ( SE1->E1_TIPO $ MVNOTAFIS+cEspSes .And. lRefaz)
 		EndIf
 	Else
 		If ( lQuery .And. Select(cAliasSD2)<>0 )
-			dbSelectArea(cAliasSD2)
-			dbCloseArea()
-			dbSelectArea("SE1")
+			DBSelectArea(cAliasSD2)
+			DBCloseArea()
+			DBSelectArea("SE1")
 		EndIf
 	EndIf
 EndIf
@@ -2939,12 +2890,12 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
    // Verifica a filial de origem das notas de devolucao de Venda  
    //===================================================================
 
-	If !Empty(SE1->E1_FILORIG) .and. !(Empty(cFilialSF1)) .And. FWModeAccess("SE1",3)=="C" .And. FWModeAccess("SF1",3)=="E"
+	If !Empty(SE1->E1_FILORIG) .And. !(Empty(cFilialSF1)) .And. FWModeAccess("SE1",3)=="C" .And. FWModeAccess("SF1",3)=="E"
 		cFilialSF1 := SE1->E1_FILORIG
-	Endif
-	If !Empty(SE1->E1_FILORIG) .and. !(Empty(cFilialSD1)) .And. FWModeAccess("SE1",3)=="C" .And. FWModeAccess("SD1",3)=="E"
+	EndIf
+	If !Empty(SE1->E1_FILORIG) .And. !(Empty(cFilialSD1)) .And. FWModeAccess("SE1",3)=="C" .And. FWModeAccess("SD1",3)=="E"
 		cFilialSD1 := SE1->E1_FILORIG
-	Endif
+	EndIf
 
 	If Year(SE1->E1_EMISSAO)<2001
 		cSerie := If(Empty(SE1->E1_SERIE),SE1->E1_PREFIXO,SE1->E1_SERIE)
@@ -2955,8 +2906,8 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 	//===================================================================
 	// Posiciona Registros                                          
 	//===================================================================
-	dbSelectArea("SF1")
-	dbSetOrder(1)
+	DBSelectArea("SF1")
+	DBSetOrder(1)
 	If (!MsSeek(cFilialSF1+SE1->E1_NUM+cSerie+SE1->E1_CLIENTE+SE1->E1_LOJA,.F.))
 		lContinua := .F.
 	EndIf
@@ -2972,8 +2923,8 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 	//   da comissao.                                                   | 
 	//                                                                  |
 	//===================================================================
-	dbSelectArea("SD1")
-	dbSetOrder(1)
+	DBSelectArea("SD1")
+	DBSetOrder(1)
 	#IFDEF TOP
 		If ( TcSrvType()!="AS/400" )
 			SD1->(dbCommit())
@@ -2997,7 +2948,7 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 			Else
 				cQuery += "    SD1.D_E_L_E_T_<>'*'"
 				cQuery += "AND SD1.D1_ITEMORI<>'"+Space(Len(SD1->D1_ITEMORI))+"' "
-			EndIF
+			EndIf
 			cQuery += "ORDER BY "+SqlOrder(SD1->(IndexKey()))
 
 			cQuery := ChangeQuery(cQuery)
@@ -3006,17 +2957,17 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 			lContinua := !(cAliasSD1)->(Eof())
 			For nCntFor := 1 To Len(aStruSD1)
 				If ( aStruSD1[nCntFor][2]!="C" )
-					TcSetField(cAliasSD1,aStruSD1[nCntFor][1],aStruSD1[nCntFor][2],aStruSD1[nCntFor][3],aStruSD1[nCntFor][4])
+					TCSetField(cAliasSD1,aStruSD1[nCntFor][1],aStruSD1[nCntFor][2],aStruSD1[nCntFor][3],aStruSD1[nCntFor][4])
 				EndIf
 			Next nCntFor
 		Else
-	#ENDIF
+	#EndIf
 		If (!MsSeek(cFilialSD1+SE1->E1_NUM+cSerie+SE1->E1_CLIENTE+SE1->E1_LOJA,.F.))
 			lContinua := .F.
 		EndIf
 		#IFDEF TOP
 		EndIf
-		#ENDIF
+		#EndIf
 	aSemNota	:=	{}
 	While ( !Eof() .And. cFilialSD1  == (cAliasSD1)->D1_FILIAL  .And.;
 			SF1->F1_DOC 	 == (cAliasSD1)->D1_DOC	  .And.;
@@ -3026,25 +2977,25 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 		//===================================================================
 		// Localiza a Nota de Saida - Item                              
 		//===================================================================
-		dbSelectArea("SD2")
-		dbSetOrder(3)
+		DBSelectArea("SD2")
+		DBSetOrder(3)
 		MsSeek(cFilialSD2+(cAliasSD1)->D1_NFORI+(cAliasSD1)->D1_SERIORI+(cAliasSD1)->D1_FORNECE+(cAliasSD1)->D1_LOJA+(cAliasSD1)->D1_COD+AllTrim((cAliasSD1)->D1_ITEMORI))
 		If !SD2->(FOUND())
 		   //===================================================================
 		   // Carrega os items que nao tem nota original
 		   //===================================================================
-			AAdd(aSemNota,(cAliasSD1)->D1_ITEM)
-		Endif
+			aAdd(aSemNota,(cAliasSD1)->D1_ITEM)
+		EndIf
 		aBaseSD1 := {} // Inicializa Bases do Item
 		
 		//===================================================================
 		// Posiciona no Nota Fiscal de Saida - Cabecalho                
 		//===================================================================
-		dbSelectArea("SF2")
-		dbSetOrder(1)
+		DBSelectArea("SF2")
+		DBSetOrder(1)
 		MsSeek(cFilialSF2+SD2->D2_DOC+SD2->D2_SERIE+SD2->D2_CLIENTE+SD2->D2_LOJA)
 		If Empty(SF2->F2_PREFIXO)
-			cPrefixo := Alltrim(Posicione("SX6",1,cFilialSF2+"MV_1DUPREF","X6_CONTEUD"))
+			cPrefixo := AllTrim(Posicione("SX6",1,cFilialSF2+"MV_1DUPREF","X6_CONTEUD"))
 			If Empty(cPrefixo) //Caso não exista o parametro na filial posicionada, pega o coteudo (GetMv)
 				cPrefixo := &(GetMV("MV_1DUPREF"))
 			EndIf
@@ -3055,8 +3006,8 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 		//===================================================================
 		// Posiciona no Titulo Financeiro                               
 		//===================================================================
-		dbSelectArea("SE1")
-		dbSetOrder(2)
+		DBSelectArea("SE1")
+		DBSetOrder(2)
 		MsSeek(cFilialSE1+SF2->F2_CLIENTE+SF2->F2_LOJA+cPrefixo+SD2->D2_DOC)
 		While ( !Eof() .And. cFilialSE1  == SE1->E1_FILIAL .And.;
 				SE1->E1_CLIENTE == SF2->F2_CLIENTE .And.;
@@ -3072,7 +3023,7 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 					cVendedor := aBaseNCC[nCntFor,1]
 					nPos := aScan(aBaseSD1,{|x| x[1]==cVendedor})
 					If ( nPos == 0 )
-						aadd(aBaseSD1,{ 	aBaseNCC[nCntFor,1],;
+						aAdd(aBaseSD1,{ 	aBaseNCC[nCntFor,1],;
 							aBaseNCC[nCntFor,2],;
 							aBaseNCC[nCntFor,3],;
 							aBaseNCC[nCntFor,4],;
@@ -3088,8 +3039,8 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 					EndIf
 				Next nCntFor
 			EndIf
-			dbSelectArea("SE1")
-			dbSkip()
+			DBSelectArea("SE1")
+			DBSkip()
 		EndDo
 		
 		//============================================================================
@@ -3111,7 +3062,7 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 			cVendedor := aBaseSD1[nCntFor,1]
 			nPos := aScan(aBAseSE1,{|x| x[1] == cVendedor })
 			If ( nPos == 0 )
-				aadd(aBaseSE1,{ 	aBaseSD1[nCntFor,1],;
+				aAdd(aBaseSE1,{ 	aBaseSD1[nCntFor,1],;
 					aBaseSD1[nCntFor,2],;
 					aBaseSD1[nCntFor,3]+aBaseSD1[nCntFor,4],0,;
 					aBaseSD1[nCntFor,5]+aBaseSD1[nCntFor,6],0,0})
@@ -3121,25 +3072,25 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 				aBaseSE1[nPos,5] += aBaseSD1[nCntFor,5]+aBaseSD1[nCntFor,6]
 			EndIf
 		Next nCntFor
-		dbSelectArea(cAliasSD1)
-		dbSkip()
+		DBSelectArea(cAliasSD1)
+		DBSkip()
 	EndDo
 	If ( (Empty(aBaseSE1).Or. Len(aSemNota) > 0) .And. lRefaz .And. cPaisLoc<>"BRA")
-		dbSelectArea("SE1")
+		DBSelectArea("SE1")
 		MsGoto(nRegistro)
 		cSerie := If(Empty(SE1->E1_SERIE),SE1->E1_PREFIXO,SE1->E1_SERIE)
-		dbSelectArea("SF1")
-		dbSetOrder(1)
+		DBSelectArea("SF1")
+		DBSetOrder(1)
 		If (!MsSeek(cFilialSF1+SE1->E1_NUM+cSerie+SE1->E1_CLIENTE+SE1->E1_LOJA,.F.))
 			lContinua := .F.
 		EndIf
-		dbSelectArea("SE4")
-		dbSetOrder(1)
+		DBSelectArea("SE4")
+		DBSetOrder(1)
 		If (!MsSeek(cFilialSE4+SF1->F1_COND))
 			lContinua := .F.
 		EndIf
-		dbSelectArea("SD1")
-		dbSetOrder(1)
+		DBSelectArea("SD1")
+		DBSetOrder(1)
 		#IFDEF TOP
 			If ( TcSrvType()!="AS/400" )
 				lQuery := .T.
@@ -3172,23 +3123,23 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 				lContinua := !(cAliasDev)->(Eof())
 				For nCntFor := 1 To Len(aStruSD1)
 					If ( aStruSD1[nCntFor][2]!= "C" )
-						TcSetField(cAliasDev,aStruSD1[nCntFor][1],aStruSD1[nCntFor][2],aStruSD1[nCntFor][3],aStruSD1[nCntFor][4])
+						TCSetField(cAliasDev,aStruSD1[nCntFor][1],aStruSD1[nCntFor][2],aStruSD1[nCntFor][3],aStruSD1[nCntFor][4])
 					EndIf
 				Next nCntFor
 				For nCntFor := 1 To Len(aStruSF4)
 					If ( aStruSF4[nCntFor][2]!="C" )
-						TcSetField(cAliasSF4,aStruSF4[nCntFor][1],aStruSF4[nCntFor][2],aStruSD1[nCntFor][3],aStruSF4[nCntFor][4])
+						TCSetField(cAliasSF4,aStruSF4[nCntFor][1],aStruSF4[nCntFor][2],aStruSD1[nCntFor][3],aStruSF4[nCntFor][4])
 					EndIf
 				Next nCntFor
 			Else
-		#ENDIF
+		#EndIf
 			If (!MsSeek(cFilialSD1+SE1->E1_NUM+cSerie+SE1->E1_CLIENTE+SE1->E1_LOJA,.F.))
 				lContinua := .F.
 			EndIf
 
 			#IFDEF TOP
 			EndIf
-			#ENDIF
+			#EndIf
 		If ( lContinua )
 			//===================================================================
 			// Calculo da comissao por item de nota fiscal 			            |
@@ -3223,19 +3174,19 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 					(cAliasDev)->D1_FORNECE  == SE1->E1_CLIENTE .And.;
 					(cAliasDev)->D1_LOJA	 == SE1->E1_LOJA	)
 
-				If Ascan(aSemNota,(cAliasDev)->D1_ITEM) ==0
-					(cAliasDev)->(DbSkip())
+				If aScan(aSemNota,(cAliasDev)->D1_ITEM) ==0
+					(cAliasDev)->(DBSkip())
 					Loop
 				EndIf
 
 				If ( !lQuery )
-					dbSelectArea("SF4")
-					dbSetOrder(1)
+					DBSelectArea("SF4")
+					DBSetOrder(1)
 					MsSeek(cFilialSF4+(cAliasDev)->D1_TES)
 				Else
 					If cPaisLoc<>"BRA"
-						SD1->(DbGoto((cAliasDev)->SD1RECNO))
-					Endif
+						SD1->(DBGoTo((cAliasDev)->SD1RECNO))
+					EndIf
 				EndIf
 				cVend := "1"
 
@@ -3243,17 +3194,17 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 
 				nImp := 0
 				If cPaisLoc <> "BRA"
-					SA3->(DbSetOrder(1))
-					SA3->(DbSeek(xFilial()+cVendedor))
+					SA3->(DBSetOrder(1))
+					SA3->(DBSeek(xFilial()+cVendedor))
 					aImp := TesImpInf(SD1->D1_TES)
-					cImp := IIF( cPaisLoc <> "BRA" ,SA3->A3_COMIMP,"N")
+					cImp := IIf( cPaisLoc <> "BRA" ,SA3->A3_COMIMP,"N")
 					nPerComis := SA3->A3_COMIS
 					For nX :=1 to Len(aImp)
 						If (cImp+aImp[nX][3] == "S1")
 							nImp += SD1->(FieldGet(FieldPos(aImp[nX][2])))
 						ElseIf (cImp+aImp[nX][3] == "N2")
 							nImp -= SD1->(FieldGet(FieldPos(aImp[nX][2]))	)
-						Endif
+						EndIf
 					Next
 				EndIf
 
@@ -3261,8 +3212,8 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 					If (cAliasDev)->(FieldPos("D1_COMIS"+cVend)) > 0 .And.;
 						(cAliasDev)->(FieldGet((cAliasDev)->(FieldPos("D1_COMIS"+cVend)))) > 0
 						nPerComis := (cAliasDev)->(FieldGet((cAliasDev)->(FieldPos("D1_COMIS"+cVend))))
-					Endif
-					aadd(aSD2Vend,{ cVendedor,;
+					EndIf
+					aAdd(aSD2Vend,{ cVendedor,;
 						(cAliasDev)->D1_TOTAL+nImp,;
 						0,;
 						0,;
@@ -3276,13 +3227,13 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 				EndIf
 
 				nTotal	  += (cAliasDev)->D1_TOTAL
-				dbSelectArea(cAliasDev)
-				dbSkip()
+				DBSelectArea(cAliasDev)
+				DBSkip()
 			EndDo
 			If ( lQuery )
-				dbSelectArea(cAliasDev)
-				dbCloseArea()
-				dbSelectArea("SD1")
+				DBSelectArea(cAliasDev)
+				DBCloseArea()
+				DBSelectArea("SD1")
 			EndIf
 			
 			//===================================================================
@@ -3317,8 +3268,8 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 				nPos		 := 0
 				nRatIcmFre:= NoRound(nIcmFrete*aSD2Vend[nCntFor,2]/nTotal,nDecimal+1)
 				nBaseSE1  := aSD2Vend[nCntFor,2]+aSD2Vend[nCntFor,4]+aSD2Vend[nCntFor,8]+nRatFrete
-				dbSelectArea("SA3")
-				dbSetOrder(1)
+				DBSelectArea("SA3")
+				DBSetOrder(1)
 				MsSeek(xFilial()+aSD2Vend[nCntFor,1])
 
 				nAlEmissao := SA3->A3_ALEMISS
@@ -3326,17 +3277,17 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 
 				If ( SA3->A3_FRETE == "N" )
 					nBaseSE1 -= ( nRatFrete )
-				Endif
+				EndIf
 
-				If (IsInCallStack("FINA070") .or. IsInCallStack("FINA110")) .And. MV_PAR05 == 1 // Juros na Comissão
+				If (IsInCallStack("FINA070") .Or. IsInCallStack("FINA110")) .And. MV_PAR05 == 1 // Juros na Comissão
 					nBaseBaix += nJuros
 				EndIf
 
-				If ( SA3->A3_ACREFIN == "N" ) .and. aSD2Vend[nCntFor,10] > 0
+				If ( SA3->A3_ACREFIN == "N" ) .And. aSD2Vend[nCntFor,10] > 0
 					nBaseSE1 -= ( aSD2Vend[nCntFor,10] )
 				EndIf
 				nPos := aScan(aBaseSE1,{|x| x[1] == aSD2Vend[nCntFor,1]})
-				If Alltrim(SE1->E1_Hist) <> "VENDA EM DINHEIRO"
+				If AllTrim(SE1->E1_Hist) <> "VENDA EM DINHEIRO"
 					nBaseBaix := Round(nBaseSE1*nAlBaixa/100,nDecimal+1) 	// Base da Comissao na Baixa
 				Else
 					nBaseBaix:= 0
@@ -3346,7 +3297,7 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 				nVlrBaix  := Round(nBaseBaix*aSD2Vend[nCntFor,9]/100,nDecimal+1) // Valor da Comissao na Baixa
 				If ( Empty(nRegDevol) .Or. nRegDevol == aSD2Vend[nCntFor,11] )
 					If ( nPos == 0 )
-						aadd(aBaseSE1,{ aSD2Vend[nCntFor,1] ,;
+						aAdd(aBaseSE1,{ aSD2Vend[nCntFor,1] ,;
 							nBaseSE1				,;
 							nBaseEmis				,;
 							nBaseBaix				,;
@@ -3378,7 +3329,7 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 			// sario calcular a base da comissao para a parcela em questao.     |
 			//																    |
 			// 2)Aqui deve-se tomar o maximo cuidado com a Condi‡Æo de pagto    |
-			// pois se o Icms Solidario ou o Ipi for separado de alguma par-    |
+			// pois se o Icms Solidario ou o Ipi For separado de alguma par-    |
 			// cela deve-se considera esta separacao para calcular-se a me-     |
 			// lhor propor‡ao possivel para a base da parcela. 				    |
 			//===================================================================
@@ -3387,8 +3338,8 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 				nProp   := 0
 				nVlrFat := xMoeda(SF1->F1_VALBRUT,SE1->E1_MOEDA,1,SE1->E1_EMISSAO)
 				nVlrTit := SE1->E1_VLCRUZ
-				dbSelectArea("SA3")
-				dbSetOrder(1)
+				DBSelectArea("SA3")
+				DBSetOrder(1)
 				MsSeek(xFilial()+aBaseSE1[nCntFor,1])
 				If ( nVlrTit > 0 )
 					nProp := nVlrFat / nVlrTit
@@ -3449,21 +3400,21 @@ If ( SE1->E1_TIPO $ MV_CRNEG ) .And. !("FINA040" $ SE1->E1_ORIGEM)
 			Next nCntFor
 		Else
 			If ( lQuery .And. Select(cAliasDev)<>0 )
-				dbSelectArea(cAliasDev)
-				dbCloseArea()
-				dbSelectArea("SE1")
+				DBSelectArea(cAliasDev)
+				DBCloseArea()
+				DBSelectArea("SE1")
 			EndIf
 		EndIf
-	Endif
+	EndIf
 	If ( lQuery .And. Select(cAliasDev)<>0 )
-		dbSelectArea(cAliasDev)
-		dbCloseArea()
-		dbSelectArea("SE1")
+		DBSelectArea(cAliasDev)
+		DBCloseArea()
+		DBSelectArea("SE1")
 	EndIf
 	If ( lQuery )
-		dbSelectArea(cAliasSD1)
-		dbCloseArea()
-		dbSelectArea("SD1")
+		DBSelectArea(cAliasSD1)
+		DBCloseArea()
+		DBSelectArea("SD1")
 	EndIf
 Else
 	If Empty(nRegDevol)
@@ -3471,35 +3422,35 @@ Else
 			cVend := "1"
 			For nCntFor := 1 To nVend
 				nIRRF := 0
-				SE1->(dbGoto(nRecnoOrig)) // pra caso o titulo parta de uma liquidação
+				SE1->(DBGoTo(nRecnoOrig)) // pra caso o titulo parta de uma liquidação
 				cVendedor := SE1->(FieldGet(SE1->(FieldPos("E1_VEND"+cVend))))
 				nPerComis := SE1->(FieldGet(SE1->(FieldPos("E1_COMIS"+cVend))))
 
-				dbSelectArea("SE3")
-				dbSetOrder(1)
-				If DbSeek(XFilial("SE3")+SE1->E1_PREFIXO+SE1->E1_NUM+SE1->E1_PARCELA)
+				DBSelectArea("SE3")
+				DBSetOrder(1)
+				If DBSeek(xFilial("SE3")+SE1->E1_PREFIXO+SE1->E1_NUM+SE1->E1_PARCELA)
                    //======================================================================================
 				   // Verifica se o tipo da comissao bate com o tipo do titulo. Pode ocorrer dois titulos
 				   // com o mesmo prefixo/numero/parcela/cliente/loja com tipos diferentes
 				   //======================================================================================
-					Do While 	SE3->( ! EoF() ) .And. ;
+					While 	SE3->( ! Eof() ) .And. ;
 								SE3->( xFilial( "SE3" ) + E3_PREFIXO + E3_NUM + E3_PARCELA ) == ;
 								SE1->( xFilial( "SE1" ) + E1_PREFIXO + E1_NUM + E1_PARCELA )
 						If SE3->E3_TIPO == SE1->E1_TIPO .And.  SE1->(FieldGet(SE1->(FieldPos("E1_VEND"+cVend)))) ==  SE3->E3_VEND
 							nPerComis := SE3->E3_PORC
 							Exit
 						EndIf
-						SE3->( dbSkip() )
+						SE3->( DBSkip() )
 					EndDo
 
 	            EndIf
 
-	            MsUnLock()
+	            MSUnLock()
 
-				SE1->(dbGoto(nRegistro)) // volta ao recno original
+				SE1->(DBGoTo(nRegistro)) // volta ao recno original
 
-				dbSelectArea("SA3")
-				dbSetOrder(1)
+				DBSelectArea("SA3")
+				DBSetOrder(1)
 				MsSeek(xFilial()+cVendedor)
 				If SE1->(FieldPos("E1_ALEMIS"+cVend))<>0//Nao criar no dicionario padrao
 					nAlEmissao := SE1->(FieldGet(FieldPos("E1_ALEMIS"+cVend)))
@@ -3512,9 +3463,9 @@ Else
 					nAlBaixa := SA3->A3_ALBAIXA
 				EndIf
 
-				If ( !Empty(cVendedor) ) .and. !SE1->E1_TIPO $ MVABATIM
-					If ( Alltrim(SE1->E1_Hist) <> "VENDA EM DINHEIRO" .AND. !"LOJA"$SE1->E1_ORIGEM ) .OR.;		 //Adriano - Comissoes
-						( Alltrim(SE1->E1_Hist) == "VENDA EM DINHEIRO" .AND. (("LOJA"$SE1->E1_ORIGEM) .OR. "FATA701"$ SE1->E1_ORIGEM))
+				If ( !Empty(cVendedor) ) .And. !SE1->E1_TIPO $ MVABATIM
+					If ( AllTrim(SE1->E1_Hist) <> "VENDA EM DINHEIRO" .And. !"LOJA"$SE1->E1_ORIGEM ) .OR.;		 //Adriano - Comissoes
+						( AllTrim(SE1->E1_Hist) == "VENDA EM DINHEIRO" .And. (("LOJA"$SE1->E1_ORIGEM) .Or. "FATA701"$ SE1->E1_ORIGEM))
 						If  lMultVend
 							nBaseEmis := Round(SE1->(FieldGet(SE1->(FieldPos("E1_BASCOM"+cVend))))*(nAlEmissao/100),nDecimal+1)
 							nBaseBaix := Round(SE1->(FieldGet(SE1->(FieldPos("E1_BASCOM"+cVend))))*(nAlBaixa/100),nDecimal+1)
@@ -3525,7 +3476,7 @@ Else
 					Else
 						nBaseEmis := SE1->(FieldGet(SE1->(FieldPos("E1_BASCOM"+cVend))))
 						nBaseBaix := nBaseEmis
-						If "LOJA"$SE1->E1_ORIGEM .AND. Alltrim(SE1->E1_Hist) <> "VENDA EM DINHEIRO"
+						If "LOJA"$SE1->E1_ORIGEM .And. AllTrim(SE1->E1_Hist) <> "VENDA EM DINHEIRO"
                            //===================================================================
 						   // Abate o percentual da administradora proporcionalmente
 						   //===================================================================
@@ -3533,7 +3484,7 @@ Else
 								nBaseCC := 1-((SE1->E1_VLRREAL - SE1->E1_VLCRUZ) / SE1->E1_VLRREAL)
 							Else
 								nBaseCC	:= 1
-							Endif
+							EndIf
 
 							If nAlEmissao > 0
 								nBaseEmis := Round( (nBaseEmis * nBaseCC) * ( nAlEmissao / 100 ), nDecimal+1 )
@@ -3541,19 +3492,19 @@ Else
 							ElseIf nAlBaixa > 0
 								nBaseEmis := 0
 								nBaseBaix := Round( (nBaseBaix * nBaseCC) * ( nAlBaixa / 100 ), nDecimal+1 )
-							Endif
-						Endif
-					Endif
+							EndIf
+						EndIf
+					EndIf
 					If SuperGetMv("MV_COMISIR") == "N" .And. lRecIRRF
 						nBaseEmis -= Round(SE1->E1_IRRF*(nAlEmissao/100),nDecimal+1)
 						nBaseBaix -= Round(SE1->E1_IRRF*(nAlBaixa/100),nDecimal+1)
 						nIRRF := Round(SE1->E1_IRRF*(nAlBaixa/100),nDecimal+1)
-					Endif
+					EndIf
 					If GetNewPar("MV_COMIINS","N") == "N"
 						nBaseEmis -= Round(SE1->E1_INSS*(nAlEmissao/100),nDecimal+1)
 						nBaseBaix -= Round(SE1->E1_INSS*(nAlBaixa/100),nDecimal+1)
 					EndIf
-					If  lPccBxCr .and. !lCalEmis
+					If  lPccBxCr .And. !lCalEmis
 						If 	!(SE5->E5_PRETPIS	$	"1;2")
 						 		nPis		:= SE5->E5_VRETPIS
 						 Else
@@ -3569,18 +3520,18 @@ Else
 						 Else
 						 		nCsll		:=	0
 						 EndIf
-					Elseif !lPccBxCr
+					ElseIf !lPccBxCr
 						SumAbatRec( SE1->E1_PREFIXO,SE1->E1_NUM,SE1->E1_PARCELA,SE1->E1_MOEDA,'V', , ,,@nTotCsAbt,@nTotPisAbt,@nTotCofAbt)
 						If nTotPisAbt > 0
 							nPis		:= SE1->E1_PIS
-						Endif
+						EndIf
 						If nTotCofAbt > 0
 							nCofins	:= SE1->E1_COFINS
-						Endif
+						EndIf
 						If nTotCsAbt > 0
 							nCsll  	:= SE1->E1_CSLL
-						Endif
-					Endif
+						EndIf
+					EndIf
 
 					If !lPccBxCr
 
@@ -3596,47 +3547,47 @@ Else
 							nBaseEmis -= Round(SE1->E1_CSLL*(nAlEmissao/100),nDecimal+1)
 							nBaseBaix -= Round(nCsll*(nAlBaixa/100),nDecimal+1)
 						EndIf
-					Endif
+					EndIf
 					If SA3->A3_ISS == "N" .Or. ( SA3->A3_ISS == "S"  .And.;
 						SE1->E1_FRETISS=="1" .And. SuperGetMV("MV_VRETISS",.F.,0) < SE1->E1_ISS )// Abate o ISS da base
 						nBaseEmis -= Round(SE1->E1_ISS*(nAlEmissao/100),nDecimal+1)
 						nBaseBaix -= Round(SE1->E1_ISS*(nAlBaixa/100),nDecimal+1)
 					EndIf
 
-					If (IsInCallStack("FINA070") .or. IsInCallStack("FINA110")) .And. MV_PAR05 == 1
+					If (IsInCallStack("FINA070") .Or. IsInCallStack("FINA110")) .And. MV_PAR05 == 1
 						nBaseBaix += nJuros
 					EndIf
 
-					    If (!lComiLiq) .and. (IsInCallStack("FINA040") .or. FunName()$ "FINA440|FATA701|LOJA701" .and. Empty(SE1->E1_NUMLIQ))
+					    If (!lComiLiq) .And. (IsInCallStack("FINA040") .Or. FunName()$ "FINA440|FATA701|LOJA701" .And. Empty(SE1->E1_NUMLIQ))
 					     nVlrEmis  := Round(nBaseEmis * (nPerComis/100),nDecimal+1)
 					     nVlrBaix  := Round(nBaseBaix * (nPerComis/100),nDecimal+1)
 					    Else
 					     nVlrEmis  := 0
 					     nVlrBaix  := Round(nBaseBaix * (nPerComis/100),nDecimal+1)
-					    Endif
+					    EndIf
 
 					    If (lComiliq)
 					      nVlrEmis  := Round(nBaseEmis * (nPerComis/100),nDecimal+1)
 					      nVlrBaix  := Round(nBaseBaix * (nPerComis/100),nDecimal+1)
-					    Endif
+					    EndIf
 
                     //======================================================================
 					// --> quer dizer que já comissionou na liquidacao do titulo original
 					//======================================================================
-					If ( lComiLiq ) .and. !Empty(SE1->E1_NUMLIQ)
-						IF IsInCallStack("FA460CAN") .or. ( FunName() == "FINA460" )
+					If ( lComiLiq ) .And. !Empty(SE1->E1_NUMLIQ)
+						If IsInCallStack("FA460CAN") .Or. ( FunName() == "FINA460" )
 						//==========================================================================
 						// Se "comiliq", considero comissao como se fosse na baixa e nao na emissao
 						//==========================================================================
 							nVlrEmis := nVlrBaix
 							nBaseEmis:= nBaseBaix
-						Elseif !( FunName() == "FINA460" )
+						ElseIf !( FunName() == "FINA460" )
 							nVlrBaix  	:= 0
 							nBaseBaix	:= 0
-						Endif
-					Endif
+						EndIf
+					EndIf
 
-					aadd(aBaseSE1,{ cVendedor,;
+					aAdd(aBaseSE1,{ cVendedor,;
 						SE1->E1_VLCRUZ,;
 						nBaseEmis,;
 						nBaseBaix,;
@@ -3652,19 +3603,19 @@ Else
 			Next nCntFor
 		EndIf
 		If ( lGrava .And. lRefaz ).AND. !"LOJA"$SE1->E1_ORIGEM
-			dbSelectArea("SE1")
+			DBSelectArea("SE1")
 			RecLock("SE1")
 			cVend := "1"
 			For nCntFor := 1 To Len(aBaseSE1)
-				dbSelectArea("SA3")
-				dbSetOrder(1)
+				DBSelectArea("SA3")
+				DBSetOrder(1)
 				MsSeek(xFilial()+aBaseSE1[nCntFor,1])
-				dbSelectArea("SE1")
+				DBSelectArea("SE1")
 				If ( FieldGet(FieldPos("E1_VEND"+cVend)) == aBaseSE1[nCntFor,1] )
 					FieldPut(FieldPos("E1_BASCOM"+cVend),aBaseSE1[nCntFor,2])
 					If ( aBaseSE1[nCntFor,4] != 0 )
 						FieldPut(FieldPos("E1_COMIS"+cVend),aBaseSE1[nCntFor,7])
-					Endif
+					EndIf
 					FieldPut(FieldPos("E1_VALCOM"+cVend),aBaseSE1[nCntFor,5])
 					If cPaisLoc == "PTG"
 			   			FieldPut(FieldPos("E1_BASCOM"+cVend),aBaseSE1[nCntFor,12])
@@ -3677,7 +3628,7 @@ Else
 				EndIf
 				cVend := Soma1(cVend,1)
 			Next nCntFor
-			MsUnlock()
+			MSUnLock()
 		EndIf
 		If ( Empty(aBaseSE1) )
 			cVend := "1"
@@ -3685,8 +3636,8 @@ Else
 				nIRRF := 0
 				cVendedor := SE1->(FieldGet(SE1->(FieldPos("E1_VEND"+cVend))))
 				nPerComis := SE1->(FieldGet(SE1->(FieldPos("E1_COMIS"+cVend))))
-				dbSelectArea("SA3")
-				dbSetOrder(1)
+				DBSelectArea("SA3")
+				DBSetOrder(1)
 				MsSeek(xFilial()+cVendedor)
 				If ( !Empty(cVendedor) )
 				    //======================================================================================
@@ -3705,11 +3656,11 @@ Else
 					EndIf
 					//===================================================================
 					// --> Quando o percentual da comissao estiver no produto o sistema
-					// --> arredonda o percentual se for pago na baixa, caso haja muita
+					// --> arredonda o percentual se For pago na baixa, caso haja muita
 					// --> distorcao de valores deve-se alterar o numero de casas
 					// --> decimais do campo E1_COMIS1..E1_COMIS(n)
 					//===================================================================
-					If  lPccBxCr .and. !lCalEmis
+					If  lPccBxCr .And. !lCalEmis
 						If !(SE5->E5_PRETPIS $	"1;2")
 							nPis		:= SE5->E5_VRETPIS
 						Else
@@ -3729,37 +3680,37 @@ Else
 					 	 nPis			:= SE1->E1_PIS
 					 	 nCofins		:= SE1->E1_COFINS
 					 	 nCsll		:= SE1->E1_CSLL
-					Endif
-					If SuperGetMv("MV_COMISIR") == "N" .and. !lMata460
+					EndIf
+					If SuperGetMv("MV_COMISIR") == "N" .And. !lMata460
 						nBaseSE1 -= SE1->E1_IRRF
 						nBaseBaix -= SE1->E1_IRRF
 						nIRRF	:= SE1->E1_IRRF
-					Endif
-					If GetNewPar("MV_COMIINS","N") == "N" .and. !lMata460
+					EndIf
+					If GetNewPar("MV_COMIINS","N") == "N" .And. !lMata460
 						nBaseSE1 -= SE1->E1_INSS
 						nBaseBaix -= SE1->E1_INSS
 					EndIf
 					If !lPccBxCr
-						If GetNewPar("MV_COMIPIS","N") == "N" .and. !lMata460
+						If GetNewPar("MV_COMIPIS","N") == "N" .And. !lMata460
 							nBaseSE1 -= SE1->E1_PIS
 							nBaseBaix -= nPis
 						EndIf
-						If GetNewPar("MV_COMICOF","N") == "N" .and. !lMata460
+						If GetNewPar("MV_COMICOF","N") == "N" .And. !lMata460
 							nBaseSE1 -= SE1->E1_COFINS
 							nBaseBaix -= nCofins
 						EndIf
-						If GetNewPar("MV_COMICSL","N") == "N" .and. !lMata460
+						If GetNewPar("MV_COMICSL","N") == "N" .And. !lMata460
 							nBaseSE1 -= SE1->E1_CSLL
 							nBaseBaix -= nCsll
 						EndIf
-					Endif
+					EndIf
 					If SA3->A3_ISS == "N" .Or. ( SA3->A3_ISS == "S" .And.;
 						SE1->E1_FRETISS=="1" .And. SuperGetMV("MV_VRETISS",.F.,0) < SE1->E1_ISS )// Abate o ISS da base
 						nBaseEmis -= Round(SE1->E1_ISS*(SA3->A3_ALEMISS/100),nDecimal+1)
 						nBaseBaix -= Round(SE1->E1_ISS*(SA3->A3_ALBAIXA/100),nDecimal+1)
 					EndIf
 
-					If (IsInCallStack("FINA070") .or. IsInCallStack("FINA110")) .And. MV_PAR05 == 1
+					If (IsInCallStack("FINA070") .Or. IsInCallStack("FINA110")) .And. MV_PAR05 == 1
 						nBaseBaix += nJuros
 					EndIf
 
@@ -3769,7 +3720,7 @@ Else
 					// No segundo elemento, a variavel nBaseSE1 foi substituida pelo campo SE1->E1_VLCRUZ (base bruta), pois apenas passava valores
 					// negativos
 					//===============================================================================================================================
-					aadd(aBaseSE1,{ cVendedor,;
+					aAdd(aBaseSE1,{ cVendedor,;
 						SE1->E1_VLCRUZ,;
 						nBaseEmis,;
 						nBaseBaix,;
@@ -3790,15 +3741,15 @@ EndIf
 //=================================================================== 
 // Restaura a Integridade dos dados de Entrada                  
 //===================================================================
-RestArea(aAreaSE1)
-RestArea(aAreaSE4)
-RestArea(aAreaSF1)
-RestArea(aAreaSF2)
-RestArea(aAreaSF4)
-RestArea(aAreaSD1)
-RestArea(aAreaSD2)
-RestArea(aAreaSA1)
-RestArea(aAreaSA3)
-RestArea(aArea)
+FWRestArea(aAreaSE1)
+FWRestArea(aAreaSE4)
+FWRestArea(aAreaSF1)
+FWRestArea(aAreaSF2)
+FWRestArea(aAreaSF4)
+FWRestArea(aAreaSD1)
+FWRestArea(aAreaSD2)
+FWRestArea(aAreaSA1)
+FWRestArea(aAreaSA3)
+FWRestArea(aArea)
 
 Return(aBaseSE1)

@@ -2,30 +2,24 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 02/05/2024 | Corrigir parâmetro do Directory. Chamado 47130
+Lucas Borges  |02/05/2024| Corrigir parâmetro do Directory. Chamado 47130
 ===============================================================================================================================
 */
 
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MCTB003
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 04/01/2024
-===============================================================================================================================
 Descrição---------: Contabilização TXT por data. Desmembra o TXT utilizado na contabilização para permitir importação por data
 					Essa função deve ser incluída no menu como Função de sistema e com o U_. Caso seja incluída como função de
-					usuário, será gerado o seguinte erro: ERROR: _SetNamedPrvt : owner private environment not found
+					usuário, será gerado o seguinte erro: ERROR: _SetNamedPrvt : owner Private environment not found
            			CTBINILAN - CTBA105.PRW(8829)
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -57,11 +51,8 @@ Return
 Programa----------: MCTB03P
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 04/01/2024
-===============================================================================================================================
 Descrição---------: Realiza o processamento da rotina.
-===============================================================================================================================
 Parametros--------: _oSelf, _cPerg
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -99,16 +90,16 @@ For _nX := 1 to Len(_aFiles)
 		_oFile:Close()
 		_oFile:= FWFileWriter():New(_aFiles[_nX])
 		_cArquivo := ""
-		If __CopyFile(_aFiles[_nX], Substr(_aFiles[_nX],1,Len(_aFiles[_nX])-4)+"_bkp.txt")
+		If __CopyFile(_aFiles[_nX], SubStr(_aFiles[_nX],1,Len(_aFiles[_nX])-4)+"_bkp.txt")
 
 			If MV_PAR07 == 2 //Sem ser Por Filial
 				_cPadrao := SubStr(_aAux[1],1,3)
-			Else // mv_par07 = 1 ->Por Filial				
+			Else // MV_PAR07 = 1 ->Por Filial				
 				_cPadrao	:= SubStr(_aAux[1],13,3)
 			EndIf
 			_cQuery := "SELECT CT5_HAGLUT FROM " + RetSqlName("CT5") + " WHERE D_E_L_E_T_ = ' ' AND CT5_LANPAD = '"+_cPadrao+"'"
 			_cData := FwExecCachedQuery():ExecScalar(_cQuery, "CT5_HAGLUT", "120", "60")
-			_cData := Replace(Upper(AllTrim(_cData)),"LERDATA(","Substr(_aAux[_nI],")
+			_cData := Replace(Upper(AllTrim(_cData)),"LERDATA(","SubStr(_aAux[_nI],")
 			
 			For _nI := 1 To Len(_aAux)
 				_cArquivo +=_aAux[_nI]+CRLF
@@ -144,4 +135,5 @@ For _nX := 1 to Len(_aFiles)
 		MsgAlert("Arquivo: "+_aFiles[_nX]+". O arquivo está vazio ou é inválido para análise! Verifique o arquivo e tente novamente.","MCTB0303")
 	EndIf
 Next _nJ
+
 Return

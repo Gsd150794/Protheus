@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 29/12/2020 | Retirada leitura direta do sigapss. Chamado 35123
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 17/08/2023 | Relatório migrado para tReport. Chamado 44764
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 21/12/2023 | Corrigir totalizado do Sintético. Chamado 45922
+Lucas Borges  |29/12/2020| Chamado 35123. Retirada leitura direta do sigapss.
+Lucas Borges  |17/08/2023| Chamado 44764. Relatório migrado para tReport.
+Lucas Borges  |21/12/2023| Chamado 45922. Corrigir totalizado do Sintético.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RFIS004
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 17/08/2023
-===============================================================================================================================
 Descrição---------: Relatório Resumo Documentos Escriturados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 17/08/2023
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -95,11 +84,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 17/08/2023
-===============================================================================================================================
 Descrição---------: Processa impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -117,10 +103,10 @@ Local _cUser    := ""
 If MV_PAR01 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"SF1")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -188,8 +174,8 @@ BeginSql alias _cAlias
     FROM SF1010 SF1, SYS_USR U
     WHERE SF1.D_E_L_E_T_ = ' '
       AND U.D_E_L_E_T_ (+) = ' '
-      AND U.USR_ID (+) = SUBSTR(F1_USERLGI, 11, 1) || SUBSTR(F1_USERLGI, 15, 1) || SUBSTR(F1_USERLGI, 02, 1)||
-          SUBSTR(F1_USERLGI, 06, 1) || SUBSTR(F1_USERLGI, 10, 1) || SUBSTR(F1_USERLGI, 14, 1) 
+      AND U.USR_ID (+) = SubStr(F1_USERLGI, 11, 1) || SubStr(F1_USERLGI, 15, 1) || SubStr(F1_USERLGI, 02, 1)||
+          SubStr(F1_USERLGI, 06, 1) || SubStr(F1_USERLGI, 10, 1) || SubStr(F1_USERLGI, 14, 1) 
       AND TO_CHAR(CAST( SF1.I_N_S_D_T_ AT TIME ZONE '-06:00' AS DATE), 'YYYYMMDD') BETWEEN %exp:MV_PAR02% AND %exp:MV_PAR03%
       AND F1_STATUS = 'A'
       %exp:_cFiltro%
@@ -213,15 +199,15 @@ oReport:Section(1):Init()
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(0)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->F1_FILIAL
 	_cUser := (_cAlias)->USR_NOME
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

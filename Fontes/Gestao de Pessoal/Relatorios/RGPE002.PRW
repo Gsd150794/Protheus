@@ -8,11 +8,7 @@ Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
    
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-
-#Include "protheus.ch"
+#Include "TOTVS.ch"
 #Include "topconn.ch"
 
 /*
@@ -20,11 +16,8 @@ Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1
 Programa----------: RGPE002
 Autor-------------: Alex Wallauer
 Data da Criacao---: 19/12/2023
-===============================================================================================================================
 Descrição---------: Chamdo 45898 - Fernando. Relatório Motivo de Contratação.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -34,28 +27,25 @@ Local _oReport	   := Nil
 Private _cCodTurno := ""
 Private _cDescTurno:= ""
 Private _dDataSPF  := Ctod("  /  /  ")
-PRIVATE _cPerg	   := "RGPE002"
-PRIVATE _cTitulo   := "Relatório Motivo de Contratação"
+Private _cPerg	   := "RGPE002"
+Private _cTitulo   := "Relatório Motivo de Contratação"
 
-IF !Pergunte(  _cPerg ,,_cTitulo )
-   RETURN .F. 
-ENDIF
+If !Pergunte(  _cPerg ,,_cTitulo )
+   Return .F. 
+EndIf
 
 _oReport := RGPE002PRC()
 _oReport:PrintDialog()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: RGPE002PRC
 Autor-------------: Alex Wallauer
 Data da Criacao---: 19/12/2023
-===============================================================================================================================
 Descrição---------: Processa a impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 /*/
@@ -96,7 +86,7 @@ If MV_PAR16 == 1 // Totais somente quando usa ordem por setor
 	TRFunction():New( _oSec002:Cell("TOTSET") ,, "COUNT" ,, "TOTAL GERAL DE SETORES " ,,, .F. , .T. )
 	_oSec002:SetTotalText( "TOTAL DE SETORES" )
 
-Endif
+EndIf
 
 //====================================================================================================
 //SECAO 3
@@ -106,7 +96,7 @@ _oSec003:SetTotalInLine(.F.)
 
 TRCell():New( _oSec003 , "FILIAL"	,, "Filial"		    ,						, 02 ,, )
 TRCell():New( _oSec003 , "MATR"	    ,, "Matricula"      , "999999"	            , 10 ,, )
-TRCell():New( _oSec003 , "NOME"		,, "Nome"			,                       , 30 ,, {|| IF(!EMPTY((_cAliaQRY)->NSOCIAL),ALLTRIM((_cAliaQRY)->NSOCIAL)+".",(_cAliaQRY)->NOME)	} )
+TRCell():New( _oSec003 , "NOME"		,, "Nome"			,                       , 30 ,, {|| If(!Empty((_cAliaQRY)->NSOCIAL),AllTrim((_cAliaQRY)->NSOCIAL)+".",(_cAliaQRY)->NOME)	} )
 TRCell():New( _oSec003 , "SEXO"		,, "SEXO"			,						, 30 ,, )
 TRCell():New( _oSec003 , "DTNASC"	,, "Dt. Nasc."		,						, 10 ,, )
 TRCell():New( _oSec003 , "DTADMI"	,, "Dt. Adm."		,						, 10 ,, )
@@ -118,12 +108,12 @@ TRCell():New( _oSec003 , "CFUNCAO"	,, "Função"			,						, 06 ,, )
 TRCell():New( _oSec003 , "FUNCAO"	,, "Desc Função"	,						, 19 ,, )
 If MV_PAR14 == 1
    TRCell():New( _oSec003,"SALARIO"	,, "Salario"		, "@E 9,999,999.99"		, 12 ,, )
-ENDIF
+EndIf
 TRCell():New( _oSec003 , "CTURNO"	,, "Turno"			,						, 10 ,, {|| U_RGPE002T("CTURNO", (_cAliaQRY)->FILIAL , (_cAliaQRY)->MATR)} )
 TRCell():New( _oSec003 , "TURNO"	,, "Desc Turno"  	,						, 50 ,, {|| U_RGPE002T("TURNO" , (_cAliaQRY)->FILIAL , (_cAliaQRY)->MATR)} )
 TRCell():New( _oSec003 , "RA_I_MOTSU",, "Motivo da Contração", "@!"             , 20 ,, )
 TRCell():New( _oSec003 , "RA_I_MATSU",, "Matricula Substituida","@!"	        , 10 ,, )
-TRCell():New( _oSec003 , "S_NOME"	 ,, "Nome"			,                       , 30 ,, {|| IF(!EMPTY((_cAliaQRY)->S_NSOCIAL),ALLTRIM((_cAliaQRY)->S_NSOCIAL)+".",(_cAliaQRY)->S_NOME)	} )
+TRCell():New( _oSec003 , "S_NOME"	 ,, "Nome"			,                       , 30 ,, {|| If(!Empty((_cAliaQRY)->S_NSOCIAL),AllTrim((_cAliaQRY)->S_NSOCIAL)+".",(_cAliaQRY)->S_NOME)	} )
 TRCell():New( _oSec003 , "S_SEXO"	 ,, "SEXO"			,						, 30 ,, )
 TRCell():New( _oSec003 , "S_DTNASC"	 ,, "Dt. Nasc."		,						, 10 ,, )
 TRCell():New( _oSec003 , "S_DTADMI"	 ,, "Dt. Adm."		,						, 10 ,, )
@@ -136,16 +126,11 @@ TRCell():New( _oSec003 , "S_CFUNCAO" ,, "Função"		,						, 06 ,, )
 TRCell():New( _oSec003 , "S_FUNCAO"	 ,, "Desc Função"	,						, 19 ,, )
 If MV_PAR14 == 1
    TRCell():New( _oSec003,"S_SALARIO",, "Salario"		, "@E 9,999,999.99"		, 12 ,, )
-ENDIF
+EndIf
 TRCell():New( _oSec003 , "S_CTURNO"	 ,, "Turno"			,						, 10 ,, {|| U_RGPE002T("CTURNO", (_cAliaQRY)->FILIAL , (_cAliaQRY)->S_MATR)} )
 TRCell():New( _oSec003 , "S_TURNO"	 ,, "Desc Turno"  	,						, 50 ,, {|| U_RGPE002T("TURNO" , (_cAliaQRY)->FILIAL , (_cAliaQRY)->S_MATR)} )
 
-
 TRFunction():New( _oSec003:Cell("FILIAL") ,, "COUNT" ,, "TOTAL GERAL DE FUNCIONARIOS " ,,, .T. , .T.,.F.)
-//TRFunction():New( _oSec003:Cell("MATR") ,, "COUNT" ,, "TOTAL GERAL COM DEMISSAO " ,,, .T. , .T. ,.F.,, {|| (_cAliaQRY)->DTDEMI # "  /  /  " } )
-
-//_oSec003:SetTotalText( "TOTAL FUNC. / TOTAL COM DEMISSAO" )
-
 
 Return( _oReport )
 
@@ -154,11 +139,8 @@ Return( _oReport )
 Programa----------: RGPE002PRT
 Autor-------------: Alex Wallauer
 Data da Criacao---: 19/12/2023
-===============================================================================================================================
 Descrição---------: Consulta e Impressão dos dados do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -185,21 +167,21 @@ Next _nI
 
 If !Empty( _cFilIn )
 	_cFilIn := SubStr( _cFilIn , 1 , Len(_cFilIn) - 1 )
-	_cQuery += " AND SRA.RA_SITFOLH IN "+ FormatIN( _cFilIn , ',' )
+	_cQuery += " AND SRA.RA_SITFOLH IN "+ FormatIn( _cFilIn , ',' )
 EndIf
 	
 //====================================================================================================
 // Trata o filtro da Data de Demissão
 //====================================================================================================
 If !Empty(MV_PAR17) .And. !Empty(MV_PAR18)
-	_cQuery += " AND SRA.RA_DEMISSA BETWEEN '"+ dToS(MV_PAR17) +"' AND '"+ dToS(MV_PAR18) +"' "
+	_cQuery += " AND SRA.RA_DEMISSA BETWEEN '"+ DToS(MV_PAR17) +"' AND '"+ DToS(MV_PAR18) +"' "
 EndIf
 
 //====================================================================================================
 // Trata o filtro da Data de Admissao
 //====================================================================================================
 If !Empty(MV_PAR19) .And. !Empty(MV_PAR20)
-	_cQuery += " AND SRA.RA_ADMISSA BETWEEN '"+ dToS(MV_PAR19) +"' AND '"+ dToS(MV_PAR20) +"' "
+	_cQuery += " AND SRA.RA_ADMISSA BETWEEN '"+ DToS(MV_PAR19) +"' AND '"+ DToS(MV_PAR20) +"' "
 EndIf
 
 //====================================================================================================
@@ -215,7 +197,7 @@ Next _nI
 
 If !Empty( _cFilIn )
 	_cFilIn := SubStr( _cFilIn , 1 , Len(_cFilIn) - 1 )
-	_cQuery += " AND SRA.RA_CATFUNC IN "+ FormatIN( _cFilIn , ',' )
+	_cQuery += " AND SRA.RA_CATFUNC IN "+ FormatIn( _cFilIn , ',' )
 EndIf
 
 If ( MV_PAR13 <> 3 )
@@ -239,11 +221,11 @@ EndIf
 
 _cQuery += " %"
 
-If Dtos(MV_PAR20) > Dtos(Date()) 
-   _cdat := Dtos(MV_PAR20)
+If DToS(MV_PAR20) > DToS(Date()) 
+   _cdat := DToS(MV_PAR20)
    _dDataSPF := MV_PAR20
 Else
-   _cdat := Dtos(date())
+   _cdat := DToS(date())
    _dDataSPF := Date()
 EndIf
 
@@ -321,22 +303,22 @@ nTot:=0
 COUNT TO nTot
 _oReport:OMETER:NTOTAL:=nTot 
 
-(_cAliaQRY)->(DBGOTOP() )
+(_cAliaQRY)->(DBGoTop() )
 
 While !_oReport:Cancel() .And. (_cAliaQRY)->( !Eof() )
     
 	_oReport:IncMeter()
 
-    _oReport:Section(1):Section(2):Cell("DTNASC"):SetValue(STOD((_cAliaQRY)->DTNASC))
-    _oReport:Section(1):Section(2):Cell("DTADMI"):SetValue(STOD((_cAliaQRY)->DTADMI))
+    _oReport:Section(1):Section(2):Cell("DTNASC"):SetValue(SToD((_cAliaQRY)->DTNASC))
+    _oReport:Section(1):Section(2):Cell("DTADMI"):SetValue(SToD((_cAliaQRY)->DTADMI))
 
-    _oReport:Section(1):Section(2):Cell("S_DTNASC"):SetValue(STOD((_cAliaQRY)->S_DTNASC))
-    _oReport:Section(1):Section(2):Cell("S_DTADMI"):SetValue(STOD((_cAliaQRY)->S_DTADMI))
-    _oReport:Section(1):Section(2):Cell("S_DTDEMI"):SetValue(STOD((_cAliaQRY)->S_DTDEMI))
+    _oReport:Section(1):Section(2):Cell("S_DTNASC"):SetValue(SToD((_cAliaQRY)->S_DTNASC))
+    _oReport:Section(1):Section(2):Cell("S_DTADMI"):SetValue(SToD((_cAliaQRY)->S_DTADMI))
+    _oReport:Section(1):Section(2):Cell("S_DTDEMI"):SetValue(SToD((_cAliaQRY)->S_DTDEMI))
     
 	If MV_PAR16 == 1
 	
-		If SubStr( Alltrim(_cSetor) , 1 , 6 ) <> SubStr( Alltrim( (_cAliaQRY)->SETOR ) , 1 , 6 )
+		If SubStr( AllTrim(_cSetor) , 1 , 6 ) <> SubStr( AllTrim( (_cAliaQRY)->SETOR ) , 1 , 6 )
 		
 			_oReport:Section(1):Section(1):Finish()
 			_oReport:Section(1):Section(2):Finish()
@@ -373,39 +355,35 @@ _oReport:Section(1):Section(2):Init()
 
 Return
 
-
 /*
 ===============================================================================================================================
 Função------------: RGPE002T
 Autor-------------: Alex Wallauer
 Data da Criacao---: 19/12/2023
-===============================================================================================================================
 Descrição---------: Retornar o código e a descrição do turno.
-===============================================================================================================================
 Parametros--------: _cCampo = Campo que chamou a função.
                     _cCodFilial = Codigo da Filial
 					_cMatricula = Codigo da Matricula
-===============================================================================================================================
 Retorno-----------: _cRet = Retorna o código ou a descrição do turno.
 ===============================================================================================================================
 */
-User function RGPE002T(_cCampo, _cCodFilial, _cMatricula)
+User Function RGPE002T(_cCampo, _cCodFilial, _cMatricula)
 Local _cRet := ""
 Local _cQry 
-IF EMPTY(_cMatricula)
-   RETURN SPACE(LEN(SR6->R6_DESC))
-ENDIF
+If Empty(_cMatricula)
+   Return Space(Len(SR6->R6_DESC))
+EndIf
 Begin Sequence
 
    If _cCampo == "CTURNO"
       _cQry := " SELECT MAX(R_E_C_N_O_) NRRECNO FROM "+ RetSqlName("SPF") + " SPF " 
 	  _cQry += " WHERE SPF.PF_FILIAL = '" + _cCodFilial + "' "
 	  _cQry += " AND SPF.PF_MAT = '" + _cMatricula + "' "
-	  _cQry += " AND SPF.PF_DATA <= '" + Dtos(_dDataSPF) + "' "
+	  _cQry += " AND SPF.PF_DATA <= '" + DToS(_dDataSPF) + "' "
 	  _cQry += " AND SPF.D_E_L_E_T_ = ' ' "
      
       If Select("TRBSPF") > 0
-	     TRBSPF->(DbCloseArea())
+	     TRBSPF->(DBCloseArea())
       EndIf
       
 	  TCQUERY _cQry NEW ALIAS "TRBSPF"	
@@ -418,13 +396,13 @@ Begin Sequence
          Break
       EndIf
     
-      SPF->(DbGoTo(TRBSPF->NRRECNO))
-	  SR6->(DbSetOrder(1)) // R6_FILIAL+R6_TURNO 
+      SPF->(DBGoTo(TRBSPF->NRRECNO))
+	  SR6->(DBSetOrder(1)) // R6_FILIAL+R6_TURNO 
 
 	  _cCodTurno  := SPF->PF_TURNOPA
 	  _cDescTurno := "SEM DESCRICAO PARA O TURNO"
 
-	  If SR6->(DbSeek(SPF->PF_FILIAL+SPF->PF_TURNOPA))
+	  If SR6->(DBSeek(SPF->PF_FILIAL+SPF->PF_TURNOPA))
 	     _cDescTurno := SR6->R6_DESC
 	  EndIf
       _cRet := _cCodTurno

@@ -11,10 +11,10 @@ Lucas Borges |23/07/25| Chamado 51340. Trocado e-mail padrão para sistema@italac
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "rwmake.ch"
-#INCLUDE "TBICONN.CH"  
-#INCLUDE 'TOPCONN.CH'
+#Include "TOTVS.ch"
+#Include "rwmake.ch"
+#Include "TBICONN.CH"  
+#Include 'TOPCONN.CH'
 /*
 ===============================================================================================================================
 Programa----------: MOMS060
@@ -32,8 +32,8 @@ User Function MOMS060()
 Local _nI        := 0
 Local _aParRet   := {}
 Local _aParAux   := {}
-Local _bOK       := {|| IF(MV_PAR01 <> "" .AND. MV_PAR02 <> ""  ,.T.,(U_ITMSG("Os campos pasta e arquivo precisam ser preenchidos.",'Atenção!',IIF(Alltrim(MV_PAR01)="","Preencha o campo pasta!","Preencha o campo arquivo!"),3),.F.) ) }
-Local _cTimeIni  := TIME()
+Local _bOK       := {|| If(MV_PAR01 <> "" .AND. MV_PAR02 <> ""  ,.T.,(U_ITMsg("Os campos pasta e arquivo precisam ser preenchidos.",'Atenção!',IIf(AllTrim(MV_PAR01)="","Preencha o campo pasta!","Preencha o campo arquivo!"),3),.F.) ) }
+Local _cTimeIni  := Time()
 Local _lRet      := .F.
 
 MV_PAR01 := "\DATA\ITALAC\MOMS060\" + Space(200)
@@ -43,8 +43,8 @@ MV_PAR04 := Space(200)
 MV_PAR05 := Space(200)
 MV_PAR06 := Space(200)
 
-AADD( _aParAux , { 1 , "Pasta: "	   , MV_PAR01, ""	, ""	, ""		, "" , 120 , .F. } )
-AADD( _aParAux , { 1 , "Arquivo: "	, MV_PAR02, ""	, ""	, ""		, "" , 120 , .F. } )
+aAdd( _aParAux , { 1 , "Pasta: "	   , MV_PAR01, ""	, ""	, ""		, "" , 120 , .F. } )
+aAdd( _aParAux , { 1 , "Arquivo: "	, MV_PAR02, ""	, ""	, ""		, "" , 120 , .F. } )
 
 For _nI := 1 To Len( _aParAux )
       aAdd( _aParRet , _aParAux[_nI][03] )
@@ -53,7 +53,7 @@ Next _nI
 If !ParamBox( _aParAux , " Importação de Dados Bancarios de Clientes " , @_aParRet, _bOK )
    _lRet := .F.
 Else
-   FWMSGRUN( ,{|oProc|  _lRet := MOMS060IM(oProc) } , "Hora Inicial: "+_cTimeIni+" Importando arquivo: "+Alltrim(MV_PAR02) )
+   FWMsgRun( ,{|oProc|  _lRet := MOMS060IM(oProc) } , "Hora Inicial: "+_cTimeIni+" Importando arquivo: "+AllTrim(MV_PAR02) )
 EndIf
 
 Return _lRet
@@ -87,7 +87,7 @@ Local _lConf     := .F.
 Local _lContinua := .F.
 Local _aButtons  := {}
 
-_cArq += Alltrim(MV_PAR01) + Alltrim(MV_PAR02)
+_cArq += AllTrim(MV_PAR01) + AllTrim(MV_PAR02)
 
 _aCab     := {"Status","Linha","A1_COD", "A1_LOJA", "A1_CGC", "BANCO", "AGENCIA", "CONTA","Log"}
 _aSizes   := {"02","05","05","05","10","10","10","10","43"}
@@ -99,8 +99,8 @@ If !(MOMS060LA(oProc,_cArq,@_aDados,@_cLinInv)) //Faz leitura do arquivo
    Return .F.
 EndIf
 
-If len(_aDados) <= 0
-   U_ITMSG( "Não foram encontrados registros válidos no arquivo!" , "Atenção!",,1 )
+If Len(_aDados) <= 0
+   U_ITMsg( "Não foram encontrados registros válidos no arquivo!" , "Atenção!",,1 )
    Return .F.
 EndIf
 
@@ -108,15 +108,15 @@ _aLog := MOMS060PR(oProc,_aDados,.F.,@_nLinProc,@_nLinNProc) // Faz o processame
 
 //Validador
 _cTitAux := "Dados do Arquivo " + _cArq
-_cMsgTop := "Análise prévia da Importação, Registros Lidos: " + ALLTRIM(TRANSFORM(_nLinProc+_nLinNProc,"@E 999,999,999")) + ", Com Erros: " + ALLTRIM(TRANSFORM(_nLinNProc,"@E 999,999,999"))
+_cMsgTop := "Análise prévia da Importação, Registros Lidos: " + AllTrim(TRANSFORM(_nLinProc+_nLinNProc,"@E 999,999,999")) + ", Com Erros: " + AllTrim(TRANSFORM(_nLinNProc,"@E 999,999,999"))
 
 _aButtons := {}
-AADD(_aButtons,{"BUDGET",{|| MOMS060EE(oProc,_aCab,_aSizes,_aLog,_cLinInv,_nLinProc,_nLinNProc,.F.)  },"", "E-mail" }) 
+aAdd(_aButtons,{"BUDGET",{|| MOMS060EE(oProc,_aCab,_aSizes,_aLog,_cLinInv,_nLinProc,_nLinNProc,.F.)  },"", "E-mail" }) 
 
 oProc:cCaption := ("Abrindo o Log do Arquivo...")
 ProcessMessages()
 
-Do While !_lConf
+While !_lConf
        //     ITListBox(_cTitAux, _aHeader , _aCols    , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _aButtons )
    _lRetMsg := U_ITLISTBOX(_cTitAux, _aCab    , _aLog     , .T.      , 4      , _cMsgTop ,          , _aSizes ,         ,     ,        , _aButtons)
    
@@ -124,7 +124,7 @@ Do While !_lConf
       _lConf     := .T.
       _lContinua := .F.
    ElseIf _lRetMsg .And. _nLinNProc > 0
-      _lRetMsg := U_ITMSG("Confirma importação mesmo contendo registros com erro?",'Atenção!',,3,2,3,,"Confirmar","Voltar")
+      _lRetMsg := U_ITMsg("Confirma importação mesmo contendo registros com erro?",'Atenção!',,3,2,3,,"Confirmar","Voltar")
       If _lRetMsg
          _lConf     := .T.
          _lContinua := .T.
@@ -149,17 +149,17 @@ If _lContinua
    _aLog := MOMS060PR(oProc,_aDados,.T.,@_nLinProc,@_nLinNProc) // Faz o processamento com gravação e retorna um log
 
    If _nLinNProc > 0
-      _lRetMsg := U_ITMSG("A importação do arquivo apresentou erro! Deseja visualizar?",'Atenção!',,3,2,3,,"Sim","Não")
+      _lRetMsg := U_ITMsg("A importação do arquivo apresentou erro! Deseja visualizar?",'Atenção!',,3,2,3,,"Sim","Não")
       If _lRetMsg
          _aButtons := {}
-         AADD(_aButtons,{"BUDGET",{|| MOMS060EE(oProc,_aCab,_aSizes,_aLog,_cLinInv,_nLinProc,_nLinNProc,.T.)  },"", "E-mail" }) 
+         aAdd(_aButtons,{"BUDGET",{|| MOMS060EE(oProc,_aCab,_aSizes,_aLog,_cLinInv,_nLinProc,_nLinNProc,.T.)  },"", "E-mail" }) 
 
              //     ITListBox(_cTitAux, _aHeader , _aCols    , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _aButtons )
          _lRetMsg := U_ITLISTBOX(_cTitAux, _aCab    , _aLog     , .T.      , 4      , _cMsgTop ,          , _aSizes ,         ,     ,        , _aButtons)
       EndIf
    EndIf
 
-   U_ITMSG( "Processamento finalizado!" , "Atenção!",,2 )
+   U_ITMsg( "Processamento finalizado!" , "Atenção!",,2 )
 
 EndIf
 
@@ -190,7 +190,7 @@ Local _nNumCol := 0
 Local _nTotLin := 0
 
 If FT_FUSE(_cArq) == -1
-   U_ITMSG("Falha ao abrir o arquivo: "+_cArq,"Erro",,1)
+   U_ITMsg("Falha ao abrir o arquivo: "+_cArq,"Erro",,1)
    Return .F.
 EndIf
 
@@ -199,7 +199,7 @@ FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
 _nTotLin := FT_FLASTREC()
 
 If _nTotLin == 0 //O arquivo informado nao possui nenhuma linha de dados
-   U_ITMSG("O arquivo informado para relizar a importação não possui dados.","Arquivo inválido",;
+   U_ITMsg("O arquivo informado para relizar a importação não possui dados.","Arquivo inválido",;
             "Favor verificar se o arquivo informado esta no formato correto.")
    Return .F.
 EndIf
@@ -207,17 +207,17 @@ EndIf
 FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
 FT_FSKIP() //PULA O CABEÇALHO
 
-Do While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
+While !FT_FEOF()  //FACA ENQUANTO NAO For FIM DE ARQUIVO
    _nCont++
 
-	oProc:cCaption := ( "Lendo linha " + strzero(_nCont,5) + " de " + strzero(_nTotLin,5) + "." )
+	oProc:cCaption := ( "Lendo linha " + StrZero(_nCont,5) + " de " + StrZero(_nTotLin,5) + "." )
 	ProcessMessages()
 
    _cDados  := FT_FREADLN()
    _aLinha  := StrTokArr(_cDados,";")
    
    //Verifica se é final de arquivo
-   If Alltrim(_cDados) = ';;;;;' .And. _nCont > _nTotLin
+   If AllTrim(_cDados) = ';;;;;' .And. _nCont > _nTotLin
       Exit
    EndIf 	
    
@@ -225,9 +225,9 @@ Do While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
 
    //Verifica se é linha válida validando 6 colunas
    If _nNumCol = 6
-      AADD(_aDados,_aLinha)
+      aAdd(_aDados,_aLinha)
    Else
-      _cLinInv += IIF(Empty(Alltrim(_cLinInv)),"","; ") + Alltrim(Str(_nCont))
+      _cLinInv += IIf(Empty(AllTrim(_cLinInv)),"","; ") + AllTrim(Str(_nCont))
    EndIf
 
    FT_FSKIP()
@@ -266,7 +266,7 @@ Local _nCont     := 0
 _cMsgEml := '<html>'
 _cMsgEml += '<head><title>'+_cTit+'</title></head>'
 _cMsgEml += '<body>'
-_cMsgEml += '<style type="text/css"><!--'
+_cMsgEml += '<style Type="text/css"><!--'
 _cMsgEml += 'table.bordasimples { border-collapse: collapse; }'
 _cMsgEml += 'table.bordasimples tr td { border:1px solid #777777; }'
 _cMsgEml += 'td.titulos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #C6E2FF; }'
@@ -289,7 +289,7 @@ _cMsgEml += '<br>'
 _cMsgEml += '<br>'
 _cMsgEml += '<table class="bordasimples" width="1300">'
 _cMsgEml += '    <tr>'
-_cMsgEml += '		<td align="center" colspan="'+ALLTRIM(STR(LEN(_aSizes)))+'" class="grupos"><b>'+_cGetAssun+'</b></td>'
+_cMsgEml += '		<td align="center" colspan="'+AllTrim(Str(Len(_aSizes)))+'" class="grupos"><b>'+_cGetAssun+'</b></td>'
 _cMsgEml += '    </tr>'
 _cMsgEml += '    <tr>'
 _cMsgEml += '      <td class="itens" align="left" width="'+_aSizes[01]+'%"><b>'+_aCab[01]+'</b></td>'
@@ -328,7 +328,7 @@ If _nLinProc > 0
    _cMsgEml += '<br>'
    _cMsgEml += '    <tr>'
    _cMsgEml += '      <td class="itens" align="center" ><b>Qtd de linhas Processadas:</b></td>'
-   _cMsgEml += '      <td class="itens" align="left" > '+ Alltrim(Str(_nLinProc)) +' <b> </b> </td>'
+   _cMsgEml += '      <td class="itens" align="left" > '+ AllTrim(Str(_nLinProc)) +' <b> </b> </td>'
    _cMsgEml += '    </tr>'
    
 EndIf
@@ -340,12 +340,12 @@ If _nLinNProc > 0
    _cMsgEml += '<br>'
    _cMsgEml += '    <tr>'
    _cMsgEml += '      <td class="itens" align="center" ><b>Qtd de linhas com falha de processamento:</b></td>'
-   _cMsgEml += '      <td class="itens" align="left" > '+ Alltrim(Str(_nLinNProc)) +' <b> </b> </td>'
+   _cMsgEml += '      <td class="itens" align="left" > '+ AllTrim(Str(_nLinNProc)) +' <b> </b> </td>'
    _cMsgEml += '    </tr>'
    
 EndIf
 
-If !Empty(Alltrim(_cLinInv))
+If !Empty(AllTrim(_cLinInv))
 
    _cMsgEml += '</center>'
    _cMsgEml += '<br>'
@@ -367,7 +367,7 @@ _cMsgEml += '    </tr>'
 _cMsgEml += '</body>'
 _cMsgEml += '</html>'
 
-_cMsgEml := STRTRAN(_cMsgEml,"#LISTA#",_cGetLista)
+_cMsgEml := StrTran(_cMsgEml,"#LISTA#",_cGetLista)
 
 Return _cMsgEml
 
@@ -406,15 +406,15 @@ Local _cTit      := ""
 Local _nI        := 0
 Local _aParRet   := {}
 Local _aParAux   := {}
-Local _bOK       := {|| IF(MV_PAR03 <> "" ,.T.,(U_ITMSG("O campo 'Para' deve ser preenchido!",'Atenção!',"Preencha o campo para envio do e-mail.",3),.F.) ) }
+Local _bOK       := {|| If(MV_PAR03 <> "" ,.T.,(U_ITMsg("O campo 'Para' deve ser preenchido!",'Atenção!',"Preencha o campo para envio do e-mail.",3),.F.) ) }
 
-MV_PAR02 := IIF(_lGrava,"Log de Processamento","Log da Análise Prévia") +" da Rotina MOMS060 - Importacao de dados bancarios para o cadastro de Cliente"
+MV_PAR02 := IIf(_lGrava,"Log de Processamento","Log da Análise Prévia") +" da Rotina MOMS060 - Importacao de dados bancarios para o cadastro de Cliente"
 MV_PAR03 := "sistema@italac.com.br"+Space(200)
 
-AADD( _aParAux , { 1 , "Assunto: "	, MV_PAR03, ""	, ""	, ""		, "" , 120 , .F. } )   
-AADD( _aParAux , { 1 , "Para: "	   , MV_PAR04, ""	, ""	, ""		, "" , 120 , .F. } )
-AADD( _aParAux , { 1 , "CC:   "	   , MV_PAR05, ""	, ""	, ""		, "" , 120 , .F. } )
-AADD( _aParAux , { 1 , "CCO:  "	   , MV_PAR06, ""	, ""	, ""		, "" , 120 , .F. } )
+aAdd( _aParAux , { 1 , "Assunto: "	, MV_PAR03, ""	, ""	, ""		, "" , 120 , .F. } )   
+aAdd( _aParAux , { 1 , "Para: "	   , MV_PAR04, ""	, ""	, ""		, "" , 120 , .F. } )
+aAdd( _aParAux , { 1 , "CC:   "	   , MV_PAR05, ""	, ""	, ""		, "" , 120 , .F. } )
+aAdd( _aParAux , { 1 , "CCO:  "	   , MV_PAR06, ""	, ""	, ""		, "" , 120 , .F. } )
 
 For _nI := 1 To Len( _aParAux )
       aAdd( _aParRet , _aParAux[_nI][03] )
@@ -440,7 +440,7 @@ If ParamBox( _aParAux , " Dados para envio do e-mail " , @_aParRet, _bOK )
    //ITEnvMail(cFrom       ,cEmailTo ,_cEmailCo,cEmailBcc,cAssunto ,cMensagem,cAttach   ,cAccount    ,cPassword   ,cServer     ,cPortCon    ,lRelauth     ,cUserAut     ,cPassAut     ,cLogErro)
    U_ITENVMAIL(_aConfig[01], cGetPara,   cGetCc,  cGetCco,_cAssunto, _cMsgEml,        "",_aConfig[01], _aConfig[02],_aConfig[03],_aConfig[04],_aConfig[05],_aConfig[06],_aConfig[07], @_cEmlLog )
 
-   U_ITMSG(UPPER(_cEmlLog)+CHR(13)+CHR(10)+;
+   U_ITMsg(Upper(_cEmlLog)+CHR(13)+CHR(10)+;
    "E-mail para: "+cGetPara+;
    " Com Copia: "+cGetCc+CHR(13)+CHR(10),"Envio do E-MAIL",,3)
    
@@ -481,16 +481,16 @@ _cMRegAlt  := "Registro alterado com sucesso!"
 _cMRegUsa  := "Registro em uso por outro processo."
 _cMLinAlt  := "Linha pronta para importação!"
 _cMChNEnc  := "Chave de cliente não encontrada para importação."
-_cMsgProc  := IIF(_lGrava,"Processando","Lendo")
+_cMsgProc  := IIf(_lGrava,"Processando","Lendo")
 _nTamA1Cod := TamSX3("A1_COD")[01]
 _nTamA1Loj := TamSX3("A1_LOJA")[01]
 
 For _nCont := 1 To Len(_aDados)
-   DbSelectArea("SA1")
-   DbSetOrder(1)
-   If DbSeek(xFilial("SA1")+strzero(Val(_aDados[_nCont][1]),_nTamA1Cod)+strzero(Val(_aDados[_nCont][2]),_nTamA1Loj) )
+   DBSelectArea("SA1")
+   DBSetOrder(1)
+   If DBSeek(xFilial("SA1")+StrZero(Val(_aDados[_nCont][1]),_nTamA1Cod)+StrZero(Val(_aDados[_nCont][2]),_nTamA1Loj) )
       
-      oProc:cCaption := (_cMsgProc +" Linha: "+Alltrim(Str(_nCont))+"  Cliente: "+SA1->A1_COD+" - "+SA1->A1_LOJA+"  "+SA1->A1_NREDUZ)
+      oProc:cCaption := (_cMsgProc +" Linha: "+AllTrim(Str(_nCont))+"  Cliente: "+SA1->A1_COD+" - "+SA1->A1_LOJA+"  "+SA1->A1_NREDUZ)
       ProcessMessages()
       
       If _lGrava
@@ -499,21 +499,21 @@ For _nCont := 1 To Len(_aDados)
                SA1->A1_I_BREC := _aDados[_nCont][4]
                SA1->A1_I_AREC := _aDados[_nCont][5]
                SA1->A1_I_CREC := _aDados[_nCont][6]
-               SA1->(MsUnlock())
+               SA1->(MSUnLock())
                
-               AADD(_aLog,{.T.,Alltrim(Str(_nCont)),_aDados[_nCont][1], _aDados[_nCont][2], _aDados[_nCont][3], _aDados[_nCont][4], _aDados[_nCont][5], _aDados[_nCont][6],_cMRegAlt})
+               aAdd(_aLog,{.T.,AllTrim(Str(_nCont)),_aDados[_nCont][1], _aDados[_nCont][2], _aDados[_nCont][3], _aDados[_nCont][4], _aDados[_nCont][5], _aDados[_nCont][6],_cMRegAlt})
                _nLinProc++
             Else
-               AADD(_aLog,{.F.,Alltrim(Str(_nCont)),_aDados[_nCont][1], _aDados[_nCont][2], _aDados[_nCont][3], _aDados[_nCont][4], _aDados[_nCont][5], _aDados[_nCont][6],_cMRegUsa})
+               aAdd(_aLog,{.F.,AllTrim(Str(_nCont)),_aDados[_nCont][1], _aDados[_nCont][2], _aDados[_nCont][3], _aDados[_nCont][4], _aDados[_nCont][5], _aDados[_nCont][6],_cMRegUsa})
                _nLinNProc++
             EndIf
          End Transaction
       Else
-         AADD(_aLog,{.T.,Alltrim(Str(_nCont)),_aDados[_nCont][1], _aDados[_nCont][2], _aDados[_nCont][3], _aDados[_nCont][4], _aDados[_nCont][5], _aDados[_nCont][6],_cMLinAlt})
+         aAdd(_aLog,{.T.,AllTrim(Str(_nCont)),_aDados[_nCont][1], _aDados[_nCont][2], _aDados[_nCont][3], _aDados[_nCont][4], _aDados[_nCont][5], _aDados[_nCont][6],_cMLinAlt})
          _nLinProc++
       EndIf
    Else
-      AADD(_aLog,{.F.,Alltrim(Str(_nCont)),_aDados[_nCont][1], _aDados[_nCont][2], _aDados[_nCont][3], _aDados[_nCont][4], _aDados[_nCont][5], _aDados[_nCont][6],_cMChNEnc})
+      aAdd(_aLog,{.F.,AllTrim(Str(_nCont)),_aDados[_nCont][1], _aDados[_nCont][2], _aDados[_nCont][3], _aDados[_nCont][4], _aDados[_nCont][5], _aDados[_nCont][6],_cMChNEnc})
       _nLinNProc++
    EndIf
 Next

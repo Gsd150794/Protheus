@@ -2,32 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 19/08/2019 | Modificada leitura de filiais - Chamado 33881
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 10/03/2021 | Corrigido usuário da última alteração- Chamado 35875
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 26/01/2022 |Parâmetros globais devem ser alterados apenas por que acessa todas as filiais. Chamado 42706
+Lucas Borges  |10/03/2021| Chamado 35875. Corrigido usuário da última alteração,
+Lucas Borges  |26/01/2022| Chamado 42706. Parâmetros globais devem ser alterados apenas por que acessa todas as filiais.
+Lucas Borges  |10/10/2025| Chamado 52181. Alterada gravação na SX6 para não gravar via RecLock
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: ACFG006
 Autor-------------: Lucas Borges
 Data da Criacao---: 30/07/2018
-===============================================================================================================================
 Descrição---------: Permite manipular o conteúdo de qualquer parâmetro informado previamente no cadastro de usuários Italac
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -59,17 +50,14 @@ Return
 Programa----------: ACFG06P
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 25/07/2018
-===============================================================================================================================
 Descrição---------: Monta rotina para alteração dos parâmetros
-===============================================================================================================================
 Parametros--------: _oSelf
-===============================================================================================================================
 Retorno-----------: 
 ===============================================================================================================================
 */
 Static Function ACFG06P
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _aFilUsr	:= FWLoadSM0(.F.,.T.) 
 Local _aParam	:= {}
 Local _cDetalhes:= ''
@@ -86,7 +74,7 @@ Local _lTodas	:= .T.
 
 DBSelectArea('ZZL')
 ZZL->( DBSetOrder(3) )
-If !Empty(MV_PAR01) .and. (FwIsAdmin() .Or. (ZZL->( DBSeek(xFilial("ZZL")+RetCodUsr()) ) .And. AllTrim(MV_PAR01) $ AllTrim(ZZL->ZZL_PARAME)))
+If !Empty(MV_PAR01) .And. (FwIsAdmin() .Or. (ZZL->( DBSeek(xFilial("ZZL")+RetCodUsr()) ) .And. AllTrim(MV_PAR01) $ AllTrim(ZZL->ZZL_PARAME)))
 	For _nI := 1 To Len( _aFilUsr )
 		If _aFilUsr[1][11] == .F.
 			_lTodas := .F.
@@ -113,7 +101,7 @@ If !Empty(MV_PAR01) .and. (FwIsAdmin() .Or. (ZZL->( DBSeek(xFilial("ZZL")+RetCod
 		_cAlias	:= GetNextAlias()
 		_cFilial:= IIf(Empty(_aParam[_nI][01]),'01',_aParam[_nI][01])
 		
-		BeginSQL Alias _cAlias
+		BeginSql Alias _cAlias
 			SELECT CV8_USER FROM %Table:CV8%
 			WHERE D_E_L_E_T_ = ' '
 			AND CV8_FILIAL = %Exp:_cFilial%
@@ -121,9 +109,9 @@ If !Empty(MV_PAR01) .and. (FwIsAdmin() .Or. (ZZL->( DBSeek(xFilial("ZZL")+RetCod
 			AND CV8_MSG LIKE %Exp:_cFiltro%
 			ORDER BY CV8_DATA DESC, CV8_HORA DESC
 			FETCH FIRST 1 ROWS ONLY
-		EndSQL		
+		EndSql		
 			_aParam[_nI][04]:= (_cAlias)->CV8_USER
-		(_cAlias)->(DbCloseArea())
+		(_cAlias)->(DBCloseArea())
 	Next
 	
 	If Len(_aParam) > 0
@@ -140,10 +128,10 @@ If !Empty(MV_PAR01) .and. (FwIsAdmin() .Or. (ZZL->( DBSeek(xFilial("ZZL")+RetCod
 			_oBrowse:AddColumn( TCColumn():New( 'Novo Conteúdo'	, {|| _aParam[_oBrowse:nAt][06] } ,,,, "LEFT" ,50,	.F. , .F.,,{ || ACFG006V(ReadVar())},, .F., ) )
 			
 			_oBrowse:aColSizes		:= { 010 , 150 , 0050 , 0050 }
-			_oBrowse:bLDblClick		:= {|z,x| IIF( x == 06 , ( lEditCell( _aParam , _oBrowse ,  , x ) , .T. ) , .F. ) , _oBrowse:Refresh() }
+			_oBrowse:bLDblClick		:= {|z,x| IIf( x == 06 , ( lEditCell( _aParam , _oBrowse ,  , x ) , .T. ) , .F. ) , _oBrowse:Refresh() }
 			_oBrowse:lAdjustColSize	:= .F.
 			
-			@255,120 BUTTON _oBtn01 PROMPT "Confirmar" SIZE 040,010 OF _oDlg PIXEL ACTION IIF( ACFG006V(_aParam) , ( _nOpca := 1 , _oDlg:End() ) , MsgAlert("Verifique o conteúdo informado no parâmetro!","ACFG00601") )
+			@255,120 BUTTON _oBtn01 PROMPT "Confirmar" SIZE 040,010 OF _oDlg PIXEL ACTION IIf( ACFG006V(_aParam) , ( _nOpca := 1 , _oDlg:End() ) , MsgAlert("Verifique o conteúdo informado no parâmetro!","ACFG00601") )
 			@255,162 BUTTON _oBtn02 PROMPT "Cancelar"  SIZE 040,010 OF _oDlg PIXEL ACTION ( _oDlg:End() , _nOpca := 2 )
 			
 		ACTIVATE MSDIALOG _oDlg CENTERED
@@ -156,14 +144,13 @@ If !Empty(MV_PAR01) .and. (FwIsAdmin() .Or. (ZZL->( DBSeek(xFilial("ZZL")+RetCod
 				_cCont:= ACFG006A(_aParam[_nI][03],2,_aParam[_nI][06],_aParam[_nI][05])
 				If !_cCont == AllTrim(X6Conteud())
 					_cDetalhes:='Conteúdo anterior: ' + AllTrim(X6Conteud()) + 'Conteúdo atual: ' + _cCont + CRLF
-					RecLock( 'SX6' , .F. )
-                    SX6->( FieldPut( FieldPos( "X6_CONTEUD"  ), _cCont ) )
-					SX6->( MsUnLock() )
 					//=========================================================================================
 					//Troco a filial corrente para poder gravar o log setando o CV8_FILIAL corretamente, assim 
 					//a consulta do logfica correta e consigo exibir ele no browse
 					//=========================================================================================
-					cFilAnt := IIf(Empty(_aParam[_nI][01]),'01',_aParam[_nI][01] )
+					cFilAnt := IIf(Empty(_aParam[_nI][01]),_cFilOri,_aParam[_nI][01] )
+					PutMV(MV_PAR01,_cCont)
+
 					ProcLogIni( _aButtons )
 					ProcLogAtu("MENSAGEM","Alteracao parametro "+MV_PAR01,_cDetalhes,_cPerg)
 				EndIf
@@ -174,41 +161,37 @@ If !Empty(MV_PAR01) .and. (FwIsAdmin() .Or. (ZZL->( DBSeek(xFilial("ZZL")+RetCod
 Else
 	MsgStop("Usuário sem acesso para alterar o parâmetro informado: " + AllTrim(MV_PAR01), "ACFG00601" )
 EndIf
-ZZL->(DbCloseArea())
-RestArea( _aArea )
+ZZL->(DBCloseArea())
+FWRestArea( _aArea )
 
 Return
-
 
 /*
 ===============================================================================================================================
 Programa----------: ACFG006A
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 30/07/2018
-===============================================================================================================================
 Descrição---------: Altera tipagem da variável para poder montar o Browse com o tipo correto. Evita que tenha que fazer algumas
 					validaçõs básicas de formato, mas não funcionou para o Lógico.
-===============================================================================================================================
 Parametros--------: _aParam[_nI][03] - Tipo do parâmetro (L-Lógico, C-Caracter, D-Data, N-Numérico)
 					_nOpc - 1-Converte de texto para o tipo correto para exibir no Browse. 2- Converte de volta para texto para
 					poder gravar na SX6.
 					_aParam[_nI][05] - Conteúdo do parâmetro/browse atualizado
 					_aParam[_nI][04] - Conteúdo do parâmetro/browse antes da atualização
-===============================================================================================================================
 Retorno-----------: _xRet - Conteúdo do parâmetro/browse já tratado
 ===============================================================================================================================
 */
 Static Function ACFG006A(_cTipo,_nOpc,_xRet,_xRetOri)
 
 If ValType(_xRet)=='L' .And. _nOpc == 1
-	_xRet:=Substr(_xRet,1,3)
+	_xRet:=SubStr(_xRet,1,3)
 ElseIf _cTipo == 'N' .And. _nOpc == 2
 	_xRet:= cValToChar(_xRet)
 ElseIf _cTipo == 'D' .And. _nOpc == 1
 	If At('/',_xRet) > 0
 		_xRet:= CToD(_xRet)
 	Else
-		_xRet:= CToD(Substr(_xRet,7,2)+'/'+Substr(_xRet,5,2)+'/'+Substr(_xRet,1,4))
+		_xRet:= CToD(SubStr(_xRet,7,2)+'/'+SubStr(_xRet,5,2)+'/'+SubStr(_xRet,1,4))
 	EndIf
 ElseIf _cTipo == 'D' .And. _nOpc == 2
 	If At('/',_xRetOri) > 0
@@ -229,15 +212,13 @@ Return (_xRet)
 Programa----------: ACFG006V
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 30/07/2018
-===============================================================================================================================
 Descrição---------: Valida conteúdo informado no browse
-===============================================================================================================================
 Parametros--------: _aParam - Conteúdo do parâmetro/browse informado pelo usuário
-===============================================================================================================================
 Retorno-----------: _lRet - .T./.F. - permite ou não prosseguir com a alteração
 ===============================================================================================================================
 */
 Static Function ACFG006V(_aParam)
+
 Local _lRet		:= .T.
 Local _nI, _nX	:= 0
 Local _cChar	:= ''

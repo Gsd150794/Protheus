@@ -2,30 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 25/10/2017 | Compatibilização do fonte nas normas da P12 e correção nos totalizadores - Chamado 22184
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 21/06/2019 | Revisão de fontes. Chamado 28346
+Lucas Borges  |25/10/2017| Chamado 22184. Compatibilização do fonte nas normas da P12 e correção nos totalizadores
+Lucas Borges  |21/06/2019| Chamado 28346. Revisão de fontes.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT048
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 20/04/2011
-===============================================================================================================================
 Descrição---------: Folha a pagar Fretista - Lista os Fretistas com seus eventos e respectivos valores totalizando o valor 
 					liquido a pagar
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -68,16 +61,14 @@ nTipo := If(aReturn[4]==1,15,18)
 RptStatus({|| RunReport(Cabec1,Cabec2,Titulo,nLin) },Titulo)
 
 Return
+
 /*
 ===============================================================================================================================
 Programa----------: RunReport
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 20/04/2011
-===============================================================================================================================
 Descrição---------: Funcao auxiliar chamada pela RPTSTATUS. A funcao RPTSTATUS monta a janela com a regua de processamento.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -117,7 +108,7 @@ ZLE->( DBSeek( xFilial("ZLE") + MV_PAR02 ) )
 	dt2:=ZLE->ZLE_DTFIM
 ZLE->(DBCloseArea())
 
-Cabec1 := "Setor: "+MV_PAR01+" Mix: "+MV_PAR02 + " De: " + DtoC(dt1) + ' ?' + DtoC(dt2)
+Cabec1 := "Setor: "+MV_PAR01+" Mix: "+MV_PAR02 + " De: " + DToC(dt1) + ' ?' + DToC(dt2)
 
 nLin := nMaxLin
 
@@ -130,21 +121,21 @@ For _nX:=1 To Len(aStruct)
 Next
 
 // cabecalho
-Cabec2:=padr("CODIGO LINHA",29)
-Cabec2+=padr("VOLUME",10)
-Cabec2+=padr("KM RODADO",10)
-Cabec2+=padr("VIAGENS",9)
+Cabec2:=PadR("CODIGO LINHA",29)
+Cabec2+=PadR("VOLUME",10)
+Cabec2+=PadR("KM RODADO",10)
+Cabec2+=PadR("VIAGENS",9)
 
 For _nX:=1 To Len(aStruct)
 	If _nX<=nMaxCol
-		Cabec2 += padr(aStruct[_nX,2],nTamCmp)
+		Cabec2 += PadR(aStruct[_nX,2],nTamCmp)
 	EndIf
 	If _nX==Len(aStruct)
-		Cabec2 += padr("OUTROS",nTamCmp)
+		Cabec2 += PadR("OUTROS",nTamCmp)
 	EndIf
 Next _nX
 
-Cabec2:=padr(Cabec2,206)
+Cabec2:=PadR(Cabec2,206)
 Cabec2+="VLR LIQUIDO"
 
 BeginSql Alias _cAlias
@@ -189,14 +180,14 @@ While (_cAlias)->(!Eof())
 
 			//Forca a quebra de pagina
 			nLin :=1000
-			if nLin >= nMaxLin 
+			If nLin >= nMaxLin 
 				Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
 			   	nLin := 9
 			EndIf
 
 		EndIf
 
-		@nLin,000 PSAY "Fretista: "+(_cAlias)->ZLD_FRETIS+"-"+(_cAlias)->ZLD_LJFRET+" "+POSICIONE("SA2",1,XFILIAL("SA2")+(_cAlias)->(ZLD_FRETIS+ZLD_LJFRET),"A2_NOME")
+		@nLin,000 PSAY "Fretista: "+(_cAlias)->ZLD_FRETIS+"-"+(_cAlias)->ZLD_LJFRET+" "+Posicione("SA2",1,xFilial("SA2")+(_cAlias)->(ZLD_FRETIS+ZLD_LJFRET),"A2_NOME")
 		nLin++
 		nLin++
 	EndIf
@@ -204,22 +195,22 @@ While (_cAlias)->(!Eof())
 	cUltFret:= (_cAlias)->(ZLD_FRETIS+ZLD_LJFRET)
 
 	// MOSTRA PRODUTOR E SEUS RESPECTIVOS VALORES
-	@nLin,000 PSAY (_cAlias)->ZLD_LINROT+" "+LEFT(POSICIONE("ZL3",1,XFILIAL("ZL3")+(_cAlias)->ZLD_LINROT,"ZL3_DESCRI"),15)
+	@nLin,000 PSAY (_cAlias)->ZLD_LINROT+" "+LEFT(Posicione("ZL3",1,xFilial("ZL3")+(_cAlias)->ZLD_LINROT,"ZL3_DESCRI"),15)
 
 	// Volume de leite coletado
-	nAux := U_VolFret(xfilial("ZLD"),MV_PAR01,(_cAlias)->ZLD_LINROT,(_cAlias)->ZLD_FRETIS,(_cAlias)->ZLD_LJFRET,dt1,dt2,1)
+	nAux := U_VolFret(xFilial("ZLD"),MV_PAR01,(_cAlias)->ZLD_LINROT,(_cAlias)->ZLD_FRETIS,(_cAlias)->ZLD_LJFRET,dt1,dt2,1)
 	nSubVol   += nAux
 	nTotVolGer+= nAux //Totalizador Geral do volume de leite
 	
 	@nLin,025 PSAY nAux Picture "@E 99,999,999"
 
 	// Km RODADO
-	nAux:= U_GetKm(xfilial("ZLD"),MV_PAR01,(_cAlias)->ZLD_LINROT,(_cAlias)->ZLD_FRETIS,(_cAlias)->ZLD_LJFRET,dt1,dt2)
+	nAux:= U_GetKm(xFilial("ZLD"),MV_PAR01,(_cAlias)->ZLD_LINROT,(_cAlias)->ZLD_FRETIS,(_cAlias)->ZLD_LJFRET,dt1,dt2)
 	nSubKm += nAux
 	@nLin,038 PSAY nAux Picture "@E 99,999,999"
 	
 	// Viagens realizadas (dias)
-	nAux:= u_getDiaFrt(xfilial("ZLD"),MV_PAR01,(_cAlias)->ZLD_LINROT,(_cAlias)->ZLD_FRETIS,(_cAlias)->ZLD_LJFRET,dt1,dt2)
+	nAux:= u_getDiaFrt(xFilial("ZLD"),MV_PAR01,(_cAlias)->ZLD_LINROT,(_cAlias)->ZLD_FRETIS,(_cAlias)->ZLD_LJFRET,dt1,dt2)
 	nSubDia += nAux
 	@nLin,046 PSAY nAux Picture "@E 99,999,999"
 
@@ -229,7 +220,7 @@ While (_cAlias)->(!Eof())
 	nPos1:=58
 	For _nX:=1 To Len(aStruct)
 
-		nVlrEvt := u_getEvtFrt(xfilial("ZLD"),MV_PAR01,(_cAlias)->ZLD_LINROT,(_cAlias)->ZLD_FRETIS,(_cAlias)->ZLD_LJFRET,aStruct[_nX,1],MV_PAR02)
+		nVlrEvt := u_getEvtFrt(xFilial("ZLD"),MV_PAR01,(_cAlias)->ZLD_LINROT,(_cAlias)->ZLD_FRETIS,(_cAlias)->ZLD_LJFRET,aStruct[_nX,1],MV_PAR02)
 
 		aStruct[_nX,3] += nVlrEvt // total geral
 
@@ -253,7 +244,7 @@ While (_cAlias)->(!Eof())
 		Else
 			nOutros += nVlrEvt
 		EndIf
-		If _nX== Len(aStruct) .and. nOutros <> 0
+		If _nX== Len(aStruct) .And. nOutros <> 0
 			@nLin,nPos1 PSAY nOutros Picture "@E 999,999.99"
 			nPos1 += nTamCmp
 			aSubTots[_nX] += nOutros // subtotal
@@ -291,11 +282,8 @@ Return
 Programa----------: showSubTotal
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 20/04/2011
-===============================================================================================================================
 Descrição---------: Imprime subtotal do fretista
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -309,12 +297,12 @@ If nQtdLin > 1
 	@nlin,038 PSAY nSubKm Picture  "@E 99,999,999"
 	@nlin,046 PSAY nSubDia Picture "@E 99,999,999"
 	nPos1:=58
-	For _nX:=1 to len(aStruct)
+	For _nX:=1 to Len(aStruct)
 		If _nX<=nMaxCol
 			@nLin,nPos1 PSAY aSubTots[_nX] Picture "@E 999,999.99"
 			nPos1 += nTamCmp				
 		EndIf
-		If _nX==len(aStruct) .and. nOutros <> 0
+		If _nX==Len(aStruct) .And. nOutros <> 0
 			@nLin,nPos1 PSAY aSubTots[_nX] Picture "@E 999,999.99"
 			nPos1 += nTamCmp
 		EndIf			
@@ -342,11 +330,8 @@ Return nLin
 Programa----------: getStruct
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 09/12/2008
-===============================================================================================================================
 Descrição---------: Retorna campos dinamicos que estao na ZLF
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -367,11 +352,11 @@ BeginSql Alias _cAlias
   ORDER BY ZLF_EVENTO  
 EndSql   
 
-While !(_cALias)->(Eof())
-	aAdd(_aCampos,{(_cAlias)->CODIGO,POSICIONE("ZL8",1,XFILIAL("ZL8")+(_cAlias)->CODIGO,"ZL8_NREDUZ"),0})
-	(_cALias)->(DBSkip())
+While !(_cAlias)->(Eof())
+	aAdd(_aCampos,{(_cAlias)->CODIGO,Posicione("ZL8",1,xFilial("ZL8")+(_cAlias)->CODIGO,"ZL8_NREDUZ"),0})
+	(_cAlias)->(DBSkip())
 EndDo
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return _aCampos
 
@@ -380,11 +365,8 @@ Return _aCampos
 Programa----------: prtResumo
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 09/12/2008
-===============================================================================================================================
 Descrição---------: Imprime resumo
-===============================================================================================================================
 Parametros--------: Cabec1,Cabec2,Titulo,nLin
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -406,7 +388,7 @@ nLin++
 
 @nLin,000 PSAY Replicate("-",60)
 nLin++
-For _nX:=1 to len(_aAux)
+For _nX:=1 to Len(_aAux)
 	@nLin,000 PSAY _aAux[_nX,1]
 	@nLin,008 PSAY _aAux[_nX,2]
 	If _aAux[_nX,3] >= 0

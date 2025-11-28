@@ -17,8 +17,8 @@ Josué Danich      | 12/07/2018 | Reconstrução de rotina usando novo tipo de envi
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#include "Protheus.ch"
-#INCLUDE "apwebsrv.ch"
+#Include "TOTVS.ch"
+#Include "apwebsrv.ch"
 
 /*
 ===============================================================================================================================
@@ -37,7 +37,7 @@ User Function MOMS011()
 
 Local aTables    := {"SF2","ZZK"}    
 
-PRIVATE _lShedule  := .F. 
+Private _lShedule  := .F. 
 Private oproc
 
                         
@@ -50,19 +50,19 @@ If _lShedule
 	RPCSetType(3)
 	RpcSetEnv("01","01",,,,/*"XML_WALlMART"*/,aTables)     
 
-    u_itconout('Iniciando rotina de envio de xmls Walmart ' + Dtoc(DATE()) + ' - ' + Time())
+    u_itconout('Iniciando rotina de envio de xmls Walmart ' + DToC(DATE()) + ' - ' + Time())
 
     U_MOMS011E(.T.)
 
-ELSE
+Else
 
    cCadastro:="Envio de Nota Fiscal do Walmart"
    aRotina := { { OemToAnsi("Pesquisar")   ,"AxPesqui"	    ,0,1,0,.F.},;
 			   { OemToAnsi("Visualizar")  ,'AxVisual'       ,0,2,0,NIL},;
 			   { OemToAnsi("Legenda")     ,'U_MOMS011L'     ,0,3,0,NIL},;
 			   { OemToAnsi("Histórico")   ,'U_MOMS011H'     ,0,3,0,NIL},;
-			   { OemToAnsi("Enviar Atual"),'fwmsgrun(,{ |oproc| U_MOMS011E(.F.,oproc)},"Aguarde...","Iniciando processo...")',0,3,0,NIL},;
-			   { OemToAnsi("Enviar Todos"),'fwmsgrun(,{ |oproc| U_MOMS011E(.T.,oproc)},"Aguarde...","Iniciando processo...")',0,3,0,NIL}}
+			   { OemToAnsi("Enviar Atual"),'FWMsgRun(,{ |oproc| U_MOMS011E(.F.,oproc)},"Aguarde...","Iniciando processo...")',0,3,0,NIL},;
+			   { OemToAnsi("Enviar Todos"),'FWMsgRun(,{ |oproc| U_MOMS011E(.T.,oproc)},"Aguarde...","Iniciando processo...")',0,3,0,NIL}}
 
    _aCorLegen:={}
    aAdd(_aCorLegen,{"!(F2_CLIENTE $ u_itgetmv('ITCODWAL','004536;000258;008753;004925;000641'))",'BR_PRETO'})	
@@ -70,14 +70,14 @@ ELSE
    aAdd(_aCorLegen,{"F2_I_ENXML == 'S'",'DISABLE'})
 
    cExprFilTop := " f2_filial = '" + cfilant + "' and "
-   cExprFilTop += " f2_emissao > '" + dtos(date()-60) + "' and f2_hora > '00:00' and "
-   cExprFilTop += " f2_cliente IN " + FormatIn(Alltrim(u_itgetmv('ITCODWAL','004536;000258;008753;004925;000641')),";") 
+   cExprFilTop += " f2_emissao > '" + DToS(date()-60) + "' and f2_hora > '00:00' and "
+   cExprFilTop += " f2_cliente IN " + FormatIn(AllTrim(u_itgetmv('ITCODWAL','004536;000258;008753;004925;000641')),";") 
   
    mBrowse(,,,,"SF2",,,,,,_aCorLegen,,,,,,,, cExprFilTop)
 
 EndIf
 
-RETURN .F.
+Return .F.
 
 /*
 ===============================================================================================================================
@@ -104,9 +104,9 @@ Local cModalidade:= ""
 Local cAlias     := GetNextAlias()  
 Local _cDescRet:= ""  
 
-_cfiltro := "% SF2.F2_CLIENTE IN " + FormatIn(u_itgetmv('ITCODWAL','004536;000258;008753;004925;000641'),";") + "%"
+_cFiltro := "% SF2.F2_CLIENTE IN " + FormatIn(u_itgetmv('ITCODWAL','004536;000258;008753;004925;000641'),";") + "%"
 
-IF lTodos
+If lTodos
 
    BeginSql Alias cAlias
 	
@@ -131,11 +131,11 @@ IF lTodos
 
    EndSql
 
-ELSE
+Else
 
    _cFil:= SF2->F2_FILIAL
    _cNF := SF2->F2_DOC
-   _DTLIM := dtos(date()-60)
+   _DTLIM := DToS(date()-60)
 
    BeginSql Alias cAlias
 	
@@ -162,54 +162,54 @@ ELSE
 
    EndSql
 
-ENDIF
+EndIf
 
-DbSelectArea(cAlias)
+DBSelectArea(cAlias)
 count to nTot
 
 If !_lShedule 
-   IF nTot = 0
-      u_itmsg("Nota(s) nao pertence a nenhum criterio da selecao","Atenção","Apenas notas do grupo Walmart podem ser enviadas por essa rotina",1)
-   ELSE
-      IF lTodos
-      	IF !u_itmsg("Todas as notas selecionadas, confirma envio?","Envio Walmart",,2,2,2)
+   If nTot = 0
+      U_ITMsg("Nota(s) nao pertence a nenhum criterio da selecao","Atenção","Apenas notas do grupo Walmart podem ser enviadas por essa rotina",1)
+   Else
+      If lTodos
+      	If !U_ITMsg("Todas as notas selecionadas, confirma envio?","Envio Walmart",,2,2,2)
          	(cAlias)->(DBCloseArea())
          	Return
-      	Endif
+      	EndIf
       Else	
-      	IF !u_itmsg("Nota(s): "+CHR(13)+CHR(10)+_cNF+" selecionada, confirma envio?","Envio Walmart",,2,2,2)
+      	If !U_ITMsg("Nota(s): "+CHR(13)+CHR(10)+_cNF+" selecionada, confirma envio?","Envio Walmart",,2,2,2)
          	(cAlias)->(DBCloseArea())
          	Return
-      	Endif
-      Endif	
-   ENDIF
-Endif
+      	EndIf
+      EndIf	
+   EndIf
+EndIf
 
-(cAlias)->(DbGotop())
+(cAlias)->(DBGoTop())
 
 _cNF:=""
 lEnvio:=.F.
 
-DO While (cAlias)->(!Eof())
+While (cAlias)->(!Eof())
 
 	If !_lShedule
 
-		oproc:cCaption := ("Enviando xml da nota " + (cAlias)->F2_FILIAL + "/" + alltrim((cAlias)->F2_DOC) + "...")
+		oproc:cCaption := ("Enviando xml da nota " + (cAlias)->F2_FILIAL + "/" + AllTrim((cAlias)->F2_DOC) + "...")
 		ProcessMessages()
 		
-	Endif
+	EndIf
 
 	cIdEnt:= (cAlias)->ID_ENT
 	
 	aNotas:= {}
-	aadd(aNotas,{})
-	aadd(Atail(aNotas),.F.)
-	aadd(Atail(aNotas),"S")
-	aadd(Atail(aNotas),StoD((cAlias)->DATE_NFE))
-	aadd(Atail(aNotas),(cAlias)->F2_SERIE)
-	aadd(Atail(aNotas),(cAlias)->F2_DOC)
-	aadd(Atail(aNotas),(cAlias)->F2_CLIENTE)
-	aadd(Atail(aNotas),(cAlias)->F2_LOJA)
+	aAdd(aNotas,{})
+	aAdd(Atail(aNotas),.F.)
+	aAdd(Atail(aNotas),"S")
+	aAdd(Atail(aNotas),SToD((cAlias)->DATE_NFE))
+	aAdd(Atail(aNotas),(cAlias)->F2_SERIE)
+	aAdd(Atail(aNotas),(cAlias)->F2_DOC)
+	aAdd(Atail(aNotas),(cAlias)->F2_CLIENTE)
+	aAdd(Atail(aNotas),(cAlias)->F2_LOJA)
 	
 	cXmlDados:= MOMS011G(cIdEnt,aNotas,cModalidade)
 	
@@ -229,18 +229,18 @@ DO While (cAlias)->(!Eof())
 		_nresult:= oWsWal:fu_upld()
 					
 		_nRetorno:=999999
-		If VALType(oWsWal:oWSfu_upldResult:NRETURN_CODE) <> 'U' 
+		If ValType(oWsWal:oWSfu_upldResult:NRETURN_CODE) <> 'U' 
 			_nRetorno  := oWsWal:oWSfu_upldResult:NRETURN_CODE
-		EndIF
+		EndIf
 		
 		_cDescRet:= ""
 		If ValType(oWsWal:oWSfu_upldResult:CRETURN_CHAV) <> 'U' 
 			_cDescRet  := oWsWal:oWSfu_upldResult:CRETURN_CHAV
-		EndIF
+		EndIf
 		
-		IF EMPTY(_cDescRet) .and. _nretorno != 0
-				_cDescRet  := IF(_nResult = Nil,"NAO HOUVE RETORNO","RETORNO NEGATIVO")
-		ENDIF
+		If Empty(_cDescRet) .And. _nretorno != 0
+				_cDescRet  := If(_nResult = Nil,"NAO HOUVE RETORNO","RETORNO NEGATIVO")
+		EndIf
 		
 		/*
 		//================================================================
@@ -249,43 +249,43 @@ DO While (cAlias)->(!Eof())
 		*/
 		If _nRetorno == 0
 			
-			SF2->(dbSetOrder(2))
-			If SF2->(dbSeek((cAlias)->F2_FILIAL + (cAlias)->F2_CLIENTE + (cAlias)->F2_LOJA + (cAlias)->F2_DOC + (cAlias)->F2_SERIE ))
+			SF2->(DBSetOrder(2))
+			If SF2->(DBSeek((cAlias)->F2_FILIAL + (cAlias)->F2_CLIENTE + (cAlias)->F2_LOJA + (cAlias)->F2_DOC + (cAlias)->F2_SERIE ))
 				
 				RecLock("SF2",.F.)
 				
 				SF2->F2_I_ENXML:= 'S'
 				
-				SF2->(MsUnlock())
+				SF2->(MSUnLock())
 				
 				lEnvio:=.T.
 				
 				_cNF+=(cAlias)->F2_FILIAL + "/" + (cAlias)->F2_DOC + " - "
 
 			EndIf
-			SF2->(dbSetOrder(1))
+			SF2->(DBSetOrder(1))
 		
-		Endif
+		EndIf
 		
 		RecLock("ZZK",.T.)
 				
 		ZZK->ZZK_FILIAL:= (cAlias)->F2_FILIAL
 		ZZK->ZZK_CDERRO:= AllTrim(Str(_nretorno))
-		ZZK->ZZK_DESCRI:= IIF(EMPTY(AllTrim(_cDescRet)) .AND. _NRETORNO != 0 ,"FALHA DE CONEXAO AO SERVIDOR DO WALMART",AllTrim(_cDescRet))
+		ZZK->ZZK_DESCRI:= IIf(Empty(AllTrim(_cDescRet)) .And. _NRETORNO != 0 ,"FALHA DE CONEXAO AO SERVIDOR DO WALMART",AllTrim(_cDescRet))
 		ZZK->ZZK_DOC   := (cAlias)->F2_DOC
 		ZZK->ZZK_SERIE := (cAlias)->F2_SERIE
 		ZZK->ZZK_CLIENT:= (cAlias)->F2_CLIENTE
 		ZZK->ZZK_LOJA  := (cAlias)->F2_LOJA
-		ZZK->ZZK_USER  := iif(_lShedule,"SCHEDULE",cusername)
-		ZZK->ZZK_DATA  := DATE()
-		ZZK->ZZK_HORA  := TIME()
+		ZZK->ZZK_USER  := IIf(_lShedule,"SCHEDULE",cUserName)
+		ZZK->ZZK_DATA  := Date()
+		ZZK->ZZK_HORA  := Time()
 				
-		ZZK->(MsUnlock())
+		ZZK->(MSUnLock())
 
 	EndIf
 	
-	dbSelectArea(cAlias)
-	(cAlias)->(dbSkip())
+	DBSelectArea(cAlias)
+	(cAlias)->(DBSkip())
 	
 	//limpa objetos xml
 	DelClassIntf()
@@ -294,28 +294,28 @@ EndDo
 			
 (cAlias)->(DBCloseArea())
 
-If _lShedule .and. nTot > 0
+If _lShedule .And. nTot > 0
 
 	RpcClearEnv() //Limpa o ambiente, liberando a licença e fechando as conexões
 	
-	u_itconout('Termino do enviou do XML das notas do cliente WALL MART na data: ' + Dtoc(DATE()) + ' - ' + Time())
+	u_itconout('Termino do enviou do XML das notas do cliente WALL MART na data: ' + DToC(DATE()) + ' - ' + Time())
 
-ELSEif ntot > 0
+ElseIf ntot > 0
     
-    IF lEnvio   
-       u_itmsg("Nota(s): "+CHR(13)+CHR(10)+_cNF+" enviada(s) com sucesso","Envio Walmart",,2 )
-    ELSE
-    	If empty(_cDescRet)
+    If lEnvio   
+       U_ITMsg("Nota(s): "+CHR(13)+CHR(10)+_cNF+" enviada(s) com sucesso","Envio Walmart",,2 )
+    Else
+    	If Empty(_cDescRet)
     	
-    		u_itmsg("Nenhuma nota enviada","Atenção","Erro de conexão ao servidor do Walmart",1)
+    		U_ITMsg("Nenhuma nota enviada","Atenção","Erro de conexão ao servidor do Walmart",1)
     	
     	Else
     	
-    		u_itmsg("Nenhuma nota enviada","Atenção","Erro: " + _cDescRet,1)
+    		U_ITMsg("Nenhuma nota enviada","Atenção","Erro: " + _cDescRet,1)
     		
-    	Endif
+    	EndIf
     	
-    ENDIF
+    EndIf
 
 EndIf
 
@@ -337,20 +337,20 @@ Retorno-----------: cRet : Cnpj da filial
 
 Static Function MOMS011C(cCodFil)
 
-local aAreaSM0 := SM0->(getArea())
-local cRet := " "
+Local aAreaSM0 := SM0->(getArea())
+Local cRet := " "
 
-SM0->(dbSelectArea("SM0"))
-SM0->(dbSetOrder(1))
-SM0->(dbSeek(cEmpAnt+ cCodFil)) 
+SM0->(DBSelectArea("SM0"))
+SM0->(DBSetOrder(1))
+SM0->(DBSeek(cEmpAnt+ cCodFil)) 
 
-cRet := alltrim(str(val(SM0->M0_CGC))) 
+cRet := AllTrim(Str(Val(SM0->M0_CGC))) 
 
 //Restaura integridade da SM0
-SM0->(dbSetOrder(aAreaSM0[2]))
-SM0->(dbGoTo(aAreaSM0[3]))
+SM0->(DBSetOrder(aAreaSM0[2]))
+SM0->(DBGoTo(aAreaSM0[3]))
 
-return cRet  
+Return cRet  
 
 /*
 ===============================================================================================================================
@@ -400,15 +400,15 @@ EndIf
          
 oWs := nil
 
-For nZ := 1 To len(aIdNfe) 
+For nZ := 1 To Len(aIdNfe) 
 	nCount++
 
 	aDados := MOMS011X( aIdNfe[nZ], cIdEnt )
 	
-	if ( nCount == 10 )
+	If ( nCount == 10 )
 		delClassIntF()
 		nCount := 0
-	endif
+	EndIf
 	
 	aAdd(aRetorno,aDados)
 	
@@ -430,7 +430,7 @@ Parametros--------: cIdEnt - Id da nfe
 Retorno-----------: aretorno - array com dados da nfe, posição [1][2] é o string do xml								
 ===============================================================================================================================
 */
-static function MOMS011X( aNfe, cIdEnt )
+Static Function MOMS011X( aNfe, cIdEnt )
 
 Local aRetorno		:= {}
 Local aIdNfe		:= {}
@@ -471,9 +471,9 @@ aAdd(aIdNfe,aNfe)
 	oWS:oWSNFEID          := NFESBRA_NFES2():New()
 	oWS:oWSNFEID:oWSNotas := NFESBRA_ARRAYOFNFESID2():New()  
 	
-	aadd(aRetorno,{"","",aIdNfe[nZ][4]+aIdNfe[nZ][5],"","","",CToD(""),"","",""})
+	aAdd(aRetorno,{"","",aIdNfe[nZ][4]+aIdNfe[nZ][5],"","","",CToD(""),"","",""})
 	
-	aadd(oWS:oWSNFEID:oWSNotas:oWSNFESID2,NFESBRA_NFESID2():New())
+	aAdd(oWS:oWSNFEID:oWSNotas:oWSNFESID2,NFESBRA_NFESID2():New())
 	Atail(oWS:oWSNFEID:oWSNotas:oWSNFESID2):cID := aIdNfe[nZ][4]+aIdNfe[nZ][5]
 	
 	If oWS:RETORNANOTASNX()
@@ -488,7 +488,7 @@ aAdd(aIdNfe,aNfe)
 					cModTrans		  := IIf (!Empty("oNFeRet:_NFE:_INFNFE:_IDE:_TPEMIS:TEXT"),oNFeRet:_NFE:_INFNFE:_IDE:_TPEMIS:TEXT,1)
 				Else
 					cModTrans := 1
-				Endif
+				EndIf
 				
 				If ValType(oWs:OWSRETORNANOTASNXRESULT:OWSNOTAS:OWSNFES5[nX]:OWSDPEC)=="O"
 					cRetDPEC        := oWs:oWSRETORNANOTASNXRESULT:OWSNOTAS:OWSNFES5[nX]:oWSDPEC:CXML
@@ -504,7 +504,7 @@ aAdd(aIdNfe,aNfe)
 						cDtHrRec		:= oDHRecbto:_ProtNFE:_INFPROT:_DHRECBTO:TEXT
 					Else
 						cDtHrRec := ""
-					Endif
+					EndIf
 					
 					nDtHrRec1		:= RAT("T",cDtHrRec)
 					
@@ -520,8 +520,8 @@ aAdd(aIdNfe,aNfe)
 				oWS:cIdInicial    := aIdNfe[nZ][4]+aIdNfe[nZ][5]
 				oWS:cIdFinal      := aIdNfe[nZ][4]+aIdNfe[nZ][5]
 				If oWS:MONITORFAIXA()
-					cCodRetNFE := oWS:oWsMonitorFaixaResult:OWSMONITORNFE[1]:OWSERRO:OWSLOTENFE[len(oWS:oWsMonitorFaixaResult:OWSMONITORNFE[1]:OWSERRO:OWSLOTENFE)]:CCODRETNFE
-					cMsgNFE	:= oWS:oWsMonitorFaixaResult:OWSMONITORNFE[1]:OWSERRO:OWSLOTENFE[len(oWS:oWsMonitorFaixaResult:OWSMONITORNFE[1]:OWSERRO:OWSLOTENFE)]:CMSGRETNFE
+					cCodRetNFE := oWS:oWsMonitorFaixaResult:OWSMONITORNFE[1]:OWSERRO:OWSLOTENFE[Len(oWS:oWsMonitorFaixaResult:OWSMONITORNFE[1]:OWSERRO:OWSLOTENFE)]:CCODRETNFE
+					cMsgNFE	:= oWS:oWsMonitorFaixaResult:OWSMONITORNFE[1]:OWSERRO:OWSLOTENFE[Len(oWS:oWsMonitorFaixaResult:OWSMONITORNFE[1]:OWSERRO:OWSLOTENFE)]:CMSGRETNFE
 				EndIf
 	
 				If nY > 0
@@ -540,14 +540,14 @@ aAdd(aIdNfe,aNfe)
 			Next nX
 		EndIf
 	Else
-		u_itmsg(IIf(Empty(GetWscError(3)),GetWscError(1),GetWscError(3)),"DANFE",,1)
+		U_ITMsg(IIf(Empty(GetWscError(3)),GetWscError(1),GetWscError(3)),"DANFE",,1)
 	EndIf 
 
 oWS       := Nil
 oDHRecbto := Nil
 oNFeRet   := Nil
 
-return aRetorno[len(aRetorno)]
+Return aRetorno[Len(aRetorno)]
 
 /*
 ===============================================================================================================================
@@ -570,7 +570,7 @@ aLegenda :=	{	{"BR_PRETO"		, "Notas de outros clientes"		},;
  
 BrwLegenda("Envio de Xmls para o Walmart","Legenda",aLegenda)
 
-return
+Return
 
 /*
 ===============================================================================================================================
@@ -644,7 +644,7 @@ Local oClone := WScls_403_nfe_xml():New()
 	oClone:npa_cd_usua   := ::npa_cd_usua
 	oClone:cpa_ds_xml_nfe := ::cpa_ds_xml_nfe
 	oClone:cpa_ds_loca_entr := ::cpa_ds_loca_entr
-	oClone:oWSfu_upldResult :=  IIF(::oWSfu_upldResult = NIL , NIL ,::oWSfu_upldResult:Clone() )
+	oClone:oWSfu_upldResult :=  IIf(::oWSfu_upldResult = NIL , NIL ,::oWSfu_upldResult:Clone() )
 Return oClone
 
 // WSDL Method fu_upld of Service WScls_403_nfe_xml
@@ -697,7 +697,7 @@ Return oClone
 
 WSMETHOD SOAPRECV WSSEND oResponse WSCLIENT cls_403_nfe_xml_SqlExecutionRetn
 	::Init()
-	If oResponse = NIL ; Return ; Endif 
+	If oResponse = NIL ; Return ; EndIf 
 	::nreturn_code       :=  WSAdvValue( oResponse,"_RETURN_CODE","int",NIL,"Property nreturn_code as s:int on SOAP Response not found.",NIL,"N",NIL,NIL) 
 	::creturn_chav       :=  WSAdvValue( oResponse,"_RETURN_CHAV","string",NIL,NIL,NIL,"S",NIL,NIL) 
 Return
@@ -715,31 +715,31 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum							
 ===============================================================================================================================
 */
-User function MOMS011H()
+User Function MOMS011H()
 
 Local _alist := {}
 
-ZZK->(Dbsetorder(1))
+ZZK->(DBSetOrder(1))
 
-If ZZK->(Dbseek(SF2->F2_FILIAL+SF2->F2_DOC))
+If ZZK->(DBSeek(SF2->F2_FILIAL+SF2->F2_DOC))
 
-	Do while ZZK->ZZK_FILIAL == SF2->F2_FILIAL .AND. ZZK->ZZK_DOC == SF2->F2_DOC
+	While ZZK->ZZK_FILIAL == SF2->F2_FILIAL .And. ZZK->ZZK_DOC == SF2->F2_DOC
 	
-		aadd(_alist,{ZZK->ZZK_DATA,ZZK->ZZK_HORA,ZZK->ZZK_CDERRO,ZZK->ZZK_DESCRI,ZZK->ZZK_USER})
+		aAdd(_alist,{ZZK->ZZK_DATA,ZZK->ZZK_HORA,ZZK->ZZK_CDERRO,ZZK->ZZK_DESCRI,ZZK->ZZK_USER})
 		
-		ZZK->(Dbskip())
+		ZZK->(DBSkip())
 						
-	Enddo
+	EndDo
 
-	_alist := asort(_alist, , , { | x,y | dtos(x[1])+x[2] < dtos(y[1])+y[2] })
+	_alist := aSort(_alist, , , { | x,y | DToS(x[1])+x[2] < DToS(y[1])+y[2] })
 	
 	U_ITListBox( 'Envios de xml para nota ' + SF2->F2_FILIAL + "/" +  SF2->F2_DOC , {"Data","Hora","Status","Detalhes","Usuário"} , _alist , .T. , 1 )
 
 
 Else
 
-	u_itmsg("Não existem envios para essa nota","Atenção",,3)
+	U_ITMsg("Não existem envios para essa nota","Atenção",,3)
 	
-Endif
+EndIf
 
 Return

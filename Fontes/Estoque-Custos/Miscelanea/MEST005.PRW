@@ -4,13 +4,13 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer |06/11/2019  Chamado 28346. Revisão de fonte para novo appserver
+Alex Wallauer |06/11/2019| Chamado 28346. Revisão de fonte para novo appserver
 Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1
 Lucas Borges  |09/05/2025| Chamado 50617. Corrigir chamada estática no nome das tabelas do sistema
 ===============================================================================================================================
 */
 
-#include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -23,7 +23,7 @@ Retorno-----------: .T. = Permite confirmar estorno / .F. = Nao Permite confirma
 ===============================================================================================================================
 */
 User Function MEST005() 
-LOCAL I
+Local I
 Private cPerg := "MEST005"
 Private TRB := CriaTrab(Nil,.F.)
 Public cPerDE, cPerAte
@@ -46,7 +46,7 @@ aSM0 := FWLoadSM0()
 cMvFil := ""
 
 For I:=1 To Len(aSM0)
-	cMvFil += aSM0[I][2]+IF(I == Len(aSM0),"",";")
+	cMvFil += aSM0[I][2]+If(I == Len(aSM0),"",";")
 Next I
 
 cExc := " SELECT * FROM " + RetSqlName("ZL6") + ""
@@ -75,24 +75,24 @@ cExc += " ORDER BY ZL6_FILIAL, ZL6_TPCUS, ZL6_GRPCUS, ZL6_CODEVE"
 cExc := ChangeQuery(cExc)
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
+	TRB->(DBCloseArea())
+EndIf
 
 MPSysOpenQuery(cExc,"TRB")
-dbSelectArea("TRB")
+DBSelectArea("TRB")
 
 lVld:= .F.
 
-While TRB->(!EoF())
+While TRB->(!Eof())
 
 	lVld := If( Empty(TRB->ZL6_CONDIC), .T.,&(AllTrim(TRB->ZL6_CONDIC)))
 	If lVld
-		aVlrCust := If(Empty(Alltrim(TRB->ZL6_REGRA)),QRYCUST(TRB->ZL6_OBSERV),&(AllTrim(TRB->ZL6_REGRA)))
+		aVlrCust := If(Empty(AllTrim(TRB->ZL6_REGRA)),QRYCUST(TRB->ZL6_OBSERV),&(AllTrim(TRB->ZL6_REGRA)))
 	
 		For I:= 1 To Len(aVlrCust)
-			DbSelectArea("ZLG")
-			ZLG->(DbSetOrder(6))
-			If ZLG->(DbSeek(TRB->ZL6_FILIAL+SubStr(aVlrCust[I][3],1,6)+aVlrCust[I][4]+aVlrCust[I][5]+aVlrCust[I][10]+aVlrCust[I][11]))
+			DBSelectArea("ZLG")
+			ZLG->(DBSetOrder(6))
+			If ZLG->(DBSeek(TRB->ZL6_FILIAL+SubStr(aVlrCust[I][3],1,6)+aVlrCust[I][4]+aVlrCust[I][5]+aVlrCust[I][10]+aVlrCust[I][11]))
 				RecLock ("ZLG",.F.)
 				RollBackSX8()
 			Else
@@ -108,10 +108,10 @@ While TRB->(!EoF())
 				ZLG->ZLG_VLREVE	:= aVlrCust[I][8]
 				ZLG->ZLG_CODEVE := aVlrCust[I][10]
 				ZLG->ZLG_SUBEVE := aVlrCust[I][11]
-				ZLG->(MsUnLock())
+				ZLG->(MSUnLock())
 			Next I
 	EndIf
-	TRB->(DbSkip())
+	TRB->(DBSkip())
 EndDo
 //===============================================================
 // Grava log da Rotina de eventos do custo do leite.
@@ -150,7 +150,7 @@ If cFun == '1'
 		cTst += " FROM " + RetSqlName("SD1") + " D1, " + RetSqlName("SB1") + " B1 "
 		cTst += " WHERE D1.D_E_L_E_T_ = ' ' " 
 		cTst += " AND D1.D1_FILIAL = '"+TRB->ZL6_FILIAL+"' "
-		cTst += " AND D1.D1_DTDIGIT BETWEEN '"+DTOS(cPerDE)+"' AND '"+DTOS(cPerAte)+"' "
+		cTst += " AND D1.D1_DTDIGIT BETWEEN '"+DToS(cPerDE)+"' AND '"+DToS(cPerAte)+"' "
 		If !Empty(AllTrim(TRB->ZL6_CENTRO))
 			cTst += " AND D1.D1_CC = '"+TRB->ZL6_CENTRO+"' "
 		EndIf
@@ -172,15 +172,15 @@ If cFun == '1'
 		cTst := ChangeQuery(cTst)
 
 		If Select("TRB1") >0
-			TRB1->(dbCloseArea())
-		Endif
+			TRB1->(DBCloseArea())
+		EndIf
 
 		MPSysOpenQuery(cTst,"TRB1")
-		dbSelectArea("TRB1")
+		DBSelectArea("TRB1")
 
 		cFlUsa  	:= TRB->ZL6_FILIAL
 		cCodApu 	:= GetSxeNum("ZLG","ZLG_CODAPU")
-		dDtApu	 	:= DTOS(cPerDE)
+		dDtApu	 	:= DToS(cPerDE)
 		cTpCust 	:= TRB->ZL6_TPCUS
 		cGrpCus	:= TRB->ZL6_GRPCUS
 		cEvent		:= TRB->ZL6_CODEVE
@@ -193,7 +193,7 @@ If cFun == '1'
 			nPrcEve += TRB1->TOTAL_NF
 			nPrcIcm	+= TRB1->ICMS
 			nTot	 += TRB1->CUSTO
-			TRB1->(DbSkip())
+			TRB1->(DBSkip())
 		EndDo
 
 		aVlrs := {}
@@ -231,15 +231,15 @@ ElseIf cFun = '2'
 		cTst := ChangeQuery(cTst)
 
 		If Select("TRB1") >0
-			TRB->(dbCloseArea())
-		Endif
+			TRB->(DBCloseArea())
+		EndIf
 
 		MPSysOpenQuery(cTst,"TRB1")
-		dbSelectArea("TRB1")
+		DBSelectArea("TRB1")
 
 		cFlUsa  	:= TRB->ZL6_FILIAL
 		cCodApu 	:= GetSxeNum("ZLG","ZLG_CODAPU")
-		dDtApu	 	:= DTOS(cPerDE)
+		dDtApu	 	:= DToS(cPerDE)
 		cTpCust 	:= TRB->ZL6_TPCUS
 		cGrpCus	:= TRB->ZL6_GRPCUS
 		cEvent		:= TRB->ZL6_CODEVE
@@ -250,7 +250,7 @@ ElseIf cFun = '2'
 			nQtd	 += TRB1->QUANTIDADE
 			nPrcLt  := 0
 			nPrcEve += TRB1->TOTAL
-			TRB1->(DbSkip())
+			TRB1->(DBSkip())
 		EndDo
 	
 		aVlrs := {}
@@ -269,15 +269,15 @@ ElseIf cFun == '3'
 		cTst := ChangeQuery(cTst)
 
 		If Select("TRB1") >0
-			TRB1->(dbCloseArea())
-		Endif
+			TRB1->(DBCloseArea())
+		EndIf
 
 		MPSysOpenQuery(cTst,"TRB1")
-		dbSelectArea("TRB1")
+		DBSelectArea("TRB1")
 
 		cFlUsa  	:= TRB->ZL6_FILIAL
 		cCodApu 	:= GetSxeNum("ZLG","ZLG_CODAPU")
-		dDtApu	 	:= DTOS(cPerDE)
+		dDtApu	 	:= DToS(cPerDE)
 		cTpCust 	:= TRB->ZL6_TPCUS
 		cGrpCus	:= TRB->ZL6_GRPCUS
 		cEvent		:= TRB->ZL6_CODEVE
@@ -288,7 +288,7 @@ ElseIf cFun == '3'
 			nQtd	 += 0
 			nPrcLt  := 0
 			nPrcEve += TRB1->E2_VALOR
-			TRB1->(DbSkip())
+			TRB1->(DBSkip())
 		EndDo
 	
 		aVlrs := {}

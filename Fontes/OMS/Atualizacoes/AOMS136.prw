@@ -8,7 +8,7 @@ Alex Wallauer| 14/08/24 | Chamado 48138. Vanderlei. Correção ortografica da pala
 Igor Melgaço | 29/08/24 | Chamado 48362. Vanderlei. Reestruturação dos códigos do cadastro de locais de embarque.
 =============================================================================================================================== 
 */
-#INCLUDE 'PROTHEUS.CH'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -16,7 +16,7 @@ Programa----------: AOMS136
 Autor-------------: Alex Wallauer
 Data da Criacao---: 22/05/2023
 ===============================================================================================================================
-Descrição---------: Rotina de manutenção do Cadastro de local de Embarque . Chamado 43864.
+Descrição---------: Rotina de manutenção do Cadastro de Local de Embarque . Chamado 43864.
 ===============================================================================================================================
 Parametros--------: Nenhum 
 ===============================================================================================================================
@@ -25,12 +25,12 @@ Retorno-----------: Nenhum
 */  
 User Function AOMS136()
 Private aTela[0][0],aGets[0]
-Private cCadastro	:= "Cadastro de local de Embarque"
+Private cCadastro	:= "Cadastro de Local de Embarque"
 Private aRotina	:= MenuDef()
 
 mBrowse(,,,,"ZEL")
 
-Return Nil       
+Return       
 
 /*
 ===============================================================================================================================
@@ -80,7 +80,7 @@ Retorno-----------: .T.
 ===============================================================================================================================*/
 User Function AOM136Inclui(cAlias,nReg,nOpc)
 
-IF nOpc = 3
+If nOpc = 3
    Return AxInclui(cAlias,nReg,nOpc,;
        /*aAcho>     */ ,;
        /*cFunc>     */ ,;
@@ -93,9 +93,9 @@ IF nOpc = 3
        /*aAuto>     */ ,;
        /*lVirtual>  */ ,;
        /*lMaximized>*/ )
-ENDIF
+EndIf
 
-Return .t.
+Return .T.
 
 /*
 ===============================================================================================================================
@@ -113,69 +113,69 @@ Retorno-----------: .T. ou .F.
 User Function AOMS136V(_cCampo)
 
 Local _lRet := .T.  // , F
-DEFAULT _cCampo:=SUBSTR(READVAR(),4)
+DEFAULT _cCampo:=SubStr(ReadVar(),4)
 
-DbSelectArea("ZEL")
+DBSelectArea("ZEL")
 
-   IF _cCampo == "ZEL_CODIGO" 
+   If _cCampo == "ZEL_CODIGO" 
       
-      IF LEN(ALLTRIM(M->ZEL_CODIGO)) < 4 //.OR. (_lRet:=ExistChav("ZEL",M->ZEL_CODIGO,1))
-         IF LEN(ALLTRIM(M->ZEL_CODIGO)) < 4
-            U_ITMSG("Codigo do local de Embarque INVALIDO.",'Atencao!',;
+      If Len(AllTrim(M->ZEL_CODIGO)) < 4 //.OR. (_lRet:=ExistChav("ZEL",M->ZEL_CODIGO,1))
+         If Len(AllTrim(M->ZEL_CODIGO)) < 4
+            U_ITMsg("Codigo do Local de Embarque INVALIDO.",'Atencao!',;
 		   	        "Digite um codigo com 4 caracteres afanumericos.",1)         
             _lRet := .F.
-         ENDIF
-      ENDIF
+         EndIf
+      EndIf
 
-   ELSEIF _cCampo == "ZEL_DESCRI" 
+   ElseIf _cCampo == "ZEL_DESCRI" 
       
-      IF EMPTY(M->ZEL_DESCRI) .OR. (_lRet:=ExistChav("ZEL",M->ZEL_DESCRI,2))
-         IF EMPTY(M->ZEL_DESCRI) 
-            U_ITMSG("Descricao do local de Embarque é obrigatorio.",'Atencao!',;
+      If Empty(M->ZEL_DESCRI) .Or. (_lRet:=ExistChav("ZEL",M->ZEL_DESCRI,2))
+         If Empty(M->ZEL_DESCRI) 
+            U_ITMsg("Descricao do Local de Embarque é obrigatorio.",'Atencao!',;
 		   	        "Digite um codigo que não exista no cadastro.",1)         
             _lRet := .F.
-         ENDIF
-      ENDIF
+         EndIf
+      EndIf
 
-   ELSEIF _cCampo == "ZEL_FILFIS" 
+   ElseIf _cCampo == "ZEL_FILFIS" 
 
-      IF !EMPTY(M->ZEL_FILFIS) 
+      If !Empty(M->ZEL_FILFIS) 
          _lRet:=ExistCpo("SM0",cEmpAnt+M->ZEL_FILFIS,1)
-      ENDIF
+      EndIf
 
-   ELSEIF _cCampo == "ZEL_LOCAL" 
+   ElseIf _cCampo == "ZEL_LOCAL" 
 
-      IF !EMPTY(M->ZEL_LOCAL) 
+      If !Empty(M->ZEL_LOCAL) 
          _lRet:=ExistCpo("NNR",M->ZEL_LOCAL)
-      ENDIF
+      EndIf
 
-   ELSEIF _cCampo == "ZEL_OPERAD" 
+   ElseIf _cCampo == "ZEL_OPERAD" 
 
-      IF !EMPTY(M->ZEL_OPERAD) 
+      If !Empty(M->ZEL_OPERAD) 
          _lRet:=ExistCpo("SA2",M->ZEL_OPERAD)
-      ELSE
-         M->ZEL_LOJAOP:=SPACE(LEN(ZEL->ZEL_LOJAOP))
-         M->ZEL_NOMEOP:=SPACE(LEN(SA2->A2_NREDUZ))
-      ENDIF
+      Else
+         M->ZEL_LOJAOP:=Space(Len(ZEL->ZEL_LOJAOP))
+         M->ZEL_NOMEOP:=Space(Len(SA2->A2_NREDUZ))
+      EndIf
 
-   ELSEIF _cCampo == "ZEL_LOJAOP" 
+   ElseIf _cCampo == "ZEL_LOJAOP" 
 
-      IF !EMPTY(M->ZEL_OPERAD) 
+      If !Empty(M->ZEL_OPERAD) 
          _lRet:=ExistCpo("SA2",M->ZEL_OPERAD+M->ZEL_LOJAOP)
-      ENDIF
+      EndIf
 
-   ELSEIF _cCampo == "ZEL_CAPALE" 
+   ElseIf _cCampo == "ZEL_CAPALE" 
          _lRet:=Positivo(M->ZEL_CAPALE)
-   ELSEIF _cCampo == "ZEL_CAPKG" 
+   ElseIf _cCampo == "ZEL_CAPKG" 
          _lRet:=Positivo(M->ZEL_CAPKG)
    ElseIf _cCampo == "OKZEL"
 
          If !Obrigatorio(aGets,aTela)
-            RETURN .F.
-         ENDIF
-         IF Inclui                   //ZEL_FILIAL+ZEL_FILFIS+ZEL_LOCAL+ZEL_OPERAD+ZEL_LOJAOP
+            Return .F.
+         EndIf
+         If Inclui                   //ZEL_FILIAL+ZEL_FILFIS+ZEL_LOCAL+ZEL_OPERAD+ZEL_LOJAOP
             _lRet :=ExistChav("ZEL",M->ZEL_FILIAL+M->ZEL_FILFIS+M->ZEL_LOCAL+M->ZEL_OPERAD+M->ZEL_LOJAOP,3)
-         ENDIF
+         EndIf
 
    EndIf
    
@@ -200,36 +200,36 @@ User Function BuscaLocalEmbarque(_cFilAtual,_cLocal,_cVend1)
 
 Local _cFilial    := xFilial("ZEL")
 Local _lAchou     := .F.
-Local _cCodLocEmb := SPACE(LEN(ZEL->ZEL_CODIGO))
+Local _cCodLocEmb := Space(Len(ZEL->ZEL_CODIGO))
 
 DEFAULT _cFilAtual:= cFilAnt
-DEFAULT _cLocal   := SPACE(LEN(ZEL->ZEL_LOCAL))
-DEFAULT _cVend1   := SPACE(LEN(SC5->C5_VEND1))
+DEFAULT _cLocal   := Space(Len(ZEL->ZEL_LOCAL))
+DEFAULT _cVend1   := Space(Len(SC5->C5_VEND1))
 
-ZEL->(DBSETORDER(3))//ZZEL_FILIAL+ZEL_FILFIS+ZEL_LOCAL+ZEL_OPERAD+ZEL_LOJAOP
-IF _cFilAtual = "20"
-   IF _cVend1 = "001622" .AND. _cLocal $ "50/52"
+ZEL->(DBSetOrder(3))//ZZEL_FILIAL+ZEL_FILFIS+ZEL_LOCAL+ZEL_OPERAD+ZEL_LOJAOP
+If _cFilAtual = "20"
+   If _cVend1 = "001622" .And. _cLocal $ "50/52"
 	   _cRegraZEL := "2) Buscou por Filial Fiscal = 20, Armazem = "+_cLocal
 	   _cCodLocEmb:= "RS50"
       _lAchou:=.T.
-   ENDIF
-ELSEIF _cFilAtual = "40"
-   IF _cLocal $ "50/52"
+   EndIf
+ElseIf _cFilAtual = "40"
+   If _cLocal $ "50/52"
 	   _cRegraZEL := "3) Buscou por Filial Fiscal = 40, Armazem = "+_cLocal
 	   _cCodLocEmb:= "MG50"
       _lAchou:=.T.
-   ENDIF
-ELSEIF _cFilAtual $ "90/93"
-   IF ZEL->(Dbseek(_cFilial+_cFilAtual+_cLocal+SPACE(LEN(ZEL->(ZEL_OPERAD+ZEL_LOJAOP)))))
+   EndIf
+ElseIf _cFilAtual $ "90/93"
+   If ZEL->(DBSeek(_cFilial+_cFilAtual+_cLocal+Space(Len(ZEL->(ZEL_OPERAD+ZEL_LOJAOP)))))
    	_cRegraZEL := "4) Buscou por Filial Fiscal = "+_cFilAtual+", Armazem = "+_cLocal
    	_cCodLocEmb:= ZEL->ZEL_CODIGO 
       _lAchou:=.T.
    EndIf 
-ENDIF
-IF !_lAchou .AND. ZEL->(Dbseek(_cFilial+_cFilAtual+SPACE(LEN(ZEL->(ZEL_LOCAL+ZEL_OPERAD+ZEL_LOJAOP)))))
+EndIf
+If !_lAchou .And. ZEL->(DBSeek(_cFilial+_cFilAtual+Space(Len(ZEL->(ZEL_LOCAL+ZEL_OPERAD+ZEL_LOJAOP)))))
 	_cRegraZEL := "1) Buscou por Filial Fiscal = "+_cFilAtual
 	_cCodLocEmb:= ZEL->ZEL_CODIGO 
 EndIf 
-ZEL->(DBSETORDER(1))
+ZEL->(DBSetOrder(1))
 
-RETURN _cCodLocEmb
+Return _cCodLocEmb

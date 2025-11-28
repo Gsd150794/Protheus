@@ -11,7 +11,7 @@
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include 'FWMVCDef.ch'
   
 /*
@@ -39,7 +39,7 @@ Local _cEndereco, _cTelefone
 
 Begin Sequence
 
-   SA2->(DbSetOrder(1)) 
+   SA2->(DBSetOrder(1)) 
    
    If _cTipoCons == "LOGISTICO"
       _cMsg := "Operador Logístico: " + _cCod + "/" + _cLoja + ", não localizado no cadastro de fornecedores."
@@ -50,7 +50,7 @@ Begin Sequence
    EndIf 
    
    If ! SA2->(MsSeek(xFilial("SA2")+_cCod+_cLoja))
-      U_ItMsg(_cMsg,"Atenção",,1)
+      U_ITMsg(_cMsg,"Atenção",,1)
       Break 
    EndIf 
    
@@ -82,7 +82,7 @@ Begin Sequence
       @ _nLin,_nCol2 Get SA2->A2_NREDUZ Size 150, 10 WHEN .F. Of _oDlgCons Pixel
 
       _nLin += 15
-      _cEndereco := AllTrim(SA2->A2_END)+" "+Alltrim(SA2->A2_NR_END)
+      _cEndereco := AllTrim(SA2->A2_END)+" "+AllTrim(SA2->A2_NR_END)
 
       @ _nLin,_nCol1 Say "Endereço: " Of _oDlgCons Pixel 
       @ _nLin,_nCol2 Get _cEndereco Size 120, 10 WHEN .F. Of _oDlgCons Pixel
@@ -115,7 +115,7 @@ Begin Sequence
 
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -136,7 +136,7 @@ Local _cTitulo
 Begin Sequence
 
    If Empty(SF2->F2_I_OPER) .Or. Empty(SF2->F2_I_OPLO)
-       U_ItMsg("Não existe Operador Logistico para a nota fiscal: "+ SF2->F2_DOC + "-" + SF2->F2_SERIE + ", da filial: " + SF2->F2_FILIAL + ".","Atenção",,1)
+       U_ITMsg("Não existe Operador Logistico para a nota fiscal: "+ SF2->F2_DOC + "-" + SF2->F2_SERIE + ", da filial: " + SF2->F2_FILIAL + ".","Atenção",,1)
        Break 
    EndIf 
    
@@ -146,7 +146,7 @@ Begin Sequence
 
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -167,7 +167,7 @@ Local _cTitulo
 Begin Sequence
 
    If Empty(SF2->F2_I_REDP) .Or. Empty(SF2->F2_I_RELO)
-       U_ItMsg("Não existe Operador de redespacho para a nota fiscal: " + SF2->F2_DOC + "-" + SF2->F2_SERIE + ", da filial: " + SF2->F2_FILIAL + ".","Atenção",,1)
+       U_ITMsg("Não existe Operador de redespacho para a nota fiscal: " + SF2->F2_DOC + "-" + SF2->F2_SERIE + ", da filial: " + SF2->F2_FILIAL + ".","Atenção",,1)
        Break 
    EndIf 
    
@@ -177,7 +177,7 @@ Begin Sequence
 
 End Sequence
 
-Return Nil
+Return
 
 
 

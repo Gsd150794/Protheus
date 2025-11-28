@@ -7,18 +7,17 @@
 Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
-#Include 'Protheus.ch'
-#INCLUDE 'TOPCONN.CH'
+
+#Include "TOTVS.ch"
+#Include 'TOPCONN.CH'
+
 /*
 ===============================================================================================================================
 Programa----------: REST014
 Autor-------------: Alex Wallauer
 Data da Criacao---: 23/05/2019
-===============================================================================================================================
 Descrição---------: Relatório para validar estoque X aplicação direta - CHAMADO 28530
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -27,25 +26,25 @@ Local oReport	:= nil
 Private _cPerg	:= "REST014"
 Private aOrd	:= {} 
 
-DO WHILE .T.
+While .T.
 
    If !Pergunte(_cPerg,.T.)
-      return .f.
+      Return .F.
    EndIf
 
-   IF MV_PAR01 > MV_PAR02
+   If MV_PAR01 > MV_PAR02
       MSGSTOP("Periodo de datas invalido.")
-      LOOP
-   ENDIF
+      Loop
+   EndIf
    
-   IF MV_PAR04 > MV_PAR05
+   If MV_PAR04 > MV_PAR05
       MSGSTOP("Periodo de produtos invalido.")
-      LOOP
-   ENDIF
+      Loop
+   EndIf
    
-   EXIT
+   Exit
    
-ENDDO
+EndDo
 
 oReport := RptDef(_cPerg)
 oReport:PrintDialog()  
@@ -62,11 +61,8 @@ Return
 Programa----------: RptDef
 Autor-------------: Alex Wallauer
 Data da Criacao---: 19/03/2019
-===============================================================================================================================
 Descrição---------: Função que faz a montagem do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -103,11 +99,8 @@ Return(oReport)
 Programa----------: RptDef
 Autor-------------: Alex Wallauer
 Data da Criacao---: 19/03/2019
-===============================================================================================================================
 Descrição---------: Função que imprime o relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -120,7 +113,7 @@ Local cQry		:= ""
 oSection1:Init()
 oReport:SetMeter(0)
 
-BEGIN SEQUENCE
+Begin Sequence
 	
     oReport:IncMeter()
 
@@ -131,28 +124,28 @@ BEGIN SEQUENCE
 	cQry += "         JOIN " + RetSqlName("SF4") + " SF4 ON D1_FILIAL = F4_FILIAL AND D1_TES = F4_CODIGO "
 	cQry += "         WHERE SD1.D_E_L_E_T_ = ' ' AND SF4.D_E_L_E_T_ = ' ' "
 	cQry += "               AND D1_FILIAL = '"+xFilial("SD1")+"' "
-	cQry += "               AND D1_DTDIGIT BETWEEN '" + DtoS(MV_PAR01) + "' AND '" + DtoS(MV_PAR02) + "' " 
+	cQry += "               AND D1_DTDIGIT BETWEEN '" + DToS(MV_PAR01) + "' AND '" + DToS(MV_PAR02) + "' " 
   	If !Empty(MV_PAR04)
-	   cQry += "            AND D1_COD >= '" + ALLTRIM(MV_PAR04) + "' "
-    ENDIF
+	   cQry += "            AND D1_COD >= '" + AllTrim(MV_PAR04) + "' "
+    EndIf
   	If !Empty(MV_PAR05)
-	   cQry += "            AND D1_COD <= '" + ALLTRIM(MV_PAR05) + "' "
-    ENDIF
+	   cQry += "            AND D1_COD <= '" + AllTrim(MV_PAR05) + "' "
+    EndIf
 	cQry += "               AND D1_COD IN (   " ///** ABRE
 	cQry += "               	SELECT DISTINCT D3_COD "
 	cQry += "                          FROM " + RetSqlName("SD3") + " D3 "
 	cQry += "                          JOIN " + RetSqlName("SC7") + " C7 ON D3_FILIAL = C7_FILIAL AND D3_NUMSEQ = C7_I_SEQD3 "
 	cQry += "                          WHERE D3.D_E_L_E_T_ = ' ' AND C7.D_E_L_E_T_ = ' ' "
 	cQry += "                          AND D3_FILIAL = '"+xFilial("SD3")+"' "
-	cQry += "                          AND D3_EMISSAO BETWEEN '" + DTOS(MV_PAR01) + "' AND '" + DTOS(MV_PAR02) + "' " 
+	cQry += "                          AND D3_EMISSAO BETWEEN '" + DToS(MV_PAR01) + "' AND '" + DToS(MV_PAR02) + "' " 
   	If !Empty(MV_PAR04)
-	   cQry += "                       AND D3_COD >= '" + ALLTRIM(MV_PAR04) + "' "
-    ENDIF
+	   cQry += "                       AND D3_COD >= '" + AllTrim(MV_PAR04) + "' "
+    EndIf
   	If !Empty(MV_PAR05)
-	   cQry += "                       AND D3_COD <= '" + ALLTRIM(MV_PAR05) + "' "
-    ENDIF
+	   cQry += "                       AND D3_COD <= '" + AllTrim(MV_PAR05) + "' "
+    EndIf
 	If !Empty(MV_PAR03)
-		cQry += "                      AND D3.D3_GRUPO IN " + FormatIn( ALLTRIM(MV_PAR03) , ";" )
+		cQry += "                      AND D3.D3_GRUPO IN " + FormatIn( AllTrim(MV_PAR03) , ";" )
  	EndIf
 	cQry += "                          AND C7_I_USOD = 'S' "
 	cQry += "                          AND D3_ESTORNO <> 'S' ) "///**FECHA
@@ -165,22 +158,22 @@ BEGIN SEQUENCE
 	cQry += "               WHERE D3.D_E_L_E_T_ = ' ' AND C7.D_E_L_E_T_ = ' ' "
 	cQry += "               AND D3_ESTORNO <> 'S' AND C7_I_USOD = 'S' AND D3.D3_FILIAL = '"+xFilial("SD3")+"' "
   	If !Empty(MV_PAR04)
-	   cQry += "            AND D3_COD >= '" + ALLTRIM(MV_PAR04) + "' "
-    ENDIF
+	   cQry += "            AND D3_COD >= '" + AllTrim(MV_PAR04) + "' "
+    EndIf
   	If !Empty(MV_PAR05)
-	   cQry += "            AND D3_COD <= '" + ALLTRIM(MV_PAR05) + "' "
-    ENDIF
+	   cQry += "            AND D3_COD <= '" + AllTrim(MV_PAR05) + "' "
+    EndIf
 	If !Empty(MV_PAR03)
-		cQry += "           AND D3.D3_GRUPO IN " + FormatIn( ALLTRIM(MV_PAR03) , ";" )
+		cQry += "           AND D3.D3_GRUPO IN " + FormatIn( AllTrim(MV_PAR03) , ";" )
  	EndIf
-	cQry += "               AND D3.D3_EMISSAO BETWEEN '" + DTOS(MV_PAR01) + "' AND '" + DTOS(MV_PAR02) + "' "  
+	cQry += "               AND D3.D3_EMISSAO BETWEEN '" + DToS(MV_PAR01) + "' AND '" + DToS(MV_PAR02) + "' "  
   	cQry += "               GROUP BY D3.D3_FILIAL , D3.D3_COD "
   	cQry += "               ORDER BY D3.D3_FILIAL , D3.D3_COD ) M "///****FECHA
   	cQry += " ON M.FIL = CP.FIL AND M.COD = CP.COD "
   	cQry += " ORDER BY M.COD "
 	
 	If Select("TRB") <> 0
-	   TRB->(DbCloseArea())
+	   TRB->(DBCloseArea())
 	EndIf
 	TCQUERY cQry  NEW ALIAS "TRB"  
 
@@ -188,8 +181,8 @@ BEGIN SEQUENCE
     COUNT TO _nTot
 	oReport:SetMeter(_nTot)
 	
-	TRB->(dbGoTop())
-	DO While !TRB->(Eof())
+	TRB->(DBGoTop())
+	While !TRB->(Eof())
 
 	   oReport:IncMeter()
 
@@ -205,10 +198,10 @@ BEGIN SEQUENCE
 		oSection1:Cell("QTDE_APL"):SetValue(TRB->QTDE_A_D)
 		oSection1:Cell("QTDE_SAP"):SetValue(TRB->QTDE_COMPRA)
 
-		oSection1:Printline()
+		oSection1:PrintLine()
 
-		TRB->(dbSkip())
-	ENDDO
+		TRB->(DBSkip())
+	EndDo
 
 	oReport:SetMeter(0)
     oReport:IncMeter()
@@ -218,18 +211,18 @@ BEGIN SEQUENCE
 	cQry += "             WHERE D3.D_E_L_E_T_ = ' ' AND C7.D_E_L_E_T_ = ' ' "
 	cQry += "               AND D3_ESTORNO <> 'S' AND C7_I_USOD = 'S' AND D3.D3_FILIAL = '"+xFilial("SD3")+"' "
   	If !Empty(MV_PAR04)
-	   cQry += "            AND D3_COD >= '" + ALLTRIM(MV_PAR04) + "' "
-    ENDIF
+	   cQry += "            AND D3_COD >= '" + AllTrim(MV_PAR04) + "' "
+    EndIf
   	If !Empty(MV_PAR05)
-	   cQry += "            AND D3_COD <= '" + ALLTRIM(MV_PAR05) + "' "
-    ENDIF
+	   cQry += "            AND D3_COD <= '" + AllTrim(MV_PAR05) + "' "
+    EndIf
 	If !Empty(MV_PAR03)
-	   cQry += "            AND D3.D3_GRUPO IN " + FormatIn( ALLTRIM(MV_PAR03) , ";" )
+	   cQry += "            AND D3.D3_GRUPO IN " + FormatIn( AllTrim(MV_PAR03) , ";" )
  	EndIf
-	cQry += "               AND D3.D3_EMISSAO BETWEEN '" + DTOS(MV_PAR01) + "' AND '" + DTOS(MV_PAR02) + "' "  
+	cQry += "               AND D3.D3_EMISSAO BETWEEN '" + DToS(MV_PAR01) + "' AND '" + DToS(MV_PAR02) + "' "  
   	cQry += "          ORDER BY D3.D3_FILIAL , D3.D3_COD "
 	If Select("TRB") <> 0
-	   TRB->(DbCloseArea())
+	   TRB->(DBCloseArea())
 	EndIf
 	TCQUERY cQry  NEW ALIAS "TRB"  
 
@@ -238,8 +231,8 @@ BEGIN SEQUENCE
 	oReport:SetMeter(_nTot)
 
     oSection2:Init()
-	TRB->(dbGoTop())
-	DO While !TRB->(Eof())
+	TRB->(DBGoTop())
+	While !TRB->(Eof())
 	    oReport:IncMeter()
 
 	    SB1->( DBSeek( xFilial() + TRB->D3_COD) )
@@ -249,12 +242,12 @@ BEGIN SEQUENCE
 		oSection2:Cell("PEDIDO")  :SetValue(TRB->C7_NUM)
 		oSection2:Cell("NUMSC")   :SetValue(TRB->C7_NUMSC)
 		oSection2:Cell("OBS")     :SetValue(TRB->D3_I_OBS)
-		oSection2:Printline()
+		oSection2:PrintLine()
 		
-		TRB->(dbSkip())
-	ENDDO
+		TRB->(DBSkip())
+	EndDo
 
-END SEQUENCE
+End Sequence
 
 oSection1:Finish()
 oSection1:Enable()

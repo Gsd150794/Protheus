@@ -2,29 +2,22 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 27/04/2017 | Chamado 19813. Inclusão da função de Log ITLOGACS().
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 11/09/2024 | Chamado 48465. Removendo warning de compilação.
+Julio Paz     |27/04/2017| Chamado 19813. Inclusão da função de Log ITLOGACS().
+Lucas Borges  |11/09/2024| Chamado 48465. Removendo warning de compilação.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MEST006
 Autor-------------: André Lisboa
 Data da Criacao---: 07/07/2014
-===============================================================================================================================
 Descrição---------: Rotina para gerar registros de inventário zerado
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -47,7 +40,7 @@ Define MsDialog oDlg01 Title "Gera inventário zerado" From 000, 000  TO 300, 600
     @ 014, 009 Say oSay1 PROMPT "Esta rotina irá gerar registros no inventário(SB7) com quantidade inventariada = 0(zero)" Size 237, 010 Of oDlg01 COLORS 0, 16777215 Pixel
     @ 031, 008 Say oSay3 PROMPT "Conforme parâmetros, para que os itens não encontrados fisicamente sejam zerados no acerto do inventário." Size 276, 010 Of oDlg01 COLORS 0, 16777215 Pixel
     @ 052, 008 Say oSay8 PROMPT "Caso já exista registro no SB7 para a chave abaixo não será incluído o registro" Size 272, 007 Of oDlg01 COLORS 0, 16777215 Pixel
-    @ 062, 008 Say oSay9 PROMPT "B7_FILIAL+B7_COD+B7_LOCAL+B7_DOC+DTOS(B7_DATA)" Size 187, 007 Of oDlg01 COLORS 0, 16777215 Pixel
+    @ 062, 008 Say oSay9 PROMPT "B7_FILIAL+B7_COD+B7_LOCAL+B7_DOC+DToS(B7_DATA)" Size 187, 007 Of oDlg01 COLORS 0, 16777215 Pixel
     
     @ 088, 009 Say oSay4 PROMPT "ATENÇÃO ESSE PROCESSO NÃO PODERÁ SER DESFEITO CONFIRA OS PARÂMETROS ATENTAMENTE !!!" Size 276, 010 Of oDlg01 COLORS 0, 16777215 Pixel
 
@@ -61,11 +54,8 @@ Return
 Programa----------: OkProc
 Autor-------------: André Lisboa
 Data da Criacao---: 07/07/2014
-===============================================================================================================================
 Descrição---------: 
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -82,11 +72,8 @@ Return
 Programa----------: AjusRun
 Autor-------------: André Lisboa
 Data da Criacao---: 07/07/2014
-===============================================================================================================================
 Descrição---------: 
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -94,13 +81,13 @@ Static Function AjusRun()
 
 Local _cTipo := ""
 
-DbSelectArea("SB2")
+DBSelectArea("SB2")
 ProcRegua(RecCount())
 SB2->(DBGoTop())
 DBSelectArea("SB7")
-SB7->(DBSetorder(4))
+SB7->(DBSetOrder(4))
 
-Do While SB2->(!Eof())
+While SB2->(!Eof())
    IncProc("Inventariando Produto ... " + SB2->B2_COD)
    _cTipo  := Posicione("SB1",1,xFilial("SB1") + SB2->B2_COD,"B1_TIPO")
 
@@ -109,8 +96,8 @@ Do While SB2->(!Eof())
       Loop
    EndIf
       
-   If !(SB7->(DBSeek(xFilial("SB2")+SB2->(B2_COD+B2_LOCAL)+MV_PAR06+Dtos(MV_PAR01))))
-      Reclock("SB7",.T.)
+   If !(SB7->(DBSeek(xFilial("SB2")+SB2->(B2_COD+B2_LOCAL)+MV_PAR06+DToS(MV_PAR01))))
+      RecLock("SB7",.T.)
       SB7->B7_FILIAL		:= xFilial("SB2")
       SB7->B7_COD   		:= SB2->B2_COD
       SB7->B7_LOCAL 		:= SB2->B2_LOCAL
@@ -121,7 +108,7 @@ Do While SB2->(!Eof())
       SB7->B7_DATA   	:= MV_PAR01
       SB7->B7_DTVALID	:= dDataBase
       SB7->B7_STATUS	   := "1"
-      SB7->(MsUnlock())
+      SB7->(MSUnLock())
    EndIf
    SB2->(DBSkip())
 EndDo

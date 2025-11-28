@@ -1,40 +1,29 @@
 /*
-======================================================================================================================================
-         							ATUALIZACOES SOFRIDAS DESDE A CONSTRUCAO INICIAL
-======================================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+===============================================================================================================================
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+===============================================================================================================================
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 19/10/2023 | Chamado 45337. Ajuste no calculo da posição atual de estoque geral e da filial.
---------------------------------------------------------------------------------------------------------------------------------------
-Igor Melgaço  | 12/03/2024 | Chamado 45575. Ajuste para conversão de texto do Assunto do email em padrao UTF8.
---------------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 24/09/2024 | Chamado 48465. Removendo warning de compilação, corrigida chamada para schedule e melhorado log
---------------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 01/08/2025 | Chamado 51453. Substituir função U_ITEncode por FWHttpEncode
-======================================================================================================================================
+Lucas Borges  |24/09/2024| Chamado 48465. Removendo warning de compilação, corrigida chamada para schedule e melhorado log
+Lucas Borges  |01/08/2025| Chamado 51453. Substituir função U_ITEncode por FWHttpEncode
+Lucas Borges  |19/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
+Jose Gavetti  |26/11/2025| Chamado 51341. __cUserId não deve ter seu conteúdo alterado orientação TOTVS. 
+===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#include "ap5mail.ch"
-#include "tbiconn.ch"
-#include "protheus.ch"  
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MCOM003
 Autor-------------: Darcio Ribeiro Sporl
 Data da Criacao---: 17/11/2015
-===============================================================================================================================
 Descrição---------: Rotina responsavel pelo envio de workflow de solicitação de compras
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function MCOM003()
+User Function MCOM003
 
 Local _cAliasSC1	:= ""
 Local lWFHTML		:= .T.
@@ -43,10 +32,10 @@ Private _cHostWF	:= ""
 Private _dDtIni		:= ""
 
 //Mensagem que ficara armazenada no arquivo totvsconsole.log para posterior monitoramento 
-FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00301"/*cMsgId*/, 'MCOM00301 - Gerando envio do workflow das solicitações de compras aos aprovadores na data: ' + Dtoc(DATE()) + ' - ' + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00301"/*cMsgId*/, 'MCOM00301 - Gerando envio do workflow das solicitações de compras aos aprovadores na data: ' + DToC(Date()) + ' - ' + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
-_cHostWF 	:= U_ItGetMv("IT_WFHOSTS","http://wfteste.italac.com.br:4034/")
-_dDtIni		:= DtoS(U_ItGetMv("IT_WFDTINI","20150101"))
+_cHostWF 	:= SuperGetMV("IT_WFHOSTS",.T.,"http://wfteste.italac.com.br:4034/")
+_dDtIni		:= DToS(SuperGetMV("IT_WFDTINI",.F.,"26/11/2025"))
 lWFHTML		:= GetMv("MV_WFHTML")
 
 PutMV("MV_WFHTML",.T.)
@@ -54,19 +43,18 @@ PutMV("MV_WFHTML",.T.)
 _cAliasSC1 := GetNextAlias()
 MCOM003Q(1,_cAliasSC1,"","","","","","","","","","")
 
-dbSelectArea(_cAliasSC1)
-(_cAliasSC1)->(dbGotop())
+DBSelectArea(_cAliasSC1)
+(_cAliasSC1)->(DBGoTop())
 
 If !(_cAliasSC1)->(Eof())
 	MCOM003S(_cAliasSC1) //Rotina responsável por montar o formulário de aprovação e o envio do link gerado.
 EndIf
 
-dbSelectArea(_cAliasSC1)
-(_cAliasSC1)->(dbCloseArea())          
+(_cAliasSC1)->(DBCloseArea())          
 
 PutMV("MV_WFHTML",lWFHTML)
 
-FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00302"/*cMsgId*/,'MCOM00302 - Termino do envio do workflow das solicitações de compras na data: ' + Dtoc(DATE()) + ' - ' + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00302"/*cMsgId*/,'MCOM00302 - Termino do envio do workflow das solicitações de compras na data: ' + DToC(Date()) + ' - ' + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
 Return        
 
@@ -75,21 +63,19 @@ Return
 Programa----------: MCOM003R
 Autor-------------: Darcio Ribeiro Sporl
 Data da Criacao---: 17/11/2015
-===============================================================================================================================
 Descrição---------: Rotina responsável pela execução do retorno do workflow
-===============================================================================================================================
 Parametros--------: _oProcess - Processo inicializado do workflow
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function MCOM003R( _oProcess )
+
 Local _cFilial		:= SubStr(_oProcess:oHtml:RetByName("Filial"),1,2)
 Local _cNumSC		:= _oProcess:oHtml:RetByName("NumSC")    
-Local _cAprova		:= UPPER(_oProcess:oHtml:RetByName("opcao"))        
-Local _cObs			:= AllTrim(UPPER(_oProcess:oHtml:RetByName("CR_OBS")))
+Local _cAprova		:= Upper(_oProcess:oHtml:RetByName("opcao"))        
+Local _cObs			:= AllTrim(Upper(_oProcess:oHtml:RetByName("CR_OBS")))
 Local _cArqHtm		:= SubStr(_oProcess:oHtml:RetByName("WFMAILID"),3,Len(_oProcess:oHtml:RetByName("WFMAILID")))
-Local _sDtLiber		:= DtoS(date())
+Local _sDtLiber		:= DToS(Date())
 Local _cHrLiber		:= SubStr(Time(),1,5)
 Local _cVlrCampo	:= ""
 Local _cHtmlMode	:= "\Workflow\htm\sc_concluida.htm"
@@ -101,7 +87,7 @@ If "APROVAR" $ _cAprova//_cAprova == "APROVAR"
 ElseIf "REJEITAR"  $ _cAprova//_cAprova == "REJEITAR" 
     _cAprova:="REJEITAR" 
 	_cVlrCampo:= "R"		
-Else             //QUESTIONAR
+Else    //QUESTIONAR
     _cAprova:="QUESTIONAR" 
 	_cVlrCampo:= "Q"		
 EndIf
@@ -128,12 +114,12 @@ FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName(
 //===================================================================================================
 //Chama query para atualização do registro da solicitação de compras, com as informações da aprovação
 //===================================================================================================
-IF _cVlrCampo = 'Q'
+If _cVlrCampo = 'Q'
 // MCOM003Q(_nOpcao,_cAlias,_cFilial,_cNumSC,_cWFID,_cSITWF,_cIDHTM,_cAprova  ,_cObs,_sDtLiber,_cHrLiber,_cProduto,_cPergPai) 
    MCOM003Q(9      ,""     ,_cFilial,_cNumSC,"1002","3"    ,""     ,"P"       ,_cObs,_sDtLiber,_cHrLiber,""       ,@_cPergPai)
-ELSE//aprovado ou rejeitado
+Else//aprovado ou rejeitado
    MCOM003Q(4      ,""     ,_cFilial,_cNumSC,"1002","3"    ,""     ,_cVlrCampo,_cObs,_sDtLiber,_cHrLiber,"")
-ENDIF
+EndIf
 
 //==================================================
 //Finalize a tarefa anterior para não ficar pendente
@@ -155,11 +141,11 @@ If File("\workflow\emp01\" + _cArqHtm + ".htm")
 	EndIf
 EndIf
 
-IF _cVlrCampo = 'Q'
+If _cVlrCampo = 'Q'
   MCOM003D(_oProcess,_cPergPai)//RETORNO QUE ENVIA E-MAIL DE QUESTIONMENTO
-ELSE//aprovado ou rejeitado
+Else//aprovado ou rejeitado
   MCOM003A(_oProcess)//RETORNO QUE ENVIA E-MAIL
-ENDIF
+EndIf
 
 Return
 
@@ -168,9 +154,7 @@ Return
 Programa----------: MCOM003Q
 Autor-------------: Darcio Ribeiro Sporl
 Data da Criacao---: 17/11/2015
-===============================================================================================================================
 Descrição---------: Rotina responsável pela seleção dos dados das solicitações, pedido de compras e atualizações do workflow
-===============================================================================================================================
 Parametros--------: _nOpcao		- 1 = Dados SC / 2 = Dados PC / 3 = Atualização E-mail Enviado / 4 = Retorno Workflow
 ------------------: _cAlias		- Alias a ser utilizado no caso das consultas
 ------------------: _cFilial	- Filial do registro que está sendo executado
@@ -183,11 +167,11 @@ Parametros--------: _nOpcao		- 1 = Dados SC / 2 = Dados PC / 3 = Atualização E-m
 ------------------: _sDtLiber	- Data da aprovação
 ------------------: _cHrLiber	- Hora da aprovação
 ------------------: _cProduto	- Produto da solicitação de compras
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function MCOM003Q(_nOpcao,_cAlias,_cFilial,_cNumSC,_cWFID,_cSITWF,_cIDHTM,_cAprova,_cObs,_sDtLiber,_cHrLiber,_cProduto,_cPergPai) 
+
 Local _cQuery := ""
 
 Do Case    
@@ -201,14 +185,14 @@ Do Case
 			SELECT	DISTINCT C1_FILIAL, C1_NUM, C1_ITEM, C1_PRODUTO, C1_DESCRI, C1_EMISSAO, C1_UM, C1_QUANT, C1_OBS, C1_I_CDSOL, ZZ7A.ZZ7_NOME AS ZZ7_NOMSOL,
 					C1_I_CODAP, ZZ7B.ZZ7_NOME AS ZZ7_NOMAPR, C1_CC, C1_I_CDINV, ZZI_DESINV, C1_I_APLIC, C1_I_URGEN, C1_I_ULTDT, C1_I_ULTPR, C1_DATPRF,
 					C1_I_OBSSC, BZ_LOCPAD, (B2_QATU+B2_QNPT) B2_QATU, C1_I_ORPRU,C1_I_ORTOT, C1_I_CLAIM,
-					(SELECT DISTINCT (ROUND(SUM(D3_QUANT/3),2)) D3_QUANT FROM %table:SD3% WHERE D3_COD = C1_PRODUTO AND D3_EMISSAO BETWEEN TO_CHAR(SYSDATE-90,'YYYYMMDD') and TO_CHAR(SYSDATE,'YYYYMMDD') AND D3_ESTORNO <> 'S' AND D3_TM = '560' AND D_E_L_E_T_ = ' ') QTDTOT
-			FROM %table:SC1% SC1
-			JOIN %table:SBZ% SBZ ON BZ_FILIAL = C1_FILIAL AND BZ_COD = C1_PRODUTO AND SBZ.%notDel%
-			LEFT JOIN %table:SB2% SB2 ON B2_FILIAL = C1_FILIAL AND B2_COD = C1_PRODUTO AND B2_LOCAL = BZ_LOCPAD AND SB2.%notDel%
-			LEFT JOIN %table:SD3% SD3 ON D3_FILIAL = C1_FILIAL AND D3_COD = C1_PRODUTO AND D3_LOCAL = BZ_LOCPAD AND SD3.%notDel%
-			JOIN %table:ZZ7% ZZ7A ON ZZ7A.ZZ7_FILIAL = C1_FILIAL AND ZZ7A.ZZ7_CODUSR = C1_I_CDSOL AND ZZ7A.%notDel%
-			JOIN %table:ZZ7% ZZ7B ON ZZ7B.ZZ7_FILIAL = C1_FILIAL AND ZZ7B.ZZ7_CODUSR = C1_I_CODAP AND ZZ7B.%notDel%
-			LEFT JOIN %table:ZZI% ZZI ON ZZI_FILIAL = C1_FILIAL AND ZZI_CODINV = C1_I_CDINV AND ZZI.%notDel%
+					(SELECT DISTINCT (Round(SUM(D3_QUANT/3),2)) D3_QUANT FROM %Table:SD3% WHERE D3_COD = C1_PRODUTO AND D3_EMISSAO BETWEEN TO_CHAR(SYSDATE-90,'YYYYMMDD') and TO_CHAR(SYSDATE,'YYYYMMDD') AND D3_ESTORNO <> 'S' AND D3_TM = '560' AND D_E_L_E_T_ = ' ') QTDTOT
+			FROM %Table:SC1% SC1
+			JOIN %Table:SBZ% SBZ ON BZ_FILIAL = C1_FILIAL AND BZ_COD = C1_PRODUTO AND SBZ.%notDel%
+			LEFT JOIN %Table:SB2% SB2 ON B2_FILIAL = C1_FILIAL AND B2_COD = C1_PRODUTO AND B2_LOCAL = BZ_LOCPAD AND SB2.%notDel%
+			LEFT JOIN %Table:SD3% SD3 ON D3_FILIAL = C1_FILIAL AND D3_COD = C1_PRODUTO AND D3_LOCAL = BZ_LOCPAD AND SD3.%notDel%
+			JOIN %Table:ZZ7% ZZ7A ON ZZ7A.ZZ7_FILIAL = C1_FILIAL AND ZZ7A.ZZ7_CODUSR = C1_I_CDSOL AND ZZ7A.%notDel%
+			JOIN %Table:ZZ7% ZZ7B ON ZZ7B.ZZ7_FILIAL = C1_FILIAL AND ZZ7B.ZZ7_CODUSR = C1_I_CODAP AND ZZ7B.%notDel%
+			LEFT JOIN %Table:ZZI% ZZI ON ZZI_FILIAL = C1_FILIAL AND ZZI_CODINV = C1_I_CDINV AND ZZI.%notDel%
 			WHERE C1_EMISSAO >= %Exp:_dDtIni%
 			  AND C1_I_SITWF = '1'
 			  AND C1_APROV = 'B'
@@ -225,11 +209,11 @@ Do Case
 
 	    BeginSql alias _cAlias                                       
 			SELECT C7_NUM, C7_ITEM, C7_PRODUTO, C7_EMISSAO, C7_QUANT, C7_UM, C7_PRECO, C7_TOTAL, C7_FORNECE, C7_LOJA, C7_I_NFORN, C7_DESCRI, B1_CONV
-			FROM %table:SC7% SC7
-			JOIN %table:SB1% SB1 ON B1_FILIAL = %xFilial:SB1% AND B1_COD = C7_PRODUTO AND SB1.%notDel%
+			FROM %Table:SC7% SC7
+			JOIN %Table:SB1% SB1 ON B1_FILIAL = %xFilial:SB1% AND B1_COD = C7_PRODUTO AND SB1.%notDel%
 			WHERE C7_FILIAL = %Exp:_cFilial%
 			  AND C7_PRODUTO = %Exp:_cProduto%
-			  AND C7_EMISSAO = (SELECT MAX(C7_EMISSAO) FROM %table:SC7% WHERE C7_FILIAL = %Exp:_cFilial% AND C7_PRODUTO = %Exp:_cProduto% AND C7_RESIDUO <> 'S' AND C7_QUJE > 0 AND D_E_L_E_T_ = ' ')//AWF-07/06/16
+			  AND C7_EMISSAO = (SELECT MAX(C7_EMISSAO) FROM %Table:SC7% WHERE C7_FILIAL = %Exp:_cFilial% AND C7_PRODUTO = %Exp:_cProduto% AND C7_RESIDUO <> 'S' AND C7_QUJE > 0 AND D_E_L_E_T_ = ' ')//AWF-07/06/16
 			  AND C7_RESIDUO <> 'S'
 			  AND C7_QUJE > 0
 			  AND SC7.%notDel%
@@ -271,7 +255,7 @@ Do Case
 		_cQuery += " 		C1_I_SITWF = '" + _cSITWF 	+ "', "
 		_cQuery += " 		C1_I_DTAPR = '" + _sDtLiber + "', "
 		_cQuery += " 		C1_I_HRAPR = '" + _cHrLiber + "', "
-		_cQuery += " 		C1_I_OBSAP = '" + LEFT(_cObs,LEN(SC1->C1_I_OBSAP)) 	+ "' "
+		_cQuery += " 		C1_I_OBSAP = '" + LEFT(_cObs,Len(SC1->C1_I_OBSAP)) 	+ "' "
 		_cQuery += "WHERE"
 		_cQuery += " D_E_L_E_T_ = ' '" 
 		_cQuery += " AND	C1_FILIAL = '" + _cFilial + "' "
@@ -289,10 +273,10 @@ Do Case
 		//=============================================================
 		BeginSql alias _cAlias
 			SELECT D1_VUNIT
-			FROM %table:SD1% SD1
+			FROM %Table:SD1% SD1
 			WHERE D1_FILIAL = %Exp:_cFilial%
 			  AND D1_COD = %Exp:_cProduto%
-			  AND D1_EMISSAO = (SELECT MAX(D1_EMISSAO) FROM %table:SD1% WHERE D1_FILIAL = %Exp:_cFilial% AND D1_COD = %Exp:_cProduto% AND D1_TIPO = 'N' AND D_E_L_E_T_ = ' ')
+			  AND D1_EMISSAO = (SELECT MAX(D1_EMISSAO) FROM %Table:SD1% WHERE D1_FILIAL = %Exp:_cFilial% AND D1_COD = %Exp:_cProduto% AND D1_TIPO = 'N' AND D_E_L_E_T_ = ' ')
 			  AND D1_TIPO = 'N'
 			  AND SD1.%notDel%
 		EndSql
@@ -304,7 +288,7 @@ Do Case
    		_cQuery := "UPDATE "
 		_cQuery += RETSQLNAME("SC1")
 		_cQuery += " SET	C1_I_WFID  = '" + _cWFID  	+ "', "
-		_cQuery += " 		C1_I_OBSAP = '" + LEFT(_cObs,LEN(SC1->C1_I_OBSAP)) 	+ "' "
+		_cQuery += " 		C1_I_OBSAP = '" + LEFT(_cObs,Len(SC1->C1_I_OBSAP)) 	+ "' "
 		_cQuery += "WHERE"
 		_cQuery += " D_E_L_E_T_ = ' '" 
 		_cQuery += " AND	C1_FILIAL = '" + _cFilial + "' "
@@ -316,11 +300,11 @@ Do Case
 			FWLogMsg("ERROR"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00310"/*cMsgId*/,"MCOM00310 - TCSqlExec( _cQuery ) : "+_cQuery+" - TCSQLError(): "+AllTrim(TCSQLError())/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 	    EndIf
 
-		//Se for questionamento, adiciona questionamento 
-		SC1->(DBSETORDER(1))
-        SC1->(DBSEEK(_cFilial+_cNumSC))
+		//Se For questionamento, adiciona questionamento 
+		SC1->(DBSetOrder(1))
+        SC1->(DBSeek(_cFilial+_cNumSC))
 
-		dbSelectArea("ZY2")
+		DBSelectArea("ZY2")
 
 		_cNumQ := GetSxeNum("ZY2","ZY2_CODIGO")
 
@@ -328,7 +312,7 @@ Do Case
 			_cPergPai := _cNumQ
 		EndIf
 
-		Reclock("ZY2", .T.)
+		RecLock("ZY2", .T.)
 		
 		ZY2->ZY2_FILIAL := xFilial("ZY2")
 		ZY2->ZY2_CODIGO	:= _cNumQ
@@ -340,17 +324,17 @@ Do Case
 		ZY2->ZY2_WFID	:= _cWFID
 		ZY2->ZY2_MENSAG := _cObs
 		ZY2->ZY2_TIPO	:= _cAprova
-		IF _cAprova = "R"//Resposta
+		If _cAprova = "R"//Resposta
 		   ZY2->ZY2_USER	:= SC1->C1_I_CDSOL//Solicitante
-		ELSE//PERGUNTA
+		Else//PERGUNTA
 		   ZY2->ZY2_USER	:= SC1->C1_I_CODAP//Aprovador
-		ENDIF
+		EndIf
 		ZY2->ZY2_PAI	:= _cPergPai
-		IF ZY2->(FIELDPOS("ZY2_ORIGEM")) <> 0
+		If ZY2->(FIELDPOS("ZY2_ORIGEM")) <> 0
 		   ZY2->ZY2_ORIGEM	:= "SC"
-		ENDIF
+		EndIf
 		
-		ZY2->( MsUnlock() )
+		ZY2->( MSUnLock() )
 		ConfirmSX8()
 
 EndCase
@@ -362,15 +346,13 @@ Return
 Programa----------: MCOM003S
 Autor-------------: Darcio Ribeiro Sporl
 Data da Criacao---: 17/11/2015
-===============================================================================================================================
 Descrição---------: Rotina responsável por montar o formulário de aprovação e o envio do link gerado.
-===============================================================================================================================
 Parametros--------: _cAliasSC1 - Recebe o alias aberto das solicitações de compras
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function MCOM003S(_cAliasSC1)
+
 Local nCont		 := 0
 Local aAreaSC1	 := (_cAliasSC1)->(GetArea())
 Local cEmail	 := ""
@@ -394,7 +376,7 @@ _oProcess := TWFProcess():New(_cCodProce,"Aprovação da Solicitação de Compras") 
 cFilSC	:= (_cAliasSC1)->C1_FILIAL + " - " + AllTrim(FWFilialName(cEmpAnt, (_cAliasSC1)->C1_FILIAL, 1 ))
 cNumSC	:= (_cAliasSC1)->C1_NUM
 cSolic	:= (_cAliasSC1)->ZZ7_NOMSOL
-dDtEmi	:= DtoC(StoD((_cAliasSC1)->C1_EMISSAO))
+dDtEmi	:= DToC(SToD((_cAliasSC1)->C1_EMISSAO))
 cAprov	:= (_cAliasSC1)->ZZ7_NOMAPR
 cEmail	:= (_cAliasSC1)->C1_I_CODAP
 cCcust	:= (_cAliasSC1)->C1_CC + Posicione("CTT",1,xFilial("CTT") + (_cAliasSC1)->C1_CC,"CTT_DESC01")
@@ -419,7 +401,7 @@ EndIf
 
 _cInves :=Posicione("ZZI",1,(_cAliasSC1)->C1_FILIAL+(_cAliasSC1)->C1_I_CDINV,"ZZI_DESINV")
 
-DO While !(_cAliasSC1)->(Eof())
+While !(_cAliasSC1)->(Eof())
 	nCont++	
 	//=================================================================
 	//Monta a estrutura para envio do workflow de cada pedido de venda
@@ -446,9 +428,9 @@ DO While !(_cAliasSC1)->(Eof())
 			_oProcess:oHtml:ValByName("CentroCusto"		, cCcust)
 			_oProcess:oHtml:ValByName("ObsGen"			, cObsGen)         
 			
-			IF (_cAliasSC1)->C1_I_CLAIM = '1'
+			If (_cAliasSC1)->C1_I_CLAIM = '1'
 	           _oProcess:oHtml:ValByName("cCLAIM"," **CLAIM**")
-		    ENDIF
+		    EndIf
 
 		EndIf
 
@@ -461,8 +443,8 @@ DO While !(_cAliasSC1)->(Eof())
 		_cAliasSD1 := GetNextAlias()
 		MCOM003Q(5,_cAliasSD1,(_cAliasSC1)->C1_FILIAL,"","","","","","","","",(_cAliasSC1)->C1_PRODUTO)
 
-		dbSelectArea(_cAliasSD1)
-		(_cAliasSD1)->(dbGotop())
+		DBSelectArea(_cAliasSD1)
+		(_cAliasSD1)->(DBGoTop())
 
 		If !(_cAliasSD1)->(Eof())
 			aAdd( _oProcess:oHtml:ValByName("Itens.VlrUc"		), Transform((_cAliasSD1)->D1_VUNIT, PesqPict("SD1","D1_VUNIT"))	)
@@ -470,17 +452,15 @@ DO While !(_cAliasSC1)->(Eof())
 			aAdd( _oProcess:oHtml:ValByName("Itens.VlrUc"		), Transform(0, PesqPict("SD1","D1_VUNIT"))							)
 		EndIf
 
-		dbSelectArea(_cAliasSD1)
-		(_cAliasSD1)->(dbCloseArea())
+		DBSelectArea(_cAliasSD1)
+		(_cAliasSD1)->(DBCloseArea())
 
-		aAdd( _oProcess:oHtml:ValByName("Itens.DtNeces"		), DtoC(StoD((_cAliasSC1)->C1_DATPRF))									)
+		aAdd( _oProcess:oHtml:ValByName("Itens.DtNeces"		), DToC(SToD((_cAliasSC1)->C1_DATPRF))									)
 		aAdd( _oProcess:oHtml:ValByName("Itens.SldAtFil"	), Transform((_cAliasSC1)->B2_QATU, PesqPict("SB2","B2_QATU"))			)
-//		aAdd( _oProcess:oHtml:ValByName("Itens.SldAtEmp"	), Transform((_cAliasSC1)->QTDTOT , PesqPict("SB2","B2_QATU"))			)
 		aAdd( _oProcess:oHtml:ValByName("Itens.SldAtEmp"	), Transform((_cAliasSC1)->QTDTOT , PesqPict("SD3","D3_QUANT"))			)
 
 	    cOrcado:="Vlr. Unit.: "+Transform((_cAliasSC1)->C1_I_ORPRU,PesqPict("SC1","C1_I_ORPRU"))+" // Vlr. Total: "+Transform((_cAliasSC1)->C1_I_ORTOT,PesqPict("SC1","C1_I_ORTOT"))
 	    nVlrTotOrc+=(_cAliasSC1)->C1_I_ORTOT
-//	    cOrcado:=STRTRAN(cOrcado,".",",")
 		If !Empty((_cAliasSC1)->C1_OBS)
 			aAdd( _oProcess:oHtml:ValByName("Itens.Obs"			), cOrcado+" -- Obs. do Item:" + (_cAliasSC1)->C1_OBS					)
 		Else
@@ -502,11 +482,11 @@ DO While !(_cAliasSC1)->(Eof())
 		_cAliasSC7 := GetNextAlias()
 		MCOM003Q(2,_cAliasSC7,(_cAliasSC1)->C1_FILIAL,"","","","","","","","",(_cAliasSC1)->C1_PRODUTO)
 
-		dbSelectArea(_cAliasSC7)
-		(_cAliasSC7)->(dbGotop())
+		DBSelectArea(_cAliasSC7)
+		(_cAliasSC7)->(DBGoTop())
 
 		If !Empty((_cAliasSC7)->C7_PRODUTO) 
-		   IF ASCAN(aDados,{|P| P[11] == (_cAliasSC7)->C7_PRODUTO } ) = 0//AWF-07/06/16
+		   If aScan(aDados,{|P| P[11] == (_cAliasSC7)->C7_PRODUTO } ) = 0//AWF-07/06/16
 			  aAdd(aDados,{	"Produto: " + (_cAliasSC7)->C7_PRODUTO + " - " + (_cAliasSC7)->C7_DESCRI,;						// [01] Descricao do Produto
 							(_cAliasSC7)->C7_NUM,;																			// [02] Número do Pedido
 							(_cAliasSC7)->C7_ITEM,;																			// [03] Item do produto
@@ -516,17 +496,17 @@ DO While !(_cAliasSC1)->(Eof())
 							(_cAliasSC7)->B1_CONV,;																			// [07] Fator de conversão
 							Transform((_cAliasSC7)->C7_PRECO, PesqPict("SC7","C7_PRECO")),;									// [08] Preço unitário
 							Transform((_cAliasSC7)->C7_TOTAL , PesqPict("SC7","C7_TOTAL")),;								// [09] Valor Total
-							DtoC(StoD((_cAliasSC7)->C7_EMISSAO)),;                           	                            // [10] Data de Emissão
+							DToC(SToD((_cAliasSC7)->C7_EMISSAO)),;                           	                            // [10] Data de Emissão
 							(_cAliasSC7)->C7_PRODUTO})														                // [11] Codigo item//AWF-07/06/16 
-			ENDIF
+			EndIf
 		EndIf
 
-		dbSelectArea(_cAliasSC7)
-		(_cAliasSC7)->(dbCloseArea())
+		DBSelectArea(_cAliasSC7)
+		(_cAliasSC7)->(DBCloseArea())
 
-		RestArea(aAreaSC1)
+		FWRestArea(aAreaSC1)
     
-    Else//***************************************************************************************************
+    Else
     
     	If Len(aDados) > 0
 	    	For nI := 1 To Len(aDados)
@@ -608,9 +588,9 @@ DO While !(_cAliasSC1)->(Eof())
 		_oProcess:NewTask("LINK", "\workflow\htm\sc_link.htm")
 
 		chtmlfile := _cMailID + ".htm"
-		cMailTo	:= "mailto:" + Alltrim(Posicione("WF7", 1, XFilial("WF7") + AllTrim(_cGet), "WF7_ENDERE"))
+		cMailTo	:= "mailto:" + AllTrim(Posicione("WF7", 1, xFilial("WF7") + AllTrim(_cGet), "WF7_ENDERE"))
 		chtmltexto := wfloadfile("\workflow\emp01\" + chtmlfile )
-		chtmltexto := strtran( chtmltexto, cmailto, "WFHTTPRET.APL" )
+		chtmltexto := StrTran( chtmltexto, cmailto, "WFHTTPRET.APL" )
 		wfsavefile("\workflow\emp"+cEmpAnt+"\" + chtmlfile, chtmltexto)
 
 		cLink := _cHostWF + "emp01/" + _cMailID + ".htm"
@@ -684,7 +664,7 @@ DO While !(_cAliasSC1)->(Eof())
     	cFilSC	:= (_cAliasSC1)->C1_FILIAL + " - " + AllTrim(FWFilialName(cEmpAnt, (_cAliasSC1)->C1_FILIAL, 1 ))
 		cNumSC	:= (_cAliasSC1)->C1_NUM
 		cSolic	:= (_cAliasSC1)->ZZ7_NOMSOL
-		dDtEmi	:= DtoC(StoD((_cAliasSC1)->C1_EMISSAO))
+		dDtEmi	:= DToC(SToD((_cAliasSC1)->C1_EMISSAO))
 		cAprov	:= (_cAliasSC1)->ZZ7_NOMAPR
 		cAprNom	:= SubStr((_cAliasSC1)->ZZ7_NOMAPR, 1, At(" ", (_cAliasSC1)->ZZ7_NOMAPR)-1)
 		If (_cAliasSC1)->C1_I_URGEN == "S"
@@ -706,12 +686,12 @@ DO While !(_cAliasSC1)->(Eof())
 		_cInves :=Posicione("ZZI",1,(_cAliasSC1)->C1_FILIAL+(_cAliasSC1)->C1_I_CDINV,"ZZI_DESINV")
 
 		cReavaliar := ""		
-		IF (_cAliasSC1)->C1_I_CLAIM = '1'
+		If (_cAliasSC1)->C1_I_CLAIM = '1'
 			cReavaliar:=cReavaliar+" **CLAIM**"
-		ENDIF
-		IF (_cAliasSC1)->C1_I_APLIC == "I"
+		EndIf
+		If (_cAliasSC1)->C1_I_APLIC == "I"
 			cReavaliar:=cReavaliar+" **INVESTIMENTO**"
-		ENDIF
+		EndIf
         _oProcess:oHtml:ValByName("cCLAIM",cReavaliar)
 
 		_oProcess:oHtml:ValByName("cLogo"			, cLogo )
@@ -739,8 +719,8 @@ DO While !(_cAliasSC1)->(Eof())
 		_cAliasSD1 := GetNextAlias()
 		MCOM003Q(5,_cAliasSD1,(_cAliasSC1)->C1_FILIAL,"","","","","","","","",(_cAliasSC1)->C1_PRODUTO)
 
-		dbSelectArea(_cAliasSD1)
-		(_cAliasSD1)->(dbGotop())
+		DBSelectArea(_cAliasSD1)
+		(_cAliasSD1)->(DBGoTop())
 
 		If !(_cAliasSD1)->(Eof())
 			aAdd( _oProcess:oHtml:ValByName("Itens.VlrUc"		), Transform((_cAliasSD1)->D1_VUNIT, PesqPict("SD1","D1_VUNIT"))	)
@@ -748,10 +728,10 @@ DO While !(_cAliasSC1)->(Eof())
 			aAdd( _oProcess:oHtml:ValByName("Itens.VlrUc"		), Transform(0, PesqPict("SD1","D1_VUNIT"))							)
 		EndIf
 
-		dbSelectArea(_cAliasSD1)
-		(_cAliasSD1)->(dbCloseArea())
+		DBSelectArea(_cAliasSD1)
+		(_cAliasSD1)->(DBCloseArea())
 
-		aAdd( _oProcess:oHtml:ValByName("Itens.DtNeces"		), DtoC(StoD((_cAliasSC1)->C1_DATPRF))									)
+		aAdd( _oProcess:oHtml:ValByName("Itens.DtNeces"		), DToC(SToD((_cAliasSC1)->C1_DATPRF))									)
 		aAdd( _oProcess:oHtml:ValByName("Itens.SldAtFil"	), Transform((_cAliasSC1)->B2_QATU, PesqPict("SB2","B2_QATU"))			)
 		aAdd( _oProcess:oHtml:ValByName("Itens.SldAtEmp"	), Transform((_cAliasSC1)->QTDTOT , PesqPict("SD3","D3_QUANT"))			)
 		
@@ -770,11 +750,11 @@ DO While !(_cAliasSC1)->(Eof())
 		_cAliasSC7 := GetNextAlias()
 		MCOM003Q(2,_cAliasSC7,(_cAliasSC1)->C1_FILIAL,"","","","","","","","",(_cAliasSC1)->C1_PRODUTO)
 
-		dbSelectArea(_cAliasSC7)
-		(_cAliasSC7)->(dbGotop())
+		DBSelectArea(_cAliasSC7)
+		(_cAliasSC7)->(DBGoTop())
 
 		If !Empty((_cAliasSC7)->C7_PRODUTO)
-    	   IF ASCAN(aDados,{|P| P[11] == (_cAliasSC7)->C7_PRODUTO } ) = 0//AWF-07/06/16
+    	   If aScan(aDados,{|P| P[11] == (_cAliasSC7)->C7_PRODUTO } ) = 0//AWF-07/06/16
 		      aAdd(aDados,{	"Produto: " + (_cAliasSC7)->C7_PRODUTO + " - " + (_cAliasSC7)->C7_DESCRI,;						// [01] Descricao do Produto
 							(_cAliasSC7)->C7_NUM,;																			// [02] Número do Pedido
 							(_cAliasSC7)->C7_ITEM,;																			// [03] Item do produto
@@ -784,18 +764,18 @@ DO While !(_cAliasSC1)->(Eof())
 							(_cAliasSC7)->B1_CONV,;																			// [07] Fator de conversão
 							Transform((_cAliasSC7)->C7_PRECO, PesqPict("SC7","C7_PRECO")),;									// [08] Preço unitário
 							Transform((_cAliasSC7)->C7_TOTAL , PesqPict("SC7","C7_TOTAL")),;								// [09] Valor Total
-							DtoC(StoD((_cAliasSC7)->C7_EMISSAO)),;                           	                            // [10] Data de Emissão
+							DToC(SToD((_cAliasSC7)->C7_EMISSAO)),;                           	                            // [10] Data de Emissão
 							(_cAliasSC7)->C7_PRODUTO})																		// [11] Cod do produto//AWF-07/06/16
-           ENDIF
+           EndIf
 		EndIf
 	
-		dbSelectArea(_cAliasSC7)
-		(_cAliasSC7)->(dbCloseArea())
+		DBSelectArea(_cAliasSC7)
+		(_cAliasSC7)->(DBCloseArea())
 
-		RestArea(aAreaSC1)
-	EndIf//***************************************************************************************************
+		FWRestArea(aAreaSC1)
+	EndIf
 	
-	(_cAliasSC1)->(dbSkip())
+	(_cAliasSC1)->(DBSkip())
 End
 
 If Len(aDados) > 0
@@ -835,7 +815,7 @@ _oProcess:cTo := NIL
 //Grava nome da task e email do aprovador no array aParams
 //A propriedade "aParams" (Array) serve para armazenar qualquer tipo de informacao para controle.
 //===============================================================================================  
-AADD(_oProcess:aParams, { _oProcess:FTaskID, UsrRetMail(cEmail) }) 
+aAdd(_oProcess:aParams, { _oProcess:FTaskID, UsrRetMail(cEmail) }) 
 
 //================================
 // respostas retornar ao Workflow:
@@ -871,9 +851,9 @@ _cAssunto := "4-Aprovação da Solicitação de Compras Filial " + cFilSC + " SC Núm
 _oProcess := TWFProcess():New(_cCodProce,"Aprovação da Solicitação de Compras")//CRIA PARA O ENVIO DO E-MAIL
 
 chtmlfile := _cMailID + ".htm"
-cMailTo	:= "mailto:" + Alltrim(Posicione("WF7", 1, XFilial("WF7") + AllTrim(GetMV('MV_WFMLBOX')), "WF7_ENDERE"))
+cMailTo	:= "mailto:" + AllTrim(Posicione("WF7", 1, xFilial("WF7") + AllTrim(GetMV('MV_WFMLBOX')), "WF7_ENDERE"))
 chtmltexto := wfloadfile("\workflow\emp01\" + chtmlfile )
-chtmltexto := strtran( chtmltexto, cmailto, "WFHTTPRET.APL" )
+chtmltexto := StrTran( chtmltexto, cmailto, "WFHTTPRET.APL" )
 wfsavefile("\workflow\emp"+cEmpAnt+"\" + chtmlfile, chtmltexto) // grava novamente com as alteracoes necessarias.
 
 //=================================================================
@@ -905,7 +885,6 @@ _oProcess:cSubject	:= FWHttpEncode(_cAssunto)
 
 _cMailID	:= _oProcess:fProcessId
 _cTaskID	:= _oProcess:fTaskID
-//RastreiaWF(_cMailID + '.' + _cTaskID , _oProcess:fProcCode, "1001", "Recebimento da Aprovacao da SC", "")
 
 //=======================================================
 // Iniciamos a tarefa e enviamos o email ao destinatário.
@@ -925,16 +904,14 @@ Return
 Programa----------: MCOM003E
 Autor-------------: Darcio Ribeiro Sporl
 Data da Criacao---: 18/11/2015
-===============================================================================================================================
 Descrição---------: Rotina responsável por atualizar a flag de reenvio do workflow
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function MCOM003E()
-Local aArea		:= GetArea()
+
+Local aArea		:= FWGetArea()
 Local cFilSC	:= SC1->C1_FILIAL
 Local cNumSC	:= SC1->C1_NUM
 Local cQuery	:= ""
@@ -952,7 +929,7 @@ If SC1->C1_APROV == 'B'
 
 	If TCSqlExec( cQuery ) < 0
 	   MsgAlert("Esta solicitação não pode ser reenviada, pois ocorreu um erro: TCSQLError(): "+AllTrim(TCSQLError()))
-	else
+	Else
 	   MsgInfo("Solicitação preparada para reenvio.")		
 	EndIf
 
@@ -960,7 +937,7 @@ Else
 	MsgAlert("Esta solicitação não pode ser reenviada, pois esta encontra-se Liberada ou Rejeitada.")
 EndIf
 
-RestArea(aArea)
+FWRestArea(aArea)
 Return
 
 /*
@@ -994,10 +971,10 @@ Private _cHostWF	:= ""
 Private _dDtIni	:= ""
 Private cLogo		:= ""
 
-FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00319"/*cMsgId*/,'MCOM00319 - Gerando envio do workflow das solicitações de compras aos aprovadores na data: ' + Dtoc(DATE()) + ' - ' + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00319"/*cMsgId*/,'MCOM00319 - Gerando envio do workflow das solicitações de compras aos aprovadores na data: ' + DToC(Date()) + ' - ' + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
-_cHostWF	:= U_ItGetMv("IT_WFHOSTS","http://wfteste.italac.com.br:4034/")
-_dDtIni		:= DtoS(U_ItGetMv("IT_WFDTINI","20150101"))
+_cHostWF	:= SuperGetMV("IT_WFHOSTS",.T.,"http://wfteste.italac.com.br:4034/")
+_dDtIni		:= DToS(SuperGetMV("IT_WFDTINI",.F.,"26/11/2025"))
 cLogo		:= _cHostWF + "htm/logo_novo.jpg"
 _cGet		:= GetMV('MV_WFMLBOX')
 
@@ -1018,10 +995,11 @@ cQryZZ7 += "  AND C1_APROV = 'B' "
 cQryZZ7 += "  AND C1_RESIDUO <> 'S' "
 cQryZZ7 += "ORDER BY ZZ7_CODUSR "
 
-dbUseArea(.T., "TOPCONN", TcGenQry(,,cQryZZ7), "TRBZZ7", .T., .F.)
-	
-dbSelectArea("TRBZZ7")
-TRBZZ7->(dbGoTop())
+cQryZZ7 := ChangeQuery(cQryZZ7)
+MPSysOpenQuery(cQryZZ7,"TRBZZ7")
+
+DBSelectArea("TRBZZ7")
+TRBZZ7->(DBGoTop())
 
 While !TRBZZ7->(Eof())
 
@@ -1053,9 +1031,9 @@ While !TRBZZ7->(Eof())
 	_cTaskID	:= _oProcess:fTaskID
 
 	chtmlfile	:= _cMailID + ".htm"
-	cMailTo		:= "mailto:" + Alltrim(Posicione("WF7", 1, XFilial("WF7") + AllTrim(_cGet), "WF7_ENDERE"))
+	cMailTo		:= "mailto:" + AllTrim(Posicione("WF7", 1, xFilial("WF7") + AllTrim(_cGet), "WF7_ENDERE"))
 	chtmltexto	:= wfloadfile("\workflow\emp01\" + chtmlfile )
-	chtmltexto	:= strtran( chtmltexto, cmailto, "WFHTTPRET.APL" )
+	chtmltexto	:= StrTran( chtmltexto, cmailto, "WFHTTPRET.APL" )
 	wfsavefile("\workflow\emp"+cEmpAnt+"\" + chtmlfile, chtmltexto)
 
 	_oProcess:oHtml:ValByName("cLogo"	, cLogo		)
@@ -1075,10 +1053,11 @@ While !TRBZZ7->(Eof())
 	cQrySC1 += "  AND SC1.D_E_L_E_T_ = ' ' "
 	cQrySC1 += "ORDER BY C1_FILIAL, C1_NUM " 
 
-	dbUseArea(.T., "TOPCONN", TcGenQry(,,cQrySC1), "TRBSC1", .T., .F.)
+	cQrySC1 := ChangeQuery(cQrySC1)
+	MPSysOpenQuery(cQrySC1,"TRBSC1")
 
-	dbSelectArea("TRBSC1")
-	TRBSC1->(dbGoTop())
+	DBSelectArea("TRBSC1")
+	TRBSC1->(DBGoTop())
 
 	While !TRBSC1->(Eof())
 		
@@ -1098,7 +1077,7 @@ While !TRBZZ7->(Eof())
 		aAdd( _oProcess:oHtml:ValByName("itens.CUSTO")	, TRBSC1->C1_CC																	)
 		If TRBSC1->C1_I_URGEN == 'S'
 			aAdd( _oProcess:oHtml:ValByName("itens.URGEN")	, "Sim"																		)
-		ELSEIf TRBSC1->C1_I_URGEN == 'N'
+		ElseIf TRBSC1->C1_I_URGEN == 'N'
 			aAdd( _oProcess:oHtml:ValByName("itens.URGEN")	, "NF"																		)
 		Else
 			aAdd( _oProcess:oHtml:ValByName("itens.URGEN")	, "Não"																		)
@@ -1106,7 +1085,7 @@ While !TRBZZ7->(Eof())
 		aAdd( _oProcess:oHtml:ValByName("itens.INVES")	, cAplic + " " + TRBSC1->ZZI_DESINV												)
 		aAdd( _oProcess:oHtml:ValByName("itens.LINK")	, AllTrim(TRBSC1->C1_I_HTM)														)
 
-		TRBSC1->(dbSkip())
+		TRBSC1->(DBSkip())
 	End
 
 	//====================================================
@@ -1128,18 +1107,18 @@ While !TRBZZ7->(Eof())
 	//=======================================================
 	_oProcess:Start()
 
-	dbSelectArea("TRBSC1")
-	TRBSC1->(dbCloseArea())
+	DBSelectArea("TRBSC1")
+	TRBSC1->(DBCloseArea())
 
-	TRBZZ7->(dbSkip())
+	TRBZZ7->(DBSkip())
 End
 
-dbSelectArea("TRBZZ7")
-TRBZZ7->(dbCloseArea())
+DBSelectArea("TRBZZ7")
+TRBZZ7->(DBCloseArea())
 
 PutMV("MV_WFHTML",lWFHTML)
 
-FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00320"/*cMsgId*/,'MCOM00320 - Termino do envio do workflow das solicitações de compras na data: ' + Dtoc(DATE()) + ' - ' + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00320"/*cMsgId*/,'MCOM00320 - Termino do envio do workflow das solicitações de compras na data: ' + DToC(Date()) + ' - ' + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
 Return
 
@@ -1148,11 +1127,8 @@ Return
 Programa----------: MCOM003A
 Autor-------------: Alex Wallauer
 Data da Criacao---: 07/06/2016
-===============================================================================================================================
 Descrição---------: Função criada aviso ao Solicitante para enviar e-mail de Aprovacao ou Rejeição
-===============================================================================================================================
 Parametros--------: _oProcess - Processo inicializado do workflow
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1161,11 +1137,11 @@ Static Function MCOM003A(_oProcess)
 Local _cFilName := _oProcess:oHtml:RetByName("Filial")
 Local _cFilSC	 := SubStr(_cFilName,1,2)
 Local _cNumSC	 := _oProcess:oHtml:RetByName("NumSC")    
-Local _cAprova	 := UPPER(_oProcess:oHtml:RetByName("opcao"))        
-Local _cObs		 := AllTrim(UPPER(_oProcess:oHtml:RetByName("CR_OBS")))
-Local _sDtLiber := DtoS(date())
+Local _cAprova	 := Upper(_oProcess:oHtml:RetByName("opcao"))        
+Local _cObs		 := AllTrim(Upper(_oProcess:oHtml:RetByName("CR_OBS")))
+Local _sDtLiber := DToS(Date())
 Local _cHrLiber := SubStr(Time(),1,5)
-Local _cHostWF  := U_ItGetMv("IT_WFHOSTS","http://wfteste.italac.com.br:4034/")
+Local _cHostWF  := SuperGetMV("IT_WFHOSTS",.T.,"http://wfteste.italac.com.br:4034/")
 Local _cLogo	 := _cHostWF + "htm/logo_novo.jpg"
 Local _cSolic   := ""
 Local _cAprNom  := ""
@@ -1187,8 +1163,8 @@ _oProcess := TWFProcess():New("APROVS","Aprovação da Solicitação de Compras")//C
 //=================================================================
 _oProcess:NewTask("LINK", "\workflow\htm\sc_solicitante.htm")
 
-SC1->(DBSETORDER(1))
-SC1->(DBSEEK(_cFilSC+_cNumSC))
+SC1->(DBSetOrder(1))
+SC1->(DBSeek(_cFilSC+_cNumSC))
 
 _cSolic :=Posicione("ZZ7",1,SC1->C1_FILIAL+SC1->C1_I_CDSOL,"ZZ7_NOME")
 _cAprNom:=Posicione("ZZ7",1,SC1->C1_FILIAL+SC1->C1_I_CODAP,"ZZ7_NOME")
@@ -1223,7 +1199,7 @@ _oProcess:oHtml:ValByName("cLogo"	  , _cLogo	)
 _oProcess:oHtml:ValByName("A_SOLIC"	  , _cSolic	)
 _oProcess:oHtml:ValByName("Aprovacao" , _cAviso)
 _oProcess:oHtml:ValByName("AprNom"	  , _cAprNom)
-_oProcess:oHtml:ValByName("A_Data"	  , DTOC(STOD(_sDtLiber)))
+_oProcess:oHtml:ValByName("A_Data"	  , DToC(SToD(_sDtLiber)))
 _oProcess:oHtml:ValByName("A_Hora"	  , _cHrLiber)
 _oProcess:oHtml:ValByName("A_CUSTO"	  , _cCcust	)
 _oProcess:oHtml:ValByName("A_URGEN"	  , _cUrgen	)
@@ -1244,7 +1220,7 @@ _oProcess:cTo := _cEmail
 //===============================
 // Informamos o assunto do email.  
 //===============================
-_cAssunto:="7-Retorno WF da Solicitação de Compras Filial " + _cFilName + " / SC Número: " + ALLTRIM(_cNumSC) + " - " + _cAvisoAssu
+_cAssunto:="7-Retorno WF da Solicitação de Compras Filial " + _cFilName + " / SC Número: " + AllTrim(_cNumSC) + " - " + _cAvisoAssu
 _oProcess:cSubject	:= FWHttpEncode(_cAssunto)
 
 //=======================================================
@@ -1252,7 +1228,7 @@ _oProcess:cSubject	:= FWHttpEncode(_cAssunto)
 //=======================================================
 _oProcess:Start() //ENVIA O E-MAIL
 // AGUARDANDO FONTE MATA235.PRX ATUALIZADO PRA ANALISE
-IF _cAprova == "REJEITAR"             
+If _cAprova == "REJEITAR"             
    
    _cQrySC1 := "SELECT R_E_C_N_O_ RECNUM  "
    _cQrySC1 += "FROM "  + RetSqlName("SC1") + " SC1 "
@@ -1265,32 +1241,32 @@ IF _cAprova == "REJEITAR"
    _cQrySC1 += "  AND C1_APROV = 'R' "
    _cQrySC1 += "  AND C1_RESIDUO <> 'S' "
    
-   dbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQrySC1 ) , "TRBSC1" , .T., .F. )
+   _cQrySC1 := ChangeQuery(_cQrySC1)
+	MPSysOpenQuery(_cQrySC1,"TRBSC1")
 
    cFilAnt:=_cFilSC
    					
-   TRBSC1->(dbGoTop())
+   TRBSC1->(DBGoTop())
    BEGIN TRANSACTION
-   DO While !TRBSC1->(Eof())
-      SC1->(DBSETORDER(1))
-	  SC1->(DBGOTO(TRBSC1->RECNUM))
+   While !TRBSC1->(Eof())
+      SC1->(DBSetOrder(1))
+	  SC1->(DBGoTo(TRBSC1->RECNUM))
 
-	  SC1->(Reclock("SC1",.F.))
+	  SC1->(RecLock("SC1",.F.))
 	  SC1->C1_I_USREL := SC1->C1_I_CDSOL
-	  SC1->C1_I_DTELR := DATE()
-	  SC1->C1_I_HRELR := TIME()	
-	  SC1->(Msunlock())
+	  SC1->C1_I_DTELR := Date()
+	  SC1->C1_I_HRELR := Time()	
+	  SC1->(MSUnLock())
 	  _cResiduo:=SC1->C1_RESIDUO
-	  __cUserID:=SC1->C1_I_CDSOL//por causa do ponto de entrada U_MT235G2
 
 	//MA235SC(nPerc, dEmisDe  , dEmisAte         , cCodigoDe  , cCodigoAte , cProdDe , cProdAte         , cFornDe, cFornAte, dDatPrfde, dDatPrfAte        , lSemOp, cItemDe      , cItemAte   ,aRecSC1)
-	  MA235SC(100  , CTOD("") ,CTOD("31/12/2030"), SC1->C1_NUM, SC1->C1_NUM,SPACE(15) ,"ZZZZZZZZZZZZZZZ",SPACE(6),"ZZZZZZ" , CTOD("") , CTOD("31/12/2030"),.F.    , SC1->C1_ITEM, SC1->C1_ITEM)      
-	  TRBSC1->(DBSKIP())
-   ENDDO
+	  MA235SC(100  , CTOD("") ,CTOD("31/12/2030"), SC1->C1_NUM, SC1->C1_NUM,Space(15) ,"ZZZZZZZZZZZZZZZ",Space(6),"ZZZZZZ" , CTOD("") , CTOD("31/12/2030"),.F.    , SC1->C1_ITEM, SC1->C1_ITEM)      
+	  TRBSC1->(DBSkip())
+   EndDo
    END TRANSACTION
 
-   TRBSC1->(dbCloseArea())
-ENDIF
+   TRBSC1->(DBCloseArea())
+EndIf
 FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00322"/*cMsgId*/,"MCOM00322 - Email enviado para: " + _cEmail + " com sucesso!"/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00323"/*cMsgId*/,"MCOM00323 - /////////////////   FIM DA MCOM003A   /////////////////////////////////////////////////////////////////////////////////"/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
@@ -1301,48 +1277,42 @@ Return
 Programa----------: MCOM003CP()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 12/09/19
-===============================================================================================================================
 Descrição---------: Recria arquivo com conteúdo de outro arquivo
-===============================================================================================================================
 Parametros--------: _carqori - Arquivo de origem
 					_carqsrc - Arquivo com conteúdo a ser utilizado
-===============================================================================================================================
-Retorno-----------: _lret - lógico indicando se completou o processo
+Retorno-----------: _lRet - lógico indicando se completou o processo
 ===============================================================================================================================
 */
 Static Function MCOM003CP(_carqori,_carqsrc)
 
-Local _lret := .T.
+Local _lRet := .T.
 Local _cconteudo := MemoRead( _carqsrc)
 
-	If empty(_cconteudo)
-		_lret := .F.
-	Endif
+	If Empty(_cconteudo)
+		_lRet := .F.
+	EndIf
 
-	If _lret .and. FERASE(_carqori)==0 
-		_nHandle := FCREATE(_carqori) 
+	If _lRet .And. FERASE(_carqori)==0 
+		_nHandle := FCreate(_carqori) 
 		If _nHandle > 0
-			FCLOSE(_nHandle)
-			_lret := memowrite(_carqori,_cconteudo)
+			FClose(_nHandle)
+			_lRet := memowrite(_carqori,_cconteudo)
 		Else
-			_lret := .F.
-		Endif
+			_lRet := .F.
+		EndIf
 	Else
-		_lret := .F.
-	Endif 
+		_lRet := .F.
+	EndIf 
 	
-Return _lret
+Return _lRet
 
 /*
 ===============================================================================================================================
 Programa----------: MCOM003D
 Autor-------------: Alex Wallauer
 Data da Criacao---: 29/07/2021
-===============================================================================================================================
 Descrição---------: Função criada aviso ao Solicitante para enviar e-mail de QUESTINAMENTO
-===============================================================================================================================
 Parametros--------: _oProcess - Processo inicializado do workflow / _cPergPai
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1351,10 +1321,10 @@ Static Function MCOM003D(_oProcess,_cPergPai)
 Local _cFilName := _oProcess:oHtml:RetByName("Filial")
 Local _cFilSC	 := SubStr(_cFilName,1,2)
 Local _cNumSC	 := _oProcess:oHtml:RetByName("NumSC")    
-Local _cObs		 := AllTrim(UPPER(_oProcess:oHtml:RetByName("ObsGen")))
-Local _sDtLiber := DtoS(date())
+Local _cObs		 := AllTrim(Upper(_oProcess:oHtml:RetByName("ObsGen")))
+Local _sDtLiber := DToS(Date())
 Local _cHrLiber := SubStr(Time(),1,5)
-Local _cHostWF	 := U_ItGetMv("IT_WFHOSTS","http://wfteste.italac.com.br:4034/")
+Local _cHostWF	 := SuperGetMV("IT_WFHOSTS",.T.,"http://wfteste.italac.com.br:4034/")
 Local _cLogo	 := _cHostWF + "htm/logo_novo.jpg"
 Local _cSolic   :=""
 Local _cAprNom  :=""
@@ -1378,8 +1348,8 @@ _oProcess := TWFProcess():New("APROVS","Questionamento da Solicitação de Compras
 //=================================================================
 _oProcess:NewTask("LINK", "\workflow\htm\SC_SOLICITANTE_Q.htm")
 
-SC1->(DBSETORDER(1))
-SC1->(DBSEEK(_cFilSC+_cNumSC))
+SC1->(DBSetOrder(1))
+SC1->(DBSeek(_cFilSC+_cNumSC))
 
 _cSolic :=Posicione("ZZ7",1,SC1->C1_FILIAL+SC1->C1_I_CDSOL,"ZZ7_NOME")
 _cAprNom:=Posicione("ZZ7",1,SC1->C1_FILIAL+SC1->C1_I_CODAP,"ZZ7_NOME")
@@ -1406,7 +1376,7 @@ _oProcess:oHtml:ValByName("cLogo"	  , _cLogo	)
 _oProcess:oHtml:ValByName("A_SOLIC"	  , _cSolic	)
 _oProcess:oHtml:ValByName("Aprovacao" , _cAviso)
 _oProcess:oHtml:ValByName("AprNom"	  , _cAprNom)
-_oProcess:oHtml:ValByName("A_Data"	  , DTOC(STOD(_sDtLiber)))
+_oProcess:oHtml:ValByName("A_Data"	  , DToC(SToD(_sDtLiber)))
 _oProcess:oHtml:ValByName("A_Hora"	  , _cHrLiber)
 _oProcess:oHtml:ValByName("A_CUSTO"	  , _cCcust	)
 _oProcess:oHtml:ValByName("A_URGEN"	  , _cUrgen	)
@@ -1443,9 +1413,9 @@ _oProcess:NewTask("LINK", "\workflow\htm\SC_LINK_Q.HTM")//Atalho no corpo do COR
 
 _cMV_WFMLBOX:= AllTrim(GetMV('MV_WFMLBOX'))
 chtmlfile := cLink + ".htm"
-cMailTo	:= "mailto:" + Alltrim(Posicione("WF7", 1, XFilial("WF7") + _cMV_WFMLBOX, "WF7_ENDERE"))
+cMailTo	:= "mailto:" + AllTrim(Posicione("WF7", 1, xFilial("WF7") + _cMV_WFMLBOX, "WF7_ENDERE"))
 chtmltexto := wfloadfile("\workflow\emp01\" + chtmlfile )//Carrega o arquivo 
-chtmltexto := strtran( chtmltexto, cmailto, "WFHTTPRET.APL" )//Procura e troca a string
+chtmltexto := StrTran( chtmltexto, cmailto, "WFHTTPRET.APL" )//Procura e troca a string
 wfsavefile("\workflow\emp"+cEmpAnt+"\" + chtmlfile, chtmltexto)//Grava o arquivo de volta
 cLink := _cHostWF + "emp01/" + cLink + ".htm"
 
@@ -1457,7 +1427,7 @@ _oProcess:oHtml:ValByName("cLogo"	  , _cLogo	)
 _oProcess:oHtml:ValByName("A_SOLIC"	  , _cSolic	)
 _oProcess:oHtml:ValByName("Aprovacao" , _cAviso)
 _oProcess:oHtml:ValByName("AprNom"	  , _cAprNom)
-_oProcess:oHtml:ValByName("A_Data"	  , DTOC(STOD(_sDtLiber)))
+_oProcess:oHtml:ValByName("A_Data"	  , DToC(SToD(_sDtLiber)))
 _oProcess:oHtml:ValByName("A_Hora"	  , _cHrLiber)
 _oProcess:oHtml:ValByName("A_CUSTO"	  , _cCcust	)
 _oProcess:oHtml:ValByName("A_URGEN"	  , _cUrgen	)
@@ -1479,7 +1449,7 @@ _oProcess:cTo := _cEmail
 //===============================
 // Informamos o assunto do email.  
 //===============================
-_cAssunto:="8-QUESTIONAMENTO da Solicitação de Compras Filial " + _cFilName + " / SC Número: " + ALLTRIM(_cNumSC) 
+_cAssunto:="8-QUESTIONAMENTO da Solicitação de Compras Filial " + _cFilName + " / SC Número: " + AllTrim(_cNumSC) 
 _oProcess:cSubject	:= FWHttpEncode(_cAssunto)
 
 //=======================================================
@@ -1496,15 +1466,13 @@ Return
 Programa----------: M003RET
 Autor-------------: Alex Wallauer
 Data da Criacao---: 29/07/2021
-===============================================================================================================================
 Descrição---------: Função criada para montar o retorno dos questionamentos referente ao pedido de compras em questão.
-===============================================================================================================================
 Parametros--------: _oProcess - Objeto do Processo de Questionamento
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function M003RET(_oProcess)
+
 //Variaveis  guardados no SC_SOLICITANTE_Q.HTM para serem usadas aqui na funcao U_M003RET()
 Local _cFilial	:= SubStr(_oProcess:oHtml:RetByName("Filial"),1,2)
 Local _cNumSC	:= _oProcess:oHtml:RetByName("NumSC")    
@@ -1513,9 +1481,9 @@ Local _cUser	:= _oProcess:oHtml:RetByName("cUser")
 //Acaba aqui
 
 Local _cAssunto     := "6-Retorno do questionamento do SC " + _cFilial + " " + _cNumSC
-Local _cObs			:= AllTrim(UPPER(_oProcess:oHtml:RetByName("CR_OBS")))
+Local _cObs			:= AllTrim(Upper(_oProcess:oHtml:RetByName("CR_OBS")))
 Local _cArqHtm		:= SubStr(_oProcess:oHtml:RetByName("WFMAILID"),3,Len(_oProcess:oHtml:RetByName("WFMAILID")))
-Local _sDtLiber		:= DtoS(date())
+Local _sDtLiber		:= DToS(Date())
 Local _cHrLiber		:= SubStr(Time(),1,5)
 Local _cHtmlMode	:= "\Workflow\htm\sc_concluida.htm"
 
@@ -1524,14 +1492,14 @@ _cQrySCR += "FROM "  + RetSqlName("SC1") + " SC1 "
 _cQrySCR += "WHERE SC1.D_E_L_E_T_ = ' ' "
 _cQrySCR += "  AND C1_FILIAL = '" + _cFilial + "' "
 _cQrySCR += "  AND C1_NUM = '" + _cNumSC + "' "
-//cQryZZ7+= "  AND C1_I_SITWF = '2' "
 _cQrySCR += "  AND C1_APROV = 'B' "
 _cQrySCR += "  AND C1_RESIDUO <> 'S' "
 
-dbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQrySCR ) , "TRBSC1" , .T., .F. )
-					
-dbSelectArea("TRBSC1")
-TRBSC1->(dbGoTop())
+_cQrySCR := ChangeQuery(_cQrySCR)
+MPSysOpenQuery(_cQrySCR,"TRBSC1")
+
+DBSelectArea("TRBSC1")
+TRBSC1->(DBGoTop())
 
 If TRBSC1->C1_REGS > 0
 
@@ -1558,8 +1526,8 @@ If TRBSC1->C1_REGS > 0
 	//========================================================================================
 	If File("\workflow\emp01\" + _cArqHtm + ".htm")
 		If __CopyFile("\workflow\emp01\" + _cArqHtm + ".htm", "\workflow\emp01\" + _cArqHtm + ".old")
-        	If !EMPTY(_cHtmlMode) 
-        		IF MCOM003CP("\workflow\emp01\" + _cArqHtm + ".htm",_cHtmlMode) //Recria _carqhtm com conteudo do modelo chtmlmode
+        	If !Empty(_cHtmlMode) 
+        		If MCOM003CP("\workflow\emp01\" + _cArqHtm + ".htm",_cHtmlMode) //Recria _carqhtm com conteudo do modelo chtmlmode
   			   		FWLogMsg("WARN"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00327"/*cMsgId*/,"MCOM00327 - Cópia do arquivo DE "+_cHtmlMode+" PARA \workflow\emp01\" + _cArqHtm + ".htm de conclusão efetuada com sucesso."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
   		    	Else
 			 		FWLogMsg("ERROR"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00328"/*cMsgId*/,"MCOM00328 - Problema na cópia de arquivo DE "+_cHtmlMode+" PARA \workflow\emp01\" + _cArqHtm + ".htm"/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)	
@@ -1598,7 +1566,7 @@ Else
 	_cHtml += '	<head> '
 	_cHtml += '		<title>Questionamento Solicitacao de Compras</title> '
 	_cHtml += '	</head> '
-	_cHtml += '	<style type="text/css"><!-- '
+	_cHtml += '	<style Type="text/css"><!-- '
 	_cHtml += '	table.bordasimples { border-collapse: collapse; } '
 	_cHtml += '	table.bordasimples tr td { border:1px solid #777777; } '
 	_cHtml += '	td.grupos	{ font-family:VERDANA; font-size:20px; V-align:middle; background-color: #C6E2FF; color:#000080; } '
@@ -1647,11 +1615,10 @@ Return
 Programa----------: SchedDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 09/09/2024
-===============================================================================================================================
-Descrição---------: Definição de Static Function SchedDef para o novo Schedule
+Descrição---------: DefiniçStaticStatic Function SchedDef para o novo Schedule
 					No novo Schedule existe uma forma para a definição dos Perguntes para o botão Parâmetros, além do cadastro 
-					das funções no SXD. Ao definir em sua rotina a static function SchedDef(), no cadastro da rotina no Agenda-
-					mento do Schedule será verificado se existe esta static function e irá executá-la habilitando o botão Parâ-
+					das funções no SXD. Ao definir em sua rotinStaticatic Function SchedDef(), no cadastro da rotina no Agenda-
+					mento do Schedule será verificado se existe estStaticic Function e irá executá-la habilitando o botão Parâ-
 					metros com as informações do retorno da SchedDef(), deixando de verificar assim as informações na SXD. O 
 					retorno da SchedDef deverá ser um array.
 					Válido para Function e User Function, lembrando que uma vez definido a SchedDef, ao chamar a rotina o ambi-
@@ -1659,13 +1626,11 @@ Descrição---------: Definição de Static Function SchedDef para o novo Schedule
 					Uma vez definido a Static Function SchedDef(), a rotina deixa de ser uma execução como processo especial, 
 					ou seja, não se deve cadastrá-la no Agendamento passando parâmetros de linha. Ex: Funcao("A","B") ou 
 					U_Funcao("A","B").
-===============================================================================================================================
 Parametros--------: aReturn[1] - Tipo: "P" - para Processo, "R" -  para Relatórios
 					aReturn[2] - Nome do Pergunte, caso nao use passar ParamDef
 					aReturn[3] - Alias  (para Relatório)
 					aReturn[4] - Array de ordem  (para Relatório)
 					aReturn[5] - Título (para Relatório)
-===============================================================================================================================
 Retorno-----------: aParam
 ===============================================================================================================================
 */

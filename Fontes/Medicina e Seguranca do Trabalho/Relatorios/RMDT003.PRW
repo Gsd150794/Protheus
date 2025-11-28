@@ -4,21 +4,13 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer |13/11/2019| Chamado 31179. Novo parametro MV_PAR18 - "Situacoes a Imp. ?" . 
 Julio Paz     |05/09/2023| Chamado 44811. Inclusão das colunas UF e Cidade do Atestado (TNY_I_UF/TNY_I_MUNI). 
 Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
-===============================================================================================================================
-
-=========================================================================================================================================================
-Analista         - Programador       - Inicio     - Envio      - Chamado - Motivo da Alteração
----------------------------------------------------------------------------------------------------------------------------------------------------------
-Bruno dos Reis   -  Igor Melgaço     - 20/01/2025 - 30/01/2025 - 48829   - Inclusão de campos no relatório.
+Igor Melgaço  |30/01/2025| Chamado 48829. Inclusão de campos no relatório.
 =========================================================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
+
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -35,14 +27,14 @@ User Function RMDT003()
 Private nXATEST := 0 //Variavel de controle utilizada na impressão tReport
 
 If !Pergunte("RMDT003",.T.)   
-	Return Nil  
-Endif  
+	Return  
+EndIf  
 
 Private oFont12	 := TFont():New("Arial",10,10,,.F.,,,,.T.,.F.)		      
 Private oFont14B  := TFont():New("Arial",10,10,,.F.,,,,.F.,.F.)
 Private oFont16B  := TFont():New("Arial",12,12,,.F.,,,,.F.,.F.)
 Private oFont12T  := TFont():New("Times New Roman",10,10,,.F.,,,,.T.,.F.)
-Private oFont12I  := TFont():New("Times New Roman",10,10,,.T.,,.t.,,.T.,.F.)
+Private oFont12I  := TFont():New("Times New Roman",10,10,,.T.,,.T.,,.T.,.F.)
 
 //-- Interface de impressao
 oReport := RMDT003I()
@@ -87,11 +79,11 @@ Retorno-----------: Nenhum
 */
 User Function RMDT003R(oPrint,i,l,g)
 
-LOCAL x,z
-LOCAL t := 1
-LOCAL cCliente := ""  
+Local x,z
+Local t := 1
+Local cCliente := ""  
 Local cSMCOD := If(FindFunction("FWGrpCompany"),FWGrpCompany(),SM0->M0_CODIGO)
-Local cSMFIL := If(FindFunction("FWCodFil"),FWCodFil(),ALLTRIM(SM0->M0_CODFIL))
+Local cSMFIL := If(FindFunction("FWCodFil"),FWCodFil(),AllTrim(SM0->M0_CODFIL))
 Local nInd := 0
 Local nLinhasMemo := 0
 Local LinA := 0
@@ -102,7 +94,7 @@ U_ITLOGACS()
 
 If lSigaMdtps
              
-	ASORT(aAtestado,,,{|x,y| x[1]+x[2]+x[5] < y[1]+y[2]+y[5] })	
+	aSort(aAtestado,,,{|x,y| x[1]+x[2]+x[5] < y[1]+y[2]+y[5] })	
 	
 	While t <= Len(aAtestado)			
 		
@@ -119,7 +111,7 @@ If lSigaMdtps
 		oPrint:Say(  140	, 2580 , "Unidade:" 			, oFont14B ) //
 		oPrint:Say(  140	, 2790 , SM0->M0_NOME 	, oFont14B ) 
 		oPrint:Say(  220	, 2580 , "Data:" 			, oFont14B ) //
-		oPrint:Say(  220	, 2726 , DtoC( Date() )	, oFont14B )   
+		oPrint:Say(  220	, 2726 , DToC( Date() )	, oFont14B )   
 			
 		oPrint:Line( 280 , 080 , 280 , 3220 ) 
 		oPrint:Line( 281 , 080 , 281 , 3220 )
@@ -167,14 +159,14 @@ If lSigaMdtps
 			LinA:= 0 //Zera varial de linha
 			
 			If cCliente <> aAtestado[x,1]+aAtestado[x,2]
-				exit
-			Endif
+				Exit
+			EndIf
 			
 			oPrint:Say( lin-60 , 090  ,Transform( aAtestado[ x , 3 ] , "@R 9.999.999/9" ) , oFont12 ) //RG
 			oPrint:Say( Lin-60 , 380  ,Transform( aAtestado[ x , 4 ] , "@R 999999" ) , oFont12 ) //Matrícula
 				
 			//Quebra nome do Funcionário
-			nLinhasMemo := MLCOUNT(Alltrim( aAtestado[ x , 3 ]),20)//Utilização do quebra linha
+			nLinhasMemo := MLCOUNT(AllTrim( aAtestado[ x , 3 ]),20)//Utilização do quebra linha
 			For nInd := 1 to nLinhasMemo
 				oPrint:Say( Lin-60 , 590 ,MemoLine( aAtestado[ x , 3 ] , 20, nInd ) , oFont12 ) //Nome Funcionário
 				If nInd <> nLinhasMemo
@@ -185,9 +177,9 @@ If lSigaMdtps
 			
 			If nLinhasMemo > 1 //Caso a quebra de linhas seja maior que 1
 				Lin -= LinN //Retira valor adicionado pela quebra
-			Endif
+			EndIf
 			
-			nLinhasMemo := MLCOUNT(Alltrim( aAtestado[ x , 9 ]),20)//Quebra linha
+			nLinhasMemo := MLCOUNT(AllTrim( aAtestado[ x , 9 ]),20)//Quebra linha
 			For nInd := 1 to nLinhasMemo
 				oPrint:Say( Lin-60 , 1070 ,MemoLine( aAtestado[ x , 9 ] , 20, nInd ) , oFont12 ) //Centro de Custo
 				If nInd <> nLinhasMemo
@@ -198,13 +190,13 @@ If lSigaMdtps
 			
 			If nLinhasMemo > 1 //Caso a quebra de linhas seja maior que 1
 				Lin -= LinA //Retira valor adicionado pela quebra
-			Endif
+			EndIf
 			
-			oPrint:Say( Lin-60 , 1560 ,DtoC( aAtestado[ x , 6 ] ) + " a " + DtoC( aAtestado[ x , 7 ] ) , oFont12 ) //Data de afastamento
+			oPrint:Say( Lin-60 , 1560 ,DToC( aAtestado[ x , 6 ] ) + " a " + DToC( aAtestado[ x , 7 ] ) , oFont12 ) //Data de afastamento
 			oPrint:Say( Lin-60 , 2060 ,Transform( aAtestado[ x , 10 ] , "@R 99999" ) , oFont12 ) //Dias Perdidos
 			oPrint:Say( Lin-60 , 2280 ,Transform( aAtestado[ x , 11 ] , "99:99" )  , oFont12 ) //Horas Perdidas
 			
-			nLinhasMemo := MLCOUNT(Alltrim(aAtestado[ x , 8 ]),28)//Quebra linha
+			nLinhasMemo := MLCOUNT(AllTrim(aAtestado[ x , 8 ]),28)//Quebra linha
 			For nInd := 1 to nLinhasMemo
 				oPrint:Say( Lin-60 , 2490 , (MemoLine( aAtestado[ x , 8 ] , 30 , nInd )) , oFont12 )//Observação
 				If nInd <> nLinhasMemo
@@ -214,7 +206,7 @@ If lSigaMdtps
 			
 	    	If Lin < (Lin + If( LinA > LinN , LinA , LinN ) ) //Caso a linha posicionada seja menor que a utilizada no centro de custo.
 	    		Lin += If( LinA > LinN , LinA , LinN )
-	    	Endif
+	    	EndIf
 			
 			If Lin < 2109
 				oPrint:Line( lin , 080 , lin , 3220 ) //horizontal
@@ -224,7 +216,7 @@ If lSigaMdtps
 				I++
 				oPrint:EndPage() 
 				If U_RMDT003R(oPrint,@i,@lin,x)
-					Return .t.
+					Return .T.
 				EndIf
 				Lin := 100
 			EndIf
@@ -240,7 +232,7 @@ If lSigaMdtps
 		EndIf
 		
 		For z := 1 to yLinhas
-			if lin > 2200
+			If lin > 2200
 				Exit
 			EndIf
 			oPrint:Line(lin,080,lin,3220) //horizontal
@@ -268,7 +260,7 @@ Else
 	oPrint:Say(  140	, 2580 , "Unidade:" 			, oFont14B ) 
 	oPrint:Say(  140	, 2790 , SM0->M0_NOME 	, oFont14B ) 
 	oPrint:Say(  220	, 2580 , "Data:" 			, oFont14B ) 
-	oPrint:Say(  220	, 2726 , DtoC( Date() )	, oFont14B )   
+	oPrint:Say(  220	, 2726 , DToC( Date() )	, oFont14B )   
 		
 	oPrint:Line( 280 , 080 , 280 , 3220 ) 
 	oPrint:Line( 281 , 080 , 281 , 3220 )
@@ -318,7 +310,7 @@ Else
 		oPrint:Say( Lin-60 , 380  ,Transform( aAtestado[ x , 2 ] , "@R 999999" ) , oFont12 ) //Matrícula
 		
 		//Quebra nome do Funcionário
-		nLinhasMemo := MLCOUNT(Alltrim( aAtestado[ x , 3 ]),20)//Utilização do quebra linha
+		nLinhasMemo := MLCOUNT(AllTrim( aAtestado[ x , 3 ]),20)//Utilização do quebra linha
 		For nInd := 1 to nLinhasMemo
 			oPrint:Say( Lin-60 , 590 ,MemoLine( aAtestado[ x , 3 ] , 20, nInd ) , oFont12 ) //Nome Funcionário
 			If nInd <> nLinhasMemo
@@ -329,10 +321,10 @@ Else
 		
 		If nLinhasMemo > 1 //Caso a quebra de linhas seja maior que 1
 			Lin -= LinN //Retira valor adicionado pela quebra
-		Endif
+		EndIf
 		
 		//Quebra Centro de Custo
-		nLinhasMemo := MLCOUNT(Alltrim( aAtestado[ x , 7 ]),20)//Utilização do quebra linha
+		nLinhasMemo := MLCOUNT(AllTrim( aAtestado[ x , 7 ]),20)//Utilização do quebra linha
 		For nInd := 1 to nLinhasMemo
 			oPrint:Say( Lin-60 , 1070 ,MemoLine( aAtestado[ x , 7 ] , 20, nInd ) , oFont12 ) //Centro de Custo
 			If nInd <> nLinhasMemo
@@ -343,13 +335,13 @@ Else
 		
 		If nLinhasMemo > 1 //Caso a quebra de linhas seja maior que 1
 			Lin -= LinA //Retira valor adicionado pela quebra
-		Endif
+		EndIf
 		
-		oPrint:Say( Lin-60 , 1560 ,DtoC( aAtestado[ x , 4 ] ) + " a " + DtoC( aAtestado[ x , 5 ] ) , oFont12 ) //Data de afastamento
+		oPrint:Say( Lin-60 , 1560 ,DToC( aAtestado[ x , 4 ] ) + " a " + DToC( aAtestado[ x , 5 ] ) , oFont12 ) //Data de afastamento
 		oPrint:Say( Lin-60 , 2060 ,Transform( aAtestado[ x , 8 ] , "@R 99999" ) , oFont12 ) //Dias Perdidos
 		oPrint:Say( Lin-60 , 2280 ,Transform( aAtestado[ x , 9 ] , "99:99" )  , oFont12 ) //Horas Perdidas
 		
-		nLinhasMemo := MLCOUNT(Alltrim(aAtestado[ x , 6 ]),28)//Quebra linha
+		nLinhasMemo := MLCOUNT(AllTrim(aAtestado[ x , 6 ]),28)//Quebra linha
 		For nInd := 1 to nLinhasMemo
 			oPrint:Say( Lin-60 , 2490 , (MemoLine( aAtestado[ x , 6 ] , 30 , nInd )) , oFont12 )//Observação
 			If nInd <> nLinhasMemo
@@ -359,7 +351,7 @@ Else
     	  
     	If Lin < (Lin + If( LinA > LinN , LinA , LinN ) ) //Caso a linha posicionada seja menor que a utilizada no centro de custo.
     		Lin += If( LinA > LinN , LinA , LinN )
-    	Endif
+    	EndIf
 		
 		If Lin < 2109 
 			oPrint:Line( lin , 080 , lin , 3220 ) //horizontal
@@ -369,7 +361,7 @@ Else
 			I++  
 			oPrint:EndPage()    
 			If U_RMDT003R(oPrint,@i,@lin,x) 
-				Return .t.
+				Return .T.
 			EndIf	
 			Lin := 100
 		EndIf	  
@@ -383,7 +375,7 @@ Else
 	EndIf
 	
 	For z := 1 to yLinhas
-		if lin > 2200
+		If lin > 2200
 			Exit
 		EndIf	
 		oPrint:Line(lin,080,lin,3220) //horizontal
@@ -394,9 +386,9 @@ Else
 	oPrint:EndPage() 		
 	lin := 100
 
-Endif
+EndIf
 
-Return .t.
+Return .T.
  
  /*
 ===============================================================================================================================
@@ -420,80 +412,80 @@ Local cHoraIni := "00:00"
 Local cHoraFim := "00:00"
 Local aHoras := {}
 
-	DbSelectArea("TNY")
-	IF(oReport<>NIL,oReport:SetMeter(LASTREC()),)
+	DBSelectArea("TNY")
+	If(oReport<>NIL,oReport:SetMeter(LASTREC()),)
 	
-	TNY->(DbSetOrder(1))
-	TNY->(DbSeek(xFilial("TNY")+mv_par01,.t.))
+	TNY->(DBSetOrder(1))
+	TNY->(DBSeek(xFilial("TNY")+MV_PAR01,.T.))
 	
-	Do While !Eof() .and. xFilial("TNY") == TNY->TNY_FILIAL .and. TNY->TNY_NUMFIC <= mv_par02	
+	While !Eof() .And. xFilial("TNY") == TNY->TNY_FILIAL .And. TNY->TNY_NUMFIC <= MV_PAR02	
 
-        IF(oReport<>NIL,oReport:IncMeter(),)
-        IF(oReport<>NIL,oReport:SetMsgPrint("Lendo Ficha: "+TNY->TNY_NUMFIC),)
+        If(oReport<>NIL,oReport:IncMeter(),)
+        If(oReport<>NIL,oReport:SetMsgPrint("Lendo Ficha: "+TNY->TNY_NUMFIC),)
 		
-		If TNY->TNY_CID < mv_par05 .or. TNY->TNY_CID > mv_par06
-			DbSelectArea("TNY")		
-			DbSkip()
+		If TNY->TNY_CID < MV_PAR05 .Or. TNY->TNY_CID > MV_PAR06
+			DBSelectArea("TNY")		
+			DBSkip()
 			Loop
 		EndIf
 		
 		//Validação de data de consulta
-		If !empty(MV_PAR14) .AND. !empty(MV_PAR15)
-			If (TNY->TNY_DTCONS < mv_par14 .OR. TNY->TNY_DTCONS > MV_PAR15)
-				DbSelectArea("TNY")		
-				DbSkip()    
+		If !Empty(MV_PAR14) .And. !Empty(MV_PAR15)
+			If (TNY->TNY_DTCONS < MV_PAR14 .Or. TNY->TNY_DTCONS > MV_PAR15)
+				DBSelectArea("TNY")		
+				DBSkip()    
 				Loop
 			EndIf       
-		Endif
+		EndIf
 		
-		If Mv_par11 == 1
-			If (TNY->TNY_DTINIC < mv_par03 .AND. TNY->TNY_DTFIM < MV_PAR03) .or. (TNY->TNY_DTINIC > mv_par04 .AND. TNY->TNY_DTFIM > MV_PAR04)
-				DbSelectArea("TNY")		
-				DbSkip()    
+		If MV_PAR11 == 1
+			If (TNY->TNY_DTINIC < MV_PAR03 .And. TNY->TNY_DTFIM < MV_PAR03) .Or. (TNY->TNY_DTINIC > MV_PAR04 .And. TNY->TNY_DTFIM > MV_PAR04)
+				DBSelectArea("TNY")		
+				DBSkip()    
 				Loop
 			EndIf       
 		Else   
 
-			If (TNY->TNY_DTSAID >= Mv_par03 .And. TNY->TNY_DTSAID <= Mv_par04) .Or. (TNY->TNY_DTALTA >= Mv_par03 .And. TNY->TNY_DTALTA <= mv_par04)//Verifica se  data do 1º afastamento esta dentro dos parametros
+			If (TNY->TNY_DTSAID >= MV_PAR03 .And. TNY->TNY_DTSAID <= MV_PAR04) .Or. (TNY->TNY_DTALTA >= MV_PAR03 .And. TNY->TNY_DTALTA <= MV_PAR04)//Verifica se  data do 1º afastamento esta dentro dos parametros
 				lAfast1:=.T.
-			Endif
-			If (TNY->TNY_DTSAI2 >= Mv_par03 .And. TNY->TNY_DTSAI2 <= Mv_par04) .Or. (TNY->TNY_DTALT2 >= Mv_par03 .And. TNY->TNY_DTALT2 <= mv_par04)//Verifica se  data do 2º afastamento esta dentro dos parametros
+			EndIf
+			If (TNY->TNY_DTSAI2 >= MV_PAR03 .And. TNY->TNY_DTSAI2 <= MV_PAR04) .Or. (TNY->TNY_DTALT2 >= MV_PAR03 .And. TNY->TNY_DTALT2 <= MV_PAR04)//Verifica se  data do 2º afastamento esta dentro dos parametros
 				lAfast2:=.T.
-			Endif
-			If (TNY->TNY_DTSAI3 >= Mv_par03 .And. TNY->TNY_DTSAI3 <= Mv_par04) .Or. (TNY->TNY_DTALT3 >= Mv_par03 .And. TNY->TNY_DTALT3 <= mv_par04)//Verifica se  data do 3º afastamento esta dentro dos parametros
+			EndIf
+			If (TNY->TNY_DTSAI3 >= MV_PAR03 .And. TNY->TNY_DTSAI3 <= MV_PAR04) .Or. (TNY->TNY_DTALT3 >= MV_PAR03 .And. TNY->TNY_DTALT3 <= MV_PAR04)//Verifica se  data do 3º afastamento esta dentro dos parametros
 				lAfast3:=.T.
-			Endif 
+			EndIf 
 			If !lAfast1 .And. !lAfast2 .And. !lAfast3//Caso as 3 datas estiverem fora dos parametros pula registro
-				DbSelectArea("TNY")		
-				DbSkip()       
+				DBSelectArea("TNY")		
+				DBSkip()       
 				Loop
-			Endif
-		Endif   
+			EndIf
+		EndIf   
 		
-		Dbselectarea("ZGE")
-		ZGE->(DbSetOrder(1))
-		DbSelectArea("TM0")  
-		TM0->(DbSetOrder(1))
-		If TM0->(DbSeek(xFilial("TM0")+TNY->TNY_NUMFIC))
-			DbSelectArea("SRA")
-			SRA->(DbSetOrder(1))
-			If SRA->(DbSeek(xFilial("SRA")+TM0->TM0_MAT))
+		DBSelectArea("ZGE")
+		ZGE->(DBSetOrder(1))
+		DBSelectArea("TM0")  
+		TM0->(DBSetOrder(1))
+		If TM0->(DBSeek(xFilial("TM0")+TNY->TNY_NUMFIC))
+			DBSelectArea("SRA")
+			SRA->(DBSetOrder(1))
+			If SRA->(DBSeek(xFilial("SRA")+TM0->TM0_MAT))
 
-			   IF MV_PAR17 = 1 .AND. dDataBase >= SRA->RA_VCTEXP2	
-				  TNY->(DbSkip())
+			   If MV_PAR17 = 1 .And. dDataBase >= SRA->RA_VCTEXP2	
+				  TNY->(DBSkip())
 				  Loop
-			   ENDIF  
+			   EndIf  
 
-			   IF !EMPTY(MV_PAR18) .AND. !SRA->RA_SITFOLH $ MV_PAR18
-				  TNY->(DbSkip())
+			   If !Empty(MV_PAR18) .And. !SRA->RA_SITFOLH $ MV_PAR18
+				  TNY->(DBSkip())
 				  Loop
-			   ENDIF  			   
+			   EndIf  			   
 
 				If ( SRA->RA_CC >= MV_PAR07 .And. SRA->RA_CC <= MV_PAR08 );  //Centro de custo
 				 		.And. ( SRA->RA_CODFUNC >= MV_PAR09 .And. SRA->RA_CODFUNC <= MV_PAR10 ); //Função
-				 		.And. ( SRA->RA_I_SETOR >= MV_PAR12 .AND. SRA->RA_I_SETOR <= MV_PAR13 ) //Setor
+				 		.And. ( SRA->RA_I_SETOR >= MV_PAR12 .And. SRA->RA_I_SETOR <= MV_PAR13 ) //Setor
 
-						If mv_par11 == 1//Verifica se considerará a data do Atestado ou do Afastamento
+						If MV_PAR11 == 1//Verifica se considerará a data do Atestado ou do Afastamento
 							
 							//Força data e hora inicial no ínicio do relatório mesmo que atestado comece no período anterior
 							If TNY->TNY_DTINIC < MV_PAR03
@@ -502,7 +494,7 @@ Local aHoras := {}
 							Else
 								_DDTINIC := TNY->TNY_DTINIC
 								cHoraIni:= TNY->TNY_HRINIC
-							Endif
+							EndIf
 							
 							//Força data e hora final no fim do relatório mesmo que atestado comece no período anterior
 							If TNY->TNY_DTFIM > MV_PAR04
@@ -511,10 +503,10 @@ Local aHoras := {}
 							Else
 								_DDFIM := TNY->TNY_DTFIM
 								cHoraFim:= If( Empty( TNY->TNY_HRFIM ) , "00:00" , TNY->TNY_HRFIM )
-							Endif
+							EndIf
 	
 							aHoras:= RMDT003H( _DDTINIC , _DDFIM , cHoraIni , cHoraFim )
-							Aadd( aAtestado,{SRA->RA_RG,;      																					//01
+							aAdd( aAtestado,{SRA->RA_RG,;      																					//01
 							                 SRA->RA_MAT,;     																					//02
 							                 SRA->RA_NOME,;    																					//03
 							                 _DDTINIC,;        																					//04
@@ -523,18 +515,18 @@ Local aHoras := {}
 							                 NGSEEK("ZAK",SRA->RA_I_SETOR,1,"ZAK_DESCRI"),;														//07
 							                 aHoras[3],;																						//08
 							                 If( aHoras[ 2 ] == "  :  "  , "00:00" , aHoras[ 2 ] ),;											//09
-							                 IIF(TNY->TNY_I_GEST == "1","S","N"),;                  											//10
-							                 TNY->TNY_I_ETIO + ' - ' + POSICIONE("ZGE",1,xfilial("ZGE")+TNY->TNY_I_ETIO,"ZGE_DESC"),;			//11
+							                 IIf(TNY->TNY_I_GEST == "1","S","N"),;                  											//10
+							                 TNY->TNY_I_ETIO + ' - ' + Posicione("ZGE",1,xFilial("ZGE")+TNY->TNY_I_ETIO,"ZGE_DESC"),;			//11
 							                 X3CBoxDesc("TNY_I_TURN",TNY->TNY_I_TURN),;															//12
 							                 X3CBoxDesc("TNY_I_TPDC",TNY->TNY_I_TPDC),;															//13
-							                 DTOC(TNY->TNY_DTCONS),;   																			//14
-							                 DTOC(SRA->RA_ADMISSA),;                                                                            //15
+							                 DToC(TNY->TNY_DTCONS),;   																			//14
+							                 DToC(SRA->RA_ADMISSA),;                                                                            //15
 											 TNY->TNY_I_UF,;                                                                                    //16 
 											 TNY->TNY_I_MUNI,;																					//17
 											 TNY->TNY_GRPCID,;																					//18
 											 TNY->TNY_CID,;																						//19
 											 TNY->TNY_EMITEN,;																					//20	
-											 Posicione("TNP",1,xfilial("TNP")+TNY->TNY_EMITEN,"TNP_NOME");						 				//21
+											 Posicione("TNP",1,xFilial("TNP")+TNY->TNY_EMITEN,"TNP_NOME");						 				//21
 											 } )		                                                                            
 						Else     
 							If lAfast1 
@@ -544,18 +536,18 @@ Local aHoras := {}
 									_DDTINIC := MV_PAR03
 								Else
 									_DDTINIC := TNY->TNY_DTSAID
-								Endif
+								EndIf
 							
 								//Força data e hora final no fim do relatório mesmo que afastamento comece no período anterior
 								If TNY->TNY_DTALTA > MV_PAR04
 									_DDFIM := MV_PAR04
 								Else
 									_DDFIM := TNY->TNY_DTALTA
-								Endif
+								EndIf
 							  
 								aHoras:= RMDT003H( _DDTINIC , _DDFIM , cHoraIni , cHoraFim )  
 								
-								Aadd( aAtestado,{	SRA->RA_RG,;																				//01
+								aAdd( aAtestado,{	SRA->RA_RG,;																				//01
 													SRA->RA_MAT,;																				//02
 													SRA->RA_NOME,;																				//03
 													_DDTINIC,;																					//04
@@ -564,21 +556,21 @@ Local aHoras := {}
 													NGSEEK("ZAK",SRA->RA_I_SETOR,1,"ZAK_DESCRI"),;												//07
 													aHoras[3]+1,;																				//08
 													If( aHoras[ 2 ] == "  :  " , "00:00" , aHoras[ 2 ] ),;										//09
-													IIF(TNY->TNY_I_GEST == "1","S","N"),;														//10
-													TNY->TNY_I_ETIO + ' - ' + POSICIONE("ZGE",1,xfilial("XGE")+TNY->TNY_I_ETIO,"ZGE_DESC"),;	//11
+													IIf(TNY->TNY_I_GEST == "1","S","N"),;														//10
+													TNY->TNY_I_ETIO + ' - ' + Posicione("ZGE",1,xFilial("XGE")+TNY->TNY_I_ETIO,"ZGE_DESC"),;	//11
 													X3CBoxDesc("TNY_I_TURN",TNY->TNY_I_TURN),;													//12
 													X3CBoxDesc("TNY_I_TPDC",TNY->TNY_I_TPDC),;													//13
-							                        DTOC(TNY->TNY_DTCONS),;   																	//14
-							                        DTOC(SRA->RA_ADMISSA),;                                                                     //15
+							                        DToC(TNY->TNY_DTCONS),;   																	//14
+							                        DToC(SRA->RA_ADMISSA),;                                                                     //15
 													TNY->TNY_I_UF,;                                                                             //16 
 													TNY->TNY_I_MUNI,;
 													TNY->TNY_GRPCID,;
 													TNY->TNY_CID,;
 													TNY->TNY_EMITEN,;																					//20	
-											 		Posicione("TNP",1,xfilial("TNP")+TNY->TNY_EMITEN,"TNP_NOME");						 				//21
+											 		Posicione("TNP",1,xFilial("TNP")+TNY->TNY_EMITEN,"TNP_NOME");						 				//21
 													} )		                                                                    
 
-							Endif   
+							EndIf   
 							
 							If (!Empty(TNY->TNY_DTSAI2) .Or. !Empty(TNY->TNY_DTALT2)) .And. lAfast2//Verifica se existe um segundo afastamento  
 							
@@ -587,17 +579,17 @@ Local aHoras := {}
 									_DDTINIC := MV_PAR03
 								Else
 									_DDTINIC := TNY->TNY_DTSAI2
-								Endif
+								EndIf
 							
 								//Força data e hora final no fim do relatório mesmo que afastamento comece no período anterior
 								If TNY->TNY_DTALT2 > MV_PAR04
 									_DDFIM := MV_PAR04 
 								Else
 									_DDFIM := TNY->TNY_DTALT2
-								Endif
+								EndIf
 							  
 								aHoras:= RMDT003H( _DDTINIC , _DDFIM , cHoraIni , cHoraFim ) 
-								Aadd( aAtestado,{	SRA->RA_RG,;																													//01
+								aAdd( aAtestado,{	SRA->RA_RG,;																													//01
 													SRA->RA_MAT,;																													//02
 													SRA->RA_NOME,;																													//03
 													_DDTINIC,;																														//04
@@ -606,21 +598,21 @@ Local aHoras := {}
 													NGSEEK("ZAK",SRA->RA_I_SETOR,1,"ZAK_DESCRI"),;																					//07
 													aHoras[3]+1,;																													//08
 													If( aHoras[ 2 ] == "  :  " , "00:00" , aHoras[ 2 ] ),;																			//09
-													IIF(TNY->TNY_I_GEST == "1","S","N"),;																							//10
-													TNY->TNY_I_ETIO + ' - ' + POSICIONE("ZGE",1,xfilial("ZGE")+TNY->TNY_I_ETIO,"ZGE_DESC"),;										//11
+													IIf(TNY->TNY_I_GEST == "1","S","N"),;																							//10
+													TNY->TNY_I_ETIO + ' - ' + Posicione("ZGE",1,xFilial("ZGE")+TNY->TNY_I_ETIO,"ZGE_DESC"),;										//11
 													X3CBoxDesc("TNY_I_TURN",TNY->TNY_I_TURN),;																						//12
 													X3CBoxDesc("TNY_I_TPDC",TNY->TNY_I_TPDC),;																						//13
-							                        DTOC(TNY->TNY_DTCONS),;   																	                                    //14
-							                        DTOC(SRA->RA_ADMISSA),;                                                                                                         //15
+							                        DToC(TNY->TNY_DTCONS),;   																	                                    //14
+							                        DToC(SRA->RA_ADMISSA),;                                                                                                         //15
 													TNY->TNY_I_UF,;                                                                                                                 //16 
 													TNY->TNY_I_MUNI,;
 													TNY->TNY_GRPCID,;
 													TNY->TNY_CID,;
 													TNY->TNY_EMITEN,;																					//20	
-											 		Posicione("TNP",1,xfilial("TNP")+TNY->TNY_EMITEN,"TNP_NOME");						 				//21
+											 		Posicione("TNP",1,xFilial("TNP")+TNY->TNY_EMITEN,"TNP_NOME");						 				//21
 													} )				                                                                                                        
 
-							Endif
+							EndIf
 							If (!Empty(TNY->TNY_DTSAI3) .Or. !Empty(TNY->TNY_DTALT3)) .And. lAfast3//Verifica se existe um terceiro afastamento  
 							
 						  		//Força data e hora inicial no ínicio do relatório mesmo que afatamento comece no período anterior
@@ -628,18 +620,18 @@ Local aHoras := {}
 									_DDTINIC := MV_PAR03
 								Else
 									_DDTINIC := TNY->TNY_DTSAI3
-								Endif
+								EndIf
 							
 								//Força data e hora final no fim do relatório mesmo que afastamento comece no período anterior
 								If TNY->TNY_DTALT3 > MV_PAR04
 									_DDFIM := MV_PAR04 
 								Else
 									_DDFIM := TNY->TNY_DTALT3
-								Endif
+								EndIf
 	
 								aHoras:= RMDT003H( _DDTINIC , _DDFIM , cHoraIni , cHoraFim )   
 							
-								Aadd( aAtestado,{	SRA->RA_RG,;																				//01
+								aAdd( aAtestado,{	SRA->RA_RG,;																				//01
 													SRA->RA_MAT,;																				//02
 													SRA->RA_NOME,;																				//03
 													_DDTINIC,;																					//04
@@ -648,22 +640,22 @@ Local aHoras := {}
 													NGSEEK("ZAK",SRA->RA_I_SETOR,1,"ZAK_DESCRI"),;												//07
 													aHoras[3]+1,;																				//08
 													If( aHoras[ 2 ] == "  :  " , "00:00" , aHoras[ 2 ] ),;										//09
-													IIF(TNY->TNY_I_GEST == "1","S","N"),;														//10
-													TNY->TNY_I_ETIO + ' - ' + POSICIONE("ZGE",1,xfilial("ZGE")+TNY->TNY_I_ETIO,"ZGE_DESC"),;	//11
+													IIf(TNY->TNY_I_GEST == "1","S","N"),;														//10
+													TNY->TNY_I_ETIO + ' - ' + Posicione("ZGE",1,xFilial("ZGE")+TNY->TNY_I_ETIO,"ZGE_DESC"),;	//11
 													X3CBoxDesc("TNY_I_TURN",TNY->TNY_I_TURN),;													//12
 													X3CBoxDesc("TNY_I_TPDC",TNY->TNY_I_TPDC),;													//13
-							                        DTOC(TNY->TNY_DTCONS),;   																	//14
-							                        DTOC(SRA->RA_ADMISSA),;		                                                                //15
+							                        DToC(TNY->TNY_DTCONS),;   																	//14
+							                        DToC(SRA->RA_ADMISSA),;		                                                                //15
 													TNY->TNY_I_UF,;                                                                             //16 
 													TNY->TNY_I_MUNI,;
 													TNY->TNY_GRPCID,;
 													TNY->TNY_CID,;
 													TNY->TNY_EMITEN,;																					//20	
-											 		Posicione("TNP",1,xfilial("TNP")+TNY->TNY_EMITEN,"TNP_NOME");						 				//21
+											 		Posicione("TNP",1,xFilial("TNP")+TNY->TNY_EMITEN,"TNP_NOME");						 				//21
 													} )		                                                                 
 							
-							Endif
-						Endif  
+							EndIf
+						EndIf  
 				EndIf	      
 			EndIf
 		EndIf		
@@ -673,7 +665,7 @@ Local aHoras := {}
 		lAfast2 := .F.
 		lAfast3 := .F.     
 
-		TNY->(DbSkip())
+		TNY->(DBSkip())
 	EndDo	
 
 
@@ -720,18 +712,18 @@ TRCell():New( oSection2 ,"UF_ATESTADO"		    , " " 	, "UF"			        ,"@!"				,2	
 If MV_PAR16 == 1
 	TRCell():New( oSection2 ,"ATESTADO_TURNO"   	, " " 	, "TURNO"			    ,"@!"				,15		,.T.	,{|| aAtestado[nXATEST,12] 															    }) 
 	TRCell():New( oSection2 ,"ATESTADO_TIPODOC" 	, " " 	, "TP DOCUMENTO"        ,"@!"				,15		,.T.	,{|| aAtestado[nXATEST,13] 																})
-Endif
+EndIf
 
 TRCell():New( oSection2 ,"ATESTADO_CONSULTA" 	, " " 	, "DT CONSULTA"         ,"@!"				,15		,.T.	,{|| aAtestado[nXATEST,14] 																})	
 
-TRCell():New( oSection2 ,"ATESTADO_DTAFAS"		, " " 	, "PERIODO DE AFAST."	,"@!"				,30		,.T.	,{|| DtoC( aAtestado[ nXATEST , 4 ] ) + " ATÉ " + DtoC( aAtestado[ nXATEST , 5 ] )		}) 
+TRCell():New( oSection2 ,"ATESTADO_DTAFAS"		, " " 	, "PERIODO DE AFAST."	,"@!"				,30		,.T.	,{|| DToC( aAtestado[ nXATEST , 4 ] ) + " ATÉ " + DToC( aAtestado[ nXATEST , 5 ] )		}) 
 TRCell():New( oSection2 ,"ATESTADO_DTPER"		, " " 	, "DIAS PERD."			,"@R 9999"			,08		,.T.	,{|| Transform( aAtestado[ nXATEST , 8 ] , "@R 9999" )	 								}) 
-TRCell():New( oSection2 ,"ATESTADO_HRPER"		, " " 	, "HORAS PERD."			,"99:99"			,11		,.T.	,{|| IIF(aAtestado[ nXATEST , 8 ]==0,Transform( aAtestado[ nXATEST , 9 ] , "99:99")," ") }) 
+TRCell():New( oSection2 ,"ATESTADO_HRPER"		, " " 	, "HORAS PERD."			,"99:99"			,11		,.T.	,{|| IIf(aAtestado[ nXATEST , 8 ]==0,Transform( aAtestado[ nXATEST , 9 ] , "99:99")," ") }) 
 
 
 If MV_PAR16 == 1
 	TRCell():New( oSection2 ,"ATESTADO_CID1"		, " " 	, "ETIOLOGIA"			,"@!"			    ,40		,.T.	,{|| aAtestado[ nXATEST , 11 ]  				 					}) 
-Endif
+EndIf
 
 TRCell():New( oSection2 ,"ATESTADO_GRUPOCID"		, " " 	, "GRUPO CID"				,"@!"				,10		,.T.	,{|| SubStr( aAtestado[ nXATEST , 18 ] , 1 , 20 ) 										}) 
 TRCell():New( oSection2 ,"ATESTADO_CIDPRINC"		, " " 	, "CID PRINCIPAL"			,"@!"				,10		,.T.	,{|| SubStr( aAtestado[ nXATEST , 19 ] , 1 , 20 ) 										}) 
@@ -740,7 +732,7 @@ TRCell():New( oSection2 ,"ATESTADO_NOME"			, " " 	, "NOME"					,"@!"				,10		,.T
 
 If  MV_PAR16 == 1 //Verifica se existe campo observação
 	oSection3 := TRSection():New( oSection2 , "Ocorrencias na Geracao da Programacao de Exames" ,{" "} )
-	TRCell():New( oSection3 ,"ATESTADO_OBSERV", " " , "OBSERVACOES"	,"@!",LEN(TNY->TNY_OBSERV),.T.,{|| aAtestado[ nXATEST , 6 ] }) 
+	TRCell():New( oSection3 ,"ATESTADO_OBSERV", " " , "OBSERVACOES"	,"@!",Len(TNY->TNY_OBSERV),.T.,{|| aAtestado[ nXATEST , 6 ] }) 
 	oSection3:nLeftMargin := 3 //Determina uma margem na lateral esquerda.
 EndIf
 
@@ -782,7 +774,7 @@ Local _nhorast := 0
 Local _nminutost := 0
 
 
-DbSelectArea( "TNY" )  
+DBSelectArea( "TNY" )  
 //----------------------------------- 
 //Preench8 array com valores.   
 //-----------------------------------
@@ -790,11 +782,11 @@ aAtestado := U_RMDT003D(oReport)
 
 //Organiza por ordem de setores + matricula + data
 
-aAtestado := ASORT(aAtestado, , , { | x,y | x[7]+x[3]+x[2]+dtos(x[4]) > y[7]+y[3]+y[2]+dtos(y[4]) } )
+aAtestado := aSort(aAtestado, , , { | x,y | x[7]+x[3]+x[2]+DToS(x[4]) > y[7]+y[3]+y[2]+DToS(y[4]) } )
    
 If Len(aAtestado) >= 1//Verifica se existe algum atestado.
 	
-	oSection1:Init()  //Inicia section
+	oSection1:Init()  //Inicia Section
 	oReport:SkipLine(8)
 	oReport:PrtCenter("PROGRAMA DE CONTROLE MEDICO DE SAUDE OCUPACIONAL")
 	oReport:SkipLine()
@@ -815,13 +807,13 @@ If Len(aAtestado) >= 1//Verifica se existe algum atestado.
 	nx := 1	
 	oReport:SetMeter(Len(aAtestado))
 	
-	Do while nX <= Len(aAtestado)//Percorre todos os registro para realizar a impressão
+	While nX <= Len(aAtestado)//Percorre todos os registro para realizar a impressão
 		
         oReport:IncMeter()
 		nXATEST := nX
 		_limprimiu := .F.
 	
-		If _csetul == aAtestado[ nX , 7 ] .and. _cfunul == aAtestado[ nX , 3 ] 
+		If _csetul == aAtestado[ nX , 7 ] .And. _cfunul == aAtestado[ nX , 3 ] 
 	
 			oSection2:Init()  //Inicia Section
 	
@@ -830,42 +822,42 @@ If Len(aAtestado) >= 1//Verifica se existe algum atestado.
 			_limprimiu := .T.
 			
 			_ntotpag++
-			_ndias := _ndias + iif(aAtestado[ nX , 8 ] > 0, aAtestado[ nX , 8 ],0)
-			_nhoras := _nhoras + val(substr(Transform( aAtestado[ nX , 9 ] , "99:99"),1,2))
-			_nminutos := _nminutos + val(substr(Transform( aAtestado[ nX , 9 ] , "99:99"),4,2))
+			_ndias := _ndias + IIf(aAtestado[ nX , 8 ] > 0, aAtestado[ nX , 8 ],0)
+			_nhoras := _nhoras + Val(SubStr(Transform( aAtestado[ nX , 9 ] , "99:99"),1,2))
+			_nminutos := _nminutos + Val(SubStr(Transform( aAtestado[ nX , 9 ] , "99:99"),4,2))
 				  
-			If !Empty( aAtestado[ nX , 6 ] ) .AND. MV_PAR16 == 1 //Verifica se existe observação
+			If !Empty( aAtestado[ nX , 6 ] ) .And. MV_PAR16 == 1 //Verifica se existe observação
 				oSection3:Init()  //Inicia Section
 				oSection3:PrintLine()  //Imprime a linha   
 				oSection3:Finish() //Fecha Section
-			Endif
+			EndIf
 		
-		Endif
+		EndIf
 		
 		//conta linhas ou Imprime total do funcionário
-		If _cfunul == aAtestado[ nX , 3 ] .and. _limprimiu
+		If _cfunul == aAtestado[ nX , 3 ] .And. _limprimiu
 		
 			_nconful++
-			_ndiasf := _ndiasf + iif(aAtestado[ nX , 8 ] > 0, aAtestado[ nX , 8 ],0)
-			_nhorasf := _nhorasf + val(substr(Transform( aAtestado[ nX , 9 ] , "99:99"),1,2))
-			_nminutosf := _nminutosf + val(substr(Transform( aAtestado[ nX , 9 ] , "99:99"),4,2))
+			_ndiasf := _ndiasf + IIf(aAtestado[ nX , 8 ] > 0, aAtestado[ nX , 8 ],0)
+			_nhorasf := _nhorasf + Val(SubStr(Transform( aAtestado[ nX , 9 ] , "99:99"),1,2))
+			_nminutosf := _nminutosf + Val(SubStr(Transform( aAtestado[ nX , 9 ] , "99:99"),4,2))
 			
 		Else
 		
 			If _nconful > 1 //Se tem mais de uma linha do funcionário imprime os totais
 			
 			
-					Do while _nminutosf > 59
+					While _nminutosf > 59
 			 		
 						_nhorasf++
 						_nminutosf := _nminutosf - 60
 			 			
-					Enddo
+					EndDo
 	
 					oReport:SkipLine(1)
 					oReport:PrtLeft("TOTAL DO FUNCIONARIO " + _cfunul + ":")					
 					oReport:SkipLine(1)
-					oReport:Prtleft(strzero(_nconful,4) + " OCORRENCIAS TOTALIZANDO " + strzero(_ndiasf,6) + " DIAS E " + strzero(_nhorasf,6) + "H:" + strzero(_nminutosf,2)+"H")
+					oReport:Prtleft(StrZero(_nconful,4) + " OCORRENCIAS TOTALIZANDO " + StrZero(_ndiasf,6) + " DIAS E " + StrZero(_nhorasf,6) + "H:" + StrZero(_nminutosf,2)+"H")
 					oReport:SkipLine(1)
 					oReport:SkipLine(1)
 			
@@ -873,12 +865,12 @@ If Len(aAtestado) >= 1//Verifica se existe algum atestado.
 			
 				oReport:SkipLine(1)
 			
-			Endif
+			EndIf
 			
-			if _nconful > 0
+			If _nconful > 0
 				_nfuns++
 				_nfunt++
-			Endif
+			EndIf
 			
 			_nconful := 0
 			_cfunul := aAtestado[ nX , 3 ]
@@ -887,18 +879,18 @@ If Len(aAtestado) >= 1//Verifica se existe algum atestado.
 			_nminutosf := 0
 			
 			
-		Endif
+		EndIf
 			
 		//Verifica a quantidade de linhas impresas,após a impressão de todos os registros ou mudança de setor
-		If ( nX =  Len(aAtestado) .or. _csetul != aAtestado[ nX , 7 ])  .And. oReport:Row() < 2100 //Verifica a quantidade de linhas impressa
+		If ( nX =  Len(aAtestado) .Or. _csetul != aAtestado[ nX , 7 ])  .And. oReport:Row() < 2100 //Verifica a quantidade de linhas impressa
 				For nY := 1 To 50
 					oReport:SkipLine()//Pula linha
 					If oReport:Row() >= 2100 //Caso atinja ao valor máximo de linhas
 						Exit
-					Endif
+					EndIf
 				Next nY 
 				
-		Endif
+		EndIf
 		//Imprime rodapé de assinaturas.
 		If oReport:Row() >= 2000 .Or. nX == Len(aAtestado)   
 		
@@ -906,17 +898,17 @@ If Len(aAtestado) >= 1//Verifica se existe algum atestado.
 				
 					//Faz totalizado do setor e incrementa totalizadores gerais
 				
-					Do while _nminutos > 59
+					While _nminutos > 59
 						_nhoras++
 						_nminutos := _nminutos - 60
-					Enddo
+					EndDo
 			 	
 					oReport:SkipLine(1)
 					oReport:PrtLeft("TOTAL DO SETOR " + _csetul + ":")					
 					oReport:SkipLine(1)
-					oReport:PrtLeft(strzero(_nfuns,4) + " FUNCIONARIOS")	
+					oReport:PrtLeft(StrZero(_nfuns,4) + " FUNCIONARIOS")	
 					oReport:SkipLine(1)
-					oReport:Prtleft(strzero(_ntotpag,4) + " OCORRENCIAS TOTALIZANDO " + strzero(_ndias,6) + " DIAS E " + strzero(_nhoras,6) + "H:" + strzero(_nminutos,2)+"H")
+					oReport:Prtleft(StrZero(_ntotpag,4) + " OCORRENCIAS TOTALIZANDO " + StrZero(_ndias,6) + " DIAS E " + StrZero(_nhoras,6) + "H:" + StrZero(_nminutos,2)+"H")
 					_nfuns := 0
 					_ndiast += _ndias
 					_ndias := 0
@@ -929,24 +921,24 @@ If Len(aAtestado) >= 1//Verifica se existe algum atestado.
 					
 					_csetul := aAtestado[ nX , 7 ]  //Atualiza campo de ultimo setor impresso
 		
-			 	Endif
+			 	EndIf
 		
 			 	If nX == Len(aAtestado) // Faz totalizador geral
 			 	
 			 	
 			 				//Faz totalizado do setor e incrementa totalizadores gerais
 				
-					Do while _nminutos > 59
+					While _nminutos > 59
 						_nhoras++
 						_nminutos := _nminutos - 60
-					Enddo
+					EndDo
 			 	
 					oReport:SkipLine(1)
 					oReport:PrtLeft("TOTAL DO SETOR " + _csetul + ":")					
 					oReport:SkipLine(1)
-					oReport:PrtLeft(strzero(_nfuns,4) + " FUNCIONARIOS")	
+					oReport:PrtLeft(StrZero(_nfuns,4) + " FUNCIONARIOS")	
 					oReport:SkipLine(1)
-					oReport:Prtleft(strzero(_ntotpag,4) + " OCORRENCIAS TOTALIZANDO " + strzero(_ndias,6) + " DIAS E " + strzero(_nhoras,6) + "H:" + strzero(_nminutos,2)+"H")
+					oReport:Prtleft(StrZero(_ntotpag,4) + " OCORRENCIAS TOTALIZANDO " + StrZero(_ndias,6) + " DIAS E " + StrZero(_nhoras,6) + "H:" + StrZero(_nminutos,2)+"H")
 					_nfuns := 0
 					_ndiast += _ndias
 					_ndias := 0
@@ -957,19 +949,19 @@ If Len(aAtestado) >= 1//Verifica se existe algum atestado.
 					_ntotpagt += _ntotpag
 					_ntotpag := 0
 			 	
-			 		Do while _nminutost > 59
+			 		While _nminutost > 59
 			 			_nhorast++
 			 			_nminutost := _nminutost - 60
-			 		Enddo
+			 		EndDo
 			 	
 			 		oReport:SkipLine(1)
 			 		oReport:PrtLeft("TOTAL GERAL:")
 			 		oReport:SkipLine(1)
-			 		oReport:PrtLeft(strzero(_nfunt,4) + " FUNCIONARIOS")	
+			 		oReport:PrtLeft(StrZero(_nfunt,4) + " FUNCIONARIOS")	
 					oReport:SkipLine(1)
-			 		oReport:PrtLeft(strzero(_ntotpagt,4) + " OCORRENCIAS TOTALIZANDO " + strzero(_ndiast,6) + " DIAS E  " + strzero(_nhorast,6) + "H:" + strzero(_nminutost,2)+"M")
+			 		oReport:PrtLeft(StrZero(_ntotpagt,4) + " OCORRENCIAS TOTALIZANDO " + StrZero(_ndiast,6) + " DIAS E  " + StrZero(_nhorast,6) + "H:" + StrZero(_nminutost,2)+"M")
 			 	
-			 	Endif
+			 	EndIf
 			 	
 			 	oReport:SkipLine(3)  
 				oReport:PrtCenter( "               ___ / ___ / ___  _____________________________                                               ___ / ___ / ___  ______________________________   " )
@@ -984,21 +976,21 @@ If Len(aAtestado) >= 1//Verifica se existe algum atestado.
 					oReport:PrtCenter("COMUNICACAO  INTERNA  DE  ATESTADOS  POR  FALTA  AO  TRABALHO")  
 					oReport:SkipLine(3)
 					oSection1:Finish()   
-				Endif
+				EndIf
 		EndIf
 		
 		oSection2:Finish() 
 	
 		If _limprimiu  //Só avança registro se imprimu linha
 			nx++
-		Endif
+		EndIf
 	
-	Enddo  
+	EndDo  
 	
 Else 
-	u_itmsg( "Não existe atestado para realizar a impressão.",,,1 )
+	U_ITMsg( "Não existe atestado para realizar a impressão.",,,1 )
 	Return .F.
-Endif
+EndIf
 
 Return 
 
@@ -1023,50 +1015,50 @@ If ddtini == ddtfim
 
 	//Mesmo dia
 	_ndias := 0
-	_cdias := alltrim(STR(_ndias))
+	_cdias := AllTrim(Str(_ndias))
 	
-	_nmini := val(substr(choraini,4,2)) + (val(substr(choraini,1,2)) * 60 )
-	_nminf := val(substr(chorafim,4,2)) + (val(substr(chorafim,1,2)) * 60 )
+	_nmini := Val(SubStr(choraini,4,2)) + (Val(SubStr(choraini,1,2)) * 60 )
+	_nminf := Val(SubStr(chorafim,4,2)) + (Val(SubStr(chorafim,1,2)) * 60 )
 	
 	_nhoras := 0
 	_nminutos := _nminf - _nmini
 	
-	Do while _nminutos > 59
+	While _nminutos > 59
 		_nminutos := _nminutos - 60
 		_nhoras := _nhoras + 1
-	Enddo
+	EndDo
 	
 	If TNY->TNY_I_DIAS == 1
 		_choras := "  :  "
 		_ndias := 1
 		_cdias := "1"
 	Else
-		_choras := strzero(_nhoras,2) + ":" + strzero(_nminutos,2)
-	Endif
+		_choras := StrZero(_nhoras,2) + ":" + StrZero(_nminutos,2)
+	EndIf
 
 Else
 
 	//dias diferentes
-	_ndias := iif((ddtfim - ddtini + 1) > 0,(ddtfim - ddtini + 1),0)
-	_cdias := alltrim(STR(_ndias))
+	_ndias := IIf((ddtfim - ddtini + 1) > 0,(ddtfim - ddtini + 1),0)
+	_cdias := AllTrim(Str(_ndias))
 	
 	_choras := "  :  "
 
-Endif
+EndIf
 
 //Ajuste para dia de final de período
-If ddtini == ddtfim .and. _choras == "23:59" .and. ddtfim == MV_PAR04
+If ddtini == ddtfim .And. _choras == "23:59" .And. ddtfim == MV_PAR04
   _ndias := 1
   _choras := "  :  "
-  _cdias := alltrim(STR(_ndias))
-Endif
+  _cdias := AllTrim(Str(_ndias))
+EndIf
 
 //Ajuste para dia de inicio de período
-If ddtini == ddtfim .and. _choras == "23:59" .and. ddtini == MV_PAR03
+If ddtini == ddtfim .And. _choras == "23:59" .And. ddtini == MV_PAR03
   _ndias := 1
   _choras := "  :  "
-  _cdias := alltrim(STR(_ndias))
-Endif
+  _cdias := AllTrim(Str(_ndias))
+EndIf
 
 _ahoras := { .T., _choras, _ndias, _cdias}
 

@@ -4,10 +4,10 @@
 ===============================================================================================================================
        Autor      |    Data    |                                             Motivo                                           
 -------------------------------------------------------------------------------------------------------------------------------
- Josué Danich     | 06/09/2017 | Usa __CUSERID quando possível - Chamado 21323
+ Josué Danich     | 06/09/2017 | Usa __cUserId quando possível - Chamado 21323
 =============================================================================================================================== 
 */
-#Include 'Protheus.ch'  
+#Include "TOTVS.ch"  
 
 
 /*
@@ -29,12 +29,12 @@ User Function MT410ALT()
 Local _aDadAux	:= {}
 Local _cCodUsr	:= RetCodUsr()
 
-//Se tiver a variável __CUSERID válida usa ao invés da função retcodusr para funcionar com os webservices
-If type('__CUSERID') == 'C'
+//Se tiver a variável __cUserId válida usa ao invés da função RetCodUsr para funcionar com os webservices
+If Type('__cUserId') == 'C'
 
-	_cCodUsr := __CUSERID
+	_cCodUsr := __cUserId
 	
-Endif
+EndIf
 
 If Type('_cActLog') == 'C' .And. !Empty(_cActLog)
 	
@@ -54,8 +54,8 @@ If Type('_cActLog') == 'C' .And. !Empty(_cActLog)
 		aAdd( _aDadAux , { 'C5_NUM'		, SC5->C5_NUM		, ''		} )
 		aAdd( _aDadAux , { 'C5_CLIENTE'	, SC5->C5_CLIENTE	, ''		} )
 		aAdd( _aDadAux , { 'C5_LOJACLI'	, SC5->C5_LOJACLI	, ''		} )
-		aAdd( _aDadAux , { 'C5_EMISSAO'	, SC5->C5_EMISSAO	, StoD('')	} )
-		aAdd( _aDadAux , { 'C5_I_DTENT'	, SC5->C5_I_DTENT	, StoD('')	} )
+		aAdd( _aDadAux , { 'C5_EMISSAO'	, SC5->C5_EMISSAO	, SToD('')	} )
+		aAdd( _aDadAux , { 'C5_I_DTENT'	, SC5->C5_I_DTENT	, SToD('')	} )
 		
 		U_ITGrvLog( _aDadAux , "SC5" , 1 , SC5->( C5_FILIAL + C5_NUM ) , _cActLog , _cCodUsr , _dDtLgC5 , _cTmLgC5 )
 		
@@ -67,4 +67,4 @@ _aLogSC5 := {}
 _aLogSC6 := {}
 _cActLog := ''
 
-Return()
+Return

@@ -2,34 +2,28 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 03/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Lucas Borges  |03/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MA110BUT
 Autor-------------: Xavier
 Data da Criacao---: 15/04/2015
-===============================================================================================================================
 Descrição---------: Ponto de entrada criação de botões na solicitação de compras
 					Este ponto de entrada tem o objetivo de permitir ao usuário manipular a barra de botões nasrotinas de 
 					visualização, inclusão, Alteração e exclusão de solcitação de compras.
 					Localização: Rotina de Solicitação de Compras MATA110()
 					Em que Ponto: Antes de montar a tela de Solicitação de Compras  para cada operação selecionada (Visualização
 					, Inclusão, Alteração e Exclusão).
-===============================================================================================================================
-Parametros--------: PARAMIXB[1] -> N -> Parâmetro numérico contendo a opção de operação da rotina selecionada nOpc:
+Parametros--------: ParamIXB[1] -> N -> Parâmetro numérico contendo a opção de operação da rotina selecionada nOpc:
 										2 - Visualização/ 3 - Inclusão/ 4 - Alteração/ 5 - Exclusão
-					PARAMIXB[2] -> A -> Vetor contendo os botões carregados pela rotina.
-===============================================================================================================================
+					ParamIXB[2] -> A -> Vetor contendo os botões carregados pela rotina.
 Retorno-----------: aBut -> A -> Retorno contendo os botões que deverão ser utilizados pelo programa de Solicitação de Compras.
 					ParamIXB[1] -> Opção selecionada pelo usuário, sendo: 2-Visulizar / 3-Incluir / 4-Alterar / 5-Excluir
 					ParamIXB[2] -> Vetor contendo os botões originais da rotina.
@@ -37,8 +31,8 @@ Retorno-----------: aBut -> A -> Retorno contendo os botões que deverão ser util
 */
 User Function MA110BUT
 
-Local aUsrBt := PARAMIXB[2]
+Local aUsrBt := ParamIXB[2]
 
-Aadd(aUsrBt,{'CLIPS',{|| U_GDTotSB2(GdFieldGet("C1_PRODUTO")) },"Consultar saldo atual","Cons.Saldos"}) 
+aAdd(aUsrBt,{'CLIPS',{|| U_GDTotSB2(GdFieldGet("C1_PRODUTO")) },"Consultar saldo atual","Cons.Saldos"}) 
 
 Return aUsrBt

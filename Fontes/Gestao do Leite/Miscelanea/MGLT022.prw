@@ -10,7 +10,7 @@ Lucas Borges  |04/06/2025| Chamado 50915. Corrgida a exportação do arquivo usand
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -82,9 +82,9 @@ _oFile:= FWFileWriter():New(__RelDir+_cNome+_cExt)
 If MV_PAR06 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,_cAux)
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
+	aAdd(_aSelFil,cFilAnt)
 EndIf
 
 If !_oFile:Create()
@@ -99,7 +99,7 @@ _oSelf:IncRegua1("Buscando produtores...")
 _cCampo += ", "+ _cAux +"_FILIAL FILIAL, SUM( "+ _cAux +"_QTDBOM ) VOLLEITE %"
 _cTabela += RetSqlName(_cAux) +" "+ _cAux + " %"
 _cFiltro += " AND "+ _cAux +".D_E_L_E_T_ = ' '"
-_cFiltro += " AND "+ _cAux +"_DTCOLE BETWEEN '"+ DTOS(MV_PAR01) +"' AND '"+ DTOS(MV_PAR02) +"' "
+_cFiltro += " AND "+ _cAux +"_DTCOLE BETWEEN '"+ DToS(MV_PAR01) +"' AND '"+ DToS(MV_PAR02) +"' "
 
 _cFiltro += " AND "+ _cAux +"_FILIAL "+ GetRngFil( _aSelFil, _cAux, .T.,)
 //Se preencheu os setores, já fiz a validação de acesso no SX1
@@ -119,7 +119,7 @@ _cGroup += + _cAux +"_FILIAL, %"
 
 _cFiltro += "%"
 // SQL para verificar os produtores dos Setores que movimentaram entrada de leite no periodo
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT SA2.A2_COD, SA2.A2_LOJA, SA2.A2_NOME, SA2.A2_L_FREQU, SA2.A2_L_CAPTQ, SA2.A2_L_SIGSI, SA2.A2_L_CLASS, A2_L_NATRA %exp:_cCampo%
 	  FROM %Table:SA2% SA2, %exp:_cTabela%
 	 WHERE SA2.D_E_L_E_T_ = ' '
@@ -129,15 +129,15 @@ BeginSQL Alias _cAlias
 	   %exp:_cFiltro%
 	 GROUP BY %exp:_cGroup% SA2.A2_COD, SA2.A2_LOJA, SA2.A2_NOME, SA2.A2_L_FREQU, SA2.A2_L_CAPTQ, SA2.A2_L_SIGSI, SA2.A2_L_CLASS, A2_L_NATRA
 	 ORDER BY SA2.A2_COD
-EndSQL
+EndSql
 
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 _oSelf:SetRegua1(_nCountRec)
 _oSelf:IncRegua1("Gerando arquivo...")
 
 If _nCountRec > 0
-	Do While (_cAlias)->(!Eof())
+	While (_cAlias)->(!Eof())
 		_nQtd++
 		_oSelf:IncRegua1("Gerando arquivo...["+ StrZero(_nQtd,6) +"] de ["+ StrZero(_nCountRec,6) +"]" ) 
 		//Inicializa o array responsavel por armazenar os dados dos usuarios do tanque
@@ -167,7 +167,7 @@ If _nCountRec > 0
 
 Else
 	MsgAlert("Não foram encontrados registros para processar com os filtros informados! Verifique os parâmetros digitados.","MGLT02202")
-	Return()
+	Return
 EndIf
 _oFile:Close()
 If GetRemoteType() == 5 //SmartClient HTML sem WebAgent
@@ -198,7 +198,7 @@ Local _nTotVolLe	:= 0
 
 BeginSql alias _cAliasSA2
 	SELECT SA2.A2_COD, SA2.A2_LOJA, SA2.A2_NOME
-	  FROM %table:SA2% SA2
+	  FROM %Table:SA2% SA2
 	 WHERE SA2.D_E_L_E_T_ = ' '
 	   AND SA2.A2_L_TANQ = %exp:(_cAlias)->A2_COD%
 	   AND SA2.A2_L_TANLJ = %exp:(_cAlias)->A2_LOJA%

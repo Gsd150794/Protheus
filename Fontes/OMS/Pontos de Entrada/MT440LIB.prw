@@ -15,8 +15,8 @@
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#INCLUDE "Protheus.ch"
-#INCLUDE "RwMake.ch"
+#Include "TOTVS.ch"
+#Include "RwMake.ch"
 
 /*
 ===============================================================================================================================
@@ -35,7 +35,7 @@ Retorno-----------: .T. - Permite Liberação .F. - Não permite a Liberação
 */
 User Function MT440LIB()
 
-Local _aArea		:=GetArea()            //Salva area geral
+Local _aArea		:=FWGetArea()            //Salva area geral
 Local _aAreaSC6	:= SC6->(GetArea())
 Local _aAreaSC5	:= SC5->(GetArea())
 Local _aAreaSA2	:= SA2->(GetArea())
@@ -44,23 +44,23 @@ Local _lRet		:= .T.
 Local _aRet		:= {}
 Local _cmens		:= ""
 Local _nqtde		:= ( SC6->C6_QTDVEN - ( SC6->C6_QTDEMP + SC6->C6_QTDENT ) )
-Local _nitem		:= val(SC6->C6_ITEM)
-Local _cpedido	:= alltrim(SC6->C6_NUM)
+Local _nitem		:= Val(SC6->C6_ITEM)
+Local _cpedido	:= AllTrim(SC6->C6_NUM)
 Local _nmax	   	:= 1 
-Local _cCodUsr	:= ALLTRIM(RetCodUsr())
+Local _cCodUsr	:= AllTrim(RetCodUsr())
 
 
 //posiciona SC5
-DbSelectArea("SC5")
-SC5->( DbSetOrder(1) )
-SC5->( DbSeek(xFilial("SC5")+_cpedido) )
+DBSelectArea("SC5")
+SC5->( DBSetOrder(1) )
+SC5->( DBSeek(xFilial("SC5")+_cpedido) )
 
 
 If SC5->C5_TIPO $ "BD"
 
-	DbSelectArea("SA2")
-	SA2->( DbSetOrder(1) )
-	SA2->( DbSeek(xFilial("SA2")+SC5->C5_CLIENTE+SC5->C5_LOJACLI))
+	DBSelectArea("SA2")
+	SA2->( DBSetOrder(1) )
+	SA2->( DBSeek(xFilial("SA2")+SC5->C5_CLIENTE+SC5->C5_LOJACLI))
 
 	If SA2->A2_MSBLQL =='1'
 
@@ -71,9 +71,9 @@ If SC5->C5_TIPO $ "BD"
 
 Else
 
-	DbSelectArea("SA1")
-	SA1->( DbSetOrder(1) )
-	SA1->( DbSeek(xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI) )
+	DBSelectArea("SA1")
+	SA1->( DBSetOrder(1) )
+	SA1->( DBSeek(xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI) )
 	
 	If SA1->A1_MSBLQL =='1'
 
@@ -88,74 +88,74 @@ EndIf
 //Valida se usuário tem acesso à todos os armazéns usados no pedido
 // e se pedido retroativo não gerará saldos negativos
 //=======================================================================
-If _lret 
+If _lRet 
 
-	DbSelectArea("SC6")
-	DbSetOrder(1)
+	DBSelectArea("SC6")
+	DBSetOrder(1)
 	
-	If DbSeek(xFilial("SC6")+_cpedido)
+	If DBSeek(xFilial("SC6")+_cpedido)
 
-		Do while _cpedido == alltrim(SC6->C6_NUM) .and. xFilial("SC6") == SC6->C6_FILIAL
+		While _cpedido == AllTrim(SC6->C6_NUM) .And. xFilial("SC6") == SC6->C6_FILIAL
 
 	
 			//============================================
 			//Valida armazémxprodutoxfilialxusuário
 			//============================================
-			_aRet := U_ACFG004E(_cCodUsr, alltrim(xFilial("SC6")), alltrim(SC6->C6_LOCAL),alltrim(SC6->C6_PRODUTO), .F.)
+			_aRet := U_ACFG004E(_cCodUsr, AllTrim(xFilial("SC6")), AllTrim(SC6->C6_LOCAL),AllTrim(SC6->C6_PRODUTO), .F.)
 			
 			//se ainda está valido verifica se não teve erro
 			If _lRet
 		
 		  	_lRet:= _aRet[1]
 		
-			Endif
+			EndIf
 		
 			// adiciona armazens com problema se ainda não estiver na mensagem
-			if empty(_cmens)
+			If Empty(_cmens)
 		
-				_cmens += "Pedido " + xfilial("SC5") + "/" + _cpedido + "/" + ALLTRIM(SC6->C6_ITEM) + " - Armazém " + _aRet[2] + CRLF
+				_cmens += "Pedido " + xFilial("SC5") + "/" + _cpedido + "/" + AllTrim(SC6->C6_ITEM) + " - Armazém " + _aRet[2] + CRLF
 			
-			else 
+			Else 
 		
-				_cmens += "Pedido " + xfilial("SC5") + "/" + _cpedido + "/" + ALLTRIM(SC6->C6_ITEM) + " - Armazém " + _aRet[2] + CRLF
+				_cmens += "Pedido " + xFilial("SC5") + "/" + _cpedido + "/" + AllTrim(SC6->C6_ITEM) + " - Armazém " + _aRet[2] + CRLF
 			
-			Endif
+			EndIf
 			
 			//Guarda maior item
-			If val(SC6->C6_ITEM) > _nmax
-				_nmax := val(SC6->C6_ITEM)
-			Endif
+			If Val(SC6->C6_ITEM) > _nmax
+				_nmax := Val(SC6->C6_ITEM)
+			EndIf
 			
-			SC6->( Dbskip() )
+			SC6->( DBSkip() )
 		
-		Enddo
+		EndDo
 		
 		//====================================================================================================================================
 		//Mostra lista de armazéns com problema somente no ultimo item do pedido para não ficar repetindo erro
 		//====================================================================================================================================
-		If !(_lRet) .and. !(empty(_cmens)) .and. _nitem == _nmax
+		If !(_lRet) .And. !(Empty(_cmens)) .And. _nitem == _nmax
 
 			MessageBox( 'Usuário sem acesso ao(s) armazém(éns) abaixo nessa filial: ' + CRLF + _cmens + CRLF + CRLF+;
 					'Caso necessário solicite a manutenção à um usuário com acesso ou, se necessário, solicite o acesso à área de TI/ERP.' , 'Atenção!' , 48 )
 	
-		Endif
+		EndIf
 		
 	EndIf
 
-Endif
+EndIf
 
 // se não validou retorna qtde 0 para liberação e nãos erá executada liberação para esse pedido
-If .not. _lret
+If .not. _lRet
 
 	_nqtde := 0
 	
-Endif
+EndIf
 
       
-Restarea(_aArea) //-- Restaura a posição da tabela corrente  
-RestArea(_aAreaSC6)
-RestArea(_aAreaSC5)
-RestArea(_aAreaSA1)
-RestArea(_aAreaSA2)
+FWRestArea(_aArea) //-- Restaura a posição da tabela corrente  
+FWRestArea(_aAreaSC6)
+FWRestArea(_aAreaSC5)
+FWRestArea(_aAreaSA1)
+FWRestArea(_aAreaSA2)
 
 Return _nqtde

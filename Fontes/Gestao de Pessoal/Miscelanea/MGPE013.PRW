@@ -2,15 +2,16 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 17/09/2019 | Chamado 28346. Retirada chamada da função itputx1
-Lucas Borges  | 02/10/2019 | Chamado 28346. Removidos os Warning na compilação da release 12.1.25
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |17/09/2019| Chamado 28346. Retirada chamada da função itputx1
+Lucas Borges  |02/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 ===============================================================================================================================
 */
 
-#include "rwmake.ch"
+#Include "TOTVS.ch"
+#Include "rwmake.ch"
 
 /*
 ===============================================================================================================================
@@ -35,10 +36,10 @@ Private _lContinua	:= .T.
 Private _oGeraTxt
 Private _nTotais 	:= 0
 
-pergunte(_cPerg,.F.)
+Pergunte(_cPerg,.F.)
 
-dbSelectArea( "SRA" )
-SRA->(dbSetOrder(1))
+DBSelectArea( "SRA" )
+SRA->(DBSetOrder(1))
 
 //-----------------------------------------------------------------------
 // Montagem da tela de processamento.                                  
@@ -49,9 +50,9 @@ SRA->(dbSetOrder(1))
 @ 018,018 Say " para o Banco do Brasil.	 						   "
 @ 026,018 Say "                                                                    "
 
-@ 070,128 BMPBUTTON TYPE 05 ACTION Pergunte(_cPerg,.T.)
-@ 070,158 BMPBUTTON TYPE 01 ACTION MGPE013O()
-@ 070,188 BMPBUTTON TYPE 02 ACTION Close(_oGeraTxt)
+@ 070,128 BMPBUTTON Type 05 ACTION Pergunte(_cPerg,.T.)
+@ 070,158 BMPBUTTON Type 01 ACTION MGPE013O()
+@ 070,188 BMPBUTTON Type 02 ACTION Close(_oGeraTxt)
 
 Activate Dialog _oGeraTxt Centered
 
@@ -70,7 +71,7 @@ Retorno-----------: Nenhum
 Static Function MGPE013O
 
 Local _cfilloc
-Local _ni
+Local _nI
 Local _lachou := .F.
 
 Private _afils := {}
@@ -83,19 +84,19 @@ Private _nrecno
 //Grava log de utilização
 u_itlogacs()
 
-//Roda loop de filiais
-If empty(MV_PAR11)
+//Roda Loop de filiais
+If Empty(MV_PAR11)
 	
 	_cfilloc := cfilant
 		
-	SM0->(Dbgotop())
+	SM0->(DBGoTop())
 		
-	Do while !(SM0->(EOF()))
+	While !(SM0->(Eof()))
 		
-		aadd(_afils,ALLTRIM(SM0->M0_CODFIL))
-		SM0->(Dbskip())
+		aAdd(_afils,AllTrim(SM0->M0_CODFIL))
+		SM0->(DBSkip())
 		
-	Enddo
+	EndDo
 	SM0->(DBSeek('01' + cfilant))
 	
 Else
@@ -103,64 +104,64 @@ Else
 	_afils := {}
 	_afils2 := {}
 	
-	If !empty(MV_PAR11)
+	If !Empty(MV_PAR11)
 	
 		_afils := StrTokArr(MV_PAR11,";")
 		
-	Endif
+	EndIf
 	
-	If !empty(MV_PAR12)
+	If !Empty(MV_PAR12)
 	
 		_afils2 := StrTokArr(MV_PAR12,";")
 		
-	Endif
+	EndIf
 	
-	For _ni := 1 to len(_afils2)
+	For _nI := 1 to Len(_afils2)
 	
-		aadd(_afils,_afils2[_ni])
+		aAdd(_afils,_afils2[_nI])
 		
-	Next _ni
+	Next _nI
 	
 	_cfilloc := cfilant
 		
-Endif
+EndIf
 	
-For _ni := 1 to len(_afils)
+For _nI := 1 to Len(_afils)
 	
-		cfilant := _afils[_ni]
+		cfilant := _afils[_nI]
 		_lHeader := .F.
 		
 		//Pega parâmetro com dados da agencia, conta/digito pagadora
 		_lachou := .F.
-		RCC->(Dbsetorder(1))
-		If RCC->(dbseek(xfilial("RCC")+"S052"+cfilant))
+		RCC->(DBSetOrder(1))
+		If RCC->(DBSeek(xFilial("RCC")+"S052"+cfilant))
 		
-			Do while !(RCC->(Eof())) .and. RCC->RCC_FILIAL == xfilial("RCC") .and. RCC->RCC_CODIGO = "S052" .and. RCC->RCC_FIL = cfilant
+			While !(RCC->(Eof())) .And. RCC->RCC_FILIAL == xFilial("RCC") .And. RCC->RCC_CODIGO = "S052" .And. RCC->RCC_FIL = cfilant
 			
-			  If substr(RCC->RCC_CONTEU,21,3) == "001"
+			  If SubStr(RCC->RCC_CONTEU,21,3) == "001"
 			  
 			  	_lachou := .T.
-			  	_cagencia := alltrim(substr(RCC->RCC_CONTEU,24,5))
-			  	_cconta := alltrim(substr(RCC->RCC_CONTEU,30,12))
-			  	_cdigito := alltrim(substr(RCC->RCC_CONTEU,42,1))
+			  	_cagencia := AllTrim(SubStr(RCC->RCC_CONTEU,24,5))
+			  	_cconta := AllTrim(SubStr(RCC->RCC_CONTEU,30,12))
+			  	_cdigito := AllTrim(SubStr(RCC->RCC_CONTEU,42,1))
 			  	_nrecno := RCC->(Recno())
 			  	
-			  	exit
+			  	Exit
 			  	
-			  Endif
+			  EndIf
 			  
-			  RCC->(Dbskip())
+			  RCC->(DBSkip())
 			  
-			Enddo
+			EndDo
 			
-		Endif
+		EndIf
 		
-		If SM0->(DBSeek('01' + cfilant)) .and. _lachou
+		If SM0->(DBSeek('01' + cfilant)) .And. _lachou
 		
 			_nQtFunc := 0 //Zera leituras de funcionarios
-			fwmsgrun(,{|oproc| MGPE013R(oproc)},"Geracao do Arquivo Holerite","Processando dados...")  
+			FWMsgRun(,{|oproc| MGPE013R(oproc)},"Geracao do Arquivo Holerite","Processando dados...")  
 				
-		Endif
+		EndIf
 		
 Next
 	
@@ -169,16 +170,16 @@ SM0->(DBSeek('01' + cfilant))
 	
 
 //Apresenta resultados da gravação
-if len(_aresults) > 0
+If Len(_aresults) > 0
 
 	U_ITListBox( 'Dados gravados nos arquivos' , {"Filial","CC","Matricula","Nome","Vencimentos","Descontos","Liquido","Salário","Cons. Liquido","Situação"} , _aresults , .T. , 1 )
-	u_itmsg("Arquivos Gerado com no Diretorio : " + MV_PAR03, "Processo Concluído",,2 )
+	U_ITMsg("Arquivos Gerado com no Diretorio : " + MV_PAR03, "Processo Concluído",,2 )
 	
 Else
 
-	u_itmsg("Não foram gerados arquivos!","Atenção",,1 )
+	U_ITMsg("Não foram gerados arquivos!","Atenção",,1 )
 
-Endif
+EndIf
 
 
 
@@ -191,7 +192,7 @@ Return
 Programa----------: MGPE013R
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 13/08/2015
-Descrição---------: Funcao auxiliar chamada pela PROCESSA.  A funcao PROCESSA monta a janela com a regua de processamento.    
+Descrição---------: Funcao auxiliar chamada pela Processa.  A funcao Processa monta a janela com a regua de processamento.    
 Parametros--------: oproc - objeto da barra de processamento
 Retorno-----------: Nenhum
 ===============================================================================================================================
@@ -234,15 +235,15 @@ Pergunte(_cPerg,.F.)
 // Cria o Arquivo TXT                                         
 //----------------------------------------------------------------
 
-_nHdl	:= MSFCREATE(Alltrim(MV_PAR03)+"BBHOL_" + cfilant +".REM")
+_nHdl	:= MSFCREATE(AllTrim(MV_PAR03)+"BBHOL_" + cfilant +".REM")
 
-IF Ferror() # 0 .AND. _nHdl = -1
+If Ferror() # 0 .And. _nHdl = -1
 
-	_cMsg := "Erro de abertura, codigo DOS:" + STR(FERROR(),2) 
+	_cMsg := "Erro de abertura, codigo DOS:" + Str(FERROR(),2) 
 	Aviso( "Atencao", _cMsg, { "OK" } ) 
     Return
 
-EndIF
+EndIf
 
 
 _cMesAnoRef := StrZero(Month(MV_PAR01),2) + StrZero(Year(MV_PAR01),4)
@@ -252,33 +253,33 @@ _cMesArqRef  := If(MV_PAR02 == 4,"13"+Right(_cMesAnoRef,4),_cMesAnoRef)
 //----------------------------------------------------------------
 //  Selecionando a Ordem de impressao escolhida no parametro.     
 //----------------------------------------------------------------
-dbSelectArea( "SI3" )
-dbSetOrder(1)
-dbSelectArea( "SRF" )
-dbSetOrder(1)
-dbSelectArea( "SRH" )
-dbSetOrder(1)
-dbSelectArea( "SRJ" )
-dbSetOrder(1)
-dbSelectArea( "SRR" )
-dbSetOrder(1)
-dbSelectArea( "SRA" )
-dbSetOrder(1)
+DBSelectArea( "SI3" )
+DBSetOrder(1)
+DBSelectArea( "SRF" )
+DBSetOrder(1)
+DBSelectArea( "SRH" )
+DBSetOrder(1)
+DBSelectArea( "SRJ" )
+DBSetOrder(1)
+DBSelectArea( "SRR" )
+DBSetOrder(1)
+DBSelectArea( "SRA" )
+DBSetOrder(1)
 
 //----------------------------------------------------------------
 // Carrega Regua Processamento                                  
 //----------------------------------------------------------------
 _nconta := RecCount()
 
-SRA->(dbGoTop())
+SRA->(DBGoTop())
 
 //----------------------------------------------------------------
 //  Selecionando o Primeiro Registro e montando Filtro.           
 //----------------------------------------------------------------
-dbSeek(CFILANT + MV_PAR06,.T.)
+DBSeek(CFILANT + MV_PAR06,.T.)
 _cCond := "SRA->RA_FILIAL + SRA->RA_MAT <= CFILANT + MV_PAR07"
 
-dbSelectArea("SRA")
+DBSelectArea("SRA")
 ProcRegua(RecCount())
 
 _nTOTVENC    := _nTOTDESC   := _nFlag      := _nChave     := 0
@@ -313,31 +314,31 @@ If !(!(Fp_CodFol(@_aCodFol,cfilant)) .Or. ! (fInfo(@_aInfo,cfilant)))
 	
 Else
 
-	u_itmsg("Filial " + cfilant + " não possui dados de folha cadastrados", "Atenção","Filial não será processada",1) 
+	U_ITMsg("Filial " + cfilant + " não possui dados de folha cadastrados", "Atenção","Filial não será processada",1) 
 	_lcontinua := .F.
 			
-Endif
+EndIf
 
 
-dbSelectArea("SRA")
-Do While SRA->(!Eof()) .And. &_cCond .And. _lContinua
+DBSelectArea("SRA")
+While SRA->(!Eof()) .And. &_cCond .And. _lContinua
 
 	//----------------------------------------------------------------
 	// Movimenta Regua Processamento                                
 	//----------------------------------------------------------------
-  	IF valtype(oproc) = "O"
+  	If ValType(oproc) = "O"
 
-      	oproc:cCaption := ("Processando filial " + alltrim(cfilant) + " - Registro " + strzero(_npos,6) + " de " + strzero(_nconta,6) + "...")
+      	oproc:cCaption := ("Processando filial " + AllTrim(cfilant) + " - Registro " + StrZero(_npos,6) + " de " + StrZero(_nconta,6) + "...")
    		ProcessMessages()
  
-    ENDIF
+    EndIf
   	_npos++
 
 	
 	If (SRA->RA_FILIAL   < CFILANT)  .Or. (SRA->RA_FILIAL   > CFILANT) .Or. ;
 		(SRA->RA_CC       < MV_PAR04)   .Or. (SRA->RA_CC       > MV_PAR05)  .Or. ;
 		(SRA->RA_MAT      < MV_PAR06)  .Or. (SRA->RA_MAT      > MV_PAR07)
-		SRA->(dbSkip())
+		SRA->(DBSkip())
 		Loop
 	EndIf
 	
@@ -348,27 +349,27 @@ Do While SRA->(!Eof()) .And. &_cCond .And. _lContinua
 	_dDtPesqAf:= CTOD("01/" + Left(_cMesAnoRef,2) + "/" + Right(_cMesAnoRef,4),"DDMMYY")
 	If _cSitFunc == "D" .And. (!Empty(SRA->RA_DEMISSA) .And. MesAno(SRA->RA_DEMISSA) > MesAno(_dDtPesqAf))
 		_cSitFunc := " "
-	Endif
+	EndIf
 	
 	//----------------------------------------------------------------
 	//  Consiste situacao e categoria dos funcionarios			     |
 	//----------------------------------------------------------------
-	If !( _cSitFunc $ MV_PAR08) .OR.  ! ( SRA->RA_CATFUNC $ MV_PAR09)
-		dbSkip()
+	If !( _cSitFunc $ MV_PAR08) .Or.  ! ( SRA->RA_CATFUNC $ MV_PAR09)
+		DBSkip()
 		Loop
-	Endif
+	EndIf
 	If _cSitFunc $ "D" .And. Mesano(SRA->RA_DEMISSA) # Mesano(MV_PAR01)
-		dbSkip()
+		DBSkip()
 		Loop
-	Endif
+	EndIf
 	
 	//----------------------------------------------------------------
 	//Consiste que o funcionário tem conta no banco do brasil
 	//----------------------------------------------------------------
-	If !( substr(alltrim(SRA->RA_BCDEPSA),1,3) == '001' )
-		dbSkip()
+	If !( SubStr(AllTrim(SRA->RA_BCDEPSA),1,3) == '001' )
+		DBSkip()
 		Loop
-	Endif
+	EndIf
 	
 	_aLanca  := {}
 	_aProve  := {}
@@ -391,39 +392,39 @@ Do While SRA->(!Eof()) .And. &_cCond .And. _lContinua
 	EndIf
 	
 	If !(SRA->RA_FILIAL $ _cFilParam) .Or. !Eval(_cAcessaSRA) // !(SRA->RA_FILIAL $ fValidFil()) .Or. !Eval(_cAcessaSRA)
-		SRA->(dbSkip())
+		SRA->(DBSkip())
 		Loop
 	EndIf
 	
 	If SRA->RA_CODFUNC # _cFuncaoAnt           // Descricao da Funcao
 		DescFun(Sra->Ra_Codfunc,Sra->Ra_Filial)
 		_cFuncaoAnt := Sra->Ra_CodFunc
-	Endif
+	EndIf
 	
 	If SRA->RA_CC # _cCcAnt                   // Centro de Custo
 		DescCC(Sra->Ra_Cc,Sra->Ra_Filial)
 		_cCcAnt := SRA->RA_CC
-	Endif
+	EndIf
 		
 	_nTotvenc := 0
 	
-	SI3->(dbSeek( xFilial("SI3",SRA->RA_FILIAL)+SRA->RA_CC ))
-	SRJ->(dbSeek( xFilial("SRJ",SRA->RA_FILIAL)+SRA->RA_CODFUNC ))
-	SRH->(dbSeek( xFilial("SRH",SRA->RA_FILIAL)+SRA->RA_MAT ))
+	SI3->(DBSeek( xFilial("SI3",SRA->RA_FILIAL)+SRA->RA_CC ))
+	SRJ->(DBSeek( xFilial("SRJ",SRA->RA_FILIAL)+SRA->RA_CODFUNC ))
+	SRH->(DBSeek( xFilial("SRH",SRA->RA_FILIAL)+SRA->RA_MAT ))
 	
-	If MV_PAR02 == 1 .OR. MV_PAR02 == 2
-		_CROT := IIF(MV_PAR02==1,'ADI','FOL')
-		dbSelectArea("SRC")
-		If dbSeek(SRA->RA_FILIAL + SRA->RA_MAT)
-			Do While !Eof() .And. SRC->RC_FILIAL+SRC->RC_MAT == SRA->RA_FILIAL+SRA->RA_MAT
+	If MV_PAR02 == 1 .Or. MV_PAR02 == 2
+		_CROT := IIf(MV_PAR02==1,'ADI','FOL')
+		DBSelectArea("SRC")
+		If DBSeek(SRA->RA_FILIAL + SRA->RA_MAT)
+			While !Eof() .And. SRC->RC_FILIAL+SRC->RC_MAT == SRA->RA_FILIAL+SRA->RA_MAT
 				If !Eval(_cAcessaSRC) 
-					dbSkip()
+					DBSkip()
 					Loop
 				EndIf
 				
 				If  SRC->RC_ROTEIR != _CROT
 		    
-					SRC->(dbSkip())
+					SRC->(DBSkip())
 					Loop
 			    
 				EndIf
@@ -431,10 +432,10 @@ Do While SRA->(!Eof()) .And. &_cCond .And. _lContinua
 				If (MV_PAR02 == 1) .And. (Src->Rc_Pd == _aCodFol[7,1])      // Desconto de Adto
 					MGPE013S("P",_aCodFol[6,1],SRC->RC_HORAS,SRC->RC_VALOR)
 					_nTOTVENC += Src->Rc_Valor
-				Elseif (MV_PAR02 == 1) .And. (Src->Rc_Pd == _aCodFol[12,1])
+				ElseIf (MV_PAR02 == 1) .And. (Src->Rc_Pd == _aCodFol[12,1])
 					MGPE013S("D",_aCodFol[9,1],SRC->RC_HORAS,SRC->RC_VALOR)
 					_nTOTDESC += SRC->RC_VALOR
-				Elseif (MV_PAR02 == 1) .And. (Src->Rc_Pd == _aCodFol[8,1])
+				ElseIf (MV_PAR02 == 1) .And. (Src->Rc_Pd == _aCodFol[8,1])
 					MGPE013S("P",_aCodFol[8,1],SRC->RC_HORAS,SRC->RC_VALOR)
 					_nTOTVENC += SRC->RC_VALOR
 				Else
@@ -442,51 +443,51 @@ Do While SRA->(!Eof()) .And. &_cCond .And. _lContinua
 						If (MV_PAR02 #1) .Or. (MV_PAR02 == 1 .And. PosSrv(Src->Rc_Pd,Sra->Ra_Filial,"RV_ADIANTA") == "S")
 							MGPE013S("P",SRC->RC_PD,SRC->RC_HORAS,SRC->RC_VALOR)
 							_nTOTVENC += Src->Rc_Valor
-						Endif
-					Elseif PosSrv( Src->Rc_Pd , SRA->RA_FILIAL , "RV_TIPOCOD" ) == "2"
+						EndIf
+					ElseIf PosSrv( Src->Rc_Pd , SRA->RA_FILIAL , "RV_TIPOCOD" ) == "2"
 						If (MV_PAR02 #1) .Or. (MV_PAR02 == 1 .And. PosSrv(Src->Rc_Pd,Sra->Ra_Filial,"RV_ADIANTA") == "S")
 							MGPE013S("D",SRC->RC_PD,SRC->RC_HORAS,SRC->RC_VALOR)
 							_nTOTDESC += Src->Rc_Valor
-						Endif
-					Elseif PosSrv( Src->Rc_Pd , SRA->RA_FILIAL , "RV_TIPOCOD" ) == "3"
+						EndIf
+					ElseIf PosSrv( Src->Rc_Pd , SRA->RA_FILIAL , "RV_TIPOCOD" ) == "3"
 						If (MV_PAR02 #1) .Or. (MV_PAR02 == 1 .And. PosSrv(Src->Rc_Pd,Sra->Ra_Filial,"RV_ADIANTA") == "S")
 							MGPE013S("B",SRC->RC_PD,SRC->RC_HORAS,SRC->RC_VALOR)
-						Endif
-					Endif
-				Endif 
+						EndIf
+					EndIf
+				EndIf 
 				If MV_PAR02 = 1
 					If SRC->RC_PD == _aCodFol[10,1]
 						_nBaseIr := SRC->RC_VALOR
-					Endif
+					EndIf
 				ElseIf SRC->RC_PD == _aCodFol[13,1]
 					_nAteLim += SRC->RC_VALOR
-				Elseif SRC->RC_PD$ _aCodFol[108,1]+'*'+_aCodFol[17,1]
+				ElseIf SRC->RC_PD$ _aCodFol[108,1]+'*'+_aCodFol[17,1]
 					_nBaseFgts += SRC->RC_VALOR
-				Elseif SRC->RC_PD$ _aCodFol[109,1]+'*'+_aCodFol[18,1]
+				ElseIf SRC->RC_PD$ _aCodFol[109,1]+'*'+_aCodFol[18,1]
 					_nFgts += SRC->RC_VALOR
-				Elseif SRC->RC_PD == _aCodFol[15,1]
+				ElseIf SRC->RC_PD == _aCodFol[15,1]
 					_nBaseIr += SRC->RC_VALOR
-				Elseif SRC->RC_PD == _aCodFol[16,1]
+				ElseIf SRC->RC_PD == _aCodFol[16,1]
 					_nBaseIrFe += SRC->RC_VALOR
-				Elseif SRC->RC_PD == _aCodFol[47,1]
+				ElseIf SRC->RC_PD == _aCodFol[47,1]
 					_nLiquido := SRC->RC_VALOR
-				Endif
-				dbSelectArea("SRC")
-				dbSkip()
-			Enddo
+				EndIf
+				DBSelectArea("SRC")
+				DBSkip()
+			EndDo
 		
 		Else
 	
-			_CROT := IIF(MV_PAR02==1,'ADI','FOL')
-			_cdtref := alltrim(str(year(MV_PAR01))) + ALLTRIM(strzero(MONTH(MV_PAR01),2))
+			_CROT := IIf(MV_PAR02==1,'ADI','FOL')
+			_cdtref := AllTrim(Str(year(MV_PAR01))) + AllTrim(StrZero(MONTH(MV_PAR01),2))
 		
-			If SRD->(dbSeek(SRA->RA_FILIAL + SRA->RA_MAT + ALLTRIM(_cdtref)))
+			If SRD->(DBSeek(SRA->RA_FILIAL + SRA->RA_MAT + AllTrim(_cdtref)))
 			
-				Do While !(SRD->(Eof())) .And. SRD->RD_FILIAL+SRD->RD_MAT+SRD->RD_DATARQ == SRA->RA_FILIAL+SRA->RA_MAT+ALLTRIM(_cdtref)
+				While !(SRD->(Eof())) .And. SRD->RD_FILIAL+SRD->RD_MAT+SRD->RD_DATARQ == SRA->RA_FILIAL+SRA->RA_MAT+AllTrim(_cdtref)
 					
 					If  SRD->RD_ROTEIR != _CROT
 			    
-						SRD->(dbSkip())
+						SRD->(DBSkip())
 						Loop
 			    
 					EndIf
@@ -494,10 +495,10 @@ Do While SRA->(!Eof()) .And. &_cCond .And. _lContinua
 					If (MV_PAR02 == 1) .And. (SRD->RD_Pd == _aCodFol[7,1])      // Desconto de Adto
 						MGPE013S("P",_aCodFol[6,1],SRD->RD_HORAS,SRD->RD_VALOR)
 						_nTOTVENC += SRD->RD_Valor
-					Elseif (MV_PAR02 == 1) .And. (SRD->RD_Pd == _aCodFol[12,1])
+					ElseIf (MV_PAR02 == 1) .And. (SRD->RD_Pd == _aCodFol[12,1])
 						MGPE013S("D",_aCodFol[9,1],SRD->RD_HORAS,SRD->RD_VALOR)
 						_nTOTDESC += SRD->RD_VALOR
-					Elseif (MV_PAR02 == 1) .And. (SRD->RD_Pd == _aCodFol[8,1])
+					ElseIf (MV_PAR02 == 1) .And. (SRD->RD_Pd == _aCodFol[8,1])
 						MGPE013S("P",_aCodFol[8,1],SRD->RD_HORAS,SRD->RD_VALOR)
 						_nTOTVENC += SRD->RD_VALOR
 					Else
@@ -506,136 +507,136 @@ Do While SRA->(!Eof()) .And. &_cCond .And. _lContinua
 							If (MV_PAR02 #1) .Or. (MV_PAR02 == 1 .And. PosSrv(SRD->RD_Pd,Sra->Ra_Filial,"RV_ADIANTA") == "S")
 								MGPE013S("P",SRD->RD_PD,SRD->RD_HORAS,SRD->RD_VALOR)
 								_nTOTVENC += SRD->RD_Valor
-							Endif
-						Elseif PosSrv( SRD->RD_Pd , SRA->RA_FILIAL , "RV_TIPOCOD" ) == "2"
+							EndIf
+						ElseIf PosSrv( SRD->RD_Pd , SRA->RA_FILIAL , "RV_TIPOCOD" ) == "2"
 							If (MV_PAR02 #1) .Or. (MV_PAR02 == 1 .And. PosSrv(SRD->RD_Pd,Sra->Ra_Filial,"RV_ADIANTA") == "S")
 								MGPE013S("D",SRD->RD_PD,SRD->RD_HORAS,SRD->RD_VALOR)
 								_nTOTDESC += SRD->RD_Valor
-							Endif
-						Elseif PosSrv( SRD->RD_Pd , SRA->RA_FILIAL , "RV_TIPOCOD" ) == "3"
+							EndIf
+						ElseIf PosSrv( SRD->RD_Pd , SRA->RA_FILIAL , "RV_TIPOCOD" ) == "3"
 							If (MV_PAR02 #1) .Or. (MV_PAR02 == 1 .And. PosSrv(SRD->RD_Pd,Sra->Ra_Filial,"RV_ADIANTA") == "S")
 								MGPE013S("B",SRD->RD_PD,SRD->RD_HORAS,SRD->RD_VALOR)
-							Endif
-						Endif
-					Endif 
+							EndIf
+						EndIf
+					EndIf 
 					If MV_PAR02 = 1
 						If SRD->RD_PD == _aCodFol[10,1]
 							_nBaseIr := SRD->RD_VALOR
-						Endif
+						EndIf
 					ElseIf SRD->RD_PD == _aCodFol[13,1]
 						_nAteLim += SRD->RD_VALOR
-					Elseif SRD->RD_PD$ _aCodFol[108,1]+'*'+_aCodFol[17,1]
+					ElseIf SRD->RD_PD$ _aCodFol[108,1]+'*'+_aCodFol[17,1]
 						_nBaseFgts += SRD->RD_VALOR
-					Elseif SRD->RD_PD$ _aCodFol[109,1]+'*'+_aCodFol[18,1]
+					ElseIf SRD->RD_PD$ _aCodFol[109,1]+'*'+_aCodFol[18,1]
 						_nFgts += SRD->RD_VALOR
-					Elseif SRD->RD_PD == _aCodFol[15,1]
+					ElseIf SRD->RD_PD == _aCodFol[15,1]
 						_nBaseIr += SRD->RD_VALOR
-					Elseif SRD->RD_PD == _aCodFol[16,1]
+					ElseIf SRD->RD_PD == _aCodFol[16,1]
 						_nBaseIrFe += SRD->RD_VALOR
-					Elseif SRD->RD_PD == _aCodFol[47,1]
+					ElseIf SRD->RD_PD == _aCodFol[47,1]
 						_nLiquido := SRD->RD_VALOR
-					Endif
-					dbSelectArea("SRD")
-					dbSkip()
-				Enddo
-			Endif
+					EndIf
+					DBSelectArea("SRD")
+					DBSkip()
+				EndDo
+			EndIf
 		
-		Endif
+		EndIf
 	
-	Elseif MV_PAR02 == 3 
-		dbSelectArea("SRC")
-		If dbSeek(SRA->RA_FILIAL + SRA->RA_MAT)
-			Do While !Eof() .And. SRA->RA_FILIAL + SRA->RA_MAT == SRC->RC_FILIAL + SRC->RC_MAT
-				If !Eval(_cAcessaSRC) .OR. alltrim(SRC->RC_ROTEIR) != '131'
-					dbSkip()
+	ElseIf MV_PAR02 == 3 
+		DBSelectArea("SRC")
+		If DBSeek(SRA->RA_FILIAL + SRA->RA_MAT)
+			While !Eof() .And. SRA->RA_FILIAL + SRA->RA_MAT == SRC->RC_FILIAL + SRC->RC_MAT
+				If !Eval(_cAcessaSRC) .Or. AllTrim(SRC->RC_ROTEIR) != '131'
+					DBSkip()
 					Loop
 				EndIf
 				If SRC->RC_PD == _aCodFol[22,1]
 					MGPE013S("P",SRC->RC_PD,SRC->RC_HORAS,SRC->RC_VALOR)
 					_nTOTVENC += SRC->RC_VALOR
-				Elseif SRC->RC_PD == _aCodFol[172,1]
+				ElseIf SRC->RC_PD == _aCodFol[172,1]
 					MGPE013S("D",SRC->RC_PD,SRC->RC_HORAS,SRC->RC_VALOR)
 					_nTOTDESC += SRC->RC_VALOR
-				Elseif SRC->RC_PD == _aCodFol[108,1] .Or. SRC->RC_PD == _aCodFol[109,1] .Or. SRC->RC_PD == _aCodFol[173,1]
+				ElseIf SRC->RC_PD == _aCodFol[108,1] .Or. SRC->RC_PD == _aCodFol[109,1] .Or. SRC->RC_PD == _aCodFol[173,1]
 					MGPE013S("B",SRC->RC_PD,SRC->RC_HORAS,SRC->RC_VALOR)
-				Endif
+				EndIf
 				
 				If SRC->RC_PD == _aCodFol[108,1]
 					_nBaseFgts := SRC->RC_VALOR
-				Elseif SRC->RC_PD == _aCodFol[109,1]
+				ElseIf SRC->RC_PD == _aCodFol[109,1]
 					_nFgts     := SRC->RC_VALOR
-				Endif
-				dbSelectArea("SRC")
-				dbSkip()
-			Enddo
+				EndIf
+				DBSelectArea("SRC")
+				DBSkip()
+			EndDo
 			_nLiquido := _nTOTVENC - _nTOTDESC
-		Endif
-	Elseif MV_PAR02 == 4
-		dbSelectArea("SRC")
-		dbSetOrder(2)
-		If dbSeek(SRA->RA_FILIAL + SRA->RA_CC + SRA->RA_MAT)
-			Do While !Eof() .And. SRA->RA_FILIAL + SRA->RA_CC + SRA->RA_MAT == SRC->RC_FILIAL + SRC->RC_CC + SRC->RC_MAT
-				If !Eval(_cAcessaSRC) .OR. alltrim(SRC->RC_ROTEIR) != '132'
-					dbSkip()
+		EndIf
+	ElseIf MV_PAR02 == 4
+		DBSelectArea("SRC")
+		DBSetOrder(2)
+		If DBSeek(SRA->RA_FILIAL + SRA->RA_CC + SRA->RA_MAT)
+			While !Eof() .And. SRA->RA_FILIAL + SRA->RA_CC + SRA->RA_MAT == SRC->RC_FILIAL + SRC->RC_CC + SRC->RC_MAT
+				If !Eval(_cAcessaSRC) .Or. AllTrim(SRC->RC_ROTEIR) != '132'
+					DBSkip()
 					Loop
 				EndIf
 				If PosSrv( SRC->RC_PD , SRA->RA_FILIAL , "RV_TIPOCOD" ) == "1"
 					MGPE013S("P",SRC->RC_PD,SRC->RC_HORAS,SRC->RC_VALOR)
 					_nTOTVENC = _nTOTVENC + SRC->RC_VALOR
-				Elseif PosSrv( SRC->RC_PD , SRA->RA_FILIAL , "RV_TIPOCOD" ) == "2"
+				ElseIf PosSrv( SRC->RC_PD , SRA->RA_FILIAL , "RV_TIPOCOD" ) == "2"
 					MGPE013S("D",SRC->RC_PD,SRC->RC_HORAS,SRC->RC_VALOR)
 					_nTOTDESC = _nTOTDESC + SRC->RC_VALOR
-				Elseif PosSrv( SRC->RC_PD , SRA->RA_FILIAL , "RV_TIPOCOD" ) == "3"
+				ElseIf PosSrv( SRC->RC_PD , SRA->RA_FILIAL , "RV_TIPOCOD" ) == "3"
 					MGPE013S("B",SRC->RC_PD,SRC->RC_HORAS,SRC->RC_VALOR)
-				Endif
+				EndIf
 				
 				If SRC->RC_PD == _aCodFol[19,1]
 					_nAteLim += SRC->RC_VALOR
-				Elseif SRC->RC_PD$ _aCodFol[108,1]
+				ElseIf SRC->RC_PD$ _aCodFol[108,1]
 					_nBaseFgts += SRC->RC_VALOR
-				Elseif SRC->RC_PD$ _aCodFol[109,1]
+				ElseIf SRC->RC_PD$ _aCodFol[109,1]
 					_nFgts += SRC->RC_VALOR
-				Elseif SRC->RC_PD == _aCodFol[27,1]
+				ElseIf SRC->RC_PD == _aCodFol[27,1]
 					_nBaseIr += SRC->RC_VALOR
-				Elseif SRC->RC_PD == _aCodFol[21,1]
+				ElseIf SRC->RC_PD == _aCodFol[21,1]
 					_nLiquido := SRC->RC_VALOR
-				Endif
-				dbSkip()
-			Enddo
-		Endif
-	Elseif MV_PAR02 == 5
-		dbSelectArea("SR1")
-		dbSetOrder(1)
-		If dbSeek( SRA->RA_FILIAL + SRA->RA_MAT )
-			Do While !Eof() .And. SRA->RA_FILIAL + SRA->RA_MAT ==	SR1->R1_FILIAL + SR1->R1_MAT
+				EndIf
+				DBSkip()
+			EndDo
+		EndIf
+	ElseIf MV_PAR02 == 5
+		DBSelectArea("SR1")
+		DBSetOrder(1)
+		If DBSeek( SRA->RA_FILIAL + SRA->RA_MAT )
+			While !Eof() .And. SRA->RA_FILIAL + SRA->RA_MAT ==	SR1->R1_FILIAL + SR1->R1_MAT
 				If !Eval(_cAcessaSR1)
-					dbSkip()
+					DBSkip()
 					Loop
 				EndIf
 				If PosSrv( SR1->R1_PD , SRA->RA_FILIAL , "RV_TIPOCOD" ) == "1"
 					MGPE013S("P",SR1->R1_PD,SR1->R1_HORAS,SR1->R1_VALOR)
 					_nTOTVENC = _nTOTVENC + SR1->R1_VALOR
-				Elseif PosSrv( SR1->R1_PD , SRA->RA_FILIAL , "RV_TIPOCOD" ) == "2"
+				ElseIf PosSrv( SR1->R1_PD , SRA->RA_FILIAL , "RV_TIPOCOD" ) == "2"
 					MGPE013S("D",SR1->R1_PD,SR1->R1_HORAS,SR1->R1_VALOR)
 					_nTOTDESC = _nTOTDESC + SR1->R1_VALOR
-				Elseif PosSrv( SR1->R1_PD , SRA->RA_FILIAL , "RV_TIPOCOD" ) == "3"
+				ElseIf PosSrv( SR1->R1_PD , SRA->RA_FILIAL , "RV_TIPOCOD" ) == "3"
 					MGPE013S("B",SR1->R1_PD,SR1->R1_HORAS,SR1->R1_VALOR)
-				Endif
-				dbskip()
-			Enddo
+				EndIf
+				DBSkip()
+			EndDo
 			_nLiquido := _nTOTVENC - _nTOTDESC
-		Endif
-	Endif
+		EndIf
+	EndIf
 	
-	dbSelectArea("SRA")
+	DBSelectArea("SRA")
 	
 	If _nTOTVENC == 0 .And. _nTOTDESC == 0
-		SRA->(dbSkip())
+		SRA->(DBSkip())
 		Loop
-	Endif
+	EndIf
 	
-	_cDataBas	:= DtoC(SRH->RH_DATABAS)
-	_cDBaseAt	:= DtoC(SRH->RH_DBASEAT)
+	_cDataBas	:= DToC(SRH->RH_DATABAS)
+	_cDBaseAt	:= DToC(SRH->RH_DBASEAT)
 	_cDFerias	:= Str(SRH->RH_DFERIAS)
 	_cDAbonPe	:= Str(SRH->RH_DABONPE)
 
@@ -649,18 +650,18 @@ Do While SRA->(!Eof()) .And. &_cCond .And. _lContinua
 	
 				//pega número sequencial do rcc
 				DBSelectArea('RCC')
-				RCC->( DBGoto(_nrecno) )
+				RCC->( DBGoTo(_nrecno) )
 								
 	
 				// Monta Header de Arquivo - Visao 1
 				_cLin := Replicate("0",20)									//01-20 preencher com zeros(000:.0)
 				_cLin += "00"													//21-22 preencher com zeros (00)
 				_cLin += "0"			 										//23-23 preencher com zero
-				_cLin += STRZERO((VAL(SUBSTR(RCC_CONTEU,24,4))),4)				//24-27 prefixo da agência do BB, sem DV
-				_cLin += STRZERO((VAL(SUBSTR(RCC_CONTEU,30,12))),11)		//28-38 num. da conta da empresa no BB, sem DV    
+				_cLin += StrZero((Val(SubStr(RCC_CONTEU,24,4))),4)				//24-27 prefixo da agência do BB, sem DV
+				_cLin += StrZero((Val(SubStr(RCC_CONTEU,30,12))),11)		//28-38 num. da conta da empresa no BB, sem DV    
 				_cLin += "EDO001"												//39-44 preencher com EDO001
-				_cLin += STRZERO((VAL(SUBSTR(RCC_CONTEU,1,20))),12)		//45-56 número do contrato, atribuído pelo EDO
-				_cLin += STRZERO((VAL(SUBSTR(RCC_CONTEU,43,6))+1),6)		//57-62 número seqüencial da remessa
+				_cLin += StrZero((Val(SubStr(RCC_CONTEU,1,20))),12)		//45-56 número do contrato, atribuído pelo EDO
+				_cLin += StrZero((Val(SubStr(RCC_CONTEU,43,6))+1),6)		//57-62 número seqüencial da remessa
 				_cLin += "00315"												//63-67 código do   produto  - 00315
 				_cLin += "00001"												//68-72 código da modalidade - 00001
 				_cLin += Transf(Year(MV_PAR01),'9999')						//73-76 ano a que se refere o documento
@@ -673,12 +674,12 @@ Do While SRA->(!Eof()) .And. &_cCond .And. _lContinua
 				MGPE013G()
 				
 				
-				MGPE013Z(STRZERO((VAL(SUBSTR(RCC_CONTEU,43,6))+1),6)) //Atualiza sequencia no RCC
+				MGPE013Z(StrZero((Val(SubStr(RCC_CONTEU,43,6))+1),6)) //Atualiza sequencia no RCC
 				
 				
 				_lHeader := .T.
 
-		Endif
+		EndIf
 		
 		//Dados do Funcionario - Visao 2
 		If _nLiquido == 0
@@ -748,26 +749,26 @@ Do While SRA->(!Eof()) .And. &_cCond .And. _lContinua
 	          _cTextoMsg += " NUMERO DA CONTA CORRENTE INVÁLIDO. "
 	       EndIf
 	    EndIf
-	Endif
+	EndIf
 	
-	aadd(_aresults,{cfilant,DescCC(Sra->Ra_Cc,Sra->Ra_Filial),SRA->RA_MAT,SubStr(SRA->RA_NOME,1,30),Transform(_nTotvenc,"@E 9999999.99"),Transform(_nTotdesc,"@E 9999999.99"),;
-			Transform(_nLiquido,"@E 9999999.99"),Transform(SRA->RA_SALARIO,"@E 9999999.99"),iif(_lliq,"OK","INCONSISTENTE"),_cTextoMsg})
+	aAdd(_aresults,{cfilant,DescCC(Sra->Ra_Cc,Sra->Ra_Filial),SRA->RA_MAT,SubStr(SRA->RA_NOME,1,30),Transform(_nTotvenc,"@E 9999999.99"),Transform(_nTotdesc,"@E 9999999.99"),;
+			Transform(_nLiquido,"@E 9999999.99"),Transform(SRA->RA_SALARIO,"@E 9999999.99"),IIf(_lliq,"OK","INCONSISTENTE"),_cTextoMsg})
 			
 	_nTotais := _nTotais + _nLiquido
 	
 	
-	dbSelectArea("SRA")
+	DBSelectArea("SRA")
 
-	dbSkip()
+	DBSkip()
 	_nTOTDESC := _nTOTVENC := 0
 EndDo
 
 If _nQtFunc > 0
 
-    aadd(_aresults,{cfilant,"Totais da Filial:","   ",strzero(_nQtFunc,6) + " funcionários","Conta pagadora: " + _cagencia + " - " + _cconta + "/" + _cdigito ,;
+    aAdd(_aresults,{cfilant,"Totais da Filial:","   ",StrZero(_nQtFunc,6) + " funcionários","Conta pagadora: " + _cagencia + " - " + _cconta + "/" + _cdigito ,;
 							" "," ",Transform(_nTotais,"@E 9999999.99")," ", "GRAVADO NO ARQUIVO DE ENVIO COM SUCESSO."})
 
-Endif
+EndIf
 							
 _nTotais := 0
 
@@ -785,24 +786,24 @@ If _lData
 
 	MGPE013G()
 		
-Endif
+EndIf
 
 
 
 //----------------------------------------------------------------
 //  Termino do relatorio                                          
 //----------------------------------------------------------------
-dbSelectArea("SRC")
-dbSetOrder(1)          // Retorno a ordem 1
-dbSelectArea("SRC")
-dbSetOrder(1)          // Retorno a ordem 1
-dbSelectArea("SRA")
+DBSelectArea("SRC")
+DBSetOrder(1)          // Retorno a ordem 1
+DBSelectArea("SRC")
+DBSetOrder(1)          // Retorno a ordem 1
+DBSelectArea("SRA")
 SET FILTER TO
 
-fClose( _nHdl )
+FClose( _nHdl )
 If !(Type("MV_PAR03") == "U")
-	fErase(Alltrim(MV_PAR03) + OrdBagExt())
-Endif
+	fErase(AllTrim(MV_PAR03) + OrdBagExt())
+EndIf
 
 
 Return
@@ -830,31 +831,31 @@ _cDesc_paga := DescPd(_cPd,Sra->Ra_Filial)  // mostra como pagto
 
 If _cTipo #'B'
 	//--Array para Recibo Pre-Impresso
-	nPos := Ascan(_aLanca,{ |X| X[2] = _cPd })
+	nPos := aScan(_aLanca,{ |X| X[2] = _cPd })
 	If nPos == 0
-		Aadd(_aLanca,{_cTipo,_cPd,_cDesc_Paga,_nHoras,_nValor})
+		aAdd(_aLanca,{_cTipo,_cPd,_cDesc_Paga,_nHoras,_nValor})
 	Else
 		_aLanca[nPos,4] += _nHoras
 		_aLanca[nPos,5] += _nValor
-	Endif
-Endif
+	EndIf
+EndIf
 
 //--Array para o Recibo Pre-Impresso
 If _cTipo = 'P'
 	_cArray := "_aProve"
-Elseif _cTipo = 'D'
+ElseIf _cTipo = 'D'
 	_cArray := "_aDesco"
-Elseif _cTipo = 'B'
+ElseIf _cTipo = 'B'
 	_cArray := "_aBases"
-Endif
+EndIf
 
-nPos := Ascan(&_cArray,{ |X| X[1] = _cPd })
+nPos := aScan(&_cArray,{ |X| X[1] = _cPd })
 If nPos == 0
-	Aadd(&_cArray,{_cPd+" "+left(_cDesc_Paga,19),_nHoras,_nValor })
+	aAdd(&_cArray,{_cPd+" "+left(_cDesc_Paga,19),_nHoras,_nValor })
 Else
 	&_cArray[nPos,2] += _nHoras
 	&_cArray[nPos,3] += _nValor
-Endif
+EndIf
 
 Return
 
@@ -895,7 +896,7 @@ Retorno-----------:
 */
 Static Function MGPE0133()
 
-Local _ni, _nLen, _cVrb, _nProv, _nDesc, _nLiq, _nSeq
+Local _nI, _nLen, _cVrb, _nProv, _nDesc, _nLiq, _nSeq
                                  
 _nProv := _nDesc := _nLiq := 0
 _nSeq  := 1
@@ -904,28 +905,28 @@ _nSeq  := 1
 	_cLin := StrZero(Val(SRA->RA_MAT),20)		//01-20 identificador do destinatário empresa
 	_cLin += StrZero(_nSeq,2)						//21-22 seqüencial da linha do texto
 	_cLin += "2"									//23-23 preencher com o número 2
-	_cLin += "EMPRESA: GOIASMINAS  - CNPJ: " + Transform(_cDesc_CGC,'@R! NN.NNN.NNN/NNNN-99') + " 1" + space(28) + CHR(13)+CHR(10)
+	_cLin += "EMPRESA: GOIASMINAS  - CNPJ: " + Transform(_cDesc_CGC,'@R! NN.NNN.NNN/NNNN-99') + " 1" + Space(28) + CHR(13)+CHR(10)
 	MGPE013G()
     _nSeq++
 
 	_cLin := StrZero(Val(SRA->RA_MAT),20)		//01-20 identificador do destinatário empresa
 	_cLin += StrZero(_nSeq,2)						//21-22 seqüencial da linha do texto
 	_cLin += "2"									//23-23 preencher com o número 2
-	_cLin += StrZero(Val(SRA->RA_MAT),6) + " - " + SRA->RA_NOME + space(9) + "0" + space(28) + CHR(13)+CHR(10)
+	_cLin += StrZero(Val(SRA->RA_MAT),6) + " - " + SRA->RA_NOME + Space(9) + "0" + Space(28) + CHR(13)+CHR(10)
 	MGPE013G()
     _nSeq++
 
 	_cLin := StrZero(Val(SRA->RA_MAT),20)		//01-20 identificador do destinatário empresa
 	_cLin += StrZero(_nSeq,2)						//21-22 seqüencial da linha do texto
 	_cLin += "2"									//23-23 preencher com o número 2
-	_cLin += "FUNCAO: " + StrZero(Val(SRA->RA_CODFUNC),5) + " - " + Left(SRJ->RJ_DESC+Space(30),30) + space(2) + "0" + space(28) + CHR(13)+CHR(10)
+	_cLin += "FUNCAO: " + StrZero(Val(SRA->RA_CODFUNC),5) + " - " + Left(SRJ->RJ_DESC+Space(30),30) + Space(2) + "0" + Space(28) + CHR(13)+CHR(10)
 	MGPE013G()
     _nSeq++
 
 	_cLin := StrZero(Val(SRA->RA_MAT),20)		//01-20 identificador do destinatário empresa
 	_cLin += StrZero(_nSeq,2)						//21-22 seqüencial da linha do texto
 	_cLin += "2"									//23-23 preencher com o número 2
-	_cLin += "COMPETENCIA: " + strzero(month(MV_PAR01),2) + "/" + strzero(year(MV_PAR01),4) + space(28) + "1" + space(28) + CHR(13)+CHR(10)
+	_cLin += "COMPETENCIA: " + StrZero(month(MV_PAR01),2) + "/" + StrZero(year(MV_PAR01),4) + Space(28) + "1" + Space(28) + CHR(13)+CHR(10)
 	MGPE013G()
     _nSeq++
 
@@ -937,22 +938,22 @@ If _nLen == 0
 EndIf
 
 // Processa Array
-For _ni := 1 To _nLen
+For _nI := 1 To _nLen
 
     //Monta inicio da linha texto
 	_cLin := StrZero(Val(SRA->RA_MAT),20)		//01-20 identificador do destinatário empresa
 	_cLin += StrZero(_nSeq,2)						//21-22 seqüencial da linha do texto
 	_cLin += "2"									//23-23 preencher com o número 2
 
-	_cVrb  := Iif(_aLanca[_ni][1] == "P", "PRO" , "DES")
+	_cVrb  := IIf(_aLanca[_nI][1] == "P", "PRO" , "DES")
 
     //Se encontrou a primeira ocorrencia de desconto, imprime total de proventos
-    If _cVrb == "DES" .and. _nDesc == 0
+    If _cVrb == "DES" .And. _nDesc == 0
 		_cLin += "TOTAL DE PROVENTOS:      "
 		_cLin += Transform(_nProv, '@E 999,999,999.99')
-		_cLin += space(9)
+		_cLin += Space(9)
 		_cLin += "1"
-		_cLin += space(28)
+		_cLin += Space(28)
 		_cLin += CHR(13)+CHR(10)
 		MGPE013G()
         _nSeq++
@@ -961,13 +962,13 @@ For _ni := 1 To _nLen
 		_cLin += "2"									//23-23 preencher com o número 2
     EndIf
 	
-	_nProv += Iif(_aLanca[_ni][1] == "P", _aLanca[_ni][5] , 0 )
-	_nDesc += Iif(_aLanca[_ni][1] == "D", _aLanca[_ni][5] , 0 )
+	_nProv += IIf(_aLanca[_nI][1] == "P", _aLanca[_nI][5] , 0 )
+	_nDesc += IIf(_aLanca[_nI][1] == "D", _aLanca[_nI][5] , 0 )
 	_cLin += _cVrb + Space(1)										//24-27 Tipo (pro,des,bas)
-	_cLin += _aLanca[_ni][2]+Space(1)								//28-31 Codigo da verba
-	_cLin += Left(_aLanca[_ni][3],20)+Space(1)						//32-52 Descricao da verba
-	_cLin += Transform(_aLanca[_ni][4], '@E 999.99')+space(1) 		//53-58 Horas do Lancamento
-	_cLin += Transform(_aLanca[_ni][5], '@E 9999,999.99')+space(1) 	//60-70 Horas do Lancamento
+	_cLin += _aLanca[_nI][2]+Space(1)								//28-31 Codigo da verba
+	_cLin += Left(_aLanca[_nI][3],20)+Space(1)						//32-52 Descricao da verba
+	_cLin += Transform(_aLanca[_nI][4], '@E 999.99')+Space(1) 		//53-58 Horas do Lancamento
+	_cLin += Transform(_aLanca[_nI][5], '@E 9999,999.99')+Space(1) 	//60-70 Horas do Lancamento
 	_cLin += "0"													//72-72 "1"-para saltar uma linha de intervalo/"0"-para linhas corridas
 	_cLin += Space(28)											//73-100 preencher com brancos
 	_cLin += CHR(13)+CHR(10)
@@ -982,9 +983,9 @@ _cLin += StrZero(_nSeq,2)						//21-22 seqüencial da linha do texto
 _cLin += "2"									//23-23 preencher com o número 2
 _cLin += "TOTAL DE DESCONTOS:      "
 _cLin += Transform(_nDesc, '@E 999,999,999.99')
-_cLin += space(9)
+_cLin += Space(9)
 _cLin += "1"
-_cLin += space(28)
+_cLin += Space(28)
 _cLin += CHR(13)+CHR(10)
 MGPE013G()
 _nSeq++
@@ -996,9 +997,9 @@ _cLin += "2"									//23-23 preencher com o número 2
 _nLiq := _nProv - _nDesc
 _cLin += "TOTAL LIQUIDO A RECEBER: "
 _cLin += Transform(_nLiq, '@E 999,999,999.99')
-_cLin += space(09)
+_cLin += Space(09)
 _cLin += "1"
-_cLin += space(28)
+_cLin += Space(28)
 _cLin += CHR(13)+CHR(10)
 MGPE013G()
 _nSeq++
@@ -1009,9 +1010,9 @@ _cLin += StrZero(_nSeq,2)						//21-22 seqüencial da linha do texto
 _cLin += "2"									//23-23 preencher com o número 2
 _cLin += "BASE FGTS: "
 _cLin += Transform(_nBaseFgts, '@E 999,999,999.99')
-_cLin += space(23)
+_cLin += Space(23)
 _cLin += "0"
-_cLin += space(28)
+_cLin += Space(28)
 _cLin += CHR(13)+CHR(10)
 MGPE013G()
 _nSeq++
@@ -1022,9 +1023,9 @@ _cLin += StrZero(_nSeq,2)						//21-22 seqüencial da linha do texto
 _cLin += "2"									//23-23 preencher com o número 2
 _cLin += "FGTS MES.: "
 _cLin += Transform(_nFgts, '@E 999,999,999.99')
-_cLin += space(23)
+_cLin += Space(23)
 _cLin += "0"
-_cLin += space(28)
+_cLin += Space(28)
 _cLin += CHR(13)+CHR(10)
 MGPE013G()
 _nSeq++
@@ -1035,9 +1036,9 @@ _cLin += StrZero(_nSeq,2)						//21-22 seqüencial da linha do texto
 _cLin += "2"									//23-23 preencher com o número 2
 _cLin += "BASE INSS: "
 _cLin += Transform(_nAteLim, '@E 999,999,999.99')
-_cLin += space(23)
+_cLin += Space(23)
 _cLin += "0"
-_cLin += space(28)
+_cLin += Space(28)
 _cLin += CHR(13)+CHR(10)
 MGPE013G()
 _nSeq++
@@ -1048,9 +1049,9 @@ _cLin += StrZero(_nSeq,2)						//21-22 seqüencial da linha do texto
 _cLin += "2"									//23-23 preencher com o número 2
 _cLin += "BASE IR..: "
 _cLin += Transform(_nBaseIr, '@E 999,999,999.99')
-_cLin += space(23)
+_cLin += Space(23)
 _cLin += "0"
-_cLin += space(28)
+_cLin += Space(28)
 _cLin += CHR(13)+CHR(10)
 MGPE013G()
 _nSeq++
@@ -1069,9 +1070,9 @@ Retorno-----------:
 */
 Static Function MGPE013G()
 
-If fWrite(_nHdl,_cLin,Len(_cLin)) != Len(_cLin)
+If FWrite(_nHdl,_cLin,Len(_cLin)) != Len(_cLin)
 	MsgAlert("Ocorreu um erro na gravacao do arquivo. Continua?","Atencao!")
-Endif
+EndIf
 
 Return
 
@@ -1095,16 +1096,16 @@ Local _aDados	:= {}
 Local _nconta	:= 0
 Local _nI		:= 0
 		
-_cQuery := " SELECT SUBSTR( RCC.RCC_CONTEU , 21 , 3 )	AS BANCO," 
-_cQuery += " LPAD(TRIM(SUBSTR( RCC.RCC_CONTEU , 1 , 20 )),12,'0') 	AS CONTRATO," 
-_cQuery += " LPAD(TRIM(SUBSTR( RCC.RCC_CONTEU , 24 , 4 )),4,'0')	AS AGENCIA," 
-_cQuery += " LPAD(TRIM(SUBSTR( RCC.RCC_CONTEU , 30 , 11 )),11,'0')	AS CONTA,"
-_cQuery += " TRIM(SUBSTR( RCC.RCC_CONTEU , 42 , 1 ))	AS DIGITO,"
-_cQuery += " LPAD(TRIM(SUBSTR( RCC.RCC_CONTEU , 43 , 6 )),6,'0')	AS SEQUENCIA,"
+_cQuery := " SELECT SubStr( RCC.RCC_CONTEU , 21 , 3 )	AS BANCO," 
+_cQuery += " LPAD(TRIM(SubStr( RCC.RCC_CONTEU , 1 , 20 )),12,'0') 	AS CONTRATO," 
+_cQuery += " LPAD(TRIM(SubStr( RCC.RCC_CONTEU , 24 , 4 )),4,'0')	AS AGENCIA," 
+_cQuery += " LPAD(TRIM(SubStr( RCC.RCC_CONTEU , 30 , 11 )),11,'0')	AS CONTA,"
+_cQuery += " TRIM(SubStr( RCC.RCC_CONTEU , 42 , 1 ))	AS DIGITO,"
+_cQuery += " LPAD(TRIM(SubStr( RCC.RCC_CONTEU , 43 , 6 )),6,'0')	AS SEQUENCIA,"
 _cQuery += " R_E_C_N_O_ AS NUM"
 _cQuery += " FROM "+ RetSqlName("RCC") + " RCC"
-_cQuery += " WHERE RCC.RCC_FILIAL = '" + xfilial("RCC") + "'"
-_cQuery += " AND D_E_L_E_T_		= ' ' AND SUBSTR( RCC.RCC_CONTEU , 21 , 3 ) = '001'"
+_cQuery += " WHERE RCC.RCC_FILIAL = '" + xFilial("RCC") + "'"
+_cQuery += " AND D_E_L_E_T_		= ' ' AND SubStr( RCC.RCC_CONTEU , 21 , 3 ) = '001'"
 _cQuery += " AND   RCC.RCC_CODIGO	= 'S052'"
 		
 		
@@ -1119,7 +1120,7 @@ DBSelectArea(_cAlias)
 While (_cAlias)->( !Eof() )
 
 	
-	aAdd( _aDados , { .F. ,  alltrim((_cAlias)->CONTRATO)+"/"+ alltrim((_cAlias)->SEQUENCIA)+"/"+ alltrim(str((_cAlias)->NUM)) } )
+	aAdd( _aDados , { .F. ,  AllTrim((_cAlias)->CONTRATO)+"/"+ AllTrim((_cAlias)->SEQUENCIA)+"/"+ AllTrim(Str((_cAlias)->NUM)) } )
 	
 	(_cAlias)->( DBSkip() )
 
@@ -1136,16 +1137,16 @@ If U_ITListBox( _cTitAux , { '__' ,  'Contrato/Sequência/Registro'  } , @_aDados
 			
 			_nconta++
 			
-			if _nconta > 1
+			If _nconta > 1
 			 
 			  alert("Selecione apenas uma conta!")
-			  return .T.
+			  Return .T.
 			 
-			 else
+			 Else
 			 
 				_cRet += _aDados[_nI][02] +';'
 			
-			endif
+			EndIf
 			
 		EndIf
 		
@@ -1162,25 +1163,25 @@ Static Function MGPE013Z(_csequen)
 
 //Grava nova sequência do banco para todos os registros do banco do brasil
 
-RCC->(Dbsetorder(1))
-If RCC->(dbseek(xfilial("RCC")+"S052"))
+RCC->(DBSetOrder(1))
+If RCC->(DBSeek(xFilial("RCC")+"S052"))
 		
-	Do while !(RCC->(Eof())) .and. RCC->RCC_FILIAL == xfilial("RCC") .and. RCC->RCC_CODIGO = "S052" 
+	While !(RCC->(Eof())) .And. RCC->RCC_FILIAL == xFilial("RCC") .And. RCC->RCC_CODIGO = "S052" 
 			
-		  If substr(RCC->RCC_CONTEU,21,3) == "001"
+		  If SubStr(RCC->RCC_CONTEU,21,3) == "001"
 
 		  		RecLock( 'RCC' , .F. )
 			
-		  		RCC->RCC_CONTEU		:= SUBSTR(RCC->RCC_CONTEU,1,42) + STRZERO((VAL(_csequen)),6)
+		  		RCC->RCC_CONTEU		:= SubStr(RCC->RCC_CONTEU,1,42) + StrZero((Val(_csequen)),6)
 			
-		  		RCC->( MsUnLock() )
+		  		RCC->( MSUnLock() )
 		  				
-		  Endif
+		  EndIf
 		  	
-		  RCC->(Dbskip())
+		  RCC->(DBSkip())
 		  
-	Enddo
+	EndDo
 	
-Endif
+EndIf
 
 Return

@@ -2,15 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 10/10/2019 | Chamado 28346. Removidos os Warning na compilação da release 12.1.25
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |10/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "TOPCONN.CH"
+#Include "TOTVS.ch"
+#Include "TOPCONN.CH"
 
 /*
 ===============================================================================================================================
@@ -48,12 +48,12 @@ Private wnrel       := "RFIN003"
 Private cPerg       := "RFIN003"
 Private cString     := "SE1"
 
-dbSelectArea("SE1")
-dbSetOrder(1)
+DBSelectArea("SE1")
+DBSetOrder(1)
 
 //Chama a tela para preenchimento dos parametros
 If !Pergunte(cPerg,.T.)
-	Return()
+	Return
 EndIf
 
 //Monta a interface padrao com o usuario...
@@ -61,13 +61,13 @@ wnrel := SetPrint(cString,NomeProg,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.F.,aOrd,.
 
 If nLastKey == 27
 	Return
-Endif
+EndIf
 
 SetDefault(aReturn,cString)
 
 If nLastKey == 27
 	Return
-Endif
+EndIf
 
 nTipo := If(aReturn[4]==1,15,18)
 
@@ -109,16 +109,16 @@ MsgRun("Aguarde.... filtrando dados...",,{||CursorWait(), FILTROSE1(), CursorArr
 SetRegua(RecCount())
 
 //Posiciona no incio da tabela temporaria.
-DbSelectArea("TMP")
-TMP->(DbGoTop())
+DBSelectArea("TMP")
+TMP->(DBGoTop())
 
-While TMP->(!EOF())
+While TMP->(!Eof())
 	
 	//Verifica o cancelamento pelo usuario...
 	If lAbortPrint
 		@nLin,00 PSAY "*** CANCELADO PELO OPERADOR ***"
 		Exit
-	Endif
+	EndIf
 	
 	//Imprime os dados do titulo...
 	
@@ -129,28 +129,28 @@ While TMP->(!EOF())
 	EndIf
 	
 	nLin := 10
-	@ nLin,050 PSAY DTOC(STOD(TMP->E1_EMISSAO))
+	@ nLin,050 PSAY DToC(SToD(TMP->E1_EMISSAO))
 	
 	nLin += 5
 	
-	DbSelectArea("SE1")
-	DbSetOrder(1)
-	DbSeek(TMP->E1_FILIAL+TMP->E1_PREFIXO+TMP->E1_NUM)
-	While SE1->E1_FILIAL == TMP->E1_FILIAL .and. SE1->E1_NUM == TMP->E1_NUM .and. SE1->E1_CLIENTE == TMP->E1_CLIENTE 	.and. SE1->E1_LOJA == TMP->E1_LOJA 
+	DBSelectArea("SE1")
+	DBSetOrder(1)
+	DBSeek(TMP->E1_FILIAL+TMP->E1_PREFIXO+TMP->E1_NUM)
+	While SE1->E1_FILIAL == TMP->E1_FILIAL .And. SE1->E1_NUM == TMP->E1_NUM .And. SE1->E1_CLIENTE == TMP->E1_CLIENTE 	.And. SE1->E1_LOJA == TMP->E1_LOJA 
 			_nVlrTotal	:=	_nVlrTotal + SE1->E1_VALOR	 
 			_nParc		:=	_nParc + 1 
-		dbskip()
-	Enddo	
+		DBSkip()
+	EndDo	
 	
 	@ nLin,012 PSAY Transform(_nVlrTotal,"@E 9,999,999.99")
 	_nVlrTotal	:=	0 
-	@ nLin,026 PSAY ALLTRIM(TMP->E1_NUM)
+	@ nLin,026 PSAY AllTrim(TMP->E1_NUM)
 	@ nLin,034 PSAY Transform(TMP->E1_VALOR,"@E 9,999,999.99")
-	@ nLin,047 PSAY ALLTRIM(TMP->E1_NUM)	
-	@ nLin,058 PSAY DTOC(STOD(TMP->E1_VENCTO))
+	@ nLin,047 PSAY AllTrim(TMP->E1_NUM)	
+	@ nLin,058 PSAY DToC(SToD(TMP->E1_VENCTO))
 	nLin += 1                                                                    
-	@ nLin,029 PSAY ALLTRIM(TMP->E1_TIPO)
-	@ nLin,050 PSAY TMP->E1_PARCELA + "/" + "0"+ ALLTRIM(TRANSFORM(_nParc,"99"))
+	@ nLin,029 PSAY AllTrim(TMP->E1_TIPO)
+	@ nLin,050 PSAY TMP->E1_PARCELA + "/" + "0"+ AllTrim(TRANSFORM(_nParc,"99"))
 	_nParc	:=	0	
  	nLin += 3
 	@ nLin,019 PSAY Transform(TMP->E1_I_DESCO,"@E 9,999,999.99")
@@ -158,29 +158,29 @@ While TMP->(!EOF())
 	nLin += 4
 	
 	//Posiciona no cadastro de clientes para impressao dos dados cadastrais.
-	DbSelectArea("SA1")
-	DbSetOrder(1)
-	DbSeek(xFILIAL("SA1")+TMP->E1_CLIENTE+TMP->E1_LOJA)
+	DBSelectArea("SA1")
+	DBSetOrder(1)
+	DBSeek(xFilial("SA1")+TMP->E1_CLIENTE+TMP->E1_LOJA)
 	
 	If found()
-		@ nLin,023 PSAY SUBSTR(SA1->A1_NOME,1,46)+" ("+SA1->A1_COD+")"
+		@ nLin,023 PSAY SubStr(SA1->A1_NOME,1,46)+" ("+SA1->A1_COD+")"
 		
 		nLin += 1
-		@ nLin,023 PSAY SUBSTR(SA1->A1_END,1,44)
+		@ nLin,023 PSAY SubStr(SA1->A1_END,1,44)
 		@ nLin,067 PSAY SA1->A1_CEP Picture "@R 99999-999"
 		
 		nLin += 2
-		@ nLin,023 PSAY ALLTRIM(SA1->A1_MUN)
+		@ nLin,023 PSAY AllTrim(SA1->A1_MUN)
 		@ nLin,057 PSAY SA1->A1_EST
 		
 		nLin += 1
-		@ nLin,023 PSAY If(Empty(SA1->A1_ENDCOB),SUBSTR(SA1->A1_END,1,44),SUBSTR(SA1->A1_ENDCOB,1,44))
+		@ nLin,023 PSAY If(Empty(SA1->A1_ENDCOB),SubStr(SA1->A1_END,1,44),SubStr(SA1->A1_ENDCOB,1,44))
 		@ nLin,067 PSAY If(Empty(SA1->A1_CEPC),SA1->A1_CEP,SA1->A1_CEPC) Picture "@R 99999-999"
 		
 		nLin += 2
-		If Empty(Alltrim(SA1->A1_CGC))
+		If Empty(AllTrim(SA1->A1_CGC))
 			@ nLin,023 PSAY "."
-		ElseIf Len(Alltrim(SA1->A1_CGC)) > 11
+		ElseIf Len(AllTrim(SA1->A1_CGC)) > 11
 			@ nLin,023 PSAY SA1->A1_CGC Picture "@R! NN.NNN.NNN/NNNN-99"
 		Else
 			@ nLin,023 PSAY SA1->A1_CGC Picture "@R 999.999.999-99"
@@ -206,12 +206,12 @@ While TMP->(!EOF())
 	SetPrc(0,0)
 	//Eject
 	
-	TMP->(DbSkip())
+	TMP->(DBSkip())
 EndDo
 
 // Apaga o arquivo temporario...
-DbSelectArea("TMP")
-DbCloseArea()
+DBSelectArea("TMP")
+DBCloseArea()
 
 //Finaliza a execucao do relatorio...
 SET DEVICE TO SCREEN
@@ -222,7 +222,7 @@ If aReturn[5]==1
 	dbCommitAll()
 	SET PRINTER TO
 	OurSpool(wnrel)
-Endif
+EndIf
 
 MS_FLUSH()
 
@@ -246,8 +246,8 @@ Local cQuery  := ""
 cQuery := "SELECT E1_FILIAL, E1_CLIENTE,E1_LOJA,E1_EMISSAO,E1_VENCTO,E1_PREFIXO,E1_NUM,E1_PARCELA,E1_VALOR,E1_I_DESCO,E1_TIPO,E1_NUMBCO FROM "
 cQuery += RetSqlName("SE1")+" "
 cQuery += "WHERE D_E_L_E_T_ = ' ' "
-cQuery += "AND E1_EMISSAO BETWEEN '"+DTOS(MV_PAR01)+"' AND '"+DTOS(MV_PAR02)+"' "
-cQuery += "AND E1_VENCTO  BETWEEN '"+DTOS(MV_PAR03)+"' AND '"+DTOS(MV_PAR04)+"' "
+cQuery += "AND E1_EMISSAO BETWEEN '"+DToS(MV_PAR01)+"' AND '"+DToS(MV_PAR02)+"' "
+cQuery += "AND E1_VENCTO  BETWEEN '"+DToS(MV_PAR03)+"' AND '"+DToS(MV_PAR04)+"' "
 cQuery += "AND E1_CLIENTE BETWEEN '"+MV_PAR05+"' AND '"+MV_PAR06+"' "
 cQuery += "AND E1_LOJA    BETWEEN '"+MV_PAR07+"' AND '"+MV_PAR08+"' "
 cQuery += "AND E1_NUM     BETWEEN '"+MV_PAR09+"' AND '"+MV_PAR10+"' "
@@ -256,13 +256,13 @@ cQuery += "AND E1_TIPO <> '"+MV_PAR13+"' "
 
 If MV_PAR14 == 1
 	cQuery += "AND E1_SALDO <> 0 "
-Endif
+EndIf
 
 cQuery += "ORDER BY E1_EMISSAO,E1_NUM,E1_PARCELA "
 
 Count To nReg
 
 TCQUERY cQuery NEW ALIAS "TMP"
-DbSelectArea("TMP")
+DBSelectArea("TMP")
 
 Return

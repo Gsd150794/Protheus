@@ -1,43 +1,18 @@
 /*
-==========================================================================================================================================================
+===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-==========================================================================================================================================================
- Autor        |   Data   |                              Motivo                      										 
-==========================================================================================================================================================
- Jerry        | 14/10/20 | Chamado 34355. Nova tratativa para Gravar data de Canhoto para Nota de Pallet Retorno.
- Julio Paz    | 24/09/21 | Chamado 37814. Inclusão de novas regras para definir transit time na validação da data de entrega.
- Jerry        | 13/05/22 | Chamado 40096. Ajuste para Determinar Quantidade de Dias a Retroceder para busca do CTE.
- Alex Wallauer| 26/05/22 | Chamado 39375. Informado uma Data de Canhoto gravar o Status = a "Aprovado" e Dt de Entrega. 
- Alex Wallauer| 15/06/22 | Chamado 40455. Gravar dados do usuario (ID,DATA,HORA,ORIGEM) que efetuar a baixa do canhoto no SF2.
- Igor Melgaço | 17/03/23 | Chamado 42943. Gravar dados do Operador Log. quando efetuar a baixa do canhoto no SF2.
- Igor Melgaço | 03/04/23 | Chamado 42943. Ajuste na variavel de nome do Operador Log.
- Julio Paz    | 04/05/23 | Chamado 43525. Exibir novos campos Data Entrega Operador Logístico e data Entrega cliente. 
- Alex Wallauer| 16/05/23 | Chamado 42943. Ajustes de gravacao dos novos campos Data Entrega Operador Logístico e Entrega cliente. 
- Alex Wallauer| 25/05/23 | Chamado 42943. Ajuste p/ não aparecer o canhoto caso os campos F2_I_DTRC/F2_I_DENOL estejam preenchidos.
- Alex Wallauer| 26/05/23 | Chamado 44025. Tratamento p/ replicar 22 campos do Trasit Time Logistico, Função Repl2DtsTransTime().
- Alex Wallauer| 19/07/23 | Chamado 44424. Ajustes do dados gravados na notas fiscais de devolucao do canhoto.
- Jerry        | 20/09/23 | Chamado 45038. Correção no posicionamento da busca do registro da SF1 para montra o Browser Principal
- Alex Wallauer| 04/10/23 | Chamado 44571. Tratamento para novo Cpo de Dt que o Transportador Entregou efetivamente a Carga no O.L.
- Alex Wallauer| 03/11/23 | Chamado 45389. Alterar a Dt.Entrega op Log (EDI)" para que fique somente como Visualização.
- Alex Wallauer| 24/01/24 | Chamado 46162. Vanderlei/Jerry. Desabilitar a replicação da data NF devolução p/ dt de canhoto na NFS.
- Alex Wallauer| 15/05/24 | Chamado 47107. Jerry. Alteracao de "Dt.Cheg.Oper.Log" p/ "Dt Ocorr Oper Log" de "Dt.Cheg.Cliente" p/ "Dt.Ocorr.Cliente"
-Lucas Borges  | 23/07/25 | Chamado 51340. Trocado e-mail padrão para sistema@italac.com.br
-==========================================================================================================================================================
-==============================================================================================================================================================
-Analista    - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
-=============================================================================================================================================================================================================================================================
-Jerry       - Alex Wallauer - 12/09/24 - 13/11/24 - 46161   - Novos tratamentos p/ os campos Dt de Entrega no Op.Log (Dt.Canhoto) e Dt.Entrega no Cliente (Dt.Canhoto) no Lançamento de CTE x Nfe, e listar os Cte da Nfe vinculadas a Nfe lançada.
-=============================================================================================================================================================================================================================================================
-
+===============================================================================================================================
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+Alex Wallauer |13/11/2024| Chamado 46161. Novos tratamentos p/ os campos Dt de Entrega no Op.Log (Dt.Canhoto) e Dt.Entrega no 
+			  |			 | Cliente (Dt.Canhoto) no Lançamento de CTE x Nfe, e listar os Cte da Nfe vinculadas a Nfe lançada.
+Lucas Borges  |23/07/2025| Chamado 51340. Trocado e-mail padrão para sistema@italac.com.br
+Lucas Borges  |17/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
+===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "FWMVCDEF.ch"
-
-#DEFINE _ENTER CHR(13) + CHR(10)
 
 /* 
 ===============================================================================================================================
@@ -80,7 +55,7 @@ ADD OPTION aRotina Title 'Incluir'		 Action 'VIEWDEF.AOMS054'	  OPERATION 3 ACCE
 ADD OPTION aRotina Title 'Alterar'		 Action 'VIEWDEF.AOMS054'	  OPERATION 4 ACCESS 0
 ADD OPTION aRotina Title 'Excluir'		 Action 'VIEWDEF.AOMS054'	  OPERATION 5 ACCESS 0
 ADD OPTION aRotina Title 'Legenda'		 Action 'U_AOMS054C()'		  OPERATION 6 ACCESS 0
-ADD OPTION aRotina Title 'CTE Diferente' Action 'FWMSGRUN(,{|O| U_AOMS54Lista(.T.,O) }, "Lendo CTEs diferentes...","Aguarde...")'  OPERATION 6 ACCESS 0
+ADD OPTION aRotina Title 'CTE Diferente' Action 'FWMsgRun(,{|O| U_AOMS54Lista(.T.,O) }, "Lendo CTEs diferentes...","Aguarde...")'  OPERATION 6 ACCESS 0
 
 //Titulo
 _oBrowse:SetDescription( "Relacionamento CTE x NF x Fatura de transporte" )
@@ -110,7 +85,7 @@ Local _cTDoc     := ZZN->ZZN_CTRANS
 Local _cTSerie   := ZZN->ZZN_SERCTR 
 Local _cTrans    := ZZN->ZZN_FTRANS
 Local _cLoja     := ZZN->ZZN_LOJAFT
-Local _aArea     := GetArea()
+Local _aArea     := FWGetArea()
 
 DBSelectArea("SF1")
 SF1->( DBSetOrder(1) )
@@ -126,7 +101,7 @@ If SF1->( DBSeek( _cFilial + _cTDoc + _cTSerie + _cTrans + _cLoja ) )
 	    	_nRet := 2
 		ElseIf SE2->E2_SALDO == 0
 			_nRet := 3
-		ElseIf SE2->E2_SALDO > 0 .AND. SE2->E2_SALDO <> SE2->E2_VALOR
+		ElseIf SE2->E2_SALDO > 0 .And. SE2->E2_SALDO <> SE2->E2_VALOR
 			_nRet := 4
 		EndIf
 		
@@ -134,7 +109,7 @@ If SF1->( DBSeek( _cFilial + _cTDoc + _cTSerie + _cTrans + _cLoja ) )
 	
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _nRet )
 
@@ -160,22 +135,18 @@ aAdd( aLegenda , { "BR_LARANJA"		, "Pago Parcial"	} )
 
 BrwLegenda( "Status CTE" , "Legenda" , aLegenda )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: ModelDef
 Autor-------------: Alexandre Villar
 Data da Criacao---: 13/08/2014
-===============================================================================================================================
 Descrição---------: Define o modelo de dados para a rotina de cadastro
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-
 Static Function ModelDef()
 
 //================================================================================
@@ -209,10 +180,10 @@ oStruITN:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 _aGatAux := FwStruTrigger( 'ZZN_SERIE'	, 'ZZN_DESMUN'	, 'U_AOMS054U(M->ZZN_NFISCA,M->ZZN_SERIE,M->ZZN_FILNFV)'						, .F. )
 oStruITN:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZZN_MTDINF'	, 'ZZN_DESMNF'	, 'Posicione("ZZO",1,XFILIAL("ZZO")+M->ZZN_MTDINF,"ZZO->ZZO_DESCRI")'	, .F. )
+_aGatAux := FwStruTrigger( 'ZZN_MTDINF'	, 'ZZN_DESMNF'	, 'Posicione("ZZO",1,xFilial("ZZO")+M->ZZN_MTDINF,"ZZO->ZZO_DESCRI")'	, .F. )
 oStruITN:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZZN_MTDIVF'	, 'ZZN_DESCMD'	, 'Posicione("ZZO",1,XFILIAL("ZZO")+M->ZZN_MTDIVF,"ZZO->ZZO_DESCRI")'	, .F. )
+_aGatAux := FwStruTrigger( 'ZZN_MTDIVF'	, 'ZZN_DESCMD'	, 'Posicione("ZZO",1,xFilial("ZZO")+M->ZZN_MTDIVF,"ZZO->ZZO_DESCRI")'	, .F. )
 oStruITN:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 //================================================================================
@@ -245,15 +216,11 @@ Return( oModel )
 Programa----------: ViewDef
 Autor-------------: Alexandre Villar
 Data da Criacao---: 13/08/2014
-===============================================================================================================================
 Descrição---------: Define a View de dados para a rotina de cadastro
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-
 Static Function ViewDef()
 
 //================================================================================
@@ -298,8 +265,8 @@ oView:SetOwnerView( "VIEW_CAL" , "BOX0103" )
 
 //Botão de posiciona linha
 oView:AddUserButton("Reenvia Fatura"         ,"",{|oView| U_ROMS057(oView)},"1-Reenvia Fatura")
-oView:AddUserButton('Lista CTEs Diferentes'  ,"",{|V|_V:=V,FWMSGRUN(,{|O| U_AOMS54Lista(.T.,O,_V,.F.) }, "Lendo CTEs diferentes...","Aguarde...")},'')
-oView:AddUserButton('Visualiza Canhoto da NF',"",{|V|_V:=V,FWMSGRUN(,{|O| U_AOMS54Lista(.T.,O,_V,.T.) }, "Lendo Canhoto da Nota...","Aguarde...")},'')
+oView:AddUserButton('Lista CTEs Diferentes'  ,"",{|V|_V:=V,FWMsgRun(,{|O| U_AOMS54Lista(.T.,O,_V,.F.) }, "Lendo CTEs diferentes...","Aguarde...")},'')
+oView:AddUserButton('Visualiza Canhoto da NF',"",{|V|_V:=V,FWMsgRun(,{|O| U_AOMS54Lista(.T.,O,_V,.T.) }, "Lendo Canhoto da Nota...","Aguarde...")},'')
 
 //================================================================================
 // Define campo incremental para o GRID
@@ -313,15 +280,11 @@ Return( oView )
 Programa----------: AOMS054K
 Autor-------------: Alexandre Villar
 Data da Criacao---: 04/06/2014
-===============================================================================================================================
 Descrição---------: Valida os Campos que serão exibidos no Browse
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: lRet - Indica se o código foi validado ou seje já existe
 ===============================================================================================================================
 */
-
 Static Function AOMS054K( _cCampo , _nLocal )
 
 Local _lRet := AllTrim( _cCampo ) $ "ZZN_FILIAL,ZZN_CODIGO,ZZN_FTRANS,ZZN_LOJAFT,ZZN_DESCTR,ZZN_CGC,ZZN_FATURA,ZZN_FATFIN"
@@ -338,13 +301,10 @@ Return( _lRet )
 Programa----------: AOMS054J
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 15/01/2017
-===============================================================================================================================
 Descrição---------: Retorna status da canhoto na tabela de muro da Estec
-===============================================================================================================================
 Parametros--------: _cfilial - filial da nota
 					_cdoc - Número da nota
 					_cserie - serie da nota
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -352,32 +312,31 @@ User Function AOMS054J(_cfilial,_cdoc, _cserie)
 
 Local _cstatus := "Nao recepcionado"   //,"Aguardando Conf","Aprovado","Reprovado"
 
-If cfilant $ U_ITGETMV("ITFILESTC","01;90;40;20;23;93")
+If cfilant $ SuperGetMV("IT_FILESTC",.F.,"01;90")
 
 	//Se é filial Estec sempre é canhoto da Estec
 	_cstatus := "Aguardando Conf"
 	
-	ZGJ->(Dbsetorder(1))
-	If ZGJ->(Dbseek(_cfilial+_cdoc+_cserie))
+	ZGJ->(DBSetOrder(1))
+	If ZGJ->(DBSeek(_cfilial+_cdoc+_cserie))
 
-		_cstatus := alltrim(ZGJ->ZGJ_STATUS)
+		_cstatus := AllTrim(ZGJ->ZGJ_STATUS)
 
 	Else
 	
-		Reclock("ZGJ",.T.)
+		RecLock("ZGJ",.T.)
 		ZGJ->ZGJ_FILIAL := _cfilial
 		ZGJ->ZGJ_NOTA  := _cdoc
 		ZGJ->ZGJ_SERIE := _cserie
-		ZGJ->ZGJ_DTENT := stod("")
-		ZGJ->ZGJ_DATAI := DATE()
-		ZGJ->ZGJ_HORAI := TIME()
+		ZGJ->ZGJ_DTENT := SToD("")
+		ZGJ->ZGJ_DATAI := Date()
+		ZGJ->ZGJ_HORAI := Time()
 		ZGJ->ZGJ_STATUS:= "Aguardando Conf"
-		ZGJ->(Msunlock())
+		ZGJ->(MSUnLock())
 		
-	Endif
+	EndIf
 	
-Endif 
-
+EndIf 
 
 Return _cstatus
 
@@ -386,15 +345,11 @@ Return _cstatus
 Programa----------: AOMS054G
 Autor-------------: Alexandre Villar
 Data da Criacao---: 24/09/2014
-===============================================================================================================================
 Descrição---------: Função que monta a tela de lançamento
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-
 Static Function AOMS054G()
 
 Local _nOpc		 := 2
@@ -406,7 +361,6 @@ Local _cAprOperL := ""
 Local _lGrvOperL := .F.  // Indica se houve alterações nas datas informadas pelo operador logístico.
 Local _lGrvCanho := .F.  // Indica se houve alterações nas datas informados do canhoto.
 Local _oModel	 := FWModelActive()
-//----------------------------------------------------------------------------------
 Local _dPrevEOL  := CTOD("") //F2_I_PENOL - Previsão de entrega no operador logístico 
 Local _dPrevECL  := CTOD("") //F2_I_PENCL - Previsão de entrega no cliente
 Local _dChegOL   := CTOD("") //F2_I_DCHOL - Data de chegada no operador logístico 
@@ -414,16 +368,14 @@ Local _dChegCL   := CTOD("") //F2_I_DCHCL - Data de chegada no cliente
 Local _dEntrCL   := CTOD("") //F2_I_DENCL - Data de entrega no cliente
 Private _dEntrOL  := CTOD("")//F2_I_DENOL - Data de entrega no operador logístico  EDI // NÃO pode MAIS ser editado.
 Private _dEntOLCha:= CTOD("")//F2_I_DTOP  - Data em que o Transportador Entregou efetivamente a Carga no Operador Logístico // pode ser editado.
-
-//----------------------------------------------------------------------------------
 Private _lTrocaNF:= .F.
 Private _lTriangu:= .F.
 Private _lReplica:= .F.
-PRIVATE _lTemOpl := .F.//ALTERA DENTRO DA FUNCAO SeMostraTela()
-PRIVATE _leOpLog := .F.//ALTERA DENTRO DA FUNCAO SeMostraTela()
+Private _lTemOpl := .F.//ALTERA DENTRO DA FUNCAO SeMostraTela()
+Private _leOpLog := .F.//ALTERA DENTRO DA FUNCAO SeMostraTela()
 Private _lPalletRetorno := .F.
 
-BEGIN SEQUENCE 
+Begin Sequence 
    
    //==========================================================
    // A tela já foi chamada uma vez para digitação das datas.
@@ -449,33 +401,33 @@ BEGIN SEQUENCE
 	  If !_lPalletRetorno 
 		 _cQuery += "     	AND F1.F1_FORMUL = 'S' "
 	  EndIf
-	  _cQuery += " 		AND D1.D1_NFORI   = '" + ALLTRIM(SF2->F2_DOC)     + "' "
-	  _cQuery += " 		AND D1.D1_SERIORI = '" + ALLTRIM(SF2->F2_SERIE)   + "' "
-	  _cQuery += " 		AND D1.D1_FORNECE = '" + ALLTRIM(SF2->F2_CLIENTE) + "' "
-	  _cQuery += " 		AND D1.D1_LOJA    = '" + ALLTRIM(SF2->F2_LOJA)    + "' "
+	  _cQuery += " 		AND D1.D1_NFORI   = '" + AllTrim(SF2->F2_DOC)     + "' "
+	  _cQuery += " 		AND D1.D1_SERIORI = '" + AllTrim(SF2->F2_SERIE)   + "' "
+	  _cQuery += " 		AND D1.D1_FORNECE = '" + AllTrim(SF2->F2_CLIENTE) + "' "
+	  _cQuery += " 		AND D1.D1_LOJA    = '" + AllTrim(SF2->F2_LOJA)    + "' "
 	  _cQuery += " 		AND F1.F1_STATUS  = 'A'  "
 		
-	  If select("SD1T") > 0
-	     Dbselectarea("SD1T")
-		 SD1T->(Dbclosearea())
-	  Endif
+	  If Select("SD1T") > 0
+	     DBSelectArea("SD1T")
+		 SD1T->(DBCloseArea())
+	  EndIf
 		
       MPSysOpenQuery( _cQuery , "SD1T" )
 
-	  If !(SD1T->(EOF()))
-		 SD1->(Dbgoto(SD1T->RECN))
-		 SF1->(Dbgoto(SD1T->RECNF1))
+	  If !(SD1T->(Eof()))
+		 SD1->(DBGoTo(SD1T->RECN))
+		 SF1->(DBGoTo(SD1T->RECNF1))
 	  	 //Achou nota de devolução da venda registra automaticamente o canhoto da entrega
-		 SF2->(Reclock("SF2", .F.))
+		 SF2->(RecLock("SF2", .F.))
 	     If _lPalletRetorno 
 		    SF2->F2_I_DTRC := SF1->F1_DAUTNFE//SD1->D1_EMISSAO
-		 ENDIF
-		 SF2->F2_I_CUSER:= Subs(Embaralha(SF1->F1_USERLGA, 1), 3, 6)//__cUserID UsrFullName(Subs(Embaralha(SD1T->F1_USERLGI, 1), 3, 6))
-		 SF2->F2_I_CDATA:= SF1->F1_DAUTNFE//DATE()
-		 SF2->F2_I_CHORA:= SF1->F1_HAUTNFE//TIME()
+		 EndIf
+		 SF2->F2_I_CUSER:= Subs(Embaralha(SF1->F1_USERLGA, 1), 3, 6)//__cUserId UsrFullName(Subs(Embaralha(SD1T->F1_USERLGI, 1), 3, 6))
+		 SF2->F2_I_CDATA:= SF1->F1_DAUTNFE//Date()
+		 SF2->F2_I_CHORA:= SF1->F1_HAUTNFE//Time()
          SF2->F2_I_CORIG:= "AOMS054"
 		 SF2->F2_I_OBRC	:= "NFD: "+SD1->D1_DOC+" "+SD1->D1_SERIE +" Formulario Proprio: ("+SF1->F1_FORMUL+")"
-		 SF2->(Msunlock())
+		 SF2->(MSUnLock())
 		
 		 //Carrega motivo de nota de devolução a origem para a nota
 		 _oModel   := FWModelActive()
@@ -485,7 +437,7 @@ BEGIN SEQUENCE
 		 cfilant := _cfilori
 		
 		 Return .T./// RETORNA AQUI
-	  Endif
+	  EndIf
 
 	 
 	  DBSelectArea('SA1')
@@ -530,7 +482,7 @@ BEGIN SEQUENCE
       _dEntOLCha:= SF2->F2_I_DTOP  // Data em que o Transportador Entregou efetivamente a Carga no Operador Logístico // pode ser editado. 
 	
 	  If ! Empty(SF2->F2_I_OUSER)
-         _cAprOperL  := UsrFullName(SF2->F2_I_OUSER) + " - " + DToc(SF2->F2_I_ODATA) + " - " + SF2->F2_I_OHORA
+         _cAprOperL  := UsrFullName(SF2->F2_I_OUSER) + " - " + DToC(SF2->F2_I_ODATA) + " - " + SF2->F2_I_OHORA
       EndIf
 
       //-------------------------------------------------------------
@@ -538,87 +490,87 @@ BEGIN SEQUENCE
 	  cGetStat    := U_AOMS054J(SF2->F2_FILIAL,SF2->F2_DOC,SF2->F2_SERIE)
 	  _cnflabel := cFilNF + "/" + cGNumNF
 
-	  //Se for cte do operador logistico e data de entrega de operador 
+	  //Se For cte do operador logistico e data de entrega de operador 
 	  // logistico já está preenchida retorna validado
 	  _loplog := u_Nfoplog(cFilNF,cGNumNF,cGSerie)
     
 	  cAprovacao:=""
       cAprovCanh:=""
-      ZGJ->(Dbsetorder(1))
-      IF ZGJ->(Dbseek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE))
+      ZGJ->(DBSetOrder(1))
+      If ZGJ->(DBSeek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE))
          cGetstat    := ZGJ->ZGJ_STATUS
          cGetDtCanh  := ZGJ->ZGJ_DTENT
-         cAprovCanh  := UsrFullName(ALLTRIM(ZGJ->ZGJ_APROVA))
-         cDatavCanh  := DTOC(ZGJ->ZGJ_DATAA)
+         cAprovCanh  := UsrFullName(AllTrim(ZGJ->ZGJ_APROVA))
+         cDatavCanh  := DToC(ZGJ->ZGJ_DATAA)
          cHoravCanh  := ZGJ->ZGJ_HORAA
          cGetObser   := ZGJ->ZGJ_OBS
-      ELSE
+      Else
          cGetDtCanh  := SF2->F2_I_DTRC
-         cDatavCanh  := DTOC(SF2->F2_I_CDATA)
+         cDatavCanh  := DToC(SF2->F2_I_CDATA)
          cHoravCanh  := SF2->F2_I_CHORA
          cGetObser   := SF2->F2_I_OBRC
-         IF !EMPTY(cGetDtCanh)
+         If !Empty(cGetDtCanh)
             cGetstat := "Aprovado"
-         ENDIF
-      ENDIF
-      IF EMPTY(cAprovCanh)//Pq o conteudo do campo ZGJ_APROVA dos antigos não é __cUserID, coloquei a partir de 16/06/2022
+         EndIf
+      EndIf
+      If Empty(cAprovCanh)//Pq o conteudo do campo ZGJ_APROVA dos antigos não é __cUserId, coloquei a partir de 16/06/2022
          cAprovCanh  := UsrFullName((SF2->F2_I_CUSER))
-      ENDIF
-      IF EMPTY(cAprovCanh)//Pq se conteudo do campo F2_I_CUSER for branco e o ZGJ_APROVA for o antigo vai ele mesmo
+      EndIf
+      If Empty(cAprovCanh)//Pq se conteudo do campo F2_I_CUSER For branco e o ZGJ_APROVA For o antigo vai ele mesmo
          cAprovCanh  := ZGJ->ZGJ_APROVA
-      ENDIF
-      cAprovacao:=ALLTRIM(cAprovCanh)
-      IF !EMPTY(CTOD(cDatavCanh))
+      EndIf
+      cAprovacao:=AllTrim(cAprovCanh)
+      If !Empty(CTOD(cDatavCanh))
          cAprovacao+=" - "+cDatavCanh
-      ENDIF
-      IF !EMPTY(cHoravCanh)
+      EndIf
+      If !Empty(cHoravCanh)
          cAprovacao+=" - "+cHoravCanh
-      ENDIF
+      EndIf
 
-	  SC5->(Dbsetorder(1))
-	  If SC5->(Dbseek(SF2->F2_FILIAL+ALLTRIM(SF2->F2_I_PEDID))) .AND. SC5->C5_I_OPER = '51' //_lPalletRetorno
-	     U_ITMSG("A PRÓXIMA TELA MOSTRA OS DADOS REFERENTE AO PEDIDO DE PALLET RETORNO DO TRANSPORTADOR: "+SC5->C5_I_NOME,"ATENÇÃO",,3)
-	  ENDIF
+	  SC5->(DBSetOrder(1))
+	  If SC5->(DBSeek(SF2->F2_FILIAL+AllTrim(SF2->F2_I_PEDID))) .And. SC5->C5_I_OPER = '51' //_lPalletRetorno
+	     U_ITMsg("A PRÓXIMA TELA MOSTRA OS DADOS REFERENTE AO PEDIDO DE PALLET RETORNO DO TRANSPORTADOR: "+SC5->C5_I_NOME,"ATENÇÃO",,3)
+	  EndIf
 
-      Do while .T.
+      While .T.
 
          _nOpc:= 2
 			
          _nLin1 := 74// 29  // soma 27
          _nLin2 := 82 // 37  // soma 27
 
-	     DEFINE MSDIALOG oDlg2 TITLE "Recebimento de Canhoto:" FROM 000, 000  TO 600, 1200 PIXEL // 450, 1200
+	     DEFINE MSDIALOG oDlg2 TITLE "Recebimento de Canhoto:" FROM 000, 000  To 600, 1200 PIXEL // 450, 1200
 	
 	        oPanel	:= TPanel():New( 0 , 0 , '' , oDlg2 ,, .T. , .T. ,,, 815 , 600 , .T. , .T. )
 
-	        @ 040, 014 SAY "Tipo da N.F."				SIZE 032, 007 PIXEL OF oPanel  
+	        @ 040, 014 Say "Tipo da N.F."				SIZE 032, 007 PIXEL OF oPanel  
 	        @ 048, 014 MSGET oGTipNF VAR _cTipoNf		SIZE 060, 010 PIXEL OF oPanel READONLY
 	
-	        @ 040, 098 SAY "Numero da N.F."				SIZE 048, 007 PIXEL OF oPanel 
+	        @ 040, 098 Say "Numero da N.F."				SIZE 048, 007 PIXEL OF oPanel 
 	        @ 048, 097 MSGET oGNumNF VAR _cnflabel		SIZE 060, 010 PIXEL OF oPanel READONLY
 	
-	        @ 040, 193 SAY "Serie"						SIZE 025, 007 PIXEL OF oPanel 
+	        @ 040, 193 Say "Serie"						SIZE 025, 007 PIXEL OF oPanel 
 	        @ 048, 193 MSGET oGSerie VAR cGSerie		SIZE 060, 010 PIXEL OF oPanel READONLY
 	
-	        @ 040, 268 SAY "Cliente/Loja"				SIZE 033, 007 PIXEL OF oPanel 
+	        @ 040, 268 Say "Cliente/Loja"				SIZE 033, 007 PIXEL OF oPanel 
 	        @ 048, 268 MSGET oGCliente VAR cGCliente	SIZE 060, 010 PIXEL OF oPanel READONLY
 	
-	        @ 040, 343 SAY "Descrição do Cliente"		SIZE 067, 007 PIXEL OF oPanel 
+	        @ 040, 343 Say "Descrição do Cliente"		SIZE 067, 007 PIXEL OF oPanel 
 	        @ 048, 343 MSGET oGDescCli VAR cGDescCli	SIZE 200, 010 PIXEL OF oPanel READONLY
 	
-	        @ 072, 014 SAY "CNPJ/CPF"					SIZE 025, 007 PIXEL OF oPanel 
+	        @ 072, 014 Say "CNPJ/CPF"					SIZE 025, 007 PIXEL OF oPanel 
 	        @ 080, 014 MSGET oGCGC VAR cGCGC			SIZE 060, 010 PIXEL OF oPanel READONLY
 	
-	        @ 072, 097 SAY "Codigo da Rede/Descrição"	SIZE 074, 007 PIXEL OF oPanel 
+	        @ 072, 097 Say "Codigo da Rede/Descrição"	SIZE 074, 007 PIXEL OF oPanel 
 	        @ 080, 097 MSGET oGRede VAR cGRede			SIZE 080, 010 PIXEL OF oPanel READONLY
 	
-	        @ 072, 193 SAY "Emissão"					SIZE 025, 007 PIXEL OF oPanel 
+	        @ 072, 193 Say "Emissão"					SIZE 025, 007 PIXEL OF oPanel 
 	        @ 080, 193 MSGET oGEmissao VAR cGEmissao	SIZE 060, 010 PIXEL OF oPanel READONLY
 	
-	        @ 072, 268 SAY "Carga"						SIZE 025, 007 PIXEL OF oPanel 
+	        @ 072, 268 Say "Carga"						SIZE 025, 007 PIXEL OF oPanel 
 	        @ 080, 268 MSGET oGCarga VAR cGCarga		SIZE 060, 010 PIXEL OF oPanel READONLY
 	
-	        @ 072, 343 SAY "Valor da N.F."				SIZE 036, 007 PIXEL OF oPanel 
+	        @ 072, 343 Say "Valor da N.F."				SIZE 036, 007 PIXEL OF oPanel 
 	        @ 080, 343 MSGET oGVlrNF VAR cGVlrNF		SIZE 060, 010 PIXEL OF oPanel READONLY PICTURE "@E 99,999,999,999.99"
 
 	        //Só mostra campo de data de operador logistico para notas que tem operador logistico ou ocorrência de op logistico
@@ -628,19 +580,19 @@ BEGIN SEQUENCE
                _nLin1 += 27
                _nLin2 += 27
 
-               @ _nLin1 , 014 SAY "Prev.Entrega Oper.Logistico"   SIZE 081, 007 PIXEL OF oPanel 
+               @ _nLin1 , 014 Say "Prev.Entrega Oper.Logistico"   SIZE 081, 007 PIXEL OF oPanel 
                @ _nLin2 , 014 MSGET _dPrevEOL                     SIZE 060, 010 PIXEL OF oPanel WHEN .F.
 
-               @ _nLin1 , 098 SAY "Dt.Ocorr.Oper.Logistico"       SIZE 081, 007 PIXEL OF oPanel          // "Dt.Chegada Oper.Logistico"
+               @ _nLin1 , 098 Say "Dt.Ocorr.Oper.Logistico"       SIZE 081, 007 PIXEL OF oPanel          // "Dt.Chegada Oper.Logistico"
                @ _nLin2 , 097 MSGET _dChegOL                      SIZE 060, 010 PIXEL OF oPanel WHEN .F.
 
-               @ _nLin1 , 182 SAY "Dt. Entrega Op. Log. (EDI)"    SIZE 081, 007 PIXEL OF oPanel
+               @ _nLin1 , 182 Say "Dt. Entrega Op. Log. (EDI)"    SIZE 081, 007 PIXEL OF oPanel
                @ _nLin2 , 182 MSGET _dEntrOL                      SIZE 060, 010 PIXEL OF oPanel WHEN .F. // NÃO pode MAIS ser editado.
 
-               @ _nLin1 , 266 SAY "Entrega no OpLog (Dt.Canhoto)" SIZE 081, 007 PIXEL OF oPanel
-               @ _nLin2 , 266 MSGET _dEntOLCha                    SIZE 060, 010 PIXEL OF oPanel WHEN !_leOpLog // Edita só se for o lançamento do CTE do Transportador
+               @ _nLin1 , 266 Say "Entrega no OpLog (Dt.Canhoto)" SIZE 081, 007 PIXEL OF oPanel
+               @ _nLin2 , 266 MSGET _dEntOLCha                    SIZE 060, 010 PIXEL OF oPanel WHEN !_leOpLog // Edita só se For o lançamento do CTE do Transportador
 
-	           @ _nLin1, 415 SAY  "Usuario Alt.Dt.Entrega Opl- Data - Hora:" SIZE 300, 007 PIXEL OF oPanel    
+	           @ _nLin1, 415 Say  "Usuario Alt.Dt.Entrega Opl- Data - Hora:" SIZE 300, 007 PIXEL OF oPanel    
                @ _nLin2, 415 MSGET _cAprOperL                     SIZE 165, 010 PIXEL OF oPanel WHEN .F.
 
             EndIf 
@@ -648,21 +600,21 @@ BEGIN SEQUENCE
             _nLin1 += 27
             _nLin2 += 27
 
-	        @ _nLin1 , 014 SAY "Prev.Entrega Cliente"            SIZE 081, 007 PIXEL OF oPanel
+	        @ _nLin1 , 014 Say "Prev.Entrega Cliente"            SIZE 081, 007 PIXEL OF oPanel
             @ _nLin2 , 014 MSGET _dPrevECL                       SIZE 060, 010 PIXEL OF oPanel WHEN .F.
 
-            @ _nLin1 , 098 SAY "Dt.Ocorrencia Cliente"           SIZE 081, 007 PIXEL OF oPanel //"Dt.Chegada Cliente"
+            @ _nLin1 , 098 Say "Dt.Ocorrencia Cliente"           SIZE 081, 007 PIXEL OF oPanel //"Dt.Chegada Cliente"
             @ _nLin2 , 097 MSGET _dChegCL                        SIZE 060, 010 PIXEL OF oPanel WHEN .F.
 
-            @ _nLin1 , 182 SAY "Dt.Entrega Cliente (EDI)"        SIZE 081, 007 PIXEL OF oPanel
+            @ _nLin1 , 182 Say "Dt.Entrega Cliente (EDI)"        SIZE 081, 007 PIXEL OF oPanel
             @ _nLin2 , 182 MSGET _dEntrCL                        SIZE 060, 010 PIXEL OF oPanel WHEN .F.
 
-	        @ _nLin1 , 266 SAY "Entrega no Cliente (Dt.Canhoto)" SIZE 081, 007 PIXEL OF oPanel
-	        @ _nLin2 , 266 MSGET oGetDtCanh VAR cGetDtCanh	     SIZE 060, 010 PIXEL OF oPanel WHEN (!_loplog .OR. _leOpLog) ;//Edita se não tiver Operador Log. OU se tiver mas é o lançamento do CTE do Transportador
-			                         VALID { || cGetStat := IIF(alltrim(cGetStat)=="Nao recepcionado","Nao recepcionado","Aprovado")}
+	        @ _nLin1 , 266 Say "Entrega no Cliente (Dt.Canhoto)" SIZE 081, 007 PIXEL OF oPanel
+	        @ _nLin2 , 266 MSGET oGetDtCanh VAR cGetDtCanh	     SIZE 060, 010 PIXEL OF oPanel WHEN (!_loplog .Or. _leOpLog) ;//Edita se não tiver Operador Log. OU se tiver mas é o lançamento do CTE do Transportador
+			                         VALID { || cGetStat := IIf(AllTrim(cGetStat)=="Nao recepcionado","Nao recepcionado","Aprovado")}
 	
             _nColU:=415
-            @ _nLin1, _nColU SAY "Usuario Apr. Canhoto - Data - Hora:" SIZE 300, 007 PIXEL OF oPanel    
+            @ _nLin1, _nColU Say "Usuario Apr. Canhoto - Data - Hora:" SIZE 300, 007 PIXEL OF oPanel    
             @ _nLin2, _nColU MSGET cAprovacao                    SIZE 165, 010 PIXEL OF oPanel WHEN .F.
 
 	        _ncol := 97
@@ -670,26 +622,26 @@ BEGIN SEQUENCE
 	        _nLin1 += 27
             _nLin2 += 27
     
-	        @ _nLin1 , 014 SAY "Status"					    SIZE 040, 007 PIXEL OF oPanel
-	        @ _nLin2 , 014 MSCOMBOBOX oGetStat VAR cGetStat ITEMS IIF(alltrim(cGetStat)=="Nao recepcionado",{"Nao recepcionado"},{"Aguardando Conf","Aprovado","Reprovado"}) SIZE 074, 010 PIXEL OF oPanel 
+	        @ _nLin1 , 014 Say "Status"					    SIZE 040, 007 PIXEL OF oPanel
+	        @ _nLin2 , 014 MSCOMBOBOX oGetStat VAR cGetStat ITEMS IIf(AllTrim(cGetStat)=="Nao recepcionado",{"Nao recepcionado"},{"Aguardando Conf","Aprovado","Reprovado"}) SIZE 074, 010 PIXEL OF oPanel 
 
-	        @ _nLin1 , 098 SAY "Observação"					SIZE 040, 007 PIXEL OF oPanel
+	        @ _nLin1 , 098 Say "Observação"					SIZE 040, 007 PIXEL OF oPanel
 	        @ _nLin2 , 098 MSGET oGetObser VAR cGetObser	SIZE 250, 010 PIXEL OF oPanel
 
-	        If alltrim(cGetStat)!="Nao recepcionado" 
+	        If AllTrim(cGetStat)!="Nao recepcionado" 
 
 	           _lReti := .F.
 
 	           //Carrega canhoto da página da Estec
-	           fwmsgrun( ,{|oproc| _lReti := U_CARCANHO(cFilNF,alltrim(cGNumNF),oproc,.F.) } , "Aguarde!", "Carregando imagem do canhoto..."  )
+	           FWMsgRun( ,{|oproc| _lReti := U_CARCANHO(cFilNF,AllTrim(cGNumNF),oproc,.F.) } , "Aguarde!", "Carregando imagem do canhoto..."  )
 	
-	           oTBitmap1 := TBitmap():New(180,014,170,300,,"\temp\canhoto" + alltrim(cGNumNF)+ "_" + AllTrim(cFilNF) + ".jpg",.T.,opanel,,,.F.,.F.,,,.F.,,.T.,,.F.) // 132,014,202,300
+	           oTBitmap1 := TBitmap():New(180,014,170,300,,"\temp\canhoto" + AllTrim(cGNumNF)+ "_" + AllTrim(cFilNF) + ".jpg",.T.,opanel,,,.F.,.F.,,,.F.,,.T.,,.F.) // 132,014,202,300
                                   
 	           oTBitmap1:lAutoSize := .T. 		
 		
 	        EndIf
 	
-		    //@ 112, _ncol MSCOMBOBOX oGetStat VAR cGetStat ITEMS IIF(alltrim(cGetStat)=="Nao recepcionado",{"Nao recepcionado"},{"Aguardando Conf","Aprovado","Reprovado"}) SIZE 074, 010 PIXEL OF oPanel 
+		    //@ 112, _ncol MSCOMBOBOX oGetStat VAR cGetStat ITEMS IIf(AllTrim(cGetStat)=="Nao recepcionado",{"Nao recepcionado"},{"Aguardando Conf","Aprovado","Reprovado"}) SIZE 074, 010 PIXEL OF oPanel 
 		
 	        oGetDtCanh:SetFocus()	  
            		
@@ -698,54 +650,54 @@ BEGIN SEQUENCE
 		 //Valida datas de canhoto contra data de emissão da nota de venda
 		 If _nOpc == 1
 
-			If _loplog .AND. !EMPTY(_dEntOLCha) .AND. (_dEntOLCha < cGEmissao) 				
-			   u_itmsg("Data de Entrega no OL (Dt.Canhoto): "+DTOC(_dEntOLCha)+" precisa ser maior ou igual a data de emissão: "+DTOC(cGEmissao)+" da nota de saída: "+_cnflabel,"Atenção",,1)
+			If _loplog .And. !Empty(_dEntOLCha) .And. (_dEntOLCha < cGEmissao) 				
+			   U_ITMsg("Data de Entrega no OL (Dt.Canhoto): "+DToC(_dEntOLCha)+" precisa ser maior ou igual a data de emissão: "+DToC(cGEmissao)+" da nota de saída: "+_cnflabel,"Atenção",,1)
 			   Loop
-            ENDIF
-			If _loplog .AND. !EMPTY(_dEntOLCha) .AND. _dEntOLCha > DATE()
-			   u_itmsg("Data de Entrega no OL (Dt.Canhoto): "+DTOC(_dEntOLCha)+" precisa ser menor ou igual a data de hoje: "+DTOC(DATE())+" da nota de saída: "+_cnflabel,"Atenção",,1)
+            EndIf
+			If _loplog .And. !Empty(_dEntOLCha) .And. _dEntOLCha > Date()
+			   U_ITMsg("Data de Entrega no OL (Dt.Canhoto): "+DToC(_dEntOLCha)+" precisa ser menor ou igual a data de hoje: "+DToC(Date())+" da nota de saída: "+_cnflabel,"Atenção",,1)
 			   Loop
-            ENDIF
+            EndIf
 
 			//Canhoto de transportador
-			If EMPTY(cGetDtCanh) .AND. !_loplog
+			If Empty(cGetDtCanh) .And. !_loplog
 				
-			   u_itmsg("Data de Entrega no Cliente (Dt.Canhoto) é obrigatório para o Cte de Transportador: "+_cnflabel,"Atenção",,1)
+			   U_ITMsg("Data de Entrega no Cliente (Dt.Canhoto) é obrigatório para o Cte de Transportador: "+_cnflabel,"Atenção",,1)
 			   Loop
 
-			ELSEIf !EMPTY(cGetDtCanh) .AND.(cGetDtCanh < cGEmissao) 
+			ElseIf !Empty(cGetDtCanh) .AND.(cGetDtCanh < cGEmissao) 
 				
-			   u_itmsg("Data de Entrega no Cliente (Dt.Canhoto): "+DTOC(cGetDtCanh)+" precisa ser maior ou igual a data de emissão: "+DTOC(cGEmissao)+" da nota de saída (canhoto): "+_cnflabel,"Atenção",,1)
+			   U_ITMsg("Data de Entrega no Cliente (Dt.Canhoto): "+DToC(cGetDtCanh)+" precisa ser maior ou igual a data de emissão: "+DToC(cGEmissao)+" da nota de saída (canhoto): "+_cnflabel,"Atenção",,1)
 			   Loop
             
-			ELSEIf !EMPTY(cGetDtCanh) .AND. cGetDtCanh > DATE() 
-				u_itmsg("Data de Entrega no Cliente (Dt.Canhoto): "+DTOC(cGetDtCanh)+" precisa ser menor ou igual a data atual!","Atenção",,1)
+			ElseIf !Empty(cGetDtCanh) .And. cGetDtCanh > Date() 
+				U_ITMsg("Data de Entrega no Cliente (Dt.Canhoto): "+DToC(cGetDtCanh)+" precisa ser menor ou igual a data atual!","Atenção",,1)
 				Loop
 			
-			Endif
+			EndIf
 		 Else
 
-			If u_itmsg("Cancela processamento de canhotos do CTR?","Atenção",,2,2,2)
+			If U_ITMsg("Cancela processamento de canhotos do CTR?","Atenção",,2,2,2)
 			   _lRet := .F.
 			   _nopc := 2
 			   _lTrocaNF := .F.
 			   _lTriangu := .F.
-			Endif
-		 Endif
+			EndIf
+		 EndIf
 
 		 Exit
-	  Enddo
+	  EndDo
 
 	  //================================================================================
       // Confirma reprovação do canhoto
 	  //================================================================================
-	  If _nOpc == 1 .AND. alltrim(cGetStat) == "Reprovado" //.AND. _nopcao == 1
-		 If !u_itmsg("Confirma reprovação do canhoto?","Atenção","CTE não será liberado para pagamento!",3,2,2)
+	  If _nOpc == 1 .And. AllTrim(cGetStat) == "Reprovado" //.AND. _nopcao == 1
+		 If !U_ITMsg("Confirma reprovação do canhoto?","Atenção","CTE não será liberado para pagamento!",3,2,2)
 		
 			_nOpc := 2
 			
-		 Endif
-	  Endif	
+		 EndIf
+	  EndIf	
 	
 	  If _nOpc == 1
 	    
@@ -758,15 +710,12 @@ BEGIN SEQUENCE
 	     EndIf 
 		
 		 //Só grava SF2 para liberar cte se o canhoto não foi reprovado
-		 If alltrim(cGetStat) != "Reprovado"
+		 If AllTrim(cGetStat) != "Reprovado"
 		
 			SF2->( RecLock( "SF2" , .F. ) )
 			SF2->F2_I_DTRC	:= cGetDtCanh
 			SF2->F2_I_OBRC	:= AllTrim( cGetObser )
             SF2->F2_I_DTOP  := _dEntOLCha // Data em que o Transportador Entregou efetivamente a Carga no Operador Logístico // pode ser editado.
-//------------------------------------------------------------------------
-            //SF2->F2_I_DENOL := _dEntrOL  // Data de entrega no operador logístico  EDI // NÃO pode MAIS ser editado.
-//------------------------------------------------------------------------
             If _lGrvOperL 
 			   SF2->F2_I_OUSER := __cUserId
 			   SF2->F2_I_ODATA := Date()
@@ -774,56 +723,55 @@ BEGIN SEQUENCE
 			EndIf
 
             If _lGrvCanho
-			   SF2->F2_I_CUSER := __cUserID // Usuário de aprovação do canhoto.
+			   SF2->F2_I_CUSER := __cUserId // Usuário de aprovação do canhoto.
                SF2->F2_I_CDATA := Date()    // Data de digitação do Canhoto.
                SF2->F2_I_CHORA := Time()    // hora de digitação do Canhoto.
 			EndIf
-//------------------------------------------------------------------------
             SF2->F2_I_CORIG := "AOMS054"
-			SF2->( MsUnlock() )
+			SF2->( MSUnLock() )
 			
 			//================================================================================
 			//	Atualiza muro de canhoto com a Estec
 			//================================================================================
-			ZGJ->(Dbsetorder(1))
-			If ZGJ->(Dbseek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE))
-		       If !EMPTY(cGetDtCanh) .And. ZGJ->ZGJ_DTENT <> cGetDtCanh
+			ZGJ->(DBSetOrder(1))
+			If ZGJ->(DBSeek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE))
+		       If !Empty(cGetDtCanh) .And. ZGJ->ZGJ_DTENT <> cGetDtCanh
 				  ZGJ->( RecLock( "ZGJ" , .F. ) )
 				  ZGJ->ZGJ_DTENT:= cGetDtCanh
 				  ZGJ->ZGJ_OBS	:= cGetObser
-			      IF !EMPTY(cGetDtCanh) //CHAMADO 39375. Quando informado uma Data de Canhoto e existir tabela de Controle de Digitalização de Canhoto (ZGJ) gravar o status da digitalização igual a "Aprovado" e Data de Entrega 
+			      If !Empty(cGetDtCanh) //CHAMADO 39375. Quando informado uma Data de Canhoto e existir tabela de Controle de Digitalização de Canhoto (ZGJ) gravar o status da digitalização igual a "Aprovado" e Data de Entrega 
 				     ZGJ->ZGJ_STATUS := "Aprovado"
-				  ELSE
-				     ZGJ->ZGJ_STATUS := ALLTRIM(cGetStat)
-				  ENDIF
-				  ZGJ->ZGJ_DATAA  := DATE()
-				  ZGJ->ZGJ_HORAA  := TIME()
-				  ZGJ->ZGJ_APROVA := __cUserID
-				  ZGJ->( MsUnlock() )
+				  Else
+				     ZGJ->ZGJ_STATUS := AllTrim(cGetStat)
+				  EndIf
+				  ZGJ->ZGJ_DATAA  := Date()
+				  ZGJ->ZGJ_HORAA  := Time()
+				  ZGJ->ZGJ_APROVA := __cUserId
+				  ZGJ->( MSUnLock() )
 	           EndIf	
-			Endif
+			EndIf
 		
 			//================================================================================
 			//	Encerra monitor de pedidos se houver e se o canhoto não estiver reprovado
 			//=============================================================================== 
-			SC5->(Dbsetorder(1))
-			SC5->(Dbseek(SF2->F2_FILIAL+SF2->F2_I_PEDID))
+			SC5->(DBSetOrder(1))
+			SC5->(DBSeek(SF2->F2_FILIAL+SF2->F2_I_PEDID))
 
-			IF !(alltrim(SC5->C5_I_OPER) $ AllTrim(U_ITGETMV( 'IT_MPVOP' , '50/51/02'))) 
+			If !(AllTrim(SC5->C5_I_OPER) $ AllTrim(SuperGetMV('IT_MPVOP',.T.,'50/51/02')))
 		
 				aheader := {}
 				acols := {}
-				aadd(aheader,{1,"C6_ITEM"})
-				aadd(aheader,{2,"C6_PRODUTO"})
-				aadd(aheader,{3,"C6_LOCAL"})
+				aAdd(aheader,{1,"C6_ITEM"})
+				aAdd(aheader,{2,"C6_PRODUTO"})
+				aAdd(aheader,{3,"C6_LOCAL"})
 
-				SC6->(Dbsetorder(1))
-				SC6->(Dbseek(SC5->C5_FILIAL+SC5->C5_NUM))
+				SC6->(DBSetOrder(1))
+				SC6->(DBSeek(SC5->C5_FILIAL+SC5->C5_NUM))
 		
-				Do while SC6->(!EOF()) .AND. SC5->C5_FILIAL == SC6->C6_FILIAL .AND. SC5->C5_NUM == SC6->C6_NUM
-					aadd(acols,{SC6->C6_ITEM,SC6->C6_PRODUTO,SC6->C6_LOCAL})
-					SC6->(Dbskip())
-				Enddo
+				While SC6->(!Eof()) .And. SC5->C5_FILIAL == SC6->C6_FILIAL .And. SC5->C5_NUM == SC6->C6_NUM
+					aAdd(acols,{SC6->C6_ITEM,SC6->C6_PRODUTO,SC6->C6_LOCAL})
+					SC6->(DBSkip())
+				EndDo
                 
 				_cFilCarreg := SC5->C5_FILIAL
                 If ! Empty(SC5->C5_I_FLFNC)
@@ -832,51 +780,51 @@ BEGIN SEQUENCE
 
 				_dDTNECE := SC5->C5_I_DTENT - (U_OMSVLDENT(SC5->C5_I_DTENT,SC5->C5_CLIENTE,SC5->C5_LOJACLI,SC5->C5_I_FILFT,SC5->C5_NUM,1, ,_cFilCarreg,SC5->C5_I_OPER,SC5->C5_I_TPVEN))
 				
-				IF !EMPTY(cGetDtCanh) .and. alltrim(cGetStat) != "Reprovado"
+				If !Empty(cGetDtCanh) .And. AllTrim(cGetStat) != "Reprovado"
 					_cJUSCOD := "012"//"RECEBIMENTO DE CANHOTO"
-					_cCOMENT := "*** Encerrado por recebimento do canhoto - entrega em " + dtoc(cGetDtCanh)
+					_cCOMENT := "*** Encerrado por recebimento do canhoto - entrega em " + DToC(cGetDtCanh)
 					_cLENCMON := 'S'
-				ELSEIF EMPTY(cGetDtCanh) 
+				ElseIf Empty(cGetDtCanh) 
 					_cJUSCOD:= "013"//"ESTORNO DE RECEBIMENTO DE CANHOTO"
 					_cCOMENT := "*** Estorno do recebimento do canhoto."
 					_cLENCMON:= 'I'
-				ELSEIF alltrim(&( _cAlias +'->'+ _cAlias +'_STATC' )) == "Reprovado"
+				ElseIf AllTrim(&( _cAlias +'->'+ _cAlias +'_STATC' )) == "Reprovado"
 					_cJUSCOD:= "013"//"ESTORNO DE RECEBIMENTO DE CANHOTO"
 					_cCOMENT := "*** Reprovacao do recebimento do canhoto. - " + cGetObser
 					_cLENCMON:= 'I'
-				ENDIF
+				EndIf
 
 				U_GrvMonitor(,,_cJUSCOD,_cCOMENT,_cLENCMON,_dDTNECE,SC5->C5_I_DTENT,SC5->C5_I_DTENT)
      
-			ENDIF
-		 Elseif alltrim(cGetStat) == "Reprovado"
+			EndIf
+		 ElseIf AllTrim(cGetStat) == "Reprovado"
 			SF2->( RecLock( "SF2" , .F. ) )
 			SF2->F2_I_DTRC	:= ctod(" ")
 			//SF2->F2_I_DTOL:= ctod(" ")
 			SF2->F2_I_OBRC	:= AllTrim( cGetObser )
-			SF2->F2_I_CUSER := __cUserID
-			SF2->F2_I_CDATA := DATE()
-			SF2->F2_I_CHORA := TIME()
+			SF2->F2_I_CUSER := __cUserId
+			SF2->F2_I_CDATA := Date()
+			SF2->F2_I_CHORA := Time()
             SF2->F2_I_CORIG := "AOMS054"
-			SF2->( MsUnlock() )
-		 Endif
+			SF2->( MSUnLock() )
+		 EndIf
 	  EndIf
 
 	  //Apaga os arquivos gerados para mostrar o canhoto
-	  ferase("\temp\canhoto" + alltrim(SF2->F2_DOC)+ "_" + AllTrim(cFilNF) + ".pdf")
-	  ferase("\temp\canhoto" + alltrim(SF2->F2_DOC)+ "_" + AllTrim(cFilNF) + ".jpg")
+	  ferase("\temp\canhoto" + AllTrim(SF2->F2_DOC)+ "_" + AllTrim(cFilNF) + ".pdf")
+	  ferase("\temp\canhoto" + AllTrim(SF2->F2_DOC)+ "_" + AllTrim(cFilNF) + ".jpg")
 	
 	  If _nopc == 1
 	
 		 _lRet := .T.
 		 
-	  Endif
+	  EndIf
 
-	  If (_lTrocaNF .OR. _lTriangu) .AND. _lReplica
+	  If (_lTrocaNF .Or. _lTriangu) .And. _lReplica
          
 		 U_Repl2DtsTransTime( SF2->(RECNO()) , SF2->F2_I_OBRC ) //REPLICA OS CAMPOS DO PEDIDO PRINCIPAL PARA OS GERADOS 
 	    
-	  Endif
+	  EndIf
 	
 	  cfilant := _cfilori
    Else
@@ -890,16 +838,16 @@ BEGIN SEQUENCE
    //ANALISA SE LIBERA OU NÃO O CTR
 
    If _lRet
-	  If EMPTY(SF2->F2_I_DTRC) .AND. (!_lTemOpl .OR. _leOpLog)  //.and. empty(SF2->F2_I_DTOL) //duas datas em branco
+	  If Empty(SF2->F2_I_DTRC) .And. (!_lTemOpl .Or. _leOpLog)  //.and. Empty(SF2->F2_I_DTOL) //duas datas em branco
 		 _lRet := .F.
 		 Help( ,, 'Atenção!',, "Canhoto não confirmado para a Nota fiscal " +;
 								_oModel:GetValue('ZZNDETAIL','ZZN_FILNFV') + "/" +  _oModel:GetValue('ZZNDETAIL','ZZN_NFISCA'), 1, 0 )
-	  Endif
+	  EndIf
    Else	 
 	  Help( ,, 'Atenção!',, "Canhoto não confirmado para a Nota fiscal " +;
 	   		_oModel:GetValue('ZZNDETAIL','ZZN_FILNFV') + "/" + _oModel:GetValue('ZZNDETAIL','ZZN_NFISCA'), 1, 0 )
 	 
-   Endif
+   EndIf
 
 End Sequence 
 
@@ -910,40 +858,37 @@ Return _lRet
 Programa----------: AOMS054A
 Autor-------------: Alexandre Villar
 Data da Criacao---: 24/09/2014
-===============================================================================================================================
 Descrição---------: Rotina para digitação da data de recebimento do canhoto
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: _lRet		- Retorno lógico da validação
 ===============================================================================================================================
 */
 Static Function AOMS054A()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _oModel	:= FWModelActive()
 Local _lRet := .T.
 Local _cfilial	:=  _oModel:GetValue( 'ZZNDETAIL' , 'ZZN_FILNFV' ) 
 Local _cChave	:= IIf( !Empty( _oModel:GetValue( 'ZZNDETAIL' , 'ZZN_NFISCA' ) ) , StrZero( Val( _oModel:GetValue( 'ZZNDETAIL' , 'ZZN_NFISCA' ) ) , TamSX3('F2_DOC')[01]   ) , '' )
 
-BEGIN SEQUENCE
+Begin Sequence
 
 If !Empty( _cChave ) .And. _cChave > StrZero( 0 , TamSX3('F2_DOC')[01] )
 
 	DBSelectArea('SF2')
 	SF2->( DBSetOrder(1) )
-	SF2->( DBGotop() )
+	SF2->( DBGoTop() )
 	If SF2->( DBSeek( _cfilial + _cChave + _oModel:GetValue( 'ZZNDETAIL' , 'ZZN_SERIE' ) ) )
 		
-		//se for a nota de carregamento de um troca nota, traz o canhoto da nota de faturamento para conferir primeiro
-		SC5->(Dbsetorder(1))
-		If SC5->(Dbseek(SF2->F2_FILIAL+ALLTRIM(SF2->F2_I_PEDID)))
+		//se For a nota de carregamento de um troca nota, traz o canhoto da nota de faturamento para conferir primeiro
+		SC5->(DBSetOrder(1))
+		If SC5->(DBSeek(SF2->F2_FILIAL+AllTrim(SF2->F2_I_PEDID)))
 		
-			IF SC5->C5_I_TRCNF == "S" .AND. SC5->C5_NUM == SC5->C5_I_PDPR
+			If SC5->C5_I_TRCNF == "S" .And. SC5->C5_NUM == SC5->C5_I_PDPR
 			
-				If SC5->(Dbseek(SC5->C5_I_FILFT+SC5->C5_I_PDFT))
+				If SC5->(DBSeek(SC5->C5_I_FILFT+SC5->C5_I_PDFT))
 				
-					IF SF2->(Dbseek(SC5->C5_I_FILFT+SC5->C5_NOTA+SC5->C5_SERIE))
+					If SF2->(DBSeek(SC5->C5_I_FILFT+SC5->C5_NOTA+SC5->C5_SERIE))
 					
 						_cfil := cfilant
 						cfilant := SC5->C5_I_FILFT
@@ -955,29 +900,29 @@ If !Empty( _cChave ) .And. _cChave > StrZero( 0 , TamSX3('F2_DOC')[01] )
 						cfilant := _cfil
 						
 						
-					Endif
+					EndIf
 					
 					SF2->( DBSeek( _cfilial + _cChave + _oModel:GetValue( 'ZZNDETAIL' , 'ZZN_SERIE' ) ) )
 					
-				Endif
+				EndIf
 				
-			Endif
+			EndIf
 			
-		Endif
+		EndIf
 		
 		If _lRet		
 		
 			_lRet := AOMS054G()  //Chama tela de confirmação do canhoto da nota selecionada
 			
-		Endif
+		EndIf
 		
 	EndIf
 
-Endif
+EndIf
 
-END SEQUENCE
+End Sequence
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return _lRet
 
@@ -986,22 +931,18 @@ Return _lRet
 Programa----------: AOMS054U
 Autor-------------: Fabiano Dias
 Data da Criacao---: 29/08/2011
-===============================================================================================================================
 Descrição---------: Rotina para preenchimento do campo virtual ZZN_DESMUN conforme o cadastro do Cliente contido na NF
-===============================================================================================================================
 Parametros--------: _cdoc - documento de saída
 					_cserie - série da nf de saída
 					_cfilial - filial da nf de saída
-===============================================================================================================================
 Retorno-----------: _cDesMun	- Descrição do município
 ===============================================================================================================================
 */
-
 User Function AOMS054U(_cdoc,_cserie,_cfilial)
 
 Local _cAlias	:= ""
 Local _cDescMun	:= ""
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 
 Default _cfilial := cfilant
 
@@ -1018,7 +959,7 @@ If !Empty(_cDoc) .And. !Empty(_cSerie) .And. ValType(_cDoc) == 'C' .And. ValType
 	AOMS054Q( 8 , _cAlias , _cDoc , _cSerie , "" , 0 , "" , "",_cfilial )
 	
 	DBSelectArea(_cAlias)
-	(_cAlias)->( DBGotop() )
+	(_cAlias)->( DBGoTop() )
 	
 	If (_cAlias)->( !Eof() )
 		_cDescMun:= (_cAlias)->CC2_MUN
@@ -1028,7 +969,7 @@ If !Empty(_cDoc) .And. !Empty(_cSerie) .And. ValType(_cDoc) == 'C' .And. ValType
 
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return( _cDescMun )
 
@@ -1037,9 +978,7 @@ Return( _cDescMun )
 Programa----------: AOMS054Q
 Autor-------------: Fabiano Dias
 Data da Criacao---: 10/08/2011
-===============================================================================================================================
 Descrição---------: Rotina desenvolvida para realizar as consultas necessárias no Banco de Dados.
-===============================================================================================================================
 Parametros--------: _nOpcao    - número da query a ser executada
 ------------------: _cAlias    - Alias da query a ser executada
 ------------------: _cDoc      - Numero da nota fiscal corrente inserida no item da fatura
@@ -1051,11 +990,9 @@ Parametros--------: _nOpcao    - número da query a ser executada
 ------------------: _cfilial   - Filial para filtrar query de sf2
 ------------------: _cftrans   - Transportador no cabeçalho
 ------------------: _clojaft   - Loja do transportador no cabeçalho
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-
 Static Function AOMS054Q( _nOpcao , _cAlias , _cDoc , _cSerie , _cCTR , _nOperacao , _cSerieCTR , _cCarga, _cfilial,_cftrans,_clojaft )
 
 Local _cFiltro		:= ''
@@ -1097,10 +1034,10 @@ Do Case
 				SA2.A2_NREDUZ,
 				'N' NFSEDEX,
 				SF2.F2_CARGA CARGA
-			FROM %table:SF2% SF2
-			JOIN %table:DAK% DAK ON DAK.DAK_FILIAL = SF2.F2_FILIAL AND DAK.DAK_COD = SF2.F2_CARGA
-			JOIN %table:DA4% DA4 ON DA4.DA4_COD = DAK.DAK_MOTORI
-			JOIN %table:SA2% SA2 ON SF2.F2_I_CTRA = SA2.A2_COD AND SF2.F2_I_LTRA = SA2.A2_LOJA
+			FROM %Table:SF2% SF2
+			JOIN %Table:DAK% DAK ON DAK.DAK_FILIAL = SF2.F2_FILIAL AND DAK.DAK_COD = SF2.F2_CARGA
+			JOIN %Table:DA4% DA4 ON DA4.DA4_COD = DAK.DAK_MOTORI
+			JOIN %Table:SA2% SA2 ON SF2.F2_I_CTRA = SA2.A2_COD AND SF2.F2_I_LTRA = SA2.A2_LOJA
 			WHERE
 				SF2.D_E_L_E_T_ = ' '
 			AND DAK.D_E_L_E_T_ = ' '
@@ -1155,7 +1092,7 @@ Do Case
 		BeginSql alias _cAlias	
 			SELECT 
 			    COUNT(*) NUMREG
-			FROM %table:ZZN%
+			FROM %Table:ZZN%
 			WHERE 
 			    D_E_L_E_T_ = ' '
 			%exp:_cFiltro%		    		    		    
@@ -1186,7 +1123,7 @@ Do Case
 		BeginSql alias _cAlias
 			SELECT
 			    COUNT(*) NUMREG
-			FROM %table:ZZN%
+			FROM %Table:ZZN%
 			WHERE
 			    D_E_L_E_T_ = ' '
 			%exp:_cFiltro%
@@ -1268,18 +1205,14 @@ Return
 Programa----------: AOMS054M
 Autor-------------: Alexandre Villar
 Data da Criacao---: 22/10/2014
-===============================================================================================================================
 Descrição---------: Rotina de controle e processamento dos pontos de entrada do MVC
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-
 User Function AOMS054M()
 
-Local _aParam		:= PARAMIXB
+Local _aParam		:= ParamIXB
 Local _xRet			:= .T.
 Local _oObj			:= ''
 Local _oModel 		:= FWModelActive()
@@ -1308,10 +1241,8 @@ Private _ccond        := ""
 Private _cconda       := ""
 Private _cnatureza    := ""
 
-
 Static _cfatura2 := ""   
 Static _lenviaf := .F.
-
 
 If _aParam <> NIL
 
@@ -1331,27 +1262,21 @@ If _aParam <> NIL
 
 		_oModel 		:= FWModelActive()
 
-		If u_itgetmv("ITFATCTR",.F.)
+		If SuperGetMV("IT_FATCTR",.F.,.F.)
 
 			_lRet := AOMS0548(_omodel) //Valida e exclui fatura se necessário
 
 			If !_lRet
-
 				Return .F.
-
 			Else
-
 				//Envia email de exclusão da fatura
 				AOMS054T(_omodel)
-
-			Endif
-
-		Endif
-
-	Endif
+			EndIf
+		EndIf
+	EndIf
 
 	
-	If _cIdPonto == 'MODELPOS'	.And. ( _nOper == MODEL_OPERATION_INSERT .Or. _nOper == MODEL_OPERATION_UPDATE ) .AND. U_ITGETMV("ITVLDCRG", .T.)
+	If _cIdPonto == 'MODELPOS'	.And. ( _nOper == MODEL_OPERATION_INSERT .Or. _nOper == MODEL_OPERATION_UPDATE ) .And. SuperGetMV("IT_VLDCRG",.F.,.T.)
 	
 		_lpassou    := .F.
 		_oModel 		:= FWModelActive()
@@ -1362,24 +1287,24 @@ If _aParam <> NIL
 
 
 		//Valida datas de vencimento
-		For _nni := 1 to _nlin
+		For _nni := 1 To _nlin
 
 			//Se a linha está deletada não faz validações
 			If _oModelDET:IsDeleted(_nni)
 				Loop
-			Endif
+			EndIf
 
 			If !_lpassou
 				_dvencto 	:= _oModelDET:GetValue("ZZN_PRVPAG", _nni )
 				_lpassou := .T.
-			Endif
+			EndIf
 
 			If _dvencto != _oModelDET:GetValue("ZZN_PRVPAG", _nni )
 	
 				Help( ,, 'Atenção!',, "Divergência de datas de previsão de pagamento", 1, 0 )
 				Return .F.
 
-			Endif
+			EndIf
 
 		Next
 
@@ -1391,260 +1316,235 @@ If _aParam <> NIL
 			
 
 		//verifica se não é fatura duplicada para o fornecedor
-		ZZN->(Dbsetorder(1))
-		If _nOper == MODEL_OPERATION_INSERT .and. !U_AOMS0546(alltrim(_oModelMAS:GetValue("ZZN_FATURA")),;
-																			alltrim(_oModelMAS:GetValue( 'ZZN_FTRANS')),;
-																			alltrim(_oModelMAS:GetValue(  'ZZN_LOJAFT')))	
-		
+		ZZN->(DBSetOrder(1))
+		If _nOper == MODEL_OPERATION_INSERT .And. !U_AOMS0546(AllTrim(_oModelMAS:GetValue("ZZN_FATURA")),;
+																			AllTrim(_oModelMAS:GetValue( 'ZZN_FTRANS')),;
+																			AllTrim(_oModelMAS:GetValue(  'ZZN_LOJAFT')))	
 			Return .F.
-				
-		Endif
+		EndIf
 
-		For _nni := 1 to _nlin
+		For _nni := 1 To _nlin
 
 			//Se a linha está deletada não faz validações
 			If _oModelDET:IsDeleted(_nni)
 				Loop
-			Endif
+			EndIf
 
 			//==========================================================================================
 			// Verifica se o Transportador da Fatura é o mesmo da Nota Fiscal se não tiver op logistico
 			//==========================================================================================
-			SF2->(Dbsetorder(1))
-			If SF2->(Dbseek(_oModelDET:GetValue("ZZN_FILNFV", _nni )+ALLTRIM(_oModelDET:GetValue("ZZN_NFISCA", _nni ))))
+			SF2->(DBSetOrder(1))
+			If SF2->(DBSeek(_oModelDET:GetValue("ZZN_FILNFV", _nni )+AllTrim(_oModelDET:GetValue("ZZN_NFISCA", _nni ))))
 
-				If  _xRet  .And. SF2->F2_I_NFSED != 'S' .and.  !U_Nfoplog(SF2->F2_FILIAL,SF2->F2_DOC,SF2->F2_SERIE)
+				If  _xRet  .And. SF2->F2_I_NFSED != 'S' .And.  !U_Nfoplog(SF2->F2_FILIAL,SF2->F2_DOC,SF2->F2_SERIE)
 				
-					_CTRANS := alltrim(_oModelMAS:GetValue( 'ZZN_FTRANS')) + alltrim(_oModelMAS:GetValue(  'ZZN_LOJAFT'))
-					_ctrans2 := alltrim(_oModelMAS:GetValue( 'ZZN_FTRANS')) + "\" + alltrim(_oModelMAS:GetValue(  'ZZN_LOJAFT'))
+					_CTRANS := AllTrim(_oModelMAS:GetValue( 'ZZN_FTRANS')) + AllTrim(_oModelMAS:GetValue(  'ZZN_LOJAFT'))
+					_ctrans2 := AllTrim(_oModelMAS:GetValue( 'ZZN_FTRANS')) + "\" + AllTrim(_oModelMAS:GetValue(  'ZZN_LOJAFT'))
 		
 					If SF2->F2_I_CTRA + SF2->F2_I_LTRA <>  _ctrans .And. Empty( _oModelDET:GetValue( 'ZZN_MTDINF',_nni ) ) 
 
-						If ascan(_aerros, {|it| it[1] == _oModelDET:GetValue("ZZN_ITEM",_nni) .and. it[4] == "Transportador do ctr divergente do transportador da nota de vendas" }) == 0
+						If aScan(_aerros, {|it| it[1] == _oModelDET:GetValue("ZZN_ITEM",_nni) .And. it[4] == "Transportador do ctr divergente do transportador da nota de vendas" }) == 0
 
-							aadd(_aerros,{				_oModelDET:GetValue("ZZN_ITEM",_nni),;
+							aAdd(_aerros,{				_oModelDET:GetValue("ZZN_ITEM",_nni),;
 					 				_oModelMAS:GetValue( 'ZZN_FTRANS')+"/"+ _oModelMAS:GetValue(  'ZZN_LOJAFT'),;
 									_oModelDET:GetValue("ZZN_CTRANS",_nni) + "/" + _oModelDET:GetValue("ZZN_SERCTR",_nni),;
 									"Transportador do ctr divergente do transportador da nota de vendas",;
 									"Transportador do ctr: " + _ctrans2  + " -  Transportador da nota de vendas(" + SF2->F2_DOC + "): " + SF2->F2_I_CTRA +"\" + SF2->F2_I_LTRA})
-						
-						Endif						
-					
+						EndIf						
 					EndIf
-										
-				Endif
-
+				EndIf
 			Else
-
-				aadd(_aerros,{				_oModelDET:GetValue("ZZN_ITEM",_nni),;
+				aAdd(_aerros,{				_oModelDET:GetValue("ZZN_ITEM",_nni),;
 					 				_oModelMAS:GetValue( 'ZZN_FTRANS')+"/"+ _oModelMAS:GetValue(  'ZZN_LOJAFT'),;
 									_oModelDET:GetValue("ZZN_CTRANS",_nni) + "/" + _oModelDET:GetValue("ZZN_SERCTR",_nni),;
 									"Nota fiscal de vendas não localizada",;
 									"Nota fiscal de vendas: " + _oModelDET:GetValue("ZZN_FILNFV", _nni ) + ;
-											"/" + ALLTRIM(_oModelDET:GetValue("ZZN_NFISCA", _nni )) + " não localizada."})
+											"/" + AllTrim(_oModelDET:GetValue("ZZN_NFISCA", _nni )) + " não localizada."})
 
-
-			Endif
+			EndIf
 
 			//Valida se todos o ctrs possuem títulos com valores coerentes pendentes de baixa e em carteira
 			
-			SE2->(Dbsetorder(6)) //E2_FILIAL+E2_FORNECE+E2_LOJA+E2_PREFIXO+E2_NUM
+			SE2->(DBSetOrder(6)) //E2_FILIAL+E2_FORNECE+E2_LOJA+E2_PREFIXO+E2_NUM
 			
-			If !(SE2->(Dbseek(xfilial("SE2")+_oModelMAS:GetValue( 'ZZN_FTRANS')+_oModelMAS:GetValue( 'ZZN_LOJAFT')+;
+			If !(SE2->(DBSeek(xFilial("SE2")+_oModelMAS:GetValue( 'ZZN_FTRANS')+_oModelMAS:GetValue( 'ZZN_LOJAFT')+;
 									_oModelDET:GetValue("ZZN_SERCTR", _nni )+_oModelDET:GetValue("ZZN_CTRANS", _nni ))))
 
-				aadd(_aerros,{				_oModelDET:GetValue("ZZN_ITEM",_nni),;
+				aAdd(_aerros,{				_oModelDET:GetValue("ZZN_ITEM",_nni),;
 					 				_oModelMAS:GetValue( 'ZZN_FTRANS')+"/"+ _oModelMAS:GetValue(  'ZZN_LOJAFT'),;
 									_oModelDET:GetValue("ZZN_CTRANS",_nni) + "/" + _oModelDET:GetValue("ZZN_SERCTR",_nni),;
 									"Título do CTR não localizado no contas a pagar",;
 									"Título do CTR : " + _oModelDET:GetValue("ZZN_CTRANS", _nni ) + ;
-											"/" + ALLTRIM(_oModelDET:GetValue("ZZN_SERCTR", _nni )) + " não localizado no contas a pagar."})
+											"/" + AllTrim(_oModelDET:GetValue("ZZN_SERCTR", _nni )) + " não localizado no contas a pagar."})
 
-			Elseif (!empty(SE2->E2_BAIXA) .OR. SE2->E2_SALDO != SE2->E2_VALOR) .and. _nOper == MODEL_OPERATION_INSERT 
+			ElseIf (!Empty(SE2->E2_BAIXA) .Or. SE2->E2_SALDO != SE2->E2_VALOR) .And. _nOper == MODEL_OPERATION_INSERT 
 
-				aadd(_aerros,{				_oModelDET:GetValue("ZZN_ITEM",_nni),;
+				aAdd(_aerros,{				_oModelDET:GetValue("ZZN_ITEM",_nni),;
 					 				_oModelMAS:GetValue( 'ZZN_FTRANS')+"/"+ _oModelMAS:GetValue(  'ZZN_LOJAFT'),;
 									_oModelDET:GetValue("ZZN_CTRANS",_nni) + "/" + _oModelDET:GetValue("ZZN_SERCTR",_nni),;
 									"Título do CTR com valor já baixado",;
 									"Título do CTR : " + _oModelDET:GetValue("ZZN_CTRANS", _nni ) + ;
-											"/" + ALLTRIM(_oModelDET:GetValue("ZZN_SERCTR", _nni )) + " com valor já baixado " + ;
+											"/" + AllTrim(_oModelDET:GetValue("ZZN_SERCTR", _nni )) + " com valor já baixado " + ;
 											" no contas a pagar."})
 
-			Elseif !empty(SE2->E2_FATURA) .AND. ALLTRIM(SE2->E2_FATURA) != alltrim(_oModelMAS:GetValue( 'ZZN_FATFIN')) .and. u_itgetmv("ITFATCTR",.F.)
+			ElseIf !Empty(SE2->E2_FATURA) .And. AllTrim(SE2->E2_FATURA) != AllTrim(_oModelMAS:GetValue( 'ZZN_FATFIN')) .And. SuperGetMV("IT_FATCTR",.F.,.F.)
 
-				aadd(_aerros,{				_oModelDET:GetValue("ZZN_ITEM",_nni),;
+				aAdd(_aerros,{				_oModelDET:GetValue("ZZN_ITEM",_nni),;
 					 				_oModelMAS:GetValue( 'ZZN_FTRANS')+"/"+ _oModelMAS:GetValue(  'ZZN_LOJAFT'),;
 									_oModelDET:GetValue("ZZN_CTRANS",_nni) + "/" + _oModelDET:GetValue("ZZN_SERCTR",_nni),;
 									"Título do CTR já pertence a fatura financeira",;
 									"Título do CTR : " + _oModelDET:GetValue("ZZN_CTRANS", _nni ) + ;
-											"/" + ALLTRIM(_oModelDET:GetValue("ZZN_SERCTR", _nni )) + " já pertence " + ;
+											"/" + AllTrim(_oModelDET:GetValue("ZZN_SERCTR", _nni )) + " já pertence " + ;
 											" a fatura: " + SE2->E2_FATURA})
 
-			Endif
+			EndIf
 
-			_nposk := ascan( _actrs, {|item| item[1]  = alltrim(_oModelDET:GetValue("ZZN_CTRANS", _nni )) })
+			_nposk := aScan( _actrs, {|item| item[1]  = AllTrim(_oModelDET:GetValue("ZZN_CTRANS", _nni )) })
 
 			If  _nposk  == 0
 
-				aadd(_actrs, {	alltrim(_oModelDET:GetValue("ZZN_CTRANS", _nni )),;
-							  	alltrim(_oModelDET:GetValue("ZZN_SERCTR",_nni)),; 
+				aAdd(_actrs, {	AllTrim(_oModelDET:GetValue("ZZN_CTRANS", _nni )),;
+							  	AllTrim(_oModelDET:GetValue("ZZN_SERCTR",_nni)),; 
 								_oModelDET:GetValue("ZZN_VLRCTR",_nni),;
 								SE2->E2_VALOR,;
 								_oModelDET:GetValue("ZZN_ITEM",_nni) })
 
 			Else
-
 				_actrs[_nposk][3] += _oModelDET:GetValue("ZZN_VLRCTR",_nni)
-
-			Endif
+			EndIf
 
 			//Puxa condição de pagamento dos ctrs
-  			_cconda := posicione("SF1",1,xfilial("SF1")+_oModelDET:GetValue("ZZN_CTRANS", _nni )+_oModelDET:GetValue("ZZN_SERCTR", _nni );
+  			_cconda := Posicione("SF1",1,xFilial("SF1")+_oModelDET:GetValue("ZZN_CTRANS", _nni )+_oModelDET:GetValue("ZZN_SERCTR", _nni );
 											+_oModelMAS:GetValue( 'ZZN_FTRANS')+_oModelMAS:GetValue( 'ZZN_LOJAFT'),"F1_COND")
 
 			If _cconda != _ccond
-
-				If empty(_ccond)
-
+				If Empty(_ccond)
 					_ccond := _cconda
-
-				Endif
-
-
-			Endif
-
-			
+				EndIf
+			EndIf
 		Next
 
 		//Valida valores de ctrs versus valores do se2
-		For _njj := 1 to len(_actrs)
+		For _njj := 1 To Len(_actrs)
 
-			if _actrs[_njj][3] != _actrs[_njj][4]
+			If _actrs[_njj][3] != _actrs[_njj][4]
 
-				aadd(_aerros,{		_actrs[_njj][5],;
+				aAdd(_aerros,{		_actrs[_njj][5],;
 					 				_oModelMAS:GetValue( 'ZZN_FTRANS')+"/"+ _oModelMAS:GetValue(  'ZZN_LOJAFT'),;
 									_actrs[_njj][1] + "/" + _actrs[_njj][2],;
 									"Título do CTR com valor divergente no contas a pagar",;
-									"Valor do CTR : " + alltrim(transform(_actrs[_njj][3], "@E 999,999,999.99")) + ;
+									"Valor do CTR : " + AllTrim(transform(_actrs[_njj][3], "@E 999,999,999.99")) + ;
 									  " com valor divergente do valor" + " no contas a pagar: " + ;
-									  alltrim(transform(_actrs[_njj][4], "@E 999,999,999.99"))})
-
-			Endif
-
+									  AllTrim(transform(_actrs[_njj][4], "@E 999,999,999.99"))})
+			EndIf
 		Next
 
-
 		//Carrega arrays com todas as notas e cargas na tela
-		For _nni := 1 to _nlin
+		For _nni := 1 To _nlin
 
 			//Se a linha está deletada não faz validações
 			If _oModelDET:IsDeleted(_nni)
 				Loop
-			Endif
+			EndIf
 		
-			_ccarga := alltrim(_oModelDET:GetValue("ZZN_CARGA", _nni ))
+			_ccarga := AllTrim(_oModelDET:GetValue("ZZN_CARGA", _nni ))
 			_cfilial := _oModelDET:GetValue("ZZN_FILNFV",_nni)
 
 			If !(_oModelDET:IsDeleted(_nni))
-				aadd(_anotast, {_oModelDET:GetValue("ZZN_FILNFV", _nni ),alltrim(_oModelDET:GetValue("ZZN_NFISCA",_nni))})
-			Endif
+				aAdd(_anotast, {_oModelDET:GetValue("ZZN_FILNFV", _nni ),AllTrim(_oModelDET:GetValue("ZZN_NFISCA",_nni))})
+			EndIf
 
-			If !(_oModelDET:IsDeleted(_nni)) .AND. !EMPTY(_ccarga) .AND. ASCAN(_acargas,{|xd| xd[2] == _ccarga .and. xd[1] == _cfilial}) == 0 
+			If !(_oModelDET:IsDeleted(_nni)) .And. !Empty(_ccarga) .And. aScan(_acargas,{|xd| xd[2] == _ccarga .And. xd[1] == _cfilial}) == 0 
 	
 				_loplogi := .F.
 				_loprede := .F.
 				
-				//Se for nota de operador logístico não precisa verificar a carga
-				DAI->(Dbsetorder(3))  //DAI_FILIAL + DAI_NFISCA + DAI_SERIE
-				If DAI->(Dbseek(_oModelDET:GetValue("ZZN_FILNFV",_nni)+ALLTRIM(_oModelDET:GetValue("ZZN_NFISCA", _nni ))+ALLTRIM(_oModelDET:GetValue("ZZN_SERIE", _nni ))))
+				//Se For nota de operador logístico não precisa verificar a carga
+				DAI->(DBSetOrder(3))  //DAI_FILIAL + DAI_NFISCA + DAI_SERIE
+				If DAI->(DBSeek(_oModelDET:GetValue("ZZN_FILNFV",_nni)+AllTrim(_oModelDET:GetValue("ZZN_NFISCA", _nni ))+AllTrim(_oModelDET:GetValue("ZZN_SERIE", _nni ))))
 				
-					If (ALLTRIM(_oModelMAS:GetValue("ZZN_FTRANS")) ==ALLTRIM(DAI->DAI_I_OPLO) .AND. ALLTRIM(_oModelMAS:GetValue("ZZN_LOJAFT")) ==ALLTRIM(DAI->DAI_I_LOPL) ) 
+					If (AllTrim(_oModelMAS:GetValue("ZZN_FTRANS")) ==AllTrim(DAI->DAI_I_OPLO) .And. AllTrim(_oModelMAS:GetValue("ZZN_LOJAFT")) ==AllTrim(DAI->DAI_I_LOPL) ) 
 					
 						_loplogi := .T.
-						aadd(_anotase, {_oModelDET:GetValue("ZZN_FILNFV",_nni),alltrim(_oModelDET:GetValue("ZZN_NFISCA",_nni))})
+						aAdd(_anotase, {_oModelDET:GetValue("ZZN_FILNFV",_nni),AllTrim(_oModelDET:GetValue("ZZN_NFISCA",_nni))})
 						
-					Endif
+					EndIf
 					
-					If (ALLTRIM(_oModelMAS:GetValue("ZZN_FTRANS")) ==ALLTRIM(DAI->DAI_I_TRED) .AND. ALLTRIM(_oModelMAS:GetValue("ZZN_LOJAFT")) ==ALLTRIM(DAI->DAI_I_LTRE) ) 
+					If (AllTrim(_oModelMAS:GetValue("ZZN_FTRANS")) ==AllTrim(DAI->DAI_I_TRED) .And. AllTrim(_oModelMAS:GetValue("ZZN_LOJAFT")) ==AllTrim(DAI->DAI_I_LTRE) ) 
 					
 						_loprede := .T.
-						aadd(_anotase, {_oModelDET:GetValue("ZZN_FILNFV",_nni),alltrim(_oModelDET:GetValue("ZZN_NFISCA",_nni))})
+						aAdd(_anotase, {_oModelDET:GetValue("ZZN_FILNFV",_nni),AllTrim(_oModelDET:GetValue("ZZN_NFISCA",_nni))})
 						
-					Endif
+					EndIf
 	
 					
-				Endif
+				EndIf
 				
-				If !_loplogi .and. !_loprede
+				If !_loplogi .And. !_loprede
 	
-					aadd(_acargas,{	_ccarga,;
-									_oModelDET:GetValue("ZZN_FILNFV",_nni) + "/" + alltrim(_oModelDET:GetValue("ZZN_NFISCA",_nni))+"/"+ALLTRIM(_oModelDET:GetValue("ZZN_SERIE", _nni )),;
-									iif(empty(ALLTRIM(DAI->DAI_I_OPLO)),"",ALLTRIM(DAI->DAI_I_OPLO)+"/"+ALLTRIM(DAI->DAI_I_LOPL)),;
-									iif(empty(ALLTRIM(DAI->DAI_I_TRED)),"",ALLTRIM(DAI->DAI_I_TRED)+"/"+ALLTRIM(DAI->DAI_I_LTRE)),;
-									alltrim(_oModelDET:GetValue("ZZN_CTRANS", _nni ))+"/"+alltrim(_oModelDET:GetValue("ZZN_SERCTR", _nni )),;
+					aAdd(_acargas,{	_ccarga,;
+									_oModelDET:GetValue("ZZN_FILNFV",_nni) + "/" + AllTrim(_oModelDET:GetValue("ZZN_NFISCA",_nni))+"/"+AllTrim(_oModelDET:GetValue("ZZN_SERIE", _nni )),;
+									IIf(Empty(AllTrim(DAI->DAI_I_OPLO)),"",AllTrim(DAI->DAI_I_OPLO)+"/"+AllTrim(DAI->DAI_I_LOPL)),;
+									IIf(Empty(AllTrim(DAI->DAI_I_TRED)),"",AllTrim(DAI->DAI_I_TRED)+"/"+AllTrim(DAI->DAI_I_LTRE)),;
+									AllTrim(_oModelDET:GetValue("ZZN_CTRANS", _nni ))+"/"+AllTrim(_oModelDET:GetValue("ZZN_SERCTR", _nni )),;
 									_oModelDET:GetValue("ZZN_FILNFV",_nni)})
 				
-				Endif
+				EndIf
 	
-			Endif
+			EndIf
 	
 		Next
 		
 		//Analisa se as cargas contidas na tela possuem todas as notas citadas na tela
-		For _nni := 1 to len(_acargas)
+		For _nni := 1 To Len(_acargas)
 		
-			DAI->(Dbsetorder(1))  //DAI_FILIAL + DAI_COD
+			DAI->(DBSetOrder(1))  //DAI_FILIAL + DAI_COD
 			
-			If DAI->(Dbseek(alltrim(_acargas[_nni][6])+alltrim(_acargas[_nni][1])))
+			If DAI->(DBSeek(AllTrim(_acargas[_nni][6])+AllTrim(_acargas[_nni][1])))
 			
-				Do while alltrim(DAI->DAI_FILIAL) == alltrim(_acargas[_nni][6]) .and. alltrim(DAI->DAI_COD) == alltrim(_acargas[_nni][1])
+				While AllTrim(DAI->DAI_FILIAL) == AllTrim(_acargas[_nni][6]) .And. AllTrim(DAI->DAI_COD) == AllTrim(_acargas[_nni][1])
 				
-				 	If ascan(_anotast,{ |xa| xa[1] == DAI->DAI_FILIAL .AND.  xa[2] == alltrim(DAI->DAI_NFISCA)}) == 0;
-					 			.and. 	ascan(_anotase,{ |xa| xa[1] == DAI->DAI_FILIAL .and. xa[2] == alltrim(DAI->DAI_NFISCA)}) == 0			 	 	
+				 	If aScan(_anotast,{ |xa| xa[1] == DAI->DAI_FILIAL .And.  xa[2] == AllTrim(DAI->DAI_NFISCA)}) == 0;
+					 			.And. 	aScan(_anotase,{ |xa| xa[1] == DAI->DAI_FILIAL .And. xa[2] == AllTrim(DAI->DAI_NFISCA)}) == 0			 	 	
 				 	
-				 		aadd(_aerros,{			_oModelDET:GetValue("ZZN_ITEM"),;
+				 		aAdd(_aerros,{			_oModelDET:GetValue("ZZN_ITEM"),;
 					 				_oModelMAS:GetValue( 'ZZN_FTRANS') + "/" + _oModelMAS:GetValue(  'ZZN_LOJAFT'),;
 									_oModelDET:GetValue("ZZN_CTRANS") + "/" + _oModelDET:GetValue("ZZN_SERCTR"),;
-									"Carga " + alltrim(DAI->DAI_FILIAL) + "/" + alltrim(DAI->DAI_COD) + " contém a nota fiscal " + alltrim(DAI->DAI_FILIAL) + "/" +  alltrim(DAI->DAI_NFISCA) + " não incluida nessa fatura!",;
-									"Carga citada na nota " + _acargas[_nni][6] + "/" + _acargas[_nni][2] + iif(!empty(_acargas[_nni][3])," com operador logístico " + _acargas[_nni][3] + ", ", " ") + ;
-									 iif(!empty(_acargas[_nni][4])," com redespacho " + _acargas[_nni][4] + ", ", " ")  +  " do CTR " + _acargas[_nni][5] })
+									"Carga " + AllTrim(DAI->DAI_FILIAL) + "/" + AllTrim(DAI->DAI_COD) + " contém a nota fiscal " + AllTrim(DAI->DAI_FILIAL) + "/" +  AllTrim(DAI->DAI_NFISCA) + " não incluida nessa fatura!",;
+									"Carga citada na nota " + _acargas[_nni][6] + "/" + _acargas[_nni][2] + IIf(!Empty(_acargas[_nni][3])," com operador logístico " + _acargas[_nni][3] + ", ", " ") + ;
+									 IIf(!Empty(_acargas[_nni][4])," com redespacho " + _acargas[_nni][4] + ", ", " ")  +  " do CTR " + _acargas[_nni][5] })
 
-				 	Endif
+				 	EndIf
 				 	
-				 	DAI->(Dbskip())
+				 	DAI->(DBSkip())
 				 	
-				 Enddo
+				 EndDo
 				 
 			Else
 			
-				aadd(_aerros,{		_oModelDET:GetValue("ZZN_ITEM"),;
+				aAdd(_aerros,{		_oModelDET:GetValue("ZZN_ITEM"),;
 					 				_oModelMAS:GetValue( 'ZZN_FTRANS')+"/"+ _oModelMAS:GetValue(  'ZZN_LOJAFT'),;
 									_oModelDET:GetValue("ZZN_CTRANS") + "/" + _oModelDET:GetValue("ZZN_SERCTR"),;
-									"Carga " + alltrim(DAI->DAI_FILIAL) + "/" + alltrim(DAI->DAI_COD) + " não localizada!",;
+									"Carga " + AllTrim(DAI->DAI_FILIAL) + "/" + AllTrim(DAI->DAI_COD) + " não localizada!",;
 									"Carga citada na nota " + _acargas[_nni][2] + " do CTR " + _acargas[_nni][5]})
 	
-			Endif
+			EndIf
 
 					
 		Next
 		
-		If len(_aerros) > 0
-		
+		If Len(_aerros) > 0
 			Help( ,, 'Atenção!',, "Existem problemas na fatura!", 1, 0 )
-
-		
 			U_ITListBox( 'Ocorreram erros de validação da fatura' , {"Linha","Transportador","CTR","Erro","Origem"} , _aerros , .T. , 1 )
-						
 			Return .F.
-			
 		Else
 
 			//Se a fatura foi validada cria a fatura no financeiro se ainda não existir
 			//Se é alteração exclui fatura primeiro
 
-				If  _nOper == MODEL_OPERATION_UPDATE  .and. !empty(alltrim(_oModelMAS:GetValue("ZZN_FATFIN")))
+				If  _nOper == MODEL_OPERATION_UPDATE  .And. !Empty(AllTrim(_oModelMAS:GetValue("ZZN_FATFIN")))
 
-					If u_itgetmv("ITFATCTR",.F.)
+					If SuperGetMV("IT_FATCTR",.F.,.F.)
 
 						_lRet := AOMS0548(_omodel) //Exclui titulos da fatura
 
@@ -1652,13 +1552,13 @@ If _aParam <> NIL
 							Return .F.
 						Else
 							AOMS054T(_omodel) //Envia email de exclusão da fatura
-						Endif
+						EndIf
 
-					Endif
+					EndIf
 
-				Endif
+				EndIf
 
-				If u_itgetmv("ITFATCTR",.F.)
+				If SuperGetMV("IT_FATCTR",.F.,.F.)
 
 					_lRet := AOMS0549(_omodel) //Libera titulos e cria fatura
 
@@ -1671,13 +1571,13 @@ If _aParam <> NIL
 						//Envia email com documento da fatura criada
 						_lenviaf := .T.
 
-					Endif
+					EndIf
 
-				Endif
+				EndIf
 	
-		Endif
+		EndIf
 		
-	Endif
+	EndIf
 
 	If _cIdPonto == 'MODELCOMMITNTTS' .And. ( _nOper == MODEL_OPERATION_INSERT .Or. _nOper == MODEL_OPERATION_UPDATE )//Chamada após a gravação total do modelo e fora da transação.
        
@@ -1685,43 +1585,43 @@ If _aParam <> NIL
 
 		_cchavi := ZZN->ZZN_FILIAL+ZZN->ZZN_FATURA+ZZN->ZZN_FTRANS+ZZN->ZZN_LOJAFT
 
-		If !empty(_cfatura2) //Criou fatura
+		If !Empty(_cfatura2) //Criou fatura
 
-			ZZN->(Dbsetorder(1))
-			If ZZN->(Dbseek(ZZN->ZZN_FILIAL+ZZN->ZZN_FATURA+ZZN->ZZN_FTRANS+ZZN->ZZN_LOJAFT))
+			ZZN->(DBSetOrder(1))
+			If ZZN->(DBSeek(ZZN->ZZN_FILIAL+ZZN->ZZN_FATURA+ZZN->ZZN_FTRANS+ZZN->ZZN_LOJAFT))
 
 				_cchavi := ZZN->ZZN_FILIAL+ZZN->ZZN_FATURA+ZZN->ZZN_FTRANS+ZZN->ZZN_LOJAFT
 
-				Do while _cchavi == ZZN->ZZN_FILIAL+ZZN->ZZN_FATURA+ZZN->ZZN_FTRANS+ZZN->ZZN_LOJAFT
+				While _cchavi == ZZN->ZZN_FILIAL+ZZN->ZZN_FATURA+ZZN->ZZN_FTRANS+ZZN->ZZN_LOJAFT
 
-					Reclock("ZZN", .F.)
+					RecLock("ZZN", .F.)
 					ZZN->ZZN_FATFIN := _cfatura2
-					ZZN->(Msunlock())
+					ZZN->(MSUnLock())
 
-					ZZN->(Dbskip())
+					ZZN->(DBSkip())
 
-				Enddo
+				EndDo
 
-			Endif
+			EndIf
 
-		Endif
+		EndIf
 
 		If _lenviaf 
 	
-			ZZN->(Dbsetorder(1))
-			ZZN->(Dbseek(_cchavi))
+			ZZN->(DBSetOrder(1))
+			ZZN->(DBSeek(_cchavi))
 
 			SE2->( DBSetOrder(1) )
 			SE2->( DBSeek( cfilant + "MAN" + _cfatura2  + '01' + "FT " +;
 								 ZZN->ZZN_FTRANS+ZZN->ZZN_LOJAFT ) )
 			
-			fwmsgrun(,{|| U_ROMS057E()}, "Criando documento da fatura " + _cfatura2 + "...","Aguarde...")
+			FWMsgRun(,{|| U_ROMS057E()}, "Criando documento da fatura " + _cfatura2 + "...","Aguarde...")
 
-		Endif
+		EndIf
 
-        FWMSGRUN(,{|O| U_AOMS54Lista(.F.,O) }, "Lendo CTEs diferentes...","Aguarde...")
+        FWMsgRun(,{|O| U_AOMS54Lista(.F.,O) }, "Lendo CTEs diferentes...","Aguarde...")
 
-	Endif
+	EndIf
 
 	
 	If _cIdPonto == 'FORMLINEPOS' .And. ( _nOper == MODEL_OPERATION_INSERT .Or. _nOper == MODEL_OPERATION_UPDATE )
@@ -1786,12 +1686,12 @@ If _aParam <> NIL
 								_oModel:GetValue('ZZNDETAIL','ZZN_SERCTR'),;		//07
 								,;													//08
 								,;													//09
-								alltrim(_oModelMAS:GetValue( 'ZZN_FTRANS' )),;	 	//10
-								alltrim(_oModelMAS:GetValue(  'ZZN_LOJAFT' ));		//11
+								AllTrim(_oModelMAS:GetValue( 'ZZN_FTRANS' )),;	 	//10
+								AllTrim(_oModelMAS:GetValue(  'ZZN_LOJAFT' ));		//11
 								 )
 				
 				DBSelectArea(_cAlias)
-				(_cAlias)->( DBGotop() )
+				(_cAlias)->( DBGoTop() )
 				
 				If (_cAlias)->NUMREG > 0
 				
@@ -1874,7 +1774,7 @@ If _aParam <> NIL
 									
 									_aHelp := {}
 									aAdd( _aHelp , { 'Já existe essa Nota Fiscal no ','lançamento atual!'											})
-									aAdd( _aHelp , { 'Se for necessário repetir a mesma Nota ','deverá ser informado o motivo da ','divergência.'	})
+									aAdd( _aHelp , { 'Se For necessário repetir a mesma Nota ','deverá ser informado o motivo da ','divergência.'	})
 									
 									U_ITCADHLP( _aHelp , 'AOMS5404' )
 									
@@ -1908,14 +1808,14 @@ If _aParam <> NIL
 					AOMS054Q( 2 , _cAlias2 , _cNFAux , _cSRAux , "", _nOper , "", ,_cFilAux )
 		
 					DBSelectArea(_cAlias2)
-					(_cAlias2)->( DBGotop() )
+					(_cAlias2)->( DBGoTop() )
 					
 					//Se a nota fiscal tem operador logistico e o transportador do cte é diferente do transp da nota já preenche o motivo de divergência
 					If U_Nfoplog((_cAlias2)->F2_FILIAL,(_cAlias2)->F2_DOC,(_cAlias2)->F2_SERIE)
 					
 						_oModelDET:SetValue("ZZN_MTDINF","31")
 					
-					Endif
+					EndIf
 					
 					If Select(_cAlias2) > 0
 						(_cAlias2)->( DBCloseArea() )
@@ -1926,13 +1826,13 @@ If _aParam <> NIL
 					
 						
 					DBSelectArea(_cAlias)
-					(_cAlias)->( DBGotop() )
+					(_cAlias)->( DBGoTop() )
 					
 					If (_cAlias)->NUMREG > 0 .And. Empty( _oModelDET:GetValue( 'ZZN_MTDINF' ) )
 						
 						_aHelp := {}
 						aAdd( _aHelp , { 'A Nota Fiscal informada já existe em ','um lançamento anterior!',''   	})
-						aAdd( _aHelp , { 'Se for necessário repetir a mesma Nota ','deverá ser informado o motivo da ','divergência.'	})
+						aAdd( _aHelp , { 'Se For necessário repetir a mesma Nota ','deverá ser informado o motivo da ','divergência.'	})
 						
 						U_ITCADHLP( _aHelp , 'AOMS5408' )
 						
@@ -1952,14 +1852,14 @@ If _aParam <> NIL
 					AOMS054Q( 2 , _cAlias , _cNFAux , _cSRAux , "", _nOper , "", ,_cFilAux )
 		
 					DBSelectArea(_cAlias)
-					(_cAlias)->( DBGotop() )
+					(_cAlias)->( DBGoTop() )
 					
 						
 					If (_cAlias)->( Eof() ) .And. Empty( _oModelDET:GetValue( 'ZZN_MTDINF' ) )  
 		    			
 		    			_aHelp := {}
 		    			aAdd( _aHelp , { 'A Nota Fiscal de venda informada não ' , 'foi encontrada nos Documentos de Saída ' ,'!'  })
-						aAdd( _aHelp , { 'Se for necessário informar essa nota'   , 'deverá ser informado o motivo da ' , 'divergência.'	                       })
+						aAdd( _aHelp , { 'Se For necessário informar essa nota'   , 'deverá ser informado o motivo da ' , 'divergência.'	                       })
 						
 						U_ITCADHLP( _aHelp , 'AOMS5409' )
 						
@@ -2001,7 +1901,7 @@ If _aParam <> NIL
 			//================================================================================
 			//If _xRet			
 			//   _xRet := AOMS054A()								
-			//Endif
+			//EndIf
 									
 		EndIf
 		
@@ -2018,18 +1918,15 @@ Return( _xRet )
 Programa----------: AOMS054N
 Autor-------------: Fabiano Dias
 Data da Criacao---: 10/08/2011
-===============================================================================================================================
 Descrição---------: Gera o número máximo para o lançamento da fatura do conhecimento de transporte.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User function AOMS054N()
+User Function AOMS054N()
 
 Local _cRet    := ""
-Local _aArea   := GetArea()     
+Local _aArea   := FWGetArea()     
 
 Local _cAlias  := GetNextAlias()
 Local _cFiltro := "%"  
@@ -2041,28 +1938,28 @@ BeginSql alias _cAlias
 	SELECT
 	      TO_NUMBER(NVL(MAX(ZZN_CODIGO),'0')) AS CODIGO
 	FROM
-	      %table:ZZN%
+	      %Table:ZZN%
 	WHERE
 	      D_E_L_E_T_ = ' '
 	      %exp:_cFiltro%	      
 EndSql
 
-dbSelectArea(_cAlias)
-(_cAlias)->(dbGotop())    
+DBSelectArea(_cAlias)
+(_cAlias)->(DBGoTop())    
 
 _cRet:= StrZero((_cAlias)->CODIGO + 1,6)          
 
 //================================================================================
 // Finaliza a area criada anteriormente.
 //================================================================================
-dbSelectArea(_cAlias)
-(_cAlias)->(dbCloseArea())
+DBSelectArea(_cAlias)
+(_cAlias)->(DBCloseArea())
 
 While !MayIUseCode("ZZN_CODIGO" + xFilial("ZZN") + _cRet)  //verifica se esta na memoria, sendo usado
 	_cRet := Soma1(_cRet)						           // busca o proximo numero disponivel 
 EndDo 
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return _cRet
 
@@ -2072,9 +1969,7 @@ Return _cRet
 Programa----------: AOMS054B
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 02/03/2018
-===============================================================================================================================
 Descrição---------: Validação de campos do grid
-===============================================================================================================================
 Parametros--------: _cnctr - numero do ctr
 					_csctr - série do ctr
 					_ctrans - código do transportador
@@ -2082,11 +1977,9 @@ Parametros--------: _cnctr - numero do ctr
 					_CCHAV - Chave do CTE
 					_ccampo - Campo chamando o gatilho
 					_cchavi - Chave do ctr selecionado
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-
 User Function AOMS054B(_cnctr , _csctr, _ctrans, _cloja, _cchav, _ccampo, _cchavi)
 
 Local _lRet := .T.
@@ -2101,7 +1994,7 @@ Default _cchavi := ""
 Begin Sequence			
 		
 	//Processa chamada a partir do campo de chave de conhecimento de transporte
-	If (_ccampo == "ZZN_CHAV"  .AND. !EMPTY(ALLTRIM(M->ZZN_CHAV))) .or. ((_ccampo == "ZZN_CTRANS" .OR. _ccampo == "ZZN_SERCTR") .and. !empty(_cchavi))
+	If (_ccampo == "ZZN_CHAV"  .And. !Empty(AllTrim(M->ZZN_CHAV))) .Or. ((_ccampo == "ZZN_CTRANS" .Or. _ccampo == "ZZN_SERCTR") .And. !Empty(_cchavi))
 	
 		//Limpa campo de municipio, ctr e série do ctr que controla when do campo de nota fiscal
 		_oModelDET:LoadValue("ZZN_DESMUN","")
@@ -2113,10 +2006,10 @@ Begin Sequence
 		
 		If _ccampo == "ZZN_CHAV"
 		
-			_cchavi := ALLTRIM(M->ZZN_CHAV)
+			_cchavi := AllTrim(M->ZZN_CHAV)
 		Else	
 			_oModelDET:LoadValue("ZZN_CHAV",_cchavi) 
-		Endif
+		EndIf
 
 		_cQuery := " SELECT R_E_C_N_O_ RECN"
 		_cQuery += " FROM "+ RetSqlName("SF1") 
@@ -2128,23 +2021,23 @@ Begin Sequence
 		_cQuery += " 		AND F1_STATUS = 'A'"
 	
 		
-		If select("SF1T") > 0
+		If Select("SF1T") > 0
 		
-			Dbselectarea("SF1T")
-			SF1T->(Dbclosearea())
+			DBSelectArea("SF1T")
+			SF1T->(DBCloseArea())
 			
-		Endif
+		EndIf
 		
 		MPSysOpenQuery( _cQuery , "SF1T" ) 
 		
 	
-		If !(SF1T->(EOF()))
+		If !(SF1T->(Eof()))
 		
-			SF1->(Dbgoto(SF1T->RECN))
+			SF1->(DBGoTo(SF1T->RECN))
 			
-			If !Empty(_oModelMAS:GetValue("ZZN_FTRANS")) .AND. !Empty(_oModelMAS:GetValue("ZZN_LOJAFT"))
+			If !Empty(_oModelMAS:GetValue("ZZN_FTRANS")) .And. !Empty(_oModelMAS:GetValue("ZZN_LOJAFT"))
 			
-				If !(alltrim(_oModelMAS:GetValue("ZZN_FTRANS")) == alltrim(SF1->F1_FORNECE)) 
+				If !(AllTrim(_oModelMAS:GetValue("ZZN_FTRANS")) == AllTrim(SF1->F1_FORNECE)) 
 				
 								
 					Help( ,, 'Atenção!',, "CTR selecionado não pertence ao mesmo transportador", 1, 0 )
@@ -2153,36 +2046,36 @@ Begin Sequence
 					
 					Break
 					
-				Endif
+				EndIf
 				
-			Endif
+			EndIf
 	
 			//Carrega dados do cabeçalho e da linha atual
 			_oModelMAS:LoadValue("ZZN_FTRANS",SF1->F1_FORNECE)  
 			_oModelMAS:LoadValue("ZZN_LOJAFT",SF1->F1_LOJA)
-			_oModelMAS:LoadValue("ZZN_DESCTR",POSICIONE("SA2",1,xFilial("SA2")+SF1->F1_FORNECE+SF1->F1_LOJA,"SA2->A2_NOME")) 
-			_oModelMAS:LoadValue("ZZN_CGC",POSICIONE("SA2",1,xFilial("SA2")+SF1->F1_FORNECE+SF1->F1_LOJA,"SA2->A2_CGC"))      
+			_oModelMAS:LoadValue("ZZN_DESCTR",Posicione("SA2",1,xFilial("SA2")+SF1->F1_FORNECE+SF1->F1_LOJA,"SA2->A2_NOME")) 
+			_oModelMAS:LoadValue("ZZN_CGC",Posicione("SA2",1,xFilial("SA2")+SF1->F1_FORNECE+SF1->F1_LOJA,"SA2->A2_CGC"))      
 			_oModelDET:LoadValue("ZZN_CTRANS",SF1->F1_DOC)  
 			_oModelDET:LoadValue("ZZN_SERCTR",SF1->F1_SERIE)
 			
 			//Se já preencheu o campo de nota e série de venda então é entrada manual e não continua carregando dados
-			If !empty(alltrim(_oModelDET:GetValue("ZZN_NFISCA"))) .AND. !empty(alltrim(_oModelDET:GetValue("ZZN_SERIE")));
-						.and. !empty(alltrim(_oModelDET:GetValue("ZZN_FILNFV")))
+			If !Empty(AllTrim(_oModelDET:GetValue("ZZN_NFISCA"))) .And. !Empty(AllTrim(_oModelDET:GetValue("ZZN_SERIE")));
+						.And. !Empty(AllTrim(_oModelDET:GetValue("ZZN_FILNFV")))
 			
 				//Garante que campo de carga e descrição do municipio estão ok
-				SF2->(Dbsetorder(1))
-				If SF2->(Dbseek(_oModelDET:GetValue("ZZN_FILNFV")+alltrim(_oModelDET:GetValue("ZZN_NFISCA"))+alltrim(_oModelDET:GetValue("ZZN_SERIE"))))
+				SF2->(DBSetOrder(1))
+				If SF2->(DBSeek(_oModelDET:GetValue("ZZN_FILNFV")+AllTrim(_oModelDET:GetValue("ZZN_NFISCA"))+AllTrim(_oModelDET:GetValue("ZZN_SERIE"))))
 				
-					_cmuni := U_AOMS054U(alltrim(SF2->F2_DOC),alltrim(SF2->F2_SERIE),alltrim(SF2->F2_FILIAL))
+					_cmuni := U_AOMS054U(AllTrim(SF2->F2_DOC),AllTrim(SF2->F2_SERIE),AllTrim(SF2->F2_FILIAL))
 					
-					_oModelDET:LoadValue("ZZN_DESMUN",alltrim(_cmuni))
-					_oModelDET:LoadValue("ZZN_CARGA",alltrim(SF2->F2_CARGA))
+					_oModelDET:LoadValue("ZZN_DESMUN",AllTrim(_cmuni))
+					_oModelDET:LoadValue("ZZN_CARGA",AllTrim(SF2->F2_CARGA))
 					
-				Endif
+				EndIf
 			
 				Break
 				
-			Endif
+			EndIf
 			
 			//Carrega xml para procurar notas do CTR
 			_anotas := {}
@@ -2194,48 +2087,48 @@ Begin Sequence
 			_cQuery += " 		AND DS_CHAVENF = '" + _cchavi + " ' "
 			
 		
-			If select("SDST") > 0
+			If Select("SDST") > 0
 		
-				Dbselectarea("SDST")
-				SDST->(Dbclosearea())
+				DBSelectArea("SDST")
+				SDST->(DBCloseArea())
 			
-			Endif
+			EndIf
 		
             MPSysOpenQuery( _cQuery , "SDST" ) 
 
 			If .not. SDST->(Eof())
 			
-					SDS->(Dbgoto(SDST->RECN))
+					SDS->(DBGoTo(SDST->RECN))
 			
 					_cQuery := " SELECT R_E_C_N_O_ RECN"
 					_cQuery += " FROM "+ RetSqlName("CKO") 
 					_cQuery += " WHERE "
 					_cQuery += "     	D_E_L_E_T_ = ' ' "
-					_cQuery += " 		AND CKO_ARQUIV = '" + ALLTRIM(SDS->DS_ARQUIVO) + " ' " 
+					_cQuery += " 		AND CKO_ARQUIV = '" + AllTrim(SDS->DS_ARQUIVO) + " ' " 
 			
-					If select("CKOT") > 0
+					If Select("CKOT") > 0
 		
-						Dbselectarea("CKOT")
-						CKOT->(Dbclosearea())
+						DBSelectArea("CKOT")
+						CKOT->(DBCloseArea())
 			
-					Endif
+					EndIf
 		
 					MPSysOpenQuery( _cQuery , "CKOT" ) 
 
 					If .not. CKOT->(Eof())
 					
-						CKO->(DbGoTo(CKOT->RECN))
+						CKO->(DBGoTo(CKOT->RECN))
 						
 						//Gera o Objeto XML
 						_cerror := ""
 						_cWarning := ""
 						
-						_cxml := strtran(CKO->CKO_XMLRET,"???")
+						_cxml := StrTran(CKO->CKO_XMLRET,"???")
 												
 						_oXml := XmlParser( _cxml, "_", @_cError, @_cWarning )
 						
 						If (_oXml == NIL )
-							u_itmsg("Falha ao gerar Objeto XML da CTR : "+SUBSTR(_cError,1,10000)+" / "+SUBSTR(_cWarning,1,10000),"Atenção","Será necessário informar manualmente as nfs do CTR",2)	
+							U_ITMsg("Falha ao gerar Objeto XML da CTR : "+SubStr(_cError,1,10000)+" / "+SubStr(_cWarning,1,10000),"Atenção","Será necessário informar manualmente as nfs do CTR",2)	
 							_lgravacko := .F.
 						Else
 							_lgravacko := .T.
@@ -2245,15 +2138,15 @@ Begin Sequence
 						
 							_cXmlDeNFE := XmlChildEx(_oXml:_CTEPROC:_CTE:_INFCTE,"_INFCTENORM")
 							
-						Endif 
+						EndIf 
 						
-						If _lgravacko .and. ValType(_cXmlDeNFE) <> "O" 
-							u_itmsg("O CTE: "+ALLTRIM(SDS->DS_DOC)+"-"+ALLTRIM(SDS->DS_SERIE)+" não pertence a uma nota fiscal de saida.","Atenção","Será necessário informar manualmente as nfs do CTR",2)		
+						If _lgravacko .And. ValType(_cXmlDeNFE) <> "O" 
+							U_ITMsg("O CTE: "+AllTrim(SDS->DS_DOC)+"-"+AllTrim(SDS->DS_SERIE)+" não pertence a uma nota fiscal de saida.","Atenção","Será necessário informar manualmente as nfs do CTR",2)		
 							_lgravacko := .F.
 						EndIf   
            
-						If _lgravacko .and. ValType(XmlChildEx(_oXml:_CTEPROC:_CTE:_INFCTE:_INFCTENORM,"_INFDOC")) <> "O" .And. ValType(XmlChildEx(_oXml:_CTEPROC:_CTE:_INFCTE:_INFCTENORM,"_INFDOC")) <> "A"
-							u_itmsg("O CTE: "+ALLTRIM(SDS->DS_DOC)+"-"+ALLTRIM(SDS->DS_SERIE)+" não pertence a uma nota fiscal de saida.","Atenção","Será necessário informar manualmente as nfs do CTR",2)		
+						If _lgravacko .And. ValType(XmlChildEx(_oXml:_CTEPROC:_CTE:_INFCTE:_INFCTENORM,"_INFDOC")) <> "O" .And. ValType(XmlChildEx(_oXml:_CTEPROC:_CTE:_INFCTE:_INFCTENORM,"_INFDOC")) <> "A"
+							U_ITMsg("O CTE: "+AllTrim(SDS->DS_DOC)+"-"+AllTrim(SDS->DS_SERIE)+" não pertence a uma nota fiscal de saida.","Atenção","Será necessário informar manualmente as nfs do CTR",2)		
 							_lgravacko := .F.                                             
 						EndIf
       
@@ -2261,10 +2154,10 @@ Begin Sequence
       
 							_cXmlDeNFE := XmlChildEx(_oXml:_CTEPROC:_CTE:_INFCTE:_INFCTENORM:_INFDOC,"_INFNFE")
       
-						Endif
+						EndIf
       
-						If _lgravacko .and.  ValType(_cXmlDeNFE) <> "O" .And. ValType(_cXmlDeNFE) <> "A"
-							u_itmsg("O CTE: "+ALLTRIM(SDS->DS_DOC)+"-"+ALLTRIM(SDS->DS_SERIE)+" não pertence a uma nota fiscal de saida.","Atenção","Será necessário informar manualmente as nfs do CTR",2)		
+						If _lgravacko .And.  ValType(_cXmlDeNFE) <> "O" .And. ValType(_cXmlDeNFE) <> "A"
+							U_ITMsg("O CTE: "+AllTrim(SDS->DS_DOC)+"-"+AllTrim(SDS->DS_SERIE)+" não pertence a uma nota fiscal de saida.","Atenção","Será necessário informar manualmente as nfs do CTR",2)		
 							_lgravacko := .F.
 						EndIf
 
@@ -2278,7 +2171,7 @@ Begin Sequence
 								_nQtdNFE := Len(_cInfoNFE)
 							EndIf
 						
-						Endif
+						EndIf
 						
 						_anotas := {}
 						_cnump := "  "
@@ -2311,70 +2204,70 @@ Begin Sequence
            
 							If _lgravacko
           	          
-								aadd(_anotas,{_cnump,_cchavep})
+								aAdd(_anotas,{_cnump,_cchavep})
 			
-							Endif
+							EndIf
           
 						Next
 						
 						_oXml := nil
 						DelClassIntf() 
 						
-					Endif
+					EndIf
 			
-			Endif
+			EndIf
 			
 			//Inclui notas de pallets referenciadas se não vieram no xml do ctr
 			_nfi := 1
 			_anotast := _anotas
 			_anotas := {}
 	
-			For _nfi := 1 to len(_anotast)
+			For _nfi := 1 To Len(_anotast)
 			
-				 aadd(_anotas,_anotast[_nfi])
+				 aAdd(_anotas,_anotast[_nfi])
 
 				_cQuery := " SELECT R_E_C_N_O_ RECN"
 				_cQuery += " FROM "+ RetSqlName("SF2") 
 				_cQuery += " WHERE "
 				_cQuery += "     	D_E_L_E_T_ = ' ' "
-				_cQuery += " 		AND F2_CHVNFE = '" + ALLTRIM(_anotast[_nfi][2]) + " ' "
+				_cQuery += " 		AND F2_CHVNFE = '" + AllTrim(_anotast[_nfi][2]) + " ' "
 	
 		
-				If select("SF2T") > 0
+				If Select("SF2T") > 0
 		
-					Dbselectarea("SF2T")
-					SF2T->(Dbclosearea())
+					DBSelectArea("SF2T")
+					SF2T->(DBCloseArea())
 			
-				Endif	
+				EndIf	
 						
 				MPSysOpenQuery( _cQuery , "SF2T" ) 
 
 				If  !(SF2T->(Eof()))
 				
-					SF2->(Dbgoto(SF2T->RECN))
+					SF2->(DBGoTo(SF2T->RECN))
 					
-					SC5->(Dbsetorder(1))
-					If SC5->(Dbseek(SF2->F2_FILIAL+ALLTRIM(SF2->F2_I_PEDID))) .AND. SC5->C5_I_PEDGE = "S"  //Verifica se pedido da nota gerou pedido de pallet
+					SC5->(DBSetOrder(1))
+					If SC5->(DBSeek(SF2->F2_FILIAL+AllTrim(SF2->F2_I_PEDID))) .And. SC5->C5_I_PEDGE = "S"  //Verifica se pedido da nota gerou pedido de pallet
 					
-						IF SC5->(Dbseek(SC5->C5_FILIAL+SC5->C5_I_NPALE))  //Procura pedido de pallet
+						If SC5->(DBSeek(SC5->C5_FILIAL+SC5->C5_I_NPALE))  //Procura pedido de pallet
 						
-							SF2->(Dbsetorder(1)) //F2_FILIAL+F2_DOC+F2_SERIE
+							SF2->(DBSetOrder(1)) //F2_FILIAL+F2_DOC+F2_SERIE
 							
-							IF SF2->(Dbseek(SC5->C5_FILIAL + SC5->C5_NOTA + SC5->C5_SERIE)) //Procura nota do pedido de pallet
+							If SF2->(DBSeek(SC5->C5_FILIAL + SC5->C5_NOTA + SC5->C5_SERIE)) //Procura nota do pedido de pallet
 							
-								If Ascan(_anotast,{|x| x[2] = alltrim(SF2->F2_CHVNFE)} ) == 0 //Verifica se a nota de pallet já não foi inclusa no xml do cte
+								If aScan(_anotast,{|x| x[2] = AllTrim(SF2->F2_CHVNFE)} ) == 0 //Verifica se a nota de pallet já não foi inclusa no xml do cte
 								
-									aadd(_anotas,{alltrim(SF2->F2_DOC),alltrim(SF2->F2_CHVNFE)}) //Inclui nota de pallet na sequência de notas do ctr
+									aAdd(_anotas,{AllTrim(SF2->F2_DOC),AllTrim(SF2->F2_CHVNFE)}) //Inclui nota de pallet na sequência de notas do ctr
 									
-								Endif
+								EndIf
 								
-							Endif
+							EndIf
 							
-						Endif
+						EndIf
 					
-					Endif	
+					EndIf	
 					
-				Endif
+				EndIf
 						
 			Next
 			
@@ -2382,7 +2275,7 @@ Begin Sequence
 			_nfi := 1
 			_ncc := 0
 
-			For _nfi := 1 to len(_anotas)
+			For _nfi := 1 To Len(_anotas)
 			 
 				_ncc++
 				
@@ -2390,33 +2283,33 @@ Begin Sequence
 				_cQuery += " FROM "+ RetSqlName("SF2") 
 				_cQuery += " WHERE "
 				_cQuery += "     	D_E_L_E_T_ = ' ' "
-				_cQuery += " 		AND F2_CHVNFE = '" + ALLTRIM(_anotas[_nfi][2]) + " ' "
+				_cQuery += " 		AND F2_CHVNFE = '" + AllTrim(_anotas[_nfi][2]) + " ' "
 	
 		
-				If select("SF2T") > 0
+				If Select("SF2T") > 0
 		
-					Dbselectarea("SF2T")
-					SF2T->(Dbclosearea())
+					DBSelectArea("SF2T")
+					SF2T->(DBCloseArea())
 			
-				Endif	
+				EndIf	
 						
 				MPSysOpenQuery( _cQuery , "SF2T" ) 
 
 				//Posiciona para função AOM S054G que verifica e confirma canhoto
 				If  !(SF2T->(Eof()))
 				
-					SF2->(Dbgoto(SF2T->RECN))
+					SF2->(DBGoTo(SF2T->RECN))
 					
-				Endif
+				EndIf
 				
                 _lteste:=.F.
-				If  !(SF2T->(Eof())) .and. AOMS054G()
+				If  !(SF2T->(Eof())) .And. AOMS054G()
 				
 					//Posiciona de novo pois a funçao de canhoto pode ter desposicionado
-					SF2->(Dbgoto(SF2T->RECN))
+					SF2->(DBGoTo(SF2T->RECN))
 
 					//Reposicionar SF1 de acordo com o CTE que esta no buffer
-					SF1->(Dbgoto(SF1T->RECN))
+					SF1->(DBGoTo(SF1T->RECN))
 					//*******************************************************
 				
 					If _ncc > 1
@@ -2433,17 +2326,17 @@ Begin Sequence
 							//Código de segurança para garantir que o ZZN_ITEM vai ser corretamente preenchido
 							_nvalit := 1
 							
-							For _nnit := 1 to _oModelDET:GetQTDLine()
+							For _nnit := 1 To _oModelDET:GetQTDLine()
 							
-								If val(_oModelDET:GetValue("ZZN_ITEM",_nnit)) >= _nvalit
+								If Val(_oModelDET:GetValue("ZZN_ITEM",_nnit)) >= _nvalit
 								
-									_nvalit := val(_oModelDET:GetValue("ZZN_ITEM",_nnit)) + 1
+									_nvalit := Val(_oModelDET:GetValue("ZZN_ITEM",_nnit)) + 1
 									
-								Endif
+								EndIf
 							
 							Next
 							
-							_oModelDET:LoadValue("ZZN_ITEM",strzero(_nvalit,3))
+							_oModelDET:LoadValue("ZZN_ITEM",StrZero(_nvalit,3))
 							_oModelDET:LoadValue("ZZN_CTRANS",SF1->F1_DOC)  
 							_oModelDET:LoadValue("ZZN_SERCTR",SF1->F1_SERIE)
 							_oModelDET:LoadValue("ZZN_CHAV",_cchav)
@@ -2454,48 +2347,48 @@ Begin Sequence
 					
 							_aerror := _oModel:GetErrorMessage(.T.)
 						
-							If len(_aerror) > 0
+							If Len(_aerror) > 0
 						
-								aadd(_aerros,{			_oModelDET:GetValue("ZZN_ITEM"),;
+								aAdd(_aerros,{			_oModelDET:GetValue("ZZN_ITEM"),;
 					 				_oModelMAS:GetValue( 'ZZN_FTRANS')+"/"+ _oModelMAS:GetValue(  'ZZN_LOJAFT'),;
 									_oModelDET:GetValue("ZZN_CTRANS") + "/" + _oModelDET:GetValue("ZZN_SERCTR"),;
-									"Erro na inclusão da linha da nota fiscal " + alltrim(SF2->F2_DOC), _aerror[6]})
+									"Erro na inclusão da linha da nota fiscal " + AllTrim(SF2->F2_DOC), _aerror[6]})
 							
 							Else
 						
-								aadd(_aerros,{				_oModelDET:GetValue("ZZN_ITEM"),;
+								aAdd(_aerros,{				_oModelDET:GetValue("ZZN_ITEM"),;
 					 				_oModelMAS:GetValue( 'ZZN_FTRANS')+"/"+ _oModelMAS:GetValue(  'ZZN_LOJAFT'),;
 									_oModelDET:GetValue("ZZN_CTRANS") + "/" + _oModelDET:GetValue("ZZN_SERCTR"),;
-									"Erro sem mensagem para a nota fiscal "  + alltrim(SF2->F2_DOC)," "})
+									"Erro sem mensagem para a nota fiscal "  + AllTrim(SF2->F2_DOC)," "})
 						
-							Endif
+							EndIf
 										
-						Endif
+						EndIf
 				
-					Endif
+					EndIf
 			
-				ElseIF (SF2T->(Eof()))
+				ElseIf (SF2T->(Eof()))
 				
-					aadd(_aerros,{				_oModelDET:GetValue("ZZN_ITEM"),;
+					aAdd(_aerros,{				_oModelDET:GetValue("ZZN_ITEM"),;
 					 				_oModelMAS:GetValue( 'ZZN_FTRANS')+"/"+ _oModelMAS:GetValue(  'ZZN_LOJAFT'),;
 									_oModelDET:GetValue("ZZN_CTRANS") + "/" + _oModelDET:GetValue("ZZN_SERCTR"),;
-									"Chave de nota fiscal não localizada "  + ALLTRIM(_anotas[_nfi][2])," "})
+									"Chave de nota fiscal não localizada "  + AllTrim(_anotas[_nfi][2])," "})
 					_lteste := .F.
 					
 				Else
 				
-					aadd(_aerros,{	_oModelDET:GetValue("ZZN_ITEM"),;
+					aAdd(_aerros,{	_oModelDET:GetValue("ZZN_ITEM"),;
 					 				_oModelMAS:GetValue( 'ZZN_FTRANS')+"/"+ _oModelMAS:GetValue(  'ZZN_LOJAFT'),;
 									_oModelDET:GetValue("ZZN_CTRANS") + "/" + _oModelDET:GetValue("ZZN_SERCTR"),;
-									 "Confirmação de canhoto não efetuada para nota "  + ALLTRIM(SF2->F2_DOC)," "})
+									 "Confirmação de canhoto não efetuada para nota "  + AllTrim(SF2->F2_DOC)," "})
 					_lteste := .F.
 					Exit //Quando não confirma canhoto sai para não ficar pedindo outros canhotos
 				
-				Endif
+				EndIf
 						
-				If select("SF2T") > 0 .and. !SF2T->(Eof()) .and. (_ncc == 1 .or. _lteste)  
+				If Select("SF2T") > 0 .And. !SF2T->(Eof()) .And. (_ncc == 1 .Or. _lteste)  
 				
-					SF2->(Dbgoto(SF2T->RECN))
+					SF2->(DBGoTo(SF2T->RECN))
 					
 					//Limpa campo de municipio que controla when do campo de nota fiscal
 					_oModelDET:LoadValue("ZZN_DESMUN"," ")
@@ -2514,29 +2407,29 @@ Begin Sequence
 					
 						_oModelDET:SeTValue("ZZN_VLRCTR",0)
 						
-					Endif
+					EndIf
 					
 					
 					//Preenche novamente campo de municipio que controla when do campo de nota fiscal
-					_cmuni := U_AOMS054U(alltrim(SF2->F2_DOC),alltrim(SF2->F2_SERIE),alltrim(SF2->F2_FILIAL))
-					SF2->(Dbgoto(SF2T->RECN))
+					_cmuni := U_AOMS054U(AllTrim(SF2->F2_DOC),AllTrim(SF2->F2_SERIE),AllTrim(SF2->F2_FILIAL))
+					SF2->(DBGoTo(SF2T->RECN))
 					
-					_oModelDET:LoadValue("ZZN_DESMUN",alltrim(_cmuni))
+					_oModelDET:LoadValue("ZZN_DESMUN",AllTrim(_cmuni))
 																
-					If empty(alltrim(_oModelDET:GeTValue("ZZN_MTDIVF")))
+					If Empty(AllTrim(_oModelDET:GeTValue("ZZN_MTDIVF")))
 					
 						_oModelDET:SeTValue("ZZN_DESCMD",' ')
 						
-					Endif
+					EndIf
 						
-				Endif
+				EndIf
 				
-				If select("SF2T") > 0
+				If Select("SF2T") > 0
 				
-					Dbselectarea("SF2T")
-					SF2T->(Dbclosearea())
+					DBSelectArea("SF2T")
+					SF2T->(DBCloseArea())
 					
-				Endif
+				EndIf
 						
 			Next
 						
@@ -2546,16 +2439,16 @@ Begin Sequence
 			_lRet := .F.
 			Break
 			
-		Endif
+		EndIf
 		
-		If select("SF1T") > 0 
+		If Select("SF1T") > 0 
 		
-			Dbselectarea("SF1T")
-			SF1T->(Dbclosearea())
+			DBSelectArea("SF1T")
+			SF1T->(DBCloseArea())
 			
-		Endif
+		EndIf
 
-		If len(_aerros) > 0
+		If Len(_aerros) > 0
 
 			//Se  falhou, limpa todos os campos atuais
 			_oModelDET:LoadValue("ZZN_DESMUN"," ")
@@ -2575,9 +2468,9 @@ Begin Sequence
 			
 			U_ITListBox( 'Ocorreram erros no carregamento do CTR' , {"Linha","Transportador","CTR","Erro","Detalhe"} , _aerros , .T. , 1 )
 			
-		Endif
+		EndIf
 				
-	Endif
+	EndIf
 
 End Sequence
 
@@ -2587,7 +2480,7 @@ If _lRet
 	_oview := FWViewActive()
 	_oview:Refresh()
 
-Endif
+EndIf
 
 Return _lRet
 
@@ -2596,15 +2489,11 @@ Return _lRet
 Programa----------: AOMS054F
 Autor-------------: Fabiano dias
 Data da Criacao---: 29/08/2011
-===============================================================================================================================
 Descrição---------: Valida se campo pode ser editado
-===============================================================================================================================
 Parametros--------: _ccampo - Campo a ser analiszado
-===============================================================================================================================
 Retorno-----------: lRet - Indica se o código foi validado ou seje já existe
 ===============================================================================================================================
 */
-
 User Function AOMS054F(_ccampo)  
 
 Local _lRet := .T.
@@ -2616,33 +2505,33 @@ If Empty( FwFldGet( 'ZZN_FATURA' ) )
 
 	_lRet := .F.
 	
-Endif
+EndIf
 
-If _lRet .and. _ccampo == "ZZN_CARGA"
+If _lRet .And. _ccampo == "ZZN_CARGA"
 
 	_lRet := .F.
 	
-Endif
+EndIf
 
-If _lRet .and. (_ccampo == "ZZN_CTRANS" .OR. _ccampo == "ZZN_SERCTR")
+If _lRet .And. (_ccampo == "ZZN_CTRANS" .Or. _ccampo == "ZZN_SERCTR")
 
-	If (!Empty(_oModelDET:GetValue("ZZN_CTRANS")) .AND. !Empty(_oModelDET:GetValue("ZZN_SERCTR")))
+	If (!Empty(_oModelDET:GetValue("ZZN_CTRANS")) .And. !Empty(_oModelDET:GetValue("ZZN_SERCTR")))
 	
 		_lRet := .F.
 		
-	Endif
+	EndIf
 	
-Endif
+EndIf
 
-If _lRet .and. (_ccampo == "ZZN_FILNFV" .OR. _ccampo == "ZZN_NFISCA" .OR. _ccampo == "ZZN_SERIE" .or. _ccampo == "ZZN_CHAVE")
+If _lRet .And. (_ccampo == "ZZN_FILNFV" .Or. _ccampo == "ZZN_NFISCA" .Or. _ccampo == "ZZN_SERIE" .Or. _ccampo == "ZZN_CHAVE")
 
-	If (!Empty(_oModelDET:GetValue("ZZN_CTRANS")) .AND. !Empty(_oModelDET:GetValue("ZZN_SERCTR")) .AND. !EMPTY((_oModelDET:GetValue("ZZN_DESMUN"))))
+	If (!Empty(_oModelDET:GetValue("ZZN_CTRANS")) .And. !Empty(_oModelDET:GetValue("ZZN_SERCTR")) .And. !Empty((_oModelDET:GetValue("ZZN_DESMUN"))))
 	
 		_lRet := .F.
 		
-	Endif
+	EndIf
 	
-Endif
+EndIf
 
 Return _lRet
 
@@ -2651,15 +2540,11 @@ Return _lRet
 Programa----------: AOMS054Z
 Autor-------------: Fabiano dias
 Data da Criacao---: 29/08/2011
-===============================================================================================================================
 Descrição---------: Validação de campo com barra de progresso
-===============================================================================================================================
 Parametros--------: _ccampo - Campo a ser analiszado
-===============================================================================================================================
 Retorno-----------: lRet - Indica se o código foi validado ou seje já existe
 ===============================================================================================================================
 */
-
 User Function AOMS054Z(_ccampo)  
 
 Local _oModel := FWModelActive()
@@ -2670,12 +2555,12 @@ Local _actes     := {}
 Local _ctransp   := ""
 Local _clojat    := {}
 Local _nI        := 0
-Local _nDiasCte  := u_itgetmv("IT_DIASCTE",0) 
+Local _nDiasCte  := SuperGetMV("IT_DIASCTE",.F.,0) 
 
 Private nTam		:= 0
 Private nMaxSelect	:= 0
 Private aCat		:= {}
-Private MvRet		:= Alltrim(ReadVar())
+Private MvRet		:= AllTrim(ReadVar())
 Private MvPar		:= ""
 Private cTitulo		:= ""
 Private MvParDef	:= ""
@@ -2684,90 +2569,88 @@ Private _lReti := .T.
 Begin Sequence
 
 //Processa chamada a partir do campo de número ou série de conhecimento de transporte
-If (_ccampo == "ZZN_CTRANS" .OR. _ccampo == "ZZN_SERCTR") .and. empty(M->ZZN_CHAV) 
-
-
+If (_ccampo == "ZZN_CTRANS" .Or. _ccampo == "ZZN_SERCTR") .And. Empty(M->ZZN_CHAV) 
 		_cQuery := " SELECT R_E_C_N_O_ RECN"
 		_cQuery += " FROM "+ RetSqlName("SF1") 
 		_cQuery += " WHERE "
 		_cQuery += "     	D_E_L_E_T_ = ' ' "
-		_cQuery += " 		AND F1_DOC = '" + alltrim(_oModelDET:GetValue("ZZN_CTRANS")) + "' "
-		_cQuery += " 		AND F1_SERIE = '" + alltrim(_oModelDET:GetValue("ZZN_SERCTR")) + "' "
-		_cQuery += " 		AND F1_FILIAL = '" + ALLTRIM(xfilial("SF1")) + "' "
+		_cQuery += " 		AND F1_DOC = '" + AllTrim(_oModelDET:GetValue("ZZN_CTRANS")) + "' "
+		_cQuery += " 		AND F1_SERIE = '" + AllTrim(_oModelDET:GetValue("ZZN_SERCTR")) + "' "
+		_cQuery += " 		AND F1_FILIAL = '" + AllTrim(xFilial("SF1")) + "' "
 		_cQuery += " 		AND F1_ESPECIE = 'CTE' "
 
 		_cQuery += " 		AND F1_STATUS = 'A'"
 		  
 		//Se cabeçalho já selecionou um fornecedor restringe a busca
-		If !empty(alltrim(_oModelMAS:GetValue("ZZN_FTRANS"))) .and. !empty(alltrim(_oModelMAS:GetValue("ZZN_LOJAFT")))
+		If !Empty(AllTrim(_oModelMAS:GetValue("ZZN_FTRANS"))) .And. !Empty(AllTrim(_oModelMAS:GetValue("ZZN_LOJAFT")))
 		
-			_cQuery += " 		AND F1_FORNECE = '" + alltrim(_oModelMAS:GetValue("ZZN_FTRANS")) + "' "
-			_cQuery += " 		AND F1_LOJA = '" + alltrim(_oModelMAS:GetValue("ZZN_LOJAFT")) + "' "
+			_cQuery += " 		AND F1_FORNECE = '" + AllTrim(_oModelMAS:GetValue("ZZN_FTRANS")) + "' "
+			_cQuery += " 		AND F1_LOJA = '" + AllTrim(_oModelMAS:GetValue("ZZN_LOJAFT")) + "' "
 		 
 		//Senão traz os transportadores que começam com T
 		Else
 		
-			_cQuery += " AND SUBSTR(F1_FORNECE,1,1) = 'T' "
+			_cQuery += " AND SubStr(F1_FORNECE,1,1) = 'T' "
 		
-		Endif
+		EndIf
 
 		If _nDiasCte > 0
-			_dInicial := DTOS(DATE()-_nDiasCte)
+			_dInicial := DToS(Date()-_nDiasCte)
 			_cQuery += "  AND F1_EMISSAO >= '" + _dInicial + "'"				
 		End
 		
-		If select("SF1T") > 0
+		If Select("SF1T") > 0
 		
-			Dbselectarea("SF1T")
-			SF1T->(Dbclosearea())
+			DBSelectArea("SF1T")
+			SF1T->(DBCloseArea())
 			
-		Endif
+		EndIf
 		
 		MPSysOpenQuery( _cQuery , "SF1T" ) 
 		_actes := {}
 		
-		If SF1T->(Eof()) .and. !(empty(alltrim(_oModelDET:GetValue("ZZN_CTRANS")))) .and. !(EMPTY(alltrim(_oModelDET:GetValue("ZZN_SERCTR"))))  
+		If SF1T->(Eof()) .And. !(Empty(AllTrim(_oModelDET:GetValue("ZZN_CTRANS")))) .And. !(Empty(AllTrim(_oModelDET:GetValue("ZZN_SERCTR"))))  
 		
-			If !empty(alltrim(_oModelMAS:GetValue("ZZN_FTRANS"))) .and. !empty(alltrim(_oModelMAS:GetValue("ZZN_LOJAFT")))
-				Help( ,, 'Atenção!',, "Número de CTE " + alltrim(_oModelDET:GetValue("ZZN_CTRANS")) + "/" + ;
-				 alltrim(_oModelDET:GetValue("ZZN_SERCTR")) + "  não localizado para o fornecedor do cabeçalho",;
+			If !Empty(AllTrim(_oModelMAS:GetValue("ZZN_FTRANS"))) .And. !Empty(AllTrim(_oModelMAS:GetValue("ZZN_LOJAFT")))
+				Help( ,, 'Atenção!',, "Número de CTE " + AllTrim(_oModelDET:GetValue("ZZN_CTRANS")) + "/" + ;
+				 AllTrim(_oModelDET:GetValue("ZZN_SERCTR")) + "  não localizado para o fornecedor do cabeçalho",;
 				  1, 0,, ,,, , {"Contate o departamento fiscal para confirmar a escrituração do CTE"} )
 			Else
-				Help( ,, 'Atenção!',, "Número de CTE " + alltrim(_oModelDET:GetValue("ZZN_CTRANS")) + "/" + alltrim(_oModelDET:GetValue("ZZN_SERCTR"));
+				Help( ,, 'Atenção!',, "Número de CTE " + AllTrim(_oModelDET:GetValue("ZZN_CTRANS")) + "/" + AllTrim(_oModelDET:GetValue("ZZN_SERCTR"));
 				 	+ "  não localizado", 1, 0,, ,,, , {"Contate o departamento fiscal para confirmar a escrituração do CTE"}  )
 		
-			Endif
+			EndIf
 			_lReti := .F.
 			Break
 			
-		Endif
+		EndIf
 	
-		Do while !(SF1T->(EOF()))
+		While !(SF1T->(Eof()))
 		
-			SF1->(Dbgoto(SF1T->RECN))
+			SF1->(DBGoTo(SF1T->RECN))
 			
-			If ascan(_actes,{|_vAux|_vAux[1]== alltrim(SF1->F1_FORNECE) .AND. _vAux[2] == alltrim(SF1->F1_LOJA)}) == 0
+			If aScan(_actes,{|_vAux|_vAux[1]== AllTrim(SF1->F1_FORNECE) .And. _vAux[2] == AllTrim(SF1->F1_LOJA)}) == 0
 			
-				aadd(_actes, {alltrim(SF1->F1_FORNECE),alltrim(SF1->F1_LOJA),alltrim(SF1->F1_CHVNFE)})
+				aAdd(_actes, {AllTrim(SF1->F1_FORNECE),AllTrim(SF1->F1_LOJA),AllTrim(SF1->F1_CHVNFE)})
 				
-			Endif
+			EndIf
 			
-			SF1T->(Dbskip())	
+			SF1T->(DBSkip())	
 	
-		Enddo
+		EndDo
 		
 		
 		_cchavi := ""
 		
 		//Se tiver só um cte com o número escolhido seleciona automaticamente
-		If len(_actes) == 1
+		If Len(_actes) == 1
 		
 			_cchavi := _actes[1][3]
 			_ctransp := _actes[1][1]
 			_clojat := _actes[1][2]
 		
 		//Se tiver mais de um cte com mesmo número para vários fornecedores então vai abrir tela de seleção
-		Elseif len(_actes) > 0
+		ElseIf Len(_actes) > 0
 		
 			//====================================================================================================
 			// Tratamento para carregar variaveis da lista de opcoes
@@ -2778,7 +2661,7 @@ If (_ccampo == "ZZN_CTRANS" .OR. _ccampo == "ZZN_SERCTR") .and. empty(M->ZZN_CHA
 
 			For _nI := 1 To Len( _actes ) 
 
-				MvParDef += AllTrim( _actes[_nI][1] + "/" + _actes[_ni][2] )
+				MvParDef += AllTrim( _actes[_nI][1] + "/" + _actes[_nI][2] )
 				aAdd( aCat , AllTrim( Posicione( 'SA2' , 1 , xFilial('SA2')+_actes[_nI][1]+_actes[_nI][2] , 'A2_NOME' ) ) )
 	
 			Next _nI
@@ -2807,7 +2690,7 @@ If (_ccampo == "ZZN_CTRANS" .OR. _ccampo == "ZZN_SERCTR") .and. empty(M->ZZN_CHA
 				//====================================================================================================
 				&MvRet := ""
 	
-				For _nI := 1 to Len( MvPar ) step nTam
+				For _nI := 1 To Len( MvPar ) step nTam
 	
 					If !(SubStr( MvPar , _nI , 1 ) $ " |*" )
 						&MvRet += SubStr( MvPar , _nI , nTam ) +";"
@@ -2821,7 +2704,7 @@ If (_ccampo == "ZZN_CTRANS" .OR. _ccampo == "ZZN_SERCTR") .and. empty(M->ZZN_CHA
 				&MvRet := SubStr( &MvRet , 1 , Len(&MvRet) - 1 )
 				
 				//Carrega chave do ctr do fornecedor selecionado
-				_np := ascan(_actes,{|_vAux|_vAux[1]== substr(alltrim(&mvret),1,6) .AND. _vAux[2] == substr(alltrim(&mvret),8,4)})
+				_np := aScan(_actes,{|_vAux|_vAux[1]== SubStr(AllTrim(&mvret),1,6) .And. _vAux[2] == SubStr(AllTrim(&mvret),8,4)})
 
 				If _np > 0
 				
@@ -2835,7 +2718,7 @@ If (_ccampo == "ZZN_CTRANS" .OR. _ccampo == "ZZN_SERCTR") .and. empty(M->ZZN_CHA
 					_lReti := .F.
 					Break
 				
-				Endif
+				EndIf
 				
 				
 			Else
@@ -2847,18 +2730,18 @@ If (_ccampo == "ZZN_CTRANS" .OR. _ccampo == "ZZN_SERCTR") .and. empty(M->ZZN_CHA
 			EndIf
 
 			
-		Endif
+		EndIf
 		
 		//Se está validando, verifica se não é fatura duplicada para o fornecedor
-		ZZN->(Dbsetorder(1))
-		If _lReti .AND. inclui .and. !U_AOMS0546(alltrim(_oModelMAS:GetValue("ZZN_FATURA")),_ctransp,_clojat)	
+		ZZN->(DBSetOrder(1))
+		If _lReti .And. inclui .And. !U_AOMS0546(AllTrim(_oModelMAS:GetValue("ZZN_FATURA")),_ctransp,_clojat)	
 		
 			_lReti := .F.
 			Break
 				
-		Endif
+		EndIf
 	
-Endif
+EndIf
 
 End Sequence
 
@@ -2866,21 +2749,17 @@ If _lReti
 
 	FWMsgRun(, {| |  _lReti := U_AOMS054B( ,,,,, _ccampo,_cchavi )  }, "Processando", "Carregando dados...")
 	
-Endif                                        
+EndIf                                        
 
 Return _lReti
-
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS054Y
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 07/03/2018
-===============================================================================================================================
 Descrição---------: Soma total da fatura
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: _ntot - Total da fatura
 ===============================================================================================================================
 */
@@ -2892,15 +2771,11 @@ Local _oModelDET := _oModel:GetModel('ZZNDETAIL')
 Local _nlin := _oModelDET:Length(.F.)
 Local _nni := 1
 
-For _nni := 1 to _nlin
-
+For _nni := 1 To _nlin
 	If !(_oModelDET:IsDeleted(_nni))
-	
 		_ntot := _ntot + _oModelDET:GetValue("ZZN_VLRCTR", _nni ) - _oModelDET:GetValue("ZZN_DESCON", _nni )
-	
-	Endif
-	
-Next
+	EndIf
+Next _nni
 
 Return _ntot
 
@@ -2909,11 +2784,8 @@ Return _ntot
 Programa----------: AOMS054D
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 07/03/2018
-===============================================================================================================================
 Descrição---------: Carrega da prevista de pagamento
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: _ddata - data prevista de pagamento
 ===============================================================================================================================
 */
@@ -2925,13 +2797,13 @@ Local _oModelDET := _oModel:GetModel('ZZNDETAIL')
 Local _nlin := _oModelDET:Length(.F.)
 Local _nni := 1
 
-For _nni := 1 to _nlin
+For _nni := 1 To _nlin
 
-	If !(_oModelDET:IsDeleted(_nni)) .AND. _oModelDET:GetValue("ZZN_PRVPAG", _nni ) > CTOD('01/01/2001')
+	If !(_oModelDET:IsDeleted(_nni)) .And. _oModelDET:GetValue("ZZN_PRVPAG", _nni ) > CTOD('01/01/2001')
 	
 		_ddata := _oModelDET:GetValue("ZZN_PRVPAG", _nni )
 	
-	Endif
+	EndIf
 	
 Next
 
@@ -2942,31 +2814,28 @@ Return _ddata
 Programa----------: AOMS0546
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 07/03/2018
-===============================================================================================================================
 Descrição---------: Valida Fatura duplicada para transportador
-===============================================================================================================================
 Parametros--------: _cfatura - número da fatura
 					_ctrans - transportador
 					_cloja - loja do transportador
-===============================================================================================================================
-Retorno-----------: _lRet - .F. se for fatura duplicada para o transportador
+Retorno-----------: _lRet - .F. se For fatura duplicada para o transportador
 ===============================================================================================================================
 */
-User function AOMS0546(_cfatura,_ctrans,_cloja)
+User Function AOMS0546(_cfatura,_ctrans,_cloja)
 
 Local _lRet := .T.
 
-_cfatura := PADL( _cfatura , TamSX3("ZZN_FATURA")[01] , '0' )
+_cfatura := PadL( _cfatura , TamSX3("ZZN_FATURA")[01] , '0' )
 
-ZZN->(Dbsetorder(1)) //ZZN_FILIAL+ZZN_FATURA+ZZN_FTTRANS+ZZN_LOJAFT
+ZZN->(DBSetOrder(1)) //ZZN_FILIAL+ZZN_FATURA+ZZN_FTTRANS+ZZN_LOJAFT
 
-If !empty(_cfatura) .and. !empty(_ctrans) .and. !empty(_cloja) .and. ZZN->(Dbseek(xfilial("ZZN")+_cfatura+_ctrans+_cloja))
+If !Empty(_cfatura) .And. !Empty(_ctrans) .And. !Empty(_cloja) .And. ZZN->(DBSeek(xFilial("ZZN")+_cfatura+_ctrans+_cloja))
 
-	_cnomefor := posicione("SA2",1,xfilial("SA2")+_ctrans+_cloja,"A2_NOME")
+	_cnomefor := Posicione("SA2",1,xFilial("SA2")+_ctrans+_cloja,"A2_NOME")
 	 Help( ,, 'Atenção!',, "Fatura " + _cfatura  + " já existe para o fornecedor " + _ctrans + "/" + _cloja + " - " + _cnomefor, 1, 0 )
 	_lRet := .F.
 	
-Endif
+EndIf
 
 
 Return _lRet	
@@ -2976,15 +2845,12 @@ Return _lRet
 Programa----------: AOMS0549
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 07/03/2018
-===============================================================================================================================
 Descrição---------: Libera titulos e inclui fatura no financeiro para o CTR
-===============================================================================================================================
 Parametros--------: _omodel  - modelo da tela ativa
-===============================================================================================================================
 Retorno-----------: _lRet - .F. se incluiu com sucesso
 ===============================================================================================================================
 */
-Static function AOMS0549(_omodel)
+Static Function AOMS0549(_omodel)
 
 Local _lRet := .T.
 Local _aTit	:= {}
@@ -2999,24 +2865,24 @@ _nlin 		:= _oModelDET:Length(.F.)
 _lpassou    := .F.
 
 //Valida datas de vencimento
-For _nni := 1 to _nlin
+For _nni := 1 To _nlin
 
 	//Se a linha está deletada não faz validações
 	If _oModelDET:IsDeleted(_nni)
 		Loop
-	Endif
+	EndIf
 
 	If !_lpassou
 		_dvencto 	:= _oModelDET:GetValue("ZZN_PRVPAG", _nni )
 		_lpassou := .T.
-	Endif
+	EndIf
 
 	If _dvencto != _oModelDET:GetValue("ZZN_PRVPAG", _nni )
 	
 		Help( ,, 'Atenção!',, "Divergência de datas de previsão de pagamento", 1, 0 )
 		Return .F.
 
-	Endif
+	EndIf
 
 Next
 
@@ -3027,79 +2893,79 @@ Begin Sequence
 
 //Libera títulos
 _atit := {}
-_dini := date()
-_dfini := date()-400
+_dini := Date()
+_dfini := Date()-400
         
-_dorig := ddatabase
-ddatabase := _dvencto
+_dorig := dDataBase
+dDataBase := _dvencto
 _ndesconto := 0
 
-For _nni := 1 to _nlin
+For _nni := 1 To _nlin
 
 	//Se a linha está deletada não faz validações
 	If _oModelDET:IsDeleted(_nni)
 		Loop
-	Endif
+	EndIf
 
 	_ndesconto += _oModelDET:GetValue("ZZN_DESCON", _nni )
 
-	//aadd(_aTit,{ SE2->E2_PREFIXO, SE2->E2_NUM, SE2->E2_PARCELA , SE2->E2_TIPO, .f.,SE2->E2_FORNECE,SE2->E2_LOJA})
-	_nlp := ascan(_atit,{|it| alltrim(it[2]) == alltrim(_oModelDET:GetValue("ZZN_CTRANS", _nni ))})
+	//aAdd(_aTit,{ SE2->E2_PREFIXO, SE2->E2_NUM, SE2->E2_PARCELA , SE2->E2_TIPO, .F.,SE2->E2_FORNECE,SE2->E2_LOJA})
+	_nlp := aScan(_atit,{|it| AllTrim(it[2]) == AllTrim(_oModelDET:GetValue("ZZN_CTRANS", _nni ))})
 
 	If _nlp == 0 //Se ainda não processou o titulo faz a liberação
 
-		SE2->(DbSetOrder(6)) // E2_FILIAL+E2_FORNECE+E2_LOJA+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO
-		If (SE2->(Dbseek(xfilial("SE2")+_oModelMAS:GetValue( 'ZZN_FTRANS')+_oModelMAS:GetValue( 'ZZN_LOJAFT')+;
+		SE2->(DBSetOrder(6)) // E2_FILIAL+E2_FORNECE+E2_LOJA+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO
+		If (SE2->(DBSeek(xFilial("SE2")+_oModelMAS:GetValue( 'ZZN_FTRANS')+_oModelMAS:GetValue( 'ZZN_LOJAFT')+;
 							_oModelDET:GetValue("ZZN_SERCTR", _nni )+_oModelDET:GetValue("ZZN_CTRANS", _nni ))))
  
  			If Empty(SE2->E2_BAIXA )  
              				
 				SE2->(RecLock("SE2",.F.))
         		SE2->E2_DATALIB := Date()
-        		SE2->E2_USUALIB := cusername
+        		SE2->E2_USUALIB := cUserName
 				SE2->E2_I_CLIB := _cCodUsr
         		SE2->E2_STATLIB := "03"  // Movimento liberado pelo usuário
-    	   		SE2->E2_CODAPRO := IIF(FindFunction("Fa006User"), Fa006User( "000000", .F., 2 ), "" )
-       	   		SE2->(MsUnlock())
+    	   		SE2->E2_CODAPRO := IIf(FindFunction("Fa006User"), Fa006User( "000000", .F., 2 ), "" )
+       	   		SE2->(MSUnLock())
 
 				If SE2->E2_EMISSAO < _dini
 
             		_dini := SE2->E2_EMISSAO
 
-				Endif
+				EndIf
 
 				If SE2->E2_EMISSAO > _dfini
 
 		       		_dfini := SE2->E2_EMISSAO
 
-    			Endif
+    			EndIf
 
 				//Array para criação da fatura
-				aadd(_aTit,{ SE2->E2_PREFIXO, SE2->E2_NUM, SE2->E2_PARCELA , SE2->E2_TIPO, .f.,SE2->E2_FORNECE,SE2->E2_LOJA})
+				aAdd(_aTit,{ SE2->E2_PREFIXO, SE2->E2_NUM, SE2->E2_PARCELA , SE2->E2_TIPO, .F.,SE2->E2_FORNECE,SE2->E2_LOJA})
 															
-			ElseIF !Empty(SE2->E2_BAIXA )
+			ElseIf !Empty(SE2->E2_BAIXA )
 
-					Disarmtransaction()	
+					DisarmTransaction()	
 					Help( ,, 'Atenção!',, "Titulo do CTR " + SE2->E2_NUM + " já possui baixa!", 1, 0 )
 					_lRet := .F.
-					BREAK
+					Break
 
-			Endif
+			EndIf
 
 		Else
 
-			Disarmtransaction()	
+			DisarmTransaction()	
 			Help( ,, 'Atenção!',, "Falha no processamento financeiro da fatura!", 1, 0 )
 			_lRet := .F.
-			BREAK
+			Break
 
 		EndIf
 					
-	Endif
+	EndIf
 
 Next
 
-_cnatureza := u_itgetmv("ITNATFAT","231007")
+_cnatureza := SuperGetMV("IT_NATFAT",.F.,"231007")
 
 //Cria Fatura no financeiro
 aArray := {  	"MAN",;
@@ -3116,10 +2982,10 @@ aArray := {  	"MAN",;
    				01,;
    				_aTit , , }
 
-_cfatura2 := soma1(GetMV( 'MV_NUMFATP' ,, '0' ))
+_cfatura2 := Soma1(GetMV( 'MV_NUMFATP' ,, '0' ))
 lMsErroAuto := .F.
 
-fwmsgrun(,{|| MsExecAuto( { |x,y| FINA290(x,y)},3,aArray,)},"Aguarde...","Criando fatura " + _cfatura2 + " no financeiro...")
+FWMsgRun(,{|| MsExecAuto( { |x,y| FINA290(x,y)},3,aArray,)},"Aguarde...","Criando fatura " + _cfatura2 + " no financeiro...")
 
 If lMsErroAuto
 
@@ -3134,10 +3000,10 @@ If lMsErroAuto
 
 	_cMsg := "Erro ao gerar a Fatura no financeiro - " +  cLogTxt
 		
-	Disarmtransaction()	
+	DisarmTransaction()	
 	Help( ,, 'Atenção!',, _cMsg, 1, 0 )
 	_lRet := .F.
-	BREAK
+	Break
   
 Else
 
@@ -3153,26 +3019,26 @@ Else
 		SE2->E2_DECRESC := _ndesconto
 		SE2->E2_SDDECRE := _ndesconto
 		SE2->E2_DATALIB := Date()
-        SE2->E2_USUALIB := cusername
+        SE2->E2_USUALIB := cUserName
 		SE2->E2_I_CLIB := RetCodUsr()
         SE2->E2_STATLIB := "03"  // Movimento liberado pelo usuário
-    	SE2->E2_CODAPRO := IIF(FindFunction("Fa006User"), Fa006User( "000000", .F., 2 ), "" )
-		SE2->( MsUnlock() )
+    	SE2->E2_CODAPRO := IIf(FindFunction("Fa006User"), Fa006User( "000000", .F., 2 ), "" )
+		SE2->( MSUnLock() )
 			
     Else
 
     	_cMsg := "Erro ao gerar a Fatura no financeiro - Titulo da fatura não localizado" 
 		
-		Disarmtransaction()	
+		DisarmTransaction()	
 		Help( ,, 'Atenção!',, _cMsg, 1, 0 )
 		_lRet := .F.
-		BREAK
-    Endif
+		Break
+    EndIf
  
-Endif
+EndIf
 
-ddatabase := _dorig
-END Sequence
+dDataBase := _dorig
+End Sequence
 END TRANSACTION
 
 Return _lRet
@@ -3182,15 +3048,12 @@ Return _lRet
 Programa----------: AOMS0548
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 07/03/2018
-===============================================================================================================================
 Descrição---------: Exclui fatura no financeiro para o CTR
-===============================================================================================================================
 Parametros--------: _omodel - modelo da tela ativa
-===============================================================================================================================
 Retorno-----------: _lRet - .F. se incluiu com sucesso
 ===============================================================================================================================
 */
-Static function AOMS0548(_omodel)
+Static Function AOMS0548(_omodel)
 
 Local _lRet := .T.
 Local nAux	:= 0
@@ -3201,10 +3064,10 @@ _nlin 		:= _oModelDET:Length(.F.)
 
 
 BEGIN TRANSACTION
-BEGIN SEQUENCE
+Begin Sequence
 
 //Valida e exclui fatura do financeiro se necessário
-If !empty(alltrim(_oModelMAS:GetValue("ZZN_FATFIN")))
+If !Empty(AllTrim(_oModelMAS:GetValue("ZZN_FATFIN")))
 
 	SE2->( DBSetOrder(1) )
 	If SE2->( DBSeek( cfilant + "MAN" + _oModelMAS:GetValue("ZZN_FATFIN")  + '01' + "FT " +;
@@ -3226,14 +3089,14 @@ If !empty(alltrim(_oModelMAS:GetValue("ZZN_FATFIN")))
            				_oModelMAS:GetValue( 'ZZN_LOJAFT'),;
 	       				  ,;
            				01,;
-   						{ SE2->E2_PREFIXO, SE2->E2_NUM, SE2->E2_PARCELA , SE2->E2_TIPO, .f.,SE2->E2_FORNECE,SE2->E2_LOJA},;
+   						{ SE2->E2_PREFIXO, SE2->E2_NUM, SE2->E2_PARCELA , SE2->E2_TIPO, .F.,SE2->E2_FORNECE,SE2->E2_LOJA},;
 						 	, , }
 
       			
 		lMsErroAuto := .F.
 
-       	fwmsgrun(,{|| MsExecAuto( { |x,y| FINA290(x,y)},4,aArray,)},"Aguarde...",;
-			   			"Excluindo fatura " + alltrim(_oModelMAS:GetValue("ZZN_FATFIN")) + " no financeiro...")
+       	FWMsgRun(,{|| MsExecAuto( { |x,y| FINA290(x,y)},4,aArray,)},"Aguarde...",;
+			   			"Excluindo fatura " + AllTrim(_oModelMAS:GetValue("ZZN_FATFIN")) + " no financeiro...")
 
 		If lMsErroAuto
 
@@ -3248,10 +3111,10 @@ If !empty(alltrim(_oModelMAS:GetValue("ZZN_FATFIN")))
 
 			_cMsg := "Erro ao excluir a Fatura no financeiro - " +  cLogTxt
 		
-			Disarmtransaction()	
+			DisarmTransaction()	
 			Help( ,, 'Atenção!',, _cMsg, 1, 0 )
 			_lRet := .F.
-			BREAK
+			Break
   
     	Else
 
@@ -3260,19 +3123,19 @@ If !empty(alltrim(_oModelMAS:GetValue("ZZN_FATFIN")))
 
     			_cMsg := "Erro ao excluir a Fatura no financeiro" 
 		
-				Disarmtransaction()	
+				DisarmTransaction()	
 				Help( ,, 'Atenção!',, _cMsg, 1, 0 )
 				_lRet := .F.
-				BREAK
+				Break
 
-         	Endif
+         	EndIf
 
-		Endif
+		EndIf
 
-	Endif
+	EndIf
  
-Endif	
-END SEQUENCE
+EndIf	
+End Sequence
 END TRANSACTION
 
 Return _lRet
@@ -3282,11 +3145,8 @@ Return _lRet
 Programa----------: AOMS054T
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 07/03/2018
-===============================================================================================================================
 Descrição---------: Monta e envia email de exclusão de fatura dos ctrs
-===============================================================================================================================
 Parametros--------: _omodel - modelo da tela
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -3294,10 +3154,10 @@ Static Function AOMS054T(_omodel)
 
 Local _cEmail 		:= SuperGetMV("IT_WFFATFI",.F.,"sistema@italac.com.br" )
 Local _cAnexo 		:= " "
-Local _ccc    		:= space(80)
+Local _ccc    		:= Space(80)
 Local _oModelMAS 	:= _oModel:GetModel('ZZNMASTER')
 Local _cfatura 		:= _oModelMas:GetValue("ZZN_FATFIN")
-Local _cnome     	:= posicione("SA2",1,xfilial("SA2")+_oModelMas:GetValue("ZZN_FTRANS")+_oModelMas:GetValue("ZZN_LOJAFT"),"A2_NOME")
+Local _cnome     	:= Posicione("SA2",1,xFilial("SA2")+_oModelMas:GetValue("ZZN_FTRANS")+_oModelMas:GetValue("ZZN_LOJAFT"),"A2_NOME")
 Local _cAssunto 	:= "Cancelamento de fatura de CTRs: " + _cfatura + " do transportador: " + _cnome
 Local oAssunto
 Local oButCan
@@ -3323,18 +3183,14 @@ Local cGetPara	:= _cEmail + Space(80)
 
 Private oDlgMail
 
-If (Len(PswRet()) # 0) // Quando nao for rotina automatica do configurador
+If (Len(PswRet()) # 0) // Quando nao For rotina automatica do configurador
 
 	_csetor	:= AllTrim(PswRet()[1][12])		// Pega departamento do usuario
    
-Endif
-
-
-If empty(alltrim(_csetor))
- 
- 	_csetor := "Logistica"
- 	
-Endif
+EndIf
+If Empty(AllTrim(_csetor))
+  	_csetor := "Logistica"
+EndIf
 
 cHtml := 'Ao departamento financeiro,'
 cHtml += '<br><br>'
@@ -3397,8 +3253,8 @@ cHtml +=             '<b><span style="font-size:12.0pt;font-family:'+"'"+'Times 
 cHtml +=             '<span style="font-size:12.0pt;font-family:'+"'"+'Times New Roman'+"'"+','+"'"+'serif'+"'"+';mso-fareast-language:PT-BR"></span></p>
 cHtml +=             '<p class=MsoNormal style="mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;text-align:justify">'
 cHtml +=             '<span style="font-size:7.5pt;font-family:'+"'"+'Times New Roman'+"'"+','+"'"+'serif'+"'"+';color:#1D2668;mso-fareast-language:PT-BR">
-cHtml +=                 'Esta mensagem é destinada exclusivamente para fins profissionais, para a(s) pessoa(s) a quem for dirigida, podendo conter informação confidencial e legalmente privilegiada. '
-cHtml +=                 'Ao recebê-la, se você não for destinatário desta mensagem, fica automaticamente notificado de abster-se a divulgar, copiar, distribuir, examinar ou, de qualquer forma, utilizar '
+cHtml +=                 'Esta mensagem é destinada exclusivamente para fins profissionais, para a(s) pessoa(s) a quem For dirigida, podendo conter informação confidencial e legalmente privilegiada. '
+cHtml +=                 'Ao recebê-la, se você não For destinatário desta mensagem, fica automaticamente notificado de abster-se a divulgar, copiar, distribuir, examinar ou, de qualquer forma, utilizar '
 cHtml +=                 'sua informação, por configurar ato ilegal. Caso você tenha recebido esta mensagem indevidamente, solicitamos que nos retorne este e-mail, promovendo, concomitantemente sua '
 cHtml +=                 'eliminação de sua base de dados, registros ou qualquer outro sistema de controle. Fica desprovida de eficácia e validade a mensagem que contiver vínculos obrigacionais, expedida '
 cHtml +=                 'por quem não detenha poderes de representação, bem como não esteja legalmente habilitado para utilizar o referido endereço eletrônico, configurando falta grave conforme nossa '
@@ -3409,30 +3265,30 @@ cHtml +=         '</td>'
 cHtml +=     '</tr>
 cHtml += '</table>'
 
-DEFINE MSDIALOG oDlgMail TITLE "E-Mail" FROM 000, 000  TO 415, 584 PIXEL
+DEFINE MSDIALOG oDlgMail TITLE "E-Mail" FROM 000, 000  To 415, 584 PIXEL
 
 	//======
 	// Para:
 	//======
-	@ 005, 006 SAY oPara PROMPT "Para:" SIZE 015, 007 OF oDlgMail PIXEL
+	@ 005, 006 Say oPara PROMPT "Para:" SIZE 015, 007 OF oDlgMail PIXEL
 	@ 005, 030 MSGET oGetPara VAR cGetPara SIZE 256, 010 OF oDlgMail PICTURE "@x" PIXEL
 
 	//===========
 	// Com cópia:
 	//===========
-	@ 021, 006 SAY oCc PROMPT "Cc:" SIZE 015, 007 OF oDlgMail PIXEL
+	@ 021, 006 Say oCc PROMPT "Cc:" SIZE 015, 007 OF oDlgMail PIXEL
 	@ 021, 030 MSGET oGetCc VAR cGetCc SIZE 256, 010 OF oDlgMail PICTURE "@x" PIXEL
 
 	//=========
 	// Assunto:
 	//=========
-	@ 037, 006 SAY oAssunto PROMPT "Assunto:" SIZE 022, 007 OF oDlgMail PIXEL
+	@ 037, 006 Say oAssunto PROMPT "Assunto:" SIZE 022, 007 OF oDlgMail PIXEL
 	@ 037, 030 MSGET oGetAssun VAR cGetAssun SIZE 256, 010 OF oDlgMail PICTURE "@x" PIXEL
 
 	//==========
 	// Mensagem:
 	//==========
-	@ 069, 006 SAY oMens PROMPT "Mensagem:" SIZE 030, 007 OF oDlgMail PIXEL
+	@ 069, 006 Say oMens PROMPT "Mensagem:" SIZE 030, 007 OF oDlgMail PIXEL
 	_oFont		:= TFont():New( 'Courier new' ,, 12 , .F. )
 	_oScrAux	:= TSimpleEditor():New( 080 , 006 , oDlgMail , 285 , 105 ,,,,, .T. )
 	
@@ -3451,7 +3307,7 @@ If nOpcA == 1
 	U_ITENVMAIL( Lower(AllTrim(UsrRetMail(RetCodUsr()))), cGetPara, cGetCc, cMailCom, cGetAssun, cHtml, cGetAnx, _aConfig[01], _aConfig[02], _aConfig[03], _aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog )
 
 Else
-	u_itmsg( 'Envio de e-mail cancelado pelo usuário.' , 'Atenção!' , ,1 )
+	U_ITMsg( 'Envio de e-mail cancelado pelo usuário.' , 'Atenção!' , ,1 )
 EndIf
 
 Return
@@ -3461,11 +3317,8 @@ Return
 Programa----------:AOMS054TT
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 12/02/2018
-===============================================================================================================================
 Descrição---------: Função criada para fazer a quebra de linha na mensagem digitada pelo usuário
-===============================================================================================================================
 Parametros--------: ExpC1	- Texto da mensagem
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -3485,11 +3338,8 @@ Return(cRet)
 Programa----------: AOMS0547
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 25/06/2019
-===============================================================================================================================
 Descrição---------: Gatilho para campos Sedex
-===============================================================================================================================
 Parametros--------: _oModelDET - objeto dos detalhes da tela
-===============================================================================================================================
 Retorno-----------: _xretorno - Retorno do gatilho
 ===============================================================================================================================
 */
@@ -3498,8 +3348,8 @@ User Function AOMS0547(_oModelDET)
 Local _xretorno := "N"
 
 //Valida se a nota é Sedex
-SC5->(Dbsetorder(1))
-If SC5->(Dbseek(SF2->F2_FILIAL+SF2->F2_I_PEDID))
+SC5->(DBSetOrder(1))
+If SC5->(DBSeek(SF2->F2_FILIAL+SF2->F2_I_PEDID))
 
 	If SC5->C5_I_NFSED == "S"
 
@@ -3509,9 +3359,9 @@ If SC5->(Dbseek(SF2->F2_FILIAL+SF2->F2_I_PEDID))
 		_oModelDET:LoadValue("ZZN_SERDEV",SC5->C5_I_SERNF)
 		_oModelDET:LoadValue("ZZN_DTDEV",SC5->C5_EMISSAO)
 
-	Endif
+	EndIf
 
-Endif
+EndIf
 
 Return _xretorno
 
@@ -3520,244 +3370,238 @@ Return _xretorno
 Programa----------: SeMostraTela()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 05/06/2023
-===============================================================================================================================
 Descrição---------: Verifica se falta confirmar datas do primeiro ou segundo percurso
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .F. ou .T.
 ===============================================================================================================================
 */
-STATIC Function SeMostraTela()
+Static Function SeMostraTela()
 Local _oModel   := FWModelActive()
 Local _oModelMAS:= _oModel:GetModel('ZZNMASTER')
-Local _cOperTriangular := ALLTRIM(U_ITGETMV( "IT_OPERTRI","05,42"))// Tipos de operações da operação trigular
+Local _cOperTriangular := AllTrim(SuperGetMV("IT_OPERTRI",.F.,"05,42"))// Tipos de operações da operação trigular
 Local _cOperRemessa    := RIGHT(_cOperTriangular,2)//42
 Local _cOperFat        := LEFT(_cOperTriangular,2)//05
-LOCAL _lPedidoPrincipal:= .F.
-LOCAL _lPedidoNormal   := .F.
-LOCAL _lMostraTela     := .F.
+Local _lPedidoPrincipal:= .F.
+Local _lPedidoNormal   := .F.
+Local _lMostraTela     := .F.
 _lTemOpl  := .F.
 _leOpLog  := .F.
 
-DAI->(Dbsetorder(3))
-If !EMPTY(SF2->F2_CARGA) .AND. !DAI->(Dbseek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE))
-   u_itmsg("Não foi possível localizar (DAI) carga vinculada a nota " + SF2->F2_FILIAL + "/" + SF2->F2_DOC+" "+SF2->F2_SERIE,"Atenção",,1)
-   RETURN .F./// RETORNA AQUI ***************************************************************************************
-ENDIF
+DAI->(DBSetOrder(3))
+If !Empty(SF2->F2_CARGA) .And. !DAI->(DBSeek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE))
+   U_ITMsg("Não foi possível localizar (DAI) carga vinculada a nota " + SF2->F2_FILIAL + "/" + SF2->F2_DOC+" "+SF2->F2_SERIE,"Atenção",,1)
+   Return .F./// RETORNA AQUI ***************************************************************************************
+EndIf
 
 _cCodOL  := ""//Preenchida dentro da U_Nfoplog()
 _cLojaOP := ""//Preenchida dentro da U_Nfoplog()
 _lTemOpl := U_Nfoplog(SF2->F2_FILIAL,SF2->F2_DOC,SF2->F2_SERIE) //NOTA TEM OPERADOR LOGISTICO ?
 
-IF _lTemOpl //Se tiver operador nos pedidos
+If _lTemOpl //Se tiver operador nos pedidos
 
-   _leOpLog := (ALLTRIM(_cCodOL)) == ALLTRIM( _oModelMAS:GetValue( 'ZZN_FTRANS' ) )//SE É OPERADOR LOGISTICO SEGUNDA PERNA  
+   _leOpLog := (AllTrim(_cCodOL)) == AllTrim( _oModelMAS:GetValue( 'ZZN_FTRANS' ) )//SE É OPERADOR LOGISTICO SEGUNDA PERNA  
 
-   If !_leOpLog .and. ALLTRIM(SF2->F2_I_CTRA) !=  ALLTRIM( _oModelMAS:GetValue( 'ZZN_FTRANS' ) ) 
+   If !_leOpLog .And. AllTrim(SF2->F2_I_CTRA) !=  AllTrim( _oModelMAS:GetValue( 'ZZN_FTRANS' ) ) 
 
-	  U_ITMSG("CTE de transportador " + ALLTRIM( _oModelMAS:GetValue( 'ZZN_FTRANS' ) ) + " e nota " + SF2->F2_DOC + " registrada para " + ;
-	  		  " transportador " + ALLTRIM(SF2->F2_I_CTRA) + " com operador logístico " + ALLTRIM(_cCodOL),;
+	  U_ITMsg("CTE de transportador " + AllTrim( _oModelMAS:GetValue( 'ZZN_FTRANS' ) ) + " e nota " + SF2->F2_DOC + " registrada para " + ;
+	  		  " transportador " + AllTrim(SF2->F2_I_CTRA) + " com operador logístico " + AllTrim(_cCodOL),;
 	  		  "Atenção","CTE precisa ser do transportador ou do operador logístico para confirmar canhoto",1)
 
-	  RETURN .F./// RETORNA AQUI ***************************************************************************************
+	  Return .F./// RETORNA AQUI ***************************************************************************************
 
-   Endif
+   EndIf
 
-Endif
+EndIf
 
-SC5->(Dbsetorder(1))
-If SC5->(Dbseek(SF2->F2_FILIAL+ALLTRIM(SF2->F2_I_PEDID)))
-   _lPedidoPrincipal:=(SC5->C5_I_OPER = _cOperRemessa .OR.  (SC5->C5_I_TRCNF == "S" .AND. SC5->C5_NUM == SC5->C5_I_PDFT))// 42 - REMESSA .OR. TROCA NF FATURAMENTO
-   _lPedidoNormal  :=(!SC5->C5_I_OPER $ _cOperTriangular .AND.  SC5->C5_I_TRCNF <> "S")
-ELSE
-	  U_ITMSG("Pedido " + ALLTRIM( SF2->F2_I_PEDID) + " da nota " + SF2->F2_DOC + " "+SF2->F2_SERIE + " não encontrado ",;
+SC5->(DBSetOrder(1))
+If SC5->(DBSeek(SF2->F2_FILIAL+AllTrim(SF2->F2_I_PEDID)))
+   _lPedidoPrincipal:=(SC5->C5_I_OPER = _cOperRemessa .Or.  (SC5->C5_I_TRCNF == "S" .And. SC5->C5_NUM == SC5->C5_I_PDFT))// 42 - REMESSA .Or. TROCA NF FATURAMENTO
+   _lPedidoNormal  :=(!SC5->C5_I_OPER $ _cOperTriangular .And.  SC5->C5_I_TRCNF <> "S")
+Else
+	  U_ITMsg("Pedido " + AllTrim( SF2->F2_I_PEDID) + " da nota " + SF2->F2_DOC + " "+SF2->F2_SERIE + " não encontrado ",;
 	  		  "Atenção",,1)
-   RETURN .F.
-ENDIF
+   Return .F.
+EndIf
 
 
-IF _lPedidoPrincipal .OR. _lPedidoNormal// ** TESTE PARA VER SE VAI ABRIR A TELA PARA O PEDIDO PRINCIPAL (42 OU TROCA NF FAT)  OU NORMAL**
-   IF !_lTemOpl .AND. Empty(SF2->F2_I_DTRC)  //NAÕ TEM OPERADOR LOGISTICO
+If _lPedidoPrincipal .Or. _lPedidoNormal// ** TESTE PARA VER SE VAI ABRIR A TELA PARA O PEDIDO PRINCIPAL (42 OU TROCA NF FAT)  OU NORMAL**
+   If !_lTemOpl .And. Empty(SF2->F2_I_DTRC)  //NAÕ TEM OPERADOR LOGISTICO
       _lMostraTela := .T.
-   ELSEIF _lTemOpl .AND. _leOpLog .AND. Empty(SF2->F2_I_DTRC) //TEM OPERADOR LOGISTICO E É O OPL - SEGUNDO TRECHO
+   ElseIf _lTemOpl .And. _leOpLog .And. Empty(SF2->F2_I_DTRC) //TEM OPERADOR LOGISTICO E É O OPL - SEGUNDO TRECHO
       _lMostraTela := .T.
-   ELSEIF _lTemOpl .AND. !_leOpLog .AND.Empty(SF2->F2_I_DENOL) //TEM OPERADOR LOGISTICO E É NÃO O OPL - PRIMEIRO TRECHO
+   ElseIf _lTemOpl .And. !_leOpLog .And.Empty(SF2->F2_I_DENOL) //TEM OPERADOR LOGISTICO E É NÃO O OPL - PRIMEIRO TRECHO
       _lMostraTela := .T.
-   ENDIF
-ENDIF
+   EndIf
+EndIf
 
-//Entra se precisar Mostrar Tela para o Pedido PRINCIPAL OU se NÃO for o pedido principal para buscar os dados do PRINCIPAL
-If (_lMostraTela .OR. !_lPedidoPrincipal) .AND. !_lPedidoNormal
+//Entra se precisar Mostrar Tela para o Pedido PRINCIPAL OU se NÃO For o pedido principal para buscar os dados do PRINCIPAL
+If (_lMostraTela .Or. !_lPedidoPrincipal) .And. !_lPedidoNormal
 
 	  //Verifica se não é nota de carregamento com nota de faturamento
 	  _nRegSF2 := SF2->(RECNO()) //GUARDA POSIÇÃO ORIGINAL DA SF2
  	 
-	  SC5->(Dbsetorder(1))
-	  If SC5->(Dbseek(SF2->F2_FILIAL+ALLTRIM(SF2->F2_I_PEDID)))
+	  SC5->(DBSetOrder(1))
+	  If SC5->(DBSeek(SF2->F2_FILIAL+AllTrim(SF2->F2_I_PEDID)))
 	
 		 If SC5->C5_I_OPER = '51' 
 			_lPalletRetorno := .T.
 		 EndIf
 		 // ------------------ CONTROLE DA TRIANGULAR				
-		 IF SC5->C5_I_OPER = _cOperRemessa// 42 - REMESSA - PRINCIPAL
+		 If SC5->C5_I_OPER = _cOperRemessa// 42 - REMESSA - PRINCIPAL
 			_lTriangu := .T.
 			_lReplica := .T.
-		 ELSEIF SC5->C5_I_OPER = _cOperFat// 05 - FATURAMENTO - GERADO - TEORICAMENTE NÃO VAI EXISTIR
+		 ElseIf SC5->C5_I_OPER = _cOperFat// 05 - FATURAMENTO - GERADO - TEORICAMENTE NÃO VAI EXISTIR
 			_lTriangu := .T.
 			_lReplica := .F.
-			If SC5->(Dbseek(SC5->C5_FILIAL+SC5->C5_I_PVREM))//  ************* POSICIONA NO PV DE REMESSA - PRINCIPAL
-	 		   IF SF2->(Dbseek(SC5->C5_FILIAL+SC5->C5_NOTA+SC5->C5_SERIE))//  ************* POSICIONA NA NOTA NO PV DE REMESSA - PRINCIPAL
+			If SC5->(DBSeek(SC5->C5_FILIAL+SC5->C5_I_PVREM))//  ************* POSICIONA NO PV DE REMESSA - PRINCIPAL
+	 		   If SF2->(DBSeek(SC5->C5_FILIAL+SC5->C5_NOTA+SC5->C5_SERIE))//  ************* POSICIONA NA NOTA NO PV DE REMESSA - PRINCIPAL
 		          _cOBSC   := "CANHOTO CONF NA NOTA DE REMESSA "+SF2->F2_FILIAL + "/" + SF2->F2_DOC
                   _cCodOL  := ""//Preenchida dentro da U_Nfoplog()
                   _lTemOpl := U_Nfoplog(SF2->F2_FILIAL,SF2->F2_DOC,SF2->F2_SERIE) //nota tem operador logistico
 				  _leOpLog := .F.
-                  If _lTemOpl  .AND. !EMPTY(_cCodOL)//se tem op log ja verifica se o TRANSP DO CTE é o OPERADOR LOGISTICO 
-	                 _leOpLog := (ALLTRIM(_cCodOL)) == ALLTRIM( _oModelMAS:GetValue( 'ZZN_FTRANS' ) )  
-                  ENDIF
+                  If _lTemOpl  .And. !Empty(_cCodOL)//se tem op log ja verifica se o TRANSP DO CTE é o OPERADOR LOGISTICO 
+	                 _leOpLog := (AllTrim(_cCodOL)) == AllTrim( _oModelMAS:GetValue( 'ZZN_FTRANS' ) )  
+                  EndIf
                   // ** VOLTA PARA O PEDIDO PRINCIPAL PARA VER SE VAI ABRIR A TELA PARA O PEDIDO GERADO (05)  **
                   _lMostraTela := .F.
-                  IF !_lTemOpl .AND. Empty(SF2->F2_I_DTRC)  
+                  If !_lTemOpl .And. Empty(SF2->F2_I_DTRC)  
                      _lMostraTela := .T.
-                  ELSEIF _lTemOpl .AND. _leOpLog .AND. Empty(SF2->F2_I_DTRC ) 
+                  ElseIf _lTemOpl .And. _leOpLog .And. Empty(SF2->F2_I_DTRC ) 
                      _lMostraTela := .T.
-                  ELSEIF _lTemOpl .AND. !_leOpLog .AND. Empty(SF2->F2_I_DENOL ) 
+                  ElseIf _lTemOpl .And. !_leOpLog .And. Empty(SF2->F2_I_DENOL ) 
                      _lMostraTela := .T.
-                  ENDIF
+                  EndIf
 
                   // ** SE NAO VAI ABRIR A TELA, REPLICA OS DADOS DO PEDIDO PRINCIPAL PARA O GERADO
-				  IF !_lMostraTela
-                     IF U_Repl2DtsTransTime( SF2->(RECNO()) , _cOBSC ) //Se replicou da 42 para a 05 não apresenta a tela
-		                RETURN _lMostraTela /// RETORNA AQUI ***************************************************************************************
-					 ELSE
+				  If !_lMostraTela
+                     If U_Repl2DtsTransTime( SF2->(RECNO()) , _cOBSC ) //Se replicou da 42 para a 05 não apresenta a tela
+		                Return _lMostraTela /// RETORNA AQUI ***************************************************************************************
+					 Else
                         _lMostraTela := .T.
-					 ENDIF
-				  ENDIF
-			   ENDIF
-			ENDIF
-		 ENDIF
+					 EndIf
+				  EndIf
+			   EndIf
+			EndIf
+		 EndIf
 		 // ------------------ CONTROLE DA TROCA NOTA
-		 IF SC5->C5_I_TRCNF == "S" .AND. SC5->C5_NUM == SC5->C5_I_PDFT //PEDIDO DE FATURAMENTO - PRINCIPAL
+		 If SC5->C5_I_TRCNF == "S" .And. SC5->C5_NUM == SC5->C5_I_PDFT //PEDIDO DE FATURAMENTO - PRINCIPAL
 			_lTrocaNF := .T.
 			_lReplica := .T.
-		 ELSEIF SC5->C5_I_TRCNF == "S" .AND. SC5->C5_NUM == SC5->C5_I_PDPR//PEDIDO DE CARREGAMENTO - GERADO
+		 ElseIf SC5->C5_I_TRCNF == "S" .And. SC5->C5_NUM == SC5->C5_I_PDPR//PEDIDO DE CARREGAMENTO - GERADO
 			_lTrocaNF := .T.
 			_lReplica := .F.
-			If SC5->(Dbseek(SC5->C5_I_FILFT+SC5->C5_I_PDFT))//  ************* POSICIONA NO PV DE FATURAMENTO - PRINCIPAL
-	 		   IF SF2->(Dbseek(SC5->C5_I_FILFT+SC5->C5_NOTA+SC5->C5_SERIE))
+			If SC5->(DBSeek(SC5->C5_I_FILFT+SC5->C5_I_PDFT))//  ************* POSICIONA NO PV DE FATURAMENTO - PRINCIPAL
+	 		   If SF2->(DBSeek(SC5->C5_I_FILFT+SC5->C5_NOTA+SC5->C5_SERIE))
 		          _cOBSC   := "CANHOTO CONF NA NOTA DE FATURAMENTO "+SF2->F2_FILIAL + "/" + SF2->F2_DOC
                   _cCodOL  := ""//Preenchida dentro da U_Nfoplog()
                   _lTemOpl := U_Nfoplog(SF2->F2_FILIAL,SF2->F2_DOC,SF2->F2_SERIE) //nota tem operador logistico
 				  _leOpLog := .F.
-                  If _lTemOpl .AND. !EMPTY(_cCodOL)//se tem op log ja verifica se o TRANSP DO CTE é o OPERADOR LOGISTICO 
-	                 _leOpLog := (ALLTRIM(_cCodOL)) == ALLTRIM( _oModelMAS:GetValue( 'ZZN_FTRANS' ) )  
-                  ENDIF
+                  If _lTemOpl .And. !Empty(_cCodOL)//se tem op log ja verifica se o TRANSP DO CTE é o OPERADOR LOGISTICO 
+	                 _leOpLog := (AllTrim(_cCodOL)) == AllTrim( _oModelMAS:GetValue( 'ZZN_FTRANS' ) )  
+                  EndIf
                   // ** VOLTA PARA O PEDIDO PRINCIPAL PARA VER SE VAI ABRIR A TELA PARA O PEDIDO GERADO (TROCA NF CARREGAMENTO) **
                   _lMostraTela := .F.
-                  IF !_lTemOpl .AND. Empty(SF2->F2_I_DTRC)  
+                  If !_lTemOpl .And. Empty(SF2->F2_I_DTRC)  
                      _lMostraTela := .T.
-                  ELSEIF _lTemOpl .AND. _leOpLog .AND. Empty(SF2->F2_I_DTRC ) 
+                  ElseIf _lTemOpl .And. _leOpLog .And. Empty(SF2->F2_I_DTRC ) 
                      _lMostraTela := .T.
-                  ELSEIF _lTemOpl .AND. !_leOpLog .AND.Empty(SF2->F2_I_DENOL ) 
+                  ElseIf _lTemOpl .And. !_leOpLog .And.Empty(SF2->F2_I_DENOL ) 
                      _lMostraTela := .T.
-                  ENDIF
+                  EndIf
 
                   // ** SE NAO VAI ABRIR A TELA, REPLICA OS DADOS DO PEDIDO PRINCIPAL PARA O GERADO
-				  IF !_lMostraTela
-                     IF U_Repl2DtsTransTime( SF2->(RECNO()) , _cOBSC ) //Se replicou da FATURAMENTO para a CARREGAMENTO não apresenta a tela
-		                RETURN _lMostraTela /// RETORNA AQUI ***************************************************************************************
-					 ELSE
+				  If !_lMostraTela
+                     If U_Repl2DtsTransTime( SF2->(RECNO()) , _cOBSC ) //Se replicou da FATURAMENTO para a CARREGAMENTO não apresenta a tela
+		                Return _lMostraTela /// RETORNA AQUI ***************************************************************************************
+					 Else
                         _lMostraTela := .T.
-					 ENDIF
-				  ENDIF
-			   Endif
-			Endif
-		 Endif
-	  Endif
+					 EndIf
+				  EndIf
+			   EndIf
+			EndIf
+		 EndIf
+	  EndIf
 
-ENDIF
+EndIf
 
-RETURN _lMostraTela
+Return _lMostraTela
 /*
 ===============================================================================================================================
 Programa----------: Repl2DtsTransTime()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 25/05/2023
-===============================================================================================================================
 Descrição---------: Atualiza todas as data de previstas e entragas na 05 da 42 e na 20 (carregamento) da troca nota
-===============================================================================================================================
 Parametros--------: _nRecnoSF2Atual = Recno do SF2 posicionado
-===============================================================================================================================
 Retorno-----------: .F. ou .T.
 ===============================================================================================================================
 */
 User Function Repl2DtsTransTime( _nRecnoSF2Atual , _cOBSC )//CHAMADA DA MOMS016.PRW TAMBEM
-LOCAL _lRet:=.F. , T
-LOCAL _aOrd:= SaveOrd({"SC5","SF2"}) // Salva a ordem dos indices.
+Local _lRet:=.F. , T
+Local _aOrd:= SaveOrd({"SC5","SF2"}) // Salva a ordem dos indices.
 
-Local _cOperTriangular:= ALLTRIM(U_ITGETMV( "IT_OPERTRI","05,42"))// Tipos de operações da operação trigular
+Local _cOperTriangular:= AllTrim(SuperGetMV("IT_OPERTRI",.F.,"05,42"))// Tipos de operações da operação trigular
 Local _cOperRemessa   := RIGHT(_cOperTriangular,2)//42
 
-LOCAL _xF2_DTRC := SF2->F2_I_DTRC  // Entrega no Cliente (Dt.Canhoto)
-LOCAL _xF2_PENOL:= SF2->F2_I_PENOL // Previsão de entrega no operador logístico 
-LOCAL _xF2_PENCL:= SF2->F2_I_PENCL // Previsão de entrega no cliente
-LOCAL _xF2_DCHOL:= SF2->F2_I_DCHOL // Data de chegada no operador logístico 
-LOCAL _xF2_DCHCL:= SF2->F2_I_DCHCL // Data de chegada no cliente
-LOCAL _xF2_DENCL:= SF2->F2_I_DENCL // Data de entrega no cliente **
-LOCAL _xF2_DENOL:= SF2->F2_I_DENOL // Data de entrega no operador logístico  EDI  **
-LOCAL _xF2_PENCO:= SF2->F2_I_PENCO // Previsão de entrega no cliente (original)
-LOCAL _xF2_OUSER:= SF2->F2_I_OUSER // Usuario Informou o Op.Log
-LOCAL _xF2_ODATA:= SF2->F2_I_ODATA // Data inf.
-LOCAL _xF2_OHORA:= SF2->F2_I_OHORA // Hora Inf.
-LOCAL _xF2_CUSER:= SF2->F2_I_CUSER // Usuário de aprovação do canhoto. 
-LOCAL _xF2_CDATA:= SF2->F2_I_CDATA // Data de digitação do Canhoto. 
-LOCAL _xF2_CHORA:= SF2->F2_I_CHORA // hora de digitação do Canhoto. 
-LOCAL _xF2_CORIG:= SF2->F2_I_CORIG // Origem
-LOCAL _xF2_TT1TR:= SF2->F2_I_TT1TR // Transit Time 1o Trecho
-LOCAL _xF2_TT2TR:= SF2->F2_I_TT2TR // Transit Time 2o Trecho
-LOCAL _xF2_REDP := SF2->F2_I_REDP  // Transportadora de redespacho     
-LOCAL _xF2_RELO := SF2->F2_I_RELO  // Loja Transportadora de redespacho
-LOCAL _xF2_OPER := SF2->F2_I_OPER  // Operador Logistico               
-LOCAL _xF2_OPLO := SF2->F2_I_OPLO  // Loja do Operador Logistico      
+Local _xF2_DTRC := SF2->F2_I_DTRC  // Entrega no Cliente (Dt.Canhoto)
+Local _xF2_PENOL:= SF2->F2_I_PENOL // Previsão de entrega no operador logístico 
+Local _xF2_PENCL:= SF2->F2_I_PENCL // Previsão de entrega no cliente
+Local _xF2_DCHOL:= SF2->F2_I_DCHOL // Data de chegada no operador logístico 
+Local _xF2_DCHCL:= SF2->F2_I_DCHCL // Data de chegada no cliente
+Local _xF2_DENCL:= SF2->F2_I_DENCL // Data de entrega no cliente **
+Local _xF2_DENOL:= SF2->F2_I_DENOL // Data de entrega no operador logístico  EDI  **
+Local _xF2_PENCO:= SF2->F2_I_PENCO // Previsão de entrega no cliente (original)
+Local _xF2_OUSER:= SF2->F2_I_OUSER // Usuario Informou o Op.Log
+Local _xF2_ODATA:= SF2->F2_I_ODATA // Data inf.
+Local _xF2_OHORA:= SF2->F2_I_OHORA // Hora Inf.
+Local _xF2_CUSER:= SF2->F2_I_CUSER // Usuário de aprovação do canhoto. 
+Local _xF2_CDATA:= SF2->F2_I_CDATA // Data de digitação do Canhoto. 
+Local _xF2_CHORA:= SF2->F2_I_CHORA // hora de digitação do Canhoto. 
+Local _xF2_CORIG:= SF2->F2_I_CORIG // Origem
+Local _xF2_TT1TR:= SF2->F2_I_TT1TR // Transit Time 1o Trecho
+Local _xF2_TT2TR:= SF2->F2_I_TT2TR // Transit Time 2o Trecho
+Local _xF2_REDP := SF2->F2_I_REDP  // Transportadora de redespacho     
+Local _xF2_RELO := SF2->F2_I_RELO  // Loja Transportadora de redespacho
+Local _xF2_OPER := SF2->F2_I_OPER  // Operador Logistico               
+Local _xF2_OPLO := SF2->F2_I_OPLO  // Loja do Operador Logistico      
 
-LOCAL aRecsSF2    := {}
-LOCAL _nRegrTriFat:= 0
-LOCAL _nRegrTransf:= 0
-LOCAL _nRegSF2    := 0
-LOCAL _nRegCopia  := 0
+Local aRecsSF2    := {}
+Local _nRegrTriFat:= 0
+Local _nRegrTransf:= 0
+Local _nRegSF2    := 0
+Local _nRegCopia  := 0
 
-SC5->(Dbsetorder(1))
-If SC5->(Dbseek(SF2->F2_FILIAL+ALLTRIM(SF2->F2_I_PEDID)))
-   SF2->(Dbsetorder(1)) //F2_FILIAL+F2_DOC+F2_SERIE
+SC5->(DBSetOrder(1))
+If SC5->(DBSeek(SF2->F2_FILIAL+AllTrim(SF2->F2_I_PEDID)))
+   SF2->(DBSetOrder(1)) //F2_FILIAL+F2_DOC+F2_SERIE
    // ------------------ CONTROLE DA TRIANGULAR ------------------ //
-   IF SC5->C5_I_OPER = _cOperRemessa//42
-      If SC5->(Dbseek(SC5->C5_FILIAL+SC5->C5_I_PVFAT))// POSICIONA NO PV DE FATURAMENTO
-         IF SF2->(Dbseek(SC5->C5_FILIAL+SC5->C5_NOTA+SC5->C5_SERIE))
+   If SC5->C5_I_OPER = _cOperRemessa//42
+      If SC5->(DBSeek(SC5->C5_FILIAL+SC5->C5_I_PVFAT))// POSICIONA NO PV DE FATURAMENTO
+         If SF2->(DBSeek(SC5->C5_FILIAL+SC5->C5_NOTA+SC5->C5_SERIE))
             _nRegrTriFat:= SF2->(RECNO()) //GUARDA A POSIÇÃO DA SF2 NA NOTA NO PV DE FATURAMENTO
-            _nRegCopia  := _nRegrTriFat//Copia os campos só se o pedido for 42 para 05
-         ENDIF
-      ENDIF
-   ENDIF
+            _nRegCopia  := _nRegrTriFat//Copia os campos só se o pedido For 42 para 05
+         EndIf
+      EndIf
+   EndIf
 
    // ------------------ CONTROLE DA TROCA NOTA ------------------ //
-   IF SC5->C5_I_TRCNF == "S" .AND. SC5->C5_NUM == SC5->C5_I_PDFT .AND. SC5->C5_I_OPER <> "20"// É PEDIDO DE FATURAMENTO , ATUALIZA O CARREGAMENTO
-	  If SC5->(Dbseek(SC5->C5_I_FLFNC+SC5->C5_I_PDPR))
-	     IF SF2->(Dbseek(SC5->C5_I_FLFNC+SC5->C5_NOTA+SC5->C5_SERIE))
+   If SC5->C5_I_TRCNF == "S" .And. SC5->C5_NUM == SC5->C5_I_PDFT .And. SC5->C5_I_OPER <> "20"// É PEDIDO DE FATURAMENTO , ATUALIZA O CARREGAMENTO
+	  If SC5->(DBSeek(SC5->C5_I_FLFNC+SC5->C5_I_PDPR))
+	     If SF2->(DBSeek(SC5->C5_I_FLFNC+SC5->C5_NOTA+SC5->C5_SERIE))
             _nRegrTransf:= SF2->(RECNO()) //GUARDA A POSIÇÃO DA SF2 NA NOTA NO PV DE CARREGAMENTO
-  	     Endif
-	  Endif
-	Endif
+  	     EndIf
+	  EndIf
+	EndIf
    aRecsSF2:={_nRegrTriFat,_nRegrTransf}
-Endif
+EndIf
 
 
-FOR T := 1 TO LEN(aRecsSF2)
+For T := 1 To Len(aRecsSF2)
     _nRegSF2:=aRecsSF2[T]
     
-	IF _nRegSF2 > 0
+	If _nRegSF2 > 0
     
-	   SF2->(Dbgoto(_nRegSF2))
-       SF2->(Reclock("SF2",.F.))
+	   SF2->(DBGoTo(_nRegSF2))
+       SF2->(RecLock("SF2",.F.))
 
        SF2->F2_I_DTRC  := _xF2_DTRC  // Entrega no Cliente (Dt.Canhoto)
        SF2->F2_I_PENOL := _xF2_PENOL // Previsão de entrega no operador logístico 
@@ -3777,21 +3621,21 @@ FOR T := 1 TO LEN(aRecsSF2)
        SF2->F2_I_TT1TR := _xF2_TT1TR // Transit Time 1o Trecho
        SF2->F2_I_TT2TR := _xF2_TT2TR // Transit Time 2o Trecho
        SF2->F2_I_OBRC  := _cOBSC     // Observacao
-       IF _nRegCopia = _nRegSF2//SÓ PEDIDO 05 da TRIANGULAR
+       If _nRegCopia = _nRegSF2//SÓ PEDIDO 05 da TRIANGULAR
           SF2->F2_I_REDP  := _xF2_REDP  // Transportadora de redespacho     
           SF2->F2_I_RELO  := _xF2_RELO  // Loja Transportadora de redespacho
           SF2->F2_I_OPER  := _xF2_OPER  // Operador Logistico               
           SF2->F2_I_OPLO  := _xF2_OPLO  // Loja do Operador Logistico      
-       ENDIF
-       SF2->(Msunlock())
+       EndIf
+       SF2->(MSUnLock())
 	   _lRet:=.T.
-	ENDIF
-NEXT
+	EndIf
+Next
 
 RestOrd(_aOrd)//VOLTA SC5 E SF2
-SF2->(DBGOTO(_nRecnoSF2Atual))//POR GARANTIA
+SF2->(DBGoTo(_nRecnoSF2Atual))//POR GARANTIA
 
-RETURN _lRet
+Return _lRet
 /*
 ===============================================================================================================================
 Programa----------: AOMS54Lista()
@@ -3802,20 +3646,20 @@ Parametros--------: lMensagem : .T. - MOSTRA / .F. - NÃO MOSTRA MENSAGEM  , oPro
 Retorno-----------: .T.
 ===============================================================================================================================
 */
-USER Function AOMS54Lista(lMensagem,oProc,_oModel,_lCanhoto)
-LOCAL _aColZZN:={} , P 
-LOCAL _aCabZZN:={}
+User Function AOMS54Lista(lMensagem,oProc,_oModel,_lCanhoto)
+Local _aColZZN:={} , P 
+Local _aCabZZN:={}
 Local _aNotas :={}
 Local nConta  :=0
-LOCAL _cOperTriangular:= ALLTRIM(U_ITGETMV( "IT_OPERTRI","05,42"))
-LOCAL _cOperFat       := LEFT( _cOperTriangular,2)//05
-LOCAL _cOperRemessa   := RIGHT(_cOperTriangular,2)//42
-LOCAL _aOrd           := SaveOrd({"ZZN","SF2","SC5"}) // Salva a ordem dos indices.
-LOCAL _cFatura        := ""
+Local _cOperTriangular:= AllTrim(SuperGetMV("IT_OPERTRI",.F.,"05,42"))
+Local _cOperFat       := LEFT( _cOperTriangular,2)//05
+Local _cOperRemessa   := RIGHT(_cOperTriangular,2)//42
+Local _aOrd           := SaveOrd({"ZZN","SF2","SC5"}) // Salva a ordem dos indices.
+Local _cFatura        := ""
 Local _oModelMAS , _oModelDET
-DEFAULT _lCanhoto := .F.
+Default _lCanhoto := .F.
 
-IF ValType(_oModel) = "O"
+If ValType(_oModel) = "O"
    _oModelMAS  :=_oModel:GetModel('ZZNMASTER')
    _oModelDET  :=_oModel:GetModel('ZZNDETAIL')
    _cFatura    := cFilAnt+" "+_oModelMAS:GetValue("ZZN_FATURA") +" "+ _oModelMAS:GetValue( 'ZZN_FTRANS') +" "+ _oModelMAS:GetValue( 'ZZN_LOJAFT')
@@ -3824,209 +3668,204 @@ IF ValType(_oModel) = "O"
    _cZZNSERCTR :=_oModelDET:GetValue("ZZN_SERCTR")
    _cZZNNFISCA :=_oModelDET:GetValue("ZZN_NFISCA")
    _cZZNSERIE  :=_oModelDET:GetValue("ZZN_SERIE")   
-ELSE
+Else
    _cFatura    :=ZZN->ZZN_FILIAL+" "+ZZN->ZZN_FATURA+" "+ZZN->ZZN_FTRANS+" "+ZZN->ZZN_LOJAFT
    _cChaveLinha:=ZZN->ZZN_FILIAL    +ZZN->ZZN_FATURA    +ZZN->ZZN_FTRANS    +ZZN->ZZN_LOJAFT
    _cZZNCTRANS :=ZZN->ZZN_CTRANS //Linha do Lançamento
    _cZZNSERCTR :=ZZN->ZZN_SERCTR //Linha do Lançamento
    _cZZNNFISCA :=ZZN->ZZN_NFISCA
    _cZZNSERIE  :=ZZN->ZZN_SERIE
-ENDIF   
+EndIf   
 
-IF _lCanhoto
+If _lCanhoto
    U_VISCANHO( cFilAnt, _cZZNNFISCA+_cZZNSERIE )
    RestOrd(_aOrd)
-   RETURN .T.
-ENDIF
+   Return .T.
+EndIf
 
-ZZN->(DBSETORDER(1))//ZZN_FILIAL+ZZN_FATURA+ZZN_FTRANS+ZZN_LOJAFT+ZZN_ITEM
+ZZN->(DBSetOrder(1))//ZZN_FILIAL+ZZN_FATURA+ZZN_FTRANS+ZZN_LOJAFT+ZZN_ITEM
 
-IF ZZN->(DBSEEK(_cChaveLinha))
-   DO WHILE ZZN->(!EOF()) .AND. ZZN->ZZN_FILIAL = cFilAnt .AND. _cChaveLinha == ZZN->ZZN_FILIAL+ZZN->ZZN_FATURA+ZZN->ZZN_FTRANS+ZZN->ZZN_LOJAFT
+If ZZN->(DBSeek(_cChaveLinha))
+   While ZZN->(!Eof()) .And. ZZN->ZZN_FILIAL = cFilAnt .And. _cChaveLinha == ZZN->ZZN_FILIAL+ZZN->ZZN_FATURA+ZZN->ZZN_FTRANS+ZZN->ZZN_LOJAFT
       nConta++
-      oProc:cCaption:='1/2 - Quantidade de NF Lidas: '+ALLTRIM(STR(nConta))+ " / "+ALLTRIM(STR(LEN(_aNotas)))
+      oProc:cCaption:='1/2 - Quantidade de NF Lidas: '+AllTrim(Str(nConta))+ " / "+AllTrim(Str(Len(_aNotas)))
       ProcessMessages()
 
 	  _cChaveNF:=ZZN->(ZZN_FILIAL+ZZN_NFISCA+ZZN_SERIE)
       
 	  If !SF2->( DBSeek( ZZN->(ZZN_FILIAL+ZZN_NFISCA+ZZN_SERIE) ) )
-	     ZZN->(DBSKIP())
-	     LOOP 
-	  ENDIF
-      IF !SC5->(Dbseek(SF2->F2_FILIAL+SF2->F2_I_PEDID))
-	     ZZN->(DBSKIP())
-	     LOOP 
-	  ENDIF
-	  //PARA TESTES
-      //IF SC5->C5_I_TRCNF = "S" .OR. SC5->C5_I_OPER $ _cOperTriangular 
+	     ZZN->(DBSkip())
+	     Loop 
+	  EndIf
+      If !SC5->(DBSeek(SF2->F2_FILIAL+SF2->F2_I_PEDID))
+	     ZZN->(DBSkip())
+	     Loop 
+	  EndIf
       
-	  IF ASCAN(_aNotas,{|P| P[1] == _cChaveNF } ) = 0
-         AADD(_aNotas,{ _cChaveNF, ZZN->ZZN_CTRANS+" "+ZZN->ZZN_SERCTR , ZZN->ZZN_ITEM , SC5->C5_NUM ,SC5->C5_I_OPER })
-      ENDIF
+	  If aScan(_aNotas,{|P| P[1] == _cChaveNF } ) = 0
+         aAdd(_aNotas,{ _cChaveNF, ZZN->ZZN_CTRANS+" "+ZZN->ZZN_SERCTR , ZZN->ZZN_ITEM , SC5->C5_NUM ,SC5->C5_I_OPER })
+      EndIf
 	  
-	  //PARA TESTES
-	  //ENDIF
-
-      ZZN->(Dbskip())
-   Enddo
-ENDIF
+      ZZN->(DBSkip())
+   EndDo
+EndIf
 
 _aColZZN:={}
-SC5->(DBSETORDER(1))
-SF2->(DBSETORDER(1))
-ZZN->(DBSETORDER(6))//ZZN_FILIAL+ZZN_NFISCA+ZZN_SERIE
-FOR P := 1 TO LEN(_aNotas)
+SC5->(DBSetOrder(1))
+SF2->(DBSetOrder(1))
+ZZN->(DBSetOrder(6))//ZZN_FILIAL+ZZN_NFISCA+ZZN_SERIE
+For P := 1 To Len(_aNotas)
 
-    oProc:cCaption:='2/2 - Quantidade de NF Lidas: '+ALLTRIM(STR(P))+ " / "+ALLTRIM(STR(LEN(_aNotas)))
+    oProc:cCaption:='2/2 - Quantidade de NF Lidas: '+AllTrim(Str(P))+ " / "+AllTrim(Str(Len(_aNotas)))
     ProcessMessages()
-	IF !ZZN->(DBSEEK(_aNotas[P,1]) )
-	   LOOP 
-	ENDIF
+	If !ZZN->(DBSeek(_aNotas[P,1]) )
+	   Loop 
+	EndIf
     
-    DO WHILE ZZN->(!EOF()) .AND. _aNotas[P,1] == ZZN->(ZZN_FILIAL+ZZN_NFISCA+ZZN_SERIE)
+    While ZZN->(!Eof()) .And. _aNotas[P,1] == ZZN->(ZZN_FILIAL+ZZN_NFISCA+ZZN_SERIE)
        
 	   _nSalvaRecZZN:=ZZN->(RECNO())//Guarda recno da posicao atual
 	   
 	   If !SF2->( DBSeek( ZZN->(ZZN_FILIAL+ZZN_NFISCA+ZZN_SERIE) ) )
-	      ZZN->(DBSKIP())
-	      LOOP 
-	   ENDIF
+	      ZZN->(DBSkip())
+	      Loop 
+	   EndIf
 
-       IF !SC5->(Dbseek(SF2->F2_FILIAL+SF2->F2_I_PEDID))
-	      ZZN->(DBSKIP())
-	      LOOP 
-	   ENDIF
+       If !SC5->(DBSeek(SF2->F2_FILIAL+SF2->F2_I_PEDID))
+	      ZZN->(DBSkip())
+	      Loop 
+	   EndIf
 	   
-	   IF !EMPTY(SC5->C5_I_OPER)
+	   If !Empty(SC5->C5_I_OPER)
           _cOperacao:=SC5->C5_I_OPER
-	   ELSE
+	   Else
           _cOperacao:="Tipo Ped.: "+SC5->C5_TIPO
-	   ENDIF
+	   EndIf
 	   
 	   // TROCA NF               OU  TRIANGULAR  
-       IF SC5->C5_I_TRCNF = "S" .OR. SC5->C5_I_OPER $ _cOperTriangular 
+       If SC5->C5_I_TRCNF = "S" .Or. SC5->C5_I_OPER $ _cOperTriangular 
           
-          IF SC5->C5_I_TRCNF = "S" 
+          If SC5->C5_I_TRCNF = "S" 
 		     _cTipoNF:="NF Troca nota"
-		  ELSEIF SC5->C5_I_OPER $ _cOperTriangular 
+		  ElseIf SC5->C5_I_OPER $ _cOperTriangular 
 		     _cTipoNF:="NF Triangular"
-		  ENDIF
+		  EndIf
 	      
-		  IF !_aNotas[P,2] == ZZN->ZZN_CTRANS+" "+ZZN->ZZN_SERCTR 
+		  If !_aNotas[P,2] == ZZN->ZZN_CTRANS+" "+ZZN->ZZN_SERCTR 
 		     _cTipoNF+=", CTE diferente"
-             _aColZZN := GrvLsta(_aColZZN,_cTipoNF,_aNotas[P])//GRAVA PRIMEIRA PERNA DE FOR DIFERENTE
-             ZZN->(DBGOTO(_nSalvaRecZZN))
-	         ZZN->(DBSKIP())
-			 LOOP// LOOP pq já busquei a segunda perna quando é o CTE igual (posicionado), senão duplica a segunda perna
-	      ENDIF
+             _aColZZN := GrvLsta(_aColZZN,_cTipoNF,_aNotas[P])//GRAVA PRIMEIRA PERNA DE For DIFERENTE
+             ZZN->(DBGoTo(_nSalvaRecZZN))
+	         ZZN->(DBSkip())
+			 Loop// Loop pq já busquei a segunda perna quando é o CTE igual (posicionado), senão duplica a segunda perna
+	      EndIf
           
 		  _cChave2P:=""
 		  _cTipoNF :=""
-          IF SC5->C5_I_TRCNF = "S" .AND. SC5->C5_I_OPER = "20" .AND. SC5->C5_NUM == SC5->C5_I_PDPR
+          If SC5->C5_I_TRCNF = "S" .And. SC5->C5_I_OPER = "20" .And. SC5->C5_NUM == SC5->C5_I_PDPR
 		     
-             IF SC5->(Dbseek(SC5->C5_I_FILFT+SC5->C5_I_PDFT))
+             If SC5->(DBSeek(SC5->C5_I_FILFT+SC5->C5_I_PDFT))
 			    _cTipoNF:="NF Troca nota, Ped. Fat. : "+SC5->C5_FILIAL+" "+SC5->C5_NUM
 		        _cTipoNF+=", Oper.: "+SC5->C5_I_OPER
 				_cChave2P:=SC5->C5_FILIAL+SC5->C5_NOTA+SC5->C5_SERIE
-			 ENDIF
+			 EndIf
 
-          ELSEIF SC5->C5_I_TRCNF = "S" .AND. SC5->C5_I_OPER <> "20" .AND. SC5->C5_NUM == SC5->C5_I_PDFT
+          ElseIf SC5->C5_I_TRCNF = "S" .And. SC5->C5_I_OPER <> "20" .And. SC5->C5_NUM == SC5->C5_I_PDFT
           
-             IF SC5->(Dbseek(SC5->C5_I_FLFNC+SC5->C5_I_PDPR))
+             If SC5->(DBSeek(SC5->C5_I_FLFNC+SC5->C5_I_PDPR))
 			    _cTipoNF:="NF Troca nota, Ped. Carr. : "+SC5->C5_FILIAL+" "+SC5->C5_NUM
 		        _cTipoNF+=", Oper.: "+SC5->C5_I_OPER
 				_cChave2P:=SC5->C5_FILIAL+SC5->C5_NOTA+SC5->C5_SERIE
-			 ENDIF
+			 EndIf
 		  
-		  ELSEIF SC5->C5_I_TRCNF <> "S" .AND. SC5->C5_I_OPER == _cOperFat//05
+		  ElseIf SC5->C5_I_TRCNF <> "S" .And. SC5->C5_I_OPER == _cOperFat//05
           
-             IF SC5->(Dbseek(SC5->C5_FILIAL+SC5->C5_I_PVREM))
+             If SC5->(DBSeek(SC5->C5_FILIAL+SC5->C5_I_PVREM))
 		        _cTipoNF:="NF Triangular, Ped. Remessa : "+SC5->C5_NUM
 		        _cTipoNF+=", Oper.: "+SC5->C5_I_OPER
 				_cChave2P:=SC5->C5_FILIAL+SC5->C5_NOTA+SC5->C5_SERIE
-			 ENDIF
+			 EndIf
 
-		  ELSEIF SC5->C5_I_TRCNF <> "S" .AND. SC5->C5_I_OPER == _cOperRemessa//42
+		  ElseIf SC5->C5_I_TRCNF <> "S" .And. SC5->C5_I_OPER == _cOperRemessa//42
 		  
-             IF SC5->(Dbseek(SC5->C5_FILIAL+SC5->C5_I_PVFAT))
+             If SC5->(DBSeek(SC5->C5_FILIAL+SC5->C5_I_PVFAT))
 		        _cTipoNF:="NF Triangular, Ped. Fat. : "+SC5->C5_NUM
 		        _cTipoNF+=", Oper.: "+SC5->C5_I_OPER
 				_cChave2P:=SC5->C5_FILIAL+SC5->C5_NOTA+SC5->C5_SERIE
-			 ENDIF
+			 EndIf
 
-		  ENDIF
+		  EndIf
 
-	      IF !EMPTY(_cChave2P) .AND. ZZN->(DBSEEK( _cChave2P ))
+	      If !Empty(_cChave2P) .And. ZZN->(DBSeek( _cChave2P ))
              _aColZZN := GrvLsta(_aColZZN,_cTipoNF,_aNotas[P])//SEMPRE GRAVA SEGUNDA PERNA 
-		  ENDIF
+		  EndIf
 
-	   ELSE
+	   Else
 
-	      IF !_aNotas[P,2] == ZZN->ZZN_CTRANS+" "+ZZN->ZZN_SERCTR 
+	      If !_aNotas[P,2] == ZZN->ZZN_CTRANS+" "+ZZN->ZZN_SERCTR 
              _aColZZN := GrvLsta(_aColZZN,"NF normal, CTE diferente",_aNotas[P])
-	      ENDIF
+	      EndIf
 
-	   ENDIF
-       ZZN->(DBGOTO(_nSalvaRecZZN)) //Volta recno da posicao atual pq pode ter seeks no ZZN
-	   ZZN->(DBSKIP())
-    ENDDO
-NEXT
+	   EndIf
+       ZZN->(DBGoTo(_nSalvaRecZZN)) //Volta recno da posicao atual pq pode ter seeks no ZZN
+	   ZZN->(DBSkip())
+    EndDo
+Next
 
-IF LEN(_aColZZN ) > 0
+If Len(_aColZZN ) > 0
 	_aCabZZN:={}
-	AADD(_aCabZZN,"Filial"           )//ZZN_FILIAL
-	AADD(_aCabZZN,"Item"             )
-	AADD(_aCabZZN,"Nota Fiscal"      )//ZZN_NFISCA
-	AADD(_aCabZZN,"Cod. Transp."     )//ZZN_FTRANS
-	AADD(_aCabZZN,"Loja Transp."     )//ZZN_LOJAFT
-	AADD(_aCabZZN,"Nome Transp."     )//A2_NOME 
-	AADD(_aCabZZN,"Nome Red. Transp.")//A2_NREDUZ
-    AADD(_aCabZZN,"Fatura"           )//ZZN_FATURA
-    AADD(_aCabZZN,"Numero CTE"       )//ZZN_CTRANS
-    AADD(_aCabZZN,"Serie CTE"        )//ZZN_SERCTR
-    AADD(_aCabZZN,"Carga"            )//ZZN_CARGA
-    AADD(_aCabZZN,"Valor CTE"        )//ZZN_VLRCTR
-    AADD(_aCabZZN,"Dados Ped. Troca NF / Triangular"   )
+	aAdd(_aCabZZN,"Filial"           )//ZZN_FILIAL
+	aAdd(_aCabZZN,"Item"             )
+	aAdd(_aCabZZN,"Nota Fiscal"      )//ZZN_NFISCA
+	aAdd(_aCabZZN,"Cod. Transp."     )//ZZN_FTRANS
+	aAdd(_aCabZZN,"Loja Transp."     )//ZZN_LOJAFT
+	aAdd(_aCabZZN,"Nome Transp."     )//A2_NOME 
+	aAdd(_aCabZZN,"Nome Red. Transp.")//A2_NREDUZ
+    aAdd(_aCabZZN,"Fatura"           )//ZZN_FATURA
+    aAdd(_aCabZZN,"Numero CTE"       )//ZZN_CTRANS
+    aAdd(_aCabZZN,"Serie CTE"        )//ZZN_SERCTR
+    aAdd(_aCabZZN,"Carga"            )//ZZN_CARGA
+    aAdd(_aCabZZN,"Valor CTE"        )//ZZN_VLRCTR
+    aAdd(_aCabZZN,"Dados Ped. Troca NF / Triangular"   )
 
-	AADD(_aCabZZN,"Item Atual"       )
-	AADD(_aCabZZN,"CTE Atual"        )
-    AADD(_aCabZZN,"Pedido NF Atual"  )
-    AADD(_aCabZZN,"Operacao NF Atual")
+	aAdd(_aCabZZN,"Item Atual"       )
+	aAdd(_aCabZZN,"CTE Atual"        )
+    aAdd(_aCabZZN,"Pedido NF Atual"  )
+    aAdd(_aCabZZN,"Operacao NF Atual")
 
 	U_ITListBox( 'Lista de CTE diferentes já lançados, Troca NF ou NF Triangular, Fatura '+_cFatura, _aCabZZN, _aColZZN , .T. , 1 )
 
-ELSE
-	IF lMensagem
-       U_ITMSG("Não foram encontrados CTE's diferentes, Troca NF ou NF Triangular para fatura: "+_cFatura,"ATENÇÃO",,1)	   
-	ENDIF
-ENDIF
+Else
+	If lMensagem
+       U_ITMsg("Não foram encontrados CTE's diferentes, Troca NF ou NF Triangular para fatura: "+_cFatura,"ATENÇÃO",,1)	   
+	EndIf
+EndIf
 
 RestOrd(_aOrd)
 
-RETURN .T.
+Return .T.
 
-STATIC Function GrvLsta(_aColZZN,_cTipoNF,_aNotasLin)
-LOCAL _Itens:={}
+Static Function GrvLsta(_aColZZN,_cTipoNF,_aNotasLin)
+Local _Itens:={}
        
-AADD(_Itens,ZZN->ZZN_FILIAL )// Pesquisado      
-AADD(_Itens,ZZN->ZZN_ITEM   )// Pesquisado 
-AADD(_Itens,ZZN->ZZN_NFISCA )// Pesquisado      
-AADD(_Itens,ZZN->ZZN_FTRANS )// Pesquisado      
-AADD(_Itens,ZZN->ZZN_LOJAFT )// Pesquisado      
-AADD(_Itens,POSICIONE("SA2",1,xFilial("SA2")+ZZN->ZZN_FTRANS + ZZN->ZZN_LOJAFT,"A2_NOME"))//Pesquisado 
-AADD(_Itens,SA2->A2_NREDUZ  )// Pesquisado     
-AADD(_Itens,ZZN->ZZN_FATURA )// Pesquisado      
-AADD(_Itens,ZZN->ZZN_CTRANS )// Pesquisado      
-AADD(_Itens,ZZN->ZZN_SERCTR )// Pesquisado      
-AADD(_Itens,ZZN->ZZN_CARGA  )// Pesquisado     
-AADD(_Itens,ZZN->ZZN_VLRCTR )// Pesquisado     
-AADD(_Itens,_cTipoNF        )// Pesquisado     
+aAdd(_Itens,ZZN->ZZN_FILIAL )// Pesquisado      
+aAdd(_Itens,ZZN->ZZN_ITEM   )// Pesquisado 
+aAdd(_Itens,ZZN->ZZN_NFISCA )// Pesquisado      
+aAdd(_Itens,ZZN->ZZN_FTRANS )// Pesquisado      
+aAdd(_Itens,ZZN->ZZN_LOJAFT )// Pesquisado      
+aAdd(_Itens,Posicione("SA2",1,xFilial("SA2")+ZZN->ZZN_FTRANS + ZZN->ZZN_LOJAFT,"A2_NOME"))//Pesquisado 
+aAdd(_Itens,SA2->A2_NREDUZ  )// Pesquisado     
+aAdd(_Itens,ZZN->ZZN_FATURA )// Pesquisado      
+aAdd(_Itens,ZZN->ZZN_CTRANS )// Pesquisado      
+aAdd(_Itens,ZZN->ZZN_SERCTR )// Pesquisado      
+aAdd(_Itens,ZZN->ZZN_CARGA  )// Pesquisado     
+aAdd(_Itens,ZZN->ZZN_VLRCTR )// Pesquisado     
+aAdd(_Itens,_cTipoNF        )// Pesquisado     
 
-AADD(_Itens,_aNotasLin[3])//"Item Atual"       
-AADD(_Itens,_aNotasLin[2])//"CTE Atual"        
-AADD(_Itens,_aNotasLin[4])//"Pedido NF Atual"  
-AADD(_Itens,_aNotasLin[5])//"Operacao NF Atual"
+aAdd(_Itens,_aNotasLin[3])//"Item Atual"       
+aAdd(_Itens,_aNotasLin[2])//"CTE Atual"        
+aAdd(_Itens,_aNotasLin[4])//"Pedido NF Atual"  
+aAdd(_Itens,_aNotasLin[5])//"Operacao NF Atual"
 
-AADD(_aColZZN,_Itens)
+aAdd(_aColZZN,_Itens)
 
-RETURN _aColZZN
+Return _aColZZN

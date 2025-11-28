@@ -2,35 +2,24 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-André Lisboa  | 22/08/2017 | Alterações gerais para versão 12 - Chamado 20782
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 09/05/2019 | Revisão de fontes. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 10/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+André Lisboa  |22/08/2017| Chamado 20782. Alterações gerais para versão 12
+Lucas Borges  |09/05/2019| Chamado 28346. Revisão de fontes.
+Lucas Borges  |10/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-
-#INCLUDE "TOTVS.CH"
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "RWMAKE.CH"
-#INCLUDE "Colors.ch"
+#Include "TOTVS.CH"
+#Include "RWMAKE.CH"
 
 /*
 ===============================================================================================================================
 Programa----------: MFIN003
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 02/09/2010
-===============================================================================================================================
 Descrição---------: Rotina para possibilitar a alteração do vencimento de varios titulos do contas a Pagar de uma unica vez
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -61,11 +50,8 @@ Return
 Programa----------: MFIN003P
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 02/09/2010
-===============================================================================================================================
 Descrição---------: Realiza o processamento da rotina.
-===============================================================================================================================
 Parametros--------: _oSelf
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -102,40 +88,40 @@ Define Font oFont12b   Name "Courier New"       Size 0,-12 Bold  // Tamanho 12 N
 Begin Transaction
 
 //Criando estrutura da tabela temporaria
-AAdd(_aStru,{"E2_STATUS"	,"C",02,00})
-AAdd(_aStru,{"E2_LEGEND"	,"C",02,00})
-AAdd(_aStru,{"E2_PREFIXO"	,"C",GetSX3Cache("E2_PREFIXO","X3_TAMANHO"),00})
-AAdd(_aStru,{"E2_NUM"		,"C",GetSX3Cache("E2_NUM","X3_TAMANHO"),00})
-AAdd(_aStru,{"E2_PARCELA"	,"C",GetSX3Cache("E2_PARCELA","X3_TAMANHO"),00})
-AAdd(_aStru,{"E2_TIPO"		,"C",GetSX3Cache("E2_TIPO","X3_TAMANHO"),00})
-AAdd(_aStru,{"E2_NATUREZ"	,"C",GetSX3Cache("E2_NATUREZ","X3_TAMANHO"),00})
-AAdd(_aStru,{"E2_FORNECE"	,"C",GetSX3Cache("E2_FORNECE","X3_TAMANHO"),00})
-AAdd(_aStru,{"E2_LOJA"		,"C",GetSX3Cache("E2_LOJA","X3_TAMANHO"),00})
-AAdd(_aStru,{"E2_NOMFOR"	,"C",GetSX3Cache("E2_NOMFOR","X3_TAMANHO"),00})
-AAdd(_aStru,{"E2_EMISSAO"	,"D",GetSX3Cache("E2_EMISSAO","X3_TAMANHO"),00})
-AAdd(_aStru,{"E2_VENCTO"	,"D",GetSX3Cache("E2_VENCTO","X3_TAMANHO"),00})
-AAdd(_aStru,{"E2_VENCREA"	,"D",GetSX3Cache("E2_VENCREA","X3_TAMANHO"),00})
-AAdd(_aStru,{"E2_VALOR"		,"N",GetSX3Cache("E2_VALOR","X3_TAMANHO"),GetSX3Cache("E2_VALOR","X3_DECIMAL")})
-AAdd(_aStru,{"E2_SALDO"		,"N",GetSX3Cache("E2_SALDO","X3_TAMANHO"),GetSX3Cache("E2_SALDO","X3_DECIMAL")})
+aAdd(_aStru,{"E2_STATUS"	,"C",02,00})
+aAdd(_aStru,{"E2_LEGEND"	,"C",02,00})
+aAdd(_aStru,{"E2_PREFIXO"	,"C",GetSX3Cache("E2_PREFIXO","X3_TAMANHO"),00})
+aAdd(_aStru,{"E2_NUM"		,"C",GetSX3Cache("E2_NUM","X3_TAMANHO"),00})
+aAdd(_aStru,{"E2_PARCELA"	,"C",GetSX3Cache("E2_PARCELA","X3_TAMANHO"),00})
+aAdd(_aStru,{"E2_TIPO"		,"C",GetSX3Cache("E2_TIPO","X3_TAMANHO"),00})
+aAdd(_aStru,{"E2_NATUREZ"	,"C",GetSX3Cache("E2_NATUREZ","X3_TAMANHO"),00})
+aAdd(_aStru,{"E2_FORNECE"	,"C",GetSX3Cache("E2_FORNECE","X3_TAMANHO"),00})
+aAdd(_aStru,{"E2_LOJA"		,"C",GetSX3Cache("E2_LOJA","X3_TAMANHO"),00})
+aAdd(_aStru,{"E2_NOMFOR"	,"C",GetSX3Cache("E2_NOMFOR","X3_TAMANHO"),00})
+aAdd(_aStru,{"E2_EMISSAO"	,"D",GetSX3Cache("E2_EMISSAO","X3_TAMANHO"),00})
+aAdd(_aStru,{"E2_VENCTO"	,"D",GetSX3Cache("E2_VENCTO","X3_TAMANHO"),00})
+aAdd(_aStru,{"E2_VENCREA"	,"D",GetSX3Cache("E2_VENCREA","X3_TAMANHO"),00})
+aAdd(_aStru,{"E2_VALOR"		,"N",GetSX3Cache("E2_VALOR","X3_TAMANHO"),GetSX3Cache("E2_VALOR","X3_DECIMAL")})
+aAdd(_aStru,{"E2_SALDO"		,"N",GetSX3Cache("E2_SALDO","X3_TAMANHO"),GetSX3Cache("E2_SALDO","X3_DECIMAL")})
 aAdd(_aStru,{"SE2RECNO"		,"N",08,00})
 
 //Armazena no array aCampos o nome, descricao dos campos e picture
-AAdd(aTitulo,{"E2_STATUS"	,"  "				," "})
-AAdd(aTitulo,{"E2_LEGEND"	,"  "				," "})
-AAdd(aTitulo,{"E2_PREFIXO"	,"PREFIXO"			,GetSX3Cache("E2_PREFIXO","X3_PICTURE")})
-AAdd(aTitulo,{"E2_NUM"		,"NUMERO >>"		,GetSX3Cache("E2_NUM","X3_PICTURE")})
-AAdd(aTitulo,{"E2_PARCELA"	,"PARCELA"			,GetSX3Cache("E2_PARCELA","X3_PICTURE")})
-AAdd(aTitulo,{"E2_TIPO"		,"TIPO"				,GetSX3Cache("E2_TIPO","X3_PICTURE")})
-AAdd(aTitulo,{"E2_NATUREZ"	,"NATUREZA"			,GetSX3Cache("E2_NATUREZ","X3_PICTURE")})
-AAdd(aTitulo,{"E2_FORNECE"	,"FORNECEDOR >>"	,GetSX3Cache("E2_FORNECE","X3_PICTURE")})
-AAdd(aTitulo,{"E2_LOJA"		,"LOJA"				,GetSX3Cache("E2_LOJA","X3_PICTURE")})
-AAdd(aTitulo,{"E2_NOMFOR"	,"RAZAO SOCIAL >>"	,"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"})//Picture passada desta forma para que o espacamento seja respeitado 
-AAdd(aTitulo,{"E2_EMISSAO"	,"EMISSAO"			,GetSX3Cache("E2_EMISSAO","X3_PICTURE")})
-AAdd(aTitulo,{"E2_VENCTO"	,"VENCIMENTO"		,GetSX3Cache("E2_VENCTO","X3_PICTURE")})
-AAdd(aTitulo,{"E2_VENCREA"	,"VENC. REAL >>"	,GetSX3Cache("E2_VENCREA","X3_PICTURE")})
-AAdd(aTitulo,{"E2_VALOR"	,"VALOR >> "		,GetSX3Cache("E2_VALOR","X3_PICTURE")})
-AAdd(aTitulo,{"E2_SALDO"	,"SALDO >>"			,GetSX3Cache("E2_SALDO","X3_PICTURE")})
-AAdd(aTitulo,{"SE2RECNO"	,"RECNO"			,"@!"})
+aAdd(aTitulo,{"E2_STATUS"	,"  "				," "})
+aAdd(aTitulo,{"E2_LEGEND"	,"  "				," "})
+aAdd(aTitulo,{"E2_PREFIXO"	,"PREFIXO"			,GetSX3Cache("E2_PREFIXO","X3_PICTURE")})
+aAdd(aTitulo,{"E2_NUM"		,"NUMERO >>"		,GetSX3Cache("E2_NUM","X3_PICTURE")})
+aAdd(aTitulo,{"E2_PARCELA"	,"PARCELA"			,GetSX3Cache("E2_PARCELA","X3_PICTURE")})
+aAdd(aTitulo,{"E2_TIPO"		,"TIPO"				,GetSX3Cache("E2_TIPO","X3_PICTURE")})
+aAdd(aTitulo,{"E2_NATUREZ"	,"NATUREZA"			,GetSX3Cache("E2_NATUREZ","X3_PICTURE")})
+aAdd(aTitulo,{"E2_FORNECE"	,"FORNECEDOR >>"	,GetSX3Cache("E2_FORNECE","X3_PICTURE")})
+aAdd(aTitulo,{"E2_LOJA"		,"LOJA"				,GetSX3Cache("E2_LOJA","X3_PICTURE")})
+aAdd(aTitulo,{"E2_NOMFOR"	,"RAZAO SOCIAL >>"	,"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"})//Picture passada desta forma para que o espacamento seja respeitado 
+aAdd(aTitulo,{"E2_EMISSAO"	,"EMISSAO"			,GetSX3Cache("E2_EMISSAO","X3_PICTURE")})
+aAdd(aTitulo,{"E2_VENCTO"	,"VENCIMENTO"		,GetSX3Cache("E2_VENCTO","X3_PICTURE")})
+aAdd(aTitulo,{"E2_VENCREA"	,"VENC. REAL >>"	,GetSX3Cache("E2_VENCREA","X3_PICTURE")})
+aAdd(aTitulo,{"E2_VALOR"	,"VALOR >> "		,GetSX3Cache("E2_VALOR","X3_PICTURE")})
+aAdd(aTitulo,{"E2_SALDO"	,"SALDO >>"			,GetSX3Cache("E2_SALDO","X3_PICTURE")})
+aAdd(aTitulo,{"SE2RECNO"	,"RECNO"			,"@!"})
 
 _cQuery := " SELECT E2_PREFIXO, E2_NUM, E2_PARCELA, E2_TIPO, E2_NATUREZ, E2_FORNECE, E2_LOJA, E2_NOMFOR, E2_EMISSAO,"
 _cQuery += " E2_VENCTO, E2_VENCREA, E2_VALOR, E2_SALDO, R_E_C_N_O_ SE2RECNO"
@@ -144,8 +130,8 @@ _cQuery += " WHERE D_E_L_E_T_ = ' '"
 _cQuery += " AND E2_SALDO > 0"
 _cQuery += " AND E2_TIPO <> 'PA '"
 _cQuery += " AND E2_FILIAL = '"  + xFilial("SE2") + "'"
-_cQuery += " AND E2_EMISSAO BETWEEN '" + dtos(MV_PAR01) + "' AND '" + dtos(MV_PAR02) + "'"
-_cQuery += " AND E2_VENCREA BETWEEN '" + dtos(MV_PAR03) + "' AND '" + dtos(MV_PAR04) + "'"
+_cQuery += " AND E2_EMISSAO BETWEEN '" + DToS(MV_PAR01) + "' AND '" + DToS(MV_PAR02) + "'"
+_cQuery += " AND E2_VENCREA BETWEEN '" + DToS(MV_PAR03) + "' AND '" + DToS(MV_PAR04) + "'"
 _cQuery += " AND E2_FORNECE BETWEEN '" + MV_PAR05 + "' AND '" + MV_PAR07 + "'"
 _cQuery += " AND E2_LOJA BETWEEN '" + MV_PAR06 + "' AND '" + MV_PAR08 + "'"
 If !Empty(MV_PAR09)
@@ -171,12 +157,12 @@ SQLToTrb(_cQuery, _aStru, _cAlias)
 
 IncProc('Lendo os dados...')
 
-DbSelectArea("SE2")
+DBSelectArea("SE2")
 (_cAlias)->( DBGoTop() )
 While (_cAlias)->(!Eof())
 	//Bloqueia os titulos selecionados na pesquisa, para que não seja possivel enquanto esta rotina estiver sendo utilizada a sua alteracao
-	SE2->( DBGoto((_cAlias)->SE2RECNO) )
-	SE2->(MsUnlock())	
+	SE2->( DBGoTo((_cAlias)->SE2RECNO) )
+	SE2->(MSUnLock())	
 	RecLock("SE2",.F.)
 	(_cAlias)->( DBSkip() )
 EndDo
@@ -187,16 +173,16 @@ EndDo
 aSize := MSADVSIZE()
 
 //Obtem tamanhos das telas
-AAdd( aObjects, { 0, 0, .t., .t., .t. } )
+aAdd( aObjects, { 0, 0, .T., .T., .T. } )
 
 aInfo    := { aSize[ 1 ], aSize[ 2 ], aSize[ 3 ], aSize[ 4 ], 3, 3 } 
 aPosObj1 := MsObjSize( aInfo, aObjects,  , .T. ) 
 
 //Botoes da tela
-Aadd( aBotoes, {"PESQUISA" ,{||xPesqTRB(_cAlias)},"Pesquisar..."					,"Pesquisar"   })
-Aadd( aBotoes, {"S4WB005N" ,{||xVisuTRB()		},"Visualizar Titulo..."			,"Titulo"      })
+aAdd( aBotoes, {"PESQUISA" ,{||xPesqTRB(_cAlias)},"Pesquisar..."					,"Pesquisar"   })
+aAdd( aBotoes, {"S4WB005N" ,{||xVisuTRB()		},"Visualizar Titulo..."			,"Titulo"      })
 aAdd( aBotoes, {'RELATORIO',{||MsgRun("Imprimindo Relatório Aguarde...",,{||CursorWait(),RelatSE2(),CursorArrow(),(_cAlias)->(DBGoTop())})  },"Imprimir"})
-Aadd( aBotoes, {"RESPONSA" ,{||AtualzTits()		},"Atualizar varios titulos..."    ,"Atual.Titulos"})
+aAdd( aBotoes, {"RESPONSA" ,{||AtualzTits()		},"Atualizar varios titulos..."    ,"Atual.Titulos"})
 
 //Cria a tela para selecao dos Titulos
 DEFINE MSDIALOG oDlg1 TITLE OemToAnsi("Rotina de Alteração de Vencimento dos Títulos a Pagar") From 0,0 To aSize[6]+15,aSize[5] OF oMainWnd PIXEL
@@ -223,7 +209,7 @@ Else
 	nWidth	:= 315
 EndIf
 
-(_cAlias)->(dbGotop())
+(_cAlias)->(DBGoTop())
 
 oBrowse := TCBrowse():New( 35,01,aPosObj1[1,3] + 7,aPosObj1[1,4],,;
 	                     ,{20,20,02,09,02,02,10,06,04,54,08,08,08,17,17},;
@@ -231,11 +217,11 @@ oBrowse := TCBrowse():New( 35,01,aPosObj1[1,3] + 7,aPosObj1[1,4],,;
 
 For _nX:=1 to Len(_aStru)
 	If _aStru[_nX,1] == "E2_STATUS" 
-		oBrowse:AddColumn(TCColumn():New("",{|| IIF((_cAlias)->E2_STATUS == Space(2),oNO,oOK)},,,,"CENTER",,.T.,.F.,,,,.F.,))
+		oBrowse:AddColumn(TCColumn():New("",{|| IIf((_cAlias)->E2_STATUS == Space(2),oNO,oOK)},,,,"CENTER",,.T.,.F.,,,,.F.,))
 	ElseIf _aStru[_nX,1] == "E2_LEGEND"
-	    oBrowse:AddColumn(TCColumn():New("",{|| IIF((_cAlias)->E2_VALOR == (_cAlias)->E2_SALDO,oAberto,oBaixado)},,,,"CENTER",,.T.,.F.,,,,.F.,))
+	    oBrowse:AddColumn(TCColumn():New("",{|| IIf((_cAlias)->E2_VALOR == (_cAlias)->E2_SALDO,oAberto,oBaixado)},,,,"CENTER",,.T.,.F.,,,,.F.,))
 	Else
-		oBrowse:AddColumn(TCColumn():New(OemToAnsi(aTitulo[_nX,2]),&("{ || " + _cAlias + '->' + _aStru[_nX,1]+"}"),aTitulo[_nX,3],,,if(_aStru[_nX,2]=="N","RIGHT","LEFT"),,.F.,.F.,,,,.F.,))
+		oBrowse:AddColumn(TCColumn():New(OemToAnsi(aTitulo[_nX,2]),&("{ || " + _cAlias + '->' + _aStru[_nX,1]+"}"),aTitulo[_nX,3],,,If(_aStru[_nX,2]=="N","RIGHT","LEFT"),,.F.,.F.,,,,.F.,))
 	EndIf
 Next _nX
 
@@ -247,7 +233,7 @@ oBrowse:bLDblClick   := {|| setStatus(_cAlias,(_cAlias)->E2_STATUS)}
 //Evento quando o usuario clica na coluna desejada
 oBrowse:bHeaderClick := { |oBrowse, nCol| nColuna:= nCol,MsgRun("Realizando operação...",,{|| ordenaDado(_cAlias,nColuna) }) }
 
-ACTIVATE MSDIALOG oDlg1 ON INIT (EnchoiceBar(oDlg1,{|| IIF(vldAlter(nQtdTit),Eval({|| nOpca := 1,oDlg1:End(),MsgRun("Processando alteraão do(s)Título(s).",,{||CursorWait(), procAltVen(), CursorArrow()})}),) },{|| nOpca := 2,oDlg1:End()},,aBotoes),oPanel:Align := CONTROL_ALIGN_TOP,oBrowse:Align := CONTROL_ALIGN_ALLCLIENT,oBrowse:Refresh())
+ACTIVATE MSDIALOG oDlg1 ON INIT (EnchoiceBar(oDlg1,{|| IIf(vldAlter(nQtdTit),Eval({|| nOpca := 1,oDlg1:End(),MsgRun("Processando alteraão do(s)Título(s).",,{||CursorWait(), procAltVen(), CursorArrow()})}),) },{|| nOpca := 2,oDlg1:End()},,aBotoes),oPanel:Align := CONTROL_ALIGN_TOP,oBrowse:Align := CONTROL_ALIGN_ALLCLIENT,oBrowse:Refresh())
 
 //Efetuando o desbloqueio dos titulos anteriormente bloqueados no momento de sua selecao
 Processa( {||desarmTit()}/*bAction*/, "Aguarde..."/*cTitle */, "Efetuando o desbloqueio dos títulos..."/*cMsg */,.F./*lAbort */)
@@ -265,11 +251,8 @@ Return
 Programa----------: lstPre
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 02/09/2010
-===============================================================================================================================
 Descrição---------: Tem por objetivo auxiliar na escolha dos Prefixos
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -279,14 +262,14 @@ Local i           := 0
 Private nTam      := 0
 Private nMaxSelect:= 0
 Private aCat      := {}
-Private MvRet     := Alltrim(ReadVar())
+Private MvRet     := AllTrim(ReadVar())
 Private MvPar     := ""
 Private cTitulo   := ""
 Private MvParDef  := ""
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //Tratamento para carregar variaveis da lista de opcoes
 nTam       := 3
@@ -294,13 +277,13 @@ nMaxSelect := 18 //75 / 4
 cTitulo    := "Prefixos"
                  
 DBSelectArea("ZAB")
-ZAB->(dbSetOrder(1))
-ZAB->(dbGotop())
+ZAB->(DBSetOrder(1))
+ZAB->(DBGoTop())
 
 While ZAB->(!Eof())  
 	MvParDef += ZAB->ZAB_PREFIX
 	aAdd(aCat,AllTrim(ZAB->ZAB_DESCRI))
-	ZAB->(dbSkip())
+	ZAB->(DBSkip())
 EndDo
 
 //Trativa abaixo para no caso de uma alteracao do campo trazer todos os dados que foram selecionados anteriormente
@@ -317,11 +300,11 @@ If f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,.F.,nTam,nMaxSelect)
 
 	//Tratamento para separar retorno com barra ";"
 	&MvRet := ""
-	for i:=1 to Len(MvPar) step nTam
-		if !(SubStr(MvPar,i,1) $ " |*")
+	For i:=1 to Len(MvPar) step nTam
+		If !(SubStr(MvPar,i,1) $ " |*")
 			&MvRet  += SubStr(MvPar,i,nTam) + ";"
-		endIf
-	next i
+		EndIf
+	Next i
 
 	//Trata para tirar o ultimo caracter
 	&MvRet := SubStr(&MvRet,1,Len(&MvRet)-1) 
@@ -335,11 +318,8 @@ Return(.T.)
 Programa----------: setStatus
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 02/09/2010
-===============================================================================================================================
 Descrição---------: Seta status
-===============================================================================================================================
 Parametros--------: _cAlias, _cStatus
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -349,15 +329,15 @@ If _cStatus == Space(2)
 	RecLock(_cAlias,.F.)
 	(_cAlias)->E2_STATUS:= 'XX'
 	nQtdTit++
-	(_cAlias)->(MsUnlock())
+	(_cAlias)->(MSUnLock())
 Else
 	RecLock(_cAlias,.F.)
 	(_cAlias)->E2_STATUS:= Space(2)
 	nQtdTit--
-	(_cAlias)->(MsUnlock())
+	(_cAlias)->(MSUnLock())
 EndIf
 
-nQtdTit:= Iif(nQtdTit<0,0,nQtdTit)
+nQtdTit:= IIf(nQtdTit<0,0,nQtdTit)
 
 oQtda:Refresh()
 
@@ -368,52 +348,52 @@ Return
 
 Static Function ordenaDado(_cAlias,nColuna)
 
-Local _aArea:= GetArea()
+Local _aArea:= FWGetArea()
 
 Do Case	
 	//Marca ou desmarca todos os titulos selecionados
 	Case nColuna == 1
-		(_cAlias)->(dbGotop())
+		(_cAlias)->(DBGoTop())
 		While (_cAlias)->(!Eof())
 			//Se o titulo nao estiver selecionado
 			If (_cAlias)->E2_STATUS == Space(2) 
 				RecLock(_cAlias,.F.)
 				(_cAlias)->E2_STATUS:= 'XX'
 				nQtdTit++
-				(_cAlias)->(MsUnlock())
+				(_cAlias)->(MSUnLock())
 			//Titulo selecionado
 			Else
 				RecLock(_cAlias,.F.)
 				(_cAlias)->E2_STATUS:= Space(2) 
 				nQtdTit--
-				(_cAlias)->(MsUnlock())
+				(_cAlias)->(MSUnLock())
 			EndIf
-			(_cAlias)->(dbSkip())
+			(_cAlias)->(DBSkip())
 		EndDo
-		nQtdTit:= Iif(nQtdTit<0,0,nQtdTit)
+		nQtdTit:= IIf(nQtdTit<0,0,nQtdTit)
 		oQtda:Refresh()
-		restArea(_aArea)
+		FWRestArea(_aArea)
 	//Numero do Titulo
 	Case nColuna == 4
-		(_cAlias)->(dbSetOrder(1))
+		(_cAlias)->(DBSetOrder(1))
 	//Codigo do Fornecedor + Loja
 	Case nColuna == 8
-		(_cAlias)->(dbSetOrder(2))
+		(_cAlias)->(DBSetOrder(2))
 	//Nome do Fornecedor
 	Case nColuna == 10
-		(_cAlias)->(dbSetOrder(3))
+		(_cAlias)->(DBSetOrder(3))
 		//Data de vencimento real
 	Case nColuna == 13
-		(_cAlias)->(dbSetOrder(6))
+		(_cAlias)->(DBSetOrder(6))
 	//Valor do Titulo
 	Case nColuna == 14
-		(_cAlias)->(dbSetOrder(4))
+		(_cAlias)->(DBSetOrder(4))
 	//Saldo do Titulo
 	Case nColuna == 15
-		(_cAlias)->(dbSetOrder(5))
+		(_cAlias)->(DBSetOrder(5))
 EndCase
 
-(_cAlias)->(dbGoTop())
+(_cAlias)->(DBGoTop())
 oBrowse:DrawSelect()
 oBrowse:Refresh(.T.)
 
@@ -435,8 +415,8 @@ Private cComboBx1:= ""
 @ 004,003 ComboBox cComboBx1 Items aComboBx1 Size 213,010 PIXEL OF oDlg ON CHANGE alteraMasc()
 @ 020,003 MsGet oGet1 Var cGet1 Size 212,009 COLOR CLR_BLACK Picture "999999999" PIXEL OF oDlg
 
-DEFINE SBUTTON FROM 004,227 TYPE 1 ENABLE ACTION (nOpca:=1,oDlg:End()) OF oDlg
-DEFINE SBUTTON FROM 021,227 TYPE 2 ENABLE ACTION (nOpca:=0,oDlg:End()) OF oDlg
+DEFINE SBUTTON FROM 004,227 Type 1 ENABLE ACTION (nOpca:=1,oDlg:End()) OF oDlg
+DEFINE SBUTTON FROM 021,227 Type 2 ENABLE ACTION (nOpca:=0,oDlg:End()) OF oDlg
 
 ACTIVATE MSDIALOG oDlg CENTERED
 
@@ -444,7 +424,7 @@ If nOpca == 1
 	If (Len(AllTrim(cGet1)) > 0 .And. Type("cGet1") == 'C') .Or. (Type("cGet1") == 'N' .And. cGet1 > 0 )
 		For nI := 1 To Len(aComboBx1)
 			If cComboBx1 == aComboBx1[nI]
-					(_cAlias)->(dbSetOrder(nI))
+					(_cAlias)->(DBSetOrder(nI))
 					MsSeek(cGet1,.T.)
 					oBrowse:DrawSelect()
 					oBrowse:Refresh(.T.)
@@ -484,14 +464,14 @@ Return
 
 Static Function xVisuTRB()
 
-Local 	aArea 		:= GetArea()
+Local 	aArea 		:= FWGetArea()
 Private cCadastro 	:= OemToAnsi( "Visualizar" )
 
-DbSelectArea("SE2")
-SE2->(DbSetOrder(1))
-SE2->(DbGoTo((_cAlias)->SE2RECNO))
+DBSelectArea("SE2")
+SE2->(DBSetOrder(1))
+SE2->(DBGoTo((_cAlias)->SE2RECNO))
 AxVisual( "SE2", (_cAlias)->SE2RECNO, 2 )
-RestArea( aArea )
+FWRestArea( aArea )
 
 Return
 
@@ -509,7 +489,7 @@ Else
 	oPrint:Say (nlinha,(nColInic + 2750),"SIGA/MFIN003",oFont12b)
 	oPrint:Say (nlinha + 100,(nColInic + 2750),"EMPRESA: " + AllTrim(SM0->M0_NOME) + '/' + AllTrim(SM0->M0_FILIAL),oFont12b)
 EndIf
-oPrint:Say (nlinha + 50,(nColInic + 2750),"DATA DE EMISSÃO: " + DtoC(DATE()),oFont12b)
+oPrint:Say (nlinha + 50,(nColInic + 2750),"DATA DE EMISSÃO: " + DToC(DATE()),oFont12b)
 nlinha+=(nSaltoLinha * 3)
 
 oPrint:Say (nlinha,nColFinal / 2,cTitulo,oFont16b,nColFinal,,,2)
@@ -552,9 +532,9 @@ oPrint:Say (nlinha + nAjuAltLi1,nColInic + 500  ,_cTipoTit                      
 oPrint:Say (nlinha + nAjuAltLi1,nColInic + 650  ,_cNatur                                    ,oFont12)
 oPrint:Say (nlinha + nAjuAltLi1,nColInic + 990  ,_cFornec+'/'+_cLojaForn                    ,oFont12)
 oPrint:Say (nlinha + nAjuAltLi1,nColInic + 1330 ,_cNomeForn                                 ,oFont12)
-oPrint:Say (nlinha + nAjuAltLi1,nColInic + 1820 ,DtoC(_dDtEmis)                             ,oFont12)
-oPrint:Say (nlinha + nAjuAltLi1,nColInic + 2060 ,DtoC(_dDtVencto)                           ,oFont12)
-oPrint:Say (nlinha + nAjuAltLi1,nColInic + 2350 ,DtoC(_dDtVencRe)                           ,oFont12)
+oPrint:Say (nlinha + nAjuAltLi1,nColInic + 1820 ,DToC(_dDtEmis)                             ,oFont12)
+oPrint:Say (nlinha + nAjuAltLi1,nColInic + 2060 ,DToC(_dDtVencto)                           ,oFont12)
+oPrint:Say (nlinha + nAjuAltLi1,nColInic + 2350 ,DToC(_dDtVencRe)                           ,oFont12)
 oPrint:Say (nlinha + nAjuAltLi1,nColInic + 2610 ,Transform(_nValor,"@E 999,999,999,999.99") ,oFont12)
 oPrint:Say (nlinha + nAjuAltLi1,nColInic + 2930 ,Transform(_nSaldo,"@E 999,999,999,999.99") ,oFont12)
 
@@ -603,17 +583,14 @@ Return
 Programa----------: RelatSE2
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 02/09/2010
-===============================================================================================================================
 Descrição---------: Imprime relação de títulos
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */                          
 Static Function RelatSE2
 
-Local _aArea        := GetArea()
+Local _aArea        := FWGetArea()
 
 Private oFont10
 Private oFont10b
@@ -668,7 +645,7 @@ EndDo
 oPrint:EndPage()
 oPrint:Preview()
 
-restArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -677,12 +654,9 @@ Return
 Programa----------: AtualzTits
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 02/09/2010
-===============================================================================================================================
 Descrição---------: Atualiza o campo da vencimento real dos registros do arquivo temporario de acordo com a data de vencimento
 					real fornecida pelo usuario, isto diante de algumas validações
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -694,15 +668,15 @@ Local oSay1
 Local nOpca
 Local oDlg
 
-Local _aArea  := GetArea()
+Local _aArea  := FWGetArea()
 
 DEFINE MSDIALOG oDlg TITLE "ATUALIA TODOS OS TITULOS MARCADOS COM A DATA DE VENCIMENTO" FROM 000, 000  TO 150, 400 COLORS 0, 16777215 PIXEL
 
-@ 027, 014 SAY oSay1 PROMPT "Data de Vencimento:" SIZE 051, 010 OF oDlg COLORS 0, 16777215 PIXEL
+@ 027, 014 Say oSay1 PROMPT "Data de Vencimento:" SIZE 051, 010 OF oDlg COLORS 0, 16777215 PIXEL
 @ 023, 067 MSGET oGet1 VAR dGet1 SIZE 094, 010 OF oDlg COLORS 0, 16777215 PIXEL
 
-DEFINE SBUTTON FROM 052,042 TYPE 1 ENABLE ACTION (nOpca:=1,oDlg:End()) OF oDlg
-DEFINE SBUTTON FROM 052,134 TYPE 2 ENABLE ACTION (nOpca:=0,oDlg:End()) OF oDlg
+DEFINE SBUTTON FROM 052,042 Type 1 ENABLE ACTION (nOpca:=1,oDlg:End()) OF oDlg
+DEFINE SBUTTON FROM 052,134 Type 2 ENABLE ACTION (nOpca:=0,oDlg:End()) OF oDlg
 
 ACTIVATE MSDIALOG oDlg CENTERED
 
@@ -718,7 +692,7 @@ If nOpca == 1
 	EndIf
 EndIf
 
-restArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -727,11 +701,8 @@ Return
 Programa----------: vldDtVenct
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 02/09/2010
-===============================================================================================================================
 Descrição---------: Valida se nova data informada é válida
-===============================================================================================================================
 Parametros--------: dDtVencto
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -758,20 +729,17 @@ Return _lRet
 Programa----------: AtualVenRe
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 02/09/2010
-===============================================================================================================================
 Descrição---------: Valida se nova data informada é válida
-===============================================================================================================================
 Parametros--------: _dDtVencRe
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AtualVenRe(_dDtVencRe)
 
-Local _aArea:= GetArea()
+Local _aArea:= FWGetArea()
 Local _lRet := .T.
 
-(_cAlias)->(dbGotop())
+(_cAlias)->(DBGoTop())
 
 While (_cAlias)->(!Eof())
 	//Somente registros marcados 
@@ -789,14 +757,14 @@ While (_cAlias)->(!Eof())
 		If _lRet
 			RecLock(_cAlias,.F.)
 				(_cAlias)->E2_VENCREA:= _dDtVencRe 
-			(_cAlias)->(MsUnlock())
+			(_cAlias)->(MSUnLock())
 		EndIf
 	EndIf
      
-	(_cAlias)->(dbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -805,11 +773,8 @@ Return
 Programa----------: vldAlter
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 02/09/2010
-===============================================================================================================================
 Descrição---------: Valida se foram selecionados títulos
-===============================================================================================================================
 Parametros--------: nQtdTit -> quantidade de títulos selecionados
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -830,21 +795,18 @@ Return _lRet
 Programa----------: desarmTit
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 02/09/2010
-===============================================================================================================================
 Descrição---------: Libera títulos lockados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function desarmTit()
 
-DbSelectArea("SE2")
+DBSelectArea("SE2")
 (_cAlias)->( DBGoTop() )
 While (_cAlias)->(!Eof())
-	SE2->( DBGoto((_cAlias)->SE2RECNO) )
-	SE2->(MsUnlock())	
+	SE2->( DBGoTo((_cAlias)->SE2RECNO) )
+	SE2->(MSUnLock())	
 	(_cAlias)->( DBSkip() )
 EndDo
 
@@ -855,22 +817,19 @@ Return
 Programa----------: procAltVen
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 02/09/2010
-===============================================================================================================================
 Descrição---------: Altera via siga-auto a data de vencimento real do titulo
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function procAltVen()
 
-Local _aArea        := GetArea()
+Local _aArea        := FWGetArea()
 Local _nModOld      := nModulo
 Local _cModOld      := cModulo
 Local _aAutoSE2     := {}
 
-Private lMsErroAuto := .f.
+Private lMsErroAuto := .F.
 
 (_cAlias)->(DBGoTop())
 
@@ -879,27 +838,27 @@ While (_cAlias)->(!Eof())
 	//Somente registros marcados 
 	If (_cAlias)->E2_STATUS == 'XX' 
 
-		DbSelectArea("SE2")
-		SE2->( DBGoto((_cAlias)->SE2RECNO) )
+		DBSelectArea("SE2")
+		SE2->( DBGoTo((_cAlias)->SE2RECNO) )
 
-		SE2->(MsUnlock())
+		SE2->(MSUnLock())
 		nModulo		:= 6
 		cModulo 	:= "FIN"
 
 		_aAutoSE2:={}
 
-		AAdd( _aAutoSE2, { "E2_FILIAL"	, xFilial("SE2") , nil } )
-		AAdd( _aAutoSE2, { "E2_PREFIXO"	, (_cAlias)->E2_PREFIXO, nil } )
-		AAdd( _aAutoSE2, { "E2_NUM"		, (_cAlias)->E2_NUM   , nil } )
-		AAdd( _aAutoSE2, { "E2_PARCELA"	, (_cAlias)->E2_PARCELA, nil } )
-		AAdd( _aAutoSE2, { "E2_TIPO"	, (_cAlias)->E2_TIPO  , nil } )
-		AAdd( _aAutoSE2, { "E2_NATUREZ"	, (_cAlias)->E2_NATUREZ, nil } )
-		AAdd( _aAutoSE2, { "E2_FORNECE"	, (_cAlias)->E2_FORNECE, nil } )
-		AAdd( _aAutoSE2, { "E2_LOJA"	, (_cAlias)->E2_LOJA  , nil } )
-		AAdd( _aAutoSE2, { "E2_EMISSAO"	, (_cAlias)->E2_EMISSAO, nil } )
-		AAdd( _aAutoSE2, { "E2_VENCTO"	, (_cAlias)->E2_VENCTO, nil } )
-		AAdd( _aAutoSE2, { "E2_VENCREA"	, DataValida((_cAlias)->E2_VENCREA), nil } )
-		AAdd( _aAutoSE2, { "E2_VALOR"	, (_cAlias)->E2_VALOR , nil } )
+		aAdd( _aAutoSE2, { "E2_FILIAL"	, xFilial("SE2") , nil } )
+		aAdd( _aAutoSE2, { "E2_PREFIXO"	, (_cAlias)->E2_PREFIXO, nil } )
+		aAdd( _aAutoSE2, { "E2_NUM"		, (_cAlias)->E2_NUM   , nil } )
+		aAdd( _aAutoSE2, { "E2_PARCELA"	, (_cAlias)->E2_PARCELA, nil } )
+		aAdd( _aAutoSE2, { "E2_TIPO"	, (_cAlias)->E2_TIPO  , nil } )
+		aAdd( _aAutoSE2, { "E2_NATUREZ"	, (_cAlias)->E2_NATUREZ, nil } )
+		aAdd( _aAutoSE2, { "E2_FORNECE"	, (_cAlias)->E2_FORNECE, nil } )
+		aAdd( _aAutoSE2, { "E2_LOJA"	, (_cAlias)->E2_LOJA  , nil } )
+		aAdd( _aAutoSE2, { "E2_EMISSAO"	, (_cAlias)->E2_EMISSAO, nil } )
+		aAdd( _aAutoSE2, { "E2_VENCTO"	, (_cAlias)->E2_VENCTO, nil } )
+		aAdd( _aAutoSE2, { "E2_VENCREA"	, DataValida((_cAlias)->E2_VENCREA), nil } )
+		aAdd( _aAutoSE2, { "E2_VALOR"	, (_cAlias)->E2_VALOR , nil } )
 
 		lMsErroAuto := .F.
 		MSExecAuto({|x,y,z| Fina050(x,y,z)},_aAutoSE2,,4) //Alteracao
@@ -918,6 +877,6 @@ While (_cAlias)->(!Eof())
 
 EndDo
 
-RestArea(_aArea)  
+FWRestArea(_aArea)  
 
 Return

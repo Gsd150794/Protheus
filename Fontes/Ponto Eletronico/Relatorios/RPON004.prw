@@ -9,7 +9,7 @@ Lucas Borges  |27/06/2025| Chamado 50617. Revisões diversas visando padronizar o
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -105,7 +105,7 @@ oReport:Section(1):Section(1):Init()
 
 lRetPon := .T.
 
-While (cAliasQRY)->(!EoF())
+While (cAliasQRY)->(!Eof())
 	_oFile:= FwFileReader():New(AllTrim((cAliasQRY)->P0_ARQUIVO))
 	
 	If _oFile:Open()
@@ -124,7 +124,7 @@ While (cAliasQRY)->(!EoF())
 		While (_oFile:hasLine())
 			cBuffer := _oFile:GetLine()
 	    
-			If Len(Alltrim(cBuffer)) == 34
+			If Len(AllTrim(cBuffer)) == 34
 				cIdOrg := SubStr(cBuffer,1,9)
 				cDt  := SubStr(cBuffer,15,4)+SubStr(cBuffer,13,2)+SubStr(cBuffer,11,2)
 				cHra := SubStr(cBuffer,19,4)
@@ -141,7 +141,7 @@ While (cAliasQRY)->(!EoF())
 				If Empty(AllTrim((_cAlias)->RFE_PIS))
 					FILIAL := xFilial("SRA")
     				MATRICULA := GetAdvFVal("SRA","RA_MAT",xFilial("SRA")+AllTrim(cPis),6,"")
-    				NOME := Alltrim(GetAdvFVal("SRA","RA_NOME",xFilial("SRA")+AllTrim(cPis),6,""))
+    				NOME := AllTrim(GetAdvFVal("SRA","RA_NOME",xFilial("SRA")+AllTrim(cPis),6,""))
     				DTPONTO := SubStr(cDt,7,2)+"/"+SubStr(cDt,5,2)+"/"+SubStr(cDt,1,4)
 					HRPONTO := SubStr(cHra,1,2)+":"+SubStr(cHra,3,2)
 					IDORG 	 := cIdOrg

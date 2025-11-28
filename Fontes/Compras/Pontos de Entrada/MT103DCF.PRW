@@ -2,20 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 02/07/2018 | Alterado nome da função TABSPED para ICompFis. Chamado 25362
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 23/01/2019 | Padronização dos campos de placa. Chamado: 27807
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 03/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Lucas Borges  |02/07/2018| Chamado 25362. Alterado nome da função TABSPED para ICompFis.
+Lucas Borges  |23/01/2019| Chamado 27807. Padronização dos campos de placa.
+Lucas Borges  |03/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "RWMake.ch"
 
 /*
@@ -29,14 +24,12 @@ Descrição---------: Habilita botão Mais Inf. e acrescenta campos na aba DANFE do
 					DANFE da rotina documento de entrada.
 					Localização: Função A103CompDanfe.
 					Em que Ponto: Ao clicar no botão Mais Inf.
-===============================================================================================================================
-Parametros--------: PARAMIXB[1] -> L -> informando se a operação é de Inclusão
-					PARAMIXB[2] -> L -> informando se a operação é de Alteração
-					PARAMIXB[3] -> L -> informando se a operação é de Visualização
-					PARAMIXB[4] -> A -> array contendo os campos e seus conteúdos que já tenham sido informados na mesma rotina 
+Parametros--------: ParamIXB[1] -> L -> informando se a operação é de Inclusão
+					ParamIXB[2] -> L -> informando se a operação é de Alteração
+					ParamIXB[3] -> L -> informando se a operação é de Visualização
+					ParamIXB[4] -> A -> array contendo os campos e seus conteúdos que já tenham sido informados na mesma rotina 
 					(ao clicar no botão Mais Inf., informar os conteúdos dos campos, sair, e clicar novamente, devem ser 
 					apresentados os mesmos conteúdos)
-===============================================================================================================================
 Retorno-----------: aCamposRet -> A -> 	Elemento 1: Código do campo
 										Elemento 2: Conteúdo do campo
 ===============================================================================================================================
@@ -47,7 +40,7 @@ User Function MT103DCF
 // Variaveis cMens1 e cMens2 declaradas como públicas no ponto de entrada MT103MEM - foi necessário
 // fazer esta declaração das variáveis para trazer carregados os conteúdos para tratamento
 //====================================================================================================
-Local _lVisual		:= PARAMIXB[3]
+Local _lVisual		:= ParamIXB[3]
 Local _oMemo01		:= Nil
 Local _oMemo02		:= Nil
 
@@ -96,11 +89,11 @@ DEFINE FONT oFont NAME "Tahoma" BOLD
 
 	oTPanel1 := TPanel():New( 0 , 0 , "" , _oDlg , NIL , .T. , .F. , NIL , NIL , 310 , 160 , .T. , .F. )
 	
-	@005,010 SAY "Mensagem NF"				  			Of oTPanel1 Pixel FONT oFont
-	@020,010 SAY "NF/Serie....: "+ cDoc +"/"+ cSerNf	Of oTPanel1 Pixel
-	@020,100 SAY "Emissao.....: "+ DtoC(cEmissao)		Of oTPanel1 Pixel
-	@020,160 SAY "Tipo........: Entrada"		 		Of oTPanel1 Pixel
-	@030,010 SAY cCliFor +"-"+ cLoj +"-"+ cNome	 		Of oTPanel1 Pixel
+	@005,010 Say "Mensagem NF"				  			Of oTPanel1 Pixel FONT oFont
+	@020,010 Say "NF/Serie....: "+ cDoc +"/"+ cSerNf	Of oTPanel1 Pixel
+	@020,100 Say "Emissao.....: "+ DToC(cEmissao)		Of oTPanel1 Pixel
+	@020,160 Say "Tipo........: Entrada"		 		Of oTPanel1 Pixel
+	@030,010 Say cCliFor +"-"+ cLoj +"-"+ cNome	 		Of oTPanel1 Pixel
 	
 	oTFolder1 := TFolder():New( 050 , 005 , U_TRANSPVLD() ,, oTPanel1 ,,,, .T. ,, 240 , 090 )
 	
@@ -109,13 +102,13 @@ DEFINE FONT oFont NAME "Tahoma" BOLD
 
 	If cFormul = 'S'
 	
-		@010,005 SAY	'Veiculo:'							OF oTFolder1:aDialogs[3] PIXEL 
-		@005,035 MSGET	_oVeiculo		VAR _cVeiculo		OF oTFolder1:aDialogs[3] PIXEL SIZE 046,010 COLORS 0,12632256 F3 "DA3" VALID(IIF(!EMPTY(_cVeiculo),IIF(EXISTCPO("DA3",_cVeiculo,1),buscaDA3(),_oVeiculo:SETFOCUS()),Eval({|| _cDescVeic:="",_cPlaca:="",.T.})))
+		@010,005 Say	'Veiculo:'							OF oTFolder1:aDialogs[3] PIXEL 
+		@005,035 MSGET	_oVeiculo		VAR _cVeiculo		OF oTFolder1:aDialogs[3] PIXEL SIZE 046,010 COLORS 0,12632256 F3 "DA3" VALID(IIf(!Empty(_cVeiculo),IIf(EXISTCPO("DA3",_cVeiculo,1),buscaDA3(),_oVeiculo:SETFOCUS()),Eval({|| _cDescVeic:="",_cPlaca:="",.T.})))
 		@005,086 MSGET	_oDescVeic		VAR _cDescVeic		OF oTFolder1:aDialogs[3] PIXEL SIZE 150,010 COLORS 0,12632256
-		@035,005 SAY	'Placa...:'							OF oTFolder1:aDialogs[3] PIXEL
+		@035,005 Say	'Placa...:'							OF oTFolder1:aDialogs[3] PIXEL
 		@030,035 GET	_oPlaca			VAR _cPlaca			OF oTFolder1:aDialogs[3] PIXEL SIZE 046,010 WHEN .T. PICTURE GetSx3Cache("F1_PLACA","X3_PICTURE")
-		@060,005 SAY	'Motorista:'						OF oTFolder1:aDialogs[3] PIXEL
-		@055,035 MSGET	_oMotorista		VAR _cMotorista		OF oTFolder1:aDialogs[3] PIXEL SIZE 046,010 COLORS 0,12632256 F3 "DA4" VALID(IIF(!EMPTY(_cMotorista),IIF(EXISTCPO("DA4",_cMotorista,1),_cDescMotor:=POSICIONE("DA4",1,XFILIAL("DA4") + _cMotorista,"DA4_NOME"),_oMotorista:SETFOCUS()),Eval({|| _cDescMotor:="",.T.})))
+		@060,005 Say	'Motorista:'						OF oTFolder1:aDialogs[3] PIXEL
+		@055,035 MSGET	_oMotorista		VAR _cMotorista		OF oTFolder1:aDialogs[3] PIXEL SIZE 046,010 COLORS 0,12632256 F3 "DA4" VALID(IIf(!Empty(_cMotorista),IIf(EXISTCPO("DA4",_cMotorista,1),_cDescMotor:=Posicione("DA4",1,xFilial("DA4") + _cMotorista,"DA4_NOME"),_oMotorista:SETFOCUS()),Eval({|| _cDescMotor:="",.T.})))
 		@055,086 MSGET	_oDescMotor		VAR _cDescMotor		OF oTFolder1:aDialogs[3] PIXEL SIZE 150,010 COLORS 0,12632256
 		
 		_oDescVeic:Disable()
@@ -141,7 +134,7 @@ If !_lVisual
 	I		:= 1
 	I2		:= 1
 	
-	While !( LRET ) .OR. !( LRET2 )
+	While !( LRET ) .Or. !( LRET2 )
 		
 		If !Empty( AllTrim( SubStr( cMens1 , I , 254 ) ) )
 			cMensAlt1 := cMensAlt1 + AllTrim( SubStr( cMens1 , I , 254 ) ) +CRLF
@@ -178,11 +171,8 @@ Return( aCamposRet )
 Programa----------: TRANSPVLD
 Autor-------------: Erich Buttner
 Data da Criacao---: 21/02/2013
-===============================================================================================================================
 Descrição---------: Criação de Aba de Transpote quando o Formulario Proprio igual a "SIM"
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -203,11 +193,8 @@ Return( aAbas )
 Programa----------: BuscaDA3
 Autor-------------: Erich Buttner
 Data da Criacao---: 21/02/2013
-===============================================================================================================================
 Descrição---------: Realiza a busca dos dados para a tela de Transporte via F3
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */

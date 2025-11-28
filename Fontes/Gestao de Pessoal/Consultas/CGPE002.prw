@@ -2,20 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alexandre V.  | 22/12/2015 | Tratativa na cláusula "ORDER BY" para remover a referência numérica. Chamado 13062
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 19/09/2019 | Revisão do fonte. Chamado 28346 
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 02/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Alexandre V.  |22/12/2015| Chamado 13062. Tratativa na cláusula "ORDER BY" para remover a referência numérica.
+Lucas Borges  |19/09/2019| Chamado 28346. Revisão do fonte.
+Lucas Borges  |02/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ===============================================================================================================================
 */
 
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-#Include "Protheus.Ch"
+#Include "TOTVS.ch"
 
 #Define TITULO "Integração - Unimed"
 
@@ -24,11 +19,8 @@ Lucas Borges  | 02/10/2019 | Removidos os Warning na compilação da release 12.1.
 Programa----------: CGPE002
 Autor-------------: Alexandre Villar
 Data da Criacao---: 23/04/2014
-===============================================================================================================================
 Descrição---------: Rotina de consulta dos lotes de processamento da integração com a Unimed
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -58,11 +50,8 @@ Return(.T.)
 Programa----------: CGPE002MNT
 Autor-------------: Alexandre Villar
 Data da Criacao---: 23/04/2014
-===============================================================================================================================
 Descrição---------: Monta a estrutura da tela principal de consulta do Lote
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -134,18 +123,15 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],000 to aSize[6],aSize[5] Of o
 	
 ACTIVATE MSDIALOG oDlg CENTERED
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: CGPE002SEL
 Autor-------------: Alexandre Villar
 Data da Criacao---: 23/04/2014
-===============================================================================================================================
 Descrição---------: Monta a estrutura de dados da tela principal de consulta do Lote
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -180,7 +166,7 @@ BeginSql alias cAlias
 	 ORDER BY Z05.Z05_FILMAT, Z05.Z05_MATRIC, Z05.Z05_SEQ
 EndSql
 
-(cAlias)->( dbEval( { || nTotReg++ } ) )
+(cAlias)->( DBEval( { || nTotReg++ } ) )
 ProcRegua(nTotReg)
 cTotReg := StrZero( nTotReg , 6 )
 (cAlias)->(DBGoTop())
@@ -217,7 +203,7 @@ If	Len(aLbxAux) > 0 .And. ValType(oLbxAux) == "O"
 							U_ITRetBox(	aLbxAux[oLbxAux:nAt][06] , "Z05_TIPO" )						,; // 06
 							U_ITRetBox(	aLbxAux[oLbxAux:nAt][07] , "Z05_ACAO" )						,; // 07
 							U_ITRetBox(	aLbxAux[oLbxAux:nAt][08] , "Z05_STATUS" )					,; // 08
-						DTOC( STOD (	aLbxAux[oLbxAux:nAt][09] ) )								,; // 09
+						DToC( SToD (	aLbxAux[oLbxAux:nAt][09] ) )								,; // 09
 										aLbxAux[oLbxAux:nAt][10] 									}} // 10
 
 	oLbxAux:Refresh()
@@ -231,11 +217,8 @@ Return
 Programa----------: MenuDef
 Autor-------------: Alexandre Villar
 Data da Criacao---: 23/04/2014
-===============================================================================================================================
 Descrição---------: Definição do Menu da Rotina Principal
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -251,11 +234,8 @@ Return(aRotina)
 Programa----------: CGPE002VLD
 Autor-------------: Alexandre Villar
 Data da Criacao---: 23/04/2014
-===============================================================================================================================
 Descrição---------: Validação para excluir da base os lotes vazios
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -287,7 +267,7 @@ While (cAlias)->( !Eof() )
 	If Z04->( DBSeek( (cAlias)->CHAVE ) )
 		Z04->( RecLock( "Z04" , .F. ) )
 		Z04->( DBDelete() )
-		Z04->( MsUnlock() )
+		Z04->( MSUnLock() )
 	EndIf
 	
 	(cAlias)->( DBSkip() )
@@ -301,11 +281,8 @@ Return
 Programa----------: CGPE002
 Autor-------------: Alexandre Villar
 Data da Criacao---: 23/04/2014
-===============================================================================================================================
 Descrição---------: Rotina de consulta detalhada dos dados de integração dos funcionários
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -338,11 +315,8 @@ Return
 Programa----------: CGPE002D
 Autor-------------: Alexandre Villar
 Data da Criacao---: 23/04/2014
-===============================================================================================================================
 Descrição---------: Monta tela para consulta do histórico detalhado
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -381,7 +355,7 @@ Private	nDvPosAnt	:= 0
 Private	cCadastro	:= "Consulta Histórico ["+ cChave +"] - "+ TITULO
 
 If Empty(cChave)
-	Return()
+	Return
 EndIf
 
 //===========================================================================
@@ -392,7 +366,7 @@ SRA->( DBSetOrder(1) )
 If !SRA->( DBSeek( cChave ) )
 	MessageBox( "O Funcionário referente à chave ["+ cChave +"] não foi encontrado." , TITULO , 0 )
 	Return(.F.)
-EndIF
+EndIf
 
 aAdd( aObjects, { 100, 025, .T. , .F. , .T. } )
 aAdd( aObjects, { 100, 100, .T. , .F. } )
@@ -415,14 +389,14 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Of oM
 	//===========================================================================
 	@ aPosObj[01][01],aPosObj[01][02] MSPANEL oScrPanel PROMPT "" SIZE aPosObj[01][03],aPosObj[01][04] OF oDlg LOWERED
 
-	@ 004 , 004 SAY "Filial:"					SIZE 025,07 OF oScrPanel PIXEL
-	@ 012 , 004 SAY SRA->RA_FILIAL			 	SIZE 060,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ 004 , 004 Say "Filial:"					SIZE 025,07 OF oScrPanel PIXEL
+	@ 012 , 004 Say SRA->RA_FILIAL			 	SIZE 060,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
 
-	@ 004 , 020 SAY "Matrícula:"				SIZE 035,07 OF oScrPanel PIXEL
-	@ 012 , 020 SAY SRA->RA_MAT				 	SIZE 035,09	OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ 004 , 020 Say "Matrícula:"				SIZE 035,07 OF oScrPanel PIXEL
+	@ 012 , 020 Say SRA->RA_MAT				 	SIZE 035,09	OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
 
-	@ 004 , 055 SAY "Funcionário:"				SIZE 165,07 OF oScrPanel PIXEL
-	@ 012 , 055 SAY AllTrim( SRA->RA_NOMECMP )	SIZE 165,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ 004 , 055 Say "Funcionário:"				SIZE 165,07 OF oScrPanel PIXEL
+	@ 012 , 055 Say AllTrim( SRA->RA_NOMECMP )	SIZE 165,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
 
 	//===========================================================================
 	//Parte 02 - Titulos Processados
@@ -477,18 +451,15 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Of oM
 	      
 ACTIVATE MSDIALOG oDlg CENTERED
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: CGPE002HIS
 Autor-------------: Alexandre Villar
 Data da Criacao---: 23/04/2014
-===============================================================================================================================
 Descrição---------: Monta a estrutura de dados da consulta detalhada do histórico
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -516,7 +487,7 @@ BeginSql alias _cAlias
 	 ORDER BY Z05.Z05_ACAO, Z05.Z05_STATUS
 EndSql
 
-(_cAlias)->( dbEval( { || nTotReg++ } ) )
+(_cAlias)->( DBEval( { || nTotReg++ } ) )
 
 ProcRegua(nTotReg)
 
@@ -524,11 +495,11 @@ ProcRegua(nTotReg)
 
 While !(_cAlias)->( Eof() )
 	
-	IF SubStr( (_cAlias)->( Z05_SEQ ) , 9 , 2 ) == "00"
+	If SubStr( (_cAlias)->( Z05_SEQ ) , 9 , 2 ) == "00"
 		cNome := (_cAlias)->( RA_NOME )
 	Else
 		cNome := (_cAlias)->( RB_NOME )
-	EndIF
+	EndIf
 	
 	aAdd( aLbxAux ,	{	(_cAlias)->( Z05_FILMAT + Z05_MATRIC + Z05_SEQ	)	,; //01
 						cNome											,; //02
@@ -551,7 +522,7 @@ If	Len(aLbxAux) > 0 .And. ValType(oLbxAux) == "O"
 				U_ITRetBox(	aLbxAux[oLbxAux:nAt][03] , "Z05_TIPO" )						,; // 03
 				U_ITRetBox(	aLbxAux[oLbxAux:nAt][04] , "Z05_ACAO" )						,; // 04
 				U_ITRetBox(	aLbxAux[oLbxAux:nAt][05] , "Z05_STATUS" )					,; // 05
-			DTOC( STOD (	aLbxAux[oLbxAux:nAt][06] ) )								,; // 06
+			DToC( SToD (	aLbxAux[oLbxAux:nAt][06] ) )								,; // 06
 							aLbxAux[oLbxAux:nAt][07] 									}} // 07
 
 	oLbxAux:Refresh()
@@ -565,11 +536,8 @@ Return
 Programa----------: CGPE002ITH
 Autor-------------: Alexandre Villar
 Data da Criacao---: 23/04/2014
-===============================================================================================================================
 Descrição---------: Recupera os dados dos itens do histórico
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -588,7 +556,7 @@ BeginSql alias _cAlias
 	 ORDER BY Z06.Z06_DATA, Z06.Z06_HORA
 EndSql
 
-(_cAlias)->( dbEval( { || nTotReg++ } ) )
+(_cAlias)->( DBEval( { || nTotReg++ } ) )
 (_cAlias)->( DBGoTop() )
 ProcRegua(nTotReg) // Regua
 
@@ -599,7 +567,7 @@ While !(_cAlias)->( Eof() )
   				U_ITRetBox(	(_cAlias)->Z06_ACAO,"Z06_ACAO" )	,; //03
       			U_ITRetBox(	(_cAlias)->Z06_STATUS,"Z06_STATUS" ),; //04
 				AllTrim(	(_cAlias)->Z06_OBS )				,; //05
-    		DTOC( STOD (	(_cAlias)->Z06_DATA ) )				,; //06
+    		DToC( SToD (	(_cAlias)->Z06_DATA ) )				,; //06
                          	(_cAlias)->Z06_HORA					}) //07
 
 	nCont++

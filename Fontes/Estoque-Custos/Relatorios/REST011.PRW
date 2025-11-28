@@ -2,27 +2,21 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges  | 12/09/2024 | Chamado 48465. Removendo warning de compilação.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: REST011
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 13/12/2017
-===============================================================================================================================
 Descrição---------: Relatório de auditoria de CC entre SA e atendimento de SA - Chamado 22875
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -47,11 +41,8 @@ Return
 Programa----------: REST011R
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 13/12/2017
-===============================================================================================================================
 Descrição---------: Reportdef do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -93,21 +84,18 @@ Return(oReport)
 Programa----------: REST011P
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 13/12/2017
-===============================================================================================================================
 Descrição---------: Reportprint do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function REST011P(oReport)
 
 Local oSection  := oReport:Section(1)
-Local _cfiltro := ""
+Local _cFiltro := ""
 
-dbSelectArea("SCP")
-SCP->(dbSetOrder(1))
+DBSelectArea("SCP")
+SCP->(DBSetOrder(1))
 //==========================================================================
 // Filtragem do relatório                                                   
 //==========================================================================
@@ -124,155 +112,155 @@ oReport:Section(1):BeginQuery()
 cAliasQRY := GetNextAlias()
 
 If !Empty(MV_PAR04)
-	_cfiltro := "% CP_NUM   >= '"  + alltrim(mv_par03) + "' AND CP_NUM <= '" +  alltrim(mv_par04) + "' " 
-Endif
+	_cFiltro := "% CP_NUM   >= '"  + AllTrim(MV_PAR03) + "' AND CP_NUM <= '" +  AllTrim(MV_PAR04) + "' " 
+EndIf
 
-If !Empty(dtos(MV_PAR02))
-	If !empty(_cfiltro)
-		_cfiltro := _cfiltro + " AND "
+If !Empty(DToS(MV_PAR02))
+	If !Empty(_cFiltro)
+		_cFiltro := _cFiltro + " AND "
 	Else
-		_cfiltro := "% "
-	Endif
-	_cfiltro := _cfiltro + " CP_EMISSAO   >= '"  + DTOS(mv_par01) + "' AND CP_EMISSAO <= '" +  DTOS(mv_par02) + "' " 
-Endif 
+		_cFiltro := "% "
+	EndIf
+	_cFiltro := _cFiltro + " CP_EMISSAO   >= '"  + DToS(MV_PAR01) + "' AND CP_EMISSAO <= '" +  DToS(MV_PAR02) + "' " 
+EndIf 
 
 If !Empty(MV_PAR05)
-	If !empty(_cfiltro)
-		_cfiltro := _cfiltro + " AND "
+	If !Empty(_cFiltro)
+		_cFiltro := _cFiltro + " AND "
 	Else
-		_cfiltro := "% "
-	Endif
-	_cfiltro := _cfiltro + " CP_SOLICIT   >= '"  + ALLTRIM(mv_par05) + "' AND CP_SOLICIT <= '" +  ALLTRIM(mv_par06) + "' " 
-Endif 
+		_cFiltro := "% "
+	EndIf
+	_cFiltro := _cFiltro + " CP_SOLICIT   >= '"  + AllTrim(MV_PAR05) + "' AND CP_SOLICIT <= '" +  AllTrim(MV_PAR06) + "' " 
+EndIf 
 
 If !Empty(MV_PAR07)
-	If !empty(_cfiltro)
-		_cfiltro := _cfiltro + " AND "
+	If !Empty(_cFiltro)
+		_cFiltro := _cFiltro + " AND "
 	Else
-		_cfiltro := "% "
-	Endif
-	_cfiltro := _cfiltro + " CP_CC   >= '"  + ALLTRIM(mv_par07) + "' AND CP_CC <= '" +  ALLTRIM(mv_par08) + "' " 
-Endif 
+		_cFiltro := "% "
+	EndIf
+	_cFiltro := _cFiltro + " CP_CC   >= '"  + AllTrim(MV_PAR07) + "' AND CP_CC <= '" +  AllTrim(MV_PAR08) + "' " 
+EndIf 
 
 If !Empty(MV_PAR09)
-	If !empty(_cfiltro)
-		_cfiltro := _cfiltro + " AND "
+	If !Empty(_cFiltro)
+		_cFiltro := _cFiltro + " AND "
 	Else
-		_cfiltro := "% "
-	Endif
-	_cfiltro := _cfiltro + " CP_PRODUTO   >= '"  + ALLTRIM(mv_par09) + "' AND CP_PRODUTO <= '" +  ALLTRIM(mv_par10) + "' " 
-Endif 
+		_cFiltro := "% "
+	EndIf
+	_cFiltro := _cFiltro + " CP_PRODUTO   >= '"  + AllTrim(MV_PAR09) + "' AND CP_PRODUTO <= '" +  AllTrim(MV_PAR10) + "' " 
+EndIf 
 
 If !Empty(MV_PAR11)
-	If !empty(_cfiltro)
-		_cfiltro := _cfiltro + " AND "
+	If !Empty(_cFiltro)
+		_cFiltro := _cFiltro + " AND "
 	Else
-		_cfiltro := "% "
-	Endif
-	_cfiltro := _cfiltro + " B1_GRUPO   >= '"  + ALLTRIM(mv_par11) + "' AND B1_GRUPO <= '" +  ALLTRIM(mv_par12) + "' " 
-Endif 
+		_cFiltro := "% "
+	EndIf
+	_cFiltro := _cFiltro + " B1_GRUPO   >= '"  + AllTrim(MV_PAR11) + "' AND B1_GRUPO <= '" +  AllTrim(MV_PAR12) + "' " 
+EndIf 
 
 If !Empty(MV_PAR13)
-	If !empty(_cfiltro)
-		_cfiltro := _cfiltro + " AND "
+	If !Empty(_cFiltro)
+		_cFiltro := _cFiltro + " AND "
 	Else
-		_cfiltro := "% "
-	Endif
-	_cfiltro := _cfiltro + " D3_LOCAL IN "+ FormatIn(ALLTRIM(MV_PAR13),";")		 
-Endif 
+		_cFiltro := "% "
+	EndIf
+	_cFiltro := _cFiltro + " D3_LOCAL IN "+ FormatIn(AllTrim(MV_PAR13),";")		 
+EndIf 
 
 If MV_PAR14 == 1
-	If !empty(_cfiltro)
-		_cfiltro := _cfiltro + " AND "
+	If !Empty(_cFiltro)
+		_cFiltro := _cFiltro + " AND "
 	Else
-		_cfiltro := "% "
-	Endif
-	_cfiltro := _cfiltro + " CP_QUANT > CP_QUJE " 
-Endif 
+		_cFiltro := "% "
+	EndIf
+	_cFiltro := _cFiltro + " CP_QUANT > CP_QUJE " 
+EndIf 
 
 If MV_PAR14 == 2
-	If !empty(_cfiltro)
-		_cfiltro := _cfiltro + " AND "
+	If !Empty(_cFiltro)
+		_cFiltro := _cFiltro + " AND "
 	Else
-		_cfiltro := "% "
-	Endif
-	_cfiltro := _cfiltro + " CP_QUANT = CP_QUJE " 
-Endif 
+		_cFiltro := "% "
+	EndIf
+	_cFiltro := _cFiltro + " CP_QUANT = CP_QUJE " 
+EndIf 
 
 _cfiltro2 := ""
 
 If  '1' $ MV_PAR15
-	If !empty(_cfiltro2)
+	If !Empty(_cfiltro2)
 		_cfiltro2 := _cfiltro2 + " OR "
 	Else
 		_cfiltro2 := "( "
-	Endif
+	EndIf
 	_cfiltro2 := _cfiltro2 + " (D3_CC = CP_CC AND (CP_CC = CQ_CC OR CQ_CC = ' ')) "	 
-Endif 
+EndIf 
 
 If  '2' $ MV_PAR15
-	If !empty(_cfiltro2)
+	If !Empty(_cfiltro2)
 		_cfiltro2 := _cfiltro2 + " OR "
 	Else
 		_cfiltro2 := "( "
-	Endif
+	EndIf
 	_cfiltro2 := _cfiltro2 + " (D3_CC <> CP_CC AND CP_CC = CQ_CC)  "	 
-Endif 
+EndIf 
 
 If  '3' $ MV_PAR15
-	If !empty(_cfiltro2)
+	If !Empty(_cfiltro2)
 		_cfiltro2 := _cfiltro2 + " OR "
 	Else
 		_cfiltro2 := "( "
-	Endif
+	EndIf
 	_cfiltro2 := _cfiltro2 + " (D3_CC = CQ_CC AND CP_CC <> CQ_CC) "	 
-Endif 
+EndIf 
 
 If  '4' $ MV_PAR15
-	If !empty(_cfiltro2)
+	If !Empty(_cfiltro2)
 		_cfiltro2 := _cfiltro2 + " OR "
 	Else
 		_cfiltro2 := "( "
-	Endif
+	EndIf
 	_cfiltro2 := _cfiltro2 + " (D3_CC = CP_CC AND CQ_CC <> CP_CC AND CP_CC <> ' ') "	 
-Endif 
+EndIf 
 
 If  '5' $ MV_PAR15
-	If !empty(_cfiltro2)
+	If !Empty(_cfiltro2)
 		_cfiltro2 := _cfiltro2 + " OR "
 	Else
 		_cfiltro2 := "( "
-	Endif
+	EndIf
 	_cfiltro2 := _cfiltro2 + " (D3_CC <> CP_CC AND CQ_CC <> CP_CC AND D3_CC <> CQ_CC) "	 
-Endif 
+EndIf 
 
-If !Empty(MV_PAR15) .and. !empty(_cfiltro2)
-	If !empty(_cfiltro)
-			_cfiltro := _cfiltro + " AND "
+If !Empty(MV_PAR15) .And. !Empty(_cfiltro2)
+	If !Empty(_cFiltro)
+			_cFiltro := _cFiltro + " AND "
 	Else
-		_cfiltro := "% "
-	Endif
-	_cfiltro := _cfiltro + _cfiltro2 + ")"
-Endif 	
+		_cFiltro := "% "
+	EndIf
+	_cFiltro := _cFiltro + _cfiltro2 + ")"
+EndIf 	
 
-If empty(_cfiltro)
-	_cfiltro := "% CP_FILIAL = '" + xfilial("SCP") + "' %"
+If Empty(_cFiltro)
+	_cFiltro := "% CP_FILIAL = '" + xFilial("SCP") + "' %"
 Else
-	_cfiltro := _cfiltro + " AND  CP_FILIAL = '" + xfilial("SCP") + "' %"
-Endif
+	_cFiltro := _cFiltro + " AND  CP_FILIAL = '" + xFilial("SCP") + "' %"
+EndIf
 
 BeginSql Alias cAliasQRY
 
 SELECT  CP_FILIAL, CP_NUM, CP_ITEM, CP_PRODUTO, CP_DESCRI, CP_EMISSAO, CP_QUANT, CP_CC, CQ_CC, CP_SOLICIT, CQ_NUMREQ, D3_NUMSEQ, D3_CC,
         D3_LOCAL, D3_EMISSAO, D3_USUARIO, CP_QUANT-CP_QUJE AS SALDO, CP_QUJE, B1_GRUPO, D3_DOC, CP_OBS, CTT_DESC01
-FROM %table:SCP% SCP JOIN %table:SCQ% SCQ ON CP_FILIAL = CQ_FILIAL AND
+FROM %Table:SCP% SCP JOIN %Table:SCQ% SCQ ON CP_FILIAL = CQ_FILIAL AND
                                         CP_NUM = CQ_NUM AND
                                         CP_ITEM = CQ_ITEM
-     JOIN %table:SD3% SD3 ON D3_FILIAL = CP_FILIAL AND
+     JOIN %Table:SD3% SD3 ON D3_FILIAL = CP_FILIAL AND
                                         D3_NUMSEQ = CQ_NUMREQ
-     JOIN %table:SB1% SB1 ON B1_COD = CP_PRODUTO
-     JOIN %table:CTT% CTT ON CTT_CUSTO = D3_CC
-WHERE %Exp:_cfiltro% AND
+     JOIN %Table:SB1% SB1 ON B1_COD = CP_PRODUTO
+     JOIN %Table:CTT% CTT ON CTT_CUSTO = D3_CC
+WHERE %Exp:_cFiltro% AND
 	SCP.%NotDel% AND 
 	SCQ.%NotDel% AND
 	SD3.%NotDel% AND
@@ -299,18 +287,15 @@ TRPosition():New(oSection,"SCP",1,{|| xFilial("SCP")+(cAliasQRY)->CP_NUM+(cAlias
 
 oSection:Print()
 
-Return NIL
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: REST0113
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 13/12/2017
-===============================================================================================================================
 Descrição---------: Corpo do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -353,10 +338,10 @@ lMTR105 := If(ValType(lMTR105)#"L",.T.,lMTR105)
 
 //==========================================================================
 //  Verifica as Perguntas Seleciondas                                       
-//  mv_par01  -  Da data      ?                                             
-//  mv_par02  -  Ate a data   ?                                             
-//  mv_par03  -  Numero de    ?                                             
-//  mv_par04  -  Numero Ate   ?                                             
+//  MV_PAR01  -  Da data      ?                                             
+//  MV_PAR02  -  Ate a data   ?                                             
+//  MV_PAR03  -  Numero de    ?                                             
+//  MV_PAR04  -  Numero Ate   ?                                             
 //==========================================================================
 Pergunte(cPerg,.F.)
 If !lMTR105 .And. ValType(aPerg) ==  "A"
@@ -375,18 +360,18 @@ Else
 	wnrel:=SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3,lDic,aOrdem,lComp,Tamanho,lFiltro)
 EndIf
 If ( nLastKey==27 )
-	dbSelectArea(cString)
-	dbSetOrder(1)
+	DBSelectArea(cString)
+	DBSetOrder(1)
 	Set Filter to
 	Return
-Endif
+EndIf
 SetDefault(aReturn,cString)
 If ( nLastKey==27 )
-	dbSelectArea(cString)
-	dbSetOrder(1)
+	DBSelectArea(cString)
+	DBSetOrder(1)
 	Set Filter to
 	Return
-Endif
+EndIf
 RptStatus({|lEnd| REST011L(@lEnd,wnRel,cString,nomeprog,Titulo)},Titulo)
 
 Return(.T.)
@@ -396,11 +381,8 @@ Return(.T.)
 Programa----------: REST011L
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 13/12/2017
-===============================================================================================================================
 Descrição---------: Imprime a linha detalhe do Relatorio.  
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -417,16 +399,16 @@ Local cCabec2:=  ""      //    123456   12   123456789012345    1234567890123456
 //                              0         1         2         3         4         5         6         7         8         9        10        11        12        13        14        15        16        17        18        19        20        21        22
 //                              01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
                                                                                                                                                                        
-dbSelectArea(cString)
+DBSelectArea(cString)
 SetRegua(LastRec())
-dbSetOrder(1)
-dbSeek(xFilial()+mv_par03,.T.)
+DBSetOrder(1)
+DBSeek(xFilial()+MV_PAR03,.T.)
 
-While (!Eof() .And. xFilial()==SCP->CP_FILIAL .And. SCP->CP_NUM >= mv_par03 .And. SCP->CP_NUM <= mv_par04)
+While (!Eof() .And. xFilial()==SCP->CP_FILIAL .And. SCP->CP_NUM >= MV_PAR03 .And. SCP->CP_NUM <= MV_PAR04)
 	lImp := .T.
-	If !(SCP->CP_EMISSAO >= mv_par01 .And. SCP->CP_EMISSAO <= mv_par02)
-		dbSkip()
-		loop
+	If !(SCP->CP_EMISSAO >= MV_PAR01 .And. SCP->CP_EMISSAO <= MV_PAR02)
+		DBSkip()
+		Loop
 	EndIf
 	If lEnd
 		@ Prow()+1,001 PSAY "CANCELADO PELO OPERADOR" //
@@ -435,7 +417,7 @@ While (!Eof() .And. xFilial()==SCP->CP_FILIAL .And. SCP->CP_NUM >= mv_par03 .And
 	If ( li > 60 )
 		li := cabec(Titulo,cCabec1,cCabec2,nomeprog,Tamanho,If(aReturn[4]==1,15,18))
 		li++
-	Endif
+	EndIf
 	aRetCQ := ca100RetCQ(SCP->CP_NUM,SCP->CP_ITEM)
 	@ li,000 PSay SCP->CP_NUM
 	@ li,009 PSay SCP->CP_ITEM
@@ -446,11 +428,11 @@ While (!Eof() .And. xFilial()==SCP->CP_FILIAL .And. SCP->CP_NUM >= mv_par03 .And
 	@ li,102 PSay aRetCQ[1]		Picture PesqPict("SCP","CP_QUANT")
 	@ li,121 PSay aRetCQ[7] 	Picture PesqPict("SCP","CP_QUANT")
 	@ li,If(cPaisLoc$"BRA",141,136) PSay aRetCQ[6]
-	@ li,151 PSay Padl(Alltrim(SCP->CP_CC),20)
+	@ li,151 PSay PadL(AllTrim(SCP->CP_CC),20)
 	@ li,176 PSay SCP->CP_SOLICIT
 	li++
-	dbSelectArea(cString)
-	dbSkip()
+	DBSelectArea(cString)
+	DBSkip()
 	cbCont++
 	IncRegua()
 EndDo
@@ -458,14 +440,14 @@ EndDo
 If ( lImp )
 	Roda(cbCont,cbText,Tamanho)
 EndIf
-dbSelectArea(cString)
+DBSelectArea(cString)
 dbClearFilter()
-dbSetOrder(1)
+DBSetOrder(1)
 Set Printer To
 If ( aReturn[5] = 1 )
 	dbCommitAll()
 	OurSpool(wnrel)
-Endif
+EndIf
 MS_FLUSH()
 Return(.T.)
 
@@ -474,14 +456,9 @@ Return(.T.)
 Programa----------: REST011C
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 14/12/2017
-===============================================================================================================================
 Descrição---------: Consulta para a pergunta de tipo de registro
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
-===============================================================================================================================
-Usuario-----------: 
 ===============================================================================================================================
 */
 User Function REST011C()
@@ -490,7 +467,7 @@ Local _nI			:= 0
 Private nTam		:= 0
 Private nMaxSelect	:= 0
 Private aCat		:= {}
-Private MvRet		:= Alltrim( ReadVar() )
+Private MvRet		:= AllTrim( ReadVar() )
 Private MvPar		:= ""
 Private cTitulo		:= ""
 Private MvParDef	:= ""
@@ -548,14 +525,9 @@ Return(.T.)
 Programa----------: REST011S
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 14/12/2017
-===============================================================================================================================
 Descrição---------: Análise de status do registro
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
-===============================================================================================================================
-Usuario-----------: 
 ===============================================================================================================================
 */
 User Function REST011S()
@@ -564,30 +536,30 @@ Local _cstatus := ""
 
 Begin Sequence
 
-If (cAliasQRY)->CP_CC == (cAliasQRY)->D3_CC  .AND. ( (cAliasQRY)->CQ_CC == (cAliasQRY)->D3_CC .OR. (cAliasQRY)->CQ_CC == ' ')
+If (cAliasQRY)->CP_CC == (cAliasQRY)->D3_CC  .And. ( (cAliasQRY)->CQ_CC == (cAliasQRY)->D3_CC .Or. (cAliasQRY)->CQ_CC == ' ')
  	_cstatus := "OK"
  	Break
-Endif
+EndIf
 
-If (cAliasQRY)->CP_CC <> (cAliasQRY)->D3_CC  .AND.  (cAliasQRY)->CQ_CC == (cAliasQRY)->CP_CC 
+If (cAliasQRY)->CP_CC <> (cAliasQRY)->D3_CC  .And.  (cAliasQRY)->CQ_CC == (cAliasQRY)->CP_CC 
  	_cstatus := "Av. Baixa"
  	Break
-Endif
+EndIf
 
-If (cAliasQRY)->CP_CC <> (cAliasQRY)->D3_CC  .AND.  (cAliasQRY)->CQ_CC == (cAliasQRY)->D3_CC 
+If (cAliasQRY)->CP_CC <> (cAliasQRY)->D3_CC  .And.  (cAliasQRY)->CQ_CC == (cAliasQRY)->D3_CC 
  	_cstatus := "Av. SA"
  	Break
-Endif
+EndIf
 
-If (cAliasQRY)->CP_CC == (cAliasQRY)->D3_CC  .AND. ( (cAliasQRY)->CQ_CC <> (cAliasQRY)->CP_CC .OR. (cAliasQRY)->CQ_CC <> ' ')
+If (cAliasQRY)->CP_CC == (cAliasQRY)->D3_CC  .And. ( (cAliasQRY)->CQ_CC <> (cAliasQRY)->CP_CC .Or. (cAliasQRY)->CQ_CC <> ' ')
  	_cstatus := "Av. Pre"
  	Break
-Endif
+EndIf
 
-If (cAliasQRY)->CP_CC <> (cAliasQRY)->D3_CC  .AND.  (cAliasQRY)->CQ_CC <> (cAliasQRY)->CP_CC 
+If (cAliasQRY)->CP_CC <> (cAliasQRY)->D3_CC  .And.  (cAliasQRY)->CQ_CC <> (cAliasQRY)->CP_CC 
  	_cstatus := "Divergente"
  	Break
-Endif
+EndIf
 
 End Sequence
 

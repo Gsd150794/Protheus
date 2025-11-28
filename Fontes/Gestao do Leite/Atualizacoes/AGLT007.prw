@@ -2,17 +2,14 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 26/09/2019 | Revisão de fontes. Chamado 28346
-Lucas Borges  | 22/07/2022 | Tratamento para Extrato Seco Total (EST). Chamado 40778
-Lucas Borges  | 24/03/2025 | Chamado 48203. Incluído campo para integração com app da Qualidade
+Lucas Borges  |26/09/2019| Chamado 28346. Revisão de fontes.
+Lucas Borges  |22/07/2022| Chamado 40778. Tratamento para Extrato Seco Total (EST).
+Lucas Borges  |24/03/2025| Chamado 48203. Incluído campo para integração com app da Qualidade
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
 #Include	"Protheus.Ch"
 #Include	"FWMVCDef.Ch"
 
@@ -41,7 +38,7 @@ oBrowse:SetDescription( "Cadastro das Regras para os Produtos - Gestão do Leite"
 oBrowse:DisableReport()
 oBrowse:Activate()
 
-Return()
+Return
 
 //-------------------------------------------------------------------
 Static Function MenuDef()
@@ -56,10 +53,10 @@ Local _oStrITN	:= FWFormStruct( 1 , "ZA7" , {|_cCampo| AGLT007CPO( 2 , _cCampo )
 Local _oModel	:= Nil
 
 // Criação dos gatilhos para o cabeçalho da rotina
-_aGatAux := FwStruTrigger( 'ZA7_TIPPRD'	, 'ZA7_DESTIP'	, 'POSICIONE("SX5",1,xFilial("SX5")+"Z7"+M->ZA7_TIPPRD,"X5DESCRI()")'	, .F. )
+_aGatAux := FwStruTrigger( 'ZA7_TIPPRD'	, 'ZA7_DESTIP'	, 'Posicione("SX5",1,xFilial("SX5")+"Z7"+M->ZA7_TIPPRD,"X5DESCRI()")'	, .F. )
 _oStrCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZA7_CODPRD'	, 'ZA7_DESPRD'	, 'POSICIONE("SB1",1,xFilial("SB1")+M->ZA7_CODPRD,"B1_DESC")'			, .F. )
+_aGatAux := FwStruTrigger( 'ZA7_CODPRD'	, 'ZA7_DESPRD'	, 'Posicione("SB1",1,xFilial("SB1")+M->ZA7_CODPRD,"B1_DESC")'			, .F. )
 _oStrITN:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 // Cria o objeto do Modelo de Dados
@@ -161,7 +158,7 @@ If _lInclui .Or. _lAltera
 	EndIf
 	_cFiltro += " %"
 	
-	BeginSQL Alias _cAlias
+	BeginSql Alias _cAlias
 		SELECT ZA7_CODPRD
 		FROM %Table:ZA7%
 		WHERE D_E_L_E_T_ =' '
@@ -169,7 +166,7 @@ If _lInclui .Or. _lAltera
 		AND ZA7_FILIAL = %xFilial:ZA7%
 		AND ZA7_CODPRD = %exp:_cCodPrd%
 		AND ZA7_TIPPRD = %exp:_cTipPrd%
-	EndSQL
+	EndSql
 	
 	If (_cAlias)->( !Eof() ) .And. !Empty( (_cAlias)->ZA7_CODPRD )
 		Help(NIL, NIL, "AGLT00701", NIL, "Já existe outro cadastro com o mesmo Código e Tipo de Produto.", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Verifique os dados digitados, e caso necessário utilize a opção alterar no cadastro já existente."})

@@ -19,9 +19,9 @@ Antonio  - Julio Paz     - 17/06/25 - 27/06/25 - 50278   - Criação de Campo e In
 ==========================================================================================================================================================================================================
 */
 
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "AP5mail.ch"
-#include "fwmvcdef.ch"
+#Include "fwmvcdef.ch"
 
 /*
 ===============================================================================================================================
@@ -39,16 +39,16 @@ Private aRotina		:= {}
 Private ccadastro   := "Prospect"
 Private _lConsdBrk  := .T.  // Quando True considera os valores de limite de crédito do Broker. Quando False considera o limite de crédito do cadastro de clientes.
 
-Aadd( aRotina , { "Efetivar"	  , "U_AOMS014T"	, 0 , 4 } )
-Aadd( aRotina , { "Alterar"		  , "U_AOMS014Y" 	, 0 , 4 } )
-Aadd( aRotina , { "Excluir"		  , "U_AOMS014R" 	, 0 , 4 } )  
-Aadd( aRotina , { "At. Cisp"	  , "U_AOMS014K" 	, 0 , 4 } ) 
-Aadd( aRotina , { "An. Cred"	  , "U_AOMS014C" 	, 0 , 4 } )
-Aadd( aRotina , { "Enviar E-mail" , "U_AOMS014G" 	, 0 , 4 } )
-Aadd( aRotina , { "Legenda"       , "U_AOMS014F" 	, 0 , 4 } )
+aAdd( aRotina , { "Efetivar"	  , "U_AOMS014T"	, 0 , 4 } )
+aAdd( aRotina , { "Alterar"		  , "U_AOMS014Y" 	, 0 , 4 } )
+aAdd( aRotina , { "Excluir"		  , "U_AOMS014R" 	, 0 , 4 } )  
+aAdd( aRotina , { "At. Cisp"	  , "U_AOMS014K" 	, 0 , 4 } ) 
+aAdd( aRotina , { "An. Cred"	  , "U_AOMS014C" 	, 0 , 4 } )
+aAdd( aRotina , { "Enviar E-mail" , "U_AOMS014G" 	, 0 , 4 } )
+aAdd( aRotina , { "Legenda"       , "U_AOMS014F" 	, 0 , 4 } )
 
 SZX->( DBSetOrder(1) )
-SZX->( DBGotop() )
+SZX->( DBGoTop() )
 
 oBrw := FWMBrowse():New()
 oBrw:SetAlias( "SZX" )
@@ -56,8 +56,8 @@ oBrw:SetDescription( "Prospect" )
 oBrw:SetFilterDefault( "SZX->ZX_STATUS = 'L'" )
 //adiciona legenda
 oBrw:AddLegend( "ZX_I_ENVML == 'S'" , "BLUE", "E-mail Enviado." )
-oBrw:AddLegend( "!EMPTY(ZX_I_GRPVE) .AND. !EMPTY(ZX_I_RISCO) .and. !empty(ZX_I_ACRED)" , "GREEN", "Análise efetuada" )
-oBrw:AddLegend( "EMPTY(ZX_I_GRPVE) .OR. EMPTY(ZX_I_RISCO) .OR. EMPTY(ZX_I_ACRED)" , "RED" , "Falta grupo de vendas,risco de crédito e observação de análise" )
+oBrw:AddLegend( "!Empty(ZX_I_GRPVE) .And. !Empty(ZX_I_RISCO) .And. !Empty(ZX_I_ACRED)" , "GREEN", "Análise efetuada" )
+oBrw:AddLegend( "Empty(ZX_I_GRPVE) .Or. Empty(ZX_I_RISCO) .Or. Empty(ZX_I_ACRED)" , "RED" , "Falta grupo de vendas,risco de crédito e observação de análise" )
 oBrw:Activate()
 
 Return(.T.)
@@ -78,7 +78,7 @@ Local _aVetor As Array
 Local _aCodAux As Array
 Local _cCodAux As Character 
 Local _nCodAux As Numeric
-LOCAL nNRelmp As Numeric
+Local nNRelmp As Numeric
 Local _cQuery As Character
 Local _cAlias As Character
 
@@ -99,7 +99,7 @@ Local _cUfMVA As Character
 Local _cTRIBMVA As Character
 Local _nLimeteAp As Numeric
 
-PRIVATE lMsErroAuto	As Logical
+Private lMsErroAuto	As Logical
 
 _aVetor 		:= {}
 _aCodAux		:= {}
@@ -129,59 +129,59 @@ lMsErroAuto   := .F.
 //================================================================ 
 // Verifica se o usuário tem permissão para efetivar o prospect.
 //================================================================
-_nLimeteAp :=  Posicione("ZZL",3,xfilial("ZZL")+AllTrim(__cUserId),"ZZL_VLMAXP") // ZZL_FILIAL+ZZL_CODUSU
+_nLimeteAp :=  Posicione("ZZL",3,xFilial("ZZL")+AllTrim(__cUserId),"ZZL_VLMAXP") // ZZL_FILIAL+ZZL_CODUSU
 If ValType(_nLimeteAp) <> "N"
    _nLimeteAp := 0
 EndIf 
 
 If SZX->ZX_I_LC > _nLimeteAp  // Sugestão de Limite de Crédito 
-   U_ITMSG("O Valor do limite de crédito deste cliente: " + AllTrim(Str(SZX->ZX_I_LC,14,2)) + ", é superior ao limite permitido para este usuário aprovar: " + AllTrim(Str(_nLimeteAp,14,2))+".","Atenção","",1)
+   U_ITMsg("O Valor do limite de crédito deste cliente: " + AllTrim(Str(SZX->ZX_I_LC,14,2)) + ", é superior ao limite permitido para este usuário aprovar: " + AllTrim(Str(_nLimeteAp,14,2))+".","Atenção","",1)
    Return
 EndIf 
  
 //================================================================
 // Valida Simples Nacional.
 //================================================================
-If empty(SZX->ZX_SIMPNAC)
+If Empty(SZX->ZX_SIMPNAC)
 
-	U_ITMSG("É obrigatorio selecionar se o cliente é Simples Nacional","Atenção","Selecione se o cliente é Simples Nacional",1)
+	U_ITMsg("É obrigatorio selecionar se o cliente é Simples Nacional","Atenção","Selecione se o cliente é Simples Nacional",1)
 	Return
 	
-Endif
+EndIf
 
-If empty(SZX->ZX_CONTRIB)
+If Empty(SZX->ZX_CONTRIB)
 
-	U_ITMSG("É obrigatorio selecionar se o cliente é Contribuinte ICMS","Atenção","Selecione se o cliente é Contribuinte ICMS",1)
+	U_ITMsg("É obrigatorio selecionar se o cliente é Contribuinte ICMS","Atenção","Selecione se o cliente é Contribuinte ICMS",1)
 	Return
 	
-Endif
+EndIf
 
 //Valida se cliente está ativo no Sintegra quando teve consulta pela Cisp
-If !empty(ALLTRIM(SZX->ZX_SITST))
+If !Empty(AllTrim(SZX->ZX_SITST))
 
-	_csitmaior := Upper(alltrim(SZX->ZX_SITST))
-	If 	!(_csitmaior == "HABILITADO" .OR. _csitmaior == "HABILITADA" .OR. _csitmaior == "ATIVO" .OR. _csitmaior == "ATIVA" .OR. _csitmaior == "ATIVO - HABILITADO"  .OR. _csitmaior == "HABILITADO - ATIVO")
+	_csitmaior := Upper(AllTrim(SZX->ZX_SITST))
+	If 	!(_csitmaior == "HABILITADO" .Or. _csitmaior == "HABILITADA" .Or. _csitmaior == "ATIVO" .Or. _csitmaior == "ATIVA" .Or. _csitmaior == "ATIVO - HABILITADO"  .Or. _csitmaior == "HABILITADO - ATIVO")
 	
-		u_itmsg("Cliente com restrição no cadastro do Sintegra","Atenção","Efetivação não será realizada",1)
+		U_ITMsg("Cliente com restrição no cadastro do Sintegra","Atenção","Efetivação não será realizada",1)
 		Return
 		
-	Endif
+	EndIf
 
-Endif
+EndIf
 
 
 //Valida se cliente está ativo no Sintegra quando teve consulta pela Cisp
-If !empty(ALLTRIM(SZX->ZX_I_SITRF))
+If !Empty(AllTrim(SZX->ZX_I_SITRF))
 
-	_csitmaior := alltrim(SZX->ZX_I_SITRF)
-	If 	!(_csitmaior == "HABILITADO" .OR. _csitmaior == "HABILITADA" .OR. _csitmaior == "ATIVO" .OR. _csitmaior == "ATIVA" .OR. _csitmaior == AllTrim(SubStr("ATIVO - HABILITADO",1,10))  .OR. _csitmaior == AllTrim(SubStr("HABILITADO - ATIVO",1,10))) // O campo ZX_I_SITRF tem um tamanho de 10 posições.
+	_csitmaior := AllTrim(SZX->ZX_I_SITRF)
+	If 	!(_csitmaior == "HABILITADO" .Or. _csitmaior == "HABILITADA" .Or. _csitmaior == "ATIVO" .Or. _csitmaior == "ATIVA" .Or. _csitmaior == AllTrim(SubStr("ATIVO - HABILITADO",1,10))  .Or. _csitmaior == AllTrim(SubStr("HABILITADO - ATIVO",1,10))) // O campo ZX_I_SITRF tem um tamanho de 10 posições.
 	
-		u_itmsg("Cliente com restrição no cadastro da Receita","Atenção","Efetivação não será realizada",1)
+		U_ITMsg("Cliente com restrição no cadastro da Receita","Atenção","Efetivação não será realizada",1)
 		Return
 		
-	Endif
+	EndIf
 
-Endif
+EndIf
 
 
 DBSelectArea('SA3')
@@ -191,39 +191,39 @@ If SA3->( DBSeek( xFilial('SA3') + SZX->ZX_VEND ) )
 	If SA3->A3_I_TIPV <> 'V'
 	
 	
-		u_itmsg('O cadastro atual não pode ser efetivado pois o vendedor amarrado ao Cliente não está classificado como Vendedor!',"Validação  de vendedor",;
+		U_ITMsg('O cadastro atual não pode ser efetivado pois o vendedor amarrado ao Cliente não está classificado como Vendedor!',"Validação  de vendedor",;
 				'Verifique os dados informados e/ou o cadastro do Vendedor no Sistema antes de solicitar a efetivação.',1)
 			
-		Return()
+		Return
 
 	EndIf
 	
 	If SA3->A3_MSBLQL == '1'
 	
-		u_itmsg('O cadastro atual não pode ser efetivado pois o vendedor amarrado ao Cliente está bloqueado no sistema!',"Validação  de vendedor",;
+		U_ITMsg('O cadastro atual não pode ser efetivado pois o vendedor amarrado ao Cliente está bloqueado no sistema!',"Validação  de vendedor",;
 				'Verifique os dados informados e/ou o cadastro do Vendedor no Sistema antes de solicitar a efetivação.',1)
 				
-		Return()
+		Return
 
 	EndIf
 	
 Else
 
-	u_itmsg('O cadastro atual não pode ser efetivado pois o vendedor amarrado ao Cliente não é válido no cadastro do Sistema!',"Validação  de vendedor",;
+	U_ITMsg('O cadastro atual não pode ser efetivado pois o vendedor amarrado ao Cliente não é válido no cadastro do Sistema!',"Validação  de vendedor",;
 				'Verifique os dados informados e/ou o cadastro do Vendedor no Sistema antes de solicitar a efetivação.',1)
 
 	
-	Return()
+	Return
 	
 EndIf
 
 
 //Valida se cliente está pertence ao grupo 11 o vendedor tem que ser genérico
-If !Empty(Alltrim(_cGrpGen)) .And. !Empty(Alltrim(_cVendGen)) 
+If !Empty(AllTrim(_cGrpGen)) .And. !Empty(AllTrim(_cVendGen)) 
 	
 	If SZX->ZX_GRCLI $ _cGrpGen .And. !(SZX->ZX_VEND $ _cVendGen)
 		
-		U_ITMSG("A efetivação não será realizada!"+Chr(13)+Chr(10)+"Para este grupo de clientes "+SZX->ZX_GRCLI+" só é permito vincular os vendedores genéricos: "+_cVendGen,"Atenção","Altere o vendedor para um que seja genérico conforme informado.",1)
+		U_ITMsg("A efetivação não será realizada!"+Chr(13)+Chr(10)+"Para este grupo de clientes "+SZX->ZX_GRCLI+" só é permito vincular os vendedores genéricos: "+_cVendGen,"Atenção","Altere o vendedor para um que seja genérico conforme informado.",1)
 
 		Return
 
@@ -233,7 +233,7 @@ EndIf
 
 
 //Validação da inscrição estadual
-If alltrim(SZX->ZX_INSCR) != "ISENTO"
+If AllTrim(SZX->ZX_INSCR) != "ISENTO"
 
 	_cInscr		:= U_AOMS014N(SZX->ZX_INSCR)
 
@@ -241,26 +241,26 @@ Else
 
 	_cInscr     := "ISENTO"
 
-Endif
+EndIf
 
 M->A1_EST   := U_AOMS014S(SZX->ZX_EST)
 
 //Nova regra para composição do Campo de IE da UF de MG, que deve conter sempre 13 caracteres
 
 If M->A1_EST == 'MG'
-	_cInscr := Alltrim(_cInscr)
+	_cInscr := AllTrim(_cInscr)
     _cInscr := PadL(_cInscr, 13, '0')
-ENDIF
+EndIf
 
 M->A1_INSCR := _cInscr
 
-If !(IE(M->A1_INSCR,M->A1_EST) .And. A030VldUCod()) .or. EMPTY(_cInscr)
+If !(IE(M->A1_INSCR,M->A1_EST) .And. A030VldUCod()) .Or. Empty(_cInscr)
 
-  U_ITMSG("Falha na validação da inscrição estadual!","Validação de inscrição estadual","Verifique a inscrição estadual no sintegra e digite somente os números ou ISENTO",1)
+  U_ITMsg("Falha na validação da inscrição estadual!","Validação de inscrição estadual","Verifique a inscrição estadual no sintegra e digite somente os números ou ISENTO",1)
   
   Return
   
-Endif                                                                                  
+EndIf                                                                                  
 
 //===============================================================================================
 // ABRE CONTROLE DE TRANSACAO
@@ -275,9 +275,9 @@ CC2->( DBSeek( xFilial("CC2") + SZX->ZX_EST + SZX->ZX_CODMUN ) )
 
 DBSelectArea("SA1")
 SA1->( DBSetOrder(3) )
-IF SA1->( DBSeek( xFilial("SA1") + SZX->ZX_CGC ) )
+If SA1->( DBSeek( xFilial("SA1") + SZX->ZX_CGC ) )
 
-	u_itmsg(	"O CPF/CNPJ informado já existe no cadastro de clientes com o Código/Loja: ["+ SA1->A1_COD +"/"+ SA1->A1_LOJA +"]", "Validação de CNPJ"	,;
+	U_ITMsg(	"O CPF/CNPJ informado já existe no cadastro de clientes com o Código/Loja: ["+ SA1->A1_COD +"/"+ SA1->A1_LOJA +"]", "Validação de CNPJ"	,;
 					"Não é permitido cadastrar dois Clientes com o mesmo CPF/CNPJ, verifique os cadastros antes de efetivar o Prospect.",1	 )
 	
 	nNRelmp := 0
@@ -303,7 +303,7 @@ Else
 	(_cAlias)->( DBGoTop() )
 	While (_cAlias)->( !Eof() )
 	
-		aAdd( _aCodAux , { (_cAlias)->A1_COD , IIF( (_cAlias)->A1_MSBLQL == '1' , 'Bloqueado' , 'Ativo' ) } )
+		aAdd( _aCodAux , { (_cAlias)->A1_COD , IIf( (_cAlias)->A1_MSBLQL == '1' , 'Bloqueado' , 'Ativo' ) } )
 		
 		If _cCodAux <> (_cAlias)->A1_COD
 			_cCodAux := (_cAlias)->A1_COD
@@ -317,13 +317,13 @@ Else
 	
 	If _nCodAux > 1
 		
-		u_itmsg( 'Existe mais um código de cliente cadastrado para esse CNPJ no sistema. Verifique o código correto e selecione para continuar com a efetivação!' , 'Atenção!' ,,1)
+		U_ITMsg( 'Existe mais um código de cliente cadastrado para esse CNPJ no sistema. Verifique o código correto e selecione para continuar com a efetivação!' , 'Atenção!' ,,1)
 		_cCodAux := U_ITListBox( 'Códigos de cliente encontrados para o CNPJ' , {'Código','Status'} , _aCodAux , .F. , 3 , 'Selecione o código a ser utilizado na efetivação:' ,,{100,100}, 1 )
 		
 		If Empty( _cCodAux )
-			u_itmsg(  'Operação cancelada pelo usuário!' ,,,1 )
+			U_ITMsg(  'Operação cancelada pelo usuário!' ,,,1 )
 			DisarmTransaction()
-			Break // Return()
+			Break // Return
 
 		EndIf
 	EndIf
@@ -341,124 +341,124 @@ Else
 	_cBairro := StrTran(_cBairro,"ª","") // Estes caracteres especiais estavam impedindo a criação do registro no Cadastro de clientes. No MSEXECAUTO. 
 	
 	If !(U_CRMA980VCP(@_cNome    ,"ZX_NOME"))
-		Break // Return()
+		Break // Return
 	EndIf
 	If !(U_CRMA980VCP(@_cNReduz  ,"ZX_NREDUZ"))
-		Break // Return()
+		Break // Return
 	EndIf
 	If !(U_CRMA980VCP(@_cEst     ,"ZX_EST"))
-		Break // Return()
+		Break // Return
 	EndIf
 	If !(U_CRMA980VCP(@_cEnd     ,"ZX_END"))
-		Break // Return()
+		Break // Return
 	EndIf
 	If !(U_CRMA980VCP(@_cBairro  ,"ZX_BAIRRO"))
-		Break // Return()
+		Break // Return
 	EndIf
 	If !(U_CRMA980VCP(@_cContato ,"ZX_CONTATO"))
-		Break // Return()
+		Break // Return
 	EndIf
 	If !(U_CRMA980VCP(@_cComplem ,"ZX_COMPLEM"))
-		Break // Return()
+		Break // Return
 	EndIf
 	If !(U_CRMA980VCP(@_cCarGc   ,"ZX_CARGC"))
-		Break // Return()
+		Break // Return
 	EndIf
 
 	//Validação de cadastro Chep
-	If len(alltrim(SZX->ZX_I_CCHEP)) == 10
+	If Len(AllTrim(SZX->ZX_I_CCHEP)) == 10
 	
-		_ccchep := alltrim(SZX->ZX_I_CCHEP)
+		_ccchep := AllTrim(SZX->ZX_I_CCHEP)
 		_cchep := "C"
 			
 	Else
 	
-		_ccchep := space(10)
+		_ccchep := Space(10)
 		_cchep := "P"
 	
-	Endif
-		Aadd(_aVetor,{ "A1_FILIAL"	, XFILIAL("SA1")								,Nil})
-		Aadd(_aVetor,{ "A1_NOME"	, LEFT(_cNome,LEN(SA1->A1_NOME))				,Nil})
-		Aadd(_aVetor,{ "A1_PESSOA"	, SZX->ZX_PESSOA								,Nil})
-		Aadd(_aVetor,{ "A1_CGC"		, SZX->ZX_CGC									,Nil})
-		Aadd(_aVetor,{ "A1_NREDUZ"	, LEFT(_cNReduz,LEN(SA1->A1_NREDUZ))			,Nil})
-		Aadd(_aVetor,{ "A1_TIPO"	, SZX->ZX_TIPO									,Nil})
-		Aadd(_aVetor,{ "A1_EST"		, _cEst											,Nil})
-		Aadd(_aVetor,{ "A1_COD_MUN"	, CC2->CC2_CODMUN								,Nil})
-		Aadd(_aVetor,{ "A1_CEP"		, SZX->ZX_CEP									,Nil})
-		Aadd(_aVetor,{ "A1_DDD"		, SZX->ZX_DDD									,Nil})
-		Aadd(_aVetor,{ "A1_TEL"		, SZX->ZX_TEL									,Nil})
-		Aadd(_aVetor,{ "A1_END"		, _cEnd											,Nil}) 
-		Aadd(_aVetor,{ "A1_BAIRRO"	, _cBairro										,Nil}) 
-		Aadd(_aVetor,{ "A1_TELEX"	, SZX->ZX_TELEX									,Nil})	
-		Aadd(_aVetor,{ "A1_FAX"		, SZX->ZX_FAX									,Nil})	
-		Aadd(_aVetor,{ "A1_PAIS"	, SZX->ZX_PAIS									,Nil})	
-		Aadd(_aVetor,{ "A1_CONTATO"	, _cContato										,Nil})		
-		Aadd(_aVetor,{ "A1_INSCR"	, _cInscr										,Nil})	
-		Aadd(_aVetor,{ "A1_PFISICA"	, SZX->ZX_PFISICA								,Nil})	
-		Aadd(_aVetor,{ "A1_DTNASC"	, SZX->ZX_DTNASC								,Nil})	
-		Aadd(_aVetor,{ "A1_EMAIL"	, SZX->ZX_EMAIL									,Nil})	
-		Aadd(_aVetor,{ "A1_HPAGE"	, SZX->ZX_HPAGE									,Nil})	
-		Aadd(_aVetor,{ "A1_INSCRM"	, SZX->ZX_INSCRM								,Nil})	
-		Aadd(_aVetor,{ "A1_INSCRUR"	, SZX->ZX_INSCRUR								,Nil})	
-		Aadd(_aVetor,{ "A1_COMPLEM"	, _cComplem										,Nil})	
-		Aadd(_aVetor,{ "A1_MSBLQL"	, "2"											,Nil})	
-		Aadd(_aVetor,{ "A1_ESTC"	, _cEst											,Nil})	
-		Aadd(_aVetor,{ "A1_CEPC"	, SZX->ZX_CEP									,Nil})	
-		Aadd(_aVetor,{ "A1_ENDCOB"	, _cEnd											,Nil})	
-		Aadd(_aVetor,{ "A1_BAIRROC"	, _cBairro										,Nil})
-		Aadd(_aVetor,{ "A1_VEND"	, SZX->ZX_VEND									,Nil})	
-		Aadd(_aVetor,{ "A1_GRPVEN"	, SZX->ZX_I_GRPVE								,Nil})
+	EndIf
+		aAdd(_aVetor,{ "A1_FILIAL"	, xFilial("SA1")								,Nil})
+		aAdd(_aVetor,{ "A1_NOME"	, LEFT(_cNome,Len(SA1->A1_NOME))				,Nil})
+		aAdd(_aVetor,{ "A1_PESSOA"	, SZX->ZX_PESSOA								,Nil})
+		aAdd(_aVetor,{ "A1_CGC"		, SZX->ZX_CGC									,Nil})
+		aAdd(_aVetor,{ "A1_NREDUZ"	, LEFT(_cNReduz,Len(SA1->A1_NREDUZ))			,Nil})
+		aAdd(_aVetor,{ "A1_TIPO"	, SZX->ZX_TIPO									,Nil})
+		aAdd(_aVetor,{ "A1_EST"		, _cEst											,Nil})
+		aAdd(_aVetor,{ "A1_COD_MUN"	, CC2->CC2_CODMUN								,Nil})
+		aAdd(_aVetor,{ "A1_CEP"		, SZX->ZX_CEP									,Nil})
+		aAdd(_aVetor,{ "A1_DDD"		, SZX->ZX_DDD									,Nil})
+		aAdd(_aVetor,{ "A1_TEL"		, SZX->ZX_TEL									,Nil})
+		aAdd(_aVetor,{ "A1_END"		, _cEnd											,Nil}) 
+		aAdd(_aVetor,{ "A1_BAIRRO"	, _cBairro										,Nil}) 
+		aAdd(_aVetor,{ "A1_TELEX"	, SZX->ZX_TELEX									,Nil})	
+		aAdd(_aVetor,{ "A1_FAX"		, SZX->ZX_FAX									,Nil})	
+		aAdd(_aVetor,{ "A1_PAIS"	, SZX->ZX_PAIS									,Nil})	
+		aAdd(_aVetor,{ "A1_CONTATO"	, _cContato										,Nil})		
+		aAdd(_aVetor,{ "A1_INSCR"	, _cInscr										,Nil})	
+		aAdd(_aVetor,{ "A1_PFISICA"	, SZX->ZX_PFISICA								,Nil})	
+		aAdd(_aVetor,{ "A1_DTNASC"	, SZX->ZX_DTNASC								,Nil})	
+		aAdd(_aVetor,{ "A1_EMAIL"	, SZX->ZX_EMAIL									,Nil})	
+		aAdd(_aVetor,{ "A1_HPAGE"	, SZX->ZX_HPAGE									,Nil})	
+		aAdd(_aVetor,{ "A1_INSCRM"	, SZX->ZX_INSCRM								,Nil})	
+		aAdd(_aVetor,{ "A1_INSCRUR"	, SZX->ZX_INSCRUR								,Nil})	
+		aAdd(_aVetor,{ "A1_COMPLEM"	, _cComplem										,Nil})	
+		aAdd(_aVetor,{ "A1_MSBLQL"	, "2"											,Nil})	
+		aAdd(_aVetor,{ "A1_ESTC"	, _cEst											,Nil})	
+		aAdd(_aVetor,{ "A1_CEPC"	, SZX->ZX_CEP									,Nil})	
+		aAdd(_aVetor,{ "A1_ENDCOB"	, _cEnd											,Nil})	
+		aAdd(_aVetor,{ "A1_BAIRROC"	, _cBairro										,Nil})
+		aAdd(_aVetor,{ "A1_VEND"	, SZX->ZX_VEND									,Nil})	
+		aAdd(_aVetor,{ "A1_GRPVEN"	, SZX->ZX_I_GRPVE								,Nil})
 
 		If _cEst $ _cUfMVA .And. SZX->ZX_SIMPNAC == "1" // Cliente do Parana e Optante do /simples nacional.
-		   Aadd(_aVetor,{ "A1_GRPTRIB"	, _cTRIBMVA     							,Nil}) // "023" / Solicitação chamado 44096.
+		   aAdd(_aVetor,{ "A1_GRPTRIB"	, _cTRIBMVA     							,Nil}) // "023" / Solicitação chamado 44096.
 		EndIf 
 
-        SA3->(DbSetOrder(1)) 
+        SA3->(DBSetOrder(1)) 
 		If SA3->(MsSeek(xFilial("SA3")+SZX->ZX_VEND))
            If SA3->A3_I_VBROK == 'B' .And. _lConsdBrk // Quando True considera os valores de limite de crédito do Broker. Quando False considera o limite de crédito do cadastro de clientes.
-			  Aadd(_aVetor,{ "A1_LC"		, SA3->A3_I_LC     ,Nil})
-			  Aadd(_aVetor,{ "A1_RISCO"	, SA3->A3_I_RISCO  ,Nil}) 
-			  Aadd(_aVetor,{ "A1_TABELA"  , SA3->A3_I_TABPR  ,Nil}) 
-			  //			ENDIF
+			  aAdd(_aVetor,{ "A1_LC"		, SA3->A3_I_LC     ,Nil})
+			  aAdd(_aVetor,{ "A1_RISCO"	, SA3->A3_I_RISCO  ,Nil}) 
+			  aAdd(_aVetor,{ "A1_TABELA"  , SA3->A3_I_TABPR  ,Nil}) 
+			  //			EndIf
 			  //			_cBoleto := "S"
            Else 
-			   Aadd(_aVetor,{ "A1_LC"		, SZX->ZX_I_LC	    ,Nil})			
-			   Aadd(_aVetor,{ "A1_RISCO"	, SZX->ZX_I_RISCO   ,Nil})			
+			   aAdd(_aVetor,{ "A1_LC"		, SZX->ZX_I_LC	    ,Nil})			
+			   aAdd(_aVetor,{ "A1_RISCO"	, SZX->ZX_I_RISCO   ,Nil})			
                If SZX->ZX_SIMPNAC == "1"
-		          Aadd(_aVetor,{ "A1_TABELA"  , SA3->A3_I_TABSN ,Nil}) 
+		          aAdd(_aVetor,{ "A1_TABELA"  , SA3->A3_I_TABSN ,Nil}) 
 			   EndIf 
 		    EndIf       
 		 EndIf
-		Aadd(_aVetor,{ "A1_I_DTCAD"	, dDatabase										,Nil})
-		Aadd(_aVetor,{ "A1_COND"	, SZX->ZX_CONDPAG								,Nil})
-		Aadd(_aVetor,{ "A1_I_CHEP"	, _cchep										,Nil})
-		Aadd(_aVetor,{ "A1_I_CCHEP"	, _ccchep										,Nil})
-		Aadd(_aVetor,{ "A1_I_CARGC"	, _cCarGc										,Nil})
-		Aadd(_aVetor,{ "A1_I_GRCLI"	, SZX->ZX_GRCLI					 				,Nil})
-		Aadd(_aVetor,{ "A1_I_CMUNC"	, CC2->CC2_CODMUN								,Nil})
-		Aadd(_aVetor,{ "A1_I_EMAIL"	, SZX->ZX_EMAILC				 				,Nil})
-		Aadd(_aVetor,{ "A1_NATUREZ"  , "111001"  									,Nil})  
-		Aadd(_aVetor,{ "A1_VENCLC"	, SZX->ZX_I_VENCL 								,Nil})
-		Aadd(_aVetor,{ "A1_CODPAIS"	, "01058"				  						,Nil})
-		Aadd(_aVetor,{ "A1_I_ACRED" , SZX->ZX_I_ACRED								,Nil})
-		Aadd(_aVetor,{ "A1_CONTRIB"	, SZX->ZX_CONTRIB								,Nil})
-		Aadd(_aVetor,{ "A1_CNAE"    , LEFT(SZX->ZX_I_END,LEN(SA1->A1_CNAE))         ,Nil})
-		Aadd(_aVetor,{ "A1_SIMPNAC"	, SZX->ZX_SIMPNAC								,Nil})
-		Aadd(_aVetor,{ "A1_I_IBOLE"	, _cBoleto										,Nil}) 
-	    Aadd(_aVetor,{ "A1_I_SUBCO"	, SZX->ZX_SUB_COD								,Nil}) 
+		aAdd(_aVetor,{ "A1_I_DTCAD"	, dDatabase										,Nil})
+		aAdd(_aVetor,{ "A1_COND"	, SZX->ZX_CONDPAG								,Nil})
+		aAdd(_aVetor,{ "A1_I_CHEP"	, _cchep										,Nil})
+		aAdd(_aVetor,{ "A1_I_CCHEP"	, _ccchep										,Nil})
+		aAdd(_aVetor,{ "A1_I_CARGC"	, _cCarGc										,Nil})
+		aAdd(_aVetor,{ "A1_I_GRCLI"	, SZX->ZX_GRCLI					 				,Nil})
+		aAdd(_aVetor,{ "A1_I_CMUNC"	, CC2->CC2_CODMUN								,Nil})
+		aAdd(_aVetor,{ "A1_I_EMAIL"	, SZX->ZX_EMAILC				 				,Nil})
+		aAdd(_aVetor,{ "A1_NATUREZ"  , "111001"  									,Nil})  
+		aAdd(_aVetor,{ "A1_VENCLC"	, SZX->ZX_I_VENCL 								,Nil})
+		aAdd(_aVetor,{ "A1_CODPAIS"	, "01058"				  						,Nil})
+		aAdd(_aVetor,{ "A1_I_ACRED" , SZX->ZX_I_ACRED								,Nil})
+		aAdd(_aVetor,{ "A1_CONTRIB"	, SZX->ZX_CONTRIB								,Nil})
+		aAdd(_aVetor,{ "A1_CNAE"    , LEFT(SZX->ZX_I_END,Len(SA1->A1_CNAE))         ,Nil})
+		aAdd(_aVetor,{ "A1_SIMPNAC"	, SZX->ZX_SIMPNAC								,Nil})
+		aAdd(_aVetor,{ "A1_I_IBOLE"	, _cBoleto										,Nil}) 
+	    aAdd(_aVetor,{ "A1_I_SUBCO"	, SZX->ZX_SUB_COD								,Nil}) 
 
 	If _nCodAux > 1
 		aAdd( _aVetor , { "A1_COD" , _cCodAux , Nil } )
 	EndIf
 
-    IF SA1->(FieldPos("A1_I_ORIGD")) > 0
-       AADD(_aVetor,{"A1_I_ORIGD", SZX->ZX_I_ORIGD		  ,Nil})
-    ENDIF    
+    If SA1->(FieldPos("A1_I_ORIGD")) > 0
+       aAdd(_aVetor,{"A1_I_ORIGD", SZX->ZX_I_ORIGD		  ,Nil})
+    EndIf    
     
-    IF SA1->(FieldPos("A1_I_DW")) > 0         
-       Aadd(_aVetor,{"A1_I_SLC"	, SZX->ZX_I_SLC		,Nil})  
-	   Aadd(_aVetor,{"A1_I_DW" 	, SZX->ZX_I_DW		,Nil})  
+    If SA1->(FieldPos("A1_I_DW")) > 0         
+       aAdd(_aVetor,{"A1_I_SLC"	, SZX->ZX_I_SLC		,Nil})  
+	   aAdd(_aVetor,{"A1_I_DW" 	, SZX->ZX_I_DW		,Nil})  
     EndIf 
 
 	nNRelmp		:= 2
@@ -496,9 +496,9 @@ Else
 		
 		EndIf
 	
-	EndIF
+	EndIf
 
-EndIF
+EndIf
 
 //===========================================================================
 //| Tratativa para os casos que falham na inclusão                          |
@@ -530,7 +530,7 @@ If nNRelmp == 1
 //===========================================================================
 //| Tratativa para os casos que foram incluídos com sucesso                 |
 //===========================================================================
-ElseIF nNRelmp == 2
+ElseIf nNRelmp == 2
 	
 	//===========================================================================
 	//| Registra o Status de "Importado" para o Prospect                        |
@@ -539,12 +539,12 @@ ElseIF nNRelmp == 2
 		SZX->ZX_STATUS	:= "I"
 		SZX->ZX_CLIENTE	:= SA1->A1_COD
 		SZX->ZX_LOJA	:= SA1->A1_LOJA
-	SZX->(MsUnlock())
+	SZX->(MSUnLock())
 	
 	//===========================================================================
 	//| Gravação das Referências e Dados Bancários                              |
 	//===========================================================================
-	If !Empty(ALLTRIM(SZX->ZX_RC1CONT)) .Or.!EMPTY(ALLTRIM(SZX->ZX_RC1EMP))
+	If !Empty(AllTrim(SZX->ZX_RC1CONT)) .Or.!Empty(AllTrim(SZX->ZX_RC1EMP))
 		
 		DBSelectArea("SAO")
 		SAO->( RecLock( "SAO" , .T. ) )
@@ -558,11 +558,11 @@ ElseIF nNRelmp == 2
 			SAO->AO_TELEFON	:= SZX->ZX_RC1TEL
 			SAO->AO_CONTATO	:= SZX->ZX_RC1CONT
 			
-		SAO->( MsUnlock() )
+		SAO->( MSUnLock() )
 		
-	EndIF
+	EndIf
 	
-	IF !Empty(ALLTRIM(SZX->ZX_RC2CONT)) .Or.!EMPTY(ALLTRIM(SZX->ZX_RC2EMP))
+	If !Empty(AllTrim(SZX->ZX_RC2CONT)) .Or.!Empty(AllTrim(SZX->ZX_RC2EMP))
 		
 		DBSelectArea("SAO")
 		SAO->( RecLock("SAO",.T.) )
@@ -576,9 +576,9 @@ ElseIF nNRelmp == 2
 			SAO->AO_TELEFON	:= SZX->ZX_RC2TEL
 			SAO->AO_CONTATO	:= SZX->ZX_RC2CONT
 			
-		SAO->( MsUnlock() )
+		SAO->( MSUnLock() )
 		
-	EndIF
+	EndIf
 	
 EndIf
 
@@ -588,15 +588,15 @@ End Sequence
 // FECHA CONTROLE DE TRANSACAO
 //===============================================================================================
 EndTran()
-MsUnlockAll()
+MSUnLockAll()
 
 //===============================================================================================
 // Mensagem de conclusão do Processamento
 //===============================================================================================
 If nNRelmp == 1
-	u_itmsg( "Não foi possível efetivar o cadastro, verifique os dados do Prospect e tente novamente."	,,,1 )
-ElseIF nNRelmp == 2
-	u_itmsg( "Cadastro efetivado com sucesso!"															,,,2 )
+	U_ITMsg( "Não foi possível efetivar o cadastro, verifique os dados do Prospect e tente novamente."	,,,1 )
+ElseIf nNRelmp == 2
+	U_ITMsg( "Cadastro efetivado com sucesso!"															,,,2 )
 EndIf
 
 Return( .T. )
@@ -619,23 +619,23 @@ Local aButtons := {}
 //Valida se cadastro não está na base de dados
 If AOMS014V(SZX->ZX_CGC)
 	Return
-Endif
+EndIf
 
 // Valida a parte de limite de crédito.
 If ! U_AOMS014W("CREDITO")
-   Return Nil 
+   Return 
 EndIf 
 
 //Atualiza via Cisp na hora de efetivar
 regtomemory("SZX")
-fwmsgrun(,{|oproc| U_AOMS014B(2,oproc)},"Aguarde...","Aguarde")
+FWMsgRun(,{|oproc| U_AOMS014B(2,oproc)},"Aguarde...","Aguarde")
 		
 //Grava alteração
 u_itmemtor("SZX")
 
 //adiciona botoes na Enchoice                       
-aAdd( aButtons, { "CISP", {|| fwmsgrun(,{|oproc| U_AOMS014B(2,oproc)},"Aguarde...","Aguarde")}, "At. Cisp", "At. Cisp" } ) 
-aAdd( aButtons, { "CRED", {|| fwmsgrun(,{|oproc| U_TelCred(1)},"Aguarde...","Aguarde")}, "An. Cred", "An. Cred" } ) 
+aAdd( aButtons, { "CISP", {|| FWMsgRun(,{|oproc| U_AOMS014B(2,oproc)},"Aguarde...","Aguarde")}, "At. Cisp", "At. Cisp" } ) 
+aAdd( aButtons, { "CRED", {|| FWMsgRun(,{|oproc| U_TelCred(1)},"Aguarde...","Aguarde")}, "An. Cred", "An. Cred" } ) 
 
 
 
@@ -655,7 +655,7 @@ If nOpca == 1
 			
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -678,24 +678,24 @@ Private cCadastro := "Alteração de Prospect" // título da tela
 AOMS014V(SZX->ZX_CGC)
 
 //Tenta atualização Cisp primeiro
-If empty(ALLTRIM(SZX->ZX_SITST))
+If Empty(AllTrim(SZX->ZX_SITST))
 
    regtomemory("SZX")
-   fwmsgrun(,{|oproc| U_AOMS014B(2,oproc)},"Aguarde...","Aguarde")
+   FWMsgRun(,{|oproc| U_AOMS014B(2,oproc)},"Aguarde...","Aguarde")
 		
    //Grava alteração
    u_itmemtor("SZX")
    
-Endif
+EndIf
 
 //adiciona botoes na Enchoice                       
-aAdd( aButtons, { "CISP", {|| fwmsgrun(,{|oproc| U_AOMS014B(2,oproc)},"Aguarde...","Aguarde")}, "At. Cisp", "At. Cisp" } ) 
-aAdd( aButtons, { "CRED", {|| fwmsgrun(,{|oproc| U_TelCred(1)},"Aguarde...","Aguarde")}, "An. Cred", "An. Cred" } ) 
+aAdd( aButtons, { "CISP", {|| FWMsgRun(,{|oproc| U_AOMS014B(2,oproc)},"Aguarde...","Aguarde")}, "At. Cisp", "At. Cisp" } ) 
+aAdd( aButtons, { "CRED", {|| FWMsgRun(,{|oproc| U_TelCred(1)},"Aguarde...","Aguarde")}, "An. Cred", "An. Cred" } ) 
 
 
 nOpca := AxAltera("SZX",SZX->(Recno()),4,,,,,,,, aButtons,,,,.T.,,,,,)
 
-Return()
+Return
 
 
 /*
@@ -728,11 +728,11 @@ If _nOpc == 1
     SA3->( DBSetOrder (1) )
     If SA3->( DBSeek( xFilial("SA3") + SZX->ZX_VEND ) )
     	cEmail := AllTrim( SA3->A3_EMAIL )
-	ELSE
+	Else
 	    cEmail := "Vendendor não encontrado: "+xFilial("SA3") +" "+ SZX->ZX_VEND
     EndIf
 	cMens1 := ""
-	cGetCc := SuperGetMV("IT_EMCCEP",.F.,"sistema@italac.com.br")+SPACE(200)//EMail Com Copia Exclusão Prospect
+	cGetCc := SuperGetMV("IT_EMCCEP",.F.,"sistema@italac.com.br")+Space(200)//EMail Com Copia Exclusão Prospect
 	_nTam:=205
 	_nCol:=009 
 	_nLin:=005 
@@ -743,15 +743,15 @@ If _nOpc == 1
 	
 		oTPanel1:= TPanel():New(0,0,"",oDlg,NIL,.T.,.F.,NIL,NIL,450,200,.T.,.F.)
 		
-		@ _nLin,_nCol SAY "Informe o Motivo da Exclusão do Prospect"				Of oTPanel1 Pixel FONT oFont
+		@ _nLin,_nCol Say "Informe o Motivo da Exclusão do Prospect"				Of oTPanel1 Pixel FONT oFont
 		_nLin+=11
-	  	@ _nLin,_nCol SAY "Nome.........: "+	UPPER( ALLTRIM( SZX->ZX_NOME ) )	Of oTPanel1 Pixel
+	  	@ _nLin,_nCol Say "Nome.........: "+	Upper( AllTrim( SZX->ZX_NOME ) )	Of oTPanel1 Pixel
 		_nLin+=10
-		@ _nLin,_nCol SAY "CGC...........: "+	SZX->ZX_CGC							Of oTPanel1 Pixel
+		@ _nLin,_nCol Say "CGC...........: "+	SZX->ZX_CGC							Of oTPanel1 Pixel
 		_nLin+=10
-		@ _nLin,_nCol SAY "Email para..: "+cEmail 									Of oTPanel1 Pixel
+		@ _nLin,_nCol Say "Email para..: "+cEmail 									Of oTPanel1 Pixel
 		_nLin+=11
-		@ _nLin,_nCol SAY "Com Copia.: "        									Of oTPanel1 Pixel
+		@ _nLin,_nCol Say "Com Copia.: "        									Of oTPanel1 Pixel
 		_nCol+=31
 		_nLin-=02
 		@ _nLin,_nCol Get cGetCc  Size _nTam,10        								Of oTPanel1 Pixel
@@ -761,14 +761,14 @@ If _nOpc == 1
 	
 		@ 005,005 Get oMemo01 var cMens1 MEMO Size 230,60 when .T.					of oTFolder1:aDialogs[1] Pixel
 		_nLin+=95		
-		TButton():New(_nLin,010, ' Confirma ', oTPanel1,{|| AOMS014R(ALLTRIM(cGetCc)) },70,15,,,,.T.)
+		TButton():New(_nLin,010, ' Confirma ', oTPanel1,{|| AOMS014R(AllTrim(cGetCc)) },70,15,,,,.T.)
 		TButton():New(_nLin,090, ' Cancela ' , oTPanel1,{|| oDlg:END()                },70,15,,,,.T.)
 		
 	ACTIVATE MSDIALOG oDlg Centered
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -791,7 +791,7 @@ Local _cEmlLog := ""
 Private cEmail := SuperGetMV("IT_EMCCEP",.F.,"sistema@italac.com.br")
 DEFAULT cGetCc := SuperGetMV("IT_EMCCEP",.F.,"sistema@italac.com.br")
 
-DbSelectArea("SA3")
+DBSelectArea("SA3")
 SA3->( DBSetOrder (1) )
 If SA3->( DBSeek( xFilial("SA3") + SZX->ZX_VEND ) )
 	cEmail := AllTrim( SA3->A3_EMAIL )
@@ -834,15 +834,15 @@ If cEmail <> ""
 	cMsg += '<td><strong>Nome Fantasia: </strong>'+SZX->ZX_NREDUZ+' </td>'
 	cMsg += '</table>'
 	cMsg += '<table width="75%" border="1">'
-	cMsg += '<td><strong>Data de Emissão: </strong>'+dtoc(SZX->ZX_EMISSAO)+' </td>'
-	cMsg += '<td><strong>Data de Fundação: </strong>'+dtoc(SZX->ZX_DTNASC)+' </td>'
+	cMsg += '<td><strong>Data de Emissão: </strong>'+DToC(SZX->ZX_EMISSAO)+' </td>'
+	cMsg += '<td><strong>Data de Fundação: </strong>'+DToC(SZX->ZX_DTNASC)+' </td>'
 	cMsg += '</table>'
 	cMsg += '<table width="75%" border="1">'
 	cMsg += '<td><strong>E-mail: </strong>'+SZX->ZX_EMAIL+' </td>'
 	cMsg += '<td><strong>Home Page: </strong>'+SZX->ZX_HPAGE+' </td>'
 	cMsg += '</table>'
 	cMsg += '<table width="75%" border="1">'
-	cMsg += '<td><strong>Condição de Pagamento: </strong>'+SZX->ZX_CONDPAG+ " - "+ALLTRIM(Posicione("SE4",1,xFilial("SE4")+SZX->ZX_CONDPAG,"SE4->E4_DESCRI"))+' </td>'
+	cMsg += '<td><strong>Condição de Pagamento: </strong>'+SZX->ZX_CONDPAG+ " - "+AllTrim(Posicione("SE4",1,xFilial("SE4")+SZX->ZX_CONDPAG,"SE4->E4_DESCRI"))+' </td>'
 	
 	If SZX->ZX_CHEP = 'S'
 	cMsg += '<td><strong>Cadastro na Chep: </strong>'+"Sim"+' </td>'
@@ -853,7 +853,7 @@ If cEmail <> ""
 	cMsg += '<td><strong>Cod. Chep: </strong>'+SZX->ZX_I_CCHEP+' </td>'
 	cMsg += '</table>'
 	cMsg += '<table width="75%" border="1">'
-	cMsg += '<td><strong>Segmento: </strong>'+SZX->ZX_GRCLI+ " - " + ALLTRIM(Posicione("ZZ6",1,xFilial("ZZ6")+SZX->ZX_GRCLI,"ZZ6->ZZ6_DESCRO"))+' </td>'
+	cMsg += '<td><strong>Segmento: </strong>'+SZX->ZX_GRCLI+ " - " + AllTrim(Posicione("ZZ6",1,xFilial("ZZ6")+SZX->ZX_GRCLI,"ZZ6->ZZ6_DESCRO"))+' </td>'
 	cMsg += '</table>'
 	cMsg += '<br>'
 	cMsg += '<table width="75%" border="1">'
@@ -866,7 +866,7 @@ If cEmail <> ""
 	cMsg += '<td><strong>Código de Municipio: </strong>'+SZX->ZX_CODMUN+' </td>'
 	cMsg += '</table>'
 	cMsg += '<table width="75%" border="1">'
-	cMsg += '<td><strong>Municipio: </strong>'+ALLTRIM(Posicione("CC2",1,xFilial("CC2")+SZX->ZX_EST+SZX->ZX_CODMUN,"CC2->CC2_MUN"))+' </td>'
+	cMsg += '<td><strong>Municipio: </strong>'+AllTrim(Posicione("CC2",1,xFilial("CC2")+SZX->ZX_EST+SZX->ZX_CODMUN,"CC2->CC2_MUN"))+' </td>'
 	cMsg += '</table>'
 	cMsg += '<table width="75%" border="1">'
 	cMsg += '<td><strong>CEP: </strong>'+SZX->ZX_CEP+' </td>'
@@ -941,14 +941,14 @@ If cEmail <> ""
 
 	If _cEmlLog == "Sucesso: e-mail enviado corretamente!"
 		EnvEmail := .T.
-		u_itmsg("Enviado email de aviso ao representante: " + cEmail+ " / Com copia:  "+cGetCc,,,3)
+		U_ITMsg("Enviado email de aviso ao representante: " + cEmail+ " / Com copia:  "+cGetCc,,,3)
 	Else
-		u_itmsg("Falha no envio do email de aviso ao representante: " + _cEmlLog,,,1)
-	Endif
+		U_ITMsg("Falha no envio do email de aviso ao representante: " + _cEmlLog,,,1)
+	EndIf
 
 Else
 	
-	u_itmsg(  "E-mail não encontrado!" ,"Erro de email", "Favor verificar o código do vendedor e se o e-mail do vendedor está preenchido!",1)
+	U_ITMsg(  "E-mail não encontrado!" ,"Erro de email", "Favor verificar o código do vendedor e se o e-mail do vendedor está preenchido!",1)
 
 EndIf
 
@@ -957,7 +957,7 @@ If EnvEmail
 	RecLock( "SZX" , .F. )
  	SZX->ZX_MOTREC := cMens1
 	SZX->( DbDelete() )
-	SZX->( MsUnLock() )
+	SZX->( MSUnLock() )
 	
 EndIf
 
@@ -980,39 +980,39 @@ Local _aCarc_Esp	:= {}
 Local _nI			:= 0
 Local _cRet			:= _cTexto
 
-AADD(_aCarc_Esp,{"!", ""})
-AADD(_aCarc_Esp,{"#", ""})
-AADD(_aCarc_Esp,{"$", ""})
-//AADD(_aCarc_Esp,{"&", ""})
-AADD(_aCarc_Esp,{"%", ""})
-AADD(_aCarc_Esp,{"*", ""})
-//AADD(_aCarc_Esp,{"/", ""})
-AADD(_aCarc_Esp,{"(", ""})
-AADD(_aCarc_Esp,{")", ""})
-AADD(_aCarc_Esp,{"+", ""})
-AADD(_aCarc_Esp,{"¨", ""})
-AADD(_aCarc_Esp,{"=", ""})
-AADD(_aCarc_Esp,{"~", ""})
-AADD(_aCarc_Esp,{"^", ""})
-AADD(_aCarc_Esp,{"]", ""})
-AADD(_aCarc_Esp,{"[", ""})
-AADD(_aCarc_Esp,{"{", ""})
-AADD(_aCarc_Esp,{"}", ""})
-AADD(_aCarc_Esp,{";", ""})
-AADD(_aCarc_Esp,{":", ""})
-AADD(_aCarc_Esp,{">", ""})
-AADD(_aCarc_Esp,{"<", ""})
-AADD(_aCarc_Esp,{"?", ""})
-AADD(_aCarc_Esp,{"_", ""})
-AADD(_aCarc_Esp,{",", ""})
-AADD(_aCarc_Esp,{"'", ""})
-AADD(_aCarc_Esp,{"  ", " "})
-AADD(_aCarc_Esp,{"   ", " "})
-AADD(_aCarc_Esp,{"    ", " "})
-AADD(_aCarc_Esp,{"     ", " "})
-AADD(_aCarc_Esp,{"      ", " "})
-AADD(_aCarc_Esp,{"       ", " "})
-AADD(_aCarc_Esp,{"        ", " "})
+aAdd(_aCarc_Esp,{"!", ""})
+aAdd(_aCarc_Esp,{"#", ""})
+aAdd(_aCarc_Esp,{"$", ""})
+//aAdd(_aCarc_Esp,{"&", ""})
+aAdd(_aCarc_Esp,{"%", ""})
+aAdd(_aCarc_Esp,{"*", ""})
+//aAdd(_aCarc_Esp,{"/", ""})
+aAdd(_aCarc_Esp,{"(", ""})
+aAdd(_aCarc_Esp,{")", ""})
+aAdd(_aCarc_Esp,{"+", ""})
+aAdd(_aCarc_Esp,{"¨", ""})
+aAdd(_aCarc_Esp,{"=", ""})
+aAdd(_aCarc_Esp,{"~", ""})
+aAdd(_aCarc_Esp,{"^", ""})
+aAdd(_aCarc_Esp,{"]", ""})
+aAdd(_aCarc_Esp,{"[", ""})
+aAdd(_aCarc_Esp,{"{", ""})
+aAdd(_aCarc_Esp,{"}", ""})
+aAdd(_aCarc_Esp,{";", ""})
+aAdd(_aCarc_Esp,{":", ""})
+aAdd(_aCarc_Esp,{">", ""})
+aAdd(_aCarc_Esp,{"<", ""})
+aAdd(_aCarc_Esp,{"?", ""})
+aAdd(_aCarc_Esp,{"_", ""})
+aAdd(_aCarc_Esp,{",", ""})
+aAdd(_aCarc_Esp,{"'", ""})
+aAdd(_aCarc_Esp,{"  ", " "})
+aAdd(_aCarc_Esp,{"   ", " "})
+aAdd(_aCarc_Esp,{"    ", " "})
+aAdd(_aCarc_Esp,{"     ", " "})
+aAdd(_aCarc_Esp,{"      ", " "})
+aAdd(_aCarc_Esp,{"       ", " "})
+aAdd(_aCarc_Esp,{"        ", " "})
 
 //Executa o Laco ate o Tamanho Total do Array
 For _nI := 1 To Len(_aCarc_Esp)
@@ -1022,7 +1022,7 @@ For _nI := 1 To Len(_aCarc_Esp)
 	EndIf
 Next
 
-_cRet := UPPER(FWNOACCENT(ALLTRIM(_cRet)))
+_cRet := Upper(FWNOACCENT(AllTrim(_cRet)))
 
 Return(_cRet)
 
@@ -1041,15 +1041,15 @@ User Function AOMS014N(_cTexto)
 Local _nI			:= 0
 Local _cRet			:= _cTexto
 
-For _ni := 1 to len(_ctexto)
+For _nI := 1 to Len(_ctexto)
 
-  If substr(_ctexto,_ni,1) != '0' .and. substr(_ctexto,_ni,1) != '1' .and. substr(_ctexto,_ni,1) != '2';
-   			.and. substr(_ctexto,_ni,1) != '3' .and. substr(_ctexto,_ni,1) != '4' .and. substr(_ctexto,_ni,1) != '5' .and.;
-   			 substr(_ctexto,_ni,1) != '6' .and. substr(_ctexto,_ni,1) != '7' .and. substr(_ctexto,_ni,1) != '8' .and. substr(_ctexto,_ni,1) != '9' 
+  If SubStr(_ctexto,_nI,1) != '0' .And. SubStr(_ctexto,_nI,1) != '1' .And. SubStr(_ctexto,_nI,1) != '2';
+   			.And. SubStr(_ctexto,_nI,1) != '3' .And. SubStr(_ctexto,_nI,1) != '4' .And. SubStr(_ctexto,_nI,1) != '5' .and.;
+   			 SubStr(_ctexto,_nI,1) != '6' .And. SubStr(_ctexto,_nI,1) != '7' .And. SubStr(_ctexto,_nI,1) != '8' .And. SubStr(_ctexto,_nI,1) != '9' 
 
-   	  _cRet := StrTran(_cRet, substr(_ctexto,_ni,1) , "")
+   	  _cRet := StrTran(_cRet, SubStr(_ctexto,_nI,1) , "")
 
-  Endif
+  EndIf
   
 Next
 
@@ -1070,26 +1070,26 @@ User Function AOMS014A()
 Local _aCodAux		:= {}
 Local _cCodAux		:= ""
 Local _nCodAux		:= 0
-LOCAL nNRelmp		:= 0
+Local nNRelmp		:= 0
 Local _cQuery		:= ""
 Local _cAlias		:= ""
 Local _cInscr		:= ""
 
-PRIVATE lMsErroAuto	:= .F.
+Private lMsErroAuto	:= .F.
 
-If empty(M->ZX_SIMPNAC)
+If Empty(M->ZX_SIMPNAC)
 
-	U_ITMSG("É obrigatorio selecionar se o cliente é Simples Nacional","Atenção","Selecione se o cliente é Simples Nacional",1)
+	U_ITMsg("É obrigatorio selecionar se o cliente é Simples Nacional","Atenção","Selecione se o cliente é Simples Nacional",1)
 	Return
 	
-Endif
+EndIf
 
-If empty(M->ZX_CONTRIB)
+If Empty(M->ZX_CONTRIB)
 
-	U_ITMSG("É obrigatorio selecionar se o cliente é Contribuinte ICMS","Atenção","Selecione se o cliente é Contribuinte ICMS",1)
+	U_ITMsg("É obrigatorio selecionar se o cliente é Contribuinte ICMS","Atenção","Selecione se o cliente é Contribuinte ICMS",1)
 	Return
 	
-Endif
+EndIf
 
 
 DBSelectArea('SA3')
@@ -1099,34 +1099,34 @@ If SA3->( DBSeek( xFilial('SA3') + M->ZX_VEND ) )
 	If SA3->A3_I_TIPV <> 'V'
 	
 	
-		u_itmsg('O cadastro atual não pode ser efetivado pois o vendedor amarrado ao Cliente não está classificado como Vendedor!',"Validação  de vendedor",;
+		U_ITMsg('O cadastro atual não pode ser efetivado pois o vendedor amarrado ao Cliente não está classificado como Vendedor!',"Validação  de vendedor",;
 				'Verifique os dados informados e/ou o cadastro do Vendedor no Sistema antes de solicitar a efetivação.',1)
 			
-		Return()
+		Return
 
 	EndIf
 	
 	If SA3->A3_MSBLQL == '1'
 	
-		u_itmsg('O cadastro atual não pode ser efetivado pois o vendedor amarrado ao Cliente está bloqueado no sistema!',"Validação  de vendedor",;
+		U_ITMsg('O cadastro atual não pode ser efetivado pois o vendedor amarrado ao Cliente está bloqueado no sistema!',"Validação  de vendedor",;
 				'Verifique os dados informados e/ou o cadastro do Vendedor no Sistema antes de solicitar a efetivação.',1)
 				
-		Return()
+		Return
 
 	EndIf
 	
 Else
 
-	u_itmsg('O cadastro atual não pode ser efetivado pois o vendedor amarrado ao Cliente não é válido no cadastro do Sistema!',"Validação  de vendedor",;
+	U_ITMsg('O cadastro atual não pode ser efetivado pois o vendedor amarrado ao Cliente não é válido no cadastro do Sistema!',"Validação  de vendedor",;
 				'Verifique os dados informados e/ou o cadastro do Vendedor no Sistema antes de solicitar a efetivação.',1)
 
 	
-	Return()
+	Return
 	
 EndIf
 
 //Validação da inscrição estadual
-If alltrim(M->ZX_INSCR) != "ISENTO"
+If AllTrim(M->ZX_INSCR) != "ISENTO"
 
 	_cInscr		:= U_AOMS014N(M->ZX_INSCR)
 
@@ -1134,18 +1134,18 @@ Else
 
 	_cInscr     := "ISENTO"
 
-Endif
+EndIf
 
 M->A1_INSCR := _cInscr
 M->A1_EST   := U_AOMS014S(SZX->ZX_EST)
 
-If !(IE(M->A1_INSCR,M->A1_EST) .And. A030VldUCod()) .or. EMPTY(_cInscr)
+If !(IE(M->A1_INSCR,M->A1_EST) .And. A030VldUCod()) .Or. Empty(_cInscr)
 
-  U_ITMSG("Falha na validação da inscrição estadual!","Validação de inscrição estadual","Verifique a inscrição estadual no sintegra e digite somente os números ou ISENTO",1)
+  U_ITMsg("Falha na validação da inscrição estadual!","Validação de inscrição estadual","Verifique a inscrição estadual no sintegra e digite somente os números ou ISENTO",1)
   
   Return
   
-Endif                                                                                  
+EndIf                                                                                  
 
 //===============================================================================================
 // ABRE CONTROLE DE TRANSACAO
@@ -1160,9 +1160,9 @@ CC2->( DBSeek( xFilial("CC2") + M->ZX_EST + M->ZX_CODMUN ) )
 
 DBSelectArea("SA1")
 SA1->( DBSetOrder(3) )
-IF SA1->( DBSeek( xFilial("SA1") + M->ZX_CGC ) )
+If SA1->( DBSeek( xFilial("SA1") + M->ZX_CGC ) )
 
-	u_itmsg(	"O CPF/CNPJ informado já existe no cadastro de clientes com o Código/Loja: ["+ SA1->A1_COD +"/"+ SA1->A1_LOJA +"]", "Validação de CNPJ"	,;
+	U_ITMsg(	"O CPF/CNPJ informado já existe no cadastro de clientes com o Código/Loja: ["+ SA1->A1_COD +"/"+ SA1->A1_LOJA +"]", "Validação de CNPJ"	,;
 					"Não é permitido cadastrar dois Clientes com o mesmo CPF/CNPJ, verifique os cadastros antes de efetivar o Prospect.",1	 )
 	
 	nNRelmp := 0
@@ -1192,7 +1192,7 @@ Else
 	(_cAlias)->( DBGoTop() )
 	While (_cAlias)->( !Eof() )
 	
-		aAdd( _aCodAux , { (_cAlias)->A1_COD , IIF( (_cAlias)->A1_MSBLQL == '1' , 'Bloqueado' , 'Ativo' ) } )
+		aAdd( _aCodAux , { (_cAlias)->A1_COD , IIf( (_cAlias)->A1_MSBLQL == '1' , 'Bloqueado' , 'Ativo' ) } )
 		
 		If _cCodAux <> (_cAlias)->A1_COD
 			_cCodAux := (_cAlias)->A1_COD
@@ -1206,14 +1206,14 @@ Else
 	
 	If _nCodAux > 1
 		
-		u_itmsg( 'Existe mais um código de cliente cadastrado para esse CNPJ no sistema. Verifique o código correto e selecione para continuar com a efetivação!' , 'Atenção!' ,,1)
+		U_ITMsg( 'Existe mais um código de cliente cadastrado para esse CNPJ no sistema. Verifique o código correto e selecione para continuar com a efetivação!' , 'Atenção!' ,,1)
 		_cCodAux := U_ITListBox( 'Códigos de cliente encontrados para o CNPJ' , {'Código','Status'} , _aCodAux , .F. , 3 , 'Selecione o código a ser utilizado na efetivação:' ,,{100,100}, 1 )
 		
 		If Empty( _cCodAux )
 		
-			u_itmsg(  'Operação cancelada pelo usuário!' ,,,1 )
+			U_ITMsg(  'Operação cancelada pelo usuário!' ,,,1 )
 			DisarmTransaction()
-			Break // Return()
+			Break // Return
 			
 		EndIf
 		
@@ -1224,22 +1224,22 @@ Else
    
    nNRelmp := 2 //Registra gravação bem sucedida
 	
-Endif
+EndIf
 
 End Sequence
 //===============================================================================================
 // FECHA CONTROLE DE TRANSACAO
 //===============================================================================================
 EndTran()
-MsUnlockAll()
+MSUnLockAll()
 
 //===============================================================================================
 // Mensagem de conclusão do Processamento
 //===============================================================================================
 If nNRelmp == 1
-	u_itmsg( "Não foi possível efetivar o cadastro, verifique os dados do Prospect e tente novamente."	,,,1 )
-ElseIF nNRelmp == 2
-	u_itmsg( "Cadastro efetivado com sucesso!"															,,,2 )
+	U_ITMsg( "Não foi possível efetivar o cadastro, verifique os dados do Prospect e tente novamente."	,,,1 )
+ElseIf nNRelmp == 2
+	U_ITMsg( "Cadastro efetivado com sucesso!"															,,,2 )
 EndIf
 
 Return( .T. )
@@ -1255,11 +1255,11 @@ Parametros--------: _natua - tipo de consulta, 1 em segundo plano, 2 em tela
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-USER FUNCTION AOMS014B(_natua,oproc)
+User Function AOMS014B(_natua,oproc)
 
-Local cUrlsintegra   // := "https://servicos.cisp.com.br/v1/sintegra/" + alltrim(M->ZX_CGC)
-Local cUrlreceita    // := "https://servicos.cisp.com.br/v1/receita-federal/" + alltrim(M->ZX_CGC)
-Local cUrlsimples    // := "https://servicos.cisp.com.br/v1/simples-nacional/" + alltrim(M->ZX_CGC)
+Local cUrlsintegra   // := "https://servicos.cisp.com.br/v1/sintegra/" + AllTrim(M->ZX_CGC)
+Local cUrlreceita    // := "https://servicos.cisp.com.br/v1/receita-federal/" + AllTrim(M->ZX_CGC)
+Local cUrlsimples    // := "https://servicos.cisp.com.br/v1/simples-nacional/" + AllTrim(M->ZX_CGC)
 Local aHeadOut        := {}
 Local cHdSintegra     := ""
 Local cCorSintegra    := ""
@@ -1269,7 +1269,7 @@ Local cHdReceita      := ""
 Local cCorReceita     := ""
 Local _oReceita
 Local _aReceita       := {}
-Local _lret           := .T.
+Local _lRet           := .T.
 Local _lerro          := .F.
 Local _cerro          := ""
 Local _lisento 		  := .F.
@@ -1278,7 +1278,7 @@ Local _nI
 
 Local _nnj			:= 0
 Local _lLinkPrd     := U_ItGetMv("IT_LKCISPP", .T.)
-Local cUrlcisp      := "https://servicos.cisp.com.br/v1/avaliacao-analitica/raiz/" + substr(alltrim(M->ZX_CGC),1,8)
+Local cUrlcisp      := "https://servicos.cisp.com.br/v1/avaliacao-analitica/raiz/" + SubStr(AllTrim(M->ZX_CGC),1,8)
 Local _cpasswd      := u_itgetmv("IT_PWCISP","!t@lac95_01#")
 Local _cuser	    := u_itgetmv("IT_USCISP","ws09501")
 Local _cDecodeTxt   := ""
@@ -1291,24 +1291,24 @@ If _lLinkPrd
    //====================================================================
    // Link base produção
    //====================================================================
-   cUrlsintegra := "https://api.maxxi.cisp.com.br/public-bases/v1/sintegra/cnpj/"+ Alltrim(M->ZX_CGC)+"/uf/"+AllTrim(M->ZX_EST)+"?key=dwnljGS5DRJ0BkzGGgRsrNZCUxqdqrZw" //"https://servicos.cisp.com.br/v1/sintegra/" + alltrim(M->ZX_CGC)
-   cUrlreceita  := "https://api.maxxi.cisp.com.br/public-bases/v1/receita-federal/cnpj/"+ alltrim(M->ZX_CGC) + "?key=dwnljGS5DRJ0BkzGGgRsrNZCUxqdqrZw" //"https://servicos.cisp.com.br/v1/receita-federal/" + alltrim(M->ZX_CGC)
-   cUrlsimples  := "https://api.maxxi.cisp.com.br/public-bases/v1/simples-nacional/cnpj/"+ alltrim(M->ZX_CGC) + "?key=dwnljGS5DRJ0BkzGGgRsrNZCUxqdqrZw" //"https://servicos.cisp.com.br/v1/simples-nacional/" + alltrim(M->ZX_CGC)
+   cUrlsintegra := "https://api.maxxi.cisp.com.br/public-bases/v1/sintegra/cnpj/"+ AllTrim(M->ZX_CGC)+"/uf/"+AllTrim(M->ZX_EST)+"?key=dwnljGS5DRJ0BkzGGgRsrNZCUxqdqrZw" //"https://servicos.cisp.com.br/v1/sintegra/" + AllTrim(M->ZX_CGC)
+   cUrlreceita  := "https://api.maxxi.cisp.com.br/public-bases/v1/receita-federal/cnpj/"+ AllTrim(M->ZX_CGC) + "?key=dwnljGS5DRJ0BkzGGgRsrNZCUxqdqrZw" //"https://servicos.cisp.com.br/v1/receita-federal/" + AllTrim(M->ZX_CGC)
+   cUrlsimples  := "https://api.maxxi.cisp.com.br/public-bases/v1/simples-nacional/cnpj/"+ AllTrim(M->ZX_CGC) + "?key=dwnljGS5DRJ0BkzGGgRsrNZCUxqdqrZw" //"https://servicos.cisp.com.br/v1/simples-nacional/" + AllTrim(M->ZX_CGC)
 Else 
    //====================================================================
    // Link base homologação
    //====================================================================
-   cUrlsintegra := "https://api-homol.maxxi.cisp.com.br/public-bases/v1/sintegra/cnpj/"+ Alltrim(M->ZX_CGC)+"/uf/"+AllTrim(M->ZX_EST)+"?key=43c629ff-e72e-4172-a0fe-ffdef386573a" //"https://servicos.cisp.com.br/v1/sintegra/" + alltrim(M->ZX_CGC)
-   cUrlreceita  := "https://api-homol.maxxi.cisp.com.br/public-bases/v1/receita-federal/cnpj/"+ alltrim(M->ZX_CGC) + "?key=43c629ff-e72e-4172-a0fe-ffdef386573a" //"https://servicos.cisp.com.br/v1/receita-federal/" + alltrim(M->ZX_CGC)
-   cUrlsimples  := "https://api-homol.maxxi.cisp.com.br/public-bases/v1/simples-nacional/cnpj/"+ alltrim(M->ZX_CGC) + "?key=43c629ff-e72e-4172-a0fe-ffdef386573a" //"https://servicos.cisp.com.br/v1/simples-nacional/" + alltrim(M->ZX_CGC)
+   cUrlsintegra := "https://api-homol.maxxi.cisp.com.br/public-bases/v1/sintegra/cnpj/"+ AllTrim(M->ZX_CGC)+"/uf/"+AllTrim(M->ZX_EST)+"?key=43c629ff-e72e-4172-a0fe-ffdef386573a" //"https://servicos.cisp.com.br/v1/sintegra/" + AllTrim(M->ZX_CGC)
+   cUrlreceita  := "https://api-homol.maxxi.cisp.com.br/public-bases/v1/receita-federal/cnpj/"+ AllTrim(M->ZX_CGC) + "?key=43c629ff-e72e-4172-a0fe-ffdef386573a" //"https://servicos.cisp.com.br/v1/receita-federal/" + AllTrim(M->ZX_CGC)
+   cUrlsimples  := "https://api-homol.maxxi.cisp.com.br/public-bases/v1/simples-nacional/cnpj/"+ AllTrim(M->ZX_CGC) + "?key=43c629ff-e72e-4172-a0fe-ffdef386573a" //"https://servicos.cisp.com.br/v1/simples-nacional/" + AllTrim(M->ZX_CGC)
 EndIf 
 
 //Só atualiza pessoas juridicas
 If (M->ZX_PESSOA == "F")
 
     If _natua == 2
-    	u_itmsg("Não atualiza pessoa física via Cisp","Atenção",,1)
-    Endif
+    	U_ITMsg("Não atualiza pessoa física via Cisp","Atenção",,1)
+    EndIf
 
     M->ZX_I_SITRF := " "
     M->ZX_I_DTSRF := " "
@@ -1318,7 +1318,7 @@ If (M->ZX_PESSOA == "F")
 
     Return
     
-Endif
+EndIf
 
 //========================================
 // Consultando CISP
@@ -1348,10 +1348,10 @@ EndIf
 cCorcisp := U_ITSUBCHR(cCorcisp, {{"*",""},{"$",""}})
 
 _ocisp   := nil
-_acisp := strtokarr(cHdcisp,chr(10))
+_acisp := StrTokArr(cHdcisp,chr(10))
 
 //Verifica e formata resposta do cisp
-If substr(cHdcisp,1,15) == "HTTP/1.1 200 OK" .and. FWJsonDeserialize(cCorcisp,@_ocisp)
+If SubStr(cHdcisp,1,15) == "HTTP/1.1 200 OK" .And. FWJsonDeserialize(cCorcisp,@_ocisp)
    _cNome   := _ocisp:cliente:razaosocial
    _cNReduz := _ocisp:cliente:nomefantasia
 EndIf 
@@ -1363,12 +1363,12 @@ EndIf
 //Define usuário e password
 aAdd( aHeadOut , "accept:application/json")
 
-IF valtype(oproc) = "O"
+If ValType(oproc) = "O"
 
    	oproc:cCaption := ("Consultando Sintegra...")
 	ProcessMessages()
  
-ENDIF
+EndIf
 
 //====================================
 // >> Obtem os dados Link Sintegra. <<
@@ -1394,10 +1394,10 @@ cCorSintegra := U_ITSUBCHR(cCorSintegra, {{"*",""},{"$",""}})
 
 If Empty(cCorSintegra)
    If _natua == 2
-   	  U_ItMsg("[AOMS014] - Falha na consulta do Sintegra.","Atenção",,1)
+   	  U_ITMsg("[AOMS014] - Falha na consulta do Sintegra.","Atenção",,1)
    Else 
       ConOut("[AOMS014] - Falha na consulta do Sintegra.") 
-   Endif
+   EndIf
 
    M->ZX_I_SITRF := " "
    M->ZX_I_DTSRF := " "
@@ -1408,12 +1408,12 @@ If Empty(cCorSintegra)
    Return
 EndIf 
 
-If !(substr(cHdSintegra,1,12) == "HTTP/1.1 200")
+If !(SubStr(cHdSintegra,1,12) == "HTTP/1.1 200")
    If _natua == 2
-   	  U_ItMsg("[AOMS014] - Falha na consulta do Sintegra: [ " + AllTrim(cCorSintegra) + " ]","Atenção",,1)
+   	  U_ITMsg("[AOMS014] - Falha na consulta do Sintegra: [ " + AllTrim(cCorSintegra) + " ]","Atenção",,1)
    Else 
       ConOut("[AOMS014] - Falha na consulta do Sintegra: [" + AllTrim(cCorSintegra) + " ]") 
-   Endif
+   EndIf
 
    M->ZX_I_SITRF := " "
    M->ZX_I_DTSRF := " "
@@ -1433,14 +1433,14 @@ _cRet := _oJson:FromJson(cCorSintegra)
 
 //Verifica e formata resposta do Sintegra 
 
-If ! (ValType(_cRet) == "U") //!(substr(cHdSintegra,1,12) == "HTTP/1.1 200" .and. (ValType(_cRet) == "U")) //FWJsonDeserialize(cCorSintegra,@_osintegra) .and. !Empty(_osintegra))
+If ! (ValType(_cRet) == "U") //!(SubStr(cHdSintegra,1,12) == "HTTP/1.1 200" .And. (ValType(_cRet) == "U")) //FWJsonDeserialize(cCorSintegra,@_osintegra) .And. !Empty(_osintegra))
     
-    If alltrim(M->ZX_INSCR) == "ISENTO" .OR. alltrim(M->ZX_INSCR) == "ISENTA"
+    If AllTrim(M->ZX_INSCR) == "ISENTO" .Or. AllTrim(M->ZX_INSCR) == "ISENTA"
     	_lisento := .T.
 		Return
     Else
        If _natua == 2
-       	  U_Itmsg("Falha no webservice do sintegra, consulta não foi completada","Atenção",cHdSintegra,1)
+       	  U_ITMsg("Falha no webservice do sintegra, consulta não foi completada","Atenção",cHdSintegra,1)
  
     	  M->ZX_I_SITRF := " "
     	  M->ZX_I_DTSRF := " "
@@ -1451,15 +1451,15 @@ If ! (ValType(_cRet) == "U") //!(substr(cHdSintegra,1,12) == "HTTP/1.1 200" .and
     	  Return
        EndIf
     
-      _lret := .F.
+      _lRet := .F.
       _lerro := .T.
       _cerro := cHdSintegra
     
       Return
     
-    Endif
+    EndIf
 
-Endif
+EndIf
 
 _aNames := _oJson:GetNames()
 
@@ -1474,18 +1474,18 @@ If (ValType(_osintegra) == "A" .Or. ValType(_osintegra) == "J") .And. ! Empty(_o
 
 //---------------------------------------------------
    _aCompany := _osintegra:GetNames() 
-   _nI := Ascan(_aCompany, "registeredName" )
+   _nI := aScan(_aCompany, "registeredName" )
    If _nI > 0
       _cNomeSint := _osintegra[_aCompany[_nI]]
    EndIf 
 
-   _nI := Ascan(_aCompany, "name" )
+   _nI := aScan(_aCompany, "name" )
    If _nI > 0
       _cNomeRSit := _osintegra[_aCompany[_nI]]
    EndIf 
 //---------------------------------------------------
 
-   _nI := Ascan(_aNames, "updateDate" )
+   _nI := aScan(_aNames, "updateDate" )
    If _nI > 0
       _cDtAlter := _oJson[_aNames[_nI]]
    EndIf 
@@ -1495,14 +1495,14 @@ If (ValType(_osintegra) == "A" .Or. ValType(_osintegra) == "J") .And. ! Empty(_o
 
    _aNameDocs := _oDoctos:GetNames()
 
-   _nI := Ascan(_aNameDocs ,"type" )
+   _nI := aScan(_aNameDocs ,"Type" )
    _cTipoDocs := ""
 
    If _nI > 0
       _cTipoDocs := _oDoctos[_aNameDocs[_nI]]	  
    EndIf 
 
-   _nI := Ascan(_aNameDocs ,"value" )
+   _nI := aScan(_aNameDocs ,"value" )
    _cNrDocs := ""
 
    If _nI > 0
@@ -1515,12 +1515,12 @@ If (ValType(_osintegra) == "A" .Or. ValType(_osintegra) == "J") .And. ! Empty(_o
    EndIf 
 EndIf 
 
-IF valtype(oproc) = "O"
+If ValType(oproc) = "O"
 
       	oproc:cCaption := ("Consultando Receita...")
    		ProcessMessages()
  
-ENDIF
+EndIf
 
 //===========================================
 // >> Obtem os dados Link Receita Federal. <<
@@ -1546,10 +1546,10 @@ cCorReceita := U_ITSUBCHR(cCorReceita, {{"*",""},{"$",""}})
 
 If Empty(cCorReceita)
    If _natua == 2
-   	  U_ItMsg("[AOMS014] - Falha na consulta da Receita Federal.","Atenção",,1)
+   	  U_ITMsg("[AOMS014] - Falha na consulta da Receita Federal.","Atenção",,1)
    Else 
       ConOut("[AOMS014] - Falha na consulta da Receita Federal.") 
-   Endif
+   EndIf
 
    M->ZX_I_SITRF := " "
    M->ZX_I_DTSRF := " "
@@ -1560,13 +1560,13 @@ If Empty(cCorReceita)
    Return
 EndIf 
 
-If !(substr(cHdReceita,1,12) == "HTTP/1.1 200")
+If !(SubStr(cHdReceita,1,12) == "HTTP/1.1 200")
    
    If _natua == 2
-   	  U_ItMsg("[AOMS014] - Falha na consulta da Receita Federal: ["+AllTrim(cHdReceita)+"]","Atenção",,1)
+   	  U_ITMsg("[AOMS014] - Falha na consulta da Receita Federal: ["+AllTrim(cHdReceita)+"]","Atenção",,1)
    Else 
       ConOut("[AOMS014] - Falha na consulta da Receita Federal: [ "+AllTrim(cHdReceita)+" ]") 
-   Endif
+   EndIf
 
    M->ZX_I_SITRF := " "
    M->ZX_I_DTSRF := " "
@@ -1587,17 +1587,17 @@ _cRetRec := _oJsonRec:FromJson(cCorReceita) // FromJson(cCorSintegra)
 
 // Verifica e formata resposta da Receita
 
-If ! (ValType(_cRetRec) == "U") //!(substr(cHdReceita,1,12) == "HTTP/1.1 200" .and. (ValType(_cRetRec) == "U"))
+If ! (ValType(_cRetRec) == "U") //!(SubStr(cHdReceita,1,12) == "HTTP/1.1 200" .And. (ValType(_cRetRec) == "U"))
      
     If _lisento //Se é isento e não achou na receita não atualiza 
     
-       _lret := .F.
+       _lRet := .F.
        _lerro := .T.
        _cerro := cHdReceita
        
        	If _natua == 2
   	
-       		u_itmsg("Falha no webservice da receita, não há dados para atualizar","Atenção",cHdReceita,1)
+       		U_ITMsg("Falha no webservice da receita, não há dados para atualizar","Atenção",cHdReceita,1)
        		
        		M->ZX_I_SITRF := " "
        		M->ZX_I_DTSRF := " "
@@ -1607,7 +1607,7 @@ If ! (ValType(_cRetRec) == "U") //!(substr(cHdReceita,1,12) == "HTTP/1.1 200" .a
        		
        		Return
   		  		
-  		Endif
+  		EndIf
      	
     Else //Se não é isento usa os dados do sintegra no lugar dos dados da receita
     
@@ -1616,14 +1616,14 @@ If ! (ValType(_cRetRec) == "U") //!(substr(cHdReceita,1,12) == "HTTP/1.1 200" .a
     	
     	If _natua == 2
   	
-       		u_itmsg("Falha no webservice da receita, usando somente dados do sintegra","Atenção",cHdReceita,1)
+       		U_ITMsg("Falha no webservice da receita, usando somente dados do sintegra","Atenção",cHdReceita,1)
   		  		
-  		Endif
+  		EndIf
     	
     
-    Endif
+    EndIf
 
-Endif
+EndIf
 
 _aNamesRec := _oJsonRec:GetNames()
 
@@ -1654,14 +1654,14 @@ EndIf
 _oRegSit   := _oReceita:GetJsonObject("register")
 _aNameReg  := _oRegSit:GetNames()
 
-_nI := Ascan(_aNameReg, "status" )
+_nI := aScan(_aNameReg, "status" )
 
 If _nI > 0
    _cSituacRg := _oRegSit[_aNameReg[_nI]]
 EndIf  
 
 If Empty(_cDtCriac) 
-   _nI := Ascan(_aNameReg, "date" )
+   _nI := aScan(_aNameReg, "date" )
 
    If _nI > 0
       _cDtCriac := _oRegSit[_aNameReg[_nI]]
@@ -1669,7 +1669,7 @@ If Empty(_cDtCriac)
 
 EndIf
 
-_nI := Ascan(_aNamesRec, "updateDate" )
+_nI := aScan(_aNamesRec, "updateDate" )
 If _nI > 0
    _cDtAltRec := _oJsonRec[_aNamesRec[_nI]]
 EndIf 
@@ -1703,15 +1703,15 @@ If _lisento  //Se é isento iguala dados da receita para sintegra
  	_CSINTEGRA := _oReceita
   	_CRECEITA := _oReceita
  
-  	_asintegra := strtokarr(cHdReceita,chr(10))
-  	_areceita := strtokarr(cHdReceita,chr(10))
+  	_asintegra := StrTokArr(cHdReceita,chr(10))
+  	_areceita := StrTokArr(cHdReceita,chr(10))
 
    _aNameRece := _CRECEITA:GetNames()
   
    _oRegSit := _CRECEITA:GetJsonObject("register")
    _aNameReg  := _oRegSit:GetNames()
 
-   _nI := Ascan(_aNameReg, "status" )
+   _nI := aScan(_aNameReg, "status" )
 
    If _nI > 0
       _cSituacRg := _oRegSit[_aNameReg[_nI]]
@@ -1719,32 +1719,32 @@ If _lisento  //Se é isento iguala dados da receita para sintegra
 
    _cDtAltRec := ""
 
-   _nI := Ascan(_aNamesRec, "updateDate" )
+   _nI := aScan(_aNamesRec, "updateDate" )
    If _nI > 0
       _cDtAltRec := _oJsonRec[_aNamesRec[_nI]]
    EndIf 
 
    _CRECSIT := _cSituacRg // _CRECEITA:situacaoCadastral 
    _CRECATU := _cDtAltRec // _CRECEITA:dataAtualizacao 
-   _CRECCON := Dtoc(Date())     // _CRECEITA:dataConsulta 
+   _CRECCON := DToC(Date())     // _CRECEITA:dataConsulta 
   
 Else
      
     _cinsco := M->ZX_INSCR 
     //Analisa resposta do sintegra e pega consulta habilitada igual à IE atual ou se não tiver pega última consulta habilitada 
     _csintegra := _osintegra // _osintegra[1]
-    if _lerrorec
+    If _lerrorec
     	_CRECEITA := _csintegra
     Else
     	_CRECEITA := _oReceita
-    Endif
+    EndIf
 
     _dmaior := Date() 
 
    _oRegSit := _CRECEITA:GetJsonObject("register")
    _aNameReg  := _oRegSit:GetNames()
 
-   _nI := Ascan(_aNameReg, "status" )
+   _nI := aScan(_aNameReg, "status" )
 
    If _nI > 0
       _cSituacRg := _oRegSit[_aNameReg[_nI]]
@@ -1753,7 +1753,7 @@ Else
    _csitmaior := Upper(_cSituacRg) 
    _nia := 0
 
-Endif
+EndIf
 
 //=====================================================
 // Obtem o endereço do Sintegra.
@@ -1761,7 +1761,7 @@ Endif
 If ValType(_CSINTEGRA) == "O" .Or. ValType(_CSINTEGRA) == "J"
    _aNameSint := _CSINTEGRA:GetNames()
 
-   _nI := Ascan(_aNameSint ,"address" )
+   _nI := aScan(_aNameSint ,"address" )
    _cEndSint := ""
 
    If _nI > 0
@@ -1786,7 +1786,7 @@ EndIf
 //=====================================================
 _aNameRece := _CRECEITA:GetNames()
 
-_nI := Ascan(_aNameRece ,"address" )
+_nI := aScan(_aNameRece ,"address" )
 _cEndRece := ""
 
 If _nI > 0
@@ -1822,9 +1822,9 @@ EndIf
 
 //Verifica se estado informado pela receita é igual ao informado pelo Sintegra
 /* Validação desnecessária. Remover conforme solicitação do Agnaldo.
-If _cUfSint <> _cUfRece // alltrim(_CSINTEGRA:uf) != alltrim(_CRECEITA:uf) 
+If _cUfSint <> _cUfRece // AllTrim(_CSINTEGRA:uf) != AllTrim(_CRECEITA:uf) 
   
-  	U_Itmsg("UF indicada pelo Sintegra diverge da indicada pela Receita, consulta não será aplicada!","Atenção",,1)
+  	U_ITMsg("UF indicada pelo Sintegra diverge da indicada pela Receita, consulta não será aplicada!","Atenção",,1)
   	M->ZX_INSCR := _cinsco
   	Return
   	
@@ -1835,7 +1835,7 @@ _cRegiSint := ""
 _cSituSint := ""
 
 If Type("_aNameSint") == "A"
-   _nI := Ascan(_aNameSint ,{|x| x=="register"})
+   _nI := aScan(_aNameSint ,{|x| x=="register"})
 
    If _nI > 0
       _cRegiSint := _CSINTEGRA[_aNameSint[_nI]]	  
@@ -1843,7 +1843,7 @@ If Type("_aNameSint") == "A"
    EndIf 
 EndIf 
 
-_nI := Ascan(_aNameRece ,{|x| x=="register"})
+_nI := aScan(_aNameRece ,{|x| x=="register"})
 _cRegiRece := ""
 _cSituRece := ""
 
@@ -1853,26 +1853,26 @@ If _nI > 0
    _cSituRece := _cRegiRece:GetJsonObject("status")
 EndIf 
 
-_CSITSINTEGRA := Upper(_cSituSint) // alltrim(_CSINTEGRA:situacaoCadastral)
+_CSITSINTEGRA := Upper(_cSituSint) // AllTrim(_CSINTEGRA:situacaoCadastral)
 _CRECSIT      := Upper(_cSituRece) // CRECEITA:situacaoCadastral
   
-If  !(_CSITSINTEGRA == "HABILITADO" .OR. _CSITSINTEGRA == "HABILITADA" .OR. _CSITSINTEGRA == "ATIVO" .OR. _CSITSINTEGRA == "ATIVA" .OR.;
-			_CSITSINTEGRA == "ATIVO - HABILITADO" .OR. _CSITSINTEGRA == "HABILITADO - ATIVO");
-			.OR. !(AllTrim(_CRECSIT) == "HABILITADO" .OR. AllTrim(_CRECSIT) == "HABILITADA" .Or. alltrim(_CRECSIT) == "ATIVA" .Or.  alltrim(_CRECSIT) == "ATIVO" ;
-			.OR. !AllTrim(_CRECSIT) == "ATIVO - HABILITADO" .OR. !AllTrim(_CRECSIT) == "HABILITADO - ATIVO" .OR. alltrim(_CRECSIT) == "ERRO DE CONSULTA")
+If  !(_CSITSINTEGRA == "HABILITADO" .Or. _CSITSINTEGRA == "HABILITADA" .Or. _CSITSINTEGRA == "ATIVO" .Or. _CSITSINTEGRA == "ATIVA" .OR.;
+			_CSITSINTEGRA == "ATIVO - HABILITADO" .Or. _CSITSINTEGRA == "HABILITADO - ATIVO");
+			.Or. !(AllTrim(_CRECSIT) == "HABILITADO" .Or. AllTrim(_CRECSIT) == "HABILITADA" .Or. AllTrim(_CRECSIT) == "ATIVA" .Or.  AllTrim(_CRECSIT) == "ATIVO" ;
+			.Or. !AllTrim(_CRECSIT) == "ATIVO - HABILITADO" .Or. !AllTrim(_CRECSIT) == "HABILITADO - ATIVO" .Or. AllTrim(_CRECSIT) == "ERRO DE CONSULTA")
   	                                    
-  		U_ITMSG("Existem restrições de cadastro no Sintegra e/ou Receita, consulta não será aplicada","Atenção",,1)
+  		U_ITMsg("Existem restrições de cadastro no Sintegra e/ou Receita, consulta não será aplicada","Atenção",,1)
   		M->ZX_INSCR := _cinsco
   		Return
 Else 
    _CRECSIT := "ATIVA" // Este campo tem dez posições. Para não gravar conteúdo truncado. Por exempo: "ATIVO - HA" ou "ATIVA - HA"
-Endif
+EndIf
   
-If !empty(alltrim(M->ZX_INSCR))
+If !Empty(AllTrim(M->ZX_INSCR))
   
   	M->ZX_CONTRIB := "1"
   	
-Endif
+EndIf
 
 //=====================================================================
 // Se a razão social da CISP-Receita estiver vazio, e do CISP-SINTEGRA 
@@ -1900,7 +1900,7 @@ If ! Empty(_cNReduz)
 EndIf 
 
 /*
-_nI := Ascan(_aNameSint ,{|x| x=="registeredName"})
+_nI := aScan(_aNameSint ,{|x| x=="registeredName"})
 
 If _nI > 0
    M->ZX_NOME := _CSINTEGRA[_aNameSint[_nI]]
@@ -1911,7 +1911,7 @@ If !Empty( _cRegiSint:GetJsonObject("name"))
 EndIf
 */
 
-//_nI := Ascan(_aNameSint ,{|x| x=="address"})
+//_nI := aScan(_aNameSint ,{|x| x=="address"})
 //If _nI > 0
 //   _oEndSint  := _CSINTEGRA[_aNameSint[_nI]] // _cRegiSint:GetJsonObject("address")
 //EndIf 
@@ -1927,25 +1927,25 @@ EndIf
 M->ZX_PAIS  := '105'
 
 If ! Empty(_cNrDocs)
-   M->ZX_INSCR := _cNrDocs  // iif("inscricaoEstadual" $ cCorSintegra,alltrim(_CSINTEGRA:inscricaoEstadual),"ISENTO")
+   M->ZX_INSCR := _cNrDocs  // IIf("inscricaoEstadual" $ cCorSintegra,AllTrim(_CSINTEGRA:inscricaoEstadual),"ISENTO")
 EndIf 
 
 If ! Empty(_cDtCriac)
-   M->ZX_DTNASC := Stod(_cDtCriac)  // stod(substr(alltrim(_CRECEITA:dataAbertura),1,4)+substr(alltrim(_CRECEITA:dataAbertura),6,2)+substr(alltrim(_CRECEITA:dataAbertura),9,2))
+   M->ZX_DTNASC := SToD(_cDtCriac)  // SToD(SubStr(AllTrim(_CRECEITA:dataAbertura),1,4)+SubStr(AllTrim(_CRECEITA:dataAbertura),6,2)+SubStr(AllTrim(_CRECEITA:dataAbertura),9,2))
 EndIf 
 
 If ! Empty(_cCodNegoc)
    //Valida se já tem cnae no CC3 e se não tiver inclui
-   _ccnae := AllTrim(_cCodNegoc) // alltrim(_CRECEITA:codigoAtividadeFiscal)
-   _ccnae := substr(_ccnae,1,2) + substr(_ccnae,4,4) + "/" + substr(_ccnae,9,2) 
-   CC3->(Dbsetorder(1))
+   _ccnae := AllTrim(_cCodNegoc) // AllTrim(_CRECEITA:codigoAtividadeFiscal)
+   _ccnae := SubStr(_ccnae,1,2) + SubStr(_ccnae,4,4) + "/" + SubStr(_ccnae,9,2) 
+   CC3->(DBSetOrder(1))
 
-   If !empty(_ccnae) .and. !(CC3->(Dbseek(xfilial("CC3")+_ccnae)))
+   If !Empty(_ccnae) .And. !(CC3->(DBSeek(xFilial("CC3")+_ccnae)))
   
-  	  CC3->(Reclock("CC3",.T.))
+  	  CC3->(RecLock("CC3",.T.))
   	  CC3->CC3_COD := _ccnae
-  	  CC3->CC3_DESC := _cDesecNegoc // ALLTRIM(_CRECEITA:descricaoAtividadeFiscal)
-  	  CC3->(Msunlock())
+  	  CC3->CC3_DESC := _cDesecNegoc // AllTrim(_CRECEITA:descricaoAtividadeFiscal)
+  	  CC3->(MSUnLock())
   	
    EndIf
  
@@ -1975,89 +1975,89 @@ If !Empty(_cComplem) .And. !AllTrim(SubStr(_cComplem,1,1)) $ "*"
    _cComplem := ""
 EndIf 
 
-If empty(alltrim(_cNumero)) .and. empty(alltrim(_cComplem))
+If Empty(AllTrim(_cNumero)) .And. Empty(AllTrim(_cComplem))
    If ! Empty(_cRua)
-      M->ZX_END :=  alltrim(_cRua) // _CSINTEGRA:endereco
+      M->ZX_END :=  AllTrim(_cRua) // _CSINTEGRA:endereco
    EndIf 
 Else 
    If ! Empty(_cRua)
-      M->ZX_END := ALLTRIM(alltrim(_cRua) + ", " + alltrim(_cNumero)+ " " + alltrim(_cComplem))
+      M->ZX_END := AllTrim(AllTrim(_cRua) + ", " + AllTrim(_cNumero)+ " " + AllTrim(_cComplem))
    EndIf 
-Endif
+EndIf
   
-If ! empty(alltrim(_cBairro)) // empty(alltrim(_CSINTEGRA:bairro))
-   M->ZX_BAIRRO := _cBairro // alltrim(_CSINTEGRA:bairro)
-Endif
+If ! Empty(AllTrim(_cBairro)) // Empty(AllTrim(_CSINTEGRA:bairro))
+   M->ZX_BAIRRO := _cBairro // AllTrim(_CSINTEGRA:bairro)
+EndIf
   
-If !(alltrim(_cCep) == '99999999' .or. alltrim(_cCep) == '00000000')
+If !(AllTrim(_cCep) == '99999999' .Or. AllTrim(_cCep) == '00000000')
 
   		//Testa se existe o Cep e se não tiver já inclui
-  		ZA5->(Dbsetorder(1))
-  		If ! (ZA5->(Dbseek(xfilial("ZA5")+alltrim(_cCep)))) //(ZA5->(Dbseek(xfilial("ZA5")+alltrim(strzero(_CSINTEGRA:cep,8)))))
+  		ZA5->(DBSetOrder(1))
+  		If ! (ZA5->(DBSeek(xFilial("ZA5")+AllTrim(_cCep)))) //(ZA5->(DBSeek(xFilial("ZA5")+AllTrim(StrZero(_CSINTEGRA:cep,8)))))
   		
   			//Separa tipo de logradouro de logradouro
-  			_endere := alltrim(_cRua) //alltrim(_CSINTEGRA:endereco)
+  			_endere := AllTrim(_cRua) //AllTrim(_CSINTEGRA:endereco)
   			_ctiplog := ""
   			_clog := ""
   			_nposi := 1  //_cRua 
-  			For _nnj := 1 to len(alltrim(_cRua)) // len(alltrim(_CSINTEGRA:endereco))
+  			For _nnj := 1 to Len(AllTrim(_cRua)) // Len(AllTrim(_CSINTEGRA:endereco))
   			
-  				If substr(_endere,_nnj,1) == " " .and. _nposi == 1
+  				If SubStr(_endere,_nnj,1) == " " .And. _nposi == 1
   					_nposi := 2
-  				Elseif _nposi == 1
-  					_ctiplog += substr(_endere,_nnj,1)
-  				Elseif _nposi == 2
-  					_clog += substr(_endere,_nnj,1)
-  				Endif 					
+  				ElseIf _nposi == 1
+  					_ctiplog += SubStr(_endere,_nnj,1)
+  				ElseIf _nposi == 2
+  					_clog += SubStr(_endere,_nnj,1)
+  				EndIf 					
   			
   			Next
   		
-  			ZA5->(Reclock("ZA5",.T.))
-  			ZA5->ZA5_UF := _cUfRece // alltrim(_CRECEITA:uf)
-  			ZA5->ZA5_CEP := AllTrim(_cCep) // alltrim(strzero(_CSINTEGRA:cep,8))
+  			ZA5->(RecLock("ZA5",.T.))
+  			ZA5->ZA5_UF := _cUfRece // AllTrim(_CRECEITA:uf)
+  			ZA5->ZA5_CEP := AllTrim(_cCep) // AllTrim(StrZero(_CSINTEGRA:cep,8))
   			ZA5->ZA5_TPLOG := _ctiplog
   			ZA5->ZA5_LOGRAD := _clog
-  			ZA5->ZA5_BAIRRO := AllTrim(_cBairro) // alltrim(_CSINTEGRA:bairro) 			
-  			ZA5->(Msunlock())
+  			ZA5->ZA5_BAIRRO := AllTrim(_cBairro) // AllTrim(_CSINTEGRA:bairro) 			
+  			ZA5->(MSUnLock())
   			
-  		Endif
+  		EndIf
 
 	  	If ! Empty(_cCep)	
-  		   M->ZX_CEP := AllTrim(_cCep) // alltrim(strzero(_CSINTEGRA:cep,8))
+  		   M->ZX_CEP := AllTrim(_cCep) // AllTrim(StrZero(_CSINTEGRA:cep,8))
 		EndIf 
   	  			
-Endif
+EndIf
 
 If ! Empty(_cUfRece)  
-   M->ZX_EST := AllTrim(_cUfRece) // alltrim(_CRECEITA:uf)
+   M->ZX_EST := AllTrim(_cUfRece) // AllTrim(_CRECEITA:uf)
 EndIf 
 
-_CMUN := POSICIONE("CC2",4,xfilial("CC2")+M->ZX_EST+alltrim(_cCidade),"CC2_CODMUN")
-If !empty(alltrim(_cCidade)) .AND. !EMPTY(alltrim(_cmun))
-   M->ZX_MUN := AllTrim(_cCidade) // alltrim(_CSINTEGRA:cidade)
+_CMUN := Posicione("CC2",4,xFilial("CC2")+M->ZX_EST+AllTrim(_cCidade),"CC2_CODMUN")
+If !Empty(AllTrim(_cCidade)) .And. !Empty(AllTrim(_cmun))
+   M->ZX_MUN := AllTrim(_cCidade) // AllTrim(_CSINTEGRA:cidade)
    M->ZX_CODMUN := _cmun
-Endif
+EndIf
 
 If ! Empty(_CRECSIT)   
    M->ZX_I_SITRF := _CRECSIT
 EndIf
 
-M->ZX_I_DTSRF := dtoc(DATE())
+M->ZX_I_DTSRF := DToC(DATE())
 
 If ! Empty(_cSituacRg)
-   M->ZX_SITST := AllTrim(_cSituacRg) // alltrim(_CSINTEGRA:situacaoCadastral) 
+   M->ZX_SITST := AllTrim(_cSituacRg) // AllTrim(_CSINTEGRA:situacaoCadastral) 
 EndIf 
 
-M->ZX_DTST  := dtoc(DATE())
+M->ZX_DTST  := DToC(DATE())
 
 //===============================================================================================================
 //Consulta ao sistema Simpes Nacional
 //===============================================================================================================
 
-IF valtype(oproc) = "O"
+If ValType(oproc) = "O"
    oproc:cCaption := ("Consultando Simples...")
    ProcessMessages()
-ENDIF
+EndIf
 
 //============================================
 // >> Obtem os dados Link Simples Nacional. <<
@@ -2115,36 +2115,36 @@ If ! Empty(cCorSimples)
 EndIf 
 
 //Verifica e formata resposta do Simples
-If ! Empty(cCorSimples) .And. Substr(cHdSimples,1,12) == "HTTP/1.1 200" .and. ValType(_cRetSimpl) == "U" //FWJsonDeserialize(cCorSimples,@_osimples) 
-   If type("_cSimpNcOp") == "C" .and. substr(alltrim(_cSimpNcOp),1, 7) == "OPTANTE"
+If ! Empty(cCorSimples) .And. SubStr(cHdSimples,1,12) == "HTTP/1.1 200" .And. ValType(_cRetSimpl) == "U" //FWJsonDeserialize(cCorSimples,@_osimples) 
+   If Type("_cSimpNcOp") == "C" .And. SubStr(AllTrim(_cSimpNcOp),1, 7) == "OPTANTE"
 	  _catusimples := '1'
    Else
    	  _catusimples := '2'
-   Endif
+   EndIf
 Else
    _catusimples := '2'
-Endif
+EndIf
   	  		
 M->ZX_SIMPNAC := _catusimples
   
 //Gravação de defaults nos campos mais usados
-If empty(M->ZX_I_RISCO)
+If Empty(M->ZX_I_RISCO)
    M->ZX_I_RISCO := "B"
-Endif
+EndIf
 
-If empty(M->ZX_I_GRPVE)
+If Empty(M->ZX_I_GRPVE)
    M->ZX_I_GRPVE  := '999999'
-Endif
+EndIf
 
-If u_itgetmv("ITDTPROS","1225") >= SUBSTR(DTOS(DATE()),5,4)
-   If empty(M->ZX_I_VENCL)
-	  M->ZX_I_VENCL := stod(substr(dtos(date()),1,4)+"1231")
-   Endif
+If u_itgetmv("ITDTPROS","1225") >= SubStr(DToS(DATE()),5,4)
+   If Empty(M->ZX_I_VENCL)
+	  M->ZX_I_VENCL := SToD(SubStr(DToS(date()),1,4)+"1231")
+   EndIf
 Else
-   If empty(M->ZX_I_VENCL)
-	  M->ZX_I_VENCL := stod(substr(dtos(date()+365),1,4)+"1231")
-   Endif
-Endif   
+   If Empty(M->ZX_I_VENCL)
+	  M->ZX_I_VENCL := SToD(SubStr(DToS(date()+365),1,4)+"1231")
+   EndIf
+EndIf   
   
 Return 
 
@@ -2158,29 +2158,29 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User function AOMS014K()
+User Function AOMS014K()
 
 Local oproc
 
-If empty(ALLTRIM(SZX->ZX_SITST)) .OR. Empty(SZX->ZX_END) 
+If Empty(AllTrim(SZX->ZX_SITST)) .Or. Empty(SZX->ZX_END) 
 
-   If u_itmsg("Atualiza prospect com dados de consulta Cisp?","Atenção",,2,2,2)
+   If U_ITMsg("Atualiza prospect com dados de consulta Cisp?","Atenção",,2,2,2)
 	
       regtomemory("SZX")
-      fwmsgrun(,{|oproc| U_AOMS014B(2,oproc)},"Aguarde...","Aguarde")
+      FWMsgRun(,{|oproc| U_AOMS014B(2,oproc)},"Aguarde...","Aguarde")
 		
       //Grava alteração
       u_itmemtor("SZX")
 
-	  U_ItMsg("Atualização do Prospect com os dados da Cisp concluído.","Atenção",,2)
+	  U_ITMsg("Atualização do Prospect com os dados da Cisp concluído.","Atenção",,2)
 		
    EndIf
 	
 Else
 
-	u_itmsg("Registro já foi atualizado via Cisp","Atenção",,1)
+	U_ITMsg("Registro já foi atualizado via Cisp","Atenção",,1)
 
-Endif
+EndIf
 
 Return
 
@@ -2196,7 +2196,7 @@ Retorno-----------: Nenhum
 */
 User Function AOMS014C()
 
-	fwmsgrun(,{ || U_TelCred(1)}, "Aguarde...","Realizando consulta Cisp...")
+	FWMsgRun(,{ || U_TelCred(1)}, "Aguarde...","Realizando consulta Cisp...")
 
 Return
 
@@ -2207,22 +2207,22 @@ Autor-------------: Josué Danich
 Data da Criacao---: 29/08/2018
 Descrição---------: Valida se cnpj já está cadastrado na base
 Parametros--------: _ccnpj - cnpj a ser testado
-Retorno-----------: _lret - validação de existência
+Retorno-----------: _lRet - validação de existência
 ===============================================================================================================================
 */
 Static Function AOMS014V(_ccnpj)
 
-Local _lret := .F.
+Local _lRet := .F.
 
-SA1->(Dbsetorder(3))
-If SA1->(Dbseek(xfilial("SA1")+alltrim(_ccnpj)))
+SA1->(DBSetOrder(3))
+If SA1->(DBSeek(xFilial("SA1")+AllTrim(_ccnpj)))
 
-	_lret := .T.
-	u_itmsg("CNPJ já está cadastrado como cliente!","Atenção","Cliente: " + SA1->A1_COD + "/" + SA1->A1_LOJA + " - " + SA1->A1_NOME,1)
+	_lRet := .T.
+	U_ITMsg("CNPJ já está cadastrado como cliente!","Atenção","Cliente: " + SA1->A1_COD + "/" + SA1->A1_LOJA + " - " + SA1->A1_NOME,1)
 	
-Endif
+EndIf
 
-Return _lret
+Return _lRet
 
 /*
 ===============================================================================================================================
@@ -2269,18 +2269,18 @@ Local _lRet     := .F.
 Private oDlgMail , _oFont
 
 
-If (Len(PswRet()) # 0) // Quando nao for rotina automatica do configurador
+If (Len(PswRet()) # 0) // Quando nao For rotina automatica do configurador
 
 	_csetor	:= AllTrim(PswRet()[1][12])		// Pega departamento do usuario
    
-Endif
+EndIf
 
 
-If empty(alltrim(_csetor))
+If Empty(AllTrim(_csetor))
  
  	_csetor := "Crédito"
  	
-Endif
+EndIf
 
 cHtml := 'Prezados(as), '
 cHtml += '<br><br>'
@@ -2297,7 +2297,7 @@ cHtml += '     <td> ' + Transform(SZX->ZX_CGC,"@R! NN.NNN.NNN/NNNN-99") + '</td>
 cHtml += '   </tr>'
 cHtml += '   <tr>'
 cHtml += '     <td> Municipio: </td>'
-cHtml += '     <td> ' + RETFIELD("CC2",1,XFILIAL("CC2")+SZX->ZX_EST+SZX->ZX_CODMUN,"CC2_MUN") + '</td>'
+cHtml += '     <td> ' + RETFIELD("CC2",1,xFilial("CC2")+SZX->ZX_EST+SZX->ZX_CODMUN,"CC2_MUN") + '</td>'
 cHtml += '   </tr>'
 cHtml += '   <tr>'
 cHtml += '     <td> Estado: </td>'
@@ -2368,8 +2368,8 @@ cHtml +=             '<b><span style="font-size:12.0pt;font-family:'+"'"+'Times 
 cHtml +=             '<span style="font-size:12.0pt;font-family:'+"'"+'Times New Roman'+"'"+','+"'"+'serif'+"'"+';mso-fareast-language:PT-BR"></span></p>
 cHtml +=             '<p class=MsoNormal style="mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;text-align:justify">'
 cHtml +=             '<span style="font-size:7.5pt;font-family:'+"'"+'Times New Roman'+"'"+','+"'"+'serif'+"'"+';color:#1D2668;mso-fareast-language:PT-BR">
-cHtml +=                 'Esta mensagem é destinada exclusivamente para fins profissionais, para a(s) pessoa(s) a quem for dirigida, podendo conter informação confidencial e legalmente privilegiada. '
-cHtml +=                 'Ao recebê-la, se você não for destinatário desta mensagem, fica automaticamente notificado de abster-se a divulgar, copiar, distribuir, examinar ou, de qualquer forma, utilizar '
+cHtml +=                 'Esta mensagem é destinada exclusivamente para fins profissionais, para a(s) pessoa(s) a quem For dirigida, podendo conter informação confidencial e legalmente privilegiada. '
+cHtml +=                 'Ao recebê-la, se você não For destinatário desta mensagem, fica automaticamente notificado de abster-se a divulgar, copiar, distribuir, examinar ou, de qualquer forma, utilizar '
 cHtml +=                 'sua informação, por configurar ato ilegal. Caso você tenha recebido esta mensagem indevidamente, solicitamos que nos retorne este e-mail, promovendo, concomitantemente sua '
 cHtml +=                 'eliminação de sua base de dados, registros ou qualquer outro sistema de controle. Fica desprovida de eficácia e validade a mensagem que contiver vínculos obrigacionais, expedida '
 cHtml +=                 'por quem não detenha poderes de representação, bem como não esteja legalmente habilitado para utilizar o referido endereço eletrônico, configurando falta grave conforme nossa '
@@ -2385,25 +2385,25 @@ DEFINE MSDIALOG oDlgMail TITLE "E-Mail" FROM 000, 000  TO 415, 584 COLORS 0, 167
 	//======
 	// Para:
 	//======
-	@ 005, 006 SAY oPara PROMPT "Para:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+	@ 005, 006 Say oPara PROMPT "Para:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
 	@ 005, 030 MSGET oGetPara VAR cGetPara SIZE 256, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 PIXEL
 
 	//===========
 	// Com cópia:
 	//===========
-	@ 021, 006 SAY oCc PROMPT "Cc:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+	@ 021, 006 Say oCc PROMPT "Cc:" SIZE 015, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
 	@ 021, 030 MSGET oGetCc VAR cGetCc SIZE 256, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 PIXEL
 
 	//=========
 	// Assunto:
 	//=========
-	@ 037, 006 SAY oAssunto PROMPT "Assunto:" SIZE 022, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+	@ 037, 006 Say oAssunto PROMPT "Assunto:" SIZE 022, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
 	@ 037, 030 MSGET oGetAssun VAR cGetAssun SIZE 256, 010 OF oDlgMail PICTURE "@x" COLORS 0, 16777215 PIXEL
 
 	//==========
 	// Mensagem:
 	//==========
-	@ 069, 006 SAY oMens PROMPT "Mensagem:" SIZE 030, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
+	@ 069, 006 Say oMens PROMPT "Mensagem:" SIZE 030, 007 OF oDlgMail COLORS 0, 16777215 PIXEL
 	_oFont		:= TFont():New( 'Courier new' ,, 12 , .F. )
 	_oScrAux	:= TSimpleEditor():New( 080 , 006 , oDlgMail , 285 , 105 ,,,,, .T. )
 	_oScrAux:TextFormat(1)
@@ -2416,17 +2416,17 @@ DEFINE MSDIALOG oDlgMail TITLE "E-Mail" FROM 000, 000  TO 415, 584 COLORS 0, 167
 ACTIVATE MSDIALOG oDlgMail CENTERED
 
 If nOpcA == 1
-   If Empty(cHtml) .OR. cHtml = NIL
+   If Empty(cHtml) .Or. cHtml = NIL
       cHtml:=_cHtml
    EndIf
    U_ITENVMAIL( Lower(AllTrim(UsrRetMail(RetCodUsr()))), cGetPara, cGetCc, cMailCom, cGetAssun, cHtml, , _aConfig[01], _aConfig[02], _aConfig[03], _aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog )
    
-   _lRet := "SUCESSO" $ UPPER(_cEmlLog)
-   U_ITMSG( _cEmlLog+CHR(13)+CHR(10)+"E-mail para: "+ALLTRIM(cGetPara) , "Atenção!" ,"CC: "+cGetCc,3 )
+   _lRet := "SUCESSO" $ Upper(_cEmlLog)
+   U_ITMsg( _cEmlLog+CHR(13)+CHR(10)+"E-mail para: "+AllTrim(cGetPara) , "Atenção!" ,"CC: "+cGetCc,3 )
 
 
 Else
-	u_itmsg( 'Envio de e-mail cancelado pelo usuário.' , 'Atenção!' , ,1 )
+	U_ITMsg( 'Envio de e-mail cancelado pelo usuário.' , 'Atenção!' , ,1 )
 EndIf
 
 Return _lRet
@@ -2449,7 +2449,7 @@ BrwLegenda(cCadastro,"Legenda",{	{"BR_VERDE", "Análise efetuada"},;
 	                                {"BR_VERMELHO","Falta grupo de vendas,risco de crédito e observação..."},;
 									{"BR_AZUL","E-mail enviado"}})
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -2470,15 +2470,15 @@ Local _cCoord, _cGeren, _cSuper, _cEmailGer
 
 Begin Sequence
    //Envia email de Informações Comerciais
-   _cEmail := posicione("SA3",1,xfilial("SA3")+SZX->ZX_VEND,"A3_EMAIL") //Email do representante responsável pelo pedido
-   _cCoord := posicione("SA3",1,xfilial("SA3")+SZX->ZX_VEND,"A3_SUPER")
-   _cGeren := posicione("SA3",1,xfilial("SA3")+SZX->ZX_VEND,"A3_GEREN")
-   _cSuper := posicione("SA3",1,xfilial("SA3")+SZX->ZX_VEND,"A3_I_SUPE")
+   _cEmail := Posicione("SA3",1,xFilial("SA3")+SZX->ZX_VEND,"A3_EMAIL") //Email do representante responsável pelo pedido
+   _cCoord := Posicione("SA3",1,xFilial("SA3")+SZX->ZX_VEND,"A3_SUPER")
+   _cGeren := Posicione("SA3",1,xFilial("SA3")+SZX->ZX_VEND,"A3_GEREN")
+   _cSuper := Posicione("SA3",1,xFilial("SA3")+SZX->ZX_VEND,"A3_I_SUPE")
    _cCC := " "
 
    _cEmailGer := ""	
    If !Empty(_cSuper)
-      _cEmailGer := Posicione("SA3",1,xfilial("SA3")+_cSuper,"A3_EMAIL")
+      _cEmailGer := Posicione("SA3",1,xFilial("SA3")+_cSuper,"A3_EMAIL")
    EndIf
 
    If ! Empty(_cEmailGer)
@@ -2487,7 +2487,7 @@ Begin Sequence
 
    _cEmailGer := ""
    If !Empty(_cCoord)
-      _cEmailGer := Posicione("SA3",1,xfilial("SA3")+_cCoord,"A3_EMAIL")
+      _cEmailGer := Posicione("SA3",1,xFilial("SA3")+_cCoord,"A3_EMAIL")
    EndIf
 
    If ! Empty(_cEmailGer)
@@ -2496,7 +2496,7 @@ Begin Sequence
    
    _cEmailGer := ""
    If !Empty(_cGeren)
-      _cEmailGer := Posicione("SA3",1,xfilial("SA3")+_cGeren,"A3_EMAIL") 
+      _cEmailGer := Posicione("SA3",1,xFilial("SA3")+_cGeren,"A3_EMAIL") 
    EndIf
 
    If ! Empty(_cEmailGer)
@@ -2509,12 +2509,12 @@ Begin Sequence
    If U_AOMS014D(,_cEmail,_cCC,_cAssunto,,_cMailcom)
       SZX->(RecLock("SZX",.F.))
       SZX->ZX_I_ENVML := "S"
-      SZX->(MsUnlock())
-   Endif
+      SZX->(MSUnLock())
+   EndIf
 
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -2526,37 +2526,37 @@ Parametros--------: _cValid = Validador a ser rodado
 Retorno-----------: _lRet = .T. Validação Ok / .F. = Falha na validação.
 ===============================================================================================================================
 */
-User function AOMS014W(_cValid)
+User Function AOMS014W(_cValid)
 Local _lRet := .T.
 Local _cRaizCnpj := SubStr(SZX->ZX_CGC,1,8)
 Local _nLimiteCr := 0 
 
 Begin Sequence 
    If _cValid == "CREDITO"
-      SA1->(DbSetOrder(17)) // H = STR(A1_CGC,1,8) // Raiz CNPJ
+      SA1->(DBSetOrder(17)) // H = Str(A1_CGC,1,8) // Raiz CNPJ
 	  If SA1->(MsSeek(_cRaizCnpj))
-	     Do While ! SA1->(Eof()) .And. SubStr(SA1->A1_CGC,1,8) == _cRaizCnpj
+	     While ! SA1->(Eof()) .And. SubStr(SA1->A1_CGC,1,8) == _cRaizCnpj
             
-			If SA1->A1_MSBLQL == "2" .And. SA1->A1_LC > 0 .And. Dtos(SA1->A1_VENCLC) >= Dtos(Date())
+			If SA1->A1_MSBLQL == "2" .And. SA1->A1_LC > 0 .And. DToS(SA1->A1_VENCLC) >= DToS(Date())
                _nLimiteCr := SA1->A1_LC
                Exit
 			EndIf 
 
-            SA1->(DbSkip())
+            SA1->(DBSkip())
 		 EndDo
 
          If _nLimiteCr > 0 .And. SZX->ZX_I_LC > 0 
-            U_ItMsg("Já existe um grupo de clientes cadastrado com a mesma raiz de CNPJ, e com Limite de Crédito informado no valor de: "+AllTrim(Str(_nLimiteCr,16,2)),"Atenção!","O limte de crédito informado no Prospect deve ser zerado.",1)
+            U_ITMsg("Já existe um grupo de clientes cadastrado com a mesma raiz de CNPJ, e com Limite de Crédito informado no valor de: "+AllTrim(Str(_nLimiteCr,16,2)),"Atenção!","O limte de crédito informado no Prospect deve ser zerado.",1)
             _lRet := .F.
 			Break
 		 EndIf 
          
 		 _lConsdBrk := .T.  // Quando True considera os valores de limite de crédito do Broker. Quando False considera o limite de crédito do cadastro de clientes.
 
-		 SA3->(DbSetOrder(1)) 
+		 SA3->(DBSetOrder(1)) 
 	     If SA3->(MsSeek(xFilial("SA3")+SZX->ZX_VEND))
             If SA3->A3_I_VBROK == 'B' .And. SA3->A3_I_LC > 0 .And. _nLimiteCr >0
-               U_ItMsg("Este cliente é um Broker e já existe um grupo de clientes cadastrado com a mesma raiz de CNPJ, e com Limite de Crédito informado no valor de: "+AllTrim(Str(_nLimiteCr,16,2)),"Atenção!","O limte de crédito do Broker não será considerado na efetivação do prospect.",1)
+               U_ITMsg("Este cliente é um Broker e já existe um grupo de clientes cadastrado com a mesma raiz de CNPJ, e com Limite de Crédito informado no valor de: "+AllTrim(Str(_nLimiteCr,16,2)),"Atenção!","O limte de crédito do Broker não será considerado na efetivação do prospect.",1)
 			   _lConsdBrk := .F.
 			   Break
             EndIf 
@@ -2569,7 +2569,7 @@ Begin Sequence
       EndIf 
 
       _lConsdBrk := .T.  // Quando True considera os valores de limite de crédito do Broker. Quando False considera o limite de crédito do cadastro de clientes.
-      SA3->(DbSetOrder(1)) 
+      SA3->(DBSetOrder(1)) 
 	  If SA3->(MsSeek(xFilial("SA3")+SZX->ZX_VEND))
          If ! (SA3->A3_I_VBROK == 'B' .And. SA3->A3_I_LC > 0)
 	        _lConsdBrk := .F.           
@@ -2577,7 +2577,7 @@ Begin Sequence
 	  EndIf 
 
 	  If SZX->ZX_I_LC == 0 .And. ! _lConsdBrk
-         U_ItMsg("O limite de crédito deste cliente precisa ser informado.","Atenção!","Informe um limite de crédito para este cliente.",1)
+         U_ITMsg("O limite de crédito deste cliente precisa ser informado.","Atenção!","Informe um limite de crédito para este cliente.",1)
          _lRet := .F.
 		 Break 
 	  EndIf 

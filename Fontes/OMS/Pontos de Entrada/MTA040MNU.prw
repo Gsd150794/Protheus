@@ -11,7 +11,7 @@ Alex Wallauer | 21/08/2023 | Chamado 43822. Ajustes na chamada da função U_COMS0
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina. 
 //====================================================================================================
-#Include "Protheus.Ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -30,8 +30,8 @@ User Function MTA040MNU()
 
 Begin Sequence 
 
-   AAdd(aRotina,{"Histórico Altarações Vendedor","U_COMS006('P')"	, 0, 2, 0, Nil }) 
+   aAdd(aRotina,{"Histórico Altarações Vendedor","U_COMS006('P')"	, 0, 2, 0, Nil }) 
 
 End Sequence 
 
-Return Nil 
+Return 

@@ -2,43 +2,35 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Jerry Santiago| 26/08/2015 | Nova tratativa da validação do Aprovador da SC através do ID o Usuário logado
-              |            | Retirado a busca do usuário Aprovador pela função U_UCFG001(1)
--------------------------------------------------------------------------------------------------------------------------------
-Darcio Ribeiro| 14/10/2015 | Incluído tratamento, onde o sistema validará se a SC está no status Aprovado ou Rejeitado,
-              |            | caso esteja, o sistema não permitirá nenhum tipo de alteração. Chamado: 12293
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 03/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Jerry Santiago|26/08/2015| Nova tratativa da validação do Aprovador da SC através do ID o Usuário logado
+              |          | Retirado a busca do usuário Aprovador pela função U_UCFG001(1)
+Darcio Ribeiro|14/10/2015| Chamado 12293. Incluído tratamento, onde o sistema validará se a SC está no status Aprovado ou Rejeitado,
+              |          | caso esteja, o sistema não permitirá nenhum tipo de alteração.
+Lucas Borges  |03/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "Protheus.ch"
+#Include "TOTVS.ch"
             
 /*
 ===============================================================================================================================
 Programa----------: MT110BLO
 Autor-------------: Tiago Correa Castro
 Data da Criacao---: 31/07/2008
-===============================================================================================================================
 Descrição---------: Ponto de Entrada para validacao da Aprovacao da Solicitacao de Compra    
 					Localização: Function A110APROV - Função da Solicitação de Compras responsavel pela aprovação das SCs.
 					Em que Ponto: Após a montagem da dialog de aprovação da Solicitação de compras. É acionado quando o usuario
 					clica nos botões Solicitação Aprovada, Rejeita ou Bloqueada, deve ser utilizado para continuar estas ações 
 					retorno .T.' ou interromper  'retorno .F.' , após clicar os botões.
-===============================================================================================================================
-Parametros--------: PARAMIXB -> A -> Paramixb[1] = 1 = Aprovar; 2 = Rejeitar; 3 = Bloquear
-===============================================================================================================================
+Parametros--------: ParamIXB -> A -> ParamIXB[1] = 1 = Aprovar; 2 = Rejeitar; 3 = Bloquear
 Retorno-----------: lContinua -> L -> .T. = Continua o processo / .F. = Interrompe o processo
 ===============================================================================================================================
 */
 User Function MT110BLO
 
-Local	_aArea	:=	GetArea()
+Local	_aArea	:=	FWGetArea()
 Local 	_lRet	:=	.T. 
 Local  _cUsu	:= __cUserId
 Local aMensagem	:= {}
@@ -112,5 +104,6 @@ If lContinua
 	EndIf
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
+
 Return (_lRet)

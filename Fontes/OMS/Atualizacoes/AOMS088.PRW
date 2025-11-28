@@ -13,7 +13,7 @@ Lucas Borges      | 14/10/2019 | Removidos os Warning na compilação da release 1
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -43,7 +43,7 @@ aAdd( aObjects, { 100, 048, .T., .F. } )
 aInfo   := { aSize[ 1 ] , aSize[ 2 ] , aSize[ 3 ] , aSize[ 4 ] , 3 , 2 }
 aPosObj := MsObjSize( aInfo , aObjects )
 
-SA1->(dbSetOrder(1))
+SA1->(DBSetOrder(1))
 mBrowse(6,1,22,75,"SA1")
 
 Return
@@ -79,19 +79,19 @@ FillGetDados(1,"SA1",1,,,{||.T.},,,,,,.T.)
 
 _nni := 1
 
-Do While _nni <= len (aheader)
+While _nni <= Len (aheader)
 	
-	aAdd( _aFields , alltrim(aheader[_nni][2]) )
+	aAdd( _aFields , AllTrim(aheader[_nni][2]) )
 	
-	If alltrim(aheader[_nni][2]) $ _ccampos
+	If AllTrim(aheader[_nni][2]) $ _ccampos
 	
-		aAdd( _aAlterFields , alltrim(aheader[_nni][2]) )
+		aAdd( _aAlterFields , AllTrim(aheader[_nni][2]) )
 		
-	Endif
+	EndIf
 	
 	_nni++
 
-Enddo
+EndDo
 
 
 aRotina := { {"Pesquisar"		,"PesqBrw"		, 0 , 1,0	,.F.}}	// "Pesquisar"
@@ -100,8 +100,8 @@ aAdd(aRotina,{"Incluir"			,"A030Inclui"	, 0 , 3,0	,NIL})	// "Incluir"
 aAdd(aRotina,{"Alterar"			,"A030Altera"	, 0 , 4,143	,NIL})	// "Alterar"
 aAdd(aRotina,{"Excluir"			,"A030Deleta"	, 0 , 5,144	,NIL})	// "Excluir"
 aAdd(aRotina,{"Contatos"		,"FtContato"	, 0 , 4,0	,NIL})	// "Contatos"
-Aadd(aRotina,{"Conhecimento"	,"MsDocument"	, 0 , 4,0	,NIL})	// "Conhecimento"
-aadd(aRotina,{"Referencias"		,"Mata030Ref"	, 0 , 3,0	,NIL})	// "Referencias"
+aAdd(aRotina,{"Conhecimento"	,"MsDocument"	, 0 , 4,0	,NIL})	// "Conhecimento"
+aAdd(aRotina,{"Referencias"		,"Mata030Ref"	, 0 , 3,0	,NIL})	// "Referencias"
 
 DEFINE MSDIALOG _oDlg TITLE "Cadastro de Clientes - Logística" FROM aSize[7],00 to aSize[6],aSize[5] COLORS 0, 16777215 Of oMainWnd PIXEL
 
@@ -113,7 +113,7 @@ ACTIVATE MSDIALOG _oDlg CENTERED ON INIT EnchoiceBar(_oDlg, {|| (_nOpc := 1, _oD
 
 If _nOpc == 1
 	
-	fwmsgrun(,{ || U_AOMS088S(_aAlterFields)},"Aguarde...","Gravando registro...")
+	FWMsgRun(,{ || U_AOMS088S(_aAlterFields)},"Aguarde...","Gravando registro...")
 
 EndIf
 
@@ -137,9 +137,9 @@ Retorno-----------: Nenhum
 Static Function MenuDef()
 Local aRotina := {}
 
-AADD(aRotina,{"Pesquisar"	,"AxPesqui"		,0,1})
-AADD(aRotina,{"Visualizar"	,"AxVisual"		,0,2})
-AADD(aRotina,{"Logística"	,"fwmsgrun(,{ || U_AOMS088L()},'Aguarde...','Carregando cadastro...')"	,0,4})
+aAdd(aRotina,{"Pesquisar"	,"AxPesqui"		,0,1})
+aAdd(aRotina,{"Visualizar"	,"AxVisual"		,0,2})
+aAdd(aRotina,{"Logística"	,"FWMsgRun(,{ || U_AOMS088L()},'Aguarde...','Carregando cadastro...')"	,0,4})
 
 Return(aRotina)
 
@@ -164,7 +164,7 @@ Local _nX := 0
 	For _nX := 1 To Len(_aAlterFields)
 		RecLock("SA1", .F.)
 			&("SA1->" + _aAlterFields[_nX]) := &("M->" + _aAlterFields[_nX])
-		MsUnLock()
+		MSUnLock()
 	Next _nX
 
 Return

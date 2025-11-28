@@ -9,7 +9,7 @@
 ===================================================================================================================================================================
 Analista         - Programador     - Inicio     - Envio    - Chamado - Motivo da Alteração
 ===================================================================================================================================================================
-Vanderlei Alves  - Alex Wallauer   - 09/06/25   - 10/06/25 - 45229   - Tratamento para validar FWIsInCallStack("U_AOMS085B") junto com FWISINCALLSTACK("U_ALTERAP")
+Vanderlei Alves  - Alex Wallauer   - 09/06/25   - 10/06/25 - 45229   - Tratamento para validar FWIsInCallStack("U_AOMS085B") junto com FWIsInCallStack("U_ALTERAP")
 ===================================================================================================================================================================
 */
 
@@ -17,8 +17,8 @@ Vanderlei Alves  - Alex Wallauer   - 09/06/25   - 10/06/25 - 45229   - Tratament
 // Definicoes de Includes da Rotina.
 //====================================================================================================
 
-#Include "Protheus.Ch"
-#INCLUDE "RwMake.ch"
+#Include "TOTVS.ch"
+#Include "RwMake.ch"
 
 /*
 ===============================================================================================================================
@@ -34,7 +34,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 
-User function M440STTS()
+User Function M440STTS()
 
 Local _aSC5			:= GetArea("SC5") 
 Local _aSC6			:= GetArea("SC6") 
@@ -46,30 +46,30 @@ Local _lMensagem	:= .F.
 // monta a consulta a ser mostrada para o usuário, caso haja algum bloqueio.	|
 //===============================================================================
 
-If type("aCols") == "A" .and. STRZERO(Len(aCols),2) == SC9->C9_ITEM
+If Type("aCols") == "A" .And. StrZero(Len(aCols),2) == SC9->C9_ITEM
 
-   SC9->( DbSetorder(1) )
-   SC9->( DbSeek( SC5->C5_FILIAL + SC5->C5_NUM ) )
+   SC9->( DBSetOrder(1) )
+   SC9->( DBSeek( SC5->C5_FILIAL + SC5->C5_NUM ) )
 	
-   DO While SC9->(!EOF()) .AND. SC9->C9_FILIAL = SC5->C5_FILIAL .and. SC9->C9_PEDIDO = SC5->C5_NUM
+   While SC9->(!Eof()) .And. SC9->C9_FILIAL = SC5->C5_FILIAL .And. SC9->C9_PEDIDO = SC5->C5_NUM
 		
-   	  If !(empty(SC9->C9_BLCRED)) .Or. !(Empty(SC9->C9_BLEST))
+   	  If !(Empty(SC9->C9_BLCRED)) .Or. !(Empty(SC9->C9_BLEST))
 		 _lMensagem := .T.
 	     Exit
    	  EndIf
-   	  SC9->( Dbskip() )
-   Enddo
+   	  SC9->( DBSkip() )
+   EndDo
 
-   If _lMensagem .and. !(FWIsInCallStack("U_ALTERAP") .or. FWIsInCallStack("U_INCLUIC") .or. FWIsInCallStack("U_AOMS085B")) 
+   If _lMensagem .And. !(FWIsInCallStack("U_ALTERAP") .Or. FWIsInCallStack("U_INCLUIC") .Or. FWIsInCallStack("U_AOMS085B")) 
       MessageLog(SC9->C9_FILIAL, SC9->C9_PEDIDO, SC9->C9_DATALIB, SC9->C9_CLIENTE, SC9->C9_LOJA)
    EndIf
 
 EndIf
 
 
-Restarea(_aSC5)	
-Restarea(_aSC6)	
-Restarea(_aSC9)	
+FWRestArea(_aSC5)	
+FWRestArea(_aSC6)	
+FWRestArea(_aSC9)	
 						
 Return
 
@@ -113,9 +113,9 @@ aAdd( _aHeaderIt,{"Qt Liberada","C9_QTDLIB ","@E 9,999,999.999                  
 aAdd( _aHeaderIt,{"Prc Venda","C9_PRCVEN ","@E 999,999,999.99999999                      ",18,8," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "})
 aAdd( _aHeaderIt,{"Armazem","C9_LOCAL  ","@!                                           ",2,0,'ExistCpo("NNR") ',"€€€€€€€€€€€€€€ ","C","NNR   "," "," "," "})
 
-dbSelectArea("SC9")
-SC9->(dbSetOrder(1))
-SC9->(dbSeek(_cFilial + _cPedido))
+DBSelectArea("SC9")
+SC9->(DBSetOrder(1))
+SC9->(DBSeek(_cFilial + _cPedido))
 
 While !SC9->(Eof()) .And. SC9->C9_FILIAL == _cFilial .And. SC9->C9_PEDIDO == _cPedido
 	If !Empty(SC9->C9_BLEST) .And. Empty(SC9->C9_BLCRED)
@@ -125,7 +125,7 @@ While !SC9->(Eof()) .And. SC9->C9_FILIAL == _cFilial .And. SC9->C9_PEDIDO == _cP
 	ElseIf !Empty(SC9->C9_BLEST) .And. !Empty(SC9->C9_BLCRED)
 		aAdd(_aColsIt,{LoadBitmap(GetResources(),"BR_VERMELHO"), SC9->C9_ITEM, Posicione("SB1",1,xFilial("SB1")+SC9->C9_PRODUTO,"B1_DESC"), SC9->C9_QTDLIB, SC9->C9_PRCVEN, SC9->C9_LOCAL, .F.})
 	EndIf
-	SC9->(dbSkip())
+	SC9->(DBSkip())
 End
 
 aAdd( _aHeaderEs, { 'Status'			, 'CHECKBOL', '@BMP', 10, 0,,, 'C',, 'V' ,  ,  , 'legenda', 'V', 'S' } )
@@ -145,16 +145,16 @@ _cQry += "  AND SC9.D_E_L_E_T_ = ' ' "
 
 dbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQry ) , "TRBARM" , .T., .F. )
 
-dbSelectArea("TRBARM")
-TRBARM->(dbGoTop())
+DBSelectArea("TRBARM")
+TRBARM->(DBGoTop())
 
 If !TRBARM->(Eof())
 	While !TRBARM->(Eof())
-		_aIn := StrTokArr(TRBARM->C9_LOCAL+";"+ALLTRIM(TRBARM->NNR_I_OPC),";")
+		_aIn := StrTokArr(TRBARM->C9_LOCAL+";"+AllTrim(TRBARM->NNR_I_OPC),";")
 		For _nY := 1 To Len(_aIn)
-			dbSelectArea("SB2")
-			dbSetOrder(1)
-			If dbSeek(xFilial("SB2") + TRBARM->C9_PRODUTO + _aIn[_nY])
+			DBSelectArea("SB2")
+			DBSetOrder(1)
+			If DBSeek(xFilial("SB2") + TRBARM->C9_PRODUTO + _aIn[_nY])
 				_nSaldo := SaldoSb2()
 				If _nSaldo > 0
 					_nSldTot += _nSaldo
@@ -162,45 +162,45 @@ If !TRBARM->(Eof())
 				EndIf
 			EndIf
 		Next _nY
-		TRBARM->(dbSkip())
+		TRBARM->(DBSkip())
 	End
 EndIf
 
 _aColsEs := aSort(_aColsEs,,,{|x,y| x[2] < y[2]})
 
-dbSelectArea("TRBARM")
-TRBARM->(dbCloseArea())
+DBSelectArea("TRBARM")
+TRBARM->(DBCloseArea())
 
 DEFINE MSDIALOG oDlgEst TITLE "Ocorreram restrições na liberação do pedido:" FROM 000, 000  TO 520, 700 COLORS 0, 16777215 PIXEL
 
-	@ 009, 006 SAY oSayPd PROMPT "Pedido:" SIZE 022, 007 OF oDlgEst COLORS 0, 16777215 PIXEL
-	@ 009, 030 SAY oSayPn PROMPT _cPedido SIZE 025, 007 OF oDlgEst COLORS 16711680, 16777215 PIXEL
-	@ 009, 062 SAY oSayDt PROMPT "Emissão:" SIZE 025, 007 OF oDlgEst COLORS 0, 16777215 PIXEL
-	@ 009, 090 SAY oSay1 PROMPT _dDataLib SIZE 032, 007 OF oDlgEst COLORS 16711680, 16777215 PIXEL
-	@ 009, 130 SAY oSayCli PROMPT "Cliente:" SIZE 019, 007 OF oDlgEst COLORS 0, 16777215 PIXEL
-	@ 009, 150 SAY oSayCln PROMPT _cCliente + "/" + _cLoja + "-" + Posicione("SA1", 1, xFilial("SA1") + _cCliente + _cLoja, "A1_NOME") SIZE 149, 007 OF oDlgEst COLORS 16711680, 16777215 PIXEL
+	@ 009, 006 Say oSayPd PROMPT "Pedido:" SIZE 022, 007 OF oDlgEst COLORS 0, 16777215 PIXEL
+	@ 009, 030 Say oSayPn PROMPT _cPedido SIZE 025, 007 OF oDlgEst COLORS 16711680, 16777215 PIXEL
+	@ 009, 062 Say oSayDt PROMPT "Emissão:" SIZE 025, 007 OF oDlgEst COLORS 0, 16777215 PIXEL
+	@ 009, 090 Say oSay1 PROMPT _dDataLib SIZE 032, 007 OF oDlgEst COLORS 16711680, 16777215 PIXEL
+	@ 009, 130 Say oSayCli PROMPT "Cliente:" SIZE 019, 007 OF oDlgEst COLORS 0, 16777215 PIXEL
+	@ 009, 150 Say oSayCln PROMPT _cCliente + "/" + _cLoja + "-" + Posicione("SA1", 1, xFilial("SA1") + _cCliente + _cLoja, "A1_NOME") SIZE 149, 007 OF oDlgEst COLORS 16711680, 16777215 PIXEL
 	@ 005, 305 BUTTON oBtSair PROMPT "Sair" SIZE 037, 012 OF oDlgEst ACTION oDlgEst:End() PIXEL
 
 	oMSNewGIt := MsNewGetDados():New( 025, 006, 127, 343, 0, "AllwaysTrue", "AllwaysTrue", "", {},, 999, "AllwaysTrue", "", "AllwaysTrue", oDlgEst, _aHeaderIt, _aColsIt)
 
 	@ 131, 006 BITMAP oBmp RESNAME "BR_PRETO" OF oDlgEst SIZE 20,20 NOBORDER PIXEL
-	@ 131, 015 SAY "Bloqueio Estoque" OF oDlgEst SIZE 100,10 PIXEL
+	@ 131, 015 Say "Bloqueio Estoque" OF oDlgEst SIZE 100,10 PIXEL
 
 	@ 131, 106 BITMAP oBmp RESNAME "BR_AZUL" OF oDlgEst SIZE 20,20 NOBORDER PIXEL
-	@ 131, 115 SAY "Bloqueio Crédito" OF oDlgEst SIZE 100,10 PIXEL
+	@ 131, 115 Say "Bloqueio Crédito" OF oDlgEst SIZE 100,10 PIXEL
 
 	@ 131, 206 BITMAP oBmp RESNAME "BR_VERMELHO" OF oDlgEst SIZE 20,20 NOBORDER PIXEL
-	@ 131, 215 SAY "Bloqueio Estoque/Crédito" OF oDlgEst SIZE 100,10 PIXEL
+	@ 131, 215 Say "Bloqueio Estoque/Crédito" OF oDlgEst SIZE 100,10 PIXEL
 
 	@ 141, 006 GROUP oGrEst TO 250, 344 PROMPT "Estoques Opcionais" OF oDlgEst COLOR 0, 16777215 PIXEL
 
 	oMSNewGEs := MsNewGetDados():New( 150, 012, 236, 339, 0, "AllwaysTrue", "AllwaysTrue", "", {},, 999, "AllwaysTrue", "", "AllwaysTrue", oDlgEst, _aHeaderEs, _aColsEs)
 
 	@ 240, 009 BITMAP oBmp RESNAME "BR_VERDE" OF oDlgEst SIZE 20,20 NOBORDER PIXEL
-	@ 240, 018 SAY "Com Estoque" OF oDlgEst SIZE 100,10 PIXEL
+	@ 240, 018 Say "Com Estoque" OF oDlgEst SIZE 100,10 PIXEL
 
-	@ 240, 150 SAY "Saldo Total:" OF oDlgEst SIZE 100,10 PIXEL
-	@ 240, 220 SAY AllTrim(Transform(_nSldTot,PesqPict("SC9","C9_QTDLIB"))) OF oDlgEst COLORS 0, 16777215 SIZE 100,10 PIXEL
+	@ 240, 150 Say "Saldo Total:" OF oDlgEst SIZE 100,10 PIXEL
+	@ 240, 220 Say AllTrim(Transform(_nSldTot,PesqPict("SC9","C9_QTDLIB"))) OF oDlgEst COLORS 0, 16777215 SIZE 100,10 PIXEL
 
 ACTIVATE MSDIALOG oDlgEst CENTERED
 

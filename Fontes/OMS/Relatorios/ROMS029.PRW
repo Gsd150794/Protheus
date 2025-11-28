@@ -10,7 +10,7 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
 
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -49,7 +49,7 @@ _oPrint:SetPaperSize(9)	// Papel A4
 _oPrint:StartPage()
 
 If !Pergunte( _cPerg , .T. )
-     Return()
+     Return
 EndIf
 
 ROMS029CAB( .F. )
@@ -63,7 +63,7 @@ Processa( {|| ROMS029RUN() } , 'Aguarde!' , 'Processando o relatorio...' )
 _oPrint:EndPage()
 _oPrint:Preview()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -105,7 +105,7 @@ For _nX:=1 to Len(oObj:aGrupo[1][2])
 			Case oObj:aGrupo[1][2][_nX]:CX1_TIPO == 'C'
 		 		cVlrParam:= &(oObj:aGrupo[1][2][_nX]:CX1_VAR01)
 			Case oObj:aGrupo[1][2][_nX]:CX1_TIPO == 'D'
-				cVlrParam:= DtoC(&(oObj:aGrupo[1][2][_nX]:CX1_VAR01))
+				cVlrParam:= DToC(&(oObj:aGrupo[1][2][_nX]:CX1_VAR01))
 			Case oObj:aGrupo[1][2][_nX]:CX1_TIPO == 'N'
 				cVlrParam:= AllTrim(Str(&(oObj:aGrupo[1][2][_nX]:CX1_VAR01)))
 		EndCase
@@ -142,7 +142,7 @@ Retorno-----------: Nenhum
 Static Function ROMS029CAB( _lImpPag )
 
 Local _cPath	:= If( IsSrvUnix() , "/" , "\" )
-Local _cTitulo	:= "Fechamento da comissão - Resumido - "+ IIF( !Empty(MV_PAR01) , MesExtenso( Val( SubStr( MV_PAR01 , 1 , 2 ) ) ) + ' de ' + SubStr( MV_PAR01 , 3 , 4 ) , "" )
+Local _cTitulo	:= "Fechamento da comissão - Resumido - "+ IIf( !Empty(MV_PAR01) , MesExtenso( Val( SubStr( MV_PAR01 , 1 , 2 ) ) ) + ' de ' + SubStr( MV_PAR01 , 3 , 4 ) , "" )
 
 _nLinha := 0100
 
@@ -159,7 +159,7 @@ _oPrint:Say( _nLinha + 100	, _nColFim - 550 , "EMPRESA: " + AllTrim(SM0->M0_NOME
 
 EndIf
 
-_oPrint:Say( _nLinha + 050	, _nColFim - 550 , "DATA DE EMISSÃO: "+ DtoC( DATE() )									, _oFont12b )
+_oPrint:Say( _nLinha + 050	, _nColFim - 550 , "DATA DE EMISSÃO: "+ DToC( Date() )									, _oFont12b )
 
 _nLinha += 050
 
@@ -170,7 +170,7 @@ _nLinha += _nSpcLin
 
 _oPrint:Line( _nLinha , _nColIni , _nLinha , _nColFim )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -198,7 +198,7 @@ _oPrint:Say( _nLinha + _nAjsLin , _nColIni + 1590 , "IRRF"				, _oFont11b )
 _oPrint:Say( _nLinha + _nAjsLin , _nColIni + 1700 , "Vlr.Comis.Liquida"	, _oFont11b )
 _oPrint:Say( _nLinha + _nAjsLin , _nColIni + 2050 , "% Vlr.Recebido"	, _oFont11b )
 
-Return()
+Return
             
 /*
 ===============================================================================================================================
@@ -228,7 +228,7 @@ _oPrint:Say( _nLinha + _nAjsLin , _nColIni + 1500 , Transform( _nIRRF		, "@E 999
 _oPrint:Say( _nLinha + _nAjsLin , _nColIni + 1800 , Transform( _nVlrLiq		, "@E 999,999,999.99" )	, _oFont10 )
 _oPrint:Say( _nLinha + _nAjsLin , _nColIni + 2200 , Transform( _nPorcCom	, "@E 999.99" ) + '%'	, _oFont10 )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -257,7 +257,7 @@ _oPrint:Say( _nLinha + _nAjsLin , _nColIni + 1500 , Transform( _nIRRF		, "@E 999
 _oPrint:Say( _nLinha + _nAjsLin , _nColIni + 1800 , Transform( _nVlrLiq		, "@E 999,999,999.99" )	, _oFont10b )
 _oPrint:Say( _nLinha + _nAjsLin , _nColIni + 2200 , Transform( _nPorcCom	, "@E 999.99" ) + '%'	, _oFont10b )
 
-Return()
+Return
            
 /*
 ===============================================================================================================================
@@ -273,7 +273,7 @@ Static Function ROMS029BOX()
 
 _oPrint:Box( _nIniBox , _nColIni , _nLinha , _nColFim )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -335,7 +335,7 @@ If _nLinha > _nQbrPag
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -354,7 +354,7 @@ _nLinha += _nSpcLin
 
 ROMS029CDR(_cTipo)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -369,7 +369,7 @@ Retorno-----------: Nenhum
 */
 Static Function ROMS029QRY( _cAlias , _nOpcao )
 
-Local _cWhere01 := "% AND SUBSTR(E3_EMISSAO,1,6) = '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' %"
+Local _cWhere01 := "% AND SubStr(E3_EMISSAO,1,6) = '" + SubStr(MV_PAR01,3,4) + SubStr(MV_PAR01,1,2) + "' %"
 
 Do Case
 
@@ -653,7 +653,7 @@ Do Case
 			,   (    SELECT DISTINCT
 			             E5.E5_FILIAL,
 			             E5.E5_DOCUMEN,
-			             CASE
+			             Case
 			                 WHEN F2.F2_VEND2 = ' '          THEN F2.F2_VEND1
 			                 WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN F2.F2_VEND2
 			                 WHEN F2.F2_VEND3 <> ' '         THEN F2.F2_VEND3
@@ -674,7 +674,7 @@ Do Case
 			         GROUP BY
 			             E5.E5_FILIAL ,
 			             E5.E5_DOCUMEN,
-			             CASE
+			             Case
 			                 WHEN F2.F2_VEND2 = ' '          THEN F2.F2_VEND1
 			                 WHEN F2.F2_VEND1 <> F2.F2_VEND2 THEN F2.F2_VEND2
 			                 WHEN F2.F2_VEND3 <> ' '         THEN F2.F2_VEND3
@@ -791,14 +791,14 @@ Do Case
 
 EndCase
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: ROMS029RUN
 Autor-----------: Fabiano Dias
 Data da Criacao-: 30/03/2011
-Descrição-------: Função que processa a impressão dos dados do relatório
+Descrição-------: Função que Processa a impressão dos dados do relatório
 Parametros------: Nenhum
 Retorno---------: Nenhum
 ===============================================================================================================================
@@ -847,16 +847,16 @@ EndIf
 	// Chama a rotina para selecao dos registros da comissao gerada para os vendedores
 	MsgRun("Aguarde....Filrando comissao dos vendedores.",,{||CursorWait(),ROMS029QRY(_cAlias,1),CursorArrow()})        
 	
-	dbSelectArea(_cAlias)
-	(_cAlias)->(dbGotop())        
+	DBSelectArea(_cAlias)
+	(_cAlias)->(DBGoTop())        
 	             	
 	//Armazena o numero de registros encontrados.
 	COUNT TO _nCountRec 
 	
 	ProcRegua(_nCountRec)
 	
-	dbSelectArea(_cAlias)
-	(_cAlias)->( DBGotop() )
+	DBSelectArea(_cAlias)
+	(_cAlias)->( DBGoTop() )
 	
 	//Efetua o grupamento dos dados dos vendedores.
 	While (_cAlias)->( !Eof() )
@@ -943,16 +943,16 @@ EndIf
 	//Chama a rotina para selecao dos registros da comissao gerada para os vendedores
 	MsgRun("Aguarde....Filrando comissão dos coordenadores.",,{||CursorWait(),ROMS029QRY(_cAliasVend,2),CursorArrow()})        
 	
-	dbSelectArea(_cAliasVend)
-	(_cAliasVend)->(dbGotop())        
+	DBSelectArea(_cAliasVend)
+	(_cAliasVend)->(DBGoTop())        
 	             	
 	//Armazena o numero de registros encontrados.
 	COUNT TO _nCountRec 
 	
 	ProcRegua(_nCountRec)
 	
-	dbSelectArea(_cAliasVend)
-	(_cAliasVend)->(dbGotop())       
+	DBSelectArea(_cAliasVend)
+	(_cAliasVend)->(DBGoTop())       
 	               	
 	//Efetua o grupamento dos dados dos vendedores
 	While (_cAliasVend)->(!Eof()) 
@@ -972,11 +972,11 @@ EndIf
 			
 			EndIf 
 					
-	(_cAliasVend)->(dbSkip())	
+	(_cAliasVend)->(DBSkip())	
     EndDo                          
 
-dbSelectArea(_cAliasVend)
-(_cAliasVend)->(dbCloseArea())     
+DBSelectArea(_cAliasVend)
+(_cAliasVend)->(DBCloseArea())     
 
 //Verifica a necessidade de quebra de pagina.
 _nLinha+=_nSpcLin	
@@ -1106,7 +1106,7 @@ DBSelectArea('ZC6')
 ZC6->( DBSetOrder(1) )
 If ZC6->( DBSeek( xFilial('ZC6') + _cCodVen + _cDtRef ) )
 	
-	_nRet := ROUND( ZC6->ZC6_VALLIQ * ( ZC6->ZC6_PERCOM / 100 ) , 2 )
+	_nRet := Round( ZC6->ZC6_VALLIQ * ( ZC6->ZC6_PERCOM / 100 ) , 2 )
 	
 EndIf
 
@@ -1132,11 +1132,11 @@ Local _nRet			:= 0
 Default _cCodCor	:= ' '
 
 _cQuery := " SELECT "
-_cQuery += "     ROUND( SUM( ZC7.ZC7_VALLIQ * ( ZAE.ZAE_COMIS1 / 100 ) ) , 2 ) AS VALCMS "
+_cQuery += "     Round( SUM( ZC7.ZC7_VALLIQ * ( ZAE.ZAE_COMIS1 / 100 ) ) , 2 ) AS VALCMS "
 _cQuery += " FROM "+ RetSqlName('ZC7') +" ZC7 "
 _cQuery += " INNER JOIN "+ RetSqlName('SA3') +" SA3 "
 _cQuery += " ON "
-_cQuery += "     SA3.A3_COD     = SUBSTR( ZC7.ZC7_CHAVE , 1 , 6 ) "
+_cQuery += "     SA3.A3_COD     = SubStr( ZC7.ZC7_CHAVE , 1 , 6 ) "
 _cQuery += " INNER JOIN "+ RetSqlName('ZAE') +" ZAE "
 _cQuery += " ON "
 _cQuery += "     ZAE.ZAE_VEND   = SA3.A3_COD "
@@ -1150,17 +1150,17 @@ _cQuery += " AND ZAE.ZAE_GRPVEN = ' ' "
 _cQuery += " AND ZAE.ZAE_CLI    = ' ' "
 _cQuery += " AND ZAE.ZAE_LOJA   = ' ' "
 _cQuery += " AND ZC7.ZC7_ITEM   = '01' "
-_cQuery += " AND SUBSTR(ZC7.ZC7_CHAVE,1,6) = '"+ _cCodCor +"' "
-_cQuery += " AND SUBSTR(ZC7.ZC7_CHAVE,7,6) = '"+ _cDtRef  +"' "
+_cQuery += " AND SubStr(ZC7.ZC7_CHAVE,1,6) = '"+ _cCodCor +"' "
+_cQuery += " AND SubStr(ZC7.ZC7_CHAVE,7,6) = '"+ _cDtRef  +"' "
 
 _cQuery += " UNION ALL "
 
 _cQuery += " SELECT "
-_cQuery += "     ROUND( SUM( ZC7.ZC7_VALLIQ * ( ZAE.ZAE_COMIS2 / 100 ) ) , 2 ) AS VALCMS "
+_cQuery += "     Round( SUM( ZC7.ZC7_VALLIQ * ( ZAE.ZAE_COMIS2 / 100 ) ) , 2 ) AS VALCMS "
 _cQuery += " FROM "+ RetSqlName('ZC7') +" ZC7 "
 _cQuery += " INNER JOIN "+ RetSqlName('SA3') +" SA3 "
 _cQuery += " ON "
-_cQuery += "     SA3.A3_COD     = SUBSTR( ZC7.ZC7_CHAVE , 1 , 6 ) "
+_cQuery += "     SA3.A3_COD     = SubStr( ZC7.ZC7_CHAVE , 1 , 6 ) "
 _cQuery += " INNER JOIN "+ RetSqlName('ZAE') +" ZAE "
 _cQuery += " ON "
 _cQuery += "     ZAE.ZAE_VEND   = SA3.A3_COD "
@@ -1174,7 +1174,7 @@ _cQuery += " AND ZAE.ZAE_GRPVEN = ' ' "
 _cQuery += " AND ZAE.ZAE_CLI    = ' ' "
 _cQuery += " AND ZAE.ZAE_LOJA   = ' ' "
 _cQuery += " AND ZAE.ZAE_CODSUP = '"+ _cCodCor +"' "
-_cQuery += " AND SUBSTR(ZC7.ZC7_CHAVE,7,6) = '"+ _cDtRef +"' "
+_cQuery += " AND SubStr(ZC7.ZC7_CHAVE,7,6) = '"+ _cDtRef +"' "
 
 If Select(_cAlias) > 0
 	(_cAlias)->( DBCloseArea() )
@@ -1187,7 +1187,7 @@ DBSelectArea(_cAlias)
 
 While (_cAlias)->(!Eof())
 
-	_nRet += IIF( ValType( (_cAlias)->VALCMS ) == 'N' , (_cAlias)->VALCMS , 0 )
+	_nRet += IIf( ValType( (_cAlias)->VALCMS ) == 'N' , (_cAlias)->VALCMS , 0 )
 
 (_cAlias)->( DBSkip() )
 EndDo

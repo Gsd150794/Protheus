@@ -9,13 +9,17 @@
  Jerry            | 18/04/2018 | Ordenar a Lista por Data / Hora.  Chamado 24548
 -------------------------------------------------------------------------------------------------------------------------------
  Lucas Borges     | 11/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
-===============================================================================================================================
+==============================================================================================================================================================================================
+Analista           - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
+==============================================================================================================================================================================================
+Alexandro Wallauer - Julio Paz     - 10/09/25 - 10/09/25 - 50058   - Correção de Error log na rotina de exportação dos dados para Excel.
+==============================================================================================================================================================================================
 */
 
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include "Protheus.Ch"
+#Include "TOTVS.ch"
 
 #Define TITULO "Consulta Cliente - Log de Alterações"
 
@@ -59,7 +63,7 @@ Else
 			SA1->(DBSetOrder(1))
 			If !SA1->( DBSeek( xFilial("SA1") + aParRet[01] ) )
 				MessageBox( "Usuário informado não foi encontrado." , TITULO , 0 )
-				Return()
+				Return
 			EndIf
 			
 		EndIf
@@ -120,7 +124,7 @@ Static Function COMS004HIS( cCodCli )
 
 Local oDlg			:= Nil
 Local oLbxTOP		:= Nil
-Local oLbxDET		:= Nil
+//Local oLbxDET		:= Nil
 Local aPosObj   	:= {}
 Local aObjects  	:= {}
 Local aSize     	:= MsAdvSize()
@@ -143,11 +147,13 @@ Local aCabLbxDET	:= { "Data"				,; // 01
 
 Private	nDvPosAnt	:= 0
 Private	cCadastro	:= "["+ cCodCli +"] - " + TITULO
+Private oLbxDET		:= Nil
+
 
 Default cCodCli		:= ""
 
 If Empty(cCodCli)
-	Return()
+	Return
 EndIf
 
 //================================================================================
@@ -157,7 +163,7 @@ DBSelectArea("SA1")
 SA1->(DBSetOrder(1))
 If !SA1->( DBSeek( xFilial("SA1") + cCodCli ) )
 	MessageBox( "O cliente ["+ cCodCli +"] não foi encontrado." , TITULO , 0 )
-	Return()
+	Return
 EndIf
 
 //================================================================================
@@ -165,10 +171,10 @@ EndIf
 //================================================================================
 DBSelectArea("Z07")
 Z07->( DBSetOrder(1) )
-IF !Z07->( DBSeek( xFilial("Z07") + "SA1 1" + SA1->( A1_FILIAL + A1_COD + A1_LOJA ) ) )
+If !Z07->( DBSeek( xFilial("Z07") + "SA1 1" + SA1->( A1_FILIAL + A1_COD + A1_LOJA ) ) )
 	MessageBox( "O cliente ["+ cCodCli +"] não possui histórico de alterações." , TITULO , 0 )
-	Return()
-EndIF
+	Return
+EndIf
 
 aAdd( aObjects, { 100 , 025 , .T. , .F. , .T. } )
 aAdd( aObjects, { 100 , 070 , .T. , .F. } )
@@ -192,11 +198,11 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Of oM
 	//================================================================================
 	@ aPosObj[01][01],aPosObj[01][02] MSPANEL oScrPanel PROMPT "" SIZE aPosObj[01][03],aPosObj[01][04] OF oDlg LOWERED
 	
-	@ 004 , 004 SAY "Código:" 		SIZE 025,07 OF oScrPanel PIXEL
-	@ 012 , 004 SAY SA1->A1_COD  	SIZE 060,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ 004 , 004 Say "Código:" 		SIZE 025,07 OF oScrPanel PIXEL
+	@ 012 , 004 Say SA1->A1_COD  	SIZE 060,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
 	
-	@ 004 , 030 SAY "Nome:" 		SIZE 025,07 OF oScrPanel PIXEL
-	@ 012 , 030 SAY SA1->A1_NOME 	SIZE 165,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ 004 , 030 Say "Nome:" 		SIZE 025,07 OF oScrPanel PIXEL
+	@ 012 , 030 Say SA1->A1_NOME 	SIZE 165,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
 	
 	//================================================================================
 	//| Monta o resumo das alterações do cadastro                                    |
@@ -232,7 +238,8 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Of oM
 	//================================================================================
 	DEFINE BUTTONBAR oBar SIZE 25,25 3D OF oDlg
 	
-	DEFINE BUTTON aBtn[01] RESOURCE PmsBExcel()[1] OF oBar GROUP ACTION DlgToExcel({{"ARRAY","",oLbxPM7:AHeaders,oLbxPM7:aArray}})	TOOLTIP "Exportar para Planilha..."
+	//DEFINE BUTTON aBtn[01] RESOURCE PmsBExcel()[1] OF oBar GROUP ACTION DlgToExcel({{"ARRAY","",oLbxPM7:AHeaders,oLbxPM7:aArray}})	TOOLTIP "Exportar para Planilha..."
+	DEFINE BUTTON aBtn[01] RESOURCE PmsBExcel()[1] OF oBar GROUP ACTION DlgToExcel({{"ARRAY","",oLbxDET:AHeaders,oLbxDET:aArray}})	TOOLTIP "Exportar para Planilha..."
 	aBtn[01]:cTitle := ""
 	
 	DEFINE BUTTON aBtn[02] RESOURCE "FINAL" 		OF oBar GROUP ACTION oDlg:End() 													TOOLTIP "Sair da Tela..."
@@ -242,7 +249,7 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Of oM
 	
 ACTIVATE MSDIALOG oDlg CENTERED
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -281,7 +288,7 @@ _cQuery += " WHERE "
 _cQuery += " 		SA1.D_E_L_E_T_  = ' ' "
 _cQuery += " AND	Z07.D_E_L_E_T_  = ' ' "
 _cQuery += " AND	Z07.Z07_ALIAS	= 'SA1' "
-IF Len(cCodCli) == TamSX3("A1_COD")[01]
+If Len(cCodCli) == TamSX3("A1_COD")[01]
 _cQuery += " AND	SA1.A1_COD      = '"+ cCodCli +"' "
 Else
 _cQuery += " AND	SA1.A1_COD || SA1.A1_LOJA = '"+ cCodCli +"' "
@@ -293,12 +300,12 @@ _cQuery += " ORDER BY SA1.A1_LOJA , Z07.Z07_DATA, Z07.Z07_HORA,  Z07.Z07_CAMPO  
 _cQuery	:= ChangeQuery(_cQuery)
 DBUseArea( .T. , "TOPCONN" , TCGenQry(,,_cQuery) , _cAlias , .F. , .T. )
 
-TcSetField( _cAlias , "Z07.Z07_DATA" , "D" , 8 , 0 )
+TCSetField( _cAlias , "Z07.Z07_DATA" , "D" , 8 , 0 )
 
 DBSelectArea(_cAlias)
 (_cAlias)->(DBGoTop()) 
 
-(_cAlias)->( dbEval( { || _nTotReg++ } ) )
+(_cAlias)->( DBEval( { || _nTotReg++ } ) )
 
 ProcRegua(_nTotReg)
 
@@ -338,7 +345,7 @@ If	Len(_aLbxAux) > 0 .And. ValType(oLbxAux) == "O"
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -385,7 +392,7 @@ _cQuery += " ORDER BY Z07.Z07_DATA , Z07.Z07_HORA , Z07.Z07_CODUSU , Z07.Z07_CON
 _cQuery	:= ChangeQuery(_cQuery)
 DBUseArea( .T. , "TOPCONN" , TCGenQry(,,_cQuery) , _cAlias , .F. , .T. )
 
-TcSetField( _cAlias , "Z07.Z07_DATA" , "D" , 8 , 0 )
+TCSetField( _cAlias , "Z07.Z07_DATA" , "D" , 8 , 0 )
 
 DBSelectArea(_cAlias)
 (_cAlias)->(DBGoTop()) 
@@ -432,4 +439,4 @@ If	Len(_aLbxAux) > 0 .And. ValType(oLbxAux) == "O"
 
 EndIf
 
-Return()
+Return

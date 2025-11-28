@@ -2,26 +2,20 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT057
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 25/11/2019
-===============================================================================================================================
 Descrição---------: Relatório CEPEA - Chamado 31287
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -40,11 +34,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 25/11/2019
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -89,11 +80,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 25/11/2019
-===============================================================================================================================
 Descrição---------: Processa impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -110,10 +98,10 @@ Local _nCountRec	:= 0
 If MV_PAR01 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLF")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -166,8 +154,8 @@ oReport:SetMeter(0)
 
 BeginSql alias _cAlias
 	SELECT A.ZLF_FILIAL, A.A2_COD, A.A2_LOJA, A.A2_NOME, A.ZL2_COD, A.ZL2_DESCRI, A.CC2_MUN, A.VOLUME, A.VALOR,
-	       DECODE( A.VOLUME,0,0,ROUND(A.VALOR / A.VOLUME, 4)) VALOR_LITRO,
-	       ROUND(A.VOLUME / SUBSTR(A.ZLF_DTFIM, 7, 2), 0) VOL_DIA
+	       DECODE( A.VOLUME,0,0,Round(A.VALOR / A.VOLUME, 4)) VALOR_LITRO,
+	       Round(A.VOLUME / SubStr(A.ZLF_DTFIM, 7, 2), 0) VOL_DIA
 	  FROM (SELECT ZLF.ZLF_FILIAL, ZLF.ZLF_DTINI, ZLF.ZLF_DTFIM, SA2.A2_COD, SA2.A2_LOJA, SA2.A2_NOME, ZL2.ZL2_COD, ZL2.ZL2_DESCRI, CC2.CC2_MUN,
 	               NVL((SELECT SUM(ZLD_QTDBOM)
 	                     FROM %Table:ZLD% ZLD
@@ -179,7 +167,7 @@ BeginSql alias _cAlias
 	                      AND ZLD.ZLD_RETILJ = SA2.A2_LOJA
 	                      AND ZLD.ZLD_SETOR = ZL2.ZL2_COD),
 	                   0) VOLUME,
-	               AVG((SELECT SUM(CASE WHEN ZLF1.ZLF_DEBCRE = 'C' THEN ZLF1.ZLF_TOTAL ELSE ZLF1.ZLF_TOTAL * -1 END) VALOR
+	               AVG((SELECT SUM(Case WHEN ZLF1.ZLF_DEBCRE = 'C' THEN ZLF1.ZLF_TOTAL Else ZLF1.ZLF_TOTAL * -1 END) VALOR
 	                     FROM %Table:ZLF% ZLF1, %Table:ZL8% ZL8
 	                    WHERE ZLF1.D_E_L_E_T_ = ' '
 	                      AND ZL8.D_E_L_E_T_ = ' '
@@ -227,11 +215,11 @@ oReport:Section(1):Init()
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->ZLF_FILIAL
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()

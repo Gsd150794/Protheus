@@ -10,7 +10,7 @@ Lucas Borges  |27/06/2025| Chamado 50617. Revisões diversas visando padronizar o
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include "Report.ch"
 
 /*
@@ -48,7 +48,7 @@ oReport:SetMsgPrint('AGUARDE OS DADOS DO RELATORIO ESTAO SENDO PROCESSADOS')//me
 //Define dados da secao Filial
 
 //Secao dados da Rede
-DEFINE SECTION oSecDados OF oReport TITLE "Dados" TABLES "SPC","SRA","SP8", "RFE"
+DEFINE Section oSecDados OF oReport TITLE "Dados" TABLES "SPC","SRA","SP8", "RFE"
 
 DEFINE CELL NAME "DATA_APONT"   	OF oSecDados ALIAS ""    TITLE "Data Apontamento"  	SIZE 12 
 DEFINE CELL NAME "MATRICULA"    	OF oSecDados ALIAS ""    TITLE "Matricula"    		SIZE 06        
@@ -82,7 +82,7 @@ oReport:SetTitle("Marc. Não Apontadas")
 oReport:Section(1):BeginQuery()
 
 BeginSql alias "cQRY"
-	SELECT (SUBSTR(P8.P8_DATAAPO, 7, 2) || '/' || SUBSTR(P8.P8_DATAAPO, 5, 2) || '/' || SUBSTR(P8.P8_DATAAPO, 1, 4)) DATA_APONT,
+	SELECT (SubStr(P8.P8_DATAAPO, 7, 2) || '/' || SubStr(P8.P8_DATAAPO, 5, 2) || '/' || SubStr(P8.P8_DATAAPO, 1, 4)) DATA_APONT,
 	       P8.P8_MAT MATRICULA, TRIM(RA.RA_NOME) NOME, COUNT(1) NR_MARC_N_APONT
 	  FROM %Table:SP8% P8, %Table:SRA% RA
 	 WHERE P8.D_E_L_E_T_ = ' '
@@ -108,11 +108,11 @@ oSecDados:Print(.T.)
       		
 oReport:Section(1):BeginQuery()	
 BeginSql alias "cQRY"
-	SELECT (SUBSTR(RFE.RFE_DATA, 7, 2) || '/' || SUBSTR(RFE.RFE_DATA, 5, 2) || '/' || SUBSTR(RFE.RFE_DATA, 1, 4)) DATA_APONT,
+	SELECT (SubStr(RFE.RFE_DATA, 7, 2) || '/' || SubStr(RFE.RFE_DATA, 5, 2) || '/' || SubStr(RFE.RFE_DATA, 1, 4)) DATA_APONT,
 	       RA.RA_MAT MATRICULA, RA.RA_NOME NOME, COUNT(1) NR_MARC_N_APONT
 	  FROM %Table:RFE% RFE, %Table:SRA% RA
 	 WHERE RFE.RFE_DATA BETWEEN %exp:MV_PAR01% AND %exp:MV_PAR02%
-	   AND SUBSTR(RFE.RFE_PIS, 2, 12) = TRIM(RA.RA_PIS)
+	   AND SubStr(RFE.RFE_PIS, 2, 12) = TRIM(RA.RA_PIS)
 	   AND RFE.D_E_L_E_T_ = ' '
 	   AND RA.D_E_L_E_T_ = ' '
 	   AND RFE.RFE_DATAAP = ' '

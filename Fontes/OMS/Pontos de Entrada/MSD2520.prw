@@ -15,7 +15,7 @@ Lucas Borges      | 07/05/2021 | Corrigida chamada de parâmetro. Chamado 36469
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -53,7 +53,7 @@ Retorno---------: Nenhum
 */
 Static Function ExclST()
 
-Local _aArea	 := GetArea()
+Local _aArea	 := FWGetArea()
 Local _cSerie    := SF2->F2_SERIE
 Local _cDoc      := SF2->F2_DOC
 Local _cCodCli   := SF2->F2_CLIENTE
@@ -68,11 +68,11 @@ Local nModAnt  := nModulo
 Local cModAnt  := cModulo
 
 DBSelectArea("SE2")
-dbSetOrder(1) //E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA 
+DBSetOrder(1) //E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA 
 
-If DbSeek(xFilial("SE2")+_cSerie+_cDoc+SPACE(2)+'ICM'+SUBSTR(_cFORST,1,6)+SUBSTR(_cFORST,7,4))
+If DBSeek(xFilial("SE2")+_cSerie+_cDoc+Space(2)+'ICM'+SubStr(_cFORST,1,6)+SubStr(_cFORST,7,4))
 				
-	lMsErroAuto := .f.
+	lMsErroAuto := .F.
 							
 	_aSE2Exc  := {	{"E2_FILIAL"  ,SE2->E2_FILIAL          	,Nil},;
 					{"E2_PREFIXO" ,SE2->E2_PREFIXO         	,Nil},;
@@ -98,19 +98,19 @@ If DbSeek(xFilial("SE2")+_cSerie+_cDoc+SPACE(2)+'ICM'+SUBSTR(_cFORST,1,6)+SUBSTR
 							
 	If lMsErroAuto
 		Mostraerro() 
-	Endif
+	EndIf
 		
 EndIf
 		
 //====================================================================================================
 // Exclui Título a Receber em nome do Cliente
 //====================================================================================================
-dbSelectArea("SE1")
-dbSetOrder(2) //E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO    
+DBSelectArea("SE1")
+DBSetOrder(2) //E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO    
 
-If DbSeek(xFilial("SE1")+_cCodCli+_cLojCli+_cSerie+_cDoc+SPACE(2)+'ICM')
+If DBSeek(xFilial("SE1")+_cCodCli+_cLojCli+_cSerie+_cDoc+Space(2)+'ICM')
 				
-	lMsErroAuto := .f.
+	lMsErroAuto := .F.
 						
 	_aSE1Exc  := {	{"E1_FILIAL"  ,SE1->E1_FILIAL    		,Nil},;
     	          	{"E1_CLIENTE" ,SE1->E1_CLIENTE      	,Nil},;
@@ -136,13 +136,13 @@ If DbSeek(xFilial("SE1")+_cCodCli+_cLojCli+_cSerie+_cDoc+SPACE(2)+'ICM')
 						
 	If lMsErroAuto
 		Mostraerro() 
-	Endif
+	EndIf
 			
 EndIf
 
 //====================================================================================================
 // Restaura as áreas posicionadas
 //====================================================================================================
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return

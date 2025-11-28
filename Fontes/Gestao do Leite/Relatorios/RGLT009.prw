@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor            |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Alexandre Villar | 22/12/2015 | Tratativa na cláusula "ORDER BY" para remover a referência numérica. Chamado 13062
--------------------------------------------------------------------------------------------------------------------------------
-Lucas B. Ferreira | 17/06/2019 | Revisão de fontes. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas B. Ferreira | 12/12/2021 | Migração para tReport. Chamado 38597
+Alexandre V.  |22/12/2015| Chamado 13062. Tratativa na cláusula "ORDER BY" para remover a referência numérica.
+Lucas Borges  |17/06/2019| Chamado 28346. Revisão de fontes.
+Lucas Borges  |12/12/2021| Chamado 38597. Migração para tReport.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT009
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 18/02/2015
-===============================================================================================================================
 Descrição---------: Relatório de Análise da entrega de leite de Produtores x Pagamento a ser realizado no período - Inativo
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -93,11 +82,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Processa impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -115,9 +101,9 @@ Local _nCountRec	:= 0
 If MV_PAR01 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"SE2")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
+	aAdd(_aSelFil,cFilAnt)
 EndIf
 
 //=====================================================
@@ -145,11 +131,11 @@ TRFunction():New(oReport:Section(1):Cell("E2_VALOR")/*oCell*/,/*cName*/,"SUM"/*c
 // Monta filtro de acordo com a tabela de origem
 //====================================================================================================
 If MV_PAR07 == 1
-	_cFiltro += " AND SE2.E2_BAIXA BETWEEN '"+ DtoS(FirstDate(MV_PAR06))+"' AND '"+ DtoS(LastDate(MV_PAR06)) +"' "
+	_cFiltro += " AND SE2.E2_BAIXA BETWEEN '"+ DToS(FirstDate(MV_PAR06))+"' AND '"+ DToS(LastDate(MV_PAR06)) +"' "
 Else
 	_cFiltro += " AND SE2.E2_BAIXA   = ' ' "
 	_cFiltro += " AND SE2.E2_SALDO + SE2.E2_SDACRES - SE2.E2_SDDECRE > 0 "
-	_cFiltro += " AND SE2.E2_VENCREA BETWEEN '"+ DtoS(FirstDate(MV_PAR06))+"' AND '"+ DtoS(LastDate(MV_PAR06)) +"' "
+	_cFiltro += " AND SE2.E2_VENCREA BETWEEN '"+ DToS(FirstDate(MV_PAR06))+"' AND '"+ DToS(LastDate(MV_PAR06)) +"' "
 EndIf
 
 _cFiltro += " AND Z08.Z08_FILIAL "+ GetRngFil( _aSelFil, "Z08", .T.,) + " %"
@@ -186,8 +172,8 @@ BeginSql alias _cAlias
 	          WHERE ZLD.D_E_L_E_T_ = ' '
 	            AND ZLD.ZLD_FILIAL = Z08.Z08_FILIAL
 	            AND ZLD.ZLD_DTCOLE BETWEEN %exp:FirstDate(MonthSub(MV_PAR06,1))% AND %exp:LastDate(MonthSub(MV_PAR06,1))%
-	            AND E2_FORNECE = CASE WHEN E2_FORNECE LIKE 'P%' THEN ZLD_RETIRO ELSE ZLD_FRETIS END
-	            AND E2_LOJA = CASE WHEN E2_FORNECE LIKE 'P%' THEN ZLD_RETILJ ELSE ZLD_RETILJ END)
+	            AND E2_FORNECE = Case WHEN E2_FORNECE LIKE 'P%' THEN ZLD_RETIRO Else ZLD_FRETIS END
+	            AND E2_LOJA = Case WHEN E2_FORNECE LIKE 'P%' THEN ZLD_RETILJ Else ZLD_RETILJ END)
 	  GROUP BY E2_FILIAL, E2_FORNECE, E2_LOJA, A2_NOME, Z08_TERMO, E2_PREFIXO, E2_NUM, E2_PARCELA, E2_TIPO, E2_VENCREA, E2_VALOR
 	  ORDER BY E2_FILIAL, E2_FORNECE, E2_LOJA, Z08_TERMO, E2_PARCELA
 EndSql
@@ -206,15 +192,15 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->E2_FILIAL
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()

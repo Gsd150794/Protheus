@@ -2,40 +2,31 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                           
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Josué Danich     | 19/09/2017 | Troca de numerador do DA4 para getsxexnum - Chamado 21467  
--------------------------------------------------------------------------------------------------------------------------------
- Josué Danich     | 18/07/2018 | Reescrita de cadastro para aproveitar fornecedor/motorista pré existente - Chamado 25427
--------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges     | 02/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Josué Danich  |19/09/2017| Chamado 21467. Troca de numerador do DA4 para getsxexnum
+Josué Danich  |18/07/2018| Chamado 25427. Reescrita de cadastro para aproveitar fornecedor/motorista pré existente
+Lucas Borges  |02/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "RwMake.ch"
-#include "protheus.ch"
-#include "topconn.ch"
+#Include "TOTVS.ch"
+#Include "topconn.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: Gp265ValPE
 Autor-------------: Tiago Correa Castro
 Data da Criacao---: 06/11/2008
-===============================================================================================================================
 Descrição---------: Ponto de Entrada para validar a inclusao/alteracao do cadastro de autonomo
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T. - Permite a Inclusão/Alteração
 ------------------: .F. - Não permite a Inclusão/Alteração
 ===============================================================================================================================
 */
 User Function Gp265ValPE()
 
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local _lRet			:= .T.
 Local _cCPF			:= M->RA_CIC
 Local _cSefip		:= M->RA_CATEG
@@ -51,16 +42,16 @@ U_ITLOGACS()
 //Valida filial de cadastro de autonomos
 If !(cfilant $ u_itgetmv("ITFILAUT","01"))
 
-	u_itmsg("Filial " + cfilant + " não autorizada para cadastro de autonomos!","Atenção","Filial(is) autorizada(s) para cadastro de autonomos: " + alltrim(u_itgetmv("ITFILAUT","01")),1)
+	U_ITMsg("Filial " + cfilant + " não autorizada para cadastro de autonomos!","Atenção","Filial(is) autorizada(s) para cadastro de autonomos: " + AllTrim(u_itgetmv("ITFILAUT","01")),1)
 	Return .F.
 
-Endif
+EndIf
 
 //================================================================================
 //| Verifico preenchimento dos campos de DDD e número do celular
 //================================================================================
-If Empty(M->RA_DDDCELU) .or. Empty(M->RA_NUMCELU)
-	u_itmsg(	 "Preenchimento do campo de DDD e número do celular é obrigatório. Devido a integração com o cadastro de motoristas."	,"Campo Obrigatório.",;
+If Empty(M->RA_DDDCELU) .Or. Empty(M->RA_NUMCELU)
+	U_ITMsg(	 "Preenchimento do campo de DDD e número do celular é obrigatório. Devido a integração com o cadastro de motoristas."	,"Campo Obrigatório.",;
 					"Favor preencher o campo de DDD e número do celular.",1				 												)
 
 	Return(.F.)
@@ -92,39 +83,39 @@ If Len(AllTrim(_cCPF)) > 0
 		
 		If Inclui
 		
-			u_itmsg("Nao será possível a inclusao desse registro pois ja existe um registro com o mesmo CPF e Categ. SEFIP na base de Dados!!","Cadastro duplicado - Inclusao",;
+			U_ITMsg("Nao será possível a inclusao desse registro pois ja existe um registro com o mesmo CPF e Categ. SEFIP na base de Dados!!","Cadastro duplicado - Inclusao",;
 						"Favor verificar se os dados do Registro estão corretos!!",1)
 			_lRet	:=	.F.
 			
 		ElseIf Altera
 		
-			u_itmsg("Nao será possível a alteracao desse registro pois ja existe um registro com o mesmo CPF e Categ. SEFIP com Matricula diferente na base de Dados!!",;
+			U_ITMsg("Nao será possível a alteracao desse registro pois ja existe um registro com o mesmo CPF e Categ. SEFIP com Matricula diferente na base de Dados!!",;
 						"Cadastro duplicado - Alteracao",;
 						"Favor verificar se os dados do Registro estão corretos!!",1)
 			_lRet	:=	.F.
 			
-		Endif                                                                          
+		EndIf                                                                          
 	
-	Endif                                                                              
+	EndIf                                                                              
 
 Else
 
-	u_itmsg("Para realizar o cadastro do Autonomo é necessario que se preencha o campo CPF.","Informação",;
+	U_ITMsg("Para realizar o cadastro do Autonomo é necessario que se preencha o campo CPF.","Informação",;
 				"Favor fornecer o CPF do Autonomo antes de realizar o seu cadastro.",1)
 	_lRet	:=	.F.
 
-EndIF
+EndIf
     
-If _lRet .and. Inclui .and. _cSefip == "15" .and. _cAutFret == "S"
+If _lRet .And. Inclui .And. _cSefip == "15" .And. _cAutFret == "S"
 
-	cQuery := " SELECT MAX( SUBSTR(RA_MAT,2,5) ) AS MAXIMO "
+	cQuery := " SELECT MAX( SubStr(RA_MAT,2,5) ) AS MAXIMO "
 	cQuery += " FROM " + RetSqlName("SRA")
-	cQuery += " WHERE RA_FILIAL = '01' AND D_E_L_E_T_ = ' ' AND SUBSTR(RA_MAT,1,1) = '4' "
+	cQuery += " WHERE RA_FILIAL = '01' AND D_E_L_E_T_ = ' ' AND SubStr(RA_MAT,1,1) = '4' "
 	
 	TcQuery cQuery New Alias "TEMP"
 	
 	DBSelectArea("TEMP")
-	TEMP->( DbGotop() )
+	TEMP->( DBGoTop() )
 	
     If TEMP->( !Eof() )
     	cCodigo := StrZero( Val(TEMP->MAXIMO) + 1 , 5 )
@@ -150,18 +141,15 @@ EndIf
 //================================================================================
 If _lRet
 
-	If M->RA_CATEG == "15" .and. M->RA_I_AUTFR == "S"
+	If M->RA_CATEG == "15" .And. M->RA_I_AUTFR == "S"
 
 		_lRet := OkGeraCad()
 		
-	Endif
+	EndIf
 	
-Endif
+EndIf
 
-//================================================================================
-//| Restaura a area.                                                             |
-//================================================================================
-RestArea( _aArea )
+FWRestArea( _aArea )
 	
 Return _lRet                     
                      
@@ -171,11 +159,8 @@ Return _lRet
 Programa----------: OkGeraCad
 Autor-------------: Fabiano Dias
 Data da Criacao---: 08/07/2010
-===============================================================================================================================
 Descrição---------: Geração automática do cadastro de Fornecedor e Motorista a partir do Autônomo
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: lret - se conseguiu gerar o cadastro com sucesso
 ===============================================================================================================================
 */
@@ -183,15 +168,15 @@ Static Function OkGeraCad()
 
 Local _lRet		:= .T.
 Local aVetor 	:= {}
-Local _cFilial	:= xfilial("SRA")
+Local _cFilial	:= xFilial("SRA")
 Local _cCodForn	:= ""
 Local _cLojForn	:= "0001"
 Local _cCodAuto := M->RA_MAT
-Local _cNome 	:= ALLTRIM( M->RA_NOMECMP	)
-Local _cNReduz	:= ALLTRIM( M->RA_NOME		)
-Local _cEnd 	:= ALLTRIM( M->RA_ENDEREC	)
-Local _cBairro 	:= ALLTRIM( M->RA_BAIRRO	)
-Local _cMuni	:= ALLTRIM( M->RA_MUNICIP	)
+Local _cNome 	:= AllTrim( M->RA_NOMECMP	)
+Local _cNReduz	:= AllTrim( M->RA_NOME		)
+Local _cEnd 	:= AllTrim( M->RA_ENDEREC	)
+Local _cBairro 	:= AllTrim( M->RA_BAIRRO	)
+Local _cMuni	:= AllTrim( M->RA_MUNICIP	)
 Local _cEst 	:= M->RA_ESTADO
 Local _cCodMuni := M->RA_CODMUN
 Local _cCEP 	:= M->RA_CEP
@@ -200,16 +185,16 @@ Local _cCPF 	:= M->RA_CIC
 Local _cOrgRG	:= M->RA_RGORG
 Local _cInscEst := "" // "ISENTO"
 Local _cDDD		:= M->RA_DDDFONE
-Local _cTel 	:= ALLTRIM( M->RA_TELEFON )
+Local _cTel 	:= AllTrim( M->RA_TELEFON )
 Local _cTelComp	:= M->RA_TELEFON
 Local _cCNH		:= M->RA_HABILIT
-Local _cPai		:= ALLTRIM( M->RA_PAI )
-Local _cMae		:= ALLTRIM( M->RA_MAE )
+Local _cPai		:= AllTrim( M->RA_PAI )
+Local _cMae		:= AllTrim( M->RA_MAE )
 Local _cCodMot	:= ""
-Local _cRg		:= ALLTRIM( M->RA_RG ) 
+Local _cRg		:= AllTrim( M->RA_RG ) 
 Local _cEmail	:= AllTrim( M->RA_EMAIL )
 Local _cDDDCel	:= M->RA_DDDCELU
-Local _cCelula	:= ALLTRIM( M->RA_NUMCELU )
+Local _cCelula	:= AllTrim( M->RA_NUMCELU )
 
 Private lMsErroAuto := .F.
 				
@@ -221,33 +206,33 @@ Begin Transaction
 	
 	//Identifica se já existe fornecedor tipo autonomo com mesmo cpf
 	_lachou := .F.
-	SA2->(dbsetorder(3))
-	If SA2->(Dbseek(xfilial("SA2")+alltrim(_cCPF)))
+	SA2->(DBSetOrder(3))
+	If SA2->(DBSeek(xFilial("SA2")+AllTrim(_cCPF)))
 	
-		Do while SA2->A2_FILIAL == xfilial("SA2") .and. alltrim(SA2->A2_CGC) ==  alltrim(_cCPF)
+		While SA2->A2_FILIAL == xFilial("SA2") .And. AllTrim(SA2->A2_CGC) ==  AllTrim(_cCPF)
 		
-		  If alltrim(SA2->A2_I_CLASS) == "A"
+		  If AllTrim(SA2->A2_I_CLASS) == "A"
 		  
-		  	_cCodForn := alltrim(SA2->A2_COD)
+		  	_cCodForn := AllTrim(SA2->A2_COD)
 		  	_lachou := .T.
 		  	
-		  Endif
+		  EndIf
 		  
-		  SA2->(Dbskip())
+		  SA2->(DBSkip())
 		  
-		Enddo
+		EndDo
 		
-		If empty(_cCodForn)
+		If Empty(_cCodForn)
 		
 			_cCodForn := U_ACOM005( "A" , _cTipo , _cCPF )
 			
-		Endif
+		EndIf
 		
 	Else
 	
 		_cCodForn := U_ACOM005( "A" , _cTipo , _cCPF )
 	
-	Endif
+	EndIf
 	
 	aAdd( aVetor , {	"A2_I_CLASS"	, "A"												, nil } )
 	aAdd( aVetor , {	"A2_TIPO"		, _cTipo										 	, nil } )
@@ -271,9 +256,9 @@ Begin Transaction
 	aAdd( aVetor , {	"A2_I_FLAUT"	, _cFilial										 	, nil } )
 	aAdd( aVetor , {	"A2_I_AUT"		, _cCodAuto											, nil } )
 	
-	MSExecAuto( {|x,y| Mata020(x,y) } , aVetor , iif(_lachou,4,3) )
+	MSExecAuto( {|x,y| Mata020(x,y) } , aVetor , IIf(_lachou,4,3) )
 	
-	IF lMSErroAuto
+	If lMSErroAuto
 	
 		DisarmTransaction()
 		
@@ -292,7 +277,7 @@ Begin Transaction
 			ConfirmSX8()
 		EndIf				
 		
-	Endif
+	EndIf
     
     //================================================================================
 	//| Cadastro de motorista                                                        |
@@ -301,8 +286,8 @@ Begin Transaction
 	aVetor 		:= 	{}  
 	_lachou := .F.
 
-	DA4->(Dbsetorder(3))
-	If DA4->(Dbseek(xfilial("DA4")+alltrim(_cCPF)))
+	DA4->(DBSetOrder(3))
+	If DA4->(DBSeek(xFilial("DA4")+AllTrim(_cCPF)))
 	
 		_cCodMot := DA4->DA4_COD
 		_lachou := .T.
@@ -354,15 +339,15 @@ Begin Transaction
 				{ 'DA4_RG'		, _cRg												, NIL } } 
 		
 		
-	Endif
+	EndIf
 	
 
 	//================================================================================
 	//| Rotina de ExecAuto usando MVC                                                | 
 	//================================================================================
-	lMSErroAuto := !ITExecAutoDA4( aVetor , iif(_lachou,4,3) )
+	lMSErroAuto := !ITExecAutoDA4( aVetor , IIf(_lachou,4,3) )
 	
-	IF lMSErroAuto
+	If lMSErroAuto
 	
 		DisarmTransaction()
 		
@@ -380,7 +365,7 @@ Begin Transaction
 			ConfirmSX8()
 		EndIf
 		
-	Endif
+	EndIf
 
 End Transaction
 
@@ -391,12 +376,9 @@ Return( _lRet )
 Programa----------: ITExecAutoDA4
 Autor-------------: Alexandre Villar
 Data da Criacao---: 30/07/2014
-===============================================================================================================================
 Descrição---------: Processamento do ExecAuto via MVC de acordo com a rotina padrão
-===============================================================================================================================
 Parametros--------: _avetor - array com campos e dados para o execauto
 					_noper - operação do execauto
-===============================================================================================================================
 Retorno-----------: lret - se conseguiu executar o execauto com sucesso
 ===============================================================================================================================
 */

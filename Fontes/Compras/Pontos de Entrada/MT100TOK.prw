@@ -5,16 +5,13 @@
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges  |19/06/2025| Chamado 50617. Revisões diversas visando padronizar os fontes
-==============================================================================================================================================================
-Analista - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
-==============================================================================================================================================================
-Andre    - Alex Wallauer - 14/10/24 - 25/10/24 -  48836  - Ajuste da Validação da diferença entre as alíquotas de ICMS do PC X NF de entrada.
-Lucas B. - Lucas Borges  - 12/03/25 - 12/03/25 -  49303  - Incluída validação se o vendedor não está bloqueado. Caso ele esteja, o execauto da MGeraNDC será
-															desarmado mas o título da devolução permanece no financeiro.
-==============================================================================================================================================================
+Lucas Borges  |12/03/2025| Chamado 49303. Incluída validação se o vendedor não está bloqueado. Caso ele esteja, o execauto da 
+			  |			 | MGeraNDC será desarmado mas o título da devolução permanece no financeiro.
+Alex Wallauer |03/09/2025| Chamado 51670. Ajuste da Validação das diferenças entre os preços do PC X NF de entrada.
+===============================================================================================================================
 */
                                                                                                                       
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -23,10 +20,10 @@ Autor-----------: Wodson Reis
 Data da Criacao-: 14/04/2009
 Descrição-------: Validação de documento de entrada. Em que Ponto: Este P.E. é chamado na função A103Tudok() Pode ser usado 
 				para validar a inclusao da NF. Esse Ponto de Entrada é chamado 2 vezes dentro da rotina A103Tudok(). Para o 
-				controle do número de vezes em que ele é chamado foi criada a variável lógica lMT100TOK, que quando for definida
+				controle do número de vezes em que ele é chamado foi criada a variável lógica lMT100TOK, que quando For definida
 				como (.F.) o ponto de entrada será chamado somente uma vez.
 Caminhos--------: Compras->Atualizações->Movimentações->Documento de Entrada->Incluir
-Parametros------: Paramixb[1] - 3 Inclusão, 4 Alteração, 5 Exclusão
+Parametros------: ParamIXB[1] - 3 Inclusão, 4 Alteração, 5 Exclusão
 Retorno---------: ( .T. ) Dados validos para inclusao. / ( .F. ) Dados não validados. 
 ===============================================================================================================================
 */
@@ -74,9 +71,9 @@ Local aCampVld	:= {'Índice','Pedido/Nota/Série','Dt Emissão','Item','Produto','Q
 Local aCampVld2	:= {'Índice','Pedido/Nota/Série','Dt Emissão','Item','Produto','Quantidade','Qtd Entregue','Vlr. Unit.','Desconto','Vlr Total Liq.','TES','Ocorrência'} As Array
 Local _nCont	:= 0 As Numeric
 Local _nVlTotal	:= 0 As Numeric
-Local _lImpNF	:= .F. As Logical
-Local _lImpNF1	:= .F. As Logical
-Local _lImpNF2	:= .F. As Logical
+Local _lDifPreco:= .F. As Logical
+Local _lDifPC	:= .F. As Logical
+Local _lDifTES	:= .F. As Logical
 Local _nDifCM	:= GetMV( "IT_DIFCM"  ,, 15 ) As Numeric //Percentual minimo de diferenca de CM para bloquear processo. (16%)
 Local _nDifCM2	:= GetMV( "IT_DIFCM2" ,, 10 ) As Numeric //Percentual minimo de diferenca de CM para exibir mensagem se continua ou nao. (11%)
 Local _nCMorig	:= 0 As Numeric 
@@ -227,7 +224,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 		EndIf
 		_lRet := .F.
 	EndIf
-    If _lRet .And. TYPE("_cFUNDFIX") = "C" 
+    If _lRet .And. Type("_cFUNDFIX") = "C" 
         If Empty(AllTrim(_cFUNDFIX))
 			_cAux:="Não foi informado o Fundo Fixo na Aba Italac."
     		If l103Auto
@@ -258,8 +255,8 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 	// Caso esteja parametrizado para verificar o processamento do XML para autorizar a gravação [8459]
 	//====================================================================================================
 	If _lRet .And. _lChkXML .And. Upper(AllTrim(cEspecie)) $ 'SPED/CTE/CTEOS' .And. cFormul <> 'S' .And. !Empty(aNfeDanfe[13])
-		SDS->(DbSetOrder(2))
-		If SDS->(DbSeek(xFilial("SDS") + aNfeDanfe[13])) 
+		SDS->(DBSetOrder(2))
+		If SDS->(DBSeek(xFilial("SDS") + aNfeDanfe[13])) 
 			If !SDS->DS_STATUS == 'P'
 				_cAux:="Documento não foi gerado via Totvs Colaboração. Documento ainda pendente no Monitor."
 				If l103Auto
@@ -279,9 +276,9 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 				_cNomArq := '273'+ aNfeDanfe[13] +'.xml'
 			EndIf
 
-			DbSelectArea('CKO')
-			CKO->( DbSetOrder(1) )
-			If CKO->( DbSeek( PadR( _cNomArq , TamSX3('CKO_ARQUIV')[01] ) ) )
+			DBSelectArea('CKO')
+			CKO->( DBSetOrder(1) )
+			If CKO->( DBSeek( PadR( _cNomArq , TamSX3('CKO_ARQUIV')[01] ) ) )
 				If CKO->CKO_FLAG == '1'
 					_cAux:="Documento consta na fila de Excluídos no Monitor."
 				//Documentos do tipo complemento. Não são tratados pelo Colaboração e tem que eser incluídos manualmente
@@ -308,11 +305,11 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 	EndIf
     
 	//====================================================================================================
-    // Faz a conversão das quantidades, quando a nota fiscal for de um produto do tipo serviço e
+    // Faz a conversão das quantidades, quando a nota fiscal For de um produto do tipo serviço e
 	// e o item do pedido de compras estiver com o campo "Controla Entregas Parciais" igual a Sim.
     //====================================================================================================
     If _lRet 
-       SC7->(DbSetOrder(1)) // C7_FILIAL+C7_NUM+C7_ITEM+C7_SEQUEN 
+       SC7->(DBSetOrder(1)) // C7_FILIAL+C7_NUM+C7_ITEM+C7_SEQUEN 
        
        _lCrtlParc := .F. // Controla quantidades parciais. 
 	   //=========================================================================
@@ -342,7 +339,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
                        _nQtdParc := aCols[_nI][_nPosPrc] / SC7->C7_PRECO
 		   		       _nPrcTot  := Round(_nQtdParc * SC7->C7_PRECO,2)
                        _nValTotDig += _nPrcTot
-					   _nJ := Ascan(_aQtdProd,{|x| x[4] == _cPedidoC .And. x[5] == _cItemPC})
+					   _nJ := aScan(_aQtdProd,{|x| x[4] == _cPedidoC .And. x[5] == _cItemPC})
 					   If _nJ > 0 
                           _nValTotPC += (_aQtdProd[_nJ,3] * _aQtdProd[_nJ,6])
 					   EndIf 
@@ -359,8 +356,8 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
              _lRet := .F.
 
              _cTextoMsg := "O valor total da nota ultrapassa o máximo permitido para a nota fiscal de entrada. " + CRLF
-             _cTextoMsg += "Valor total permitido: " + Alltrim( Transform(_nValMax,"@E 999,999,999,999.99")) + ". " + CRLF 
-		     _cTextoMsg += "Valor total informado: " + Alltrim( Transform(_nValTotDig,"@E 999,999,999,999.99")) + "."
+             _cTextoMsg += "Valor total permitido: " + AllTrim( Transform(_nValMax,"@E 999,999,999,999.99")) + ". " + CRLF 
+		     _cTextoMsg += "Valor total informado: " + AllTrim( Transform(_nValTotDig,"@E 999,999,999,999.99")) + "."
 
 		     If l103Auto
 			 	AutoGRLog("MT100TOK06B"+CRLF+_cTextoMsg)
@@ -372,7 +369,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
     EndIf 
 
 	If _lRet 
-       SC7->(DbSetOrder(1)) // C7_FILIAL+C7_NUM+C7_ITEM+C7_SEQUEN  
+       SC7->(DBSetOrder(1)) // C7_FILIAL+C7_NUM+C7_ITEM+C7_SEQUEN  
 
 	   For _nI := 1 To Len(aCols)                                                                                                                            
 		   If !aCols[_nI][Len(aHeader)+1] //Não verifica linhas deletadas
@@ -397,7 +394,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 			           EndIf 
 
 					   //=======================================================================================
-					   // Quando o item da nota for do tipo serviço e possuir controle de entregas parciais,
+					   // Quando o item da nota For do tipo serviço e possuir controle de entregas parciais,
 					   // o usuário informa no campo valor unitário o valor pago parcialmente.
 					   // Este trecho calcula o percentual pago e converte as quantidade e o valor total pago.
 					   // Para preencher os demais campos da tela com os valores corretos, como valor total do
@@ -569,10 +566,10 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 		//====================================================================================================
 		//Valido se o período do Leite de terceiros existe e está aberto
 		//====================================================================================================
-		_cDtRef:= DtoS(IIf(l103Auto,aAutoCab[aScan( aAutoCab , {|X| Upper( AllTrim( X[1] ) ) == "F1_DTDIGIT"} )][2],dDataBase))//DtoS( dDataBase )
+		_cDtRef:= DToS(IIf(l103Auto,aAutoCab[aScan( aAutoCab , {|X| Upper( AllTrim( X[1] ) ) == "F1_DTDIGIT"} )][2],dDataBase))//DToS( dDataBase )
 		_lRet:= U_ValLT3(aCols,_cDtRef,_nPosCod,_nPosNOri,_nPosSOri)
 	EndIf
-	If cTipo == "D" .AND. _lRet .AND. _lGeraNDC
+	If cTipo == "D" .And. _lRet .And. _lGeraNDC
 		_cAlias := GetNextAlias()
 		BeginSql alias _cAlias      
 			SELECT 1 ACHOU FROM %Table:SA1%
@@ -605,14 +602,14 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 	// Feito comparacao verificando se rotina é proveniente de retorno
 	//====================================================================================================
 	If _lRet
-		ZZL->( DbSetOrder(3) )
-		If ZZL->( DbSeek( xFilial("ZZL") + RetCodUsr() ) )
-			If ZZL->(FIELDPOS("ZZL_PEFRPA")) = 0 .OR. ZZL->ZZL_PEFRPA == "S"
+		ZZL->( DBSetOrder(3) )
+		If ZZL->( DBSeek( xFilial("ZZL") + RetCodUsr() ) )
+			If ZZL->(FIELDPOS("ZZL_PEFRPA")) = 0 .Or. ZZL->ZZL_PEFRPA == "S"
 				_lValidFrac1UM:=.F.
 			EndIf
 		EndIf
-		ZZL->( DbSetOrder(1) )
-		SB1->( DbSetOrder(1) )
+		ZZL->( DBSetOrder(1) )
+		SB1->( DBSetOrder(1) )
     
 		For _nI := 1 To Len(aCols)
 		    If aCols[_nI][_nPosDel]//Se deletado
@@ -622,7 +619,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 			//============================================================================================================
 			//Verifica se TES do documento vinculado é compatível quanto a movimentação de estoque com o CTE sendo incluso
 			//=============================================================================================================
-			If Upper(AllTrim(cEspecie)) $ 'CTE' .AND. !Empty(aCols[_nI][_nPosTes]) .and. !Empty(aCols[_nI][_nPosIT])
+			If Upper(AllTrim(cEspecie)) $ 'CTE' .And. !Empty(aCols[_nI][_nPosTes]) .And. !Empty(aCols[_nI][_nPosIT])
 	
 				//guarda posição do SD1 e do SF1
 				_nposor1 := SD1->(Recno())
@@ -631,34 +628,34 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 				_asf1    := SF1->(GetArea())
 					
 				//Procura referência na SDT para achar chave da nota fiscal de origem
-				SDT->(DbSetOrder(8)) //DT_FILIAL+DT_FORNEC+DT_LOJA+DT_DOC+DT_SERIE+DT_ITEM
-				If SDT->(DbSeek(xFilial("SDT")+cA100For+cLoja+cnfiscal+cserie+aCols[_nI][_nPosItn]))
+				SDT->(DBSetOrder(8)) //DT_FILIAL+DT_FORNEC+DT_LOJA+DT_DOC+DT_SERIE+DT_ITEM
+				If SDT->(DBSeek(xFilial("SDT")+cA100For+cLoja+cnfiscal+cserie+aCols[_nI][_nPosItn]))
 				
-					SF1->(DbSetOrder(8)) //F1_FILIAL+F1_CHVNFE
-					If SF1->(DbSeek(xFilial("SF1")+SDT->DT_CHVNFO))
+					SF1->(DBSetOrder(8)) //F1_FILIAL+F1_CHVNFE
+					If SF1->(DBSeek(xFilial("SF1")+SDT->DT_CHVNFO))
 						//Procura tes de origem na SD1
-						SD1->(DbSetOrder(1))
-						If SD1->(DbSeek(SF1->F1_FILIAL+SF1->F1_DOC+SF1->F1_SERIE+SF1->F1_FORNECE+SF1->F1_LOJA+SDT->DT_COD+ aCols[_nI][_nPosIT] ))
-							Do While SD1->(!EOF()) .AND. SF1->F1_FILIAL == SD1->D1_FILIAL .AND. SF1->F1_DOC == SD1->D1_DOC .AND.;
-							 		  SF1->F1_DOC == SD1->D1_DOC .AND. SF1->F1_FORNECE == SD1->D1_FORNECE .AND.;
-							 		  SF1->F1_LOJA == SD1->D1_LOJA .AND. SDT->DT_COD == SD1->D1_COD .AND. aCols[_nI][_nPosIT] == SD1->D1_ITEM
+						SD1->(DBSetOrder(1))
+						If SD1->(DBSeek(SF1->F1_FILIAL+SF1->F1_DOC+SF1->F1_SERIE+SF1->F1_FORNECE+SF1->F1_LOJA+SDT->DT_COD+ aCols[_nI][_nPosIT] ))
+							While SD1->(!Eof()) .And. SF1->F1_FILIAL == SD1->D1_FILIAL .And. SF1->F1_DOC == SD1->D1_DOC .AND.;
+							 		  SF1->F1_DOC == SD1->D1_DOC .And. SF1->F1_FORNECE == SD1->D1_FORNECE .AND.;
+							 		  SF1->F1_LOJA == SD1->D1_LOJA .And. SDT->DT_COD == SD1->D1_COD .And. aCols[_nI][_nPosIT] == SD1->D1_ITEM
 						
 								_cmvestnf := Posicione("SF4",1,xFilial("SF4")+aCols[_nI][_nPosTes],"F4_ESTOQUE")
 								_cmvestct := Posicione("SF4",1,xFilial("SF4")+SD1->D1_TES,"F4_ESTOQUE")
 		 	 		
-								If !(AllTrim(_cmvestct) == AllTrim(_cmvestnf)) .and. _cmvestct == "N"
-						 			aadd(_alogTES,{SD1->D1_FILIAL,SD1->D1_DOC+" / "+SD1->D1_SERIE+" / "+SD1->D1_ITEM,aCols[_nI][_nPosItn],SD1->D1_FORNECE+"/"+SD1->D1_LOJA,;
+								If !(AllTrim(_cmvestct) == AllTrim(_cmvestnf)) .And. _cmvestct == "N"
+						 			aAdd(_alogTES,{SD1->D1_FILIAL,SD1->D1_DOC+" / "+SD1->D1_SERIE+" / "+SD1->D1_ITEM,aCols[_nI][_nPosItn],SD1->D1_FORNECE+"/"+SD1->D1_LOJA,;
 						 	 					SD1->D1_TES + " - Estoque  " + _cmvestnf, aCols[_nI][_nPosTes] + " - Estoque " + _cmvestct })
 						 	 	EndIf
-						 	 	SD1->(Dbskip())
-						 	 Enddo
+						 	 	SD1->(DBSkip())
+						 	 EndDo
 						EndIf	
 					EndIf
 				EndIf
 				
 				//Reposiciona SD1 e SF1
-				SD1->(RestArea(_asd1))
-				SF1->(RestArea(_asf1))
+				SD1->(FWRestArea(_asd1))
+				SF1->(FWRestArea(_asf1))
 				SD1->(DBGoTo(_nposor1))
 				SF1->(DBGoTo(_nposor2))	
 			EndIf 			
@@ -669,25 +666,25 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 			_lQtZero := ( "1" == Posicione( "SF4" , 1 , xFilial("SF4") + aCols[_nI][_nPosTes] , "F4_QTDZERO" ))
 			_cCod := aCols[_nI][_nPosCod]
 			
-			SB1->( DbSeek( xFilial("SB1") + _cCod ) )
+			SB1->( DBSeek( xFilial("SB1") + _cCod ) )
 
 			If _cRet_TN = "ACHOU_PF"//AWF - 29/11/2016 - Projeto Unificação
-			   SC6->( DbSetOrder(2) )//C6_FILIAL+C6_PRODUTO+C6_NUM+C6_ITEM
+			   SC6->( DBSetOrder(2) )//C6_FILIAL+C6_PRODUTO+C6_NUM+C6_ITEM
 			   _cQtdeOri:=""
 			   _cPrUnOri:=""
 			   _cMensagem:=""
 			   _lOK:=.F.
-               If SC6->( DbSeek( _cFilCarregamento + aCols[_nI][_nPosCod] + _cPedCarregamento ) )
+               If SC6->( DBSeek( _cFilCarregamento + aCols[_nI][_nPosCod] + _cPedCarregamento ) )
                   _cQtdeOri:=TRANS(SC6->C6_QTDVEN ,AVSX3('C6_QTDVEN',6))
                   _cPrUnOri:=TRANS(SC6->C6_PRCVEN ,AVSX3('C6_PRCVEN',6))
 
-                  If SC6->C6_QTDVEN = aCols[_nI][_nPosQtd] .AND. ((SC6->C6_PRCVEN - aCols[_nI][_nPosPrc]) < 0.01 .And. (SC6->C6_PRCVEN - aCols[_nI][_nPosPrc]) > -0.01)
+                  If SC6->C6_QTDVEN = aCols[_nI][_nPosQtd] .And. ((SC6->C6_PRCVEN - aCols[_nI][_nPosPrc]) < 0.01 .And. (SC6->C6_PRCVEN - aCols[_nI][_nPosPrc]) > -0.01)
 			         _lOK:=.T.
 			      Else
 			         If SC6->C6_QTDVEN # aCols[_nI][_nPosQtd]
 			           _cMensagem:="Quantidade diferente  "
 			         EndIf
-			         If (SC6->C6_PRCVEN - aCols[_nI][_nPosPrc]) > 0.01 .OR. (SC6->C6_PRCVEN - aCols[_nI][_nPosPrc]) < -0.01
+			         If (SC6->C6_PRCVEN - aCols[_nI][_nPosPrc]) > 0.01 .Or. (SC6->C6_PRCVEN - aCols[_nI][_nPosPrc]) < -0.01
 			           _cMensagem+="Preço diferente"
 			         EndIf
 			         _lDiferente:=.T.
@@ -697,7 +694,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 			      _lDiferente:=.T.
                EndIf
 
-               AADD(_aLogItens,{ _lOK , STRZERO(_nI,4), aCols[_nI][_nPosCod] , _cQtdeOri , _cPrUnOri ,;
+               aAdd(_aLogItens,{ _lOK , StrZero(_nI,4), aCols[_nI][_nPosCod] , _cQtdeOri , _cPrUnOri ,;
                                  TRANS(aCols[_nI][_nPosQtd],AVSX3('D1_QUANT',6)),;
                                  TRANS(aCols[_nI][_nPosPrc],AVSX3('D1_VUNIT',6)),_cMensagem } )
 			EndIf
@@ -708,8 +705,8 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 					_aSldSB6:= CalcTerc(aCols[_nI][_nPosCod],cA100For,cLoja,aCols[_nI][_nPosItB6],aCols[_nI][_nPosTes],cTipo)
 					_nDif   := _aSldSB6[1] - aCols[_nI][_nPosQtd]  // 2 - 1,5 = 0,5
 					
-					If _aSldSB6[1] # 0 .AND. _nDif # 0 .AND. _nDif < _nTolera // 0,5 < 1
-						AADD(_aLogSaldos,{ .F. ,;
+					If _aSldSB6[1] # 0 .And. _nDif # 0 .And. _nDif < _nTolera // 0,5 < 1
+						aAdd(_aLogSaldos,{ .F. ,;
 						aCols[_nI][_nPosCod],;
 						TRANS(aCols[_nI][_nPosQtd],;
 						AVSX3('C6_QTDVEN',6)) ,;
@@ -734,14 +731,14 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 					_nFtMax		:= SB1->B1_I_FTMAX
 					If _cVldCon == "1"//B1_I_SFCON // QUEIJOS
 						_lDifPes := .F.
-						If aCols[_nI][_nPosDPE] == "S" .AND. ;
+						If aCols[_nI][_nPosDPE] == "S" .And. ;
 						  FWAlertYesNo("A nota atual é referente à diferença de pesagem entre a Italac e o Cliente?","MT100TOK009")
 							_lDifPes := .T.
 						Else
 							aCols[_nI][_nPosDPE] := "N"	 
 						EndIf
 
-						If _lDifPes .and. aCols[_nI][_nPosDPE] == "S"
+						If _lDifPes .And. aCols[_nI][_nPosDPE] == "S"
 							aCols[_nI][_nPosUsr] := cUserName
 						Else
 							_nVlrPeca := _nQtdProd / _nQtd2UM
@@ -751,7 +748,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 						
 						EndIf
 					
-					ElseIf aCols[_nI][_nPosQ2U] == 0 .and. !(_lDifPes)
+					ElseIf aCols[_nI][_nPosQ2U] == 0 .And. !(_lDifPes)
 						_cAux:="Para o produto "+ aCols[_nI][_nPosCod] +" é obrigatorio o preenchimento da segunda unidade de medida. Favor preencher a segunda unidade de medida!"
 						If l103Auto
 							AutoGRLog("MT100TOK010"+CRLF+_cAux)
@@ -769,10 +766,10 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 			
 			//====================================================================================================
 			//  Validação da diferença entre o custo médio e o custo de entrada somente se movimenta estoque
-			//  se for nota do tipo que conste no parâmetro IT_VALCMT e se tipo do produto não constar do 
+			//  se For nota do tipo que conste no parâmetro IT_VALCMT e se tipo do produto não constar do 
 			//  parâmetro IT_VALCMP
 			//====================================================================================================
-			If 	Posicione("SF4",1,xFilial("SF4")+AllTrim(acols[_Ni][_nPosTes]),"F4_ESTOQUE") = "S" .and.;
+			If 	Posicione("SF4",1,xFilial("SF4")+AllTrim(acols[_nI][_nPosTes]),"F4_ESTOQUE") = "S" .and.;
 				!(Posicione("SB1",1,xFilial("SB1")+AllTrim(aCols[_nI][_nPosCod]),"B1_TIPO") $ _cValCMP) .and.;
 				AllTrim(CTIPO) $ _cValCMT .and.;
 				!aCols[_nI][_nPosDel]
@@ -793,11 +790,11 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 			
 					_nDifPrd := _nDifPrd * 100
 			
-					If _nDifPrd > _nDifCM2 .and. _nDifPrd <= _nDifCM
-						AADD( _aErro1 , { _nI , AllTrim( aCols[_nI][02] ) , _nDifPrd } )
+					If _nDifPrd > _nDifCM2 .And. _nDifPrd <= _nDifCM
+						aAdd( _aErro1 , { _nI , AllTrim( aCols[_nI][02] ) , _nDifPrd } )
 						_lErro1 := .T.
 					ElseIf _nDifPrd > _nDifCM
-						AADD( _aErro2 , { _nI , AllTrim( aCols[_nI][02] ) , _nDifPrd } )
+						aAdd( _aErro2 , { _nI , AllTrim( aCols[_nI][02] ) , _nDifPrd } )
 						_lErro2 := .T.
 					EndIf	 
 				EndIf		
@@ -808,9 +805,9 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 	        // e a configuração do produto que diz para movimentar estoque.
 			// Somente valida para documento tipo Normal
 	        //================================================================================    
-			If CTIPO == "N" .AND. AllTrim(Posicione("SF4",1,xFilial("SF4")+AllTrim(acols[_nI][_nPosTes]),"F4_ESTOQUE")) == "N" .And. ;
+			If CTIPO == "N" .And. AllTrim(Posicione("SF4",1,xFilial("SF4")+AllTrim(acols[_nI][_nPosTes]),"F4_ESTOQUE")) == "N" .And. ;
 				AllTrim(Posicione("SB5",1,xFilial("SB5")+AllTrim(aCols[_nI][_nPosCod]),"B5_I_ESTOB")) == "S"
-				_cAux:="O Produto " + AllTrim(aCols[_nI][_nPosCod]) + " exige movimento de estoque e a TES " + AllTrim(acols[_Ni][_nPosTes]) + " não movimenta estoque!"
+				_cAux:="O Produto " + AllTrim(aCols[_nI][_nPosCod]) + " exige movimento de estoque e a TES " + AllTrim(acols[_nI][_nPosTes]) + " não movimenta estoque!"
 				If l103Auto
 					AutoGRLog("MT100TOK011"+CRLF+_cAux)
 				Else
@@ -853,7 +850,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 					
 				EndIf
 				//AWF - 01/11/2016 - Projeto Unificação
-				If  _cRet_TN # "ACHOU_PF" .AND. SB1->B1_TIPO <> "PA" .And. SB1->B1_LOCPAD <> aCols[_nI][_nPosArm] .and. _lRet
+				If  _cRet_TN # "ACHOU_PF" .And. SB1->B1_TIPO <> "PA" .And. SB1->B1_LOCPAD <> aCols[_nI][_nPosArm] .And. _lRet
 					_lRet := FWAlertYesNo("O Armazém selecionado ["+ aCols[_nI][_nPosArm] +"] não é o Armazém Padrão cadastrado para o Produto ["+ _cCod +"]. Deseja confirmar o produto com esse Armazém?","MT100TOK014")
 					If !_lRet .And. l103Auto
 						AutoGRLog("MT100TOK014"+CRLF+"O Armazém selecionado ["+ aCols[_nI][_nPosArm] +"] não é o Armazém Padrão cadastrado para o Produto ["+ _cCod +"].")
@@ -864,34 +861,34 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 			//Correção de bases para  PORTARIA CAT 42/2018 - Chamado 28559
 			_nPosTes := aScan( aHeader , {|X| Upper( AllTrim( X[2] ) ) == "D1_TES"     } ) // Código da TES
 			_nPosPROD:= aScan( aHeader , {|X| Upper( AllTrim( X[2] ) ) == "D1_COD"     } ) // Código do produto
-			_cgrupo := Posicione("SB1",1,xFilial("SB1")+acols[_ni][_nPosPROD],"B1_GRUPO")
+			_cgrupo := Posicione("SB1",1,xFilial("SB1")+acols[_nI][_nPosPROD],"B1_GRUPO")
 			
-			If acols[_ni][_nPosTes] $ SuperGetMV("IT_CAT42TE",.F.,"491")
+			If acols[_nI][_nPosTes] $ SuperGetMV("IT_CAT42TE",.F.,"491")
 				_nbasest := Posicione("SBM",1,xFilial("SBM")+_cgrupo,"BM_I_BASEN")
 				_naliqn  := SuperGetMV("IT_CAT42AL",.F.,18)
 				If _nbasest > 0
-					acols[_ni][_nPosbasen] := acols[_ni][_npostotal] * _nbasest
-					acols[_ni][_nPosbasen] := (acols[_ni][_nPosbasen] * (_naliqn/100)) - acols[_ni][_nposvalicm]
-					acols[_ni][_nPosaliqn] := _naliqn
+					acols[_nI][_nPosbasen] := acols[_nI][_npostotal] * _nbasest
+					acols[_nI][_nPosbasen] := (acols[_nI][_nPosbasen] * (_naliqn/100)) - acols[_nI][_nposvalicm]
+					acols[_nI][_nPosaliqn] := _naliqn
 				EndIf
 			EndIf
 
-			IF _lValidFrac1UM
-				SB1->(DbSeek(xFilial("SB1") + AllTrim(aCols[_ni][_nPosPROD])))
-				If SB1->B1_TIPO == "PA" .AND. SB1->B1_UM == "UN"
-					If aCols[_ni,_nPosQtd] <> Int(aCols[_ni,_nPosQtd])
+			If _lValidFrac1UM
+				SB1->(DBSeek(xFilial("SB1") + AllTrim(aCols[_nI][_nPosPROD])))
+				If SB1->B1_TIPO == "PA" .And. SB1->B1_UM == "UN"
+					If aCols[_nI,_nPosQtd] <> Int(aCols[_nI,_nPosQtd])
 						_lRet2 := .F.
-						_cProds+="Item: " + aCols[_ni,_nPosItn]+" Prod.: " + AllTrim(aCols[_ni][_nPosPROD])+" - UM: "+SB1->B1_UM+ " - " + LEFT(SB1->B1_DESC,25) + CHR(13)+CHR(10)
+						_cProds+="Item: " + aCols[_nI,_nPosItn]+" Prod.: " + AllTrim(aCols[_nI][_nPosPROD])+" - UM: "+SB1->B1_UM+ " - " + LEFT(SB1->B1_DESC,25) + CHR(13)+CHR(10)
 					EndIf
 				EndIf
 			EndIf
 
 			_cCGC      := AllTrim(Posicione("SA2",1,xFilial("SA2")+cA100For+cLoja,"A2_CGC"))
 
-			If _lRet .AND. !AllTrim(SM0->M0_CGC) == _cCGC .AND. ;
-			                         cFilAnt $ _cFilTrFil .AND. ;
-				                    cA100For $ _cCliTrFil .AND. ;
-				              !Empty(AllTrim(_cProTrFil)) .AND. !(AllTrim(aCols[_nI][_nPosProd]) $ _cProTrFil)
+			If _lRet .And. !AllTrim(SM0->M0_CGC) == _cCGC .And. ;
+			                         cFilAnt $ _cFilTrFil .And. ;
+				                    cA100For $ _cCliTrFil .And. ;
+				              !Empty(AllTrim(_cProTrFil)) .And. !(AllTrim(aCols[_nI][_nPosProd]) $ _cProTrFil)
 
 				If Posicione("SF4",1,xFilial("SF4")+aCols[_nI][_nPosTes],"F4_TRANFIL") == "1"
 					_cMovEstSD1 := Posicione("SF4",1,xFilial("SF4")+aCols[_nI][_nPosTes],"F4_ESTOQUE")
@@ -907,7 +904,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 					If !Empty(AllTrim(_cCodFil))
 						_cCodCli := SA1->A1_COD
 						_cLojaCli :=  SA1->A1_LOJA
-						_cEmissao := DTOS(dDEmissao)
+						_cEmissao := DToS(dDEmissao)
 						_cCodigo  := aCols[_nI][_nPosCod]
 						_cItem    := StrZero(Val(aCols[_nI][_nPosItn]),TamSX3("D2_ITEM")[1])
 						_cAliasSD2	:= GetNextAlias()
@@ -950,15 +947,15 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 								_lRet := .F. 
 							EndIf
 
-							If _lRet .AND. (_cAliasSD2)->F4_ESTOQUE <> _cMovEstSD1
+							If _lRet .And. (_cAliasSD2)->F4_ESTOQUE <> _cMovEstSD1
 								_lRet := .F. 
 								_aLogSD2 := {}
-								aadd(_alogSD2,{(_cAliasSD2)->D2_FILIAL,(_cAliasSD2)->D2_DOC+" / "+(_cAliasSD2)->D2_SERIE+" / "+(_cAliasSD2)->D2_ITEM,aCols[_nI][_nPosItn],(_cAliasSD2)->D2_CLIENTE+"/"+(_cAliasSD2)->D2_LOJA,;
+								aAdd(_alogSD2,{(_cAliasSD2)->D2_FILIAL,(_cAliasSD2)->D2_DOC+" / "+(_cAliasSD2)->D2_SERIE+" / "+(_cAliasSD2)->D2_ITEM,aCols[_nI][_nPosItn],(_cAliasSD2)->D2_CLIENTE+"/"+(_cAliasSD2)->D2_LOJA,;
 											(_cAliasSD2)->D2_TES + " - Estoque  " + (_cAliasSD2)->F4_ESTOQUE, aCols[_nI][_nPosTes] + " - Estoque " + _cMovEstSD1 })
 
 								_ahead := {"Filial","Nota origem","Item","Cliente","TES NF Origem","TES NF"}
 
-								U_ITMSG("Divergência entre as TES da NF de origem e a TES da entrada quanto ao campo que atualiza as movimentações de estoque para o item " + AllTrim(aCols[_nI][_nPosItn]) + " Produto " + AllTrim(aCols[_nI][_nPosCod]) + ".  Clique no botão 'Mais detalhes' para mais informações. ",;//,_ntipo,_nbotao,_nmenbot,_lHelpMvc,_cbt1,_cbt2,_bMaisDetalhes
+								U_ITMsg("Divergência entre as TES da NF de origem e a TES da entrada quanto ao campo que atualiza as movimentações de estoque para o item " + AllTrim(aCols[_nI][_nPosItn]) + " Produto " + AllTrim(aCols[_nI][_nPosCod]) + ".  Clique no botão 'Mais detalhes' para mais informações. ",;//,_ntipo,_nbotao,_nmenbot,_lHelpMvc,_cbt1,_cbt2,_bMaisDetalhes
 										"Atenção","Documento não será gravado até as TES estejam iguais referente a informação de estoque."+Chr(13)+Chr(10)+Chr(13)+Chr(10)+"Procure o responsável no departamento fiscal pelos cadastros das TES."         ,1     ,       ,        ,         ,     ,     ,;
 										{|| U_ITListBox( 'Existem divergências de TES' , _ahead , _alogSD2 , .T. , 1 )} )
 
@@ -1001,25 +998,25 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 			
 		Next _nI
 
-		If _lValidFrac1UM .AND. !_lRet2
-			U_ITMSG("Não é permitido fracionar a quantidade da 1a. UM de produto onde a UM for UN. Clique em mais detalhes",;//,_ntipo,_nbotao,_nmenbot,_lHelpMvc,_cbt1,_cbt2,_bMaisDetalhes
+		If _lValidFrac1UM .And. !_lRet2
+			U_ITMsg("Não é permitido fracionar a quantidade da 1a. UM de produto onde a UM For UN. Clique em mais detalhes",;//,_ntipo,_nbotao,_nmenbot,_lHelpMvc,_cbt1,_cbt2,_bMaisDetalhes
 			        "Validação Fracionado","Favor informar apenas quantidades inteiras na Primeira Unidade de Medida."         ,1     ,       ,        ,         ,     ,     ,;
 			        {|| Aviso("Validação Fracionado",_cProds,{"Fechar"}) } )
 			_lRet:=.F.
 		EndIf		
 		
-		If len(_alogTES) > 0
-			U_ITMSG("Divergência entre a TES do conhecimento e a utilizada na Nota Fiscal de Origem quanto a movimentação de estoque.",;
+		If Len(_alogTES) > 0
+			U_ITMsg("Divergência entre a TES do conhecimento e a utilizada na Nota Fiscal de Origem quanto a movimentação de estoque.",;
 					"Atenção","Documento não será gravado, verifique a TES na próxima tela.",1)
 			_ahead := {"Filial","Nota origem","Item","Fornecedor","TES NF","TES CTE"}
 			U_ITListBox( 'Existem divergências de TES' , _ahead , _alogTES , .T. , 1 )
 			_lRet := .F.
 		EndIf
 
-		If !Empty(_cItens2) .AND. _lRet
+		If !Empty(_cItens2) .And. _lRet
 			_cItens2 := "Produto - Conversao da 2 UM"+CRLF+_cItens2 
       		bBloco:={||  AVISO("ATENCA",_cItens2,{"Fechar"},3) }
-			U_ITMSG(	"Existe produto(s) que é obrigatorio o preenchimento da segunda unidade de medida." ,;
+			U_ITMsg(	"Existe produto(s) que é obrigatorio o preenchimento da segunda unidade de medida." ,;
 								"Atenção","Favor preencher a segunda unidade de medida, VER MAIS DETALHES",1,,,,,,bBloco )
 			_lRet := .F.				
 		EndIf
@@ -1082,7 +1079,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
     
 	If cFilAnt $ _cFilTpc
 		//============================================================================================================================
-		// Se o formulário não for próprio e o tipo for igual a Normal, o sistema irá fazer todas as validações do vínculo do PC x NF
+		// Se o formulário não For próprio e o tipo For igual a Normal, o sistema irá fazer todas as validações do vínculo do PC x NF
 		//============================================================================================================================
 		If cFormul == "N" .And. cTipo == "N"
 			If _lRet
@@ -1115,14 +1112,14 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 							//======================================================
 							// Posiciono na TES para validar se esta gera duplicata
 							//======================================================
-							SF4->(DbSetOrder(1))
-							If SF4->(DbSeek(xFilial("SF4") + aCols[_nI][_nPosTes]))
+							SF4->(DBSetOrder(1))
+							If SF4->(DBSeek(xFilial("SF4") + aCols[_nI][_nPosTes]))
 								If SF4->F4_DUPLIC == "S"
 									//====================================================================
 									// Se a TES gerar duplicata, a próxima validação é o grupo do produto
 									//====================================================================
-									SB1->(DbSetOrder(1))
-									If SB1->(DbSeek(xFilial("SB1") + aCols[_nI][_nPosCod]))
+									SB1->(DBSetOrder(1))
+									If SB1->(DBSeek(xFilial("SB1") + aCols[_nI][_nPosCod]))
 										If !( SB1->B1_GRUPO $ _cGrpNob )
 											If SB1->B1_I_PEDCO != "N"
 												//============================================================================================================================================
@@ -1190,33 +1187,33 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 						
 							TMPPED->(DBGoTop())
 	
-                            IF TMPPED->C7_MOEDA <> 1
+                            If TMPPED->C7_MOEDA <> 1
 	                           _nTxMoeda := RecMoeda(dDEmissao,TMPPED->C7_MOEDA)
 	                        EndIf   
 
 							If !TMPPED->(Eof())
                                 _nPrecoRS:=TMPPED->C7_PRECO
-                                IF TMPPED->C7_MOEDA <> 1
+                                If TMPPED->C7_MOEDA <> 1
                                    _nPrecoRS:=TMPPED->C7_PRECO*_nTxMoeda
                                 EndIf
 								//============================================
 								// Valida se é uso direto com TES sem estoque
 								//============================================
-								If  TMPPED->C7_I_USOD = 'S' .AND. Posicione("SF4",1,xFilial("SF4")+aCols[_nI][_nPosTes],"F4_ESTOQUE") != "S"  
-									_lImpNF2 := .T.
-									aAdd( _aLogVld2 , {StrZero(_nCont++,4),"Pedido: " + TMPPED->C7_NUM,STOD(TMPPED->C7_EMISSAO),TMPPED->C7_ITEM,TMPPED->C7_PRODUTO,AllTrim(Transform(TMPPED->C7_QUANT,PesqPict("SC7","C7_QUANT"))),AllTrim(Transform(TMPPED->C7_QUJE,PesqPict("SC7","C7_QUJE"))),AllTrim(Transform(_nPrecoRS,PesqPict("SC7","C7_PRECO"))),AllTrim(Transform(TMPPED->C7_VLDESC,PesqPict("SC7","C7_VLDESC"))),AllTrim(Transform(TMPPED->C7_TOTAL,PesqPict("SC7","C7_TOTAL"))),aCols[_nI][_nPosTes],"Pedido de uso direto com TES que não movimenta estoque! "} )
+								If  TMPPED->C7_I_USOD = 'S' .And. Posicione("SF4",1,xFilial("SF4")+aCols[_nI][_nPosTes],"F4_ESTOQUE") != "S"  
+									_lDifTES := .T.
+									aAdd( _aLogVld2 , {StrZero(_nCont++,4),"Pedido: " + TMPPED->C7_NUM,SToD(TMPPED->C7_EMISSAO),TMPPED->C7_ITEM,TMPPED->C7_PRODUTO,AllTrim(Transform(TMPPED->C7_QUANT,PesqPict("SC7","C7_QUANT"))),AllTrim(Transform(TMPPED->C7_QUJE,PesqPict("SC7","C7_QUJE"))),AllTrim(Transform(_nPrecoRS,PesqPict("SC7","C7_PRECO"))),AllTrim(Transform(TMPPED->C7_VLDESC,PesqPict("SC7","C7_VLDESC"))),AllTrim(Transform(TMPPED->C7_TOTAL,PesqPict("SC7","C7_TOTAL"))),aCols[_nI][_nPosTes],"Pedido de uso direto com TES que não movimenta estoque! "} )
 								EndIf
                                 
 								//----------------------------------------------------------------------
 								//Verifica se condição de pagamento da nota é a mesma do pedido
 								//----------------------------------------------------------------------
 								If !Empty(CCONDICAO) .And. AllTrim(TMPPED->C7_COND) <> AllTrim(CCONDICAO)
-									If ascan(_apederro, TMPPED->C7_NUM) == 0
-										_lImpNF1 := .T.
-										aadd(_apederro, TMPPED->C7_NUM)
-										aAdd( _aLogVld , {StrZero(_nCont++,4),"Pedido: " + TMPPED->C7_NUM,STOD(TMPPED->C7_EMISSAO),TMPPED->C7_ITEM,TMPPED->C7_PRODUTO,AllTrim(Transform(TMPPED->C7_QUANT,PesqPict("SC7","C7_QUANT"))),AllTrim(Transform(TMPPED->C7_QUJE,PesqPict("SC7","C7_QUJE"))),AllTrim(Transform(_nPrecoRS,PesqPict("SC7","C7_PRECO"))),AllTrim(Transform(TMPPED->C7_VLDESC,PesqPict("SC7","C7_VLDESC"))),AllTrim(Transform(TMPPED->C7_TOTAL,PesqPict("SC7","C7_TOTAL"))),;
+									If aScan(_apederro, TMPPED->C7_NUM) == 0
+										_lDifPC := .T.
+										aAdd(_apederro, TMPPED->C7_NUM)
+										aAdd( _aLogVld , {StrZero(_nCont++,4),"Pedido: " + TMPPED->C7_NUM,SToD(TMPPED->C7_EMISSAO),TMPPED->C7_ITEM,TMPPED->C7_PRODUTO,AllTrim(Transform(TMPPED->C7_QUANT,PesqPict("SC7","C7_QUANT"))),AllTrim(Transform(TMPPED->C7_QUJE,PesqPict("SC7","C7_QUJE"))),AllTrim(Transform(_nPrecoRS,PesqPict("SC7","C7_PRECO"))),AllTrim(Transform(TMPPED->C7_VLDESC,PesqPict("SC7","C7_VLDESC"))),AllTrim(Transform(TMPPED->C7_TOTAL,PesqPict("SC7","C7_TOTAL"))),;
 										                                      "Pedido com condição de pagamento ( " + AllTrim(TMPPED->C7_COND) + ") diferente da escolhida no documento de entrada: " + AllTrim(CCONDICAO)} )
-										aAdd( _aLogVld , {StrZero(_nCont++,4),"",STOD(""),"","","","","","","",""} )
+										aAdd( _aLogVld , {StrZero(_nCont++,4),"",SToD(""),"","","","","","","",""} )
 									EndIf
 								EndIf					
 								
@@ -1226,13 +1223,13 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 								_nTotNF  := aCols[_nI][_nPosVlr] - aCols[_nI][_nPosDsc] - aCols[_nI][_nPosIcm] + aCols[_nI][_nPosIPI]
 								_nTotNfs += _nTotNF   // 1 = Roda uma query no SC7 e soma o Total NF 
                                 
-							    IF (_nPos:=ASCAN(_aItensNFAtual,{|P| P[1] == aCols[_nI][_nPosPed] + aCols[_nI][_nPosIte] })) <> 0
+							    If (_nPos:=aScan(_aItensNFAtual,{|P| P[1] == aCols[_nI][_nPosPed] + aCols[_nI][_nPosIte] })) <> 0
                                    _aItensNFAtual[_nPos,2] += aCols[_nI][_nPosQtd]
-                                ELSE
-								   AADD(_aItensNFAtual, {aCols[_nI][_nPosPed] + aCols[_nI][_nPosIte] ,;//01
+                                Else
+								   aAdd(_aItensNFAtual, {aCols[_nI][_nPosPed] + aCols[_nI][_nPosIte] ,;//01
 								                                                aCols[_nI][_nPosQtd] })//02					   
 						        EndIf
-					            AADD(_aItensPrev,{          aCols[_nI][_nPosPed],; //01
+					            aAdd(_aItensPrev,{          aCols[_nI][_nPosPed],; //01
 					            	                        aCols[_nI][_nPosCod],; //02
 					            	                        aCols[_nI][_nPosIte],; //03
 										                                cNFiscal,; //04 - NF
@@ -1263,38 +1260,40 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 								//===================================================================
 								// Valida diferença entre as alíquotas de ICMS da Nota x Pedido
 								//===================================================================
-								If  !EMPTY(TMPPED->C7_PICM) .and. aCols[_nI][_nPosPICM] <> TMPPED->C7_PICM
-									_lImpNF1 := .T.
-									aAdd( _aLogVld , {StrZero(_nCont++,4),"Pedido: " + TMPPED->C7_NUM     ,STOD(TMPPED->C7_EMISSAO),TMPPED->C7_ITEM     ,TMPPED->C7_PRODUTO  ,AllTrim(Transform(TMPPED->C7_QUANT    ,PesqPict("SC7","C7_QUANT"))),AllTrim(Transform(TMPPED->C7_QUJE,PesqPict("SC7","C7_QUJE"))),AllTrim(Transform(_nPrecoRS,PesqPict("SC7","C7_PRECO")))           ,AllTrim(Transform(TMPPED->C7_VLDESC,PesqPict("SC7","C7_VLDESC")))    ,AllTrim(Transform(TMPPED->C7_TOTAL,PesqPict("SC7","C7_TOTAL")))    ,;
+								If  !Empty(TMPPED->C7_PICM) .And. aCols[_nI][_nPosPICM] <> TMPPED->C7_PICM
+									_lDifPC := .T.
+									aAdd( _aLogVld , {StrZero(_nCont++,4),"Pedido: " + TMPPED->C7_NUM     ,SToD(TMPPED->C7_EMISSAO),TMPPED->C7_ITEM     ,TMPPED->C7_PRODUTO  ,AllTrim(Transform(TMPPED->C7_QUANT    ,PesqPict("SC7","C7_QUANT"))),AllTrim(Transform(TMPPED->C7_QUJE,PesqPict("SC7","C7_QUJE"))),AllTrim(Transform(_nPrecoRS,PesqPict("SC7","C7_PRECO")))           ,AllTrim(Transform(TMPPED->C7_VLDESC,PesqPict("SC7","C7_VLDESC")))    ,AllTrim(Transform(TMPPED->C7_TOTAL,PesqPict("SC7","C7_TOTAL")))    ,;
 									                                      "Aliquota de ICMS divergente PC: " + AllTrim(Transform(TMPPED->C7_PICM      ,PesqPict("SC7","C7_PICM"))) + "%"} )
 									aAdd( _aLogVld , {StrZero(_nCont++,4),"Nota: "   + CNFISCAL+"/"+CSERIE,dDataBase               ,aCols[_nI][_nPosItn],aCols[_nI][_nPosCod],AllTrim(Transform(aCols[_nI][_nPosQtd],PesqPict("SD1","D1_QUANT"))),""                                                           ,AllTrim(Transform(aCols[_nI][_nPosPrc],PesqPict("SD1","D1_VUNIT"))),AllTrim(Transform(aCols[_nI][_nPosDsc],PesqPict("SD1","D1_VALDESC"))),AllTrim(Transform(aCols[_nI][_nPosVlr],PesqPict("SD1","D1_TOTAL"))),;
 									                                      "Aliquota de ICMS divergente NF: " + AllTrim(Transform(aCols[_nI][_nPosPICM],PesqPict("SC7","C7_PICM"))) + "%"} )
-									aAdd( _aLogVld , {StrZero(_nCont++,4),"",STOD(""),"","","","","","","",""} )
+									aAdd( _aLogVld , {StrZero(_nCont++,4),"",SToD(""),"","","","","","","",""} )
 								EndIf
 
 								//====================================
 								// Valida quantidade da Nota x Pedido
 								//====================================
-								If Iif(_nQtdVen > 0, _nQtdVen, aCols[_nI][_nPosQtd]) > ((TMPPED->C7_QUANT - TMPPED->C7_QUJE) + _nPtolPC)
-									_lImpNF1 := .T.
-									aAdd( _aLogVld , {StrZero(_nCont++,4),"Pedido: " + TMPPED->C7_NUM,STOD(TMPPED->C7_EMISSAO),TMPPED->C7_ITEM,TMPPED->C7_PRODUTO,AllTrim(Transform(TMPPED->C7_QUANT,PesqPict("SC7","C7_QUANT"))),AllTrim(Transform(TMPPED->C7_QUJE,PesqPict("SC7","C7_QUJE"))),AllTrim(Transform(_nPrecoRS,PesqPict("SC7","C7_PRECO"))),AllTrim(Transform(TMPPED->C7_VLDESC,PesqPict("SC7","C7_VLDESC"))),AllTrim(Transform(TMPPED->C7_TOTAL,PesqPict("SC7","C7_TOTAL"))),"Quantidade divergente e fora da tolerância de " + AllTrim(Str(_nPerToQ)) + "% Qtde: " + AllTrim(Str(_nValToQ))} )
+								If IIf(_nQtdVen > 0, _nQtdVen, aCols[_nI][_nPosQtd]) > ((TMPPED->C7_QUANT - TMPPED->C7_QUJE) + _nPtolPC)
+									_lDifPC := .T.
+									aAdd( _aLogVld , {StrZero(_nCont++,4),"Pedido: " + TMPPED->C7_NUM,SToD(TMPPED->C7_EMISSAO),TMPPED->C7_ITEM,TMPPED->C7_PRODUTO,AllTrim(Transform(TMPPED->C7_QUANT,PesqPict("SC7","C7_QUANT"))),AllTrim(Transform(TMPPED->C7_QUJE,PesqPict("SC7","C7_QUJE"))),AllTrim(Transform(_nPrecoRS,PesqPict("SC7","C7_PRECO"))),AllTrim(Transform(TMPPED->C7_VLDESC,PesqPict("SC7","C7_VLDESC"))),AllTrim(Transform(TMPPED->C7_TOTAL,PesqPict("SC7","C7_TOTAL"))),"Quantidade divergente e fora da tolerância de " + AllTrim(Str(_nPerToQ)) + "% Qtde: " + AllTrim(Str(_nValToQ))} )
 									aAdd( _aLogVld , {StrZero(_nCont++,4),"Nota: " + CNFISCAL + "/" + CSERIE,dDataBase,aCols[_nI][_nPosItn],aCols[_nI][_nPosCod],AllTrim(Transform(aCols[_nI][_nPosQtd],PesqPict("SD1","D1_QUANT"))),"",AllTrim(Transform(aCols[_nI][_nPosPrc],PesqPict("SD1","D1_VUNIT"))),AllTrim(Transform(aCols[_nI][_nPosDsc],PesqPict("SD1","D1_VALDESC"))),AllTrim(Transform(aCols[_nI][_nPosVlr],PesqPict("SD1","D1_TOTAL"))),"Quantidade divergente e fora da tolerância."} )
-									aAdd( _aLogVld , {StrZero(_nCont++,4),"",STOD(""),"","","","","","","",""} )
+									aAdd( _aLogVld , {StrZero(_nCont++,4),"",SToD(""),"","","","","","","",""} )
 								EndIf
 
 								//=======================================
 								// Valida preço unitário da Nota x Pedido
 								//=======================================
-								If (aCols[_nI][_nPosPrc]/_nTxMoeda) - (_nPrecoRS/_nTxMoeda) > (_nPtolP2/_nTxMoeda)
-									_lImpNF := .T.
-									aAdd( _aLogVld , {StrZero(_nCont++,4),"Pedido: " + TMPPED->C7_NUM,STOD(TMPPED->C7_EMISSAO),TMPPED->C7_ITEM,TMPPED->C7_PRODUTO,AllTrim(Transform(TMPPED->C7_QUANT,PesqPict("SC7","C7_QUANT"))),AllTrim(Transform(TMPPED->C7_QUJE,PesqPict("SC7","C7_QUJE"))),AllTrim(Transform(_nPrecoRS,PesqPict("SC7","C7_PRECO"))),AllTrim(Transform(TMPPED->C7_VLDESC,PesqPict("SC7","C7_VLDESC"))),AllTrim(Transform(TMPPED->C7_TOTAL,PesqPict("SC7","C7_TOTAL"))),;
+								_nDifPU:= ((aCols[_nI][_nPosPrc]/_nTxMoeda) - (_nPrecoRS/_nTxMoeda))
+								If _nDifPU <> 0 .AND. (_nDifPU > (_nPtolP2/_nTxMoeda) .OR.;//SE MAIOR 
+                                                       _nDifPU < (_nPtolP2/_nTxMoeda) ) //OU SE MENOR
+									_lDifPreco := .T.
+									aAdd( _aLogVld , {StrZero(_nCont++,4),"Pedido: " + TMPPED->C7_NUM,SToD(TMPPED->C7_EMISSAO),TMPPED->C7_ITEM,TMPPED->C7_PRODUTO,AllTrim(Transform(TMPPED->C7_QUANT,PesqPict("SC7","C7_QUANT"))),AllTrim(Transform(TMPPED->C7_QUJE,PesqPict("SC7","C7_QUJE"))),AllTrim(Transform(_nPrecoRS,PesqPict("SC7","C7_PRECO"))),AllTrim(Transform(TMPPED->C7_VLDESC,PesqPict("SC7","C7_VLDESC"))),AllTrim(Transform(TMPPED->C7_TOTAL,PesqPict("SC7","C7_TOTAL"))),;
 									                  "Preço Unitário divergente e fora da tolerância de " + AllTrim(Str(_nPtolPU)) + "% Valor: " + AllTrim(Str(_nPtolP2))} )
 									aAdd( _aLogVld , {StrZero(_nCont++,4),"Nota: " + CNFISCAL + "/" + CSERIE,dDataBase,aCols[_nI][_nPosItn],aCols[_nI][_nPosCod],AllTrim(Transform(aCols[_nI][_nPosQtd],PesqPict("SD1","D1_QUANT"))),"",AllTrim(Transform(aCols[_nI][_nPosPrc],PesqPict("SD1","D1_VUNIT"))),AllTrim(Transform(aCols[_nI][_nPosDsc],PesqPict("SD1","D1_VALDESC"))),AllTrim(Transform(aCols[_nI][_nPosVlr],PesqPict("SD1","D1_TOTAL"))),;
 									                  "Preço Unitário divergente e fora da tolerância."} )
-									aAdd( _aLogVld , {StrZero(_nCont++,4),"",STOD(""),"","","","","","","",""} )
+									aAdd( _aLogVld , {StrZero(_nCont++,4),"",SToD(""),"","","","","","","",""} )
 								EndIf
 								
-								If ASCAN(_aPedidos, aCols[_nI][_nPosPed]) = 0//_cPedAnt <> aCols[_nI][_nPosPed]
+								If aScan(_aPedidos, aCols[_nI][_nPosPed]) = 0//_cPedAnt <> aCols[_nI][_nPosPed]
 									aAdd(_aPedidos, aCols[_nI][_nPosPed])
 									//_cPedAnt := aCols[_nI][_nPosPed]
 								EndIf
@@ -1306,8 +1305,9 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 						EndIf
 					EndIf			
                 Next _nI
-				aAdd( _aLogAux , {StrZero(_nCont++,4),"",STOD(""),"","","","","","","",""} )
 				
+				aAdd( _aLogAux , {StrZero(_nCont++,4),"",SToD(""),"","","","","","","",""} )
+                _nQtdeSaldo:=0//SALDO TOTAL DE TODOS OS ITENS DO PC DISPONIVEL PARA FAZER NOTAS
 				For _nI := 1 To Len(_aPedidos)
 					//========================================================
 					// Totais de preço, desconto e total do pedido de compras
@@ -1324,20 +1324,20 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 					TMPTPD->(DBGoTop())
 
 					_nMoePedido:=TMPTPD->C7_MOEDA
-                    IF _nMoePedido <> 1
+                    If _nMoePedido <> 1
                        _nTxMoeda := RecMoeda(dDEmissao,_nMoePedido)
                     EndIf   
 	                
-					Do While !TMPTPD->(Eof())
+					While !TMPTPD->(Eof())
 
-                       IF TMPTPD->C7_MOEDA <> 1
+                       If TMPTPD->C7_MOEDA <> 1
 						  _nTotVuP += (TMPTPD->C7_PRECO*_nTxMoeda)
 						  _nTotDsP += (TMPTPD->C7_VLDESC*_nTxMoeda)
 						  _nTotIpP += (TMPTPD->C7_VALIPI*_nTxMoeda)
 						  _nTotPed += ((TMPTPD->C7_TOTAL - TMPTPD->C7_VLDESC + TMPTPD->C7_VALIPI)*_nTxMoeda)
                           _nPrecoRS:= TMPTPD->C7_PRECO*_nTxMoeda
                           _nTotalRS:= ((TMPTPD->C7_TOTAL - TMPTPD->C7_VLDESC + TMPTPD->C7_VALIPI)*_nTxMoeda)
-					   ELSE
+					   Else
                           _nPrecoRS:= TMPTPD->C7_PRECO
                           _nTotalRS:= (TMPTPD->C7_TOTAL - TMPTPD->C7_VLDESC + TMPTPD->C7_VALIPI)
 						  _nTotVuP += TMPTPD->C7_PRECO
@@ -1345,16 +1345,17 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 						  _nTotIpP += TMPTPD->C7_VALIPI
 						  _nTotPed += TMPTPD->C7_TOTAL - TMPTPD->C7_VLDESC + TMPTPD->C7_VALIPI
                        EndIf
-					   aAdd( _aLogAu1 , {StrZero(_nCont++,4),"Pedido: " + TMPTPD->C7_NUM,STOD(TMPTPD->C7_EMISSAO),TMPTPD->C7_ITEM,TMPTPD->C7_PRODUTO,AllTrim(Transform(TMPTPD->C7_QUANT,PesqPict("SC7","C7_QUANT"))),AllTrim(Transform(TMPTPD->C7_QUJE,PesqPict("SC7","C7_QUJE"))),AllTrim(Transform(TMPTPD->C7_PRECO,PesqPict("SC7","C7_PRECO"))),AllTrim(Transform(TMPTPD->C7_VLDESC,PesqPict("SC7","C7_VLDESC"))),AllTrim(Transform(TMPTPD->C7_TOTAL - TMPTPD->C7_VLDESC + TMPTPD->C7_VALIPI,PesqPict("SC7","C7_TOTAL"))),""} )
+					   aAdd( _aLogAu1 , {StrZero(_nCont++,4),"Pedido: " + TMPTPD->C7_NUM,SToD(TMPTPD->C7_EMISSAO),TMPTPD->C7_ITEM,TMPTPD->C7_PRODUTO,AllTrim(Transform(TMPTPD->C7_QUANT,PesqPict("SC7","C7_QUANT"))),AllTrim(Transform(TMPTPD->C7_QUJE,PesqPict("SC7","C7_QUJE"))),AllTrim(Transform(TMPTPD->C7_PRECO,PesqPict("SC7","C7_PRECO"))),AllTrim(Transform(TMPTPD->C7_VLDESC,PesqPict("SC7","C7_VLDESC"))),AllTrim(Transform(TMPTPD->C7_TOTAL - TMPTPD->C7_VLDESC + TMPTPD->C7_VALIPI,PesqPict("SC7","C7_TOTAL"))),""} )
 
                        _nQtde:=TMPTPD->C7_QUANT-TMPTPD->C7_QUJE
-					    IF (_nPos:=ASCAN(_aItensNFAtual,{|P| P[1]== TMPTPD->C7_NUM+TMPTPD->C7_ITEM })) <> 0
+					    If (_nPos:=aScan(_aItensNFAtual,{|P| P[1]== TMPTPD->C7_NUM+TMPTPD->C7_ITEM })) <> 0
                             _nQtdeNFAtual:= _aItensNFAtual[_nPos,2] 
 							_nQtde := (_nQtde-_nQtdeNFAtual)//tira a qtde da NF atual
 						EndIf
-						_nQtde:=IF(_nQtde<0,0,_nQtde)
+						_nQtde:=If(_nQtde<0,0,_nQtde)
 
-					   AADD(_aItensPrev,{         TMPTPD->C7_NUM,;//01
+						_nQtdeSaldo+=_nQtde
+					   aAdd(_aItensPrev,{         TMPTPD->C7_NUM,;//01
 					            	          TMPTPD->C7_PRODUTO,;//02
 					            	             TMPTPD->C7_ITEM,;//03
 										     	        "PEDIDO",;//04  //NF
@@ -1366,8 +1367,8 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 								                       _nTxMoeda,;//10  USAR A TAXA DA DATA DE EMISSAO DA NOTA ATUAL RecMoeda(dDEmissao,_nMoePedido)
 											  "1-ITEM DO PEDIDO"})//11
 
-					   TMPTPD->(dbSkip())
-					Enddo
+					   TMPTPD->(DBSkip())
+					EndDo
 					TMPTPD->(DBCloseArea())
 
 					//========================================================================
@@ -1385,7 +1386,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 												
 					TMPNFE->(DBGoTop())
 					
-					Do While !TMPNFE->(EOF())
+					While !TMPNFE->(Eof())
 					
 						_nTotDsN += TMPNFE->D1_VALDESC
 						_nTotIcN += TMPNFE->D1_ICMSRET
@@ -1393,7 +1394,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 					    _nTaxaNF := RecMoeda(TMPNFE->D1_EMISSAO ,_nMoePedido)
                         
 						_nTotalNF := TMPNFE->D1_TOTAL - TMPNFE->D1_VALDESC - TMPNFE->D1_ICMSRET + TMPNFE->D1_VALIPI
-                        IF _nMoePedido <> 1
+                        If _nMoePedido <> 1
 						   _nTotalNF := _nTotalNF / _nTaxaNF
                            _nTotalNF := _nTotalNF *_nTxMoeda 
                         EndIf   
@@ -1402,7 +1403,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 						
 						aAdd( _aLogAux , {StrZero(_nCont++,4),"Nota: " + TMPNFE->D1_DOC + "/" + TMPNFE->D1_SERIE, dDataBase, TMPNFE->D1_ITEM, TMPNFE->D1_COD, AllTrim(Transform(TMPNFE->D1_QUANT,PesqPict("SD1","D1_QUANT"))),"",AllTrim(Transform(TMPNFE->D1_VUNIT,PesqPict("SD1","D1_VUNIT"))),AllTrim(Transform(TMPNFE->D1_VALDESC,PesqPict("SD1","D1_VALDESC"))),AllTrim(Transform(TMPNFE->D1_TOTAL - TMPNFE->D1_VALDESC - TMPNFE->D1_ICMSRET + TMPNFE->D1_VALIPI,PesqPict("SD1","D1_TOTAL"))),""} )
 
-					   AADD(_aItensPrev,{                      TMPNFE->D1_PEDIDO,;//01
+					   aAdd(_aItensPrev,{                      TMPNFE->D1_PEDIDO,;//01
 					            	                              TMPNFE->D1_COD,;//02
 					            	                           TMPNFE->D1_ITEMPC,;//03
 										                     	  TMPNFE->D1_DOC,;//04 //NF
@@ -1414,9 +1415,9 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 								                                        _nTaxaNF,;//10//Taxa NF
 												              "2-ITEM DA NOTA  "})//11
 
-					    TMPNFE->(dbSkip())
+					    TMPNFE->(DBSkip())
 
-					ENDDO
+					EndDo
 					TMPNFE->(DBCloseArea())
 				Next _nI
 
@@ -1424,27 +1425,27 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 					For _nI := 1 To Len(_aLogAu1)
 						aAdd(_aLogVld, _aLogAu1[_nI])
 					Next _nI
-					aAdd( _aLogVld , {StrZero(_nCont++,4),"",STOD(""),"","","","","","","",""} )
+					aAdd( _aLogVld , {StrZero(_nCont++,4),"",SToD(""),"","","","","","","",""} )
 				EndIf
 				
 				If Len(_aLogAux) > 0
 					For _nI := 1 To Len(_aLogAux)
 						aAdd(_aLogVld, _aLogAux[_nI])
 					Next _nI
-					aAdd( _aLogVld , {StrZero(_nCont++,4),"",STOD(""),"","","","","","","",""} )
+					aAdd( _aLogVld , {StrZero(_nCont++,4),"",SToD(""),"","","","","","","",""} )
 				EndIf
 
                 nTotSemPrevisto:=_nTotNfs
 				aProdPrevisto:={}
 				For _nI := 1 To Len(_aItensPrev)
-				    IF LEFT(_aItensPrev[_nI,11],1) = "2" 
-					   LOOP
+				    If LEFT(_aItensPrev[_nI,11],1) = "2" 
+					   Loop
 					EndIf
 				    _nSoma:=_nPreco:=_nImps:=0
 				    _nQtde :=_aItensPrev[_nI,05]
 				    _nSaldo:=_aItensPrev[_nI,06]
 					_nTaxa :=_aItensPrev[_nI,10]//Usou A TAXA DA DATA DE EMISSAO DA NOTA ATUAL RecMoeda(dDEmissao,_nMoePedido)
-				    IF _nSaldo > 0 .AND. _nSaldo <> _nQtde//Se o produto tem nota já, usa a quantidade que não foi usada ainda
+				    If _nSaldo > 0 .And. _nSaldo <> _nQtde//Se o produto tem nota já, usa a quantidade que não foi usada ainda
 					   _nPreco:=_aItensPrev[_nI,7]
 					   _nImps :=((_aItensPrev[_nI,9]/_nQtde)*_nSaldo)
 					   _nSoma :=((_nSaldo * _nPreco) + _nImps) 
@@ -1453,8 +1454,8 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 					   _nSoma :=_aItensPrev[_nI,8] 
 					   _nImps :=_aItensPrev[_nI,9]
 					EndIf
-					AADD(aProdPrevisto,ACLONE(_aItensPrev[_nI]))
-					_nPosPre:=LEN(aProdPrevisto)
+					aAdd(aProdPrevisto,ACLONE(_aItensPrev[_nI]))
+					_nPosPre:=Len(aProdPrevisto)
 					aProdPrevisto[_nPosPre,04]:="PREVISTO"
 					aProdPrevisto[_nPosPre,05]:=_nSaldo
 					aProdPrevisto[_nPosPre,06]:=0
@@ -1466,7 +1467,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 				Next
 
 				For _nI := 1 To Len(aProdPrevisto)
-				    AADD(_aItensPrev,ACLONE(aProdPrevisto[_nI]))
+				    aAdd(_aItensPrev,ACLONE(aProdPrevisto[_nI]))
 				Next                
 
 				aSort(_aItensPrev,,,{ |x,y| x[1]+x[3]+x[11]+x[4] < y[1]+y[3]+y[11]+y[4] })
@@ -1474,17 +1475,17 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 				_nSoma:=0
 				_nTotItem:=0
 				For _nI := 1 To Len(_aItensPrev)
-				    IF LEFT(_aItensPrev[_nI,11],1) = "1" 
+				    If LEFT(_aItensPrev[_nI,11],1) = "1" 
 				       _nTotItem:=_aItensPrev[_nI,08]
-					   LOOP
+					   Loop
 					EndIf
-				    IF LEFT(_aItensPrev[_nI,11],1) = "2" 
+				    If LEFT(_aItensPrev[_nI,11],1) = "2" 
 	                   _nSoma+=	_aItensPrev[_nI,08]			
-					   LOOP
+					   Loop
 					EndIf
-				    IF LEFT(_aItensPrev[_nI,11],1) = "3" 
+				    If LEFT(_aItensPrev[_nI,11],1) = "3" 
 					   _nSoma+=	_aItensPrev[_nI,08]		
-					   _aItensPrev[_nI,11]:="3-SOMA PREVISTA, Total Item: "+AllTrim(TRANS(_nSoma,"@E 999,999,999,999.99"))+IF(_nTotItem<>_nSoma," divergente do Pedido, Diferenca: "+AllTrim(TRANS(_nSoma-_nTotItem,"@E 999,999,999.999999999")),"")
+					   _aItensPrev[_nI,11]:="3-SOMA PREVISTA, Total Item: "+AllTrim(TRANS(_nSoma,"@E 999,999,999,999.99"))+If(_nTotItem<>_nSoma," divergente do Pedido, Diferenca: "+AllTrim(TRANS(_nSoma-_nTotItem,"@E 999,999,999.999999999")),"")
 					   _nSoma:=0
 					EndIf
 				Next                
@@ -1502,11 +1503,11 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
                 _aAuxItensPrev:={}
 				_cItem:=""
 	            For _nI := 1 To Len(_aItensPrev)
-					IF Empty(_cItem)
+					If Empty(_cItem)
 					   _cItem:=_aItensPrev[_nI,03]
 					ElseIf _cItem <> _aItensPrev[_nI,03]
 					   _cItem:=_aItensPrev[_nI,03]
-				       AADD(_aAuxItensPrev,{   "",;//01
+				       aAdd(_aAuxItensPrev,{   "",;//01
 					            	           "",;//02
 					            	           "",;//03
 										       "",;//04 
@@ -1518,7 +1519,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 								               "",;//10
 			                                   ""})//11
 					EndIf
-				    AADD(_aAuxItensPrev,ACLONE(_aItensPrev[_nI]))
+				    aAdd(_aAuxItensPrev,ACLONE(_aItensPrev[_nI]))
 				Next _nI
 				_aItensPrev:=ACLONE(_aAuxItensPrev)
                 
@@ -1527,7 +1528,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
                    _nTxMoeda := RecMoeda(dDEmissao,_nMoePedido)
                 EndIf   
 
-				AADD(_aItensPrev,{	"",;//01
+				aAdd(_aItensPrev,{	"",;//01
 					              	"",;//02
 					              	"",;//03
 								  	"",;//04 
@@ -1539,7 +1540,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
  			 						TRANS(_nTxMoeda,"@E 9999.999999999"),;//10
 			                		"SOMA SEM O PREVISTO"})//11
 
-				AADD(_aItensPrev,{  "",;//01
+				aAdd(_aItensPrev,{  "",;//01
 					            	"",;//02
 					            	"",;//03
 									"",;//04 
@@ -1551,7 +1552,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 						 			TRANS(_nTxMoeda,"@E 9999.999999999"),;//10
 			                 		"TOTAL DOS PEDIDOS" })//11
 
-				AADD(_aItensPrev,{  "",;//01
+				aAdd(_aItensPrev,{  "",;//01
 					            	"",;//02
 					            	"",;//03
 									"",;//04 
@@ -1563,7 +1564,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
  			 						TRANS(_nTxMoeda,"@E 9999.999999999"),;//10
 			                     	"TOTAL PREVISTO"})//11
 
-				AADD(_aItensPrev,{  "",;//01
+				aAdd(_aItensPrev,{  "",;//01
 									"",;//02
 									"",;//03
 									"",;//04 
@@ -1574,44 +1575,49 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 					                "",;//09
  			 						TRANS(_nTxMoeda,"@E 9999.999999999"),;//10
 			                 		"PREVISTO - PEDIDOS"})//11
-               
-			   /* Reescrever esta validação.
-			   If ( ((_nTotNfs - _nTotPed)/_nTxMoeda) > _nValToT )//TESTA SE A SOMATORIA DE TODAS AS NOTAS É MAIOR QUE 20 REIAS 
-					_lImpNF := .T.
-					If ( ((_nTotNfs - _nTotPed)/_nTxMoeda) > _nValToT )
-						aAdd( _aLogVld , {StrZero(_nCont++,4),"",dDataBase,"","","","","","",_nTotNfs,"Divergência no valor total da Nota"} )
-					EndIf
-				Else
-					_lImpNF := .F. //Se não estourar o 20 reias no total da nota , não valida o preço unitario
-				EndIf
-                */
-				
+               				
+                _lAviso := .F.
                 If ( _nTotNfs /_nTxMoeda) >  (_nTotPed + _nValToT )//TESTA SE A SOMATORIA DE TODAS AS NOTAS É MAIOR QUE 20 REIAS 
-					_lImpNF := .T.
+                   _lDifPreco := .T.
 					aAdd( _aLogVld , {StrZero(_nCont++,4),"",dDataBase,"","","","","","",_nTotNfs,"Divergência no valor total da Nota"} )
 				Else
-					_lImpNF := .F. //Se não estourar o 20 reias no total da nota , não valida o preço unitario
+                   IF !_lDifPC .AND. _lDifPreco .AND. _nQtdeSaldo > 0 //SE TEM SALDO AINDA PARA FAZER NOTA DO PEDIDO SÓ AVISA SOBRE O ERRO DO PREÇO UNITARIO
+                      _lAviso := .T.//Só VIRA aviso quando não tem erro _lDifPC (_lDifPC=.F.) e tem erro do preço unitario (_lDifPC=.T.) 
+                                    //e o saldo de qq item do PC é maior que zero (_nQtdeSaldo > 0)
 				EndIf
-
+                   _lDifPreco := .F. //Se não estourar o 20 reias no total da nota , não valida o preço unitario
+                EndIf
 
 				For _nI := 1 To Len(_aLogVld)
 					_aLogVld[_nI][1] := StrZero(_nI,4)
 				Next _nI
 
-				If _lImpNF  .OR. _lImpNF1
-					If FWAlertYesNo("Foram encontradas divergências entre o pedido e o documento e foi gerado um log, deseja visualizar o log?","MT100TOK023")
+				If _lDifTES 
+                   U_ITListBox( 'TES escolhida inválida para compra de uso direto (MT100TOK)' , aCampVld2 , _aLogVld2 , .T. , 1 )
+                   _lRet := .F.
+				EndIf
+                If _lRet .And. (_lDifPC .OR. _lDifPreco .OR. _lAviso)
+                   IF _lAviso .AND. !_lDifPC//O aviso é só para estouro de preço unitario em notas de pedido parccial
 						_aCabItensPrev:={"PEDIDO","PRODUTO","ITEM","NOTA","Quantidade","Qtde não usada","Vlr. Unit.","Vlr Total Liq.","'IPI-Desc-ICM Ret.","*Tx Moeda","Ocorrencia"}
 						_aButtons:={}
-						AADD(_aButtons,{"BUDGET",{||  U_ITListBox( 'Log do TOTAL PREVISTO Pedido x NF, Filial: '+cFilAnt , _aCabItensPrev , _aItensPrev , .T.      , 1 )  },"Detalhar Previsto", "Detalhar Previsto" }) 
-				  //                                              _cTitAux                                              , _aHeader       , _aCols      , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _aButtons
-						U_ITListBox( '(MT100TOK) Log de Comparação Pedido x NF, Filial: '+cFilAnt , aCampVld , _aLogVld , .T.      , 1      ,          ,          ,         ,         ,     ,        ,_aButtons)
-					EndIf
+						aAdd(_aButtons,{"BUDGET",{||  U_ITListBox( 'Log do TOTAL PREVISTO Pedido x NF, Filial: '+cFilAnt , _aCabItensPrev , _aItensPrev , .T.      , 1 )  },"Detalhar Previsto", "Detalhar Previsto" }) 
+                      //                  _cTitAux                                              , _aHeader , _aCols   , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel,_aButtons
+                      bBloco:={||  U_ITListBox( 'Log de Comparação Pedido x NF, Filial: '+cFilAnt , aCampVld , _aLogVld , .T.      , 1      ,          ,          ,         ,         ,     ,        ,_aButtons) }
+                      _cProblema:='Foram encontradas divergências entre o pedido e o documento, clique em "mais detalhes" para verificar, CONFIRMA GRAVAÇÃO?'
+                      _cSolucao:="Entre em contato com o departamento compras para verificar."
+                      If !U_ITMSG(_cProblema,'Atenção!',_cSolucao,3,2,3,,"GRAVAR","VOLTAR",bBloco)
 				   _lRet := .F.
 				EndIf
-				
-				If _lImpNF2 
-					 U_ITListBox( '(MT100TOK) TES escolhida inválida para compra de uso direto (MT100TOK)' , aCampVld2 , _aLogVld2 , .T. , 1 )
+                   Else
+                      If FWAlertYesNo("Foram encontradas divergências entre o pedido e o documento e foi gerado um log, deseja visualizar o log?","MT100TOK023")
+                         _aCabItensPrev:={"PEDIDO","PRODUTO","ITEM","NOTA","Quantidade","Qtde não usada","Vlr. Unit.","Vlr Total Liq.","'IPI-Desc-ICM Ret.","*Tx Moeda","Ocorrencia"}
+                         _aButtons:={}
+                         AADD(_aButtons,{"BUDGET",{||  U_ITListBox( 'Log do TOTAL PREVISTO Pedido x NF, Filial: '+cFilAnt , _aCabItensPrev , _aItensPrev , .T.      , 1 )  },"Detalhar Previsto", "Detalhar Previsto" }) 
+                         //                  _cTitAux                                              , _aHeader , _aCols   , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel,_aButtons
+                         U_ITListBox( 'Log de Comparação Pedido x NF, Filial: '+cFilAnt , aCampVld , _aLogVld , .T.      , 1      ,          ,          ,         ,         ,     ,        ,_aButtons)
+                      EndIf
 					_lRet := .F.
+                   Endif
 				EndIf
 	
 			EndIf
@@ -1622,7 +1628,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 	//Valida nota/série/item origem para notas que tem esses itens prenchidos
 	//e são notas normais sem formulário próprio
 	//=======================================================================
-	If _lRet .And. cFormul <> "S" .AND. CTIPO == "N"
+	If _lRet .And. cFormul <> "S" .And. CTIPO == "N"
 
    		_aLogNfO	:=	{} 
 		_nPosNfO 	:= 	aScan( aHeader , {|X| Upper( AllTrim( X[2] ) ) == "D1_NFORI"   	  	} ) // Nota fiscal de Origem
@@ -1634,11 +1640,11 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 		For _nI := 1 to Len(acols)
 			If !aCols[_nI][Len(aHeader)+1] //Não verifica linhas deletadas
 				//verifica se série/nota/item origem estão preenchidos
-				If 	Empty(acols[_nI][_nPosNfO]) .and. ( !(Empty(acols[_nI][_nPosSeO])) .or. !(Empty(acols[_nI][_nPosItO]))) .or. ;
-					Empty(acols[_nI][_nPosSeO]) .and. ( !(Empty(acols[_nI][_nPosNfO])) .or. !(Empty(acols[_nI][_nPosItO]))) .or. ;
-					Empty(acols[_nI][_nPosItO]) .and. ( !(Empty(acols[_nI][_nPosNfO])) .or. !(Empty(acols[_nI][_nPosSeO]))) 
+				If 	Empty(acols[_nI][_nPosNfO]) .And. ( !(Empty(acols[_nI][_nPosSeO])) .Or. !(Empty(acols[_nI][_nPosItO]))) .Or. ;
+					Empty(acols[_nI][_nPosSeO]) .And. ( !(Empty(acols[_nI][_nPosNfO])) .Or. !(Empty(acols[_nI][_nPosItO]))) .Or. ;
+					Empty(acols[_nI][_nPosItO]) .And. ( !(Empty(acols[_nI][_nPosNfO])) .Or. !(Empty(acols[_nI][_nPosSeO]))) 
 	
-						aadd(_aLogNfO, {	acols[_nI][_nPosItn], acols[_nI][_nPosCod], 1, "", "", "" } )						
+						aAdd(_aLogNfO, {	acols[_nI][_nPosItn], acols[_nI][_nPosCod], 1, "", "", "" } )						
 				
 				//se estão preenchidos verifica se os dados são consistentes com pelo menos uma nota de entrada ou saída
 				ElseIf !(	Empty(acols[_nI][_nPosNfO]))
@@ -1668,7 +1674,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 					MPSysOpenQuery(_cQuery,_cAlias)
 				
 					//se não encontrar procura no d1
-					if  (_cAlias)->( Eof() )
+					If  (_cAlias)->( Eof() )
     	 		
 						_cQuery := " SELECT SD1.D1_DOC "
 						_cQuery += " FROM  "+ RetSQLName('SD1') +" SD1 "
@@ -1697,9 +1703,9 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 						_cQuery := ChangeQuery(_cQuery)
 						MPSysOpenQuery(_cQuery,_cAlias)
      	
-    	 				If (_cAlias)->(EoF())
+    	 				If (_cAlias)->(Eof())
     	 					//se não encontrou nota com os dados 
-    	 					aadd(_aLogNfO, {	acols[_nI][_nPosItn], acols[_nI][_nPosCod], 2, AllTrim(acols[_nI][_nPosNfO]),;
+    	 					aAdd(_aLogNfO, {	acols[_nI][_nPosItn], acols[_nI][_nPosCod], 2, AllTrim(acols[_nI][_nPosNfO]),;
     	 														 AllTrim(acols[_nI][_nPosSeO]), AllTrim(acols[_nI][_nPosItO])   } )	
     	 				EndIf
     	 			EndIf	
@@ -1714,7 +1720,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 		//se teve problemas haverá registros no array _aLogNfO
 		If Len(_aLogNfO) > 0
 			_cmens 	:= ""
-			For _nI := 1 To len(_aLogNfo)
+			For _nI := 1 To Len(_aLogNfo)
 				If _aLogNfo[_nI][3] == 1
 					_cmens += " Para o produto "+ _aLogNfo[_nI][2] +", item " + _aLogNfo[_nI][1] 
 					_cmens += " não foram preenchidos todos os dados da nota de origem." + CHR(13)
@@ -1734,7 +1740,7 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
 
     //Validacoes do Projeto de unificação de pedidos de troca nota //AWF-TN
 	If _lRet
-		IF _cRet_TN == "NAO_ACHOU_PF"
+		If _cRet_TN == "NAO_ACHOU_PF"
   			_cAux:= "Pedido de Faturamento "+xFilial("SC5")+" "+_cPedFaturamento+" não encontrado ou Pedido de Carregamento "+_cFilCarregamento+" "+_cPedCarregamento
 			_cAux+= " não vinculado a esse Pedido de Faturamento. Favor entrar em contato com area de TI."
 			If l103Auto
@@ -1746,26 +1752,26 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
     	ElseIf _cRet_TN = "ACHOU_PF"
 			_lOK:=.F.
          
-	     	SC6->(DbSetOrder(1))//C6_FILIALC6_NUM
-         	If SC6->(DbSeek(_cFilCarregamento + _cPedCarregamento))
-	            Do While SC6->( !EoF() ) .AND. SC6->C6_FILIAL + SC6->C6_NUM == _cFilCarregamento  + _cPedCarregamento 
+	     	SC6->(DBSetOrder(1))//C6_FILIALC6_NUM
+         	If SC6->(DBSeek(_cFilCarregamento + _cPedCarregamento))
+	            While SC6->( !Eof() ) .And. SC6->C6_FILIAL + SC6->C6_NUM == _cFilCarregamento  + _cPedCarregamento 
 	            	If aScan(_aLogItens, {|L| L[3] == SC6->C6_PRODUTO }) = 0
 						_lDiferente:=.T.
-		                AADD(_aLogItens,{ .F. ,SC6->C6_ITEM, SC6->C6_PRODUTO , TRANS(SC6->C6_QTDVEN ,AVSX3('C6_QTDVEN',6)) ,;
+		                aAdd(_aLogItens,{ .F. ,SC6->C6_ITEM, SC6->C6_PRODUTO , TRANS(SC6->C6_QTDVEN ,AVSX3('C6_QTDVEN',6)) ,;
                                                            TRANS(SC6->C6_PRCVEN ,AVSX3('C6_PRCVEN',6)) ,"","","Item nao encontrado na NF" } )
 		            EndIf
 		            SC6->( DBSkip() )
             	EndDo
          	EndIf
 
-         	If Len(_aLogItens) > 0 .AND. _lDiferente
+         	If Len(_aLogItens) > 0 .And. _lDiferente
 				For _nI := 1 To Len(_aLogItens)
 					_aLogItens[_nI,3] := AllTrim(_aLogItens[_nI,3])+" - "+AllTrim(Posicione("SB1",1,xFilial("SB1")+_aLogItens[_nI,2],"B1_DESC"))
 				Next _nI
 				_lRet:=!_lDiferente//Se tiver diferente = .T. retorna .F.
             
 				//Ordena _alogitens trazendo itens com problema primeiro
-				_alogitens := ASort(_alogitens, , , {|x,y|x[7] < y[7]})
+				_alogitens := aSort(_alogitens, , , {|x,y|x[7] < y[7]})
 
 				_cProblema:="Ocorreram divergencias entre os itens do Pedidos de Carregamento e da NF, para maiores detalhes veja a Coluna Observação."
 				_cSolucao :="Para fechar a tela de Log clique no Botão FECHAR."
@@ -1783,13 +1789,13 @@ If !FWIsInCallStack("SPEDNFE") .And. !FWIsInCallStack("MATA920") .And. !_lRLeite
             Next _nI
             _lRet:=.F.
 
-			//"Após o lançamento dessa NF o saldo em poder de terceiros ficará apenas com a qtde de "+AllTrim(STR(_nDif))+", e isso deixará o saldo em aberto." ,;
+			//"Após o lançamento dessa NF o saldo em poder de terceiros ficará apenas com a qtde de "+AllTrim(Str(_nDif))+", e isso deixará o saldo em aberto." ,;
 			//"Favor verifcar com o depto. Fiscal e fornecedor as quantidades a retornar." )
             _cProblema:="Após o lançamento dessa NF o saldo dos produtos em poder de terceiros listados nesse Log ficará apenas com a qtde em aberta listada e isso deixará o saldo em aberto."
             _cSolucao :="Para fechar a tela de Log clique no Botão FECHAR."
             _bOK:={|| xMagHelpFis("Atenção! (MT100TOK)",_cProblema,_cSolucao) , .F. }
 
-            U_ITListBox( 'Log de Saldos de retorno de Estoque (MT100TOK-'+AllTrim(STR(ProcLine()))+')' ,;
+            U_ITListBox( 'Log de Saldos de retorno de Estoque (MT100TOK-'+AllTrim(Str(ProcLine()))+')' ,;
 	                   {" ","Código e Descricao do Item",'Quantidade','Saldo Atual','Qtde em aberto','Observação'},_aLogSaldos,.T.,4,_cProblema,,;
  	                   { 10,                         130,          30,           40,              50,         100},, _bOK  , )
        	EndIf
@@ -1821,29 +1827,29 @@ _cPedFaturamento :=""
 _cFilCarregamento:=""
 _cPedCarregamento:=""
 
-SA2->(DbSetOrder(1))
-If SA2->(DbSeek(xFilial("SA2")+cChaveSA2))
+SA2->(DBSetOrder(1))
+If SA2->(DBSeek(xFilial("SA2")+cChaveSA2))
    _cCNPJ:=SA2->A2_CGC
 EndIf
 
-SM0->(DbSetOrder(1))
+SM0->(DBSetOrder(1))
 SM0->(DBGoTop())
-Do While SM0->(!EoF())
+While SM0->(!Eof())
    If SM0->M0_CGC == _cCNPJ
 	  _cFilCarregamento:=AllTrim(SM0->M0_CODFIL)
 	  Exit
    EndIf
-   SM0->(DbSkip())
+   SM0->(DBSkip())
 EndDo
 SM0->(DBGoTo(_nRecSM0))
 
-SF2->( DbSetOrder(1) )
-If !Empty(_cFilCarregamento) .And. SF2->(DbSeek(_cFilCarregamento+cChaveSF2))
+SF2->( DBSetOrder(1) )
+If !Empty(_cFilCarregamento) .And. SF2->(DBSeek(_cFilCarregamento+cChaveSF2))
 	_cPedCarregamento:=SF2->F2_I_PEDID
 EndIf
 
-SC5->( DbSetOrder(1) )
-If !Empty(_cPedCarregamento) .And. SC5->(DbSeek(_cFilCarregamento+_cPedCarregamento))
+SC5->( DBSetOrder(1) )
+If !Empty(_cPedCarregamento) .And. SC5->(DBSeek(_cFilCarregamento+_cPedCarregamento))
 	_lPed_Troca_NF  :=(SC5->C5_I_TRCNF = "S")
 	_cPedFaturamento:= SC5->C5_I_PDFT
 EndIf
@@ -1851,7 +1857,7 @@ EndIf
 cRet:="NAO_TROCA_NF"//Inicia com "NAOTROCANF" pq pode ser que o Pedido não é troca nota
 If _lPed_Troca_NF
 	cRet:="NAO_ACHOU_PF"
-	If SC5->(DbSeek(xFilial("SC5")+_cPedFaturamento)) .And. _cPedCarregamento == SC5->C5_I_PDPR
+	If SC5->(DBSeek(xFilial("SC5")+_cPedFaturamento)) .And. _cPedCarregamento == SC5->C5_I_PDPR
        cRet:="ACHOU_PF"
 	EndIf
 EndIf

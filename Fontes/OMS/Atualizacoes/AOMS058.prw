@@ -2,43 +2,29 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 05/03/2017 | Foi aterada a validacao da TES para quando o campo C5_I_OPER não preenchido - Chamado 16784
-Josué Danich  | 11/07/2018 | Incluida validação de operações não permitidas na inclusão manual - Chamado 25063
-Lucas Borges  | 14/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
-Julio Paz     | 10/12/2020 | Criação de função para preencher o novo campo custo net, através de gatilho de campo.Chamado 34751
-Igor Melgaço  | 08/12/2022 | Novo tratamento para Pedidos de Operacao Triangular. Chamado 41604 
-============================================================================================================================================================
-Analista         - Programador     - Inicio     - Envio    - Chamado - Motivo da Alteração
-------------------------------------------------------------------------------------------------------------------------------------------------------------
-Andre Carvalho   - Igor Melgaço    - 11/06/25   - 11/07/25 - 50716   - Ajustes para busca de preço do produto na tabela Z09, para pedidos de transferência entre filiais
-============================================================================================================================================================
+Igor Melgaço  |8/12/2022 | Chamado 41604. Novo tratamento para Pedidos de Operacao Triangular
+Igor Melgaço  |11/07/2925| Chamado 50716. Ajustes para busca de preço do produto na tabela Z09, para pedidos de transferência entre filiais
+Lucas Borges  |18/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
+===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================                                
-#DEFINE _ENTER CHR(13)+CHR(10) 
-#INCLUDE "RwMake.ch"
+#Include "TOTVS.ch"
 
 /*/
 ===============================================================================================================================
-Programa       : AOMS058   
-Autor          : Fabiano Dias           
-Data da Criacao: 22/08/2011 
-===============================================================================================================================
-Descricao : Rotina de acionamento de gatilhos em pedidos de vendas e validações auxiliares do MT410TOK            
-===============================================================================================================================
-Parametros: _nOpcao = 1 - Indica que o gatilho esta sendo executado pelo campo C6_PRODUTO, ou seja na linha posicionada. 
+Programa----------: AOMS058
+Autor-------------: Fabiano Dias           
+Data da Criacao---: 22/08/2011 
+Descrição---------: Rotina de acionamento de gatilhos em pedidos de vendas e validações auxiliares do MT410TOK
+Parametros--------: _nOpcao = 1 - Indica que o gatilho esta sendo executado pelo campo C6_PRODUTO, ou seja na linha posicionada. 
             _nOpcao = 2 - Funcao chamada dentro da validacao do campo C5_CLIENTE, para todos os itens acols.    	
             _nOpcao = 3 - Funcao chamada de dentro do ponto de entrada MT410TOK
             _nOpcao = 4 - Funcao chamada de dentro do ponto de entrada MT410TOK
+Retorno-----------: Nenhum						  							                               						
 ===============================================================================================================================
-Retorno   : Nenhum						  							                               						
-===============================================================================================================================
-/*/
-
+*/
 User Function AOMS058(_nOpcao)
 
 Local _nPosProd  := aScan(aHeader,{|W| Upper(AllTrim(W[2])) == "C6_PRODUTO" })
@@ -75,7 +61,7 @@ EndIf
 // Caso exista, faz uma copia do aRotina                    
 //===========================================================
 If Type( "aRotina" ) == "A"
-	aRotBack := AClone( aRotina )
+	aRotBack := aClone( aRotina )
 EndIf
 
 //===========================================================
@@ -109,106 +95,106 @@ _cRetorno:= .T.
 
 If _nopcao == 2 //Valida operações não permitidas para inclusão manual
 
-	If M->C5_I_OPER $ u_itgetmv("ITOPERBLQ","05") .and. (Inclui .or. Altera) .and. !l410auto
+	If M->C5_I_OPER $ SuperGetMV("IT_OPERBLQ",.F.,"05") .And. (Inclui .Or. Altera) .And. !l410auto
 	
-		U_ITMSG('Operação ' + M->C5_I_OPER + ' não permitida para inclusão manual',"Atenção",,1)
+		U_ITMsg('Operação ' + M->C5_I_OPER + ' não permitida para inclusão manual',"Atenção",,1)
 		Return .F.
 		
-	Endif
+	EndIf
 
-Endif
+EndIf
 
 If _nOpcao == 1//Indica que o gatilho esta sendo executado pelo campo C6_PRODUTO, ou seja na linha posicionada. 
 	
 	_cRetorno:= aCols[n,_nPosProd] 
 		               		
-ElseIF cFilAnt = "91" .AND. !Empty(M->C5_CLIENTE) .AND. (_nOpcao = 2 .OR. _nOpcao = 4)//AWF - Foi incluída novas validacoes para o Desconto PIS e COFINS Vendas Manaus. Chamado: 16998
+ElseIf cFilAnt = "91" .And. !Empty(M->C5_CLIENTE) .And. (_nOpcao = 2 .Or. _nOpcao = 4)//AWF - Foi incluída novas validacoes para o Desconto PIS e COFINS Vendas Manaus. Chamado: 16998
                                                        //_nOpcao = 2 - Funcao chamada dentro da validacao do campo C5_CLIENTE
                                                        //_nOpcao = 4 - Funcao chamada de dentro do ponto de entrada MT410TOK
     _lMV_DESZFPC:=GetMv("MV_DESZFPC")
-    _cEstado    :=POSICIONE("SA1",1,xFilial("SA1")+M->C5_CLIENTE+M->C5_LOJACLI,"A1_EST")
-    _cMunicipio :=POSICIONE("SA1",1,xFilial("SA1")+M->C5_CLIENTE+M->C5_LOJACLI,"A1_COD_MUN")
+    _cEstado    :=Posicione("SA1",1,xFilial("SA1")+M->C5_CLIENTE+M->C5_LOJACLI,"A1_EST")
+    _cMunicipio :=Posicione("SA1",1,xFilial("SA1")+M->C5_CLIENTE+M->C5_LOJACLI,"A1_COD_MUN")
     
-    lCalc:=(POSICIONE("CC2",1,xFilial("CC2")+_cEstado+_cMunicipio,"CC2_I_CALC") = "1")
+    lCalc:=(Posicione("CC2",1,xFilial("CC2")+_cEstado+_cMunicipio,"CC2_I_CALC") = "1")
 
     _lTem_Item :=.F.
     _lITodosSim:=.T.
     _lITodosNao:=.T.
-    FOR L := 1 TO LEN(aCols)
-	    IF aTail(aCols[L])//aCols[L,len(aHeader)+1] // Se Linha Deletada
-	       LOOP
-	    ENDIF
+    For L := 1 To Len(aCols)
+	    If aTail(aCols[L])//aCols[L,Len(aHeader)+1] // Se Linha Deletada
+	       Loop
+	    EndIf
 	    _cCodItem:= aCols[L,_nPosProd] 
-	    IF EMPTY(_cCodItem)
-	       LOOP
-	    ENDIF
+	    If Empty(_cCodItem)
+	       Loop
+	    EndIf
         _lTem_Item:=.T.
-	    _lSim:=(POSICIONE("SB1",1,xFilial("SB1")+_cCodItem,'B1_I_CALC') = "1")
-	    IF _lSim
+	    _lSim:=(Posicione("SB1",1,xFilial("SB1")+_cCodItem,'B1_I_CALC') = "1")
+	    If _lSim
            _lITodosNao:=.F.
-	    ELSE
+	    Else
            _lITodosSim:=.F.
-	    ENDIF
-    NEXT
+	    EndIf
+    Next
 
     lITemDiferente:=.F.
-    IF !_lITodosSim .AND. !_lITodosNao//Se os 2 tiver Falso é que tem item diferente
+    If !_lITodosSim .And. !_lITodosNao//Se os 2 tiver Falso é que tem item diferente
        lITemDiferente:=.T.
-    ENDIF
+    EndIf
 
-    IF lCalc .and. lITemDiferente//Se nao tiver itens não vai entrar nunca aqui//OK 
+    If lCalc .And. lITemDiferente//Se nao tiver itens não vai entrar nunca aqui//OK 
     
-       U_MT_ITMSG("Conteudo Atual: "+IF(_lMV_DESZFPC,"Habilitado","Desabilitado")+_ENTER+;
-              "O pedido contém produtos com dois grupos de Desconto Suframa diferentes: ICMS e ICMS + PIS COFINS, é necessário que: "+_ENTER+;
+       U_MT_ITMSG("Conteudo Atual: "+If(_lMV_DESZFPC,"Habilitado","Desabilitado")+CRLF+;
+              "O pedido contém produtos com dois grupos de Desconto Suframa diferentes: ICMS e ICMS + PIS COFINS, é necessário que: "+CRLF+;
               "Informe somente um grupo de desconto, caso necessário faça dois pedidos separados, um só com desconto ICMS e outros com os dois descontos",;
               'Atenção! Ped.:'+M->C5_NUM,,1)
 
-       IF _nOpcao = 4//Quando for _nOpcao = 2 nao retorna falso Só avisa
+       If _nOpcao = 4//Quando For _nOpcao = 2 nao retorna falso Só avisa
           _cRetorno:= .F.
-       ENDIF
+       EndIf
     
-    ELSEIF _lMV_DESZFPC .AND. !lCalc//Entra aqui indenpendente de ter itens ou nao //OK
+    ElseIf _lMV_DESZFPC .And. !lCalc//Entra aqui indenpendente de ter itens ou nao //OK
 
-       u_itmsg("Conteudo Atual: "+IF(_lMV_DESZFPC,"Habilitado","Desabilitado")+_ENTER+;
-              "O municipio do cliente pertence a uma área da Zona Franca de Manaus, é necessário que o desconto do PIS e COFINS seja desabilitado na"+_ENTER+;
+       U_ITMsg("Conteudo Atual: "+If(_lMV_DESZFPC,"Habilitado","Desabilitado")+CRLF+;
+              "O municipio do cliente pertence a uma área da Zona Franca de Manaus, é necessário que o desconto do PIS e COFINS seja desabilitado na"+CRLF+;
               "Rotina 'Desconto P/C ZF'",;
               'Atenção! Ped.:'+M->C5_NUM,,1)
        
-       IF _nOpcao = 4//Quando for _nOpcao = 2 nao retorna falso Só avisa
+       If _nOpcao = 4//Quando For _nOpcao = 2 nao retorna falso Só avisa
           _cRetorno:= .F.
-       ENDIF
+       EndIf
 
-    ELSEIF !_lTem_Item //Se nao tiver itens nao valida os proximos IFs ainda, só no OK final //OK
+    ElseIf !_lTem_Item //Se nao tiver itens nao valida os proximos IFs ainda, só no OK final //OK
 
-    ELSEIF !_lMV_DESZFPC .AND. lCalc .and. _lITodosNao //OK
+    ElseIf !_lMV_DESZFPC .And. lCalc .And. _lITodosNao //OK
 
-       u_itmsg("Conteudo Atual: "+IF(_lMV_DESZFPC,"Habilitado","Desabilitado")+_ENTER+;
-              "O municipio do cliente pertence a uma área de livre comércio, é necessário que o desconto do PIS e COFINS seja habilitado na "+_ENTER+;
+       U_ITMsg("Conteudo Atual: "+If(_lMV_DESZFPC,"Habilitado","Desabilitado")+CRLF+;
+              "O municipio do cliente pertence a uma área de livre comércio, é necessário que o desconto do PIS e COFINS seja habilitado na "+CRLF+;
               "Rotina 'Desconto P/C ZF'",;
               'Atenção! Ped.:'+M->C5_NUM,,1)
 
-       IF _nOpcao = 4//Quando for _nOpcao = 2 nao retorna falso Só avisa
+       If _nOpcao = 4//Quando For _nOpcao = 2 nao retorna falso Só avisa
           _cRetorno:= .F.
-       ENDIF
+       EndIf
 
-    ELSEIF _lMV_DESZFPC .AND. lCalc .and. _lITodosSim //OK
+    ElseIf _lMV_DESZFPC .And. lCalc .And. _lITodosSim //OK
 
-       u_itmsg("Conteudo Atual: "+IF(_lMV_DESZFPC,"Habilitado","Desabilitado")+_ENTER+;
+       U_ITMsg("Conteudo Atual: "+If(_lMV_DESZFPC,"Habilitado","Desabilitado")+CRLF+;
               "O(s) produto(s) informado(s) no pedido só podem ser comercializados com o desconto de ICMS Suframa, é necessário que o desconto do PIS e COFINS seja desabilitado na "+;
               "Rotina 'Desconto P/C ZF'",;
               'Atenção! Ped.:'+M->C5_NUM,,1)
 
-       IF _nOpcao = 4//Quando for _nOpcao = 2 nao retorna falso Só avisa
+       If _nOpcao = 4//Quando For _nOpcao = 2 nao retorna falso Só avisa
           _cRetorno:= .F.
-       ENDIF
+       EndIf
 
-    ENDIF
+    EndIf
     
 EndIf 
 
-IF _nOpcao = 4//Funcao chamada de dentro do ponto de entrada MT410TOK
+If _nOpcao = 4//Funcao chamada de dentro do ponto de entrada MT410TOK
    Return _cRetorno
-ENDIF
+EndIf
 
 
 //====================================================================
@@ -217,27 +203,27 @@ ENDIF
 //preenchidos e somente para pedidos do tipo normal.                 
 //====================================================================
 //Para o M->C5_TIPO = 'B' o _cTpOper vai estar em branco e o M->C5_TIPO = 'N' vai esta preenchido
-//If ( !EMPTY(_cTpOper) .OR. (M->C5_TIPO = 'B' .AND. _lExistCpo) ) .AND. !EMPTY(_cCliPed) .AND. !EMPTY(_cLjCliPed) .AND. M->C5_TIPO $ 'N,B'          	
-If !EMPTY(_cTpOper) .AND. !EMPTY(_cCliPed) .AND. !EMPTY(_cLjCliPed) .AND. M->C5_TIPO $ 'N,B'
+//If ( !Empty(_cTpOper) .Or. (M->C5_TIPO = 'B' .And. _lExistCpo) ) .And. !Empty(_cCliPed) .And. !Empty(_cLjCliPed) .And. M->C5_TIPO $ 'N,B'          	
+If !Empty(_cTpOper) .And. !Empty(_cCliPed) .And. !Empty(_cLjCliPed) .And. M->C5_TIPO $ 'N,B'
 
-	dbSelectArea(IF( M->C5_TIPO = 'B' , "SA2","SA1" ))
-	dbSetOrder(1)
+	DBSelectArea(If( M->C5_TIPO = 'B' , "SA2","SA1" ))
+	DBSetOrder(1)
 	If MsSeek(xFilial() + _cCliPed + _cLjCliPed)					  				
 
-       IF M->C5_TIPO = 'B'//Fornecedor
+       If M->C5_TIPO = 'B'//Fornecedor
 		  _cSuframa:= ""
 		  _cEstCli := SA2->A2_EST
-       ELSE
+       Else
 		  _cSuframa:= SA1->A1_SUFRAMA
 		  _cEstCli := SA1->A1_EST
-       ENDIF
+       EndIf
 		
 		//====================================
 		//Veirifica se o cliente tem suframa.
 		//====================================
-		If !EMPTY(_cSuframa)//O campo de Suframa não é "sim" ou "nao" é um código
+		If !Empty(_cSuframa)//O campo de Suframa não é "sim" ou "nao" é um código
 			_cSuframa:= "S"
-		Else  
+		Else
 			_cSuframa:= "N"
 		EndIf 
 		
@@ -267,18 +253,18 @@ If !EMPTY(_cTpOper) .AND. !EMPTY(_cCliPed) .AND. !EMPTY(_cLjCliPed) .AND. M->C5_
 				//=========================================================================
 				//Posiciona os registros                                                  
 				//=========================================================================
-				dbSelectArea(IIF(M->C5_TIPO$"DB","SA2","SA1"))
-				dbSetOrder(1)
+				DBSelectArea(IIf(M->C5_TIPO$"DB","SA2","SA1"))
+				DBSetOrder(1)
 				If MsSeek(xFilial() + _cCliPed + _cLjCliPed)					  				
 				
-					dbSelectArea("SF4") 
-					SF4->(dbSetOrder(1))
-					If SF4->(dbSeek(xFilial("SF4") + _cTES))     
+					DBSelectArea("SF4") 
+					SF4->(DBSetOrder(1))
+					If SF4->(DBSeek(xFilial("SF4") + _cTES))     
 					
-						Aadd(_aDadosCfo,{"OPERNF","S"})
-					 	Aadd(_aDadosCfo,{"TPCLIFOR",M->C5_TIPOCLI})					
-					 	Aadd(_aDadosCfo,{"UFDEST",Iif(M->C5_TIPO $ "DB",SA2->A2_EST,SA1->A1_EST)})
-					 	Aadd(_aDadosCfo,{"INSCR" ,If(M->C5_TIPO$"DB",SA2->A2_INSCR,SA1->A1_INSCR)})
+						aAdd(_aDadosCfo,{"OPERNF","S"})
+					 	aAdd(_aDadosCfo,{"TPCLIFOR",M->C5_TIPOCLI})					
+					 	aAdd(_aDadosCfo,{"UFDEST",IIf(M->C5_TIPO $ "DB",SA2->A2_EST,SA1->A1_EST)})
+					 	aAdd(_aDadosCfo,{"INSCR" ,If(M->C5_TIPO$"DB",SA2->A2_INSCR,SA1->A1_INSCR)})
 					 	
 						aCols[n,_nPCFO] := MaFisCfo(,SF4->F4_CF,_aDadosCfo)
 					
@@ -291,7 +277,7 @@ If !EMPTY(_cTpOper) .AND. !EMPTY(_cCliPed) .AND. !EMPTY(_cLjCliPed) .AND. M->C5_
 				//==========================================================================
 				//==============================================================================================================================
 				//A funcao runtrigger executa todos os gatilhos para determinado campo                                                         
-				//o n sera a posicao atual na getdados, pode ser a variavel N ou um endereço de for/next dependendo da sua necessidade			
+				//o n sera a posicao atual na getdados, pode ser a variavel N ou um endereço de For/Next dependendo da sua necessidade			
 				//para executar gatilhos na enchoice vc troca o parametro 2 para 1 e nao passa posicao de Acols                                
 				//==============================================================================================================================
 				If ExistTrigger('C6_TES    ')  
@@ -301,9 +287,9 @@ If !EMPTY(_cTpOper) .AND. !EMPTY(_cCliPed) .AND. !EMPTY(_cLjCliPed) .AND. M->C5_
 				//==============================================
 				//Caso nao tenha econtrado uma TES inteligente.
 				//==============================================
-				If _cTES == Space(03) .AND. !IsInCallStack('MSEXECAUTO')
+				If _cTES == Space(03) .And. !IsInCallStack('MSEXECAUTO')
 				
-					u_itmsg(	"Não existe nenhuma regra de TES Inteligente cadastrada para: "+CHR(13)+CHR(10)+;
+					U_ITMsg(	"Não existe nenhuma regra de TES Inteligente cadastrada para: "+CHR(13)+CHR(10)+;
 								"Filial / Estado / Operacao: "+cFilAnt+" / "+_cEstFil+" / "+_cTpOper+CHR(13)+CHR(10)+;
 								"Cliente / Loja / Est. / Suframa: "+_cCliPed+" / "+_cLjCliPed+" / "+_cEstCli+" / "+_cSuframa+CHR(13)+CHR(10)+;
 								"Produto / Armazem: "+AllTrim(aCols[n,_nPosProd])+" / "+aCols[n,_nPosLoc],'Atenção! Ped.:'+M->C5_NUM,;
@@ -317,9 +303,9 @@ If !EMPTY(_cTpOper) .AND. !EMPTY(_cCliPed) .AND. !EMPTY(_cLjCliPed) .AND. M->C5_
 			//de venda que percorrera todo o acols para checar os produtos fornecidos
 			//no pedido de venda para constatar se existe TES Inteligente.           
 			//========================================================================
-		Else                           
+		Else                  
 			
-				For k:=1 to Len(aCols)			      
+				For k:=1 To Len(aCols)			      
 					//=======================================
 					//Verifica se a linha nao esta deletada.
 					//=======================================
@@ -340,18 +326,18 @@ If !EMPTY(_cTpOper) .AND. !EMPTY(_cCliPed) .AND. !EMPTY(_cLjCliPed) .AND. M->C5_
 						//=========================================================================
 						//Posiciona os registros                                                  
 						//=========================================================================
-						dbSelectArea(IIF(M->C5_TIPO$"DB","SA2","SA1"))
-						dbSetOrder(1)
+						DBSelectArea(IIf(M->C5_TIPO$"DB","SA2","SA1"))
+						DBSetOrder(1)
 						If MsSeek(xFilial() + _cCliPed + _cLjCliPed)							  				
 						
-							dbSelectArea("SF4") 
-							SF4->(dbSetOrder(1))
-							If SF4->(dbSeek(xFilial("SF4") + _cTES))     
+							DBSelectArea("SF4") 
+							SF4->(DBSetOrder(1))
+							If SF4->(DBSeek(xFilial("SF4") + _cTES))     
 							
-								Aadd(_aDadosCfo,{"OPERNF","S"})
-							 	Aadd(_aDadosCfo,{"TPCLIFOR",M->C5_TIPOCLI})					
-							 	Aadd(_aDadosCfo,{"UFDEST",Iif(M->C5_TIPO $ "DB",SA2->A2_EST,SA1->A1_EST)})
-							 	Aadd(_aDadosCfo,{"INSCR" ,If(M->C5_TIPO$"DB",SA2->A2_INSCR,SA1->A1_INSCR)}) 
+								aAdd(_aDadosCfo,{"OPERNF","S"})
+							 	aAdd(_aDadosCfo,{"TPCLIFOR",M->C5_TIPOCLI})					
+							 	aAdd(_aDadosCfo,{"UFDEST",IIf(M->C5_TIPO $ "DB",SA2->A2_EST,SA1->A1_EST)})
+							 	aAdd(_aDadosCfo,{"INSCR" ,If(M->C5_TIPO$"DB",SA2->A2_INSCR,SA1->A1_INSCR)}) 
 							 	
 							 	t := n
 							 	n := k //Reposiciona o n para que a mafiscfo ajuste o acols correto
@@ -367,7 +353,7 @@ If !EMPTY(_cTpOper) .AND. !EMPTY(_cCliPed) .AND. !EMPTY(_cLjCliPed) .AND. M->C5_
 						//==========================================================================
 						//==============================================================================================================================
 						//A funcao runtrigger executa todos os gatilhos para determinado campo                                                         
-						//o n sera a posicao atual na getdados, pode ser a variavel N ou um endereço de for/next dependendo da sua necessidade			
+						//o n sera a posicao atual na getdados, pode ser a variavel N ou um endereço de For/Next dependendo da sua necessidade			
 						//para executar gatilhos na enchoice vc troca o parametro 2 para 1 e nao passa posicao de Acols                                
 						//==============================================================================================================================
 						t := n
@@ -406,9 +392,9 @@ If !EMPTY(_cTpOper) .AND. !EMPTY(_cCliPed) .AND. !EMPTY(_cLjCliPed) .AND. M->C5_
 	//Caso nao tenha encontrado uma regra de TES inteligente para quando
 	//percorrer todo o acols.                                           
 	//==================================================================
-	If _lTES .And. _nOpcao == 2  .and. !l410Auto
+	If _lTES .And. _nOpcao == 2  .And. !l410Auto
 	
-		u_itmsg("Existe(m) produto(s) sem uma regra de TES INTELIGENTE cadastrada, este(s) produto(s) encontra(m)-se com a TES em branco.",'Atenção! (AOMS058) Ped.:'+M->C5_NUM,;
+		U_ITMsg("Existe(m) produto(s) sem uma regra de TES INTELIGENTE cadastrada, este(s) produto(s) encontra(m)-se com a TES em branco.",'Atenção! (AOMS058) Ped.:'+M->C5_NUM,;
 					"Favor solicitar ao responsável pelo cadastramento das regras de TES INTELIGENTE para efetuar a inserção dos itens que se encontram com a TES em branco.",1)       
 	
 	EndIf   	
@@ -437,7 +423,7 @@ EndIf
 // Restaura o aRotina                                               
 //===================================================================
 If ValType( aRotBack ) == "A"
-	aRotina := AClone( aRotBack )
+	aRotina := aClone( aRotBack )
 EndIf
 
 //===========================================================
@@ -450,17 +436,17 @@ EndIf
 //===================
 // Restaura a area. 
 //===================
-SC5->(Restarea(_aareaSC5))
-SC6->(Restarea(_aareaSC6))
-SC9->(Restarea(_aareaSC9))
-SM0->(Restarea(_aareaSM0))
-SX2->(Restarea(_aareaSX2))
-SX3->(Restarea(_aareaSX3))
-SX7->(Restarea(_aareaSX7))
-SA1->(Restarea(_aareaSA1))
-SB1->(Restarea(_aareaSB1))
-SB2->(Restarea(_aareaSB2))
-SE4->(Restarea(_aareaSE4))
+SC5->(FWRestArea(_aareaSC5))
+SC6->(FWRestArea(_aareaSC6))
+SC9->(FWRestArea(_aareaSC9))
+SM0->(FWRestArea(_aareaSM0))
+SX2->(FWRestArea(_aareaSX2))
+SX3->(FWRestArea(_aareaSX3))
+SX7->(FWRestArea(_aareaSX7))
+SA1->(FWRestArea(_aareaSA1))
+SB1->(FWRestArea(_aareaSB1))
+SB2->(FWRestArea(_aareaSB2))
+SE4->(FWRestArea(_aareaSE4))
 
 Return _cRetorno
  
@@ -469,17 +455,15 @@ Return _cRetorno
 Função.........: AOMS058X   
 Autor..........: Igor Melgaço
 Data da Criacao: 17/06/2025
-===============================================================================================================================
 Descricao......: Busca o preço do produto na tabela Z09, para pedidos de transferência entre filiais e cópia de pedido.
-===============================================================================================================================
 Parametros: _cTipoOper,_cFilOrig
-===============================================================================================================================
 Retorno   : Nenhum						  							                               						
 ===============================================================================================================================
-/*/
+*/
  
 User Function AOMS058X(_cTipoOper,_cFilOrig)
-Local _cOpTransf := U_ITGETMV( 'IT_OPMEDIO' , "20|22" )
+
+Local _cOpTransf := SuperGetMV("IT_OPMEDIO",.F.,'20|22')
 Local _nPosProd  := aScan(aHeader,{|W| Upper(AllTrim(W[2])) == "C6_PRODUTO" })
 Local _nPosPreco := aScan(aHeader,{|W| Upper(AllTrim(W[2])) == "C6_PRCVEN"} ) 
 Local _nPosPRUN  := aScan(aHeader,{|x| AllTrim(Upper(x[2]) ) == "C6_PRUNIT"} ) 
@@ -500,9 +484,9 @@ ElseIf Inclui
 	_lContinua := .T.
 EndIf 
 
-If _lContinua .And. _cTipoOper $ _cOpTransf .AND. !Empty(M->C5_CLIENTE)
+If _lContinua .And. _cTipoOper $ _cOpTransf .And. !Empty(M->C5_CLIENTE)
 
-	_cFilDest := Alltrim(Posicione("SA1",1,xfilial("SA1")+M->C5_CLIENTE+M->C5_LOJACLI,"SA1->A1_I_FILOR")) //filial destino do cliente selecionado
+	_cFilDest := AllTrim(Posicione("SA1",1,xFilial("SA1")+M->C5_CLIENTE+M->C5_LOJACLI,"SA1->A1_I_FILOR")) //filial destino do cliente selecionado
 	_dData := dDataBase
 
 	For k := 1 To Len(aCols)
@@ -517,8 +501,8 @@ If _lContinua .And. _cTipoOper $ _cOpTransf .AND. !Empty(M->C5_CLIENTE)
         _cQry += "	FROM " + RetSqlName("Z09")+" Z09 "
         _cQry += "	WHERE Z09_CODOPE = '"+_cTipoOper+"' "
         _cQry += "	  AND Z09_CODPRO = '"+aCols[k][_nPosProd]+"' "
-        _cQry += "	  AND Z09_INIVIG <= '"+DTOS(_dData)+"' "  
-        _cQry += "	  AND Z09_FIMVIG >= '"+DTOS(_dData)+"' "
+        _cQry += "	  AND Z09_INIVIG <= '"+DToS(_dData)+"' "  
+        _cQry += "	  AND Z09_FIMVIG >= '"+DToS(_dData)+"' "
         _cQry += "	  AND ( Z09_FILORI = ' ' OR Z09_FILORI = '"+_cFilOrig+"' ) "
         _cQry += "	  AND ( Z09_FILDES = ' ' OR  Z09_FILDES = '"+_cFilDest+"' ) " 
         _cQry += "	  AND Z09.D_E_L_E_T_ = ' ' "
@@ -528,7 +512,7 @@ If _lContinua .And. _cTipoOper $ _cOpTransf .AND. !Empty(M->C5_CLIENTE)
 
         MPSysOpenQuery( _cQry,_cAliasZ09 )
 
-        If (_cAliasZ09)->( !EOF() ) //Se achou prepara para validação
+        If (_cAliasZ09)->( !Eof() ) //Se achou prepara para validação
 			__ReadVarB := ""
 			t := n
 			n := k //Reposiciona o n para que a mafiscfo ajuste o acols correto
@@ -541,7 +525,7 @@ If _lContinua .And. _cTipoOper $ _cOpTransf .AND. !Empty(M->C5_CLIENTE)
 
 			If Type("__ReadVar") == "C"
 			   __ReadVarB := __ReadVar
-			Endif
+			EndIf
 
 			__ReadVar :="C6_PRCVEN"
 
@@ -556,7 +540,7 @@ If _lContinua .And. _cTipoOper $ _cOpTransf .AND. !Empty(M->C5_CLIENTE)
 			n := t 	
         EndIf
 
-		(_cAliasZ09)->( DbClosearea() )
+		(_cAliasZ09)->( DBCloseArea() )
 
 	Next
 	//=================================================
@@ -573,21 +557,18 @@ EndIf
 
 Return 
 
-/*/
+/*
 ===============================================================================================================================
 Função.........: AOMS058N   
 Autor..........: Julio de Paula Paz
 Data da Criacao: 10/12/2020
-===============================================================================================================================
 Descricao......: Retorna o custo net do item de pedido de vendas.
-===============================================================================================================================
 Parametros: _cCampo = Campo que disparou o gatilho de cálculo do custo net.
-===============================================================================================================================
 Retorno   : Nenhum						  							                               						
 ===============================================================================================================================
-/*/
- 
+*/
 User Function AOMS058N(_cCampo)
+
 Local _nRet := 0
 Local _nPosPrcVen 
 Local _nPosPDesc  

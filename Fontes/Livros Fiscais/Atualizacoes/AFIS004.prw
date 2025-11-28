@@ -1,32 +1,24 @@
-/*
+/*
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Alexandre V. | 22/12/2015 | Tratativa na cláusula "ORDER BY" para remover a referência numérica. Chamado 13062
--------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer| 31/01/2019 | Aviso para quando os campos F4_DUPLIC e F4_UPRC estiverem diferentes. Chamado 27890
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 02/04/2019 | Revisão de fontes. Help 28346
+Alexandre V.  |22/12/2015| Chamado 13062. Tratativa na cláusula "ORDER BY" para remover a referência numérica.
+Alex Wallauer |31/01/2019| Chamado 27890. Aviso para quando os campos F4_DUPLIC e F4_UPRC estiverem diferentes.
+Lucas Borges  |02/04/2019| Chamado 28346. Revisão de fontes. 
 ===============================================================================================================================
 */
 
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-#INCLUDE "protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa--------: AFIS004
 Autor-----------: Alexandre Villar
 Data da Criacao-: 03/08/2015
-===============================================================================================================================
 Descrição-------: Rotina para liberação de TES pelas áreas: Fiscal, Pis/Cofins e Estoque - Chamado 9688
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -48,18 +40,15 @@ DBSelectArea("SF4")
 SF4->( DBSetOrder(1) )
 MBrowse( ,,,, "SF4" ,,,,,, _aCores )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: AFIS004S
 Autor-----------: Alexandre Villar
 Data da Criacao-: 03/08/2015
-===============================================================================================================================
 Descrição-------: Legenda da tela
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -71,18 +60,15 @@ Local _aCores := {	{ 'BR_VERDE'	, "TES Liberada"		  		},;
 
 BrwLegenda( cCadastro , "Legenda" , _aCores )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AFIS004L
 Autor-------------: Alexandre Villar
 Data da Criacao---: 03/08/2015
-===============================================================================================================================
 Descrição---------: Rotina para Liberar a TES bloqueada pelo cadastro
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -96,20 +82,20 @@ Local _xValid	:= U_ITACSUSR( 'ZZL_LCADTE' )
 //====================================================================================================
 If ValType(_xValid) == 'C' .And. !Empty(_xValid) .And. _xValid $ ('FPE')
 	
-//1) Quando F4_DUPLIC = 'N' .and. SF4->F4_UPRC = 'S'  ===========>  "Para TES que NÂO geram financeiro o campo atualiza preço de compra deveria estar também como "NÃO", deseja de continuar? "
-	If SF4->F4_TIPO = 'E' .AND. SF4->F4_DUPLIC = 'N' .AND. SF4->F4_UPRC = 'S' .AND. !MSgYesNo("Para TES que NÂO geram financeiro o campo atualiza preço de compra deveria estar também como NÃO, deseja de continuar ?","AFIS00401")
+//1) Quando F4_DUPLIC = 'N' .And. SF4->F4_UPRC = 'S'  ===========>  "Para TES que NÂO geram financeiro o campo atualiza preço de compra deveria estar também como "NÃO", deseja de continuar? "
+	If SF4->F4_TIPO = 'E' .And. SF4->F4_DUPLIC = 'N' .And. SF4->F4_UPRC = 'S' .And. !MSgYesNo("Para TES que NÂO geram financeiro o campo atualiza preço de compra deveria estar também como NÃO, deseja de continuar ?","AFIS00401")
 	   Return .F.
 	EndIf
 
-//2) Quando F4_DUPLIC = 'S' .and. SF4->F4_UPRC = 'N'  ===========>  "Para TES que GERAM financeiro o campo atualiza preço de compra deveria estar com preenchido com "SIM", deseja de continuar?"
-	If SF4->F4_TIPO = 'E' .AND. SF4->F4_DUPLIC = 'S' .and. SF4->F4_UPRC = 'N' .AND. !MsgYesNo("Para TES que GERAM financeiro o campo atualiza preço de compra deveria estar com preenchido com SIM, deseja de continuar?","AFIS00402")
+//2) Quando F4_DUPLIC = 'S' .And. SF4->F4_UPRC = 'N'  ===========>  "Para TES que GERAM financeiro o campo atualiza preço de compra deveria estar com preenchido com "SIM", deseja de continuar?"
+	If SF4->F4_TIPO = 'E' .And. SF4->F4_DUPLIC = 'S' .And. SF4->F4_UPRC = 'N' .And. !MsgYesNo("Para TES que GERAM financeiro o campo atualiza preço de compra deveria estar com preenchido com SIM, deseja de continuar?","AFIS00402")
 	   Return .F.
 	EndIf
 
 //TES de saida (F4_TIPO = 'S') realizar a validação somente se F4_UPRC = 'S', caso esteja apresentar a seguinte mensagem: "Para TES de saida o campo atualiza preço deveria estar preenchido como "NAO", deseja continuar?"
-	If SF4->F4_TIPO = 'S' .AND. M->F4_UPRC = 'S' .AND. !MsgYesNo("Para TES de saida o campo atualiza preço deveria estar preenchido como NÃO, deseja de continuar?","AGLT00403")
-	   RETURN .F.
-	ENDIF
+	If SF4->F4_TIPO = 'S' .And. M->F4_UPRC = 'S' .And. !MsgYesNo("Para TES de saida o campo atualiza preço deveria estar preenchido como NÃO, deseja de continuar?","AGLT00403")
+	   Return .F.
+	EndIf
 
 	If _xValid == 'F'
 		
@@ -123,7 +109,7 @@ If ValType(_xValid) == 'C' .And. !Empty(_xValid) .And. _xValid $ ('FPE')
 				
 				RecLock( 'SF4' , .F. )
 				SF4->F4_I_BLFPE := 'S' + SubStr( SF4->F4_I_BLFPE , 2 , 2 )
-				SF4->( MSUnlock() )
+				SF4->( MSUnLock() )
 				
 				U_ITGrvLog( _aDadLog , 'SF4' , 1 , SF4->( F4_FILIAL + F4_CODIGO ) , 'A' , RetCodUsr() , Date() , Time() )
 				
@@ -144,7 +130,7 @@ If ValType(_xValid) == 'C' .And. !Empty(_xValid) .And. _xValid $ ('FPE')
 				
 				RecLock( 'SF4' , .F. )
 				SF4->F4_I_BLFPE := SubStr( SF4->F4_I_BLFPE , 1 , 1 ) +'S'+ SubStr( SF4->F4_I_BLFPE , 3 , 1 )
-				SF4->( MSUnlock() )
+				SF4->( MSUnLock() )
 				
 				U_ITGrvLog( _aDadLog , 'SF4' , 1 , SF4->( F4_FILIAL + F4_CODIGO ) , 'A' , RetCodUsr() , Date() , Time() )
 				
@@ -166,7 +152,7 @@ If ValType(_xValid) == 'C' .And. !Empty(_xValid) .And. _xValid $ ('FPE')
 				
 				RecLock( 'SF4' , .F. )
 				SF4->F4_I_BLFPE := SubStr( SF4->F4_I_BLFPE , 1 , 2 ) +'S'
-				SF4->( MSUnlock() )
+				SF4->( MSUnLock() )
 				
 				U_ITGrvLog( _aDadLog , 'SF4' , 1 , SF4->( F4_FILIAL + F4_CODIGO ) , 'A' , RetCodUsr() , Date() , Time() )
 				
@@ -180,22 +166,18 @@ Else
 	Help(NIL, NIL, "AFIS00410", NIL, "O usuário atual não tem permissão para liberação do cadastro de TES na Gestão de Usuários da Italac.",1, 0, NIL, NIL, NIL, NIL, NIL, {"Solicite o Acesso ao Depto responsavel."})	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: AFIS004C
 Autor-----------: Alexandre Villar
 Data da Criacao-: 03/08/2015
-===============================================================================================================================
 Descrição-------: Consulta histórico de alterações da TES
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-
 User Function AFIS004C()
 
 Local _aLogReg	:= {}
@@ -203,12 +185,12 @@ Local _cAlias	:= GetNextAlias()
 Local _cTitLog	:= 'Consulta histórico de alterações da TES: '+ SF4->F4_CODIGO
 Local _aHeader	:= { 'Data' , 'Hora' , 'Opção' , 'Campo' , 'Conteúdo Orig.' , 'Conteúdo Alt.' , 'Usuário' }
 Local _cTxtAux	:= ''
-Local _aAllusers:= FWSFAllUsers() //não é permitirdo chamar a função que retorna apenas o nome por estar dentro do loop
+Local _aAllusers:= FWSFAllUsers() //não é permitirdo chamar a função que retorna apenas o nome por estar dentro do Loop
 Local _nPos		:= 0
 
 BeginSql alias _cAlias
 	SELECT Z07_DATA, Z07_HORA, Z07_OPCAO, Z07_CAMPO, Z07_CONORG, Z07_CONALT, Z07_CODUSU
-	FROM %table:Z07%
+	FROM %Table:Z07%
 	WHERE D_E_L_E_T_ = ' '
 	AND Z07_FILIAL = %xFilial:Z07%
 	AND Z07_ALIAS = 'SF4'
@@ -217,9 +199,9 @@ EndSql
 	
 While (_cAlias)->( !Eof() )
 	_nPos:= aScan(_aAllusers,{|x| x[2] == (_cAlias)->Z07_CODUSU})
-	aAdd( _aLogReg , {	DtoC( StoD( (_cAlias)->Z07_DATA ) )								,;
+	aAdd( _aLogReg , {	DToC( SToD( (_cAlias)->Z07_DATA ) )								,;
 						AllTrim( (_cAlias)->Z07_HORA )									,;
-						IIF( (_cAlias)->Z07_OPCAO == 'I' , 'Inclusão' , 'Alteração' )	,;
+						IIf( (_cAlias)->Z07_OPCAO == 'I' , 'Inclusão' , 'Alteração' )	,;
 						AllTrim( (_cAlias)->Z07_CAMPO )									,;
 						AllTrim( (_cAlias)->Z07_CONORG )								,;
 						AllTrim( (_cAlias)->Z07_CONALT )								,;
@@ -234,11 +216,11 @@ If Empty( _aLogReg )
 	_aLogReg := { { '' , '' , '' , '' , '' , '' , '' } }
 EndIf
 
-_cTxtAux := 'Status para uso: '		+ IIF( SF4->F4_MSBLQL == '1' , 'Bloqueado' , 'Liberado' )						+ Space(20)
-_cTxtAux += 'Status Fiscal: '		+ IIF( SubStr( SF4->F4_I_BLFPE , 1 , 1 ) == 'S' , 'Liberado' , 'Bloqueado' )	+ Space(20)
-_cTxtAux += 'Status PIS/COFINS: '	+ IIF( SubStr( SF4->F4_I_BLFPE , 2 , 1 ) == 'S' , 'Liberado' , 'Bloqueado' )	+ Space(20)
-_cTxtAux += 'Status Estoque: '		+ IIF( SubStr( SF4->F4_I_BLFPE , 3 , 1 ) == 'S' , 'Liberado' , 'Bloqueado' )
+_cTxtAux := 'Status para uso: '		+ IIf( SF4->F4_MSBLQL == '1' , 'Bloqueado' , 'Liberado' )						+ Space(20)
+_cTxtAux += 'Status Fiscal: '		+ IIf( SubStr( SF4->F4_I_BLFPE , 1 , 1 ) == 'S' , 'Liberado' , 'Bloqueado' )	+ Space(20)
+_cTxtAux += 'Status PIS/COFINS: '	+ IIf( SubStr( SF4->F4_I_BLFPE , 2 , 1 ) == 'S' , 'Liberado' , 'Bloqueado' )	+ Space(20)
+_cTxtAux += 'Status Estoque: '		+ IIf( SubStr( SF4->F4_I_BLFPE , 3 , 1 ) == 'S' , 'Liberado' , 'Bloqueado' )
 
 U_ITListBox( _cTitLog , _aHeader , _aLogReg , .T. , 1 , _cTxtAux )
 
-Return()
+Return

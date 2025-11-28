@@ -2,30 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Alexandre V. | 26/05/2015 | Atualização das rotinas do Leite para remoção de campos. Chamados: 9332/6460/8917/10299
--------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges | 25/07/2019 | Revisão de fontes. Chamado 28346
+ Alexandre V. |26/05/2015| Chamados 9332/6460/8917/10299. Atualização das rotinas do Leite para remoção de campos.
+ Lucas Borges |25/07/2019| Chamado 28346. Revisão de fontes.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "REPORT.CH"
+#Include "TOTVS.ch"
+#Include "REPORT.CH"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT001
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 29/01/2009
-===============================================================================================================================
 Descrição---------: Relatório da Recepção de Leite diária por Produtor
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -54,11 +47,11 @@ _oReport:HideParamPage()
 _oReport:SetLandscape()
 _oReport:SetTotalInLine(.F.)
 
-DEFINE SECTION _oZLD OF _oReport TITLE "Recebimentos" TABLES "ZLD"
+DEFINE Section _oZLD OF _oReport TITLE "Recebimentos" TABLES "ZLD"
 DEFINE CELL NAME "ZLD_FRETIS" 		OF _oZLD ALIAS "ZLD" TITLE "Fretista"
 DEFINE CELL NAME "A2_NOME"   		OF _oZLD ALIAS "SA2" TITLE "Nome"
 
-DEFINE SECTION _oZLDA OF _oZLD TITLE "Detalhes" TABLES "ZLD"
+DEFINE Section _oZLDA OF _oZLD TITLE "Detalhes" TABLES "ZLD"
 DEFINE CELL NAME "ZLD_RETIRO" 		OF _oZLDA ALIAS "ZLD" TITLE "Código"	SIZE 6.5
 DEFINE CELL NAME "ZLD_RETILJ" 		OF _oZLDA ALIAS "ZLD" TITLE "Loja"		SIZE 4.5
 DEFINE CELL NAME "ZLD_DCRRET" 		OF _oZLDA ALIAS "ZLD" TITLE "Produtor"	SIZE 20 PICTURE "@S20"
@@ -128,11 +121,8 @@ Return
 Programa----------: PrintReport
 Autor-------------: Jeovane
 Data da Criacao---: 24/09/2008
-===============================================================================================================================
 Descrição---------: Printa o relatorio
-===============================================================================================================================
 Parametros--------: _oReport
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -148,7 +138,7 @@ BeginSql alias "QRYZLD"
                         AND C.A2_COD = ZLD.ZLD_RETIRO
                         AND C.A2_LOJA = ZLD.ZLD_RETILJ) ZLD_DCRRET,
                     ZLD.ZLD_FRETIS, ZLD.ZLD_LJFRET, SA2.A2_NOME
-      FROM %table:ZLD% ZLD, %table:SA2% SA2
+      FROM %Table:ZLD% ZLD, %Table:SA2% SA2
      WHERE ZLD.D_E_L_E_T_ = ' '
        AND SA2.D_E_L_E_T_ = ' '
        AND ZLD.ZLD_FILIAL = %xFilial:ZLD%
@@ -174,12 +164,9 @@ Return
 Programa----------: procLinha
 Autor-------------: Jeovane
 Data da Criacao---: 24/09/2008
-===============================================================================================================================
 Descrição---------: Funcao chamada no linecondition da secao do relatorio, atualiza variavel privada _aValores com respectivos
 					valores da linha
-===============================================================================================================================
 Parametros--------: cProdutor,cLoja,cFretista,cLjFret,_cDiaIni,_cDiaFim
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -187,7 +174,7 @@ Static Function procLinha(cProdutor,cLoja,cFretista,cLjFret,_cDiaIni,_cDiaFim)
 
 Local _lRet		:= .T.
 Local _cAlias	:= GetNextAlias()
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _nI		:= 0
 
 _nTot1 := 0
@@ -197,7 +184,7 @@ _nTot3 := 0
 _aValores := getaVal()
 
 BeginSql alias _cAlias
-	SELECT SUBSTR(ZLD_DTCOLE, 7, 2) DIA, COALESCE(SUM(ZLD_QTDBOM), 0) BOM
+	SELECT SubStr(ZLD_DTCOLE, 7, 2) DIA, COALESCE(SUM(ZLD_QTDBOM), 0) BOM
 	  FROM %Table:ZLD%
 	 WHERE D_E_L_E_T_ = ' '
 	   AND ZLD_FILIAL = %xFilial:ZLD%
@@ -206,7 +193,7 @@ BeginSql alias _cAlias
 	   AND ZLD_RETILJ = %exp:cLoja%
 	   AND ZLD_FRETIS = %exp:cFretista%
 	   AND ZLD_LJFRET = %exp:cLjFret%
-	 GROUP BY SUBSTR(ZLD_DTCOLE, 7, 2)
+	 GROUP BY SubStr(ZLD_DTCOLE, 7, 2)
 EndSql
 
 //Atualiza valores na matriz de acordo com query
@@ -228,7 +215,7 @@ Next _nI
 
 _nTot3 += _nTot1 + _nTot2
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return( _lRet )
 
@@ -237,11 +224,8 @@ Return( _lRet )
 Programa----------: getaVal
 Autor-------------: Jeovane
 Data da Criacao---: 24/09/2008
-===============================================================================================================================
 Descrição---------: Funcao usada para preencher vetor _aValores com valores padrao
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: _aRet
 ===============================================================================================================================
 */
@@ -252,7 +236,7 @@ Local _nX	:= 0
 
 //Preenche Matriz a Valores default
 For _nX := 1 to 31
-	aadd(_aRet,{StrZero(_nX,2),0})
+	aAdd(_aRet,{StrZero(_nX,2),0})
 Next _nX
 
 Return( _aRet )

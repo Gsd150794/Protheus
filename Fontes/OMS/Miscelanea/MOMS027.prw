@@ -17,10 +17,10 @@ Lucas Borges  | 23/07/2025 | Chamado 51340. Ajustar função para validação de amb
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#INCLUDE "RWMake.ch"
-#INCLUDE "TopConn.ch"
-#INCLUDE "Protheus.ch"
-#INCLUDE "FileIO.ch"	
+#Include "RWMake.ch"
+#Include "TopConn.ch"
+#Include "TOTVS.ch"
+#Include "FileIO.ch"	
 
 #DEFINE ENTER	Chr(13)+Chr(10)
 
@@ -71,11 +71,11 @@ If AliasInDic("SZY")
 
 Else
 	
-	u_itmsg(  "Para utilizar a integração é necessário aplicar a atualização de dicionários 'UPDCISP'." , "Atenção!",,1 )
+	U_ITMsg(  "Para utilizar a integração é necessário aplicar a atualização de dicionários 'UPDCISP'." , "Atenção!",,1 )
 	
-EndIF
+EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -102,16 +102,16 @@ Local aparam			:= {cEmpAnt,cFilAnt,.T.,.F.}
 //===========================================================================
 If !U_ITVLDUSR(4)
 
-	u_itmsg("Usuário sem acesso à alteração dos dados da base da CISP.","Atenção", "Verifique com a área de TI/ERP.",1)
+	U_ITMsg("Usuário sem acesso à alteração dos dados da base da CISP.","Atenção", "Verifique com a área de TI/ERP.",1)
 
-	Return()
+	Return
 	
 EndIf
 
 
 If !Pergunte( cPerg )
-	u_itmsg( "Operação cancelada pelo usuário." , "Atenção!",,1 )
-	Return()
+	U_ITMsg( "Operação cancelada pelo usuário." , "Atenção!",,1 )
+	Return
 EndIf
 
 lThread := ( MV_PAR05 == 2 )
@@ -143,7 +143,7 @@ Else
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -151,7 +151,7 @@ Programa----------: MOMS027P
 Autor-------------: Alexandre Villar
 Data da Criacao---: 07/03/2014
 ===============================================================================================================================
-Descrição---------: Rotina que processa a atualização dos dados da base CISP
+Descrição---------: Rotina que Processa a atualização dos dados da base CISP
 ===============================================================================================================================
 Parametros--------: lThread		- se verdadeiro define que a rotina está sendo executada via JOB
 ------------------: cEmpAux		- variável da Empresa para criação do ambiente via JOB
@@ -178,7 +178,7 @@ If !Empty(aParam)
 	cFilAux	:= aParam[02]
 	lThread	:= .T.
 	lJobMan	:= .F.
-EndIF
+EndIf
 
 //===========================================================================
 //| Processa a abertura do ambiente caso a execução seja via JOB            |
@@ -196,7 +196,7 @@ If lThread
 	RpcSetType(2)
 		
 	If !RPCSETENV( cEmpAux , cFilAux )
-		Return()
+		Return
 	EndIf
 				
 	//===========================================================================
@@ -214,7 +214,7 @@ Else
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -244,8 +244,8 @@ Local cCodCisp	:= AllTrim( GetMV( "IT_CISPCOD" ,, "0095" ) )
 Local cCNPJ		:= ""
 
 Local _dDataDE2	:= YEARSUB( dDataRef , 1 )
-Local dDataAc	:= STOD("")
-Local dDataAnt	:= STOD("")
+Local dDataAc	:= SToD("")
+Local dDataAnt	:= SToD("")
 Local nVLimCre	:= 0
 Local nValorX	:= 0
 Local nValorY	:= 0
@@ -285,12 +285,12 @@ Default lThread	:= .F.
 //===========================================================================
 //| Verifica se a rotina está sendo executada via JOB                       |
 //===========================================================================
-IF lThread
+If lThread
 	
 	//===========================================================================
 	//| Caso necessário inicializa os parâmetros de configuração                |
 	//===========================================================================
-	IF Type(MV_PAR05) <> "N"
+	If Type(MV_PAR05) <> "N"
 	
 		Pergunte( cPerg , .F. )
 		
@@ -301,7 +301,7 @@ IF lThread
 		MV_PAR05 := 2
 		MV_PAR06 := GetMV( "IT_CISPENV" ,, 1 )
 		
-	EndIF
+	EndIf
 	
 Else
 
@@ -319,7 +319,7 @@ Else
 	IncProcG2( "Lendo registros..." )
 	ProcessMessage()
 
-EndIF
+EndIf
 
 u_itconout("Atualização de Clientes [ Processo 01 de 03 ] - Lendo registros...")
 
@@ -329,7 +329,7 @@ u_itconout("Atualização de Clientes [ Processo 01 de 03 ] - Lendo registros...")
 cQuery := " SELECT "+ENTER
 cQuery += " 	'1'				   		AS PCTIPO	,"+ENTER
 cQuery += " 	'"+ cCodCisp +"'   		AS PCCASS	,"+ENTER
-cQuery += " 	SUBSTR(SA1.A1_CGC,1,8)	AS PCCCLI	,"+ENTER
+cQuery += " 	SubStr(SA1.A1_CGC,1,8)	AS PCCCLI	,"+ENTER
 cQuery += " 	'00000000'		   		AS PCDDAT	,"+ENTER
 cQuery += " 	MIN(SA1.A1_I_DTCAD)		AS PCDCDD	,"+ENTER
 cQuery += " 	'00000000'		 		AS PCDUCM	,"+ENTER
@@ -364,17 +364,17 @@ cQuery += " WHERE "+ENTER
 cQuery += " 		SA1.D_E_L_E_T_			= ' ' "+ENTER
 cQuery += " AND		SA1.A1_PESSOA			= 'J' "+ENTER
 cQuery += " AND		SA1.A1_FILIAL			= '"+ xFilial("SA1") +"' "+ENTER
-cQuery += " AND		SUBSTR(SA1.A1_CGC,1,8)	<> '"+ Space(08) +"' "+ENTER
-cQuery += " AND		SUBSTR(SA1.A1_CGC,1,8)	<> '00000000' "+ENTER
-cQuery += " AND		SA1.A1_I_DTCAD			< '"+ DtoS(dDataRef) +"' "+ENTER
-cQuery += " AND		NOT EXISTS				( SELECT SZY.ZY_PCCCLI FROM "+ RetSqlName("SZY") +" SZY WHERE TRIM(SZY.ZY_PCCCLI) = TRIM(SUBSTR(SA1.A1_CGC,1,8)) AND TRIM(SZY.D_E_L_E_T_) IS NULL ) "+ENTER
+cQuery += " AND		SubStr(SA1.A1_CGC,1,8)	<> '"+ Space(08) +"' "+ENTER
+cQuery += " AND		SubStr(SA1.A1_CGC,1,8)	<> '00000000' "+ENTER
+cQuery += " AND		SA1.A1_I_DTCAD			< '"+ DToS(dDataRef) +"' "+ENTER
+cQuery += " AND		NOT EXISTS				( SELECT SZY.ZY_PCCCLI FROM "+ RetSqlName("SZY") +" SZY WHERE TRIM(SZY.ZY_PCCCLI) = TRIM(SubStr(SA1.A1_CGC,1,8)) AND TRIM(SZY.D_E_L_E_T_) IS NULL ) "+ENTER
 cQuery += " AND		SA1.A1_COD				> '000001' "
-cQuery += " AND		SUBSTR(SA1.A1_CGC,1,8)  BETWEEN '"+ MV_PAR01 +"' AND '"+ MV_PAR02 +"' "+ENTER
+cQuery += " AND		SubStr(SA1.A1_CGC,1,8)  BETWEEN '"+ MV_PAR01 +"' AND '"+ MV_PAR02 +"' "+ENTER
 cQuery += " AND		SA1.A1_COD  BETWEEN '"+ MV_PAR03 +"' AND '"+ MV_PAR04 +"' "+ENTER
-cQuery += " AND      SA1.A1_FILIAL = '" + xfilial("SA1") + "'"
+cQuery += " AND      SA1.A1_FILIAL = '" + xFilial("SA1") + "'"
 
-cQuery += " GROUP BY SUBSTR(SA1.A1_CGC,1,8) "+ENTER
-cQuery += " ORDER BY SUBSTR(SA1.A1_CGC,1,8) "+ENTER
+cQuery += " GROUP BY SubStr(SA1.A1_CGC,1,8) "+ENTER
+cQuery += " ORDER BY SubStr(SA1.A1_CGC,1,8) "+ENTER
 
 //===========================================================================
 //| Verifica e inicializa os dados para análise                             |
@@ -394,14 +394,14 @@ DBSelectArea(cAlias)
 //===========================================================================
 //| Tratativa das mensagens para processamento via JOB ou Rotina            |
 //===========================================================================
-IF !(lThread)
+If !(lThread)
 	
-	(cAlias)->( DBEVAL( {|| nTotReg++ } ) )
+	(cAlias)->( DBEval( {|| nTotReg++ } ) )
 	(cAlias)->( DBGoTop() )
 	
 	BarGauge2Set(nTotReg)
 
-EndIF
+EndIf
 
 //===========================================================================
 //| Inclui os Clientes na Base da CISP                                      |
@@ -410,16 +410,16 @@ While (cAlias)->(!Eof())
 	
 	nI++
 	
-	IF !lThread
+	If !lThread
 	
 		IncProcG2( "["+StrZero(nI,9)+"] de ["+StrZero(nTotReg,9)+"]" )
 		ProcessMessage()
 	
-	EndIF
+	EndIf
 	
 	u_itconout("Atualizando clientes - ["+StrZero(nI,9)+"] de ["+StrZero(nTotReg,9)+"]")
 
-	If !SZY->( DbSeek( xFilial("SZY") + (cAlias)->PCCCLI ) )
+	If !SZY->( DBSeek( xFilial("SZY") + (cAlias)->PCCCLI ) )
 	
 		SZY->( RecLock( "SZY" , .T. ) )
 		
@@ -427,7 +427,7 @@ While (cAlias)->(!Eof())
 			SZY->ZY_PCTIPO	:= (cAlias)->PCTIPO
 			SZY->ZY_PCCASS	:= (cAlias)->PCCASS
 			SZY->ZY_PCCCLI	:= (cAlias)->PCCCLI
-			SZY->ZY_PCDCDD	:= STOD( (cAlias)->PCDCDD	)
+			SZY->ZY_PCDCDD	:= SToD( (cAlias)->PCDCDD	)
 			SZY->ZY_PCVULC	:= Val( (cAlias)->PCVULC	)
 			SZY->ZY_PCVMAC	:= Val( (cAlias)->PCVMAC	)
 			SZY->ZY_PCVSAT	:= Val( (cAlias)->PCVSAT	)
@@ -447,24 +447,24 @@ While (cAlias)->(!Eof())
 			SZY->ZY_PCVSIT	:= (cAlias)->PCVSIT
 			SZY->ZY_PCTIPG	:= (cAlias)->PCTIPG
 			SZY->ZY_PCGGA	:= (cAlias)->PCGGA
-			SZY->ZY_PCDTG	:= STOD( (cAlias)->PCDTG	)
+			SZY->ZY_PCDTG	:= SToD( (cAlias)->PCDTG	)
 			SZY->ZY_PCVLG	:= Val( (cAlias)->PCVLG		)
 			SZY->ZY_PCVPA	:= Val( (cAlias)->PCVPA		)
 			SZY->ZY_PCSVV	:= (cAlias)->PCSVV
 			
-		SZY->(MsUnlock())
+		SZY->(MSUnLock())
 		
 	EndIf
 	
-(cAlias)->(DBSKIP())
-ENDDO
+(cAlias)->(DBSkip())
+EndDo
 
 (cAlias)->( DBCloseArea() )
 
 //===========================================================================
 //| Tratativa das mensagens para processamento via JOB ou Rotina            |
 //===========================================================================
-IF !(lThread)
+If !(lThread)
 
 	//===========================================================================
 	//| Inicializa barras de processamento                                      |
@@ -476,7 +476,7 @@ IF !(lThread)
 	IncProcG2( "Lendo registros..." )
 	ProcessMessage()
 
-EndIF
+EndIf
 
 u_itconout("Atualização de Valores [ Processo 02 de 03 ] - Lendo registros...")
 
@@ -484,7 +484,7 @@ u_itconout("Atualização de Valores [ Processo 02 de 03 ] - Lendo registros...")
 //| Monta consulta para análise dos Valores dos Clientes                    |
 //===========================================================================
 cQuery := " SELECT "+ENTER
-cQuery += " 	SUBSTR(SA1.A1_CGC,1,8)	AS CNPJ, "+ENTER
+cQuery += " 	SubStr(SA1.A1_CGC,1,8)	AS CNPJ, "+ENTER
 cQuery += " 	SA1.A1_COD AS A1_COD, "+ENTER
 cQuery += " 	SA1.A1_LOJA AS A1_LOJA, "+ENTER
 cQuery += " 	SE1.E1_EMISSAO			AS DATACC, "+ENTER
@@ -514,11 +514,11 @@ cQuery += " 	SE1.D_E_L_E_T_			= ' ' "+ENTER
 cQuery += " AND	SE1.E1_I_AVACC <> 'N' " +ENTER
 cQuery += " AND	SE1.E1_TIPO				NOT IN ('NCC','RA', 'NDC') "+ENTER
 cQuery += " AND	SE1.E1_CLIENTE			> '000001' "+ENTER
-cQuery += " AND	SUBSTR(SA1.A1_CGC,1,8)	BETWEEN '"+ MV_PAR01 +"' AND '"+ MV_PAR02 +"' "+ENTER
-cQuery += " AND	SE1.E1_EMISSAO			< '"+ DtoS( dDataRef ) +"' "+ENTER
-cQuery += " AND SE1.E1_VENCREA > '" + DTOS(dDataRef - 1825) +"' "+ENTER
+cQuery += " AND	SubStr(SA1.A1_CGC,1,8)	BETWEEN '"+ MV_PAR01 +"' AND '"+ MV_PAR02 +"' "+ENTER
+cQuery += " AND	SE1.E1_EMISSAO			< '"+ DToS( dDataRef ) +"' "+ENTER
+cQuery += " AND SE1.E1_VENCREA > '" + DToS(dDataRef - 1825) +"' "+ENTER
 cQuery += " AND	SA1.A1_COD  BETWEEN '"+ MV_PAR03 +"' AND '"+ MV_PAR04 +"' "+ENTER     
-cQuery += " AND SA1.A1_FILIAL = '" + xfilial("SA1") + "'"
+cQuery += " AND SA1.A1_FILIAL = '" + xFilial("SA1") + "'"
 cQuery += " ORDER BY CNPJ, DATACC, ORDEM "+ENTER
 
 
@@ -526,19 +526,19 @@ If Select(cAlias) > 0
 	(cAlias)->( DBCloseArea() )
 EndIf
 
-IF !(lThread)
+If !(lThread)
 	
 	IncProcG2( "Preparando tabela temporária..." )
 	ProcessMessage()
 
-EndIF
+EndIf
 
 u_itconout("Atualização de Valores [ Processo 02 de 03 ] - Preparando tabela temporária...")
 
 DBUseArea( .T. , "TOPCONN" , TcGenQry(,,cQuery) , cAlias , .T. , .F. )
 
 //===========================================================================
-//| Inicializa o ambiente e processa a leitura e gravação dos dados         |
+//| Inicializa o ambiente e Processa a leitura e gravação dos dados         |
 //===========================================================================
 DBSelectArea(cAlias)
 (cAlias)->( DBGoTop() )
@@ -549,14 +549,14 @@ nTotReg		:= 0
 //===========================================================================
 //| Tratativa das mensagens para processamento via JOB ou Rotina            |
 //===========================================================================
-(cAlias)->( DBEVAL( {|| nTotReg++ } ) )
+(cAlias)->( DBEval( {|| nTotReg++ } ) )
 (cAlias)->( DBGoTop() )
 
-IF !(lThread)
+If !(lThread)
 	
 	BarGauge2Set(nTotReg)
 
-EndIF
+EndIf
 
 //===========================================================================
 //| Processa a análise e gravação dos dados                                 |
@@ -571,15 +571,15 @@ While !(cAlias)->(Eof())
 	//Verifica se já foi gravado
 	DBSelectArea("SZY")
 	SZY->( DBSetOrder(1) )
-	IF SZY->( DbSeek( xFilial("SZY") + cCNPJ ) ) .and. SZY->ZY_PCDDAT == dDataRef
+	If SZY->( DBSeek( xFilial("SZY") + cCNPJ ) ) .And. SZY->ZY_PCDDAT == dDataRef
 	
 		nI++
 		u_itconout("Atualização de Valores [ Processo 02 de 03 ] - ["+StrZero(nI,9)+"] de ["+StrZero(nTotReg,9)+"]")
 	
-		(cAlias)->(Dbskip())
+		(cAlias)->(DBSkip())
 		Loop
 		
-	Endif
+	EndIf
 	
 	nVLimCre	:= U_MOMS027K((cAlias)->A1_COD,(cAlias)->A1_LOJA)
 	
@@ -611,17 +611,17 @@ While !(cAlias)->(Eof())
 	//===========================================================================
 	nSaldo		:= 0
 	nSaldoAC	:= 0
-	dDataAc		:= StoD("")
+	dDataAc		:= SToD("")
 	nSaldoAnt	:= 0
-	dDataAnt	:= StoD("")
+	dDataAnt	:= SToD("")
 	
 	//===========================================================================
 	//| Variáveis de Atualização da Penúltima e Última compra do Cliente        |
 	//===========================================================================
 	nValUC		:= 0
-	dDataUC		:= StoD("")
+	dDataUC		:= SToD("")
 	nValPC		:= 0
-	dDataPC		:= StoD("")
+	dDataPC		:= SToD("")
 	
 	//===========================================================================
 	//| Variáveis do cálculo de atrasos dos Clientes                            |
@@ -642,21 +642,21 @@ While !(cAlias)->(Eof())
 	
 		nI++
 		
-		IF !lThread
+		If !lThread
 		
 			IncProcG2("["+StrZero(nI,9)+"] de ["+StrZero(nTotReg,9)+"]")
 			ProcessMessage()
 		
-		EndIF
+		EndIf
 		
 		u_itconout("Atualização de Valores [ Processo 02 de 03 ] - ["+StrZero(nI,9)+"] de ["+StrZero(nTotReg,9)+"]")
  		
 		//===========================================================================
 		//| Construção do Saldo através da C.C. do Cliente                          |
 		//===========================================================================
-		If StoD( (cAlias)->DATACC ) >= _dDataDE2 .and. (cAlias)->ORDEM == 1
+		If SToD( (cAlias)->DATACC ) >= _dDataDE2 .And. (cAlias)->ORDEM == 1
 					
-			aadd(_atitulos,{(cAlias)->(Recno()),; 	//1
+			aAdd(_atitulos,{(cAlias)->(Recno()),; 	//1
 				0,;						//2
 				(cAlias)->E1_FILIAL,;	//3
 				 (cAlias)->E1_PREFIXO,;	//4
@@ -669,11 +669,11 @@ While !(cAlias)->(Eof())
 				 (cAlias)->DATACC ,;  //11
 				  { }             } )	//12
 
-			_atitulos[len(_atitulos)][12] := MOMS0278(_atitulos[len(_atitulos)] )
+			_atitulos[Len(_atitulos)][12] := MOMS0278(_atitulos[Len(_atitulos)] )
 			nSaldo := 0
 		
 			//Roda todos os titulos anteriores para pegar os saldos no dia do novo titulo
-			For _nnj := 1 to len(_atitulos)
+			For _nnj := 1 to Len(_atitulos)
 				
 				nSaldo += MOMS0279(_atitulos[_nnj][12],(cAlias)->DATACC)
 			
@@ -686,7 +686,7 @@ While !(cAlias)->(Eof())
 				nSaldo := 0
 			EndIf
 		
-			_atitulos[len(_atitulos)][2] := nSaldo		
+			_atitulos[Len(_atitulos)][2] := nSaldo		
 							
 			//===========================================================================
 			//| Atualização dos dados de Maior Acúmulo do Cliente                       |
@@ -694,13 +694,13 @@ While !(cAlias)->(Eof())
 			If nSaldo >= nSaldoAc
 
 				nSaldoAc	:= nSaldo
-				dDataAc		:= STOD( (cAlias)->DATACC )
+				dDataAc		:= SToD( (cAlias)->DATACC )
 
 			EndIf
 						
-		EndIF
+		EndIf
 		
-	(cAlias)->(DbSkip())
+	(cAlias)->(DBSkip())
 	EndDo
 		
 	
@@ -709,7 +709,7 @@ While !(cAlias)->(Eof())
 	//===============================================================================================
 	_aCodCli	:= {}
 	_cQuery	:= " SELECT SA1.A1_COD,SA1.A1_LOJA,A1_I_DTCAD FROM "
-	_cQuery	+= RetSqlName('SA1') +" SA1 WHERE SA1.D_E_L_E_T_ = ' ' AND SUBSTR( SA1.A1_CGC , 1 , 8 ) = '"+ AllTrim( cCNPJ ) +"' "
+	_cQuery	+= RetSqlName('SA1') +" SA1 WHERE SA1.D_E_L_E_T_ = ' ' AND SubStr( SA1.A1_CGC , 1 , 8 ) = '"+ AllTrim( cCNPJ ) +"' "
 	
 	If Select(_cAlias) > 0
 		(_cAlias)->( DBCloseArea() )
@@ -739,8 +739,8 @@ While !(cAlias)->(Eof())
 			_cQuery += " AND  SE1.E1_TIPO    NOT IN ('NCC','RA','NDC') "
 			_cQuery += " AND  SE1.E1_I_AVACC <> 'N' " +ENTER
 			_cQuery += " AND  SE1.E1_CLIENTE > '000001' "
-			_cQuery += " AND  SE1.E1_VENCREA > '" + DTOS(dDataRef - 1825) +"' "+ENTER
-			_cQuery += " AND  SE1.E1_EMISSAO < '"+ DtoS( dDataRef ) +"' "+ENTER
+			_cQuery += " AND  SE1.E1_VENCREA > '" + DToS(dDataRef - 1825) +"' "+ENTER
+			_cQuery += " AND  SE1.E1_EMISSAO < '"+ DToS( dDataRef ) +"' "+ENTER
 	
 			
 			If Select(_cAlias) > 0
@@ -766,15 +766,15 @@ While !(cAlias)->(Eof())
 				//===========================================================================
 				//| Guarda os valores a vencer para os calculos                             |
 				//===========================================================================
-				IF StoD( (_cAlias)->VENCTO ) > dDataRef .And. (_cAlias)->SALDO > 0
+				If SToD( (_cAlias)->VENCTO ) > dDataRef .And. (_cAlias)->SALDO > 0
 			
-					nDiasAt := StoD( (_cAlias)->VENCTO ) - dDataRef
+					nDiasAt := SToD( (_cAlias)->VENCTO ) - dDataRef
 					
-			      	IF nDiasAt < 0
+			      	If nDiasAt < 0
 			      	
 			      		nDiasAt := 0
 		        	
-		        	EndIF
+		        	EndIf
 		
 	        	
 					nValAVX += (_cAlias)->SALDO								// Soma o valor dos títulos a vencer
@@ -782,58 +782,58 @@ While !(cAlias)->(Eof())
 					nValAVZ += ( (_cAlias)->SALDO * nDiasAt )				// Soma a quantidade de dias a vencer x valor do título a vencer
 					nValAVA++												// Soma a quantidade de titulos a vencer
 				
-				EndIF
+				EndIf
 			
 				//===========================================================================
 				//| Calcula os Saldos e Médias de Títulos em Aberto e em Atraso             |
 				//===========================================================================
-				IF (_cAlias)->SALDO > 0 
+				If (_cAlias)->SALDO > 0 
             
-					nDiasAtr := dDataRef - StoD( (_cAlias)->VENCTO )
+					nDiasAtr := dDataRef - SToD( (_cAlias)->VENCTO )
 				
-					IF nDiasAtr > 5
+					If nDiasAtr > 5
 						nVal05		+= Round( (_cAlias)->SALDO , 2 )
 						nValAc05	+= Round( nDiasAtr * (_cAlias)->SALDO , 2 )
-					EndIF
+					EndIf
 				
-					IF nDiasAtr > 15
+					If nDiasAtr > 15
 						nVal15		+= Round( (_cAlias)->SALDO , 2 )
 						nValAc15	+= Round( nDiasAtr * (_cAlias)->SALDO , 2 )
-					EndIF
+					EndIf
 				
-					IF nDiasAtr > 30
+					If nDiasAtr > 30
 						nVal30		+= Round( (_cAlias)->SALDO , 2 )
 						nValAc30	+= Round( nDiasAtr * (_cAlias)->SALDO , 2 )
-					EndIF
+					EndIf
 			
-				EndIF
+				EndIf
 	
 			
 				//===============================================================================================
 				// Guarda valores dos Títulos Baixados para o Cálculo das Médias de Atraso
 				//===============================================================================================
-		       	IF (_cAlias)->SALDO = 0 
+		       	If (_cAlias)->SALDO = 0 
 		       	
-		       		If StoD( (_cAlias)->BAIXA ) > Stod( '19900101' )
+		       		If SToD( (_cAlias)->BAIXA ) > SToD( '19900101' )
 		       	
-		       			nDiasAt := StoD( (_cAlias)->BAIXA ) - StoD( (_cAlias)->VENCTO )
+		       			nDiasAt := SToD( (_cAlias)->BAIXA ) - SToD( (_cAlias)->VENCTO )
 		       		
 		       		Else
 		       	
-		       			nDiasAt := dDataRef - StoD( (_cAlias)->VENCTO )
+		       			nDiasAt := dDataRef - SToD( (_cAlias)->VENCTO )
 		       	
-		       		Endif
+		       		EndIf
 		        
-		       		IF nDiasAt < 0
+		       		If nDiasAt < 0
 		       			nDiasAt := 0
-		       		EndIF
+		       		EndIf
 		        
 		       		nValorX	+= ( (_cAlias)->VALOR  )	// Soma o valor dos títulos pagos
 		       		nValorY += nDiasAt					 					// Soma a Quantidade de Dias em Atraso do Cliente
 		       		nValorZ += ( ( (_cAlias)->VALOR  ) * nDiasAt )			// Soma a Quantidade de Dias em Atraso x Valor do Título Pagos com Atraso
 		       		nValorA++												// Soma a Quantidade de títulos baixados
 		       		
-		       	Endif
+		       	EndIf
 				
 			(_cAlias)->( DBSkip() )
 			
@@ -851,7 +851,7 @@ While !(cAlias)->(Eof())
 			_cQuery += " WHERE "
 			_cQuery += "      SF2.D_E_L_E_T_ = ' ' "
 			_cQuery += " AND  SF2.F2_CLIENTE = '"+ _ccodcli +"' "
-			_cQuery += " AND  SF2.F2_EMISSAO < '"+ DtoS( dDataRef ) +"' "+ENTER
+			_cQuery += " AND  SF2.F2_EMISSAO < '"+ DToS( dDataRef ) +"' "+ENTER
 			_cQuery += " GROUP BY SF2.F2_EMISSAO"
 			_cQuery += " ORDER BY SF2.F2_EMISSAO DESC"
 			
@@ -864,28 +864,28 @@ While !(cAlias)->(Eof())
 			DBSelectArea(_cAlias)
 			(_cAlias)->( DBGoTop() )
 
-			dDataUC := stod('')
+			dDataUC := SToD('')
 			nValUC := 0
-			dDataPUC := stod('')
+			dDataPUC := SToD('')
 			nValPUC := 0
 
 			 If !((_cAlias)->(Eof()))
 			 
 				//Grava ultima compra
-				dDataUC := Stod((_cAlias)->EMISSAO)
+				dDataUC := SToD((_cAlias)->EMISSAO)
 				nValUC := (_cAlias)->VALOR				
 			
-			Endif
+			EndIf
 			
-			(_cAlias)->(Dbskip())
+			(_cAlias)->(DBSkip())
 			
 			If !((_cAlias)->(Eof()))
 			 
 				//Grava penultima compra
-				dDataPUC := Stod((_cAlias)->EMISSAO)
+				dDataPUC := SToD((_cAlias)->EMISSAO)
 				nValPUC := (_cAlias)->VALOR				
 			
-			Endif		
+			EndIf		
 	
 	EndIf	
 	
@@ -896,7 +896,7 @@ While !(cAlias)->(Eof())
 	//===========================================================================
 	DBSelectArea("SZY")
 	SZY->( DBSetOrder(1) )
-	IF SZY->( DbSeek( xFilial("SZY") + cCNPJ ) )
+	If SZY->( DBSeek( xFilial("SZY") + cCNPJ ) )
 	
 		SZY->( RecLock("SZY",.F.) )
 		    
@@ -913,13 +913,13 @@ While !(cAlias)->(Eof())
 			//===========================================================================
 			//| Tratativa para o arredondamento das médias                              |
 			//===========================================================================
-			IF SZY->ZY_PCQDAP == 0 .And. SZY->ZY_PCQPAG > 0
+			If SZY->ZY_PCQDAP == 0 .And. SZY->ZY_PCQPAG > 0
 				SZY->ZY_PCQDAP := 0.01
-			EndIF
+			EndIf
 			
-			IF SZY->ZY_PCQPAG == 0 .And. SZY->ZY_PCQDAP > 0
+			If SZY->ZY_PCQPAG == 0 .And. SZY->ZY_PCQDAP > 0
 				SZY->ZY_PCQPAG := 0.01
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Grava as Médias à Vencer do Cliente                                     |
@@ -930,31 +930,31 @@ While !(cAlias)->(Eof())
 			//===========================================================================
 			//| Registra a atualização dos dados de Valores Vencidos                    |
 			//===========================================================================
-			SZY->ZY_PCDATV	:= ROUND( nVal05 , 2 )					// Valor do Débito Vencido há mais de 5 dias
-			SZY->ZY_PCMPTV	:= ROUND( nValAc05 / nVal05 , 0 )		// Média Ponderada dos vencidos há mais de 5 dias
-			SZY->ZY_PCV15D	:= ROUND( nVal15 , 2 )					// Valor do Débito vencido há mais de 15 dias
-			SZY->ZY_PCM15D	:= ROUND( nValAc15 / nVal15 , 0 )		// Média Ponderada dos vencidos há mais de 15 dias
-			SZY->ZY_PCV30D	:= ROUND( nVal30 , 2 )					// Valor do Débito vencido há mais de 30 dias
-			SZY->ZY_PCM30D	:= ROUND( nValAc30 / nVal30 , 0 )		// Média Ponderada dos vencidos há mais de 30 dias
+			SZY->ZY_PCDATV	:= Round( nVal05 , 2 )					// Valor do Débito Vencido há mais de 5 dias
+			SZY->ZY_PCMPTV	:= Round( nValAc05 / nVal05 , 0 )		// Média Ponderada dos vencidos há mais de 5 dias
+			SZY->ZY_PCV15D	:= Round( nVal15 , 2 )					// Valor do Débito vencido há mais de 15 dias
+			SZY->ZY_PCM15D	:= Round( nValAc15 / nVal15 , 0 )		// Média Ponderada dos vencidos há mais de 15 dias
+			SZY->ZY_PCV30D	:= Round( nVal30 , 2 )					// Valor do Débito vencido há mais de 30 dias
+			SZY->ZY_PCM30D	:= Round( nValAc30 / nVal30 , 0 )		// Média Ponderada dos vencidos há mais de 30 dias
 			
 			//===========================================================================
 			//| Verifica a atualização dos dados de maior acúmulo                       |
 			//===========================================================================
-			IF dDataAC  >= _dDataDE2				// Verifica a atualização para os Clientes que possuem o maior acúmulo nos últimos 12 meses
+			If dDataAC  >= _dDataDE2				// Verifica a atualização para os Clientes que possuem o maior acúmulo nos últimos 12 meses
 			 
-				If dDataAc > 	SZY->ZY_PCDMAC .and. nSaldoAC > SZY->ZY_PCVMAC // Se a data e o valor acumulado for maior que o último enviado
+				If dDataAc > 	SZY->ZY_PCDMAC .And. nSaldoAC > SZY->ZY_PCVMAC // Se a data e o valor acumulado For maior que o último enviado
 				
 					SZY->ZY_PCVMAC	:= nSaldoAC		  		// Grava o novo Valor do Maior Acúmulo
 					SZY->ZY_PCDMAC	:= dDataAC		  		// Grava a nova Data do Maior Acúmulo
 					
-				Endif
+				EndIf
 						
-			EndIF
+			EndIf
 				
 			//===========================================================================
 			//| Registra a atualização da Penúltima e Última compra                     |
 			//===========================================================================
-			IF nValUC > 0 
+			If nValUC > 0 
 			
 				If  dDataUC > SZY->ZY_PCDUCM
 						//Garante que só manda alteração se as datas de ultima compra e penultima compra são 
@@ -965,48 +965,48 @@ While !(cAlias)->(Eof())
 					SZY->ZY_PCDUCM	:= dDataUC
 					SZY->ZY_PCVULC	:= nValUC
 					
-				Endif
+				EndIf
 							
-			EndIF
+			EndIf
 			
 			//=============================================================================
 			// Se a data de maior acumuluo é de um ano anterior e a ultima compra menos que 
 			// um ano anterior ajusta maior acumulo para a ultima compra 	
 			//=============================================================================
-			IF SZY->ZY_PCDUCM >= _dDataDE2	 .and. SZY->ZY_PCDMAC <= _dDataDE2
+			If SZY->ZY_PCDUCM >= _dDataDE2	 .And. SZY->ZY_PCDMAC <= _dDataDE2
 					
 				  SZY->ZY_PCDMAC := SZY->ZY_PCDUCM
 				  SZY->ZY_PCVMAC := SZY->ZY_PCVSAT
 			
-			EndIF		
+			EndIf		
 		
 	
 			
 			//===========================================================================
 			//| Verifica acumulos e ultima compra                     |
 			//===========================================================================
-			IF SZY->ZY_PCVPCO == 0 .and. SZY->ZY_PCDUCM != SZY->ZY_PCDMAC 
+			If SZY->ZY_PCVPCO == 0 .And. SZY->ZY_PCDUCM != SZY->ZY_PCDMAC 
 			
 				SZY->ZY_PCDMAC := SZY->ZY_PCDUCM
-				SZY->ZY_PCDTPC := stod(" ")
+				SZY->ZY_PCDTPC := SToD(" ")
 							
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Verifica acumulos e ultima compra                     |
 			//===========================================================================
-			IF SZY->ZY_PCDUCM < SZY->ZY_PCDMAC 
+			If SZY->ZY_PCDUCM < SZY->ZY_PCDMAC 
 			
 				SZY->ZY_PCDMAC := SZY->ZY_PCDUCM
 							
-			EndIF
+			EndIf
 			
 	
 						
 			//===========================================================================
-			// Se o saldo atual ou ultima compra for maior que o Maior Acúmulo faz ajuste
+			// Se o saldo atual ou ultima compra For maior que o Maior Acúmulo faz ajuste
 			//===========================================================================
-			IF SZY->ZY_PCVMAC <= SZY->ZY_PCVSAT .OR. SZY->ZY_PCVMAC <= SZY->ZY_PCVULC
+			If SZY->ZY_PCVMAC <= SZY->ZY_PCVSAT .Or. SZY->ZY_PCVMAC <= SZY->ZY_PCVULC
 			
 				If SZY->ZY_PCVULC >= SZY->ZY_PCVSAT
 				
@@ -1016,15 +1016,15 @@ While !(cAlias)->(Eof())
 				
 				  SZY->ZY_PCVMAC := SZY->ZY_PCVSAT
 				  
-				Endif
+				EndIf
 			
-			EndIF	
+			EndIf	
 			
 		SZY->ZY_PCDDAT	:= dDataRef
 		
-		SZY->( MsUnlock() )
+		SZY->( MSUnLock() )
 		
-	EndIF
+	EndIf
     
 EndDo
 
@@ -1033,7 +1033,7 @@ EndDo
 //===========================================================================
 //| Tratativa das mensagens para processamento via JOB ou Rotina            |
 //===========================================================================
-IF !(lThread)
+If !(lThread)
 	
 	//===========================================================================
 	//| Inicializa barras de processamento                                      |
@@ -1046,49 +1046,49 @@ IF !(lThread)
 	IncProcG2( "Atualizando registros..." )
 	ProcessMessage()
 	
-EndIF
+EndIf
 
 u_itconout("Verificando os registros [ Processo 03 de 03 ] - Atualizando registros...")
 
 DBSelectArea("SZY")
-SZY->( DbGotop() )
+SZY->( DBGoTop() )
 
 //===========================================================================
 //| Verificação final dos dados gravados e atualização da Data da Informação|
 //===========================================================================
 While SZY->(!Eof())
 
-	IF SZY->ZY_PCCCLI >= MV_PAR01 .And. SZY->ZY_PCCCLI <= MV_PAR02
+	If SZY->ZY_PCCCLI >= MV_PAR01 .And. SZY->ZY_PCCCLI <= MV_PAR02
 	
 		SZY->( RecLock( "SZY" , .F. ) )
 			
-			IF !EMPTY(SZY->ZY_PCDCDD)
-				IF !EMPTY(SZY->ZY_PCDUCM) .And. SZY->ZY_PCDUCM >= _dDataDE2
-					IF !EMPTY(SZY->ZY_PCVULC)
-						IF !EMPTY(SZY->ZY_PCDMAC)
-							IF !EMPTY(SZY->ZY_PCVMAC)
-								IF SZY->ZY_PCVPCO == 0 .AND. !EMPTY(SZY->ZY_PCDTPC)
-									SZY->ZY_PCDTPC := StoD("")
-								EndIF
-							EndIF
-						EndIF
-					EndIF
-				EndIF
-			EndIF
+			If !Empty(SZY->ZY_PCDCDD)
+				If !Empty(SZY->ZY_PCDUCM) .And. SZY->ZY_PCDUCM >= _dDataDE2
+					If !Empty(SZY->ZY_PCVULC)
+						If !Empty(SZY->ZY_PCDMAC)
+							If !Empty(SZY->ZY_PCVMAC)
+								If SZY->ZY_PCVPCO == 0 .And. !Empty(SZY->ZY_PCDTPC)
+									SZY->ZY_PCDTPC := SToD("")
+								EndIf
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
 			
 			SZY->ZY_PCDDAT	:= dDataRef
 		
-		SZY->( MsUnlock() )
+		SZY->( MSUnLock() )
 	
 	EndIf
 	
-SZY->( DbSkip() )
+SZY->( DBSkip() )
 EndDo
 
 //===========================================================================
 //| Tratativa das mensagens para processamento via JOB ou Rotina            |
 //===========================================================================
-IF !(lThread)
+If !(lThread)
 	
 	//===========================================================================
 	//| Inicializa barras de processamento                                      |
@@ -1101,11 +1101,11 @@ IF !(lThread)
 	IncProcG2( "Verificando registros..." )
 	ProcessMessage()
 	
-EndIF
+EndIf
 
 u_itconout("Verificando os registros [ Processo 03 de 03 ] - Verificando registros...")
 
-IF MV_PAR06 == 1
+If MV_PAR06 == 1
 	
 	If lThread
 	
@@ -1127,9 +1127,9 @@ IF MV_PAR06 == 1
 	Processa( {|| U_MOMS027T( .F. , .T. ) } , "Geração do Arquivo" , "Iniciando, aguarde..." )
 	u_itconout("Processo finalizado.")
 	
-EndIF
+EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1159,9 +1159,9 @@ Default lEnvMail	:= .F.
 //===========================================================================
 If !lThread .And. !U_ITVLDUSR(4)
 
-	u_itmsg("Usuário sem acesso à alteração dos dados da base da CISP.","Atenção","Verifique com a área de TI/ERP.",,1)
+	U_ITMsg("Usuário sem acesso à alteração dos dados da base da CISP.","Atenção","Verifique com a área de TI/ERP.",,1)
 	
-	Return()
+	Return
 	
 EndIf
 
@@ -1177,15 +1177,15 @@ Else
 	
 	If !lEnvMail
 	
-		_nOp:=Aviso( "Atenção!","A rotina atual permite gerar o arquivo em um local específico ou processar o envio automático por e-mail." +ENTER+ENTER+;
+		_nOp:=Aviso( "Atenção!","A rotina atual permite gerar o arquivo em um Local específico ou processar o envio automático por e-mail." +ENTER+ENTER+;
 								"Selecione a saída desejada:"	,;
 								{"Arquivo","E-mail","Cancela"} )
 								//1          2        3
-		IF _nOp = 1
+		If _nOp = 1
 	
 			DEFINE MSDIALOG oDlg TITLE "Geração de Arquivo [TXT]" FROM 0,0 TO 060,552 OF oDlg PIXEL
 			
-				@005,005 SAY "Diretório de Destino:"	SIZE 065,010 PIXEL OF oDlg COLOR CLR_HBLUE
+				@005,005 Say "Diretório de Destino:"	SIZE 065,010 PIXEL OF oDlg COLOR CLR_HBLUE
 				@014,005 MSGET cDir PICTURE "@!"		SIZE 195,010 PIXEL OF oDlg
 				@014,200 BUTTON "..."					SIZE 013,012 PIXEL OF oDlg ACTION cDir := cGetFile( "\" , "Selecione o Diretorio de Destino:" ,,,, GETF_RETDIRECTORY+GETF_LOCALHARD )
 				
@@ -1194,7 +1194,7 @@ Else
 			
 			ACTIVATE MSDIALOG oDlg CENTER
 		
-		ElseIF _nOp = 2
+		ElseIf _nOp = 2
 		
 			nOpc		:= 1
 			cDir		:= AllTrim( GetMV( "IT_CISPDIR" ,, "\data\CISP\" ) )
@@ -1225,11 +1225,11 @@ If nOpc == 1
 	
 Else
 
-	u_itmsg(  "Operação cancelada pelo usuário!" , "Atenção!",,1 )
+	U_ITMsg(  "Operação cancelada pelo usuário!" , "Atenção!",,1 )
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1263,7 +1263,7 @@ Local cAttach		:= ""
 Local aConfig		:= {}
 Local cLog			:= ""
 
-Local dRefAtu		:= StoD("")
+Local dRefAtu		:= SToD("")
 
 Local nI			:= 0
 Local nTotReg		:= 0
@@ -1284,27 +1284,27 @@ Else
 EndIf
 
 If !(lThread)
-   IF U_ITMSG("Deseja atulizar a data de processamento para a data de Hoje ?",'Atenção!',,2,2,2)
+   If U_ITMsg("Deseja atulizar a data de processamento para a data de Hoje ?",'Atenção!',,2,2,2)
 
 	  ProcRegua(3)
 	  IncProc("Atualizando a Data...,Aguarde!")
 
-	  cQuery := "UPDATE " + RETSQLNAME('SZY') + " SET ZY_PCDDAT = '"+DTOS(DATE())+"' WHERE D_E_L_E_T_ <> '*' "
+	  cQuery := "UPDATE " + RETSQLNAME('SZY') + " SET ZY_PCDDAT = '"+DToS(DATE())+"' WHERE D_E_L_E_T_ = ' ' "
 
 	  IncProc("Atualizando a Data...,Aguarde!")
 		
 	   If TCSqlExec(cQuery) < 0
 		   Conout(TcSqlError())
            bBloco:={||  AVISO("TcSqlError()",TcSqlError(),{"Fechar"},3) }
-		   U_ITMSG("Erro na atualização da Data: Ver Detalhes ",'Atenção!',"O Arquivo será gerado mesmo assim.",3,,,,,,bBloco)
-	   ELSE
+		   U_ITMsg("Erro na atualização da Data: Ver Detalhes ",'Atenção!',"O Arquivo será gerado mesmo assim.",3,,,,,,bBloco)
+	   Else
 			TCSQLEXEC( "COMMIT" )
-	   ENDIF
+	   EndIf
 
 	  IncProc("Atualizando a Data...,Aguarde!")
 
-   ENDIF
-ENDIF
+   EndIf
+EndIf
 
 //===========================================================================
 //| Apaga o arquivo se o mesmo ja existir para criacao do novo.             |
@@ -1326,10 +1326,10 @@ If File( _cNArq1 )
 	If !lProcOk
 	
 		If !(lThread)
-			u_itmsg( "Não foi possível excluir o arquivo existente: "+ ENTER + ENTER + _cNArq1 , "Atenção!" , ,1 )
+			U_ITMsg( "Não foi possível excluir o arquivo existente: "+ ENTER + ENTER + _cNArq1 , "Atenção!" , ,1 )
 		EndIf
 		
-		Return()
+		Return
 		
 	EndIf
 	
@@ -1340,15 +1340,15 @@ EndIf
 //===========================================================================
 If lProcOk
 
-	nHandle := FCREATE( _cNArq1 )
+	nHandle := FCreate( _cNArq1 )
 	
 	If nHandle == -1
 	
 		If !(lThread)
-			u_itmsg( "Não foi possível criar o arquivo: "+ ENTER + ENTER + _cNArq1 , "Atenção!" ,"Verifique o destino e tente novamente..." ,  ,1 )
+			U_ITMsg( "Não foi possível criar o arquivo: "+ ENTER + ENTER + _cNArq1 , "Atenção!" ,"Verifique o destino e tente novamente..." ,  ,1 )
 		EndIf
 		
-		Return()
+		Return
 		
 	EndIf
 	
@@ -1360,7 +1360,7 @@ If SZY->( !Eof() )
 	dRefAtu := YEARSUB( SZY->ZY_PCDDAT , 1 )
 Else
 	dRefAtu := YEARSUB( dDataRef , 1 )
-EndIF
+EndIf
 
 //===========================================================================
 //| Seleciona os dados CISP para o arquivo.                                 |
@@ -1394,7 +1394,7 @@ cQuery += " FROM "+ RetSqlName("SZY") +" SZY "
 cQuery += " WHERE "
 cQuery += " 		SZY.D_E_L_E_T_	= ' ' "						// Não permite os deletados
 cQuery += " AND		SZY.ZY_PCVMAC	> 0.01 "					// Deve possuir registro de Maior Acúmulo
-cQuery += " AND	(	SZY.ZY_PCDUCM	> '"+ DtoS( dRefAtu ) +"' "	// A Data da última compra deve estar no período
+cQuery += " AND	(	SZY.ZY_PCDUCM	> '"+ DToS( dRefAtu ) +"' "	// A Data da última compra deve estar no período
 cQuery += " 	OR	SZY.ZY_PCVSAT	> 0.01  "					// ou possuir saldo em aberto
 cQuery += "     OR  SZY.ZY_FLAGEN = '1' ) "                       //Flag para forçar envio em caso de arquivo comp.pdf
 
@@ -1402,7 +1402,7 @@ cQuery += "     OR  SZY.ZY_FLAGEN = '1' ) "                       //Flag para fo
 //| Prepara e inicializa os dados para gravação do arquivo.                 |
 //===========================================================================
 If Select(cAlias) > 0
-	(cAlias)->(DBCLOSEAREA())
+	(cAlias)->(DBCloseArea())
 EndIf
 
 DBUseArea( .T. , "TOPCONN" , TcGenQry(,,cQuery) , cAlias , .T. , .F. )
@@ -1410,10 +1410,10 @@ DBUseArea( .T. , "TOPCONN" , TcGenQry(,,cQuery) , cAlias , .T. , .F. )
 nTotReg	:= 0
 nI		:= 0
 
-DBSELECTAREA(cAlias)
-(cAlias)->( DBGOTOP() )
-(cAlias)->( DBEVAL( {|| nTotReg++} ) )
-(cAlias)->( DBGOTOP() )
+DBSelectArea(cAlias)
+(cAlias)->( DBGoTop() )
+(cAlias)->( DBEval( {|| nTotReg++} ) )
+(cAlias)->( DBGoTop() )
 
 If !(lThread)
 	ProcRegua(nTotReg)
@@ -1422,20 +1422,20 @@ EndIf
 //===========================================================================
 //| Processa a gravação do arquivo.                                         |
 //===========================================================================
-While (cAlias)->(!EOF())
+While (cAlias)->(!Eof())
 
 	nI++
 	
 	If !lThread
 		IncProc("["+ StrZero(nI,9) +"] de ["+ StrZero(nTotReg,9) +"]")
-	EndIF
+	EndIf
 	
 	lErroVal := .F.
 	
 	//===========================================================================
 	//| Validação da dada de cadastro do Cliente                                |
 	//===========================================================================
-	IF EMPTY( (cAlias)->ZY_PCDCDD )
+	If Empty( (cAlias)->ZY_PCDCDD )
 		aAdd( aValid , { AllTrim( (cAlias)->ZY_PCCCLI ) , "Data de cadastro do Cliente é obrigatória." } )
 		lErroVal := .T.
 	EndIf
@@ -1443,7 +1443,7 @@ While (cAlias)->(!EOF())
 	//===========================================================================
 	//| Validação da dada de última compra                                      |
 	//===========================================================================
-	IF EMPTY( (cAlias)->ZY_PCDUCM )
+	If Empty( (cAlias)->ZY_PCDUCM )
 		aAdd( aValid , { AllTrim( (cAlias)->ZY_PCCCLI ) , "Não existe registro de última compra no histórico desde a implantação." } )
 		lErroVal := .T.
 	EndIf
@@ -1451,7 +1451,7 @@ While (cAlias)->(!EOF())
 	//===========================================================================
 	//| Validação do valor da última compra                                     |
 	//===========================================================================
-	IF	EMPTY( (cAlias)->ZY_PCVULC ) .Or. (cAlias)->ZY_PCVULC == 0
+	If	Empty( (cAlias)->ZY_PCVULC ) .Or. (cAlias)->ZY_PCVULC == 0
 		aAdd( aValid , { AllTrim( (cAlias)->ZY_PCCCLI ) , "Não existe valor de última compra no histórico desde a implantação." } )
 		lErroVal := .T.
 	EndIf
@@ -1459,7 +1459,7 @@ While (cAlias)->(!EOF())
 	//===========================================================================
 	//| Validação da dada de maior acúmulo de saldo em aberto do Cliente        |
 	//===========================================================================
-	IF	EMPTY( (cAlias)->ZY_PCDMAC )
+	If	Empty( (cAlias)->ZY_PCDMAC )
 		aAdd( aValid , { AllTrim( (cAlias)->ZY_PCCCLI ) , "Não foram encontrados registros de data do maior acúmulo de saldo em aberto." } )
 		lErroVal := .T.
 	EndIf
@@ -1467,7 +1467,7 @@ While (cAlias)->(!EOF())
 	//===========================================================================
 	//| Validação do valor de maior acúmulo de saldo em aberto do Cliente       |
 	//===========================================================================
-	IF	EMPTY( (cAlias)->ZY_PCVMAC )
+	If	Empty( (cAlias)->ZY_PCVMAC )
 		aAdd( aValid , { AllTrim( (cAlias)->ZY_PCCCLI ) , "Não foram encontrados registros de valor do maior acúmulo de saldo em aberto." } )
 		lErroVal := .T.
 	EndIf
@@ -1475,10 +1475,10 @@ While (cAlias)->(!EOF())
 	//===========================================================================
 	//| Se não passou pela validação não inclui o registro no arquivo           |
 	//===========================================================================
-	IF lErroVal
-		(cAlias)->( DBSKIP() )
+	If lErroVal
+		(cAlias)->( DBSkip() )
 		Loop
-	EndIF
+	EndIf
 	
 	nRegOk++
 	
@@ -1495,30 +1495,30 @@ While (cAlias)->(!EOF())
 	EndIf
 	
 	clinha += (cAlias)->ZY_PCTIPO												// | 01 | Identif. (1-CNPJ / 2-CPF / 3-RG / 4-Export. / 5-Insc.Prod./ 9-Outros)
-	cLinha += STRZERO( VAL( (cAlias)->ZY_PCCASS ) , 04 )						// | 02 | Código do Associado
-	cLinha += STRZERO( VAL( (cAlias)->ZY_PCCCLI ) , 20 )						// | 03 | Identificação. (CNPJ / CPF / RG / Export. / Insc.Prod. / Outros)
+	cLinha += StrZero( Val( (cAlias)->ZY_PCCASS ) , 04 )						// | 02 | Código do Associado
+	cLinha += StrZero( Val( (cAlias)->ZY_PCCCLI ) , 20 )						// | 03 | Identificação. (CNPJ / CPF / RG / Export. / Insc.Prod. / Outros)
 //	cLinha += PadR( AllTrim( (cAlias)->ZY_PCDDAT )	, 08 , "0" )				// | 04 | Data da Informação
-	cLinha += PadR( AllTrim( DTOS(DATE()) )			, 08 , "0" )				// | 04 | Data da Informação
+	cLinha += PadR( AllTrim( DToS(DATE()) )			, 08 , "0" )				// | 04 | Data da Informação
 	cLinha += PadR( AllTrim( (cAlias)->ZY_PCDCDD )	, 08 , "0" )				// | 05 | Data do Cadastro do Cliente
 	cLinha += PadR( AllTrim( (cAlias)->ZY_PCDUCM )	, 08 , "0" )				// | 06 | Data da Última Compra
-	cLinha += STRZERO( (cAlias)->ZY_PCVULC * 100 , 15 )							// | 07 | Valor da Última Compra
+	cLinha += StrZero( (cAlias)->ZY_PCVULC * 100 , 15 )							// | 07 | Valor da Última Compra
 	cLinha += PadR( AllTrim( (cAlias)->ZY_PCDMAC )	, 08 , "0" )				// | 08 | Data do Maior Acúmulo
-	cLinha += STRZERO( (cAlias)->ZY_PCVMAC * 100 , 15 )							// | 09 | Valor do Maior Acúmulo
-	cLinha += STRZERO( (cAlias)->ZY_PCVSAT * 100 , 15 )							// | 10 | Valor do Débito Atual Total
-	cLinha += STRZERO( (cAlias)->ZY_PCVLCR * 100 , 15 )							// | 11 | Valor do Limite de Crédito
-	cLinha += STRZERO( INT( (cAlias)->ZY_PCQPAG * 100 ) , 06 )					// | 12 | Média Ponderada de Atraso nos Pagamentos (Títulos Baixados)
-	cLinha += STRZERO( INT( (cAlias)->ZY_PCQDAP * 100 ) , 06 )					// | 13 | Média Aritmética dos Dias de Atraso nos Pagamentos (Títulos Baixados)
-	cLinha += STRZERO( (cAlias)->ZY_PCVDAV * 100 , 15 )							// | 14 | Valor Débito Atual a Vencer
-	cLinha += STRZERO( INT( (cAlias)->ZY_PCMDAV * 100 ) , 06 )					// | 15 | Média Ponderada de Títulos a Vencer
-	cLinha += STRZERO( INT( (cAlias)->ZY_PCMPMV * 100 ) , 06 )					// | 16 | Prazo Médio de Vendas
-	cLinha += STRZERO( (cAlias)->ZY_PCDATV * 100 , 15 )							// | 17 | Valor do Débito Atual Vencido (+5 Dias)
-	cLinha += STRZERO( INT( (cAlias)->ZY_PCMPTV ) , 04 )						// | 18 | Média Ponderada de Atraso Títulos Vencidos e não Pagos (+5 Dias)
-	cLinha += STRZERO( (cAlias)->ZY_PCV15D * 100 , 15 )							// | 19 | Valor do Débito Atual Vencido (+15 Dias)
-	cLinha += STRZERO( INT( (cAlias)->ZY_PCM15D ) , 04 )						// | 20 | Média Ponderada de Atraso Títulos Vencidos e não Pagos (+15 Dias)
-	cLinha += STRZERO( (cAlias)->ZY_PCV30D * 100 , 15 )							// | 21 | Valor do Débito Atual Vencido (+30 Dias)
-	cLinha += STRZERO( INT( (cAlias)->ZY_PCM30D ) , 04 )						// | 22 | Média Ponderada de Atraso Títulos Vencidos e não Pagos (+30 Dias)
+	cLinha += StrZero( (cAlias)->ZY_PCVMAC * 100 , 15 )							// | 09 | Valor do Maior Acúmulo
+	cLinha += StrZero( (cAlias)->ZY_PCVSAT * 100 , 15 )							// | 10 | Valor do Débito Atual Total
+	cLinha += StrZero( (cAlias)->ZY_PCVLCR * 100 , 15 )							// | 11 | Valor do Limite de Crédito
+	cLinha += StrZero( INT( (cAlias)->ZY_PCQPAG * 100 ) , 06 )					// | 12 | Média Ponderada de Atraso nos Pagamentos (Títulos Baixados)
+	cLinha += StrZero( INT( (cAlias)->ZY_PCQDAP * 100 ) , 06 )					// | 13 | Média Aritmética dos Dias de Atraso nos Pagamentos (Títulos Baixados)
+	cLinha += StrZero( (cAlias)->ZY_PCVDAV * 100 , 15 )							// | 14 | Valor Débito Atual a Vencer
+	cLinha += StrZero( INT( (cAlias)->ZY_PCMDAV * 100 ) , 06 )					// | 15 | Média Ponderada de Títulos a Vencer
+	cLinha += StrZero( INT( (cAlias)->ZY_PCMPMV * 100 ) , 06 )					// | 16 | Prazo Médio de Vendas
+	cLinha += StrZero( (cAlias)->ZY_PCDATV * 100 , 15 )							// | 17 | Valor do Débito Atual Vencido (+5 Dias)
+	cLinha += StrZero( INT( (cAlias)->ZY_PCMPTV ) , 04 )						// | 18 | Média Ponderada de Atraso Títulos Vencidos e não Pagos (+5 Dias)
+	cLinha += StrZero( (cAlias)->ZY_PCV15D * 100 , 15 )							// | 19 | Valor do Débito Atual Vencido (+15 Dias)
+	cLinha += StrZero( INT( (cAlias)->ZY_PCM15D ) , 04 )						// | 20 | Média Ponderada de Atraso Títulos Vencidos e não Pagos (+15 Dias)
+	cLinha += StrZero( (cAlias)->ZY_PCV30D * 100 , 15 )							// | 21 | Valor do Débito Atual Vencido (+30 Dias)
+	cLinha += StrZero( INT( (cAlias)->ZY_PCM30D ) , 04 )						// | 22 | Média Ponderada de Atraso Títulos Vencidos e não Pagos (+30 Dias)
 	cLinha += PadR( AllTrim( (cAlias)->ZY_PCDTPC ) , 08 , "0" )					// | 23 | Data da Penúltima Compra
-	cLinha += STRZERO( (cAlias)->ZY_PCVPCO * 100 , 15 )							// | 24 | Valor da Penúltima Compra
+	cLinha += StrZero( (cAlias)->ZY_PCVPCO * 100 , 15 )							// | 24 | Valor da Penúltima Compra
 	cLinha += "2"																// | 25 | Situação do Cálculo Limite de Crédito: 2 - 2	Limite Operacional de Crédito 
 	cLinha += "0"																// | 26 | Tipo de Garantia
 	cLinha += "00"																// | 27 | Grau da Garantia - Hipoteca
@@ -1527,24 +1527,24 @@ While (cAlias)->(!EOF())
 	cLinha += "000000000000000"													// | 30 | Valor da Venda de Pagamento Antecipado
 	cLinha += "  "																// | 31 | Venda sem Crédito (Antecipado)
 	
-	FWRITE( nHandle , cLinha )
+	FWrite( nHandle , cLinha )
 
-(cAlias)->( DBSKIP() )
+(cAlias)->( DBSkip() )
 EndDo
 
-(cAlias)->(DBCLOSEAREA())
-FCLOSE( nHandle )
+(cAlias)->(DBCloseArea())
+FClose( nHandle )
 
 //===========================================================================
 //| Caso sejam identificadas inconsistências exibe janela de informações.   |
 //===========================================================================
-IF !Empty( aValid )
+If !Empty( aValid )
     
 	If !(lThread)
 		U_ITListBox( "Registros não enviados:" , {"CNPJ","Motivo"} , aValid )
 	EndIf
 	
-EndIF
+EndIf
 
 //===========================================================================
 //| Verifica se foram gravados resgitros no arquivo.                        |
@@ -1552,8 +1552,8 @@ EndIF
 If nRegOk > 0
 	
 	If !(lThread)
-		u_itmsg(  "Arquivo:"+ ENTER + ENTER + _cNArq1 + ENTER + ENTER +"gerado com Sucesso!" ,"Concluído!",,2 )
-	EndIF
+		U_ITMsg(  "Arquivo:"+ ENTER + ENTER + _cNArq1 + ENTER + ENTER +"gerado com Sucesso!" ,"Concluído!",,2 )
+	EndIf
 	
 	If lEnvMail
 		
@@ -1575,11 +1575,11 @@ If nRegOk > 0
 		If Empty( cLog )
 			
 			If !(lThread)
-				u_itmsg( "E-mail enviado com sucesso!" , "Atenção!",,2 )
+				U_ITMsg( "E-mail enviado com sucesso!" , "Atenção!",,2 )
 			Else
 			
 				//Grava data de envio de email para não enviar mais de um email por dia via schedule
-				putmv("ITDTCISP",DATE())
+				PutMV("ITDTCISP",DATE())
 			
 			EndIf
 			
@@ -1588,12 +1588,12 @@ If nRegOk > 0
 		Else
 		
 			If !(lThread)
-				u_itmsg(  cLog , "Atenção!",,3 )
+				U_ITMsg(  cLog , "Atenção!",,3 )
 			EndIf
 			
 		EndIf
 		
-		FRename( _cNArq1 , SubStr( _cNArq1 , 1 , Len(_cNArq1) - 4 ) +"_"+ DtoS( Date() ) +"_"+ StrTran( Time() , ":" , "" ) +".txt" )
+		FRename( _cNArq1 , SubStr( _cNArq1 , 1 , Len(_cNArq1) - 4 ) +"_"+ DToS( Date() ) +"_"+ StrTran( Time() , ":" , "" ) +".txt" )
 		
 	EndIf
 	
@@ -1612,12 +1612,12 @@ ElseIf File(_cNArq1)
 	Next nI
 	
 	If !(lThread)
-		u_itmsg(  "Falha na geração do arquivo!"+ CRLF +"O arquivo não pode ser gerado em branco." , "Atenção!",,1 )
+		U_ITMsg(  "Falha na geração do arquivo!"+ CRLF +"O arquivo não pode ser gerado em branco." , "Atenção!",,1 )
 	EndIf
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1645,9 +1645,9 @@ Default lThread	:= .F.
 //===========================================================================
 If !lThread .And. !U_ITVLDUSR(4)
 
-	u_itmsg("Usuário sem acesso à alteração dos dados da base da CISP.","Atenção","Verifique com a área de TI/ERP.",,1)
+	U_ITMsg("Usuário sem acesso à alteração dos dados da base da CISP.","Atenção","Verifique com a área de TI/ERP.",,1)
 
-	Return()
+	Return
 	
 EndIf
 
@@ -1679,7 +1679,7 @@ Retorno-----------: Nenhum
 
 Static Function MOMS027INF( lThread )
 
-Local _dDataDE2	:= StoD("")
+Local _dDataDE2	:= SToD("")
 Local aDadosAux	:= {}
 Local lValid	:= .F.
 Local nI		:= 0
@@ -1692,9 +1692,9 @@ Default lThread	:= .F.
 //===========================================================================
 DBSelectArea("SZY")
 
-SZY->( DBGotop() )
+SZY->( DBGoTop() )
 SZY->( DBEval( {|| nTotReg++ } ) )
-SZY->( DBGotop() )
+SZY->( DBGoTop() )
 
 ProcRegua(nTotReg)
 
@@ -1713,271 +1713,271 @@ While SZY->(!Eof())
 	//===========================================================================
 	//| Verifica o preenchimento da data de cadastro                            |
 	//===========================================================================
-	IF EMPTY(SZY->ZY_PCDCDD)
+	If Empty(SZY->ZY_PCDCDD)
 		lValid := .T.
 		aAdd( aDadosAux , { SZY->ZY_PCCCLI , "Data de cadastro do Cliente está em branco." } )
-	ElseIF SZY->ZY_PCDCDD > SZY->ZY_PCDDAT
+	ElseIf SZY->ZY_PCDCDD > SZY->ZY_PCDDAT
 		lValid := .T.
 		aAdd( aDadosAux , { SZY->ZY_PCCCLI , "Data de cadastro do Cliente é maior que a data de atualização da base." } )
-	EndIF
+	EndIf
 	
 	//===========================================================================
 	//| Só valida clientes que possuem registro de data de última compra.       |
 	//===========================================================================
-	If !EMPTY(SZY->ZY_PCDUCM)
+	If !Empty(SZY->ZY_PCDUCM)
 		
 		//===========================================================================
 		//| Só valida clientes que possuem registro de valor da última compra.      |
 		//===========================================================================
-		If !EMPTY(SZY->ZY_PCVULC)
+		If !Empty(SZY->ZY_PCVULC)
 
 			//===========================================================================
 			//| Validações da Data de Última Compra                                     |
 			//===========================================================================
-			IF SZY->ZY_PCDUCM > SZY->ZY_PCDDAT
+			If SZY->ZY_PCDUCM > SZY->ZY_PCDDAT
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "Data da última compra é maior que a data de atualização da base." } )
-			EndIF
+			EndIf
 			
-			IF SZY->ZY_PCDUCM < SZY->ZY_PCDCDD
+			If SZY->ZY_PCDUCM < SZY->ZY_PCDCDD
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "Data da última compra é menor do que a data de cadastro do Cliente." } )
-			EndIF
+			EndIf
 			
-			IF SZY->ZY_PCDUCM <= SZY->ZY_PCDTPC
+			If SZY->ZY_PCDUCM <= SZY->ZY_PCDTPC
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "Data da última compra é menor ou igual do que a data da penúltima compra." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validações da Data de Maior Acúmulo do Cliente                          |
 			//===========================================================================
-			IF SZY->ZY_PCDMAC > SZY->ZY_PCDDAT
+			If SZY->ZY_PCDMAC > SZY->ZY_PCDDAT
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "Data de maior acúmulo é maior do que a data de atualização da base." } )
-			EndIF
+			EndIf
 			
-			IF SZY->ZY_PCDMAC < SZY->ZY_PCDCDD
+			If SZY->ZY_PCDMAC < SZY->ZY_PCDCDD
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "Data de maior acúmulo é menor do que a data de cadastro do Cliente." } )
-			EndIF
+			EndIf
 			
-			IF SZY->ZY_PCDMAC > SZY->ZY_PCDUCM
+			If SZY->ZY_PCDMAC > SZY->ZY_PCDUCM
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "Data de maior acúmulo é maior do que a data da última compra." } )
-			EndIF
+			EndIf
 			
 				
 			//===========================================================================
 			//| Validações do Valor de Maior Acúmulo do Cliente                         |
 			//===========================================================================
-			IF SZY->ZY_PCVMAC < SZY->ZY_PCVSAT
+			If SZY->ZY_PCVMAC < SZY->ZY_PCVSAT
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "O valor do maior acúmulo é menor do que o valor do saldo atual do Cliente." } )
-			EndIF
+			EndIf
 			
-			IF SZY->ZY_PCVMAC < SZY->ZY_PCVULC
+			If SZY->ZY_PCVMAC < SZY->ZY_PCVULC
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "O valor do maior acúmulo é menor do que o valor da última compra do Cliente." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validações do Valor do Saldo Atual do Cliente                           |
 			//===========================================================================
-			IF SZY->ZY_PCVSAT < SZY->ZY_PCVDAV
+			If SZY->ZY_PCVSAT < SZY->ZY_PCVDAV
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "O saldo atual é menor do que o saldo atual à vencer do Cliente." } )
-			EndIF
+			EndIf
 			
-			IF SZY->ZY_PCVSAT < SZY->ZY_PCDATV
+			If SZY->ZY_PCVSAT < SZY->ZY_PCDATV
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "O saldo atual é menor do que o saldo vencido (+5) do Cliente." } )
-			EndIF
+			EndIf
 			
-			IF SZY->ZY_PCVSAT < SZY->ZY_PCV15D
+			If SZY->ZY_PCVSAT < SZY->ZY_PCV15D
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "O saldo atual é menor do que o saldo vencido (+15) do Cliente." } )
-			EndIF
+			EndIf
 			
-			IF SZY->ZY_PCVSAT < SZY->ZY_PCV30D
+			If SZY->ZY_PCVSAT < SZY->ZY_PCV30D
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "O saldo atual é menor do que o saldo vencido (+30) do Cliente." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação da Média Ponderada de Atrasos do Cliente                      |
 			//===========================================================================
-			IF SZY->ZY_PCQPAG == 0 .And. SZY->ZY_PCQDAP <> 0
+			If SZY->ZY_PCQPAG == 0 .And. SZY->ZY_PCQDAP <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "A média ponderada de atrasos é igual a zero e a média aritmética não é igual a zero." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação da Média Aritmética de Atrasos do Cliente                     |
 			//===========================================================================
-			IF SZY->ZY_PCQDAP == 0 .And. SZY->ZY_PCQPAG <> 0
+			If SZY->ZY_PCQDAP == 0 .And. SZY->ZY_PCQPAG <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "A média aritmética de atrasos é igual a zero e a média ponderada não é igual a zero." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação do Saldo Atual à vencer do Cliente                            |
 			//===========================================================================
-			IF SZY->ZY_PCVDAV > SZY->ZY_PCVSAT
+			If SZY->ZY_PCVDAV > SZY->ZY_PCVSAT
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "O saldo atual à vencer é maior que o saldo total atual do Cliente." } )
-			EndIF
+			EndIf
 			
-			IF SZY->ZY_PCVDAV == 0 .And. SZY->ZY_PCMDAV <> 0
+			If SZY->ZY_PCVDAV == 0 .And. SZY->ZY_PCMDAV <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "O saldo atual à vencer é igual a zero e foi calculada a média ponderada de títulos à vencer." } )
-			EndIF
+			EndIf
 			
-			IF SZY->ZY_PCVDAV == 0 .And. SZY->ZY_PCMPMV <> 0
+			If SZY->ZY_PCVDAV == 0 .And. SZY->ZY_PCMPMV <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "O saldo atual à vencer é igual a zero e foi calculada a média de prazo à vencer." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação da Média Ponderada à vencer do Cliente                        |
 			//===========================================================================
-			IF SZY->ZY_PCMDAV == 0 .And. SZY->ZY_PCVDAV <> 0
+			If SZY->ZY_PCMDAV == 0 .And. SZY->ZY_PCVDAV <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "A média ponderada de títulos à vencer é igual a zero e o saldo à vencer é maior que zero." } )
-			EndIF
+			EndIf
 			
-			IF SZY->ZY_PCMDAV == 0 .And. SZY->ZY_PCMPMV <> 0
+			If SZY->ZY_PCMDAV == 0 .And. SZY->ZY_PCMPMV <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "A média ponderada de títulos à vencer é igual a zero e a média de prazo à vencer é maior que zero." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação do Prazo Médio à vencer do Cliente                            |
 			//===========================================================================
-			IF SZY->ZY_PCMPMV == 0 .And. SZY->ZY_PCVDAV <> 0
+			If SZY->ZY_PCMPMV == 0 .And. SZY->ZY_PCVDAV <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "O prazo médio à vencer é igual a zero e o saldo à vencer é maior que zero." } )
-			EndIF
+			EndIf
 			
-			IF SZY->ZY_PCMPMV == 0 .And. SZY->ZY_PCMDAV <> 0
+			If SZY->ZY_PCMPMV == 0 .And. SZY->ZY_PCMDAV <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "O prazo médio à vencer é igual a zero e a média ponderada à vencer é maior que zero." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação do Saldo à vencido (+5) do Cliente                            |
 			//===========================================================================
-			IF SZY->ZY_PCDATV > SZY->ZY_PCVSAT
+			If SZY->ZY_PCDATV > SZY->ZY_PCVSAT
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "O saldo vencido (+5) é maior que o saldo total atual do Cliente." } )
-			EndIF
+			EndIf
 			
-			IF SZY->ZY_PCDATV == 0 .And. SZY->ZY_PCMPTV <> 0
+			If SZY->ZY_PCDATV == 0 .And. SZY->ZY_PCMPTV <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "O saldo vencido (+5) é igual a zero e foi calculada média ponderada de vencidos (+5)." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação da Média ponderada vencida (+5) do Cliente                    |
 			//===========================================================================
-			IF SZY->ZY_PCMPTV <> 0 .And. SZY->ZY_PCMPTV < 5
+			If SZY->ZY_PCMPTV <> 0 .And. SZY->ZY_PCMPTV < 5
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "A média ponderada de vencidos (+5) é menor do que 5." } )
-			EndIF
+			EndIf
 			
-			IF SZY->ZY_PCMPTV == 0 .And. SZY->ZY_PCDATV <> 0
+			If SZY->ZY_PCMPTV == 0 .And. SZY->ZY_PCDATV <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "A média ponderada de vencidos (+5) é igual a zero e existe saldo vencido (+5)." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação do Saldo à vencido (+15) do Cliente                            |
 			//===========================================================================
-			IF SZY->ZY_PCV15D > SZY->ZY_PCDATV
+			If SZY->ZY_PCV15D > SZY->ZY_PCDATV
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "O saldo vencido (+15) é maior que o saldo vencido (+5)." } )
-			EndIF
+			EndIf
 			
-			IF SZY->ZY_PCV15D == 0 .And. SZY->ZY_PCM15D <> 0
+			If SZY->ZY_PCV15D == 0 .And. SZY->ZY_PCM15D <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "O saldo vencido (+15) é igual a zero e foi calculada média ponderada vencida (+15)." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação da Média ponderada vencida (+15) do Cliente                   |
 			//===========================================================================
-			IF SZY->ZY_PCM15D <> 0 .And. SZY->ZY_PCM15D < 15
+			If SZY->ZY_PCM15D <> 0 .And. SZY->ZY_PCM15D < 15
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "A média ponderada de vencidos (+15) é menor do que 15." } )
-			EndIF
+			EndIf
 			
-			IF SZY->ZY_PCM15D == 0 .And. SZY->ZY_PCV15D <> 0
+			If SZY->ZY_PCM15D == 0 .And. SZY->ZY_PCV15D <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "A média ponderada de vencidos (+15) é igual a zero e existe saldo vencido (+15)." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação do Saldo à vencido (+30) do Cliente                            |
 			//===========================================================================
-			IF SZY->ZY_PCV30D > SZY->ZY_PCV15D
+			If SZY->ZY_PCV30D > SZY->ZY_PCV15D
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "O saldo vencido (+30) é maior que o saldo vencido (+15)." } )
-			EndIF
+			EndIf
 			
-			IF SZY->ZY_PCV30D == 0 .And. SZY->ZY_PCM30D <> 0
+			If SZY->ZY_PCV30D == 0 .And. SZY->ZY_PCM30D <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "O saldo vencido (+30) é igual a zero e foi calculada média ponderada vencida (+30)." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação da Média ponderada vencida (+30) do Cliente                   |
 			//===========================================================================
-			IF SZY->ZY_PCM30D <> 0 .And. SZY->ZY_PCM30D < 30
+			If SZY->ZY_PCM30D <> 0 .And. SZY->ZY_PCM30D < 30
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "A média ponderada de vencidos (+30) é menor do que 30." } )
-			EndIF
+			EndIf
 			
-			IF SZY->ZY_PCM30D == 0 .And. SZY->ZY_PCV30D <> 0
+			If SZY->ZY_PCM30D == 0 .And. SZY->ZY_PCV30D <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "A média ponderada de vencidos (+30) é igual a zero e existe saldo vencido (+30)." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação da Data da Penúltima Compra do Cliente                        |
 			//===========================================================================
-			IF SZY->ZY_PCDTPC == SZY->ZY_PCDUCM
+			If SZY->ZY_PCDTPC == SZY->ZY_PCDUCM
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "A data da penúltima compra é igual à data de última compra." } )
-			EndIF
+			EndIf
 			
-			IF SZY->ZY_PCDTPC > SZY->ZY_PCDUCM
+			If SZY->ZY_PCDTPC > SZY->ZY_PCDUCM
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "A data da penúltima compra é maior que a data de última compra." } )
-			EndIF
+			EndIf
 			
-			IF Empty( SZY->ZY_PCDTPC ) .And. SZY->ZY_PCVPCO <> 0
+			If Empty( SZY->ZY_PCDTPC ) .And. SZY->ZY_PCVPCO <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "Não foi registrada a data da penúltima compra e o valor da penúltima compra é maior que zero." } )
-			EndIF
+			EndIf
 			
-			IF !Empty( SZY->ZY_PCDTPC ) .And. SZY->ZY_PCDTPC < SZY->ZY_PCDCDD
+			If !Empty( SZY->ZY_PCDTPC ) .And. SZY->ZY_PCDTPC < SZY->ZY_PCDCDD
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "A data da penúltima compra é anterior à data de cadastro do Cliente." } )
-			EndIF
+			EndIf
 			
-			IF Empty( SZY->ZY_PCDTPC ) .And. !Empty( SZY->ZY_PCDUCM ) .And. !Empty( SZY->ZY_PCDMAC ) .And. SZY->ZY_PCDUCM <> SZY->ZY_PCDMAC
+			If Empty( SZY->ZY_PCDTPC ) .And. !Empty( SZY->ZY_PCDUCM ) .And. !Empty( SZY->ZY_PCDMAC ) .And. SZY->ZY_PCDUCM <> SZY->ZY_PCDMAC
 				lValid := .T.
 				aAdd( aDadosAux , { SZY->ZY_PCCCLI , "Não foi registrada a data da penúltima compra e a data de maior acúmulo é diferente da data de última compra." } )
-			EndIF
+			EndIf
 			
 		EndIf
 		
 	EndIf
 	
-SZY->(DbSkip())
+SZY->(DBSkip())
 EndDo
 
-SZY->(DbGotop())
+SZY->(DBGoTop())
 
 //===========================================================================
 //| Verifica se existem inconsistências e exibe informações caso necessário |
@@ -1997,9 +1997,9 @@ Else
 		
 		MsgInfo( "Todos os registros foram validados com sucesso!" , "Concluído!" )
 		
-	EndIF
+	EndIf
 	
-EndIF
+EndIf
 
 Return( aDadosAux )
 
@@ -2033,7 +2033,7 @@ Private _aCamposVis	:= {	"NOUSER"	, "ZY_FILIAL"	, "ZY_PCTIPO"	, "ZY_PCCASS"	, "Z
 //| Adiciona botões das funcionalidades extras da rotina                    |
 //===========================================================================
 aAdd( aButtons , { "RECALC" , {|| MsgRun( "Selecionando Registros..." , "Aguarde" , {|| MOMS027CCR() } ) }	, "Conta Corrente"		, "C.Corrente"	} )
-AaDD( aButtons , { "POSCLI" , {|| MsgRun( "Selecionando Registros..." , "Aguarde" , {|| MOMS027CAD() } ) }	, "Cadastro do Cliente"	, "Cadastro"	} )
+aAdd( aButtons , { "POSCLI" , {|| MsgRun( "Selecionando Registros..." , "Aguarde" , {|| MOMS027CAD() } ) }	, "Cadastro do Cliente"	, "Cadastro"	} )
 
 //===========================================================================
 //| Inicializa a visualização padrão da base                                |
@@ -2041,7 +2041,7 @@ AaDD( aButtons , { "POSCLI" , {|| MsgRun( "Selecionando Registros..." , "Aguarde
 DBSelectArea("SZY")
 AxVisual( "SZY" , SZY->(Recno()) , 2 , _aCamposVis ,,,, aButtons )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2069,9 +2069,9 @@ Private cCadastro	:= "Integração - Cisp"
 //===========================================================================
 If !U_ITVLDUSR(4)
 
-	u_itmsg("Usuário sem acesso à alteração dos dados da base da CISP.","Atenção","Verifique com a área de TI/ERP.",,1)
+	U_ITMsg("Usuário sem acesso à alteração dos dados da base da CISP.","Atenção","Verifique com a área de TI/ERP.",,1)
 
-	Return()
+	Return
 	
 EndIf
 
@@ -2079,14 +2079,14 @@ EndIf
 //| Adiciona botões das funcionalidades extras da rotina                    |
 //===========================================================================
 aAdd( aButtons , { "RECALC" , {|| MsgRun( "Selecionando Registros..." , "Aguarde" , {|| MOMS027CCR() } ) }	, "Conta Corrente"		, "C.Corrente"	} )
-AaDD( aButtons , { "POSCLI" , {|| MsgRun( "Selecionando Registros..." , "Aguarde" , {|| MOMS027CAD() } ) }	, "Cadastro do Cliente"	, "Cadastro"	} )
+aAdd( aButtons , { "POSCLI" , {|| MsgRun( "Selecionando Registros..." , "Aguarde" , {|| MOMS027CAD() } ) }	, "Cadastro do Cliente"	, "Cadastro"	} )
 
 //===========================================================================
 //| Inicializa a exclusão padrão da base                                    |
 //===========================================================================
 AxDeleta( cAlias , nReg , nOpc ,,, aButtons )
 
-Return()
+Return
 
 
 /*
@@ -2105,7 +2105,7 @@ Retorno-----------: Nenhum
 
 Static Function MOMS027CAD()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local aDadosAux	:= {}
 Local oDlg		:= Nil
 Local oLbx		:= Nil
@@ -2120,7 +2120,7 @@ If SA1->( DBSeek( xFilial("SA1") + AllTrim(SZY->ZY_PCCCLI) ) )
 	While SubStr( SA1->A1_CGC , 1 , 8 ) == AllTrim( SZY->ZY_PCCCLI )
 	
 		aAdd( aDadosAux , { SA1->A1_COD +' - '+ SA1->A1_LOJA , SA1->A1_NOME , SA1->A1_MUN , SA1->A1_EST } )
-		SA1->(DbSkip())
+		SA1->(DBSkip())
 	
 	EndDo
 
@@ -2134,21 +2134,21 @@ If SA1->( DBSeek( xFilial("SA1") + AllTrim(SZY->ZY_PCCCLI) ) )
 		oLbx:SetArray( aDadosAux )
 		oLbx:bLine := {|| { aDadosAux[oLbx:nAt][01] , aDadosAux[oLbx:nAt][02] , aDadosAux[oLbx:nAt][03] , aDadosAux[oLbx:nAt][04] }}
 	
-	DEFINE SBUTTON FROM 237,374 TYPE 1 ACTION oDlg:End() ENABLE OF oDlg PIXEL
+	DEFINE SBUTTON FROM 237,374 Type 1 ACTION oDlg:End() ENABLE OF oDlg PIXEL
 	ACTIVATE MSDIALOG oDlg CENTER
    
 Else
 
-   u_itmsg( "Cliente não encontrado" , "Atenção" ,,1 )
-   RestArea(_aArea)
-   Return()
+   U_ITMsg( "Cliente não encontrado" , "Atenção" ,,1 )
+   FWRestArea(_aArea)
+   Return
    
 EndIf
 
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2189,11 +2189,11 @@ Static oDlg			:= Nil
 DEFINE MSDIALOG oDlg TITLE "Conta Corrente" FROM 000,000 TO 500,800 COLORS RGB(141,192,222),RGB(188,199,205) PIXEL
 
 	MOMS027BR1()
-	MOMS027CD1( ALLTRIM( SZY->ZY_PCCCLI ) )
+	MOMS027CD1( AllTrim( SZY->ZY_PCCCLI ) )
 
 ACTIVATE MSDIALOG oDlg CENTER ON INIT MOMS027ENB( oDlg )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2216,11 +2216,11 @@ Local oBar		:= Nil
 DEFINE BUTTONBAR oBar SIZE 25,25 3D TOP OF oObj
 
 DEFINE BUTTON oBtnNp  RESOURCE "MDIEXCEL"	OF oBar ACTION Processa( {|lEnd| MOMS027EXC( oWBrowse1:aArray ) } , 'Processando arquivo...' )	TOOLTIP ""
-DEFINE BUTTON oBtOk   RESOURCE "CANCEL"		OF oBar ACTION oDlg:End()												  		TOOLTIP ""
+DEFINE BUTTON oBtOk   RESOURCE "Cancel"		OF oBar ACTION oDlg:End()												  		TOOLTIP ""
 
 oBar:bRClicked :={|| AllwaysTrue() }
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2249,8 +2249,8 @@ Local nI		:= 0
 
 If nTotReg <= 0
 	
-	u_itmsg(  "Não é possível gerar um arquivo vazio!" , "Atenção!",,1 )
-	Return()
+	U_ITMsg(  "Não é possível gerar um arquivo vazio!" , "Atenção!",,1 )
+	Return
 	
 EndIf
 
@@ -2259,18 +2259,18 @@ ProcRegua( nTotReg )
 //===========================================================================
 //| Verifica a geração do arquivo                                           |
 //===========================================================================
-nHandle := FCREATE( cArqPesq , 0 )
+nHandle := FCreate( cArqPesq , 0 )
 
 If nHandle == -1
-	u_itmsg( "Nao foi possivel abrir ou criar o arquivo: " + cArqPesq,"Atenção",,1 )
-	Return()
+	U_ITMsg( "Nao foi possivel abrir ou criar o arquivo: " + cArqPesq,"Atenção",,1 )
+	Return
 EndIf
 
 //===========================================================================
 //| Monta o cabeçalho do arquivo                                            |
 //===========================================================================
 cCabHtml	:= "<!-- Created with AEdiX by Kirys Tech 2000,http://www.kt2k.com --> "				+ENTER
-cCabHtml	+= "<!DOCTYPE html PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>"	 				+ENTER
+cCabHtml	+= "<!DOCTYPE html Public '-//W3C//DTD HTML 4.01 Transitional//EN'>"	 				+ENTER
 cCabHtml	+= "<html>"															 					+ENTER
 cCabHtml	+= "<head>"															 					+ENTER
 cCabHtml	+= "  <title>Centro de custo</title>"									 				+ENTER
@@ -2306,7 +2306,7 @@ cLinFile	+= "</TR>"																												+ENTER
 cFileCont	+= cLinFile
 cLinFile	:= ""
 
-FWRITE( nHandle , cFileCont )
+FWrite( nHandle , cFileCont )
 
 lFlag		:= .T.
 
@@ -2318,9 +2318,9 @@ For nI := 1 To nTotReg
 	IncProc( "["+ StrZero(nI,6) +"] de ["+ StrZero( nTotReg , 6 ) +"]" )
 	If lFlag
 	
-		IF	( SZY->ZY_PCVMAC == Val( StrTran( StrTran( aDadosAux[nI][08] ,".","" ) , "," , "." ) )	.AND. SZY->ZY_PCDMAC == CTOD( aDadosAux[nI][07] ) )	.OR.;
-			( SZY->ZY_PCVPCO == Val( StrTran( StrTran( aDadosAux[nI][06] ,".","" ) , "," , "." ) )	.AND. SZY->ZY_PCDTPC == CTOD( aDadosAux[nI][03] ) )	.OR.;
-			( SZY->ZY_PCVULC == Val( StrTran( StrTran( aDadosAux[nI][06] ,".","" ) , "," , "." ) )	.AND. SZY->ZY_PCDUCM == CTOD( aDadosAux[nI][03] ) )
+		If	( SZY->ZY_PCVMAC == Val( StrTran( StrTran( aDadosAux[nI][08] ,".","" ) , "," , "." ) )	.And. SZY->ZY_PCDMAC == CTOD( aDadosAux[nI][07] ) )	.OR.;
+			( SZY->ZY_PCVPCO == Val( StrTran( StrTran( aDadosAux[nI][06] ,".","" ) , "," , "." ) )	.And. SZY->ZY_PCDTPC == CTOD( aDadosAux[nI][03] ) )	.OR.;
+			( SZY->ZY_PCVULC == Val( StrTran( StrTran( aDadosAux[nI][06] ,".","" ) , "," , "." ) )	.And. SZY->ZY_PCDUCM == CTOD( aDadosAux[nI][03] ) )
 			
 			If CTOD( aDadosAux[nI][07] ) > YEARSUB( dDataRef , 1 )
 			
@@ -2348,11 +2348,11 @@ For nI := 1 To nTotReg
 				cLinFile		+= "<TD bgcolor='#FFFFFF' align='right'><FONT face=' Arial ' size=1 color='#FF0000' ><b>"+	AllTrim( aDadosAux[nI][18] )	+"</b></FONT></TD>"+ENTER
 				cLinFile		+= "</TR>"
 				
- 			ELSE
+ 			Else
  			
-				IF	( SZY->ZY_PCVMAC == Val( StrTran( StrTran( aDadosAux[nI][08] ,".","" ) , "," , "." ) )	.AND. SZY->ZY_PCDMAC == CTOD( aDadosAux[nI][07] ) )	.OR.;
-					( SZY->ZY_PCVPCO == Val( StrTran( StrTran( aDadosAux[nI][06] ,".","" ) , "," , "." ) )	.AND. SZY->ZY_PCDTPC == CTOD( aDadosAux[nI][03] ) )	.OR.;
-					( SZY->ZY_PCVULC == Val( StrTran( StrTran( aDadosAux[nI][06] ,".","" ) , "," , "." ) )	.AND. SZY->ZY_PCDUCM == CTOD( aDadosAux[nI][03] ) )
+				If	( SZY->ZY_PCVMAC == Val( StrTran( StrTran( aDadosAux[nI][08] ,".","" ) , "," , "." ) )	.And. SZY->ZY_PCDMAC == CTOD( aDadosAux[nI][07] ) )	.OR.;
+					( SZY->ZY_PCVPCO == Val( StrTran( StrTran( aDadosAux[nI][06] ,".","" ) , "," , "." ) )	.And. SZY->ZY_PCDTPC == CTOD( aDadosAux[nI][03] ) )	.OR.;
+					( SZY->ZY_PCVULC == Val( StrTran( StrTran( aDadosAux[nI][06] ,".","" ) , "," , "." ) )	.And. SZY->ZY_PCDUCM == CTOD( aDadosAux[nI][03] ) )
 
 					cLinFile	:= "<TR>"+ENTER
 					cLinFile	+= "<TD bgcolor='#FFFFFF' align='center'><FONT face=' Arial ' size=1 color='#FF0000' ><b>"+ AllTrim( aDadosAux[nI][01] )	+"</b></FONT></TD>"+ENTER
@@ -2408,7 +2408,7 @@ For nI := 1 To nTotReg
 			     
 			EndIf
 						
-		ELSE
+		Else
 
 			If	CTOD( aDadosAux[nI][07] ) > YEARSUB( dDataRef , 1 )
 
@@ -2436,7 +2436,7 @@ For nI := 1 To nTotReg
 				cLinFile		+= "<TD bgcolor='#FFFFFF' align='right'><FONT face=' Arial ' size=1 color='#27408B' ><b>"+	AllTrim( aDadosAux[nI][18] )	+"</b></FONT></TD>"+ENTER
 				cLinFile		+= "</TR>"
 				
-			ELSE
+			Else
 			
 				cLinFile := "<TR>"
 				cLinFile		+= "<TD bgcolor='#FFFFFF' align='center'><FONT face=' Arial ' size=1 color='#8B8989' ><b>"+	AllTrim( aDadosAux[nI][01] )	+"</b></FONT></TD>"+ENTER
@@ -2466,13 +2466,13 @@ For nI := 1 To nTotReg
 					
 		EndIf
 		
-		lFlag := .f.
+		lFlag := .F.
 		
-	ELSE
+	Else
 	
-		IF	( SZY->ZY_PCVMAC == Val( StrTran( StrTran( aDadosAux[nI][08] ,".","" ) , "," , "." ) )	.AND. SZY->ZY_PCDMAC == CTOD( aDadosAux[nI][07] ) )	.OR.;
-			( SZY->ZY_PCVPCO == Val( StrTran( StrTran( aDadosAux[nI][06] ,".","" ) , "," , "." ) )	.AND. SZY->ZY_PCDTPC == CTOD( aDadosAux[nI][03] ) )	.OR.;
-			( SZY->ZY_PCVULC == Val( StrTran( StrTran( aDadosAux[nI][06] ,".","" ) , "," , "." ) )	.AND. SZY->ZY_PCDUCM == CTOD( aDadosAux[nI][03] ) )
+		If	( SZY->ZY_PCVMAC == Val( StrTran( StrTran( aDadosAux[nI][08] ,".","" ) , "," , "." ) )	.And. SZY->ZY_PCDMAC == CTOD( aDadosAux[nI][07] ) )	.OR.;
+			( SZY->ZY_PCVPCO == Val( StrTran( StrTran( aDadosAux[nI][06] ,".","" ) , "," , "." ) )	.And. SZY->ZY_PCDTPC == CTOD( aDadosAux[nI][03] ) )	.OR.;
+			( SZY->ZY_PCVULC == Val( StrTran( StrTran( aDadosAux[nI][06] ,".","" ) , "," , "." ) )	.And. SZY->ZY_PCDUCM == CTOD( aDadosAux[nI][03] ) )
 			
 			If CTOD( aDadosAux[nI][07] ) > YEARSUB( dDataRef , 1 )
 			
@@ -2500,7 +2500,7 @@ For nI := 1 To nTotReg
 				cLinFile		+= "<TD bgcolor='#C6E2FF' align='right'><FONT face=' Arial ' size=1 color='#FF0000' ><b>"+	AllTrim( aDadosAux[nI][18] )	+"</b></FONT></TD>"+ENTER
 				cLinFile		+= "</TR>"
 				
-			ELSE
+			Else
 			
 				cLinFile		:= "<TR>"
 				cLinFile		+= "<TD bgcolor='#C6E2FF' align='center'><FONT face=' Arial ' size=1 color='#8B8989' ><b>"+	AllTrim( aDadosAux[nI][01] )	+"</b></FONT></TD>"+ENTER
@@ -2528,9 +2528,9 @@ For nI := 1 To nTotReg
 
 			EndIf
 			
-		ELSE
+		Else
 		
-			IF	CTOD( aDadosAux[nI][07] ) > YEARSUB( dDataRef , 1 )
+			If	CTOD( aDadosAux[nI][07] ) > YEARSUB( dDataRef , 1 )
 			
 				cLinFile		:= "<TR>"
 				cLinFile		+= "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#27408B' ><b>"+	AllTrim( aDadosAux[nI][01] )	+"</b></FONT></TD>"+ENTER
@@ -2556,7 +2556,7 @@ For nI := 1 To nTotReg
 				cLinFile		+= "<TD bgcolor='#C6E2FF' align='right'><FONT face='Arial ' size=1 color='#27408B' ><b>"+	AllTrim( aDadosAux[nI][18] )	+"</b></FONT></TD>"+ENTER
 				cLinFile		+= "</TR>"
 				
-			ELSE
+			Else
 			
 				cLinFile		:= "<TR>"+ENTER
 				cLinFile		+= "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#8B8989' ><b>"+	AllTrim( aDadosAux[nI][01] )	+"</b></FONT></TD>"+ENTER
@@ -2590,154 +2590,154 @@ For nI := 1 To nTotReg
 		
 	EndIf
 	
-	FWRITE( nHandle , cLinFile )
+	FWrite( nHandle , cLinFile )
 	cLinFile := ""
 	
 Next nI
 
 cLinFile := "</Table>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<table border='1' cellpadding='3' cellspacing='0' bordercolor='#8B8B83' bgColor='#FFFFFF'>"+ENTER
 cLinFile += "<TR>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#6E8B3D' align='center'><FONT face=' Arial ' size=1 color='#FFFFFF'><b>Data Informação</b></FONT></TD>"+ENTER
-cLinFile += "<TD bgcolor='#6E8B3D' align='center'><FONT face=' Arial ' size=1 color='#FFFFFF'><b>"+DTOC(SZY->ZY_PCDDAT)+"</b></FONT></TD>"+ENTER
+cLinFile += "<TD bgcolor='#6E8B3D' align='center'><FONT face=' Arial ' size=1 color='#FFFFFF'><b>"+DToC(SZY->ZY_PCDDAT)+"</b></FONT></TD>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#0000CD' ><b>Cnpj</b></FONT></TD>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+SZY->ZY_PCCCLI+"</b></FONT></TD>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#0000CD' ><b>Data Cad.</b></FONT></TD>"+ENTER
-cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+DTOC(SZY->ZY_PCDCDD)+"</b></FONT></TD>"+ENTER
+cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+DToC(SZY->ZY_PCDCDD)+"</b></FONT></TD>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#0000CD' ><b>Vlr.Maior.Acum.</b></FONT></TD>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+Transform(SZY->ZY_PCVMAC,"@E 9,999,999,999.99")+"</b></FONT></TD>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#0000CD' ><b>Data M.Acum</b></FONT></TD>"+ENTER
-cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+DTOC(SZY->ZY_PCDMAC)+"</b></FONT></TD>"+ENTER
+cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+DToC(SZY->ZY_PCDMAC)+"</b></FONT></TD>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile ) 
+FWrite( nHandle , cLinFile ) 
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#0000CD' ><b>Deb.Atual Total</b></FONT></TD>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+Transform(SZY->ZY_PCVSAT,"@E 9,999,999,999.99")+"</b></FONT></TD>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#0000CD' ><b>Penúlt.Compra</b></FONT></TD>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+Transform(SZY->ZY_PCVPCO,"@e 9,999,999,999.99")+"</b></FONT></TD>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#0000CD' ><b>Data Penúlt.Cp.</b></FONT></TD>"+ENTER
-cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+DTOC(SZY->ZY_PCDTPC)+"</b></FONT></TD>"+ENTER
+cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+DToC(SZY->ZY_PCDTPC)+"</b></FONT></TD>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#0000CD' ><b>Ultima Compra.</b></FONT></TD>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+Transform(SZY->ZY_PCVULC,"@E 9,999,999,999.99")+"</b></FONT></TD>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#0000CD' ><b>Data Ult.Compra</b></FONT></TD>"+ENTER
-cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+DTOC(SZY->ZY_PCDUCM)+"</b></FONT></TD>"+ENTER
+cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+DToC(SZY->ZY_PCDUCM)+"</b></FONT></TD>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#0000CD' ><b>Med.Pond.Atraso</b></FONT></TD>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+Transform(SZY->ZY_PCQPAG,"@E 999.99")+"</b></FONT></TD>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#0000CD' ><b>Med.Aritm.Atraso</b></FONT></TD>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+Transform(SZY->ZY_PCQDAP,"@E 999.99")+"</b></FONT></TD>"+ENTER  
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#0000CD' ><b>Vlr.Deb.a Venc.</b></FONT></TD>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+Transform(SZY->ZY_PCVDAV,"@E 9,999,999,999.99")+"</b></FONT></TD>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#0000CD' ><b>Med.Pond.A Vc.</b></FONT></TD>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+Transform(SZY->ZY_PCMDAV,"@E 999.99")+"</b></FONT></TD>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#0000CD' ><b>Prazo Med. Vd.</b></FONT></TD>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+Transform(SZY->ZY_PCMPMV,"@E 999.99")+"</b></FONT></TD>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#0000CD' ><b>Vencido +5 dias</b></FONT></TD>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+Transform(SZY->ZY_PCDATV,"@E 9,999,999,999.99")+"</b></FONT></TD>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#0000CD' ><b>Med.Pond.+5 dias</b></FONT></TD>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+Transform(SZY->ZY_PCMPTV,"@E 999.99")+"</b></FONT></TD>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#0000CD' ><b>Vencido +15 dias</b></FONT></TD>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+Transform(SZY->ZY_PCV15D,"@E 9,999,999,999.99")+"</b></FONT></TD>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#0000CD' ><b>Med.Pond.+15 dias</b></FONT></TD>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+Transform(SZY->ZY_PCM15D,"@E 999.99")+"</b></FONT></TD>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#0000CD' ><b>Vencido +30 dias</b></FONT></TD>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+Transform(SZY->ZY_PCV30D,"@E 9,999,999,999.99")+"</b></FONT></TD>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 cLinFile := "<TR>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#0000CD' ><b>Med.Pond.+30 dias</b></FONT></TD>"+ENTER
 cLinFile += "<TD bgcolor='#C6E2FF' align='center'><FONT face='Arial ' size=1 color='#000000' ><b>"+Transform(SZY->ZY_PCM30D,"@E 9,999.99")+"</b></FONT></TD>"+ENTER
 cLinFile += "</TR>"+ENTER
-FWRITE( nHandle , cLinFile )
+FWrite( nHandle , cLinFile )
 
 //-- Acrescenta o rodape do html --//
-FWRITE( nHandle , cRodHtml )
+FWrite( nHandle , cRodHtml )
 
 //-- Libera o Arquivo --//
-FCLose(nHandle)
+FClose(nHandle)
 
 LjMsgRun( "Abrindo o arquivo..." , "Aguarde!" , {|| SHELLEXECUTE( "open" , cArqPesq , "" , "" , 5 ) } )
 
-Return()
+Return
 
 /*/
 
@@ -2758,7 +2758,7 @@ Static Function MOMS027BR1()
 
 Local oFont1 := TFont():New( "Arial" , 9 , 7 ,.T.,.F.,5,.T.,5,.T.,.F.)
 
-Aadd( aWBrowse1 , {" "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "} )
+aAdd( aWBrowse1 , {" "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "} )
 
 @012,001 LISTBOX oWBrowse1	Fields HEADER	"Docto"		, "Parc."	, "Emissão"	, "CNPJ"	, "Valor Op."	, "Vlr Fat."	, "Data Op."	, "Saldo C/C "	, "Maior Acum. "	,;
 											"Data M.A."	, "Vcto. "	, "Baixa"	, "Atraso"	, "Vlr Atr."	, "Data"		, "Valor"		, "Dias AV"		, "Vlr.AV"			 ;
@@ -2784,7 +2784,7 @@ oWBrowse1:bLine := {|| {	aWBrowse1[oWBrowse1:nAt,01]	,;
 							aWBrowse1[oWBrowse1:nAt,16]	,;
 							aWBrowse1[oWBrowse1:nAt,17]	,;
 							aWBrowse1[oWBrowse1:nAt,18]	}}
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2809,20 +2809,20 @@ cQuery := " SELECT "+ ENTER
 cQuery += " 	E1_NUM,"+ENTER
 cQuery += " 	E1_PARCELA,"+ENTER
 cQuery += " 	E1_EMISSAO,"+ENTER
-cQuery += " 	SUBSTR(A1_CGC,1,8) AS CNPJ,"+ENTER
+cQuery += " 	SubStr(A1_CGC,1,8) AS CNPJ,"+ENTER
 cQuery += " 	E1_VALOR,"+ENTER
 cQuery += " 	F2_VALFAT,"+ENTER
 cQuery += " 	E1_EMISSAO AS DATACC,"+ENTER
 cQuery += " 	0 AS SALDO,"+ENTER
 cQuery += " 	E1_VENCREA,"+ ENTER
-cQuery += " 	CASE WHEN E1_VENCREA >= '"+ DTOS(_dDataDE2) +"' THEN ' ' ELSE E1_BAIXA END AS E1_BAIXA , "+ENTER
+cQuery += " 	Case WHEN E1_VENCREA >= '"+ DToS(_dDataDE2) +"' THEN ' ' Else E1_BAIXA END AS E1_BAIXA , "+ENTER
 cQuery += " 	0 AS DIATRA ,"+ENTER
 cQuery += " 	0 AS VLRCALC, "+ENTER
 cQuery += " 	'' AS DATAM,"+ENTER
 cQuery += " 	0 AS VLRM,"+ENTER
-cQuery += " 	CASE WHEN E1_VENCREA >= '"+ DTOS(Date()) +"' THEN E1_VALOR ELSE 0 END AS VLRDAV,"+ENTER
-cQuery += " 	CASE WHEN E1_VENCREA > '"+ DTOS(Date()) +"' THEN ABS( TO_DATE(E1_EMISSAO,'YYYYMMDD')-TO_DATE(E1_VENCREA,'YYYYMMDD') ) ELSE 0 END AS DIASAV, "+ENTER
-cQuery += " 	CASE WHEN E1_VENCREA > '"+ DTOS(Date()) +"' THEN ABS( TO_DATE(E1_EMISSAO,'YYYYMMDD')-TO_DATE(E1_VENCREA,'YYYYMMDD') ) * E1_VALOR ELSE 0 END AS VLRAVC,"+ENTER
+cQuery += " 	Case WHEN E1_VENCREA >= '"+ DToS(Date()) +"' THEN E1_VALOR Else 0 END AS VLRDAV,"+ENTER
+cQuery += " 	Case WHEN E1_VENCREA > '"+ DToS(Date()) +"' THEN ABS( TO_DATE(E1_EMISSAO,'YYYYMMDD')-TO_DATE(E1_VENCREA,'YYYYMMDD') ) Else 0 END AS DIASAV, "+ENTER
+cQuery += " 	Case WHEN E1_VENCREA > '"+ DToS(Date()) +"' THEN ABS( TO_DATE(E1_EMISSAO,'YYYYMMDD')-TO_DATE(E1_VENCREA,'YYYYMMDD') ) * E1_VALOR Else 0 END AS VLRAVC,"+ENTER
 cQuery += " 	A1_LC,"+ENTER
 cQuery += " 	1 AS ORDEM"+ENTER
 
@@ -2842,14 +2842,14 @@ cQuery += " AND	SE1.E1_LOJA				= SF2.F2_LOJA "+ENTER
 cQuery += " AND	SF2.D_E_L_E_T_			= ' ' "+ENTER
 
 cQuery += " WHERE"+ENTER
-cQuery += " 		SE1.E1_EMISSAO	<= '"+ DTOS(Date())	+"'"+ENTER
-cQuery += " AND (	SE1.E1_BAIXA	>= '"+ DTOS(_dDataDE2)	+"' OR TRIM(SE1.E1_BAIXA) IS NULL )"+ENTER
+cQuery += " 		SE1.E1_EMISSAO	<= '"+ DToS(Date())	+"'"+ENTER
+cQuery += " AND (	SE1.E1_BAIXA	>= '"+ DToS(_dDataDE2)	+"' OR TRIM(SE1.E1_BAIXA) IS NULL )"+ENTER
 cQuery += " AND		SE1.E1_TIPO		NOT IN ( 'NCC' , 'RA', 'NDC' ) "+ENTER
 cQuery += " AND		SE1.D_E_L_E_T_	= ' ' "+ENTER
 cQuery += " AND	    SE1.E1_I_AVACC <> 'N' " +ENTER
-cQuery += " AND     SE1.E1_VENCREA > '" + DTOS(dDataRef - 1825) +"' "+ENTER
+cQuery += " AND     SE1.E1_VENCREA > '" + DToS(dDataRef - 1825) +"' "+ENTER
 cQuery += " AND		SA1.D_E_L_E_T_	= ' ' "+ENTER
-cQuery += " AND		SUBSTR(A1_CGC,1,8)	BETWEEN '"+CNPJ+"' AND '"+CNPJ+"' "+ENTER
+cQuery += " AND		SubStr(A1_CGC,1,8)	BETWEEN '"+CNPJ+"' AND '"+CNPJ+"' "+ENTER
 
 cQuery += " UNION ALL"+ENTER
 
@@ -2857,23 +2857,23 @@ cQuery += " SELECT"+ENTER
 cQuery += " 	E1_NUM,"+ENTER
 cQuery += " 	E1_PARCELA,"+ENTER
 cQuery += " 	E1_EMISSAO,"+ENTER
-cQuery += " 	SUBSTR(A1_CGC,1,8) AS CNPJ, "+ENTER
-cQuery += " 	CASE WHEN TRIM(E1_BAIXA) IS NOT NULL THEN (E1_VALOR*-1) END AS E1_VALOR,"+ENTER
+cQuery += " 	SubStr(A1_CGC,1,8) AS CNPJ, "+ENTER
+cQuery += " 	Case WHEN TRIM(E1_BAIXA) IS NOT NULL THEN (E1_VALOR*-1) END AS E1_VALOR,"+ENTER
 cQuery += " 	0 AS F2_VALFAT,"+ENTER
-cQuery += " 	CASE WHEN TRIM(E1_BAIXA) IS NOT NULL THEN E1_BAIXA END AS DATACC,"+ENTER
+cQuery += " 	Case WHEN TRIM(E1_BAIXA) IS NOT NULL THEN E1_BAIXA END AS DATACC,"+ENTER
 cQuery += " 	0 AS SALDO,"+ENTER
 cQuery += " 	E1_VENCREA,"+ENTER
 cQuery += " 	E1_BAIXA,"+ENTER
-cQuery += " 	CASE "+ENTER
+cQuery += " 	Case "+ENTER
 cQuery += " 		WHEN ABS( TO_DATE(E1_VENCREA,'YYYYMMDD')-TO_DATE(E1_BAIXA,'YYYYMMDD') ) >= 0	THEN ABS( TO_DATE(E1_VENCREA,'YYYYMMDD')-TO_DATE(E1_BAIXA,'YYYYMMDD') ) "+ENTER
-cQuery += " 		WHEN TRIM(E1_BAIXA) IS NOT NULL AND E1_BAIXA > E1_VENCREA					THEN ABS( TO_DATE(E1_VENCREA,'YYYYMMDD')-TO_DATE('"+ DTOS(Date()) +"','YYYYMMDD') ) "+ENTER
-cQuery += " 		WHEN TRIM(E1_BAIXA) IS NULL AND E1_VENCREA < '"+ DTOS(Date())+"'		THEN ABS( TO_DATE(E1_VENCREA,'YYYYMMDD')-TO_DATE('"+ DTOS(Date()) +"','YYYYMMDD') ) "+ENTER
-cQuery += " 		ELSE 0 END AS DIATRA,"+ENTER
-cQuery += " 	CASE "+ENTER
+cQuery += " 		WHEN TRIM(E1_BAIXA) IS NOT NULL AND E1_BAIXA > E1_VENCREA					THEN ABS( TO_DATE(E1_VENCREA,'YYYYMMDD')-TO_DATE('"+ DToS(Date()) +"','YYYYMMDD') ) "+ENTER
+cQuery += " 		WHEN TRIM(E1_BAIXA) IS NULL AND E1_VENCREA < '"+ DToS(Date())+"'		THEN ABS( TO_DATE(E1_VENCREA,'YYYYMMDD')-TO_DATE('"+ DToS(Date()) +"','YYYYMMDD') ) "+ENTER
+cQuery += " 		Else 0 END AS DIATRA,"+ENTER
+cQuery += " 	Case "+ENTER
 cQuery += " 		WHEN ABS( TO_DATE(E1_VENCREA,'YYYYMMDD')-TO_DATE(E1_BAIXA,'YYYYMMDD') ) >= 0	THEN ( E1_VALOR * ABS( TO_DATE(E1_VENCREA,'YYYYMMDD')-TO_DATE(E1_BAIXA,'YYYYMMDD') ) ) "+ENTER
-cQuery += " 		WHEN TRIM(E1_BAIXA) IS NOT NULL AND E1_BAIXA > E1_VENCREA					THEN ( E1_VALOR * ABS( TO_DATE(E1_VENCREA,'YYYYMMDD')-TO_DATE('"+ DTOS(Date()) +"','YYYYMMDD') ) )"+ENTER
-cQuery += " 		WHEN TRIM(E1_BAIXA) IS NULL AND E1_VENCREA < '"+DTOS(Date())+"'		THEN ( E1_VALOR * ABS( TO_DATE(E1_VENCREA,'YYYYMMDD')-TO_DATE('"+ DTOS(Date()) +"','YYYYMMDD') ) )"+ENTER
-cQuery += " 		ELSE 0 END AS VLRCALC,"+ENTER
+cQuery += " 		WHEN TRIM(E1_BAIXA) IS NOT NULL AND E1_BAIXA > E1_VENCREA					THEN ( E1_VALOR * ABS( TO_DATE(E1_VENCREA,'YYYYMMDD')-TO_DATE('"+ DToS(Date()) +"','YYYYMMDD') ) )"+ENTER
+cQuery += " 		WHEN TRIM(E1_BAIXA) IS NULL AND E1_VENCREA < '"+DToS(Date())+"'		THEN ( E1_VALOR * ABS( TO_DATE(E1_VENCREA,'YYYYMMDD')-TO_DATE('"+ DToS(Date()) +"','YYYYMMDD') ) )"+ENTER
+cQuery += " 		Else 0 END AS VLRCALC,"+ENTER
 cQuery += " 	'' AS DATAM,"+ENTER
 cQuery += " 	0 AS VLRM,"+ENTER
 cQuery += " 	0 AS VLRDAV,"+ENTER
@@ -2898,15 +2898,15 @@ cQuery += " AND	SE1.E1_LOJA				= SF2.F2_LOJA "+ENTER
 cQuery += " AND	SF2.D_E_L_E_T_			= ' ' "+ENTER
 
 cQuery += " WHERE"+ENTER
-cQuery += " 		SE1.E1_EMISSAO	<= '"+ DTOS(Date()) +"'"+ENTER
+cQuery += " 		SE1.E1_EMISSAO	<= '"+ DToS(Date()) +"'"+ENTER
 cQuery += " AND	SE1.E1_TIPO		NOT IN ( 'NCC' , 'RA', 'NDC' ) "+ENTER
 cQuery += " AND	SE1.D_E_L_E_T_	= ' ' "+ENTER
 cQuery += " AND	SE1.E1_I_AVACC <> 'N' " +ENTER
 cQuery += " AND	SE1.E1_BAIXA	<> ' ' "+ENTER
-cQuery += " AND	SE1.E1_BAIXA	>= '"+ DTOS(_dDataDE2) +"'"+ENTER
-cQuery += " AND	SE1.E1_VENCREA	< '"+ DTOS(Date()) +"'"+ENTER
-cQuery += " AND SE1.E1_VENCREA > '" + DTOS(dDataRef - 1825) +"' "+ENTER
-cQuery += " AND	SUBSTR(SA1.A1_CGC,1,8) BETWEEN  '"+CNPJ+"' AND '"+CNPJ+"' "+ENTER
+cQuery += " AND	SE1.E1_BAIXA	>= '"+ DToS(_dDataDE2) +"'"+ENTER
+cQuery += " AND	SE1.E1_VENCREA	< '"+ DToS(Date()) +"'"+ENTER
+cQuery += " AND SE1.E1_VENCREA > '" + DToS(dDataRef - 1825) +"' "+ENTER
+cQuery += " AND	SubStr(SA1.A1_CGC,1,8) BETWEEN  '"+CNPJ+"' AND '"+CNPJ+"' "+ENTER
 
 cQuery += " ORDER BY CNPJ , DATACC , E1_NUM , E1_PARCELA , ORDEM "+ENTER
 
@@ -2953,9 +2953,9 @@ _otemp:Create()
 xSaldo	:= 0 
 xSaldo1	:= 0
 xSalac	:= 0
-xData 	:= STOD("")
+xData 	:= SToD("")
 
-While TRB1->(!EoF()) 
+While TRB1->(!Eof()) 
 
 	xSaldo1	+= TRB1->E1_VALOR
    	xSaldo	+= TRB1->E1_VALOR 
@@ -2965,26 +2965,26 @@ While TRB1->(!EoF())
 	   xSaldo  := 0
    	EndIf
    	
-	TRD1->( Reclock( "TRD1" , .T. ) )
+	TRD1->( RecLock( "TRD1" , .T. ) )
 	
 		TRD1->E1_NUM		:= TRB1->E1_NUM
 		TRD1->E1_PARCELA	:= TRB1->E1_PARCELA
-		TRD1->E1_EMISSAO	:= STOD( TRB1->E1_EMISSAO )
+		TRD1->E1_EMISSAO	:= SToD( TRB1->E1_EMISSAO )
 		TRD1->CNPJ			:= TRB1->CNPJ
 		TRD1->E1_VALOR		:= TRB1->E1_VALOR
 		TRD1->F2_VALFAT		:= TRB1->F2_VALFAT
-		TRD1->DATACC		:= STOD( TRB1->DATACC )
+		TRD1->DATACC		:= SToD( TRB1->DATACC )
 		
-	    If xSaldo1 >= xSalac .and. STOD( TRB1->DATACC ) >= _dDataDE2
+	    If xSaldo1 >= xSalac .And. SToD( TRB1->DATACC ) >= _dDataDE2
 		    xSalac			:= xSaldo
-		    xData			:= STOD( TRB1->DATACC )
+		    xData			:= SToD( TRB1->DATACC )
 		EndIf
 		
-		TRD1->E1_VENCREA	:= STOD( TRB1->E1_VENCREA )
-		TRD1->E1_BAIXA		:= STOD( TRB1->E1_BAIXA )
+		TRD1->E1_VENCREA	:= SToD( TRB1->E1_VENCREA )
+		TRD1->E1_BAIXA		:= SToD( TRB1->E1_BAIXA )
 		TRD1->DIATRA		:= TRB1->DIATRA
 		TRD1->VLRCALC		:= TRB1->VLRCALC
-		TRD1->DATAM			:= STOD( TRB1->DATAM )
+		TRD1->DATAM			:= SToD( TRB1->DATAM )
 		TRD1->VLRM			:= TRB1->VLRM
 		TRD1->DIASAV		:= TRB1->DIASAV
 		TRD1->VLRAVC		:= TRB1->VLRAVC
@@ -2992,12 +2992,12 @@ While TRB1->(!EoF())
 	    TRD1->DATAMAC		:= xData
 		TRD1->SALDO			:= XSALDO
 		
-	TRD1->( Msunlock() )
+	TRD1->( MSUnLock() )
 	
-TRB1->(DbSkip())
+TRB1->(DBSkip())
 EndDo
 
-TRD1->( DbGotop() )
+TRD1->( DBGoTop() )
 xSaldo := 0
 
 If TRD1->( !Eof() )
@@ -3008,26 +3008,26 @@ If TRD1->( !Eof() )
 	
 		xSaldo += TRD1->E1_VALOR 
 		
-		Aadd( aWBrowse1 , {	ALLTRIM(	TRD1->E1_NUM )	  							,;
-							ALLTRIM(	TRD1->E1_PARCELA )							,;
-							DTOC(		TRD1->E1_EMISSAO )							,;
-							ALLTRIM(	TRD1->CNPJ )								,;
+		aAdd( aWBrowse1 , {	AllTrim(	TRD1->E1_NUM )	  							,;
+							AllTrim(	TRD1->E1_PARCELA )							,;
+							DToC(		TRD1->E1_EMISSAO )							,;
+							AllTrim(	TRD1->CNPJ )								,;
 							TRANSFORM(	TRD1->E1_VALOR	, "@e 9,999,999,999.99" )	,;
 							TRANSFORM(	TRD1->F2_VALFAT	, "@e 9,999,999,999.99" )	,;
-							DTOC(		TRD1->DATACC )								,;
+							DToC(		TRD1->DATACC )								,;
 							TRANSFORM(	TRD1->SALDO		, "@e 9,999,999,999.99" )	,;
 							TRANSFORM(	TRD1->MAIORAC	, "@e 9,999,999,999.99" )	,;		
-							DTOC(		TRD1->DATAMAC )								,;		
-							DTOC(		TRD1->E1_VENCREA )							,;
-							DTOC(		TRD1->E1_BAIXA )							,;
+							DToC(		TRD1->DATAMAC )								,;		
+							DToC(		TRD1->E1_VENCREA )							,;
+							DToC(		TRD1->E1_BAIXA )							,;
 							TRANSFORM(	TRD1->DIATRA	, "@e 999,999" )			,;
 							TRANSFORM(	TRD1->VLRCALC	, "@e 9,999,999,999.99" )	,;
-							DTOC(		TRD1->DATAM )								,;
+							DToC(		TRD1->DATAM )								,;
 							TRANSFORM(	TRD1->VLRM		, "@e 9,999,999,999.99" )	,;
 							TRANSFORM(	TRD1->DIASAV	, "@e 999,999")	  			,;
 							TRANSFORM(	TRD1->VLRAVC	, "@e 9,999,999,999.99" )	})
 		
-	TRD1->(DbSkip())
+	TRD1->(DBSkip())
 	EndDo
 	
 Else
@@ -3037,7 +3037,7 @@ Else
 	aWBrowse1	:= {}
 	
 	aAdd( aWBrowse1 , {" "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "} )
-	u_itmsg( "Cnpj sem movimento!" , "Atenção",,1 )
+	U_ITMsg( "Cnpj sem movimento!" , "Atenção",,1 )
 	
 EndIf
 
@@ -3089,7 +3089,7 @@ Local nOpc		:= 0
 //===========================================================================
 DEFINE MSDIALOG oDlg TITLE "Validação de Arquivo [TXT]" FROM 0,0 TO 060,552 OF oDlg PIXEL
 
-	@005,005 SAY "Selecione o Arquivo:"				SIZE 065,010 PIXEL OF oDlg COLOR CLR_HBLUE
+	@005,005 Say "Selecione o Arquivo:"				SIZE 065,010 PIXEL OF oDlg COLOR CLR_HBLUE
 	@014,005 MSGET cArqAux PICTURE "@!"				SIZE 195,010 PIXEL OF oDlg
 	
 	@029,400 BTNBMP oBtnAux RESOURCE "OPEN_OCEAN"	SIZE 025,025 PIXEL OF oDlg ACTION ( cArqAux := cGetFile( "*.txt" , "Selecione o Diretorio de Destino:" , 1 , "C:\" , .F. , GETF_LOCALHARD + GETF_NETWORKDRIVE ) )
@@ -3109,11 +3109,11 @@ If nOpc == 1
 	
 Else
 
-	u_itmsg( "Operação cancelada pelo usuário!" , "Atenção!",,1 )
+	U_ITMsg( "Operação cancelada pelo usuário!" , "Atenção!",,1 )
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -3140,14 +3140,14 @@ Local nLinha	:= 0
 Local nTotReg	:= 0
 Local nRegVal	:= 0 , nI
 
-IF nHdlAux == -1
-	u_itmsg( "Não foi possível abrir o arquivo informado! Verifique o arquivo e tente novamente.","Atenção",,1 )
-	Return()
-EndIF
+If nHdlAux == -1
+	U_ITMsg( "Não foi possível abrir o arquivo informado! Verifique o arquivo e tente novamente.","Atenção",,1 )
+	Return
+EndIf
 
 nTotReg := FT_FLastRec()
 
-IF nTotReg > 0
+If nTotReg > 0
 
 	aHeader := {	"Tipo Ident."					,; //| 01 |
 					"Código Associado"				,; //| 02 |
@@ -3225,13 +3225,13 @@ IF nTotReg > 0
 								SubStr( cBuffer , 264 , 13 ) +"."+ SubStr( cBuffer , 277 , 02 )	,; //30	PCVPA	N 15 264 / 278	Valor da Venda Pagamento Antecipado
 								SubStr( cBuffer , 279 , 02 )									}) //31	PCSVV	C 02 279 / 280	Venda sem Crédito (ANTECIPADO)
 		
-		EndIF
+		EndIf
 		
 	FT_FSKIP()
 	EndDo
 	
-	IF Empty( aColAux )
-		u_itmsg(  "Não foram encontrados registros válidos para exibir! Verifique o arquivo e tente novamente." , "Atenção!",,1 )
+	If Empty( aColAux )
+		U_ITMsg(  "Não foram encontrados registros válidos para exibir! Verifique o arquivo e tente novamente." , "Atenção!",,1 )
 	Else
 		
 		nRegVal := Len( aColAux )
@@ -3245,12 +3245,12 @@ IF nTotReg > 0
 			//===========================================================================
 			//| Ajusta formato dos campos de Data                                       |
 			//===========================================================================
-			aColAux[nI][04] := StoD(	aColAux[nI][04] )
-			aColAux[nI][05] := StoD(	aColAux[nI][05] )
-			aColAux[nI][06] := StoD(	aColAux[nI][06] )
-			aColAux[nI][08] := StoD(	aColAux[nI][08] )
-			aColAux[nI][23] := StoD(	aColAux[nI][23] )
-			aColAux[nI][28] := StoD(	aColAux[nI][28] )
+			aColAux[nI][04] := SToD(	aColAux[nI][04] )
+			aColAux[nI][05] := SToD(	aColAux[nI][05] )
+			aColAux[nI][06] := SToD(	aColAux[nI][06] )
+			aColAux[nI][08] := SToD(	aColAux[nI][08] )
+			aColAux[nI][23] := SToD(	aColAux[nI][23] )
+			aColAux[nI][28] := SToD(	aColAux[nI][28] )
 			
 			//===========================================================================
 			//| Ajusta formato dos campos de Valor                                      |
@@ -3281,19 +3281,19 @@ IF nTotReg > 0
 		//===========================================================================
 		lValida := U_ITListBox( "Leitura do Arquivo CISP: ["+ StrZero( nRegVal , 9 ) +"] registros." , aHeader , aColAux , .T. )
 		
-		If lValida .And. u_itmsg( "Deseja processar a validação dos dados do arquivo?" , "Atenção!" ,,3,2,2 ) 
+		If lValida .And. U_ITMsg( "Deseja processar a validação dos dados do arquivo?" , "Atenção!" ,,3,2,2 ) 
 			LjMsgRun( "Validando dados do arquivo..." , "Aguarde!" , {|| MOMS027VAR(aColAux) } )
 		EndIf
 	
-	EndIF
+	EndIf
 
 Else
 
-	u_itmsg(  "O arquivo está vazio ou é inválido para análise! Verifique o arquivo e tente novamente." , "Atenção!" ,,1 )
+	U_ITMsg(  "O arquivo está vazio ou é inválido para análise! Verifique o arquivo e tente novamente." , "Atenção!" ,,1 )
 
-EndIF
+EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -3366,271 +3366,271 @@ While nI < nTotReg
 	//===========================================================================
 	//| Verifica o preenchimento da data de cadastro                            |
 	//===========================================================================
-	IF EMPTY( aDados[nI][05] )
+	If Empty( aDados[nI][05] )
 		lValid := .T.
 		aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "Data de cadastro do Cliente está em branco." } )
-	ElseIF aDados[nI][05] > aDados[nI][04]
+	ElseIf aDados[nI][05] > aDados[nI][04]
 		lValid := .T.
 		aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "Data de cadastro do Cliente é maior que a data de atualização da base." } )
-	EndIF
+	EndIf
 	
 	//===========================================================================
 	//| Só valida clientes que possuem registro de data de última compra.       |
 	//===========================================================================
-	If !EMPTY(aDados[nI][06])
+	If !Empty(aDados[nI][06])
 		
 		//===========================================================================
 		//| Só valida clientes que possuem registro de valor da última compra.      |
 		//===========================================================================
-		If !EMPTY(aDados[nI][07]) .And. aDados[nI][07] > 0
+		If !Empty(aDados[nI][07]) .And. aDados[nI][07] > 0
 
 			//===========================================================================
 			//| Validações da Data de Última Compra                                     |
 			//===========================================================================
-			IF aDados[nI][06] > aDados[nI][04]
+			If aDados[nI][06] > aDados[nI][04]
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "Data da última compra é maior que a data de atualização da base." } )
-			EndIF
+			EndIf
 			
-			IF aDados[nI][06] < aDados[nI][05]
+			If aDados[nI][06] < aDados[nI][05]
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "Data da última compra é menor do que a data de cadastro do Cliente." } )
-			EndIF
+			EndIf
 			
-			IF aDados[nI][06] <= aDados[nI][23]
+			If aDados[nI][06] <= aDados[nI][23]
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "Data da última compra é menor ou igual do que a data da penúltima compra." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validações da Data de Maior Acúmulo do Cliente                          |
 			//===========================================================================
-			IF aDados[nI][08] > aDados[nI][04]
+			If aDados[nI][08] > aDados[nI][04]
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "Data de maior acúmulo é maior do que a data de atualização da base." } )
-			EndIF
+			EndIf
 			
-			IF aDados[nI][08] < aDados[nI][05]
+			If aDados[nI][08] < aDados[nI][05]
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "Data de maior acúmulo é menor do que a data de cadastro do Cliente." } )
-			EndIF
+			EndIf
 			
-			IF aDados[nI][08] > aDados[nI][06]
+			If aDados[nI][08] > aDados[nI][06]
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "Data de maior acúmulo é maior do que a data da última compra." } )
-			EndIF
+			EndIf
 			
 				
 			//===========================================================================
 			//| Validações do Valor de Maior Acúmulo do Cliente                         |
 			//===========================================================================
-			IF aDados[nI][09] < aDados[nI][10]
+			If aDados[nI][09] < aDados[nI][10]
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "O valor do maior acúmulo é menor do que o valor do saldo atual do Cliente." } )
-			EndIF
+			EndIf
 			
-			IF aDados[nI][09] < aDados[nI][07]
+			If aDados[nI][09] < aDados[nI][07]
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "O valor do maior acúmulo é menor do que o valor da última compra do Cliente." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validações do Valor do Saldo Atual do Cliente                           |
 			//===========================================================================
-			IF aDados[nI][10] < aDados[nI][14]
+			If aDados[nI][10] < aDados[nI][14]
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "O saldo atual é menor do que o saldo atual à vencer do Cliente." } )
-			EndIF
+			EndIf
 			
-			IF aDados[nI][10] < aDados[nI][17]
+			If aDados[nI][10] < aDados[nI][17]
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "O saldo atual é menor do que o saldo vencido (+5) do Cliente." } )
-			EndIF
+			EndIf
 			
-			IF aDados[nI][10] < aDados[nI][19]
+			If aDados[nI][10] < aDados[nI][19]
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "O saldo atual é menor do que o saldo vencido (+15) do Cliente." } )
-			EndIF
+			EndIf
 			
-			IF aDados[nI][10] < aDados[nI][21]
+			If aDados[nI][10] < aDados[nI][21]
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "O saldo atual é menor do que o saldo vencido (+30) do Cliente." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação da Média Ponderada de Atrasos do Cliente                      |
 			//===========================================================================
-			IF aDados[nI][12] == 0 .And. aDados[nI][13] <> 0
+			If aDados[nI][12] == 0 .And. aDados[nI][13] <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "A média ponderada de atrasos é igual a zero e a média aritmética não é igual a zero." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação da Média Aritmética de Atrasos do Cliente                     |
 			//===========================================================================
-			IF aDados[nI][13] == 0 .And. aDados[nI][12] <> 0
+			If aDados[nI][13] == 0 .And. aDados[nI][12] <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "A média aritmética de atrasos é igual a zero e a média ponderada não é igual a zero." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação do Saldo Atual à vencer do Cliente                            |
 			//===========================================================================
-			IF aDados[nI][14] > aDados[nI][10]
+			If aDados[nI][14] > aDados[nI][10]
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "O saldo atual à vencer é maior que o saldo total atual do Cliente." } )
-			EndIF
+			EndIf
 			
-			IF aDados[nI][14] == 0 .And. aDados[nI][15] <> 0
+			If aDados[nI][14] == 0 .And. aDados[nI][15] <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "O saldo atual à vencer é igual a zero e foi calculada a média ponderada de títulos à vencer." } )
-			EndIF
+			EndIf
 			
-			IF aDados[nI][14] == 0 .And. aDados[nI][16] <> 0
+			If aDados[nI][14] == 0 .And. aDados[nI][16] <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "O saldo atual à vencer é igual a zero e foi calculada a média de prazo à vencer." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação da Média Ponderada à vencer do Cliente                        |
 			//===========================================================================
-			IF aDados[nI][15] == 0 .And. aDados[nI][14] <> 0
+			If aDados[nI][15] == 0 .And. aDados[nI][14] <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "A média ponderada de títulos à vencer é igual a zero e o saldo à vencer é maior que zero." } )
-			EndIF
+			EndIf
 			
-			IF aDados[nI][15] == 0 .And. aDados[nI][16] <> 0
+			If aDados[nI][15] == 0 .And. aDados[nI][16] <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "A média ponderada de títulos à vencer é igual a zero e a média de prazo à vencer é maior que zero." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação do Prazo Médio à vencer do Cliente                            |
 			//===========================================================================
-			IF aDados[nI][16] == 0 .And. aDados[nI][14] <> 0
+			If aDados[nI][16] == 0 .And. aDados[nI][14] <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "O prazo médio à vencer é igual a zero e o saldo à vencer é maior que zero." } )
-			EndIF
+			EndIf
 			
-			IF aDados[nI][16] == 0 .And. aDados[nI][15] <> 0
+			If aDados[nI][16] == 0 .And. aDados[nI][15] <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "O prazo médio à vencer é igual a zero e a média ponderada à vencer é maior que zero." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação do Saldo à vencido (+5) do Cliente                            |
 			//===========================================================================
-			IF aDados[nI][17] > aDados[nI][10]
+			If aDados[nI][17] > aDados[nI][10]
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "O saldo vencido (+5) é maior que o saldo total atual do Cliente." } )
-			EndIF
+			EndIf
 			
-			IF aDados[nI][17] == 0 .And. aDados[nI][18] <> 0
+			If aDados[nI][17] == 0 .And. aDados[nI][18] <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "O saldo vencido (+5) é igual a zero e foi calculada média ponderada de vencidos (+5)." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação da Média ponderada vencida (+5) do Cliente                    |
 			//===========================================================================
-			IF aDados[nI][18] <> 0 .And. aDados[nI][18] < 5
+			If aDados[nI][18] <> 0 .And. aDados[nI][18] < 5
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "A média ponderada de vencidos (+5) é menor do que 5." } )
-			EndIF
+			EndIf
 			
-			IF aDados[nI][18] == 0 .And. aDados[nI][17] <> 0
+			If aDados[nI][18] == 0 .And. aDados[nI][17] <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "A média ponderada de vencidos (+5) é igual a zero e existe saldo vencido (+5)." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação do Saldo à vencido (+15) do Cliente                            |
 			//===========================================================================
-			IF aDados[nI][19] > aDados[nI][17]
+			If aDados[nI][19] > aDados[nI][17]
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "O saldo vencido (+15) é maior que o saldo vencido (+5)." } )
-			EndIF
+			EndIf
 			
-			IF aDados[nI][19] == 0 .And. aDados[nI][20] <> 0
+			If aDados[nI][19] == 0 .And. aDados[nI][20] <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "O saldo vencido (+15) é igual a zero e foi calculada média ponderada vencida (+15)." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação da Média ponderada vencida (+15) do Cliente                   |
 			//===========================================================================
-			IF aDados[nI][20] <> 0 .And. aDados[nI][20] < 15
+			If aDados[nI][20] <> 0 .And. aDados[nI][20] < 15
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "A média ponderada de vencidos (+15) é menor do que 15." } )
-			EndIF
+			EndIf
 			
-			IF aDados[nI][20] == 0 .And. aDados[nI][19] <> 0
+			If aDados[nI][20] == 0 .And. aDados[nI][19] <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "A média ponderada de vencidos (+15) é igual a zero e existe saldo vencido (+15)." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação do Saldo à vencido (+30) do Cliente                            |
 			//===========================================================================
-			IF aDados[nI][21] > aDados[nI][19]
+			If aDados[nI][21] > aDados[nI][19]
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "O saldo vencido (+30) é maior que o saldo vencido (+15)." } )
-			EndIF
+			EndIf
 			
-			IF aDados[nI][21] == 0 .And. aDados[nI][22] <> 0
+			If aDados[nI][21] == 0 .And. aDados[nI][22] <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "O saldo vencido (+30) é igual a zero e foi calculada média ponderada vencida (+30)." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação da Média ponderada vencida (+30) do Cliente                   |
 			//===========================================================================
-			IF aDados[nI][22] <> 0 .And. aDados[nI][22] < 30
+			If aDados[nI][22] <> 0 .And. aDados[nI][22] < 30
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "A média ponderada de vencidos (+30) é menor do que 30." } )
-			EndIF
+			EndIf
 			
-			IF aDados[nI][22] == 0 .And. aDados[nI][21] <> 0
+			If aDados[nI][22] == 0 .And. aDados[nI][21] <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "A média ponderada de vencidos (+30) é igual a zero e existe saldo vencido (+30)." } )
-			EndIF
+			EndIf
 			
 			//===========================================================================
 			//| Validação da Data da Penúltima Compra do Cliente                        |
 			//===========================================================================
-			IF aDados[nI][23] == aDados[nI][06]
+			If aDados[nI][23] == aDados[nI][06]
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "A data da penúltima compra é igual à data de última compra." } )
-			EndIF
+			EndIf
 			
-			IF aDados[nI][23] > aDados[nI][06]
+			If aDados[nI][23] > aDados[nI][06]
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "A data da penúltima compra é maior que a data de última compra." } )
-			EndIF
+			EndIf
 			
-			IF Empty( aDados[nI][23] ) .And. aDados[nI][24] <> 0
+			If Empty( aDados[nI][23] ) .And. aDados[nI][24] <> 0
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "Não foi registrada a data da penúltima compra e o valor da penúltima compra é maior que zero." } )
-			EndIF
+			EndIf
 			
-			IF !Empty( aDados[nI][23] ) .And. aDados[nI][23] < aDados[nI][05]
+			If !Empty( aDados[nI][23] ) .And. aDados[nI][23] < aDados[nI][05]
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "A data da penúltima compra é anterior à data de cadastro do Cliente." } )
-			EndIF
+			EndIf
 			
-			IF Empty( aDados[nI][23] ) .And. !Empty( aDados[nI][06] ) .And. !Empty( aDados[nI][08] ) .And. aDados[nI][06] <> aDados[nI][08]
+			If Empty( aDados[nI][23] ) .And. !Empty( aDados[nI][06] ) .And. !Empty( aDados[nI][08] ) .And. aDados[nI][06] <> aDados[nI][08]
 				lValid := .T.
 				aAdd( aDadosAux , { StrZero(nI,6) , aDados[nI][03] , "Não foi registrada a data da penúltima compra e a data de maior acúmulo é diferente da data de última compra." } )
-			EndIF
+			EndIf
 			
 		EndIf
 		
 	EndIf
 	
-SZY->(DbSkip())
+SZY->(DBSkip())
 EndDo
 
-SZY->(DbGotop())
+SZY->(DBGoTop())
 
 //===========================================================================
 //| Verifica se existem inconsistências e exibe informações caso necessário |
@@ -3640,9 +3640,9 @@ If lValid
 	U_ITListBox( "Inconsistências" , { "Linha" , "CNPJ" , "Mensagem" } , aDadosAux )
 Else
 	MsgInfo( "Todos os registros foram validados com sucesso!" , "Concluído!" )
-EndIF
+EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -3674,7 +3674,7 @@ cMsgAux += '<FONT FACE="Courier New" Style="font-size:12px">'
 cMsgAux	+= 'Processamento do envio de Arquivos para a CISP para atualização de bases:<br>'
 cMsgAux += '-------------------------------------------------------------------------------------------------------<br>'
 cMsgAux += ' Ambiente.........: '+ GetEnvServer() +'<br>'
-cMsgAux += ' Data Proc........: '+ DtoC( Date() ) +'<br>'
+cMsgAux += ' Data Proc........: '+ DToC( Date() ) +'<br>'
 cMsgAux += ' Hora.............: '+ Time() +'<br>'
 cMsgAux += '-------------------------------------------------------------------------------------------------------<br>'
 
@@ -3713,13 +3713,13 @@ Local nHandle	:= 0
 Local nI		:= 0
 Local nConta	:= 0
 
-Local _cNArq1	:= AllTrim( GetMV( "IT_CISPDIR" ,, "\data\CISP\" ) ) + "Log_Validacao_"+ DtoS(Date()) +"_"+ StrTran( Time() , ":" , "" ) +".txt"
+Local _cNArq1	:= AllTrim( GetMV( "IT_CISPDIR" ,, "\data\CISP\" ) ) + "Log_Validacao_"+ DToS(Date()) +"_"+ StrTran( Time() , ":" , "" ) +".txt"
 
 Local cEmailTo	:= Lower( AllTrim( GetMV( "IT_CISPDEV" ,, "sistema@italac.com.br"		) ) )
 Local cEmailCo	:= Lower( AllTrim( GetMV( "IT_CISPCOV" ,, ""							) ) )
 Local cEmailBcc	:= Lower( AllTrim( GetMV( "IT_CISPOOV" ,, ""							) ) )
 
-Local cAssunto	:= "Arquivo CISP - Falha de Validação da Base: "+ SubStr( DtoS( dDataRef ) , 7 , 2 ) +"-"+ SubStr( DtoS( dDataRef ) , 5 , 2 ) +"-"+ SubStr( DtoS( dDataRef ) , 1 , 4 )
+Local cAssunto	:= "Arquivo CISP - Falha de Validação da Base: "+ SubStr( DToS( dDataRef ) , 7 , 2 ) +"-"+ SubStr( DToS( dDataRef ) , 5 , 2 ) +"-"+ SubStr( DToS( dDataRef ) , 1 , 4 )
 Local cMensagem	:= MOMS027MSG( 2 )
 Local aConfig	:= U_ITCFGEML( AllTrim( GetMV( "IT_CISPCFG" ,, "002" ) ) ) //Configuração de e-mail a ser considerada para o envio (Tabela Z02)
 Local cLog		:= ""
@@ -3728,11 +3728,11 @@ Default aValid	:= {}
 
 If !Empty(aValid)
 	
-	nHandle := FCREATE( _cNArq1 )
+	nHandle := FCreate( _cNArq1 )
 	
 	If nHandle == -1
 	
-		Return()
+		Return
 		
 	EndIf
 	
@@ -3740,13 +3740,13 @@ If !Empty(aValid)
 	    
 		cLinha := "Cliente: "+ aValid[nI][01] +" - "+ aValid[nI][02] + ENTER
 		
-		FWRITE( nHandle , cLinha )
+		FWrite( nHandle , cLinha )
 		
 		nConta++
 		
 	Next nI
 	
-	FCLOSE( nHandle )
+	FClose( nHandle )
 	
 	If nConta > 0
 		
@@ -3764,11 +3764,11 @@ If !Empty(aValid)
 		SLEEP( 5000 )
 		Next nI
 		
-	EndIF
+	EndIf
 	
-EndIF
+EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -3794,22 +3794,22 @@ Local _aareaSA1 := SA1->(Getarea())
 DBSelectArea("SA1")
 SA1->( DBSetOrder(1) )
 		
-If SA1->( DBSeek( xfilial("SA1") + _ccodigo ) ) 
+If SA1->( DBSeek( xFilial("SA1") + _ccodigo ) ) 
 
 		   dDtLimCr:= SA1->A1_VENCLC			     // Recupera a Data de Validade do Limite de Crédito
 
-		   DO WHILE SA1->(!EOF()) .AND.  _ccodigo == SA1->A1_COD
-		      IF SA1->A1_LC > 0 .and. SA1->A1_VENCLC >= date() .and. SA1->A1_MSBLQL != '1'
+		   While SA1->(!Eof()) .And.  _ccodigo == SA1->A1_COD
+		      If SA1->A1_LC > 0 .And. SA1->A1_VENCLC >= Date() .And. SA1->A1_MSBLQL != '1'
 	
 		      	_nlimite += SA1->A1_LC
 	
-		      ENDIF
-		      SA1->(DBSKIP())
-		   ENDDO
+		      EndIf
+		      SA1->(DBSkip())
+		   EndDo
 		   
-Endif
+EndIf
 
-SA1->(Restarea(_aareaSA1))
+SA1->(FWRestArea(_aareaSA1))
 
 Return _nlimite
 
@@ -3849,12 +3849,12 @@ EndIf
 
 DBUseArea( .T. , "TOPCONN" , TcGenQry(,,cQuery) , "SE5T" , .T. , .F. )
 	
-Do while !SE5T->(Eof())
+While !SE5T->(Eof())
 	
-	aadd(_aextrato,{SE5T->E5_DATA,SE5T->E5_VALOR,SE5T->E5_RECPAG})
-	SE5T->(Dbskip())
+	aAdd(_aextrato,{SE5T->E5_DATA,SE5T->E5_VALOR,SE5T->E5_RECPAG})
+	SE5T->(DBSkip())
 	
-Enddo
+EndDo
 
 Return _aextrato
 
@@ -3876,9 +3876,9 @@ Static Function MOMS0279(_aextrato,_cdata)
 
 Local _nsaldi := 0   , _nnk
 
-For _nnk := 1 to len(_aextrato)
+For _nnk := 1 to Len(_aextrato)
 
-	If stod(_aextrato[_nnk][1]) <= stod(_cdata)
+	If SToD(_aextrato[_nnk][1]) <= SToD(_cdata)
 	
 		If _aextrato[_nnk][3] == "R"
 		
@@ -3888,9 +3888,9 @@ For _nnk := 1 to len(_aextrato)
 		
 			_nsaldi := _nsaldi + _aextrato[_nnk][2]
 		
-		Endif
+		EndIf
 		
-	Endif
+	EndIf
 
 Next
 

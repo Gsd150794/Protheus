@@ -8,11 +8,11 @@
 ===============================================================================================================================
 */
 
-#INCLUDE "FWMBROWSE.CH"
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "TOPCONN.CH"
-#INCLUDE "RWMAKE.CH"
+#Include "FWMBROWSE.CH"
+#Include "FWMVCDEF.CH"
+#Include "TOTVS.ch"
+#Include "TOPCONN.CH"
+#Include "RWMAKE.CH"
  
 /*
 ===============================================================================================================================
@@ -36,7 +36,7 @@ _oBrowse:SetMenuDef( 'AOMS124' )
 _oBrowse:SetDescription("Cadastro de Microregião")
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -148,10 +148,10 @@ ElseIf _nOperation == MODEL_OPERATION_UPDATE
 EndIf
 
 If _lValida
-    Z22->(DbSetOrder(1))
-    If Z22->( Dbseek(xFilial("Z22")+_cCod) )
+    Z22->(DBSetOrder(1))
+    If Z22->( DBSeek(xFilial("Z22")+_cCod) )
         _lReturn := .F.
-        U_ITMSG("Código da Microregião informado já consta no cadastro. ",;
+        U_ITMsg("Código da Microregião informado já consta no cadastro. ",;
               "Atenção",;
               "Modifique o código digitado.  ",3 , , , .T.)
 

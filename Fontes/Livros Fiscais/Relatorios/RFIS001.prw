@@ -2,7 +2,7 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges  | 16/08/2022 | Chamado 41037. Corrigida query para não considerar pre-notas
 Lucas Borges  | 09/07/2024 | Chamado 47804. Modificado mecanismo de busca do volume
@@ -10,7 +10,7 @@ Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para cont
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -115,10 +115,10 @@ Local _lPlanilha 	:= oReport:nDevice == 4
 If MV_PAR09 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"SF1")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -195,8 +195,8 @@ _cAlias := GetNextAlias()
 
 BeginSql alias _cAlias
 	SELECT F1_FILIAL, F1_EMISSAO, F1_DTDIGIT, F1_DOC, F1_SERIE, A2_COD, A2_LOJA,A2_NOME, A2_CGC, A2_TIPO, F1_VALBRUT,
-		   SUM(CASE WHEN F1_BASEFUN = 0 THEN D1_BSSENAR ELSE D1_BASEFUN END) F1_BASEFUN, F1_CONTSOC, F1_INSS, F1_VLSENAR,
-		   F1_L_MIX, SUBSTR(ZLE_DTINI,5,2)||'/'||SUBSTR(ZLE_DTINI,1,4) MES_ANO,F1_L_SETOR, F1_L_LINHA, 
+		   SUM(Case WHEN F1_BASEFUN = 0 THEN D1_BSSENAR Else D1_BASEFUN END) F1_BASEFUN, F1_CONTSOC, F1_INSS, F1_VLSENAR,
+		   F1_L_MIX, SubStr(ZLE_DTINI,5,2)||'/'||SubStr(ZLE_DTINI,1,4) MES_ANO,F1_L_SETOR, F1_L_LINHA, 
 		   NVL((SELECT SUM(ZLD_QTDBOM) FROM %Table:ZLD%
 			WHERE D_E_L_E_T_ = ' '
 			AND ZLD_DTCOLE BETWEEN ZLE_DTINI AND ZLE_DTFIM
@@ -205,7 +205,7 @@ BeginSql alias _cAlias
 			AND ZLD_RETILJ = A2_LOJA
 			AND ZLD_SETOR = F1_L_SETOR
 			AND ZLD_LINROT = F1_L_LINHA),0) VOLUME, CC2_EST, CC2_CODMUN, CC2_MUN
-	  FROM %Table:SA2% SA2, %table:SF1% SF1, %table:SD1% SD1, %table:CC2% CC2, %table:ZLE% ZLE
+	  FROM %Table:SA2% SA2, %Table:SF1% SF1, %Table:SD1% SD1, %Table:CC2% CC2, %Table:ZLE% ZLE
 	 WHERE SA2.D_E_L_E_T_ = ' '
 	   AND SF1.D_E_L_E_T_ = ' '
 	   AND SD1.D_E_L_E_T_ = ' '
@@ -248,7 +248,7 @@ oReport:Section(1):Init()
 nInc	:= RecCount()
 oReport:SetMeter(nInc)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 
 	//Mascara para impressao - CNPJ/CPF
 	If RetPessoa((_cAlias)->A2_CGC) == "J"
@@ -262,10 +262,10 @@ While !oReport:Cancel() .And. (_cAlias)->(!EOF())
 	//para carregar o valor correto.
 	_cFilial:= (_cAlias)->F1_FILIAL
 	_cMun	:= (_cAlias)->CC2_CODMUN + ' - ' + (_cAlias)->CC2_MUN
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

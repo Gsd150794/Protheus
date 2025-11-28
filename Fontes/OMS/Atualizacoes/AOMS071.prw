@@ -18,7 +18,7 @@ Lucas Borges      | 14/10/2019 | Removidos os Warning na compilação da release 1
 // Definicoes de Includes da Rotina.
 //====================================================================================================
 #Include 'FWMVCDEF.CH'
-#Include 'PROTHEUS.CH'
+#Include "TOTVS.ch"
 
 #define	MB_OK				0
 /*
@@ -39,9 +39,9 @@ User Function AOMS071()
 Local oBrowse		:= Nil
 Local _cMensagem	:= ""
 
-dbSelectArea("ZZL")
-dbSetOrder(3) //ZZL_FILIAL + ZZL_CODUSU
-If dbSeek(xFilial("ZZL") + __cUserId)
+DBSelectArea("ZZL")
+DBSetOrder(3) //ZZL_FILIAL + ZZL_CODUSU
+If DBSeek(xFilial("ZZL") + __cUserId)
 	If ZZL->ZZL_LIBCRE == "S"
 		oBrowse := FWMBrowse():New()
 
@@ -185,7 +185,7 @@ Retorno-----------: Lógico - .T. dados válidas, .F. dados inválidos
 */
 User Function AOMS071I()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _lRet		:= .T.
 Local _cAlias	:= Alias()
 Local _nReg		:= Recno()
@@ -194,7 +194,7 @@ Private cCadastro	:= "Cadastro de Aprovador de Workflow de Liberação de (Crédito
 
 AxInclui( _cAlias, _nReg, 3, , , , "U_AOMSITOK()", , , , , , , .T.)
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 Return(_lRet)
 
 /*
@@ -212,7 +212,7 @@ Retorno-----------: Lógico - .T. dados válidas, .F. dados inválidos
 */
 User Function AOMSITOK()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _lRet		:= .T.
 Local _cQryD	:= ""
 
@@ -225,8 +225,8 @@ _cQryD += "  AND D_E_L_E_T_ = ' ' "
 
 dbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQryD ) , "TRBDUP" , .T., .F. )
 	
-dbSelectArea("TRBDUP")
-TRBDUP->(dbGoTop())
+DBSelectArea("TRBDUP")
+TRBDUP->(DBGoTop())
 	
 If TRBDUP->DUPLIC > 0
 	_lRet := .F.
@@ -238,10 +238,10 @@ If TRBDUP->DUPLIC > 0
 	U_ITCADHLP( _aInfHlp , "AOMS07101" )
 EndIf
 
-dbSelectArea("TRBDUP")
-TRBDUP->(dbCloseArea())
+DBSelectArea("TRBDUP")
+TRBDUP->(DBCloseArea())
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 Return(_lRet)
 
 /*
@@ -259,7 +259,7 @@ Retorno-----------: Lógico - .T. dados válidas, .F. dados inválidos
 */
 User Function AOMS071A()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _lRet		:= .T.
 Local _cAlias	:= Alias()
 Local _nReg		:= Recno()
@@ -268,7 +268,7 @@ Private cCadastro	:= "Cadastro de Aprovador de Workflow de Liberação de (Crédito
 
 AxAltera( _cAlias, _nReg, 4, , , , , "U_AOMSATOK()", , , , , , , .T.)
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 Return(_lRet)
 
 /*
@@ -286,7 +286,7 @@ Retorno-----------: Lógico - .T. dados válidas, .F. dados inválidos
 */
 User Function AOMSATOK()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _lRet		:= .T.
 Local _cQry		:= ""
 Local _cQryA	:= ""
@@ -304,8 +304,8 @@ If !M->ZY0_ATIVO == "S"
 	
 	dbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQry ) , "TRBZY0" , .T., .F. )
 	
-	dbSelectArea("TRBZY0")
-	TRBZY0->(dbGoTop())
+	DBSelectArea("TRBZY0")
+	TRBZY0->(DBGoTop())
 	
 	If TRBZY0->TOTREG == 0
 		_cQryA := "SELECT * "
@@ -316,8 +316,8 @@ If !M->ZY0_ATIVO == "S"
 		
 		dbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQryA ) , "TRBLST" , .T., .F. )
 		
-		dbSelectArea("TRBLST")
-		TRBLST->(dbGoTop())
+		DBSelectArea("TRBLST")
+		TRBLST->(DBGoTop())
 		
 		If !TRBLST->(Eof())
 		
@@ -328,7 +328,7 @@ If !M->ZY0_ATIVO == "S"
 								TRBLST->ZY0_TIPO	,;
 								TRBLST->ZY0_ATIVO	})
 
-				TRBLST->(dbSkip())
+				TRBLST->(DBSkip())
 			End
 
 			_aHeader := { ' ' , 'Cód. Usuário' , 'Nome' , 'Tipo' , 'Ativo ?' }
@@ -337,18 +337,18 @@ If !M->ZY0_ATIVO == "S"
 		
 				For _nI := 1 To Len(_aCols)
 					If _aCols[_nI][1]
-						dbSelectArea("ZY0")
-						dbSetOrder(1)
-						dbSeek(xFilial("ZY0") + _aCols[_nI][2] )//+ _aCols[_nI][4])
-					    DO WHILE !ZY0->(EOF()) .AND. ZY0->ZY0_FILIAL == xFilial("ZY0") .AND. ZY0->ZY0_CODUSR == _aCols[_nI][2]
-						   IF _aCols[_nI][4] == ZY0->ZY0_TIPO
+						DBSelectArea("ZY0")
+						DBSetOrder(1)
+						DBSeek(xFilial("ZY0") + _aCols[_nI][2] )//+ _aCols[_nI][4])
+					    While !ZY0->(Eof()) .And. ZY0->ZY0_FILIAL == xFilial("ZY0") .And. ZY0->ZY0_CODUSR == _aCols[_nI][2]
+						   If _aCols[_nI][4] == ZY0->ZY0_TIPO
 						      RecLock("ZY0", .F.)
 							  ZY0->ZY0_ATIVO := "S"
-							  MsUnLock()
-							  EXIT
-						   ENDIF  						
-						   ZY0->(DBSKIP())
-						ENDDO
+							  MSUnLock()
+							  Exit
+						   EndIf  						
+						   ZY0->(DBSkip())
+						EndDo
 					EndIf
 				Next _nI
 
@@ -371,16 +371,16 @@ If !M->ZY0_ATIVO == "S"
 			U_ITCADHLP( _aInfHlp , "AOMS07107" )
 		EndIf
 
-		dbSelectArea("TRBLST")
-		TRBLST->(dbCloseArea())
+		DBSelectArea("TRBLST")
+		TRBLST->(DBCloseArea())
 
 	EndIf
 	
-	dbSelectArea("TRBZY0")
-	TRBZY0->(dbCloseArea())
+	DBSelectArea("TRBZY0")
+	TRBZY0->(DBCloseArea())
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 Return(_lRet)
 
 /*
@@ -398,7 +398,7 @@ Retorno-----------: Lógico - .T. dados válidas, .F. dados inválidos
 */
 User Function AOMS071VC()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _lRet		:= .T.
 Local _cCampo	:= ReadVar()
 
@@ -407,5 +407,5 @@ If "ZY0_CODUSR" $ _cCampo
 	M->ZY0_NOMUSR := AllTrim(UsrRetName(M->ZY0_CODUSR))
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 Return(_lRet)

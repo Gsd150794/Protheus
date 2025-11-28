@@ -14,10 +14,10 @@ Lucas Borges  | 16/10/2019 | Removidos os Warning na compilação da release 12.1.
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "rwmake.ch"
-#INCLUDE "topconn.ch"
-#include "TBICONN.CH" 
+#Include "TOTVS.ch"
+#Include "rwmake.ch"
+#Include "topconn.ch"
+#Include "TBICONN.CH" 
 
 /*
 ===============================================================================================================================
@@ -41,13 +41,13 @@ Private aItens	   := {}
 Private cItens	   := ""
 Private cOrigemRPA := ""
 
-IF !Pergunte (cPerg,.T.)
-	RETURN()
-ENDIF
+If !Pergunte (cPerg,.T.)
+	Return
+EndIf
 
 Processa( {|lEnd| MontaRel() } , 'Efetuando processamento...' , 'Aguarde!' )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -134,7 +134,7 @@ If nCountRec > 0
 	ProcRegua(nCountRec)
 	
 	DBSelectArea(_cAliasDados)
-	(_cAliasDados)->( DBGotop() )
+	(_cAliasDados)->( DBGoTop() )
 	
 	While (_cAliasDados)->(!Eof())
 	
@@ -198,7 +198,7 @@ If _nNum == 1 //Verifica se houve algum erro durante as impressões
     		cItens += aItens[_nX][1] + ", "
 	Next _nX
 	
-	xmaghelpfis(	"Divergência de valores"								,;
+	xMagHelpFis(	"Divergência de valores"								,;
 					"Ocorreram problemas na impressão do RPA nº "+ cItens	,;
 					"Entre em contato com o Depto. de TI"					 )
 	
@@ -209,7 +209,7 @@ EndIf
 oPrint:EndPage() // Finaliza a página
 oPrint:Preview() // Visualiza antes de imprimir
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -315,17 +315,17 @@ Else
 	
 	cErro := ""
 	
-	If ( ALLTRIM( _cQry->ZZ2_RECIBO ) ) <> ""
+	If ( AllTrim( _cQry->ZZ2_RECIBO ) ) <> ""
 	
 		cErro += " VALOR SEST/SENAT e/ou VALOR INSS e/ou VALOR IRRF "
 		
-		AADD( aItens , { ALLTRIM(_aDados[01]) , ALLTRIM(cErro) } )
+		aAdd( aItens , { AllTrim(_aDados[01]) , AllTrim(cErro) } )
 		
 		_nNum := 1
 		
 		_cQry->( DBCloseArea() )
 		
-		Return()
+		Return
 		
 	EndIf
 	
@@ -337,7 +337,7 @@ Else
 	If nCountRec > 0
 	
 		DBSelectArea(_cAliasSE2)
-		(_cAliasSE2)->( DBGotop() )
+		(_cAliasSE2)->( DBGoTop() )
 		
 		While (_cAliasSE2)->(!Eof())
 		
@@ -387,31 +387,31 @@ Else
 		//================================================================================
 		oPrint:Box( 0150 , 0100 , 0420 , 2300 )
 		oPrint:Say( 0150 , 0120 , "Nome....: "			, oFont12 )
-		oPrint:Say( 0150 , 0370 , alltrim(_aDados[07])	, oFont12n)
+		oPrint:Say( 0150 , 0370 , AllTrim(_aDados[07])	, oFont12n)
 		oPrint:Say( 0150 , 1700 , "Cod.....: "			, oFont12 )
-		oPrint:Say( 0150 , 2000 , alltrim(_aDados[08])	, oFont12 )
+		oPrint:Say( 0150 , 2000 , AllTrim(_aDados[08])	, oFont12 )
 		oPrint:Say( 0200 , 0120 , "Endereco: "			, oFont12 )
-		oPrint:Say( 0200 , 0370 , alltrim(_aDados[09])	, oFont12 )
+		oPrint:Say( 0200 , 0370 , AllTrim(_aDados[09])	, oFont12 )
 		oPrint:Say( 0250 , 0120 , "Cidade..: "			, oFont12 )
-		oPrint:Say( 0250 , 0370 , alltrim(_aDados[10])	, oFont12 )
+		oPrint:Say( 0250 , 0370 , AllTrim(_aDados[10])	, oFont12 )
 		oPrint:Say( 0300 , 0120 , "Bairro..: "			, oFont12 )
-		oPrint:Say( 0300 , 0370 , alltrim(_aDados[11])	, oFont12 )
+		oPrint:Say( 0300 , 0370 , AllTrim(_aDados[11])	, oFont12 )
 		oPrint:Say( 0300 , 1700 , "CEP.....: "			, oFont12 )
-		oPrint:Say( 0300 , 2000 , alltrim(_aDados[12])	, oFont12 )
+		oPrint:Say( 0300 , 2000 , AllTrim(_aDados[12])	, oFont12 )
 		
 		If _aDados[16] == "1"
 		
 			oPrint:Say( 350 , 0120 , "CPF.....: "			,oFont12 )
-			oPrint:Say( 350 , 0370 , alltrim(_aDados[13])	,oFont12 )
+			oPrint:Say( 350 , 0370 , AllTrim(_aDados[13])	,oFont12 )
 			oPrint:Say( 350 , 1700 , "PIS.....: "			,oFont12 )
-			oPrint:Say( 350 , 2000 , alltrim(_aDados[14])	,oFont12 )
+			oPrint:Say( 350 , 2000 , AllTrim(_aDados[14])	,oFont12 )
 			
 		Else
 		
 			oPrint:Say  (350,0120,"CGC.....: "			, oFont12 )
-			oPrint:Say  (350,0370,alltrim(_aDados[13])	, oFont12 )
+			oPrint:Say  (350,0370,AllTrim(_aDados[13])	, oFont12 )
 			oPrint:Say  (350,1700,"Inscric.: "			, oFont12 )
-			oPrint:Say  (350,2000,alltrim(_aDados[15])	, oFont12 )
+			oPrint:Say  (350,2000,AllTrim(_aDados[15])	, oFont12 )
 			
 		EndIf
 		
@@ -438,7 +438,7 @@ Else
 		nNotas := 1
 
 		DBSelectArea(_cAliasZZ3)
-		(_cAliasZZ3)->( DBGotop() )
+		(_cAliasZZ3)->( DBGoTop() )
 		
 		While (_cAliasZZ3)->( !Eof() ) 
 		
@@ -450,7 +450,7 @@ Else
 				Else
 					_cMun	:= Posicione('SA1',1,xFilial('SA1')+(_cAliasZZ3)->(F2_CLIENTE+F2_LOJA),'A1_MUN')
 					_cEst	:= Posicione('SA1',1,xFilial('SA1')+(_cAliasZZ3)->(F2_CLIENTE+F2_LOJA),'A1_EST')
-				EndIF
+				EndIf
 				
 				oPrint:Say( _nLin , _nCol1 , StrZero( _nseq++ , 3 )											, oFont12n )
 				oPrint:Say( _nLin , _nCol2 , (_cAliasZZ3)->ZZ3_DOC											, oFont12n )
@@ -465,7 +465,7 @@ Else
 				_nPedagio+= (_cAliasZZ3)->ZZ3_VRPEDA
 				nNotas++
 			
-			EndIF
+			EndIf
 			
 			cont++
 			
@@ -578,7 +578,7 @@ Else
 
 EndIf
 	
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -604,11 +604,11 @@ _cArq   := ''
 cTitulo := "RPA Fretistas - Divergencias" 
 
 cHtml := Space(0)
-cHtml += '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">'
+cHtml += '<!DOCTYPE HTML Public "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">'
 cHtml += '<html>'
 cHtml += '<head>'
 cHtml += '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"><title>Untitled Document</title>'
-cHtml += '<style type="text/css">'
+cHtml += '<style Type="text/css">'
 cHtml += '<!--body,td,th { font-family: Arial, Helvetica, sans-serif; font-size: 12px;}.negrito { font-family: Arial, Helvetica, sans-serif; font-size: 12px; font-weight: bold; color: #003366;}.negrito2 { font-family: Arial, Helvetica, sans-serif; font-size: 15px; font-weight: bold; color: #003366;}.texto1 { font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: #666666;}.texto2 { font-family: Arial, Helvetica, sans-serif; font-size: 9px; color: #666666;}-->'
 cHtml += '</style>'
 cHtml += '</head>'

@@ -9,7 +9,7 @@ Lucas Borges  |19/06/2025| Chamado 50617. Revisões diversas visando padronizar o
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -18,7 +18,7 @@ Autor-------------: Darcio Ribeiro Sporl
 Data da Criacao---: 02/07/2015
 Descrição---------: Ponto de entrada na execução do filtro na importação do pedido de compras
 Parametros--------: Nenhum
-Retorno-----------: Lógico - .T. se o registro for válido, .F. para descartar o registro
+Retorno-----------: Lógico - .T. se o registro For válido, .F. para descartar o registro
 ===============================================================================================================================
 */
 User Function MT103VPC

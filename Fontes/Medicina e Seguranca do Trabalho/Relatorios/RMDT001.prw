@@ -2,68 +2,57 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                           
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Josué Danich      | 26/06/2019 | Ajustes para loboguara - Chamado 28886
--------------------------------------------------------------------------------------------------------------------------------
-Lucas B. Ferreira | 16/09/2019 | Retirado uso não permitido de chamada de API de Console. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas B. Ferreira | 02/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer    | 20/03/2020 | Mensagem na geração do recibo de entrega do EPI X geração da SA. Chamado 32334
- -------------------------------------------------------------------------------------------------------------------------------
-Jonathan          | 16/07/2020 | Ajuste da impressão do recibo de entrega. Chamado 33416
+Lucas Borges  |02/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
+Alex Wallauer |20/03/2020| Chamado 32334. Mensagem na geração do recibo de entrega do EPI X geração da SA.
+Jonathan      |16/07/2020| Chamado 33416. Ajuste da impressão do recibo de entrega.
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#include "TOTVS.CH"  
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "MDTR805.ch"
+
+#Include "TOTVS.ch"
+#Include "MDTR805.ch"
+
 /*
 ===============================================================================================================================
 Programa----------: RMDT001
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 01/09/2015
-===============================================================================================================================
 Descrição---------: Recibo de entrega de EPI copiado e ajustado do fonte padrão MDTR805
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function RMDT001()
+User Function RMDT001
 
 //=======================================================================
 // Define Variaveis                                             
 //=======================================================================
-LOCAL _cwnrel   := "MDTR805"
-Local _aArea := GetArea()
-LOCAL _cDesc1  := STR0001 //"Relatorio de Comprovante de Entrega de EPI.                                     "
-LOCAL _cDesc2  := STR0002 //"Conforme parametros o usuario pode selecionar os funcionarios, periodo desejado "
-LOCAL _cDesc3  := STR0003 //"e indicar se deseja imprimir apenas epi's nao impressos ou para todos.          "
-LOCAL _cString := "TNF"
+Local _cwnrel   := "MDTR805"
+Local _aArea := FWGetArea()
+Local _cDesc1  := STR0001 //"Relatorio de Comprovante de Entrega de EPI.                                     "
+Local _cDesc2  := STR0002 //"Conforme parametros o usuario pode selecionar os funcionarios, periodo desejado "
+Local _cDesc3  := STR0003 //"e indicar se deseja imprimir apenas epi's nao impressos ou para todos.          "
+Local _cString := "TNF"
 Local _cQry  , D
-PRIVATE nomeprog 	:= "MDTR805"
-PRIVATE tamanho  	:= "M"
-PRIVATE  aReturn  	:= { STR0004, 1,STR0005, 2, 2, 1, "",1 } //"Zebrado"###"Administracao"
-PRIVATE titulo   	:= STR0006 //"Comprovante de Entrega de EPI"
-PRIVATE _ntipo    	:= 0
-PRIVATE nLastKey 	:= 0
-PRIVATE cPerg    	:= "MDT805    "
-PRIVATE cabec1	 	:= " "
-PRIVATE cabec2   	:= " "
-PRIVATE nSizeSI3, nSizeSRJ
-PRIVATE cFuncMat  	:= " "
-PRIVATE _cULIT		:= '01'
-PRIVATE _cUlSC		:= CA105NUM
+Private nomeprog 	:= "MDTR805"
+Private tamanho  	:= "M"
+Private  aReturn  	:= { STR0004, 1,STR0005, 2, 2, 1, "",1 } //"Zebrado"###"Administracao"
+Private titulo   	:= STR0006 //"Comprovante de Entrega de EPI"
+Private _ntipo    	:= 0
+Private nLastKey 	:= 0
+Private cPerg    	:= "MDT805    "
+Private cabec1	 	:= " "
+Private cabec2   	:= " "
+Private nSizeSI3, nSizeSRJ
+Private cFuncMat  	:= " "
+Private _cULIT		:= '01'
+Private _cUlSC		:= CA105NUM
 
 _l655CTR := .F.
 //filtra só entregas da filial sem recibo impresso
 _cQry := "SELECT TNF.R_E_C_N_O_ AS NRRECNO FROM " + RetSqlName("TNF") + " TNF " 
-_cQry += " WHERE TNF.D_E_L_E_T_ <> '*' AND TNF_FILIAL = '" + xFilial("TNF") + "' "
+_cQry += " WHERE TNF.D_E_L_E_T_ = ' ' AND TNF_FILIAL = '" + xFilial("TNF") + "' "
 _cQry += " AND TNF_MAT = '" +M->RA_MAT+ "' AND TNF_DTRECI = '        ' "
 
 If Select("QRYTNF") > 0
@@ -72,89 +61,89 @@ EndIf
 
 DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQry ) , "QRYTNF" , .T. , .F. )
 
-QRYTNF->(DbGoTop())
+QRYTNF->(DBGoTop())
 
 _aDados:={} 
 lTemErro:=.F.
-SCP->(Dbsetorder(1))
-Do While ! QRYTNF->(Eof())  
+SCP->(DBSetOrder(1))
+While ! QRYTNF->(Eof())  
    
-   TNF->(DbGoTo(QRYTNF->NRRECNO))
+   TNF->(DBGoTo(QRYTNF->NRRECNO))
    aItem:={}
-   AADD(aItem,.T.)
+   aAdd(aItem,.T.)
    cMens:="SA Gerada com sucesso"
-   If EMPTY(TNF->TNF_NUMSA)
+   If Empty(TNF->TNF_NUMSA)
 
-      AADD(aItem,_cUlSC+"*")
-      If !SCP->(Dbseek(cFilAnt+_cUlSC))
+      aAdd(aItem,_cUlSC+"*")
+      If !SCP->(DBSeek(cFilAnt+_cUlSC))
          aItem[1]:=.F.    
          lTemErro:=.T.
          cMens:="Não gerou a SA corretamente"
-      ENDIF
+      EndIf
 
    Else
 
-      AADD(aItem,TNF->TNF_NUMSA)
-      If !SCP->(Dbseek(cFilAnt+TNF->TNF_NUMSA))
+      aAdd(aItem,TNF->TNF_NUMSA)
+      If !SCP->(DBSeek(cFilAnt+TNF->TNF_NUMSA))
          aItem[1]:=.F.
          lTemErro:=.T.
          cMens:="Não gerou a SA corretamente"
-      ENDIF
+      EndIf
 
    EndIf
-   AADD(aItem,TNF->TNF_MAT+"-"+NgSeek('SRA',TNF->TNF_MAT,1,'SRA->RA_NOME'))
-// AADD(aItem,SRA->RA_RG)
-// AADD(aItem,SRA->RA_NASC)
-// AADD(aItem,SRA->RA_ADMISSA)
-// AADD(aItem,Alltrim( Str( YEAR(DATE())-YEAR(SRA->RA_ADMISSA),3 ) )  )
-   AADD(aItem,SRA->RA_CC+ "-"+NgSeek('SI3',SRA->RA_CC,1,'SI3->I3_DESC') )
-// AADD(aItem,TNF->TNF_CODFUN+"-"+Alltrim (NgSeek('SRJ',TNF->TNF_CODFUN,1,'SRJ->RJ_DESC')) )      
-   AADD(aItem,ALLTRIM(TNF->TNF_CODEPI)+"-"+NgSeek('SB1',TNF->TNF_CODEPI,1,'SB1->B1_DESC'))
-   AADD(aItem,DTOC(TNF->TNF_DTENTR))			 
-   AADD(aItem,TNF->TNF_HRENTR)
-   AADD(aItem,TNF->TNF_QTDENT) 
-   AADD(aItem,IF(TNF->TNF_INDDEV = "1","SIM","NAO"))
-   AADD(aItem,cMens)
-   AADD(aItem,QRYTNF->NRRECNO)
+   aAdd(aItem,TNF->TNF_MAT+"-"+NgSeek('SRA',TNF->TNF_MAT,1,'SRA->RA_NOME'))
+// aAdd(aItem,SRA->RA_RG)
+// aAdd(aItem,SRA->RA_NASC)
+// aAdd(aItem,SRA->RA_ADMISSA)
+// aAdd(aItem,AllTrim( Str( YEAR(DATE())-YEAR(SRA->RA_ADMISSA),3 ) )  )
+   aAdd(aItem,SRA->RA_CC+ "-"+NgSeek('SI3',SRA->RA_CC,1,'SI3->I3_DESC') )
+// aAdd(aItem,TNF->TNF_CODFUN+"-"+AllTrim (NgSeek('SRJ',TNF->TNF_CODFUN,1,'SRJ->RJ_DESC')) )      
+   aAdd(aItem,AllTrim(TNF->TNF_CODEPI)+"-"+NgSeek('SB1',TNF->TNF_CODEPI,1,'SB1->B1_DESC'))
+   aAdd(aItem,DToC(TNF->TNF_DTENTR))			 
+   aAdd(aItem,TNF->TNF_HRENTR)
+   aAdd(aItem,TNF->TNF_QTDENT) 
+   aAdd(aItem,If(TNF->TNF_INDDEV = "1","SIM","NAO"))
+   aAdd(aItem,cMens)
+   aAdd(aItem,QRYTNF->NRRECNO)
    
-   AADD(_aDados,aItem)
-   QRYTNF->(DBSKIP()) 
+   aAdd(_aDados,aItem)
+   QRYTNF->(DBSkip()) 
 
-ENDDO
+EndDo
 
-DO WHILE LEN(_aDados) > 0 .AND. lTemErro
+While Len(_aDados) > 0 .And. lTemErro
    _aTit:={}
    _aSiz:={}
-   AADD(_aTit,' ') 
-   AADD(_aSiz,10)
-   AADD(_aTit,'S.A.') 
-   AADD(_aSiz,10)
-   AADD(_aTit,'FUNCIONARIO') 
-   AADD(_aSiz,120)
-/* AADD(_aTit,'RG')
-   AADD(_aSiz,35)
-   AADD(_aTit,'NASC')
-   AADD(_aSiz,35)
-   AADD(_aTit,'ADMIS')
-   AADD(_aSiz,30)
-   AADD(_aTit,'IDADE')
-   AADD(_aSiz,20)*/
-   AADD(_aTit,'CENTRO DE CUSTO')
-   AADD(_aSiz,100)
-// AADD(_aTit,'FUNCAO')
-// AADD(_aSiz,100)
-   AADD(_aTit,'EPI')
-   AADD(_aSiz,120)
-   AADD(_aTit,'DT ENT')
-   AADD(_aSiz,20)
-   AADD(_aTit,'HORA')
-   AADD(_aSiz,20)
-   AADD(_aTit,'QTDE')
-   AADD(_aSiz,20)
-   AADD(_aTit,'DEVOLUCAO')
-   AADD(_aSiz,20)
-   AADD(_aTit,'RESULTADO')
-   AADD(_aSiz,20)
+   aAdd(_aTit,' ') 
+   aAdd(_aSiz,10)
+   aAdd(_aTit,'S.A.') 
+   aAdd(_aSiz,10)
+   aAdd(_aTit,'FUNCIONARIO') 
+   aAdd(_aSiz,120)
+/* aAdd(_aTit,'RG')
+   aAdd(_aSiz,35)
+   aAdd(_aTit,'NASC')
+   aAdd(_aSiz,35)
+   aAdd(_aTit,'ADMIS')
+   aAdd(_aSiz,30)
+   aAdd(_aTit,'IDADE')
+   aAdd(_aSiz,20)*/
+   aAdd(_aTit,'CENTRO DE CUSTO')
+   aAdd(_aSiz,100)
+// aAdd(_aTit,'FUNCAO')
+// aAdd(_aSiz,100)
+   aAdd(_aTit,'EPI')
+   aAdd(_aSiz,120)
+   aAdd(_aTit,'DT ENT')
+   aAdd(_aSiz,20)
+   aAdd(_aTit,'HORA')
+   aAdd(_aSiz,20)
+   aAdd(_aTit,'QTDE')
+   aAdd(_aSiz,20)
+   aAdd(_aTit,'DEVOLUCAO')
+   aAdd(_aSiz,20)
+   aAdd(_aTit,'RESULTADO')
+   aAdd(_aSiz,20)
 
    _cTitulo:="EPIs SEM SA"
 
@@ -162,37 +151,37 @@ DO WHILE LEN(_aDados) > 0 .AND. lTemErro
    
    LDEL:=.F.
 
-   bOk    :={|oDlg| IF(U_ITMSG("Confirma EXCLUIR os EPIs ENTREGUES ?"         ,'Atenção!',,2,2,2) , (LDEL:=.T. ,oDlg:End() ), )    }
-   bCancel:={|oDlg| IF(U_ITMSG("Confirma SAIR SEM excluir os EPIs ENTREGUES ?",'Atenção!',,3,2,2) , (LDEL:=.F. ,oDlg:End() ), )    }
+   bOk    :={|oDlg| If(U_ITMsg("Confirma EXCLUIR os EPIs ENTREGUES ?"         ,'Atenção!',,2,2,2) , (LDEL:=.T. ,oDlg:End() ), )    }
+   bCancel:={|oDlg| If(U_ITMsg("Confirma SAIR SEM excluir os EPIs ENTREGUES ?",'Atenção!',,3,2,2) , (LDEL:=.F. ,oDlg:End() ), )    }
 
    //                           , _aCols  ,_lMaxSiz,_nTipo,_cMsgTop, _lSelUnc ,_aSizes , _nCampo , bOk , bCancel, _abuttons )
       U_ITListBox(_cTitulo,_aTit,_aDados  , .T.    , 4    ,_cMsgTop,          ,_aSiz   ,         , bOk ,bCancel, )
                                                                                                   
-   IF LDEL
+   If LDEL
       nConta:=0
-      FOR D := 1 TO LEN(_aDados)  
-         IF !_aDados[ D , 1 ]
-            TNF->(DBGOTO( _aDados[ D , LEN( _aDados[D] ) ] ))
-            TNF->(RECLOCK("TNF",.F.))
+      For D := 1 TO Len(_aDados)  
+         If !_aDados[ D , 1 ]
+            TNF->(DBGoTo( _aDados[ D , Len( _aDados[D] ) ] ))
+            TNF->(RecLock("TNF",.F.))
             TNF->(DBDELETE())
             nConta++
-         ENDIF
-      NEXT   
+         EndIf
+      Next   
       
-      U_ITMSG(ALLTRIM(STR(nConta))+" REGISTROS APAGADOS COM SUCESSO",'Atenção!',,2)
+      U_ITMsg(AllTrim(Str(nConta))+" REGISTROS APAGADOS COM SUCESSO",'Atenção!',,2)
       
-      IF LEN(_aDados) <> nConta
-         EXIT
-      ENDIF
+      If Len(_aDados) <> nConta
+         Exit
+      EndIf
 
-   ENDIF
+   EndIf
 
-   RETURN .F.
+   Return .F.
 
-ENDDO
+EndDo
 
-nSizeSI3 := If((TAMSX3("I3_CUSTO")[1]) < 1,9,(TAMSX3("I3_CUSTO")[1]))
-nSizeSRJ := If((TAMSX3("RJ_FUNCAO")[1]) < 1,4,(TAMSX3("RJ_FUNCAO")[1])) 
+nSizeSI3 := If((TamSX3("I3_CUSTO")[1]) < 1,9,(TamSX3("I3_CUSTO")[1]))
+nSizeSRJ := If((TamSX3("RJ_FUNCAO")[1]) < 1,4,(TamSX3("RJ_FUNCAO")[1])) 
 
 
 
@@ -200,11 +189,11 @@ nSizeSRJ := If((TAMSX3("RJ_FUNCAO")[1]) < 1,4,(TAMSX3("RJ_FUNCAO")[1]))
 // Verifica as perguntas selecionadas                           
 //=======================================================================
 
-pergunte(cPerg,.F.)
+Pergunte(cPerg,.F.)
 MV_PAR01 := '      '
 MV_PAR02 := 'ZZZZZZ'
-MV_PAR03 := STOD('19900101')
-MV_PAR04 := STOD('20301231')
+MV_PAR03 := SToD('19900101')
+MV_PAR04 := SToD('20301231')
 MV_PAR05 := 1
 MV_PAR06 := '     '
 MV_PAR07 := 1
@@ -213,26 +202,26 @@ MV_PAR09 := '      '
 MV_PAR10 := 'ZZZZZZ'
 MV_PAR11 := 2
 MV_PAR12 := 1
-MV_PAR13 := STOD('19900101')
-MV_PAR14 := STOD('20301231')
-MV_PAR15 := XFILIAL("TNF")
-MV_PAR16 := XFILIAL("TNF")
+MV_PAR13 := SToD('19900101')
+MV_PAR14 := SToD('20301231')
+MV_PAR15 := xFilial("TNF")
+MV_PAR16 := xFilial("TNF")
 MV_PAR17 := 1
 MV_PAR18 := 2
 
 //=======================================================================
 // Variaveis utilizadas para parametros                                     
-// mv_par01             // De Funcionario                                   
-// mv_par02             // Ate Funcionario                                  
-// mv_par03             // De Data Entrega                                  
-// mv_par04             // Ate Data Entrega                                 
-// mv_par05             // So nao Impresos / Todos / Ultima retirada        
-// mv_par06             // Termo de Responsabilidade                        
-// mv_par07             // Duas vias                                        
-// mv_par08             // Ordenar por                                      
-// mv_par09             // De Centro de Custo                               
-// mv_par10             // Ate Centro de Custo                              
-// mv_par11             // Considerar funcionarios demitidos                
+// MV_PAR01             // De Funcionario                                   
+// MV_PAR02             // Ate Funcionario                                  
+// MV_PAR03             // De Data Entrega                                  
+// MV_PAR04             // Ate Data Entrega                                 
+// MV_PAR05             // So nao Impresos / Todos / Ultima retirada        
+// MV_PAR06             // Termo de Responsabilidade                        
+// MV_PAR07             // Duas vias                                        
+// MV_PAR08             // Ordenar por                                      
+// MV_PAR09             // De Centro de Custo                               
+// MV_PAR10             // Ate Centro de Custo                              
+// MV_PAR11             // Considerar funcionarios demitidos                
 //                            1 - Sim                                       
 //                            2 - Nao                                       
 //=======================================================================
@@ -256,7 +245,7 @@ EndIf
     Set Filter to
     Return
 
-Endif
+EndIf
 
 SetDefault(aReturn,_cString)
 
@@ -267,7 +256,7 @@ EndIf
    Set Filter to
    Return
 
-Endif
+EndIf
 
 RptStatus({|lEnd| RMDT001R(@lEnd,_cwnrel,titulo,tamanho)},titulo)
 
@@ -275,7 +264,7 @@ If Select("QRYTNF") > 0
 	QRYTNF->( DBCloseArea() )
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -284,14 +273,11 @@ Return
 Programa----------: RMDT001R
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 01/09/2015
-===============================================================================================================================
 Descrição---------: Chamada do Relat¢rio 
-===============================================================================================================================
 Parametros--------: 	lEnd - controle de sucesso do relatório
 						_cwnrel - objeto de impressão
 						titulo - Título do relatório
 						tamanho - se é condensado ou não
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -300,53 +286,53 @@ Static Function RMDT001R(lEnd,_cwnrel,titulo,tamanho)
 //=======================================================================
 // Define Variaveis                                             
 //=======================================================================
-LOCAL _cCC := ""
+Local _cCC := ""
 
 //=======================================================================
 // Variaveis para controle do cursor de progressao do relatorio 
 //=======================================================================
-LOCAL _nTotRegs := 0
+Local _nTotRegs := 0
 
 //=======================================================================
 // Variaveis locais exclusivas deste programa                   
 //=======================================================================
-LOCAL _aDBF := {}
+Local _aDBF := {}
 
 //=======================================================================
 // Contadores de linha e pagina                                 
 //=======================================================================
-PRIVATE li := 80 ,m_pag := 1
-PRIVATE lCPONumcap := .t.,lCPODtVenc := .t.
+Private li := 80 ,m_pag := 1
+Private lCPONumcap := .T.,lCPODtVenc := .T.
 
 If TNF->(FieldPos("TNF_NUMCAP")) <= 0
 
-	lCPONumcap := .f.
+	lCPONumcap := .F.
 
-Endif
+EndIf
 
-AADD(_aDBF,{"FUNCI"  , "C", 06,0})           
-AADD(_aDBF,{"NOME"   , "C", 40,0})           
-AADD(_aDBF,{"RG"     , "C", 15,0})           
-AADD(_aDBF,{"NASC"   , "D", 08,0})           
-AADD(_aDBF,{"ADMIS"  , "D", 08,0})           
-AADD(_aDBF,{"IDADE"  , "C", 03,0})           
-AADD(_aDBF,{"CC"     , "C", nSizeSI3,0})
-AADD(_aDBF,{"DESCC"  , "C", 60,0})  
-AADD(_aDBF,{"FUNCAO" , "C", nSizeSRJ,0})
-AADD(_aDBF,{"DESCFUN", "C", 20,0})   
-AADD(_aDBF,{"CODEPI" , "C", 15,0}) 
-AADD(_aDBF,{"DESEPI" , "C", 40,0}) 
-AADD(_aDBF,{"DTENT"  , "D", 08,0}) 
-AADD(_aDBF,{"HRENT"  , "C", 05,0}) 
-AADD(_aDBF,{"QTDE"   , "N", 06,2}) 
-AADD(_aDBF,{"DEV"    , "C", 01,0}) 
-AADD(_aDBF,{"NUMCAP" , "C", 12,0}) 
-AADD(_aDBF,{"NUMCRI" , "C", 12,0})
-AADD(_aDBF,{"NUMCRF" , "C", 12,0})
-AADD(_aDBF,{"DTDEVO" , "D", 08,0})
-AADD(_aDBF,{"NUMSA"  , "C", 12,0})
-AADD(_aDBF,{"ITEMSA" , "C", 12,0}) 
-AADD(_aDBF,{"NRRECNO", "N", 10,0})
+aAdd(_aDBF,{"FUNCI"  , "C", 06,0})           
+aAdd(_aDBF,{"NOME"   , "C", 40,0})           
+aAdd(_aDBF,{"RG"     , "C", 15,0})           
+aAdd(_aDBF,{"NASC"   , "D", 08,0})           
+aAdd(_aDBF,{"ADMIS"  , "D", 08,0})           
+aAdd(_aDBF,{"IDADE"  , "C", 03,0})           
+aAdd(_aDBF,{"CC"     , "C", nSizeSI3,0})
+aAdd(_aDBF,{"DESCC"  , "C", 60,0})  
+aAdd(_aDBF,{"FUNCAO" , "C", nSizeSRJ,0})
+aAdd(_aDBF,{"DESCFUN", "C", 20,0})   
+aAdd(_aDBF,{"CODEPI" , "C", 15,0}) 
+aAdd(_aDBF,{"DESEPI" , "C", 40,0}) 
+aAdd(_aDBF,{"DTENT"  , "D", 08,0}) 
+aAdd(_aDBF,{"HRENT"  , "C", 05,0}) 
+aAdd(_aDBF,{"QTDE"   , "N", 06,2}) 
+aAdd(_aDBF,{"DEV"    , "C", 01,0}) 
+aAdd(_aDBF,{"NUMCAP" , "C", 12,0}) 
+aAdd(_aDBF,{"NUMCRI" , "C", 12,0})
+aAdd(_aDBF,{"NUMCRF" , "C", 12,0})
+aAdd(_aDBF,{"DTDEVO" , "D", 08,0})
+aAdd(_aDBF,{"NUMSA"  , "C", 12,0})
+aAdd(_aDBF,{"ITEMSA" , "C", 12,0}) 
+aAdd(_aDBF,{"NRRECNO", "N", 10,0})
 
 If Select("TRB") <> 0
 	TRB->( DBCloseArea() )
@@ -354,7 +340,7 @@ EndIf
 
 _otemp := FWTemporaryTable():New( "TRB", _aDBF )
 
-If mv_par12 == 1  //Cod EPI
+If MV_PAR12 == 1  //Cod EPI
 
 	_otemp:AddIndex( "01", {"FUNCI","CODEPI","DTENT"} )
 	_otemp:AddIndex( "02", {"NOME","CODEPI","DTENT"} )
@@ -368,47 +354,47 @@ Else  //Nome EPI
 	_otemp:AddIndex( "03", {"CC","FUNCI","DESEPI","DTENT"} )
 	_otemp:AddIndex( "04", {"DESCC","FUNCI","DESEPI","DTENT"} )
 
-Endif
+EndIf
 
 _otemp:Create()
 
 //=======================================================================
 // Verifica se deve comprimir ou nao                            
 //=======================================================================
-_ntipo  := IIF(aReturn[4]==1,15,18)
+_ntipo  := IIf(aReturn[4]==1,15,18)
 
 
 Count to _nTotRegs
 
 SetRegua(_nTotRegs)
 
-QRYTNF->(DbGoTop())
+QRYTNF->(DBGoTop())
 
 //=======================================================================
 // Efeuta a leitura dos dados da tabela TNF, com base no resultado da
 // query para ler os  EPI's Entregues aos Funcionarios.
 //=======================================================================
-Do While ! QRYTNF->(Eof())  
+While ! QRYTNF->(Eof())  
    
-   TNF->(DbGoTo(QRYTNF->NRRECNO))
+   TNF->(DBGoTo(QRYTNF->NRRECNO))
 	
 	IncRegua()
 	
-	DbSelectArea("SRA")
-	SRA->(DbSetOrder(1))
-	SRA->(DbSeek(xFilial("SRA")+TNF->TNF_MAT))
+	DBSelectArea("SRA")
+	SRA->(DBSetOrder(1))
+	SRA->(DBSeek(xFilial("SRA")+TNF->TNF_MAT))
 	
 	_cCC := SRA->RA_CC
  	cFuncMat := TNF->TNF_MAT
  	
-   	dbSelectArea("TNF")       
-	Reclock("TNF",.f.)
+   	DBSelectArea("TNF")       
+	RecLock("TNF",.F.)
 	TNF->TNF_DTRECI := Date()
-	MsUnlock("TNF")
+	MSUnLock("TNF")
 	
   	U_RMDT001G()
   	 
-	QRYTNF->(DbSkip())	
+	QRYTNF->(DBSkip())	
 	
 EndDo
 
@@ -418,7 +404,7 @@ EndIf
 
 u_RMDT001I() 
 
-DBSELECTAREA("TRB")
+DBSelectArea("TRB")
 USE
       
 //=======================================================================
@@ -436,24 +422,21 @@ If aReturn[5] = 1
  	dbCommitAll()
   	OurSpool(_cwnrel)
 
-Endif
+EndIf
 
 MS_FLUSH()
-DBSELECTAREA("TNF")
-DBSETORDER(2)
+DBSelectArea("TNF")
+DBSetOrder(2)
 
-Return NIL
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: RMDT001S
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 01/09/2015
-===============================================================================================================================
 Descrição---------: Incrementa Linha e Controla Salto de Pagina
-===============================================================================================================================
 Parametros--------: 	Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -500,33 +483,30 @@ xxxxxxxxxxxxxxx  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  xx/xx/xx  xx:xx  xxx,xx  xxx
 Programa----------: RMDT001I
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 01/09/2015
-===============================================================================================================================
 Descrição---------: Impressão do Relatório
-===============================================================================================================================
 Parametros--------: 	Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function RMDT001I()
 
 Local linhaCorrente
-Local _lPrimvez := .t.
+Local _lPrimvez := .T.
 Local _cDt := ""
 
-DBSELECTAREA("TRB")
-If mv_par08 == 1  //Matricula
-	dbSetOrder(1)
-Elseif mv_par08 == 2  //Nome Funcionario
-	dbSetOrder(2)
-Elseif mv_par08 == 3  //Cod. C. Custo
-	dbSetOrder(3)
-Elseif mv_par08 == 4  //Nome C. Custo
-	dbSetOrder(4)	
-Endif
+DBSelectArea("TRB")
+If MV_PAR08 == 1  //Matricula
+	DBSetOrder(1)
+ElseIf MV_PAR08 == 2  //Nome Funcionario
+	DBSetOrder(2)
+ElseIf MV_PAR08 == 3  //Cod. C. Custo
+	DBSetOrder(3)
+ElseIf MV_PAR08 == 4  //Nome C. Custo
+	DBSetOrder(4)	
+EndIf
 
-Dbgotop()
-DO WHILE !EOF()
+DBGoTop()
+While !Eof()
 
 	CFUNC := TRB->FUNCI
 	nVolta := 0
@@ -534,7 +514,7 @@ DO WHILE !EOF()
 	@ li,000 PSay " "+Replicate("_",131)
 	RMDT001S()
 	@ li,000 PSay "|"
-	@ li,001 Psay STR0027+ Substr(SM0->M0_NOMECOM,1,60) //"Empresa...:"
+	@ li,001 Psay STR0027+ SubStr(SM0->M0_NOMECOM,1,60) //"Empresa...:"
 	@ li,083 Psay "CGC..:"+ SM0->M0_CGC
 	@ li,132 PSay "|"
 	RMDT001S()
@@ -560,12 +540,12 @@ DO WHILE !EOF()
 	RMDT001S()
 	@ li,000 PSay STR0012 //"|Centro de Custo.:"
 
-	@ li,019 PSay Alltrim(TRB->CC) +" - "+ Alltrim(TRB->DESCC)
+	@ li,019 PSay AllTrim(TRB->CC) +" - "+ AllTrim(TRB->DESCC)
 	@ li,132 PSay "|"
 	
 	RMDT001S()                                 
 	@ li,000 PSay STR0013 //"|Funcao..........:"
-	@ li,019 PSay Alltrim(TRB->FUNCAO) +" - "+ Alltrim(TRB->DESCFUN) PICTURE "@!"
+	@ li,019 PSay AllTrim(TRB->FUNCAO) +" - "+ AllTrim(TRB->DESCFUN) PICTURE "@!"
 	@ li,132 PSay "|"
 	
 	RMDT001S()
@@ -577,8 +557,8 @@ DO WHILE !EOF()
 	@ li,121 PSay TRB->IDADE +" "+ STR0039 //"anos"
 	@ li,132 PSay "|"
 	
-	llinha := .f. 
-	lFirst := .t.
+	llinha := .F. 
+	lFirst := .T.
 	
 	RMDT001S()
 	@ li,000 PSay "|"
@@ -603,19 +583,19 @@ DO WHILE !EOF()
 	@ li,132 Psay "|"    
 	RMDT001S()
 	@ li,000 Psay "|"
-	DbSelectArea("TN3")
+	DBSelectArea("TN3")
 
 	If TN3->(FieldPos("TN3_NUMCRF")) > 0
 
 		@ li,002 PSay STR0033  //"Num. CRF"
-		lLinha := .t.
+		lLinha := .T.
 
 	EndIf
 
 	If TN3->(FieldPos("TN3_NUMCRI")) > 0
 
 		@ li,016 PSay STR0034  //"Num. CRI"
-		lLinha := .t.
+		lLinha := .T.
 
 	EndIf
 	
@@ -624,11 +604,11 @@ DO WHILE !EOF()
 	@ li,044 PSay "Item"
 
 
-	DBSELECTAREA('TRB')
+	DBSelectArea('TRB')
 
-	While !Eof() .AND. TRB->FUNCI == CFUNC
+	While !Eof() .And. TRB->FUNCI == CFUNC
 
-			If lLinha .and. lFirst
+			If lLinha .And. lFirst
 
 				@ li,132 Psay "|"
 				RMDT001S()
@@ -643,36 +623,36 @@ DO WHILE !EOF()
 
 			EndIf	
 
-			lFirst := .f.
-			_cDt := Strzero(Day(TRB->DTENT),2)+"/"+Strzero(Month(TRB->DTENT),2)+"/"+Substr(Str(Year(TRB->DTENT),4),3,2)
+			lFirst := .F.
+			_cDt := StrZero(Day(TRB->DTENT),2)+"/"+StrZero(Month(TRB->DTENT),2)+"/"+SubStr(Str(Year(TRB->DTENT),4),3,2)
 			
 			@ li,001 PSAY TRB->CODEPI
-			@ li,017 PSay substr(alltrim(TRB->DESEPI),1,32) PICTURE "@!"
+			@ li,017 PSay SubStr(AllTrim(TRB->DESEPI),1,32) PICTURE "@!"
 			@ li,053 PSay _cDt PICTURE "99/99/99"
 			@ li,063 PSay TRB->HRENT PICTURE "99:99"
 			@ li,070 PSay TRB->QTDE  PICTURE "@E 999.99"
 
-			IF TRB->DEV = "1"
+			If TRB->DEV = "1"
 
 				@ li,078 PSAY STR0021 //"SIM"
 
-			ELSE
+			Else
 
 				@ li,078 PSAY STR0022  //"NAO"
 
-			ENDIF
+			EndIf
 
-			_cDt := Strzero(Day(TRB->DTDEVO),2)+"/"+Strzero(Month(TRB->DTDEVO),2)+"/"+Substr(Str(Year(TRB->DTDEVO),4),3,2)
+			_cDt := StrZero(Day(TRB->DTDEVO),2)+"/"+StrZero(Month(TRB->DTDEVO),2)+"/"+SubStr(Str(Year(TRB->DTDEVO),4),3,2)
 
 			If TNF->(FieldPos("TNF_DTDEVO")) > 0
 
 				@ li,083 PSay _cDt PICTURE "99/99/99"
 
-			ENDIF			
+			EndIf			
 
 			If !Empty(TRB->NUMCAP)
 
-				@ li,093 PSay Alltrim(SUBSTR(TRB->NUMCAP,1,12))    
+				@ li,093 PSay AllTrim(SubStr(TRB->NUMCAP,1,12))    
 
 			EndIf
 
@@ -684,46 +664,46 @@ DO WHILE !EOF()
 
 			EndIf	
 
-			DbSelectArea("TN3")
+			DBSelectArea("TN3")
 
-			IF TN3->(FieldPos("TN3_NUMCRF") > 0)
+			If TN3->(FieldPos("TN3_NUMCRF") > 0)
 
 				@ li,002 PSay TRB->NUMCRF
 
-			ENDIF
+			EndIf
 
-			IF TN3->(FieldPos("TN3_NUMCRI") > 0)
+			If TN3->(FieldPos("TN3_NUMCRI") > 0)
 
 				@ li,016 PSay TRB->NUMCRI
 
-			ENDIF
+			EndIf
 			
 			//@ li,030 PSay TRB->NUMSA  
 			//@ li,044 PSay TRB->ITEMSA 
 			
 			_nRegAtu := TNF->(Recno()) 	 
-			TNF->(DbGoTo(TRB->NRRECNO)) 
+			TNF->(DBGoTo(TRB->NRRECNO)) 
 			   
             @ li,030 PSay TNF->TNF_NUMSA   
 			@ li,044 PSay TNF->TNF_ITEMSA			
 			
-			TNF->(DbGoTo(_nRegAtu)) 
+			TNF->(DBGoTo(_nRegAtu)) 
 
 			@ li,107 PSay "Ass.: _________________"
 			@ li,132 PSay "|"
 			nVolta++
-			DBSELECTAREA("TRB")
-			DBSKIP()
+			DBSelectArea("TRB")
+			DBSkip()
 
-	ENDDO
+	EndDo
 
-	DBSKIP(-1)
+	DBSkip(-1)
 	    	
 	//termo
-	dbSelectArea("TMZ")
-	dbSetOrder(01)
+	DBSelectArea("TMZ")
+	DBSetOrder(01)
 
-	If dbSeek(xFilial("TMZ")+MV_PAR06)
+	If DBSeek(xFilial("TMZ")+MV_PAR06)
 
 		RMDT001S()
 		@ li,000 PSay "|"
@@ -743,17 +723,17 @@ DO WHILE !EOF()
 
 			If lPrimeiro
 
-				if !empty((MemoLine(TMZ->TMZ_DESCRI,56,linhaCorrente)))
+				If !Empty((MemoLine(TMZ->TMZ_DESCRI,56,linhaCorrente)))
 
 					@ li,001 PSAY (MemoLine(TMZ->TMZ_DESCRI,130,linhaCorrente))
 					@ li,132 PSay "|"
-					lPrimeiro := .f.
+					lPrimeiro := .F.
 
 				Else
 
 					Exit
 
-				Endif
+				EndIf
 
 			Else
 
@@ -771,7 +751,7 @@ DO WHILE !EOF()
 
 			@ li,000 PSay "|"
 
-		Endif
+		EndIf
 
 		@ li,132 PSay "|"
 
@@ -804,17 +784,17 @@ DO WHILE !EOF()
 	@ li,132 PSay "|"        
 	li := 80
 
-	If mv_par07 == 2 .and. _lPrimvez
+	If MV_PAR07 == 2 .And. _lPrimvez
 
-		DbSelectArea("TRB")
-		DbSkip(-(nVolta-1))
-		_lPrimvez := .f.
+		DBSelectArea("TRB")
+		DBSkip(-(nVolta-1))
+		_lPrimvez := .F.
 
 	Else
 
-		DbSelectArea("TRB")     
-		DbSkip()
-		_lPrimvez := .t.
+		DBSelectArea("TRB")     
+		DBSkip()
+		_lPrimvez := .T.
 
 	EndIf
 	
@@ -827,19 +807,16 @@ Return
 Programa----------: RMDT001G
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 01/09/2015
-===============================================================================================================================
 Descrição---------: Armazena informacoes de um recibo para impressao.
-===============================================================================================================================
 Parametros--------: 	Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function RMDT001G()
 
 DBSelectArea("TN3")
-TN3->(DBSetorder(1))
-TN3->(DBSeek(XFILIAL("TN3")+TNF->TNF_FORNEC+TNF->TNF_LOJA+TNF->TNF_CODEPI+TNF->TNF_NUMCAP))
+TN3->(DBSetOrder(1))
+TN3->(DBSeek(xFilial("TN3")+TNF->TNF_FORNEC+TNF->TNF_LOJA+TNF->TNF_CODEPI+TNF->TNF_NUMCAP))
 
 DBSelectArea("TRB")
 TRB->(DbAppend())
@@ -848,11 +825,11 @@ TRB->NOME     := SubStr(NgSeek('SRA',cFuncMat,1,'SRA->RA_NOME'),1,40)
 TRB->RG       := NgSeek('SRA',cFuncMat,1,'SRA->RA_RG')
 TRB->NASC     := NgSeek('SRA',cFuncMat,1,'SRA->RA_NASC')
 TRB->ADMIS    := NgSeek('SRA',cFuncMat,1,'SRA->RA_ADMISSA')
-TRB->IDADE    := Alltrim( Str( YEAR(DATE())-YEAR(TRB->NASC),3 ) )
+TRB->IDADE    := AllTrim( Str( YEAR(DATE())-YEAR(TRB->NASC),3 ) )
 TRB->CC       := NgSeek('SRA',cFuncMat,1,'SRA->RA_CC')
 TRB->DESCC    := NgSeek('SI3',TRB->CC,1,'SI3->I3_DESC')
 TRB->FUNCAO   := TNF->TNF_CODFUN
-TRB->DESCFUN  := Alltrim (NgSeek('SRJ',TRB->FUNCAO,1,'SRJ->RJ_DESC'))       
+TRB->DESCFUN  := AllTrim (NgSeek('SRJ',TRB->FUNCAO,1,'SRJ->RJ_DESC'))       
 TRB->CODEPI   := TNF->TNF_CODEPI
 TRB->DESEPI   := NgSeek('SB1',TNF->TNF_CODEPI,1,'SB1->B1_DESC')
 TRB->DTENT    := TNF->TNF_DTENTR			 
@@ -862,24 +839,24 @@ TRB->DEV      := TNF->TNF_INDDEV
 TRB->NUMCAP   := If(lCPONumcap,TNF->TNF_NUMCAP,TN3->TN3_NUMCAP)
 TRB->NRRECNO  := TNF->(Recno())
 
-If  empty(TNF->TNF_NUMSA)
+If  Empty(TNF->TNF_NUMSA)
 	//grava SCP gravada nessa liberação e controla item da SCP
 	TRB->NUMSA 	:= _cUlSC+"*"
-	TRB->ITEMSA	:= strzero(val(_cULIT),2)
-	_cUlit := strzero(val(_cULIT)+1,2)
+	TRB->ITEMSA	:= StrZero(Val(_cULIT),2)
+	_cUlit := StrZero(Val(_cULIT)+1,2)
 Else
 	//Grava SCP já salva anteriormente
 	TRB->NUMSA		:= TNF->TNF_NUMSA
-	TRB->ITEMSA	:= strzero(val(_cULIT),2)
-	_cUlit := strzero(val(_cULIT)+1,2)
+	TRB->ITEMSA	:= StrZero(Val(_cULIT),2)
+	_cUlit := StrZero(Val(_cULIT)+1,2)
 	_cUlSC := TNF->TNF_NUMSA
 EndIf
 
-IF TN3->(FieldPos("TN3_NUMCRI")) > 0 
+If TN3->(FieldPos("TN3_NUMCRI")) > 0 
 	TRB->NUMCRI    := TN3->TN3_NUMCRI
 EndIf
 
-IF TN3->(FieldPos("TN3_NUMCRF")) > 0 
+If TN3->(FieldPos("TN3_NUMCRF")) > 0 
 	TRB->NUMCRF    := TN3->TN3_NUMCRF
 EndIf
 

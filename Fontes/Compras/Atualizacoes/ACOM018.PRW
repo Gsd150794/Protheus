@@ -11,10 +11,8 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes e Defines da Rotina. 
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
+
 /*
 ===============================================================================================================================
 Programa----------: ACOM018
@@ -26,62 +24,63 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function ACOM018()
+
 Local _aOrd := SaveOrd({"SC1"})
 
 //Valida se pedido de compra não está eliminado por residuo
 If SC7->C7_RESIDUO == 'S'
 
-	messagebox("Pedido eliminado por residuo!", "Alerta", 48)
+	MessageBox("Pedido eliminado por residuo!", "Alerta", 48)
 	Return
 	
-Endif
+EndIf
 
 //Valida se pedido já teve entrega
-If SC7->C7_QUJE > 0 .OR. SC7->C7_QTDACLA > 0
+If SC7->C7_QUJE > 0 .Or. SC7->C7_QTDACLA > 0
 
-	messagebox("Pedido já teve entregas realizadas!", "Alerta", 48)
+	MessageBox("Pedido já teve entregas realizadas!", "Alerta", 48)
 	Return
 	
-Endif
+EndIf
 
 
 //Valida se produto posicionado é serviço
-If posicione("SB1",1,xfilial("SB1")+SC7->C7_PRODUTO,"B1_GRUPO") != '1000'
+If Posicione("SB1",1,xFilial("SB1")+SC7->C7_PRODUTO,"B1_GRUPO") != '1000'
 
-	messagebox("Produto não é tipo serviço!", "Alerta", 48)
+	MessageBox("Produto não é tipo serviço!", "Alerta", 48)
 	
 Else
 	
 	If Pergunte("ACOM018",.T.)
 
-		If posicione("SB1",1,xfilial("SB1")+Alltrim(MV_PAR01),"B1_GRUPO") != '1000'
+		If Posicione("SB1",1,xFilial("SB1")+AllTrim(MV_PAR01),"B1_GRUPO") != '1000'
 		
-			Messagebox("Produto escolhido não é tipo serviço!", "Alerta", 48)
+			MessageBox("Produto escolhido não é tipo serviço!", "Alerta", 48)
 			
 		Else
             //==============================================================================================
             // Atualizando a tabela SC7
             //==============================================================================================
-			Reclock("SC7",.F.)
-			SC7->C7_PRODUTO := Alltrim(MV_PAR01)
+			RecLock("SC7",.F.)
+			SC7->C7_PRODUTO := AllTrim(MV_PAR01)
 			SC7->C7_DESCRI	:= SB1->B1_DESC
 			SC7->C7_I_DESCD	:= SB1->B1_I_DESCD
-			SC7->( Msunlock() )
+			SC7->( MSUnLock() )
 			
 			//==============================================================================================
             // Atualizando a tabela SC1
             //==============================================================================================
-            SC1->(DbSetOrder(1)) // C1_FILIAL+C1_NUM+C1_ITEM 
+            SC1->(DBSetOrder(1)) // C1_FILIAL+C1_NUM+C1_ITEM 
             If SC1->(DBSeek(SC7->(C7_FILIAL+C7_NUMSC+C7_ITEMSC)))
-               SC1->(Reclock("SC1",.F.))
-			   SC1->C1_PRODUTO := Alltrim(MV_PAR01)
+               SC1->(RecLock("SC1",.F.))
+			   SC1->C1_PRODUTO := AllTrim(MV_PAR01)
 			   SC1->C1_DESCRI  := SB1->B1_DESC			   
-			   SC1->( Msunlock() )
+			   SC1->( MSUnLock() )
             EndIf
             			
-			Messagebox("Produto atualizado com sucesso!", "Alerta", 64)
+			MessageBox("Produto atualizado com sucesso!", "Alerta", 64)
 			
-		Endif
+		EndIf
 		
 		//===========================================================================
        // Grava log de acesso a rotina de alteração de serviço do pedido de compras. 
@@ -89,7 +88,7 @@ Else
        U_ITLOGACS('ACOM018')
 		
 		
-	Endif
+	EndIf
 
 EndIf
 

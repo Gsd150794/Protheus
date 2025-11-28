@@ -21,19 +21,19 @@ Data da Criacao---: 14/07/2023
 Descrição---------: Chamado 44097. P. E. antes de operações de Inclusão/Exclusão/Cópia/Alteração no Pedido de Vendas.
 ------------------: Executa da Função A410Grava() dentro do programa MATN410.PRW 
 ===============================================================================================================================
-Parametros--------: PARAMIXB[1] = indica a operação: 1 - inclusão / 2 - alteração / 3 - exclusão	
+Parametros--------: ParamIXB[1] = indica a operação: 1 - inclusão / 2 - alteração / 3 - exclusão	
 ===============================================================================================================================
 Retorno-----------: .T. => O programa não faz nada com o retorno.
 ===============================================================================================================================
 */
 User Function M410AGRV()
-Local _nOpc:= PARAMIXB[1]  // indica a operação: 1 - inclusão / 2 - alteração / 3 - exclusão	
+Local _nOpc:= ParamIXB[1]  // indica a operação: 1 - inclusão / 2 - alteração / 3 - exclusão	
 Local _nX
 Local _nColPr,_nColCF,_nColCS,_nColOC,_nColOF
 Local _cITFLNT2104,_cITGPNT2104,_cITCFNT2104,_cITCSNT2104
 
 If  _nOpc == 3// SE É EXCLUSAO NÃO FAZ NADA
-   RETURN .T.
+   Return .T.
 EndIf
 
 _nColPr:=aScan( aHeader , {|x| AllTrim( Upper(x[2]) ) == 'C6_PRODUTO' } ) 
@@ -55,16 +55,16 @@ _cITCSNT2104:= U_ITGETMV("ITCSNT2104","010")           //Parâmetro para definir 
 // // - C6_OBSFCMP --> "cBenef"
 // // - C6_OBSFISC --> "PR830001"
 
-IF xFilial("SC5") $ _cITFLNT2104
+If xFilial("SC5") $ _cITFLNT2104
    For _nX := 1 To Len( aCols )
-       IF LEFT(aCols[_nX,_nColPr],4) $ _cITGPNT2104 .AND.;
-	      ALLTRIM(aCols[_nX,_nColCF]) $ _cITCFNT2104 .AND. ALLTRIM(aCols[_nX,_nColCS]) $ _cITCSNT2104
+       If LEFT(aCols[_nX,_nColPr],4) $ _cITGPNT2104 .AND.;
+	      AllTrim(aCols[_nX,_nColCF]) $ _cITCFNT2104 .And. AllTrim(aCols[_nX,_nColCS]) $ _cITCSNT2104
    
           aCols[_nX,_nColOC] := "cBenef"
           aCols[_nX,_nColOF] := "PR830001"
-       ENDIF
-   NEXT
-ENDIF
+       EndIf
+   Next
+EndIf
 
 Return( .T. )
 

@@ -4,13 +4,13 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |27/06/2025| Chamado 50617. Revisões diversas visando padronizar os fontes
 Lucas Borges  |23/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
 Lucas Borges  |01/08/2025| Chamado 51453. Substituir função EncodeUtf8 por FWHttpEncode
+Lucas Borges  |14/09/2025| Chamado 51799. Implementada função para validar ambiente de teste totvs.framework.environment.Type.get()
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 Static _cUrl As Character
 Static _cKey As Character
@@ -57,7 +57,7 @@ oJsonFunc   := Nil
 
 _aSM0       := FWLoadSM0()
 
-If SuperGetMV("IT_AMBTEST",.F.,.T.)
+If totvs.framework.environment.Type.get() <> '1'
 	_cUrl := ""
 	_cKey := ""
 Else
@@ -77,7 +77,7 @@ If _lScheduler
 	MPON002INT(oProc)
 Else
 
-	lGP010   := FwIsInCallStack("U_GP010AGRV") //Inclusão, Alteração ou Exclusão de Funcionario
+	lGP010   := FWIsInCallStack("U_GP010AGRV") //Inclusão, Alteração ou Exclusão de Funcionario
 	_cFilial := FWCodFil()
 
 	If MPON002VF(_lScheduler) //valida se a Filial Existe no Kairos DIMEP
@@ -152,7 +152,7 @@ Local oJsonFil 	:= Nil As Object
 Local _nPos 	:= 0 As Numeric
 Local _lRet 	:= .F. As Logical
 
-If (_nPos := ASCAN(_aSM0,{|A|A[2]==_cFilial})) <> 0
+If (_nPos := aScan(_aSM0,{|A|A[2]==_cFilial})) <> 0
 
 	_cIdent     := AllTrim(_aSM0[_nPos][18]) //CNPJ da Filial Posicionada
 
@@ -279,9 +279,9 @@ Else
 EndIf
 
 If oProc <> NIL
-	If lGP010 .AND. Len(aLogERR) > 0
+	If lGP010 .And. Len(aLogERR) > 0
 		lMostralog := .T.
-	ElseIf !lGP010 .AND. Len(aLog) > 0
+	ElseIf !lGP010 .And. Len(aLog) > 0
 		lMostralog := .T.
 	Else
 		lMostralog := .F.            
@@ -289,7 +289,7 @@ If oProc <> NIL
 
 	If lMostralog
 		_cTitAux := "Log de processamento de integrações Kairos DIMEP"
-		_cMsgTop := Iif(lGP010,"Verifique as falhas de gravações de acordo com o Log:","Log de processamento")
+		_cMsgTop := IIf(lGP010,"Verifique as falhas de gravações de acordo com o Log:","Log de processamento")
 		//ITListBox( _cTitAux , _aHeader , _aCols , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab , bDblClk , _aColXML , bCondMarca,_bLegenda                      ,_lHasOk,_bHeadClk,_aSX1)
 		U_ITListBox( _cTitAux , aCab     , aLog   , .F.      , 2      , _cMsgTop ,          ,         ,         ,     ,        ,          ,       ,         ,          ,           , {|C,L|U_MGPE026L(C,L)}        , .F.   ,         ,     )
 	EndIf
@@ -302,7 +302,7 @@ Else
 	
 	_cLinha   := StrTran(_cLinha,".",",")
 	_cDir     := "\data\Italac\mpon002\"
-	_cFileNome:= _cDir + "mpon002_"+DToS(DATE())+"_"+STRTRAN(TIME(),":","_")+".csv"
+	_cFileNome:= _cDir + "mpon002_"+DToS(DATE())+"_"+StrTran(TIME(),":","_")+".csv"
 	
 	_oFWriter:=FWFileWriter():New(_cFileNome , .T.)
 	_oFWriter:Write(_cLinha)
@@ -337,7 +337,7 @@ aHeader := MPON002CH()
 
 oJsonFunc := nil
 
-If nCad = 1 .OR. nCad = 3
+If nCad = 1 .Or. nCad = 3
 	//Pesquisa se existe o Funcionario
 	cParms    := "/People/SearchPerson"
 	cBodyJson := MPON002JSO("SC")	 //Carrega o Json da Requisição conforme SRA posicionado Metodo Search Person
@@ -362,7 +362,7 @@ If nCad = 1 .OR. nCad = 3
 	EndIf
 
 	If lContinua
-		If _lRet .AND. _lModifica .AND. SRA->RA_I_DIMEP == "S" .AND. SRA->RA_SITFOLH <> "D" 
+		If _lRet .And. _lModifica .And. SRA->RA_I_DIMEP == "S" .And. SRA->RA_SITFOLH <> "D" 
 			cTipo := "Alteração"
 			If MPON002VA() //Verifica se Altera ou Não
 				cParms    := "/People/ChangePerson"
@@ -372,31 +372,31 @@ If nCad = 1 .OR. nCad = 3
 			Else
 				lGravaLog := .F.
 			EndIf
-		ElseIf !_lRet .AND. _lInclui .AND. SRA->RA_I_DIMEP == "S" .AND. SRA->RA_SITFOLH <> "D"
+		ElseIf !_lRet .And. _lInclui .And. SRA->RA_I_DIMEP == "S" .And. SRA->RA_SITFOLH <> "D"
 			cTipo     := "Inclusão"
 			cBodyJson := MPON002JSO("SP")	//Carrega o Json da Requisição conforme SRA posicionado
 			cParms    := "/People/SavePerson" 
 			_lRet     := MPON002REST(_cUrl,cParms,aHeader,cBodyJson,@cResult)
 			lGravaLog := .T.
-		ElseIf _lRet .AND. _lDemite .AND. SRA->RA_I_DIMEP == "S" .AND. SRA->RA_SITFOLH == "D"
+		ElseIf _lRet .And. _lDemite .And. SRA->RA_I_DIMEP == "S" .And. SRA->RA_SITFOLH == "D"
 			cTipo     := "Demissão"
 			cParms    := "/Dismiss/MarkDismiss"
 			cBodyJson := MPON002JSO("DM")	//Carrega o Json da Requisição conforme SRA posicionado
 			
 			_lRet     := MPON002REST(_cUrl,cParms,aHeader,cBodyJson,@cResult)
 			
-			If _lRet .OR. "Person already dismiss" $ cResult
+			If _lRet .Or. "Person already dismiss" $ cResult
 				SRA->(RecLock("SRA",.F.))
 				SRA->RA_I_DIMEP := "N"
-				SRA->(Msunlock())
+				SRA->(MSUnLock())
 			EndIf			
 			
 			lGravaLog := .T.
-		ElseIf !_lRet .AND. _lDemite .AND. SRA->RA_I_DIMEP == "S" .AND. SRA->RA_SITFOLH == "D"
+		ElseIf !_lRet .And. _lDemite .And. SRA->RA_I_DIMEP == "S" .And. SRA->RA_SITFOLH == "D"
 
 			SRA->(RecLock("SRA",.F.))
 			SRA->RA_I_DIMEP := "N"
-			SRA->(Msunlock())
+			SRA->(MSUnLock())
 
 			lGravaLog := .F.
 		Else
@@ -413,7 +413,7 @@ If nCad = 1 .OR. nCad = 3
 	EndIf
 EndIf
 
-If nCad = 2 .OR. nCad = 3
+If nCad = 2 .Or. nCad = 3
 	//Pesquisa se existe o Usuario
 	cParms    := "User/Search" 
 	cBodyJson := MPON002JSO("US")	 //Carrega o Json da Requisição conforme SRA posicionado Metodo Search Person
@@ -421,14 +421,14 @@ If nCad = 2 .OR. nCad = 3
 	_lRet     := MPON002REST(_cUrl,cParms,aHeader,cBodyJson,@cResult)
 	lGravaLog := .F.
 
-	If _lRet .AND. _lModifica .AND. SRA->RA_I_DIMEP == "S" .AND. SRA->RA_SITFOLH <> "D" 
+	If _lRet .And. _lModifica .And. SRA->RA_I_DIMEP == "S" .And. SRA->RA_SITFOLH <> "D" 
 		cTipo     := "Alteração"
 		cParms    := "User/Update"
 		cBodyJson := MPON002JSO("UU")	//Carrega o Json da Requisição conforme SRA posicionado
 		
 		_lRet     := MPON002REST(_cUrl,cParms,aHeader,cBodyJson,@cResult)
 		lGravaLog := .T.
-	ElseIf !_lRet .AND. _lInclui .AND. SRA->RA_I_DIMEP == "S" .AND. SRA->RA_SITFOLH <> "D"
+	ElseIf !_lRet .And. _lInclui .And. SRA->RA_I_DIMEP == "S" .And. SRA->RA_SITFOLH <> "D"
 		cTipo     := "Inclusão"
 		cParms    := "User/Create"
 		cBodyJson := MPON002JSO("UC")	//Carrega o Json da Requisição conforme SRA posicionado
@@ -474,27 +474,27 @@ Local _cPis 		:= AllTrim(SRA->RA_PIS) As Character
 Local _cSexo 		:= IIf(SRA->RA_SEXO=="M","1","2") As Character
 Local lContinua 	:= .F. As Logical
 
-If AttIsMemberOf(oJsonFunc[1], "Matricula") .AND. oJsonFunc[1]:Matricula <> Val(_cMatricula)
+If AttIsMemberOf(oJsonFunc[1], "Matricula") .And. oJsonFunc[1]:Matricula <> Val(_cMatricula)
 	lContinua := .T.
-ElseIf AttIsMemberOf(oJsonFunc[1], "Cracha") .AND. oJsonFunc[1]:Cracha <> Val(_cCracha) 
+ElseIf AttIsMemberOf(oJsonFunc[1], "Cracha") .And. oJsonFunc[1]:Cracha <> Val(_cCracha) 
 	lContinua := .T.
-ElseIf AttIsMemberOf(oJsonFunc[1], "Nome") .AND. oJsonFunc[1]:Nome <> _cNome
+ElseIf AttIsMemberOf(oJsonFunc[1], "Nome") .And. oJsonFunc[1]:Nome <> _cNome
 	lContinua := .T.
-ElseIf AttIsMemberOf(oJsonFunc[1], "Cpf") .AND. oJsonFunc[1]:Cpf <> _cCPF 
+ElseIf AttIsMemberOf(oJsonFunc[1], "Cpf") .And. oJsonFunc[1]:Cpf <> _cCPF 
 	lContinua := .T.
-ElseIf AttIsMemberOf(oJsonFunc[1], "CpfResponsavel") .AND. AllTrim(oJsonFunc[1]:CpfResponsavel) <> AllTrim(_cCPFResp) 
+ElseIf AttIsMemberOf(oJsonFunc[1], "CpfResponsavel") .And. AllTrim(oJsonFunc[1]:CpfResponsavel) <> AllTrim(_cCPFResp) 
 	lContinua := .T.
-ElseIf AttIsMemberOf(oJsonFunc[1], "Email") .AND. UPPER(AllTrim(oJsonFunc[1]:Email)) <> UPPER(_cEmail) 
+ElseIf AttIsMemberOf(oJsonFunc[1], "Email") .And. Upper(AllTrim(oJsonFunc[1]:Email)) <> Upper(_cEmail) 
 	lContinua := .T.
-ElseIf AttIsMemberOf(oJsonFunc[1], "DataAdmissao") .AND. oJsonFunc[1]:DataAdmissao <> _cDtAdmissao
+ElseIf AttIsMemberOf(oJsonFunc[1], "DataAdmissao") .And. oJsonFunc[1]:DataAdmissao <> _cDtAdmissao
 	lContinua := .T.
-ElseIf AttIsMemberOf(oJsonFunc[1], "BaseHoras") .AND. oJsonFunc[1]:BaseHoras <> Val(_cBaseHoras) 
+ElseIf AttIsMemberOf(oJsonFunc[1], "BaseHoras") .And. oJsonFunc[1]:BaseHoras <> Val(_cBaseHoras) 
 	lContinua := .T.
-ElseIf AttIsMemberOf(oJsonFunc[1], "CodigoPis") .AND. oJsonFunc[1]:CodigoPis <> _cPis
+ElseIf AttIsMemberOf(oJsonFunc[1], "CodigoPis") .And. oJsonFunc[1]:CodigoPis <> _cPis
 	lContinua := .T.
-ElseIf AttIsMemberOf(oJsonFunc[1], "CodigoPisNumerico") .AND. oJsonFunc[1]:CodigoPisNumerico <> Val(_cPis)
+ElseIf AttIsMemberOf(oJsonFunc[1], "CodigoPisNumerico") .And. oJsonFunc[1]:CodigoPisNumerico <> Val(_cPis)
 	lContinua := .T.
-ElseIf AttIsMemberOf(oJsonFunc[1], "Sexo") .AND. oJsonFunc[1]:Sexo <> Val(_cSexo)
+ElseIf AttIsMemberOf(oJsonFunc[1], "Sexo") .And. oJsonFunc[1]:Sexo <> Val(_cSexo)
 	lContinua := .T.
 EndIf
 
@@ -542,7 +542,7 @@ Local _cCPF 		:= AllTrim(SRA->RA_CIC) As Character
 Local _cEmail 		:= Lower(AllTrim(SRA->RA_EMAIL)) As Character
 Local _cDtAdmissao 	:= '' As Character
 Local _cDtDemissao 	:= Subs(DToS(SRA->RA_DEMISSA),1,4)+"-"+Subs(DToS(SRA->RA_DEMISSA),5,2)+"-"+Subs(DToS(SRA->RA_DEMISSA),7,2) As Character
-Local _cBaseHoras 	:= AllTrim(STR(SRA->RA_HRSMES))As Character
+Local _cBaseHoras 	:= AllTrim(Str(SRA->RA_HRSMES))As Character
 Local _cPis 		:= AllTrim(SRA->RA_PIS) As Character
 Local _cSexo 		:= IIf(SRA->RA_SEXO=="M","1","2") As Character
 Local _cPasswpord 	:= _cCPF As Character
@@ -555,7 +555,7 @@ If cOper == "SC" //Search Person
 	cBodyJson := '{'
 	cBodyJson += 		'"Matricula":'+_cMatricula+' '// (Campo obrigatório) Matricula do funcionário. / 
 	cBodyJson += '}'
-ElseIf cOper == "SP" .OR. cOper == "CP" //Save Person ou Change Person
+ElseIf cOper == "SP" .Or. cOper == "CP" //Save Person ou Change Person
 	cBodyJson := '{'
 
 	If cOper == "CP"
@@ -580,9 +580,9 @@ ElseIf cOper == "SP" .OR. cOper == "CP" //Save Person ou Change Person
 
 	cBodyJson += 		',"DataAdmissao":"'+_cDtAdmissao+'" ' //*(Campo obrigatório) Data de admissão do funcionário. */ 
 
-	If cOper == "CP" .AND. !Empty(AllTrim(DToS(SRA->RA_DEMISSA)))
+	If cOper == "CP" .And. !Empty(AllTrim(DToS(SRA->RA_DEMISSA)))
 		cBodyJson += 		',"DataDemissao":"'+_cDtDemissao +'" ' //* (Campo opcional) Data de demissão do funcionário. */
-	ElseIf cOper == "CP" .AND. Empty(AllTrim(DToS(SRA->RA_DEMISSA)))
+	ElseIf cOper == "CP" .And. Empty(AllTrim(DToS(SRA->RA_DEMISSA)))
 		cBodyJson += 		',"DataDemissao":""' //* (Campo opcional) Data de demissão do funcionário. */      
 	EndIf
 	
@@ -648,12 +648,12 @@ ElseIf cOper == "DM" //Dismiss/MarkDismiss
 	aAdd(_aMotRes,{"21","20-Rescisão com justa causa por iniciativa do empregado"})
 	aAdd(_aMotRes,{"23","30-Transf. do empreg. p/outro estab. da mesma empr., ou outra, c/ônus"})
 
-	SRG->( DbSetOrder(1) )
-	If SRG->( DbSeek( SRA->( RA_FILIAL + RA_MAT ) ) )
+	SRG->( DBSetOrder(1) )
+	If SRG->( DBSeek( SRA->( RA_FILIAL + RA_MAT ) ) )
 		_cIDRes := AllTrim(SRG->RG_TIPORES)
 	EndIf
 
-	_nPos      := Ascan(_aMotRes,{|x| x[1] == _cIDRes})
+	_nPos      := aScan(_aMotRes,{|x| x[1] == _cIDRes})
 
 	If _nPos > 0
 		_cMotDemis := _aMotRes[_nPos,2]
@@ -748,7 +748,7 @@ If oRest:Post(aHeader)
 
 			If ValType(cRegistro) == "U"
 				If oJson["Sucesso"]
-					If cParms == "/People/SearchPerson" .OR. cParms == "/OrganizationalStructure/SearchOrganizationalStructure"
+					If cParms == "/People/SearchPerson" .Or. cParms == "/OrganizationalStructure/SearchOrganizationalStructure"
 						cResult := oJson["Obj"]
 					Else 
 						cResult := oJson["Mensagem"]
@@ -811,15 +811,15 @@ Static Function MPON002W(oProc As Object,_lInclui As Logical,_lModifica As Logic
 
 Local _cAliasSRA := GetNextAlias() As Character
 
-BeginSQL alias _cAliasSRA
+BeginSql alias _cAliasSRA
 	SELECT R_E_C_N_O_ SRA_RECNO FROM %Table:SRA%
 	WHERE RA_FILIAL = %exp:_cFilial%
 	AND RA_I_DIMEP = 'S' 
 	AND D_E_L_E_T_ = ' '
-EndSQL
+EndSql
 		
-Do While (_cAliasSRA)->(!EOF()) 
-	SRA->(DbGoto((_cAliasSRA)->SRA_RECNO))
+While (_cAliasSRA)->(!Eof()) 
+	SRA->(DBGoTo((_cAliasSRA)->SRA_RECNO))
 
 	If oProc <> Nil 
 		oProc:cCaption:=("Sinc. Funcionario: " + SRA->RA_MAT + " " + AllTrim(SRA->RA_NOMECMP))

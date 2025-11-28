@@ -5,14 +5,11 @@
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges  |09/05/2025| Chamado 50617. Corrigir chamada estática no nome das tabelas do sistema
-===============================================================================================================================
-Analista       - Programador     - Inicio     - Envio    - Chamado - Motivo de Alteração
-===============================================================================================================================
-Lucas          - Alex Wallauer   - 02/05/2025 - 06/05/25 - 50525   - Ajuste para remoção de diretório local C:\SMARTCLIENT\.
+Alex Wallauer |06/05/2025| Chamado 50525. Ajuste para remoção de diretório Local C:\SMARTCLIENT\.
 ===============================================================================================================================
 */
 
-#INCLUDE 'PROTHEUS.CH'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -25,10 +22,10 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function RCOM019()
-    PRIVATE nHandle       := 0
-    PRIVATE cNomArq       := "RCOM019D"+DtoS(Date())+"N000"
-    PRIVATE cExt          := ".XML"
-    PRIVATE oBj           := Nil
+    Private nHandle       := 0
+    Private cNomArq       := "RCOM019D"+DToS(Date())+"N000"
+    Private cExt          := ".XML"
+    Private oBj           := Nil
 
     Private cCab        := "\data\italac\RCOM019\RCOM019_CAB.txt"
     Private cRodp       := "\data\italac\RCOM019\RCOM019_RODP.txt"
@@ -36,17 +33,17 @@ User Function RCOM019()
     Private aArq        := {}
     Private cPathSrv    := GetTempPath()
 
-    IF !File(cCab)
-        U_ITMSG("Layout XML não encontrado","Falha", "Entre em contato com a equipe de TI.",1)
-        RETURN
-    ENDIF
+    If !File(cCab)
+        U_ITMsg("Layout XML não encontrado","Falha", "Entre em contato com a equipe de TI.",1)
+        Return
+    EndIf
 
     //===============================================
     // Montagem do corpo do XML
     //===============================================
-    FWMSGRUN(,{|oBj|  ROMS019B(oBj) },'Aguarde processamento...','Carregando dados...')
+    FWMsgRun(,{|oBj|  ROMS019B(oBj) },'Aguarde processamento...','Carregando dados...')
 
-RETURN
+Return
 
 /*
 ===============================================================================================================================
@@ -86,10 +83,10 @@ Static Function ROMS019B(Obj)
     //===============================================
     // Gravo todas as linhas do arquivo no aArq
     //===============================================
-    WHILE !FT_FEOF() 
-        Aadd(aArq, FT_FREADLN())
+    While !FT_FEOF() 
+        aAdd(aArq, FT_FREADLN())
         FT_FSKIP()
-    ENDDO
+    EndDo
     FT_FUSE()
 
     Obj:cCaption := ("Gerando arquivo...")
@@ -139,143 +136,143 @@ Static Function ROMS019B(Obj)
 
     MPSysOpenQuery(cQuery,cNwAlias)
 
-    IF (cNwAlias)->(EOF())
-        U_ITMSG("Pedido não possui notas vinculadas!", "Falha",,1)
-        RETURN 
-    ENDIF
+    If (cNwAlias)->(Eof())
+        U_ITMsg("Pedido não possui notas vinculadas!", "Falha",,1)
+        Return 
+    EndIf
     //===========================================================
     // Montagem do Corpor do XML
     //===========================================================
-    DO CASE
-        CASE (cNwAlias)->C7_I_APLIC == 'C'
+    Do Case
+        Case (cNwAlias)->C7_I_APLIC == 'C'
             cConsumo      := cStlyP
             cServ         := 's87'
             cManut        := 's87'
             cInvest       := 's87' 
-        CASE (cNwAlias)->C7_I_APLIC == 'M'
+        Case (cNwAlias)->C7_I_APLIC == 'M'
             cConsumo      := 's86'
             cServ         := 's87'
             cManut        := cStlyP
             cInvest       := 's87' 
-        CASE (cNwAlias)->C7_I_APLIC == 'I'
+        Case (cNwAlias)->C7_I_APLIC == 'I'
             cConsumo      := 's86'
             cServ         := 's87'
             cManut        := 's87'
             cInvest       := cStlyP  
-        CASE (cNwAlias)->C7_I_APLIC == 'S'
+        Case (cNwAlias)->C7_I_APLIC == 'S'
             cConsumo      := 's86'
             cServ         := cStlyP
             cManut        := 's87'
             cInvest       := 's87' 
-    ENDCASE 
+    EndCase 
 
     cOBS := (cNwAlias)->C7_OBS
 
-    Aadd(aArq, '<Row ss:AutoFitHeight="0" ss:Height="15">' )
-    Aadd(aArq, '    <Cell ss:MergeAcross="8" ss:StyleID="s66"><Data ss:Type="String">ROMANEIO DE LANCAMENTO DE NOTA FISCAL</Data></Cell>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s68"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s69"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s69"/>' )
-    Aadd(aArq, '   </Row>' )
-    Aadd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="15.75">' )
-    Aadd(aArq, '    <Cell ss:StyleID="s68"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s68"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s68"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s68"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s68"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s68"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s68"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s68"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s70"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s70"/>' )
-    Aadd(aArq, '   </Row>' )
-    Aadd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="15.45" ss:StyleID="s71">' )
-    Aadd(aArq, '    <Cell ss:Index="3" ss:MergeAcross="1" ss:StyleID="m406893492"><Data' )
-    Aadd(aArq, '      ss:Type="String">PEDIDO DE COMPRA </Data></Cell>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s78"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s78"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s78"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s78"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s79"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s79"/>' )
-    Aadd(aArq, '   </Row>' )
-    Aadd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="18">' )
-    Aadd(aArq, '    <Cell ss:Index="3" ss:MergeAcross="1" ss:StyleID="m406893512"><Data' )
-    Aadd(aArq, '      ss:Type="String">'+cPedido+'</Data></Cell>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s68"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s68"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s68"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s68"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s70"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s70"/>' )
-    Aadd(aArq, '   </Row>' )
-    Aadd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="15.45" ss:StyleID="s71">' )
-    Aadd(aArq, '    <Cell ss:Index="3" ss:StyleID="s80"><Data ss:Type="String">CONSUMO</Data></Cell>' )
-    Aadd(aArq, '    <Cell ss:StyleID="'+cConsumo+'"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s78"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s78"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s78"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s78"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s79"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s79"/>' )
-    Aadd(aArq, '   </Row>' )
-    Aadd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="15.45" ss:StyleID="s71">' )
-    Aadd(aArq, '    <Cell ss:Index="3" ss:StyleID="s80"><Data ss:Type="String">SERVICO</Data></Cell>' )
-    Aadd(aArq, '    <Cell ss:StyleID="'+cServ+'"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s88"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s88"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s88"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s88"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s79"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s79"/>' )
-    Aadd(aArq, '   </Row>' )
-    Aadd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="15.45" ss:StyleID="s71">' )
-    Aadd(aArq, '    <Cell ss:Index="3" ss:StyleID="s80"><Data ss:Type="String">MANUTENCAO</Data></Cell>' )
-    Aadd(aArq, '    <Cell ss:StyleID="'+cManut+'"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s88"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s88"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s88"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s88"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s79"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s79"/>' )
-    Aadd(aArq, '   </Row>' )
-    Aadd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="15.45" ss:StyleID="s71">' )
-    Aadd(aArq, '    <Cell ss:Index="3" ss:StyleID="s80"><Data ss:Type="String">INVESTIMENTO</Data></Cell>' )
-    Aadd(aArq, '    <Cell ss:StyleID="'+cInvest+'"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s88"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s88"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s88"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s88"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s79"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s79"/>' )
-    Aadd(aArq, '   </Row>' )
-    Aadd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="18" ss:StyleID="s70">' )
-    Aadd(aArq, '    <Cell ss:StyleID="s89"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s89"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s89"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s89"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s89"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s89"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s89"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s89"/>' )
-    Aadd(aArq, '   </Row>' )
-    Aadd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="15.45" ss:StyleID="s71">' )
-    Aadd(aArq, '    <Cell ss:StyleID="s90"><Data ss:Type="String">CODIGO</Data></Cell>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s90"><Data ss:Type="String">DESC DETALH.</Data></Cell>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s90"><Data ss:Type="String">DESCRICAO</Data></Cell>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s90"><Data ss:Type="String">U.M.</Data></Cell>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s90"><Data ss:Type="String">QUANT PC</Data></Cell>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s90"><Data ss:Type="String">QUANT NF</Data></Cell>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s90"><Data ss:Type="String">ENDERECO</Data></Cell>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s90"><Data ss:Type="String">ESTOQUE</Data></Cell>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s90"><Data ss:Type="String">RESID</Data></Cell>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s79"/>' )
-    Aadd(aArq, '   </Row>' )
+    aAdd(aArq, '<Row ss:AutoFitHeight="0" ss:Height="15">' )
+    aAdd(aArq, '    <Cell ss:MergeAcross="8" ss:StyleID="s66"><Data ss:Type="String">ROMANEIO DE LANCAMENTO DE NOTA FISCAL</Data></Cell>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s68"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s69"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s69"/>' )
+    aAdd(aArq, '   </Row>' )
+    aAdd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="15.75">' )
+    aAdd(aArq, '    <Cell ss:StyleID="s68"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s68"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s68"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s68"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s68"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s68"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s68"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s68"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s70"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s70"/>' )
+    aAdd(aArq, '   </Row>' )
+    aAdd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="15.45" ss:StyleID="s71">' )
+    aAdd(aArq, '    <Cell ss:Index="3" ss:MergeAcross="1" ss:StyleID="m406893492"><Data' )
+    aAdd(aArq, '      ss:Type="String">PEDIDO DE COMPRA </Data></Cell>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s78"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s78"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s78"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s78"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s79"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s79"/>' )
+    aAdd(aArq, '   </Row>' )
+    aAdd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="18">' )
+    aAdd(aArq, '    <Cell ss:Index="3" ss:MergeAcross="1" ss:StyleID="m406893512"><Data' )
+    aAdd(aArq, '      ss:Type="String">'+cPedido+'</Data></Cell>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s68"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s68"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s68"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s68"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s70"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s70"/>' )
+    aAdd(aArq, '   </Row>' )
+    aAdd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="15.45" ss:StyleID="s71">' )
+    aAdd(aArq, '    <Cell ss:Index="3" ss:StyleID="s80"><Data ss:Type="String">CONSUMO</Data></Cell>' )
+    aAdd(aArq, '    <Cell ss:StyleID="'+cConsumo+'"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s78"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s78"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s78"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s78"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s79"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s79"/>' )
+    aAdd(aArq, '   </Row>' )
+    aAdd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="15.45" ss:StyleID="s71">' )
+    aAdd(aArq, '    <Cell ss:Index="3" ss:StyleID="s80"><Data ss:Type="String">SERVICO</Data></Cell>' )
+    aAdd(aArq, '    <Cell ss:StyleID="'+cServ+'"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s88"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s88"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s88"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s88"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s79"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s79"/>' )
+    aAdd(aArq, '   </Row>' )
+    aAdd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="15.45" ss:StyleID="s71">' )
+    aAdd(aArq, '    <Cell ss:Index="3" ss:StyleID="s80"><Data ss:Type="String">MANUTENCAO</Data></Cell>' )
+    aAdd(aArq, '    <Cell ss:StyleID="'+cManut+'"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s88"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s88"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s88"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s88"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s79"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s79"/>' )
+    aAdd(aArq, '   </Row>' )
+    aAdd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="15.45" ss:StyleID="s71">' )
+    aAdd(aArq, '    <Cell ss:Index="3" ss:StyleID="s80"><Data ss:Type="String">INVESTIMENTO</Data></Cell>' )
+    aAdd(aArq, '    <Cell ss:StyleID="'+cInvest+'"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s88"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s88"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s88"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s88"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s79"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s79"/>' )
+    aAdd(aArq, '   </Row>' )
+    aAdd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="18" ss:StyleID="s70">' )
+    aAdd(aArq, '    <Cell ss:StyleID="s89"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s89"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s89"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s89"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s89"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s89"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s89"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s89"/>' )
+    aAdd(aArq, '   </Row>' )
+    aAdd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="15.45" ss:StyleID="s71">' )
+    aAdd(aArq, '    <Cell ss:StyleID="s90"><Data ss:Type="String">CODIGO</Data></Cell>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s90"><Data ss:Type="String">DESC DETALH.</Data></Cell>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s90"><Data ss:Type="String">DESCRICAO</Data></Cell>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s90"><Data ss:Type="String">U.M.</Data></Cell>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s90"><Data ss:Type="String">QUANT PC</Data></Cell>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s90"><Data ss:Type="String">QUANT NF</Data></Cell>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s90"><Data ss:Type="String">ENDERECO</Data></Cell>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s90"><Data ss:Type="String">ESTOQUE</Data></Cell>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s90"><Data ss:Type="String">RESID</Data></Cell>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s79"/>' )
+    aAdd(aArq, '   </Row>' )
 
-    WHILE (cNwAlias)->(!EOF())
+    While (cNwAlias)->(!Eof())
         Obj:cCaption := ("Gerando arquivo...")
         ProcessMessages()
-        Aadd(aProds, {;
+        aAdd(aProds, {;
             (cNwAlias)->D1_COD,;
             (cNwAlias)->D1_ITEMPC,;
             (cNwAlias)->C7_ITEM,;
@@ -283,17 +280,17 @@ Static Function ROMS019B(Obj)
             (cNwAlias)->D1_SERIE,;
             (cNwAlias)->D1_DTDIGIT,;
             (cNwAlias)->D1_QUANT})
-        (cNwAlias)->(DBSKIP())
-    ENDDO
+        (cNwAlias)->(DBSkip())
+    EndDo
 
-    (cNwAlias)->(DBGOTOP())
+    (cNwAlias)->(DBGoTop())
 
-    WHILE (cNwAlias)->(!EOF())
+    While (cNwAlias)->(!Eof())
 
-        IF (cNwAlias)->D1_COD == cProdA
-            (cNwAlias)->(DBSKIP())
-            LOOP
-        ENDIF
+        If (cNwAlias)->D1_COD == cProdA
+            (cNwAlias)->(DBSkip())
+            Loop
+        EndIf
 
         Obj:cCaption := ("Gerando arquivo...")
         ProcessMessages()
@@ -303,71 +300,71 @@ Static Function ROMS019B(Obj)
         aSaldo := CalcEst(cCodP,(cNwAlias)->C7_LOCAL,DATE()+1, cFilAnt)
         nSaldo := aSaldo[1]
 
-        FOR nI := 1 TO Len(aProds)
-            IF aProds[nI][1] == (cNwAlias)->D1_COD .AND. aProds[nI][2] == (cNwAlias)->C7_ITEM
-                cNfs += aProds[nI][4] +"/"+aProds[nI][5] + " - " +  Strzero(Day(StoD(aProds[nI][6])),2)+"/"+Strzero(Month(StoD(aProds[nI][6])),2)+"/"+Substr(Str(Year(StoD(aProds[nI][6])),4),3,2) + "; "
+        For nI := 1 TO Len(aProds)
+            If aProds[nI][1] == (cNwAlias)->D1_COD .And. aProds[nI][2] == (cNwAlias)->C7_ITEM
+                cNfs += aProds[nI][4] +"/"+aProds[nI][5] + " - " +  StrZero(Day(SToD(aProds[nI][6])),2)+"/"+StrZero(Month(SToD(aProds[nI][6])),2)+"/"+SubStr(Str(Year(SToD(aProds[nI][6])),4),3,2) + "; "
                 nQuant += aProds[nI][7]
-                cResid := IIF(!EMPTY((cNwAlias)->C7_RESIDUO), "SIM","NAO" )
-            ENDIF
+                cResid := IIf(!Empty((cNwAlias)->C7_RESIDUO), "SIM","NAO" )
+            EndIf
         Next nI
 
-        (cNwAlias)->(DBGOTO(nX))
+        (cNwAlias)->(DBGoTo(nX))
 
-        Aadd(aArq, '<Row ss:AutoFitHeight="0">' )
-        Aadd(aArq, '    <Cell ss:StyleID="s91"><Data ss:Type="String">'+(cNwAlias)->D1_COD+'</Data></Cell>' )
-        Aadd(aArq, '    <Cell ss:StyleID="s91"><Data ss:Type="String">'+(cNwAlias)->B1_I_DESCD+'</Data></Cell>' )
-        Aadd(aArq, '    <Cell ss:StyleID="s91"><Data ss:Type="String">'+(cNwAlias)->B1_DESC+'</Data></Cell>' )
-        Aadd(aArq, '    <Cell ss:StyleID="s91"><Data ss:Type="String">'+(cNwAlias)->C7_UM+'</Data></Cell>' )
-        Aadd(aArq, '    <Cell ss:StyleID="s93"><Data ss:Type="Number">'+cValToChar((cNwAlias)->C7_QUANT)+'</Data></Cell>' )
-        Aadd(aArq, '    <Cell ss:StyleID="s93"><Data ss:Type="Number">'+cValToChar(nQuant)+'</Data></Cell>' )
-        Aadd(aArq, '    <Cell ss:StyleID="s91"><Data ss:Type="String">'+(cNwAlias)->BZ_I_LOCAL+'</Data></Cell>' )
-        Aadd(aArq, '    <Cell ss:StyleID="s93"><Data ss:Type="Number">'+cValToChar(nSaldo)+'</Data></Cell>' )
-        Aadd(aArq, '    <Cell ss:StyleID="s94"><Data ss:Type="String">'+cResid+'</Data></Cell>' )
-        Aadd(aArq, '    <Cell ss:StyleID="s70"/>' )
-        Aadd(aArq, '   </Row>' )
-        Aadd(aArq, '   <Row ss:AutoFitHeight="0">' )
-        Aadd(aArq, '    <Cell ss:MergeAcross="8" ss:StyleID="m406893532"><Data ss:Type="String">'+cNfs+'</Data></Cell>' )
-        Aadd(aArq, '    <Cell ss:StyleID="s70"/>' )
-        Aadd(aArq, '   </Row>' )
+        aAdd(aArq, '<Row ss:AutoFitHeight="0">' )
+        aAdd(aArq, '    <Cell ss:StyleID="s91"><Data ss:Type="String">'+(cNwAlias)->D1_COD+'</Data></Cell>' )
+        aAdd(aArq, '    <Cell ss:StyleID="s91"><Data ss:Type="String">'+(cNwAlias)->B1_I_DESCD+'</Data></Cell>' )
+        aAdd(aArq, '    <Cell ss:StyleID="s91"><Data ss:Type="String">'+(cNwAlias)->B1_DESC+'</Data></Cell>' )
+        aAdd(aArq, '    <Cell ss:StyleID="s91"><Data ss:Type="String">'+(cNwAlias)->C7_UM+'</Data></Cell>' )
+        aAdd(aArq, '    <Cell ss:StyleID="s93"><Data ss:Type="Number">'+cValToChar((cNwAlias)->C7_QUANT)+'</Data></Cell>' )
+        aAdd(aArq, '    <Cell ss:StyleID="s93"><Data ss:Type="Number">'+cValToChar(nQuant)+'</Data></Cell>' )
+        aAdd(aArq, '    <Cell ss:StyleID="s91"><Data ss:Type="String">'+(cNwAlias)->BZ_I_LOCAL+'</Data></Cell>' )
+        aAdd(aArq, '    <Cell ss:StyleID="s93"><Data ss:Type="Number">'+cValToChar(nSaldo)+'</Data></Cell>' )
+        aAdd(aArq, '    <Cell ss:StyleID="s94"><Data ss:Type="String">'+cResid+'</Data></Cell>' )
+        aAdd(aArq, '    <Cell ss:StyleID="s70"/>' )
+        aAdd(aArq, '   </Row>' )
+        aAdd(aArq, '   <Row ss:AutoFitHeight="0">' )
+        aAdd(aArq, '    <Cell ss:MergeAcross="8" ss:StyleID="m406893532"><Data ss:Type="String">'+cNfs+'</Data></Cell>' )
+        aAdd(aArq, '    <Cell ss:StyleID="s70"/>' )
+        aAdd(aArq, '   </Row>' )
 
         cNfs := ""
         cResid:= ""
         nQuant := 0
         cProdA := (cNwAlias)->D1_COD
-        (cNwAlias)->(DBSKIP())
-    ENDDO
-    Aadd(aArq, ' <Row ss:AutoFitHeight="0" ss:Height="15" ss:StyleID="s70">' )
-    Aadd(aArq, '    <Cell ss:StyleID="s102"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s102"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s102"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s102"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s102"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s102"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s102"/>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s102"/>' )
-    Aadd(aArq, '   </Row>' )
-    Aadd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="15.75" ss:StyleID="s70">' )
-    Aadd(aArq, '    <Cell ss:MergeAcross="8" ss:StyleID="s104"><Data ss:Type="String">OBSERVACAO</Data></Cell>' )
-    Aadd(aArq, '   </Row>' )
-    Aadd(aArq, '   <Row ss:AutoFitHeight="0">' )
-    Aadd(aArq, '    <Cell ss:MergeAcross="8" ss:MergeDown="4" ss:StyleID="m406893572"><Data' )
-    Aadd(aArq, '      ss:Type="String">'+cOBS+'</Data></Cell>' )
-    Aadd(aArq, '    <Cell ss:StyleID="s70"/>' )
-    Aadd(aArq, '   </Row>' )
-    Aadd(aArq, '   <Row ss:AutoFitHeight="0">' )
-    Aadd(aArq, '    <Cell ss:Index="10" ss:StyleID="s70"/>' )
-    Aadd(aArq, '   </Row>' )
-    Aadd(aArq, '   <Row ss:AutoFitHeight="0">' )
-    Aadd(aArq, '    <Cell ss:Index="10" ss:StyleID="s70"/>' )
-    Aadd(aArq, '   </Row>' )
-    Aadd(aArq, '   <Row ss:AutoFitHeight="0">' )
-    Aadd(aArq, '    <Cell ss:Index="10" ss:StyleID="s70"/>' )
-    Aadd(aArq, '   </Row>' )
-    Aadd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="15">' )
-    Aadd(aArq, '    <Cell ss:Index="10" ss:StyleID="s70"/>' )
-    Aadd(aArq, '   </Row>' )
+        (cNwAlias)->(DBSkip())
+    EndDo
+    aAdd(aArq, ' <Row ss:AutoFitHeight="0" ss:Height="15" ss:StyleID="s70">' )
+    aAdd(aArq, '    <Cell ss:StyleID="s102"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s102"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s102"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s102"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s102"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s102"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s102"/>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s102"/>' )
+    aAdd(aArq, '   </Row>' )
+    aAdd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="15.75" ss:StyleID="s70">' )
+    aAdd(aArq, '    <Cell ss:MergeAcross="8" ss:StyleID="s104"><Data ss:Type="String">OBSERVACAO</Data></Cell>' )
+    aAdd(aArq, '   </Row>' )
+    aAdd(aArq, '   <Row ss:AutoFitHeight="0">' )
+    aAdd(aArq, '    <Cell ss:MergeAcross="8" ss:MergeDown="4" ss:StyleID="m406893572"><Data' )
+    aAdd(aArq, '      ss:Type="String">'+cOBS+'</Data></Cell>' )
+    aAdd(aArq, '    <Cell ss:StyleID="s70"/>' )
+    aAdd(aArq, '   </Row>' )
+    aAdd(aArq, '   <Row ss:AutoFitHeight="0">' )
+    aAdd(aArq, '    <Cell ss:Index="10" ss:StyleID="s70"/>' )
+    aAdd(aArq, '   </Row>' )
+    aAdd(aArq, '   <Row ss:AutoFitHeight="0">' )
+    aAdd(aArq, '    <Cell ss:Index="10" ss:StyleID="s70"/>' )
+    aAdd(aArq, '   </Row>' )
+    aAdd(aArq, '   <Row ss:AutoFitHeight="0">' )
+    aAdd(aArq, '    <Cell ss:Index="10" ss:StyleID="s70"/>' )
+    aAdd(aArq, '   </Row>' )
+    aAdd(aArq, '   <Row ss:AutoFitHeight="0" ss:Height="15">' )
+    aAdd(aArq, '    <Cell ss:Index="10" ss:StyleID="s70"/>' )
+    aAdd(aArq, '   </Row>' )
 
-    (cNwAlias)->(DbCloseArea())
+    (cNwAlias)->(DBCloseArea())
 
     FT_FUSE(cRodp)
     nTotal := FT_FLASTREC()
@@ -376,31 +373,31 @@ Static Function ROMS019B(Obj)
     //===============================================
     // Grava todas as linhas do arquivo no aArq
     //===============================================
-    WHILE !FT_FEOF()
+    While !FT_FEOF()
         Obj:cCaption := ("Gerando arquivo...")
         ProcessMessages()
-        Aadd(aArq, FT_FREADLN())
+        aAdd(aArq, FT_FREADLN())
         FT_FSKIP()
-    ENDDO
+    EndDo
     FT_FUSE()
 
     //===============================================
     // Garava o arquivo
     //===============================================
-    WHILE File(cPathSrv+cNomArq+cExt)
+    While File(cPathSrv+cNomArq+cExt)
         cNomArq := Soma1(cNomArq)
-    ENDDO
+    EndDo
     
     nHandle := FCreate(cPathSrv+cNomArq+cExt)
-    IF nHandle = -1
-        U_ITMSG("Nã foi possível gerar o arquivo "+cPathSrv+" "+cNomArq+cExt,"Falha","Entre em contato com a equipe de TI",1)
-    ELSE
-        FOR nZ := 1 TO Len(aArq)
+    If nHandle = -1
+        U_ITMsg("Nã foi possível gerar o arquivo "+cPathSrv+" "+cNomArq+cExt,"Falha","Entre em contato com a equipe de TI",1)
+    Else
+        For nZ := 1 TO Len(aArq)
             FWrite(nHandle, aArq[nZ] + CRLF)
-        NEXT nZ
+        Next nZ
         FClose(nHandle)
-        U_ITMSG("Arquvio "+cPathSrv+" "+cNomArq+cExt+" gerado com sucesso!","Processo concluído!",,2)
-    ENDIF
+        U_ITMsg("Arquvio "+cPathSrv+" "+cNomArq+cExt+" gerado com sucesso!","Processo concluído!",,2)
+    EndIf
 
      //Tentando abrir o objeto
     nRet := shellExecute("Open", cNomArq+cExt, "", cPathSrv, 1 )

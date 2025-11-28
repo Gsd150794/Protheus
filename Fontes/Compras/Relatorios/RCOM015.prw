@@ -2,27 +2,21 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 06/09/2024 | Chamado 48316. Incluído parâmetro para tratar CFOP.
+Lucas Borges  |06/09/2024| Chamado 48316. Incluído parâmetro para tratar CFOP.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RCOM015
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 31/07/2024
-===============================================================================================================================
 Descrição---------: Relatório de Descontos Tetra Pak
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -41,11 +35,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 31/07/2024
-===============================================================================================================================
 Descrição---------: Processa a montagem do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -110,11 +101,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 31/07/2024
-===============================================================================================================================
 Descrição---------: Processa a impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -131,10 +119,10 @@ Local _cCFOPS	    := "% AND D2_CF IN "+ FormatIn( AllTrim(SuperGetMV("IT_CFTETRS
 If MV_PAR01 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"SD1")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -171,12 +159,12 @@ oReport:SetMeter(0)
 BeginSql alias _cAlias
   SELECT D1_FILIAL, D1_DOC, D1_SERIE, D1_FORNECE, D1_LOJA, D1_EMISSAO, D1_DTDIGIT, D1_ITEM, D1_COD, B1_DESC, D1_TOTAL, D1_CUSTO, D3_CUSTO1,
   D1_VALIPI, D1_VALICM, D1_VALIMP5, D1_VALIMP6, D1_VALDESC+D1_SEGURO+D1_DESPESA+D1_VALFRE D1_VALDESC,
-  ROUND(D1_CUSTO*(ZM5_AVD)/100,6) ZM5_AVD,
-  ROUND(D1_CUSTO*(ZM5_QSR)/100,6) ZM5_QSR,
-  ROUND(D1_CUSTO*(ZM5_SDESN)/100,6) ZM5_SDESN,
-  ROUND(D1_CUSTO*(ZM5_LAD)/100,6) ZM5_LAD,
-  ROUND(D1_CUSTO*(ZM5_APD)/100,6) ZM5_APD,
-  ROUND(D1_CUSTO*(ZM5_CTD)/100,6) ZM5_CTD
+  Round(D1_CUSTO*(ZM5_AVD)/100,6) ZM5_AVD,
+  Round(D1_CUSTO*(ZM5_QSR)/100,6) ZM5_QSR,
+  Round(D1_CUSTO*(ZM5_SDESN)/100,6) ZM5_SDESN,
+  Round(D1_CUSTO*(ZM5_LAD)/100,6) ZM5_LAD,
+  Round(D1_CUSTO*(ZM5_APD)/100,6) ZM5_APD,
+  Round(D1_CUSTO*(ZM5_CTD)/100,6) ZM5_CTD
   FROM %Table:SD3% SD3, %Table:SD1% SD1, %Table:ZM5% ZM5, %Table:SB1% SB1
   WHERE SD3.D_E_L_E_T_ = ' '
   AND SD1.D_E_L_E_T_ = ' '
@@ -199,12 +187,12 @@ BeginSql alias _cAlias
   UNION ALL
   SELECT D2_FILIAL, D2_DOC, D2_SERIE, D2_CLIENTE, D2_LOJA, D2_EMISSAO, D2_EMISSAO, D2_ITEM, D2_COD, B1_DESC, D2_TOTAL, D2_CUSTO1, D3_CUSTO1,
   D2_VALIPI, D2_VALICM, D2_VALIMP5, D2_VALIMP6, D2_DESCON+D2_SEGURO+D2_DESPESA+D2_VALFRE D1_VALDESC,
-  ROUND(D2_CUSTO1*(ZM5_AVD)/100,6) ZM5_AVD,
-  ROUND(D2_CUSTO1*(ZM5_QSR)/100,6) ZM5_QSR,
-  ROUND(D2_CUSTO1*(ZM5_SDESN)/100,6) ZM5_SDESN,
-  ROUND(D2_CUSTO1*(ZM5_LAD)/100,6) ZM5_LAD,
-  ROUND(D2_CUSTO1*(ZM5_APD)/100,6) ZM5_APD,
-  ROUND(D2_CUSTO1*(ZM5_CTD)/100,6) ZM5_CTD
+  Round(D2_CUSTO1*(ZM5_AVD)/100,6) ZM5_AVD,
+  Round(D2_CUSTO1*(ZM5_QSR)/100,6) ZM5_QSR,
+  Round(D2_CUSTO1*(ZM5_SDESN)/100,6) ZM5_SDESN,
+  Round(D2_CUSTO1*(ZM5_LAD)/100,6) ZM5_LAD,
+  Round(D2_CUSTO1*(ZM5_APD)/100,6) ZM5_APD,
+  Round(D2_CUSTO1*(ZM5_CTD)/100,6) ZM5_CTD
   FROM %Table:SD3% SD3, %Table:SD2% SD2, %Table:ZM5% ZM5, %Table:SB1% SB1, %Table:SD1% SD1
   WHERE SD3.D_E_L_E_T_ = ' '
   AND SD2.D_E_L_E_T_ = ' '
@@ -250,13 +238,13 @@ oReport:Section(1):Init()
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(0)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

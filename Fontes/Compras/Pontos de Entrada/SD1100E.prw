@@ -1,38 +1,30 @@
 /*
 ===============================================================================================================================
-                                    ATUALIZACOES SOFRIDAS DESDE A CONSTRUÇAO INICIAL
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                           |
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Alexandre Villar | 28/08/2015 | Ajuste para não bloquear o estorno da classificação de documentos. Chamados 11497/11578      |
-------------------:------------:----------------------------------------------------------------------------------------------:
-Lucas B. Ferreira | 06/06/2017 | Ajustada validação para não executar o PE no fechamento do Leite - Chamado 14511			  |
+Alexandre V.  |28/08/2015| Chamados 11497/11578. Ajuste para não bloquear o estorno da classificação de documentos.
+Lucas Borges  |06/06/2017| Chamado 14511. Ajustada validação para não executar o PE no fechamento do Leite
 ===============================================================================================================================
 */
 
-#Include "RwMake.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa--------: SF1100E
 Autor-----------: Alexandre Villar
 Data da Criacao-: 26/11/2014
-===============================================================================================================================
 Descrição-------: Ponto de entrada após a exclusão da nota fiscal
-===============================================================================================================================
-Uso-------------: Italac
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
-===============================================================================================================================
-Setor-----------: TI
 ===============================================================================================================================
 */
 
-User Function SD1100E()
+User Function SD1100E
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cStatus	:= ''
 Local _lRLeite	:= !AllTrim( Upper( FUNNAME() ) ) $"U_MGLT009/MGLT010"
 
@@ -47,12 +39,12 @@ If _lRLeite
 				
 				ZLX->( RecLock( 'ZLX' , .F. ) )
 				ZLX->( DBDelete() )
-				ZLX->( MsUnLock() )
+				ZLX->( MSUnLock() )
 				
 			Else
 				
-				IF ZLX->ZLX_STATUS <> '1'
-					_cStatus := IIF( !Empty( ZLX->ZLX_CODANA ) , IIF( ZLX->ZLX_STATUS == '2' , 'CLASSIFICADO' , 'FECHADO' ) , 'PENDENTE' )
+				If ZLX->ZLX_STATUS <> '1'
+					_cStatus := IIf( !Empty( ZLX->ZLX_CODANA ) , IIf( ZLX->ZLX_STATUS == '2' , 'CLASSIFICADO' , 'FECHADO' ) , 'PENDENTE' )
 				Else
 					_cStatus := 'vinculado à uma análise de qualidade'
 				EndIf
@@ -67,12 +59,12 @@ If _lRLeite
 			ZLX->( RecLock( 'ZLX' , .F. ) )
 			ZLX->ZLX_VLRNF	:= 0
 			ZLX->ZLX_ICMSNF	:= 0
-			ZLX->( MsUnLock() )
+			ZLX->( MSUnLock() )
 			
 		EndIf
 	
 	EndIf
 EndIf
-RestArea( _aArea )
+FWRestArea( _aArea )
 
-Return()
+Return

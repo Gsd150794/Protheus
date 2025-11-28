@@ -1,34 +1,24 @@
 /*
 ===============================================================================================================================
-                  ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                            
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Josué Danich     | 17/01/2019 | Revisão de código para servidor lobo-guara - Chamado 27727
--------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges     | 27/09/2019 | Revisão de fontes. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges     | 03/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Josué Danich  |17/01/2019| Chamado 27727. Revisão de código para servidor lobo-guara
+Lucas Borges  |27/09/2019| Chamado 28346. Revisão de fontes.
+Lucas Borges  |03/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ==============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
-
-#DEFINE _ENTER CHR(13)+CHR(10) 
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa--------: AGLT053
 Autor-----------: Alex Wallauer
 Data da Criacao-: 22/12/2010
-===============================================================================================================================
 Descrição-------: CADASTRO DA Tabela de Frete T1 (1º Percurso)- CHAMADO 22197
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -50,9 +40,7 @@ Return
 Programa----------: MenuDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 02/08/2018
-===============================================================================================================================
 Descrição---------: Utilizacao de Menu Funcional
-===============================================================================================================================
 Parametros--------: aRotina
 					1. Nome a aparecer no cabecalho
 					2. Nome da Rotina associada
@@ -65,7 +53,6 @@ Parametros--------: aRotina
 						5 - Remove o registro corrente do Banco de Dados
 					5. Nivel de acesso
 					6. Habilita Menu Funcional
-===============================================================================================================================
 Retorno-----------: Array com opcoes da rotina
 ===============================================================================================================================
 */
@@ -84,11 +71,8 @@ Return( aRotina )
 Programa----------: AGLT053R
 Autor-------------: Alex Wallauer
 Data da Criacao---: 23/05/2018  
-===============================================================================================================================
 Descrição---------: Monta tela com os dados do RPA Avulso
-===============================================================================================================================
 Parametros--------: nOpc: opcao
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -135,19 +119,19 @@ For _nI := 1 To Len(_aZFF)
 	_cx3_relacao := getsx3cache(_aZFF[_nI][1],"X3_RELACAO")
 	_cx3_context := getsx3cache(_aZFF[_nI][1],"X3_CONTEXT")
 
-	AADD( aCpoEnchoice , _aZFF[_nI][1] )
+	aAdd( aCpoEnchoice , _aZFF[_nI][1] )
 
 	xVarAux	:= "M->"+ _aZFF[_nI][1]
 	&xVarAux	:= CriaVar( _aZFF[_nI][1] )
 	
-	If alltrim(_cx3_context ) == "V"
+	If AllTrim(_cx3_context ) == "V"
 		aAdd( vCampos , { _aZFF[_nI][1] , _cx3_relacao } )
 	EndIf
 	
 Next _nI
 
 
-If nOpc <> 3 // se nao for inclusao preenche os campos do cabecalho
+If nOpc <> 3 // se nao For inclusao preenche os campos do cabecalho
 
 	DBSelectArea("ZFF")
 	
@@ -167,9 +151,9 @@ EndIf
 //================================================================================
 _aZFG := ZFG->(Dbstruct())
 
-For nUsado := 1 to len(_aZFG)
+For nUsado := 1 to Len(_aZFG)
 
-	If _aZFG[nUsado][1] != "ZFG_FILIAL" .AND. _aZFG[nUsado][1] != "ZFG_CODIGO"
+	If _aZFG[nUsado][1] != "ZFG_FILIAL" .And. _aZFG[nUsado][1] != "ZFG_CODIGO"
 
 		aAdd( aHeader , {	trim(getsx3cache(_aZFG[nUsado][1],"X3_TITULO") )	,;
 							getsx3cache(_aZFG[nUsado][1],"X3_CAMPO")		,;
@@ -182,11 +166,11 @@ For nUsado := 1 to len(_aZFG)
 							getsx3cache(_aZFG[nUsado][1],"X3_ARQUIVO")		,;
 							getsx3cache(_aZFG[nUsado][1],"X3_CONTEXT")	})
 							
-	Endif
+	EndIf
 
 Next
 
-nUsado := len(_aZFG)-2
+nUsado := Len(_aZFG)-2
 
 DBSelectArea("ZFF")
 
@@ -209,14 +193,14 @@ Else
 	aCols	:= {}
 	
 	ZFG->( DBSetOrder(1) )
-	IF ZFG->( DBSeek( ZFF->ZFF_FILIAL + ZFF->ZFF_CODIGO ) )
+	If ZFG->( DBSeek( ZFF->ZFF_FILIAL + ZFF->ZFF_CODIGO ) )
 	
 		While ZFG->(!Eof()) .And. ZFG->( ZFG_FILIAL + ZFG_CODIGO ) == xFilial("ZFG") + ZFF->ZFF_CODIGO
 		
 			aAdd( aCols , Array( nUsado + 1 ) )
 			
 			For _nI := 1 To nUsado
-				aCols[Len(aCols)][_ni] := IIf( aHeader[_ni][10] # "V" , ZFG->( FieldGet( FieldPos( aHeader[_ni][02] )) ) , CriaVar( aHeader[_ni][02] ) )
+				aCols[Len(aCols)][_nI] := IIf( aHeader[_nI][10] # "V" , ZFG->( FieldGet( FieldPos( aHeader[_nI][02] )) ) , CriaVar( aHeader[_nI][02] ) )
 			Next _nI
 			
   			aCols[Len(aCols)][nUsado+1] := .F.
@@ -231,22 +215,22 @@ Else
 		aCols[1,1] := "001"
 		
 		For _nI := 2 To nUsado
-			aCols[1,_ni] := 0
+			aCols[1,_nI] := 0
 		Next _nI
 		
 	EndIf 
 	
-Endif
+EndIf
 
 //================================================================================
 //| Monta a tela para exibição                                                   |
 //================================================================================
-DO WHILE .T.
+While .T.
 
 	aSize    := MsAdvSize()
 	aObjects := {}
-	AAdd( aObjects, { 100, 100, .T., .T. } )
-	AAdd( aObjects, { 100, 100, .T., .T. } )
+	aAdd( aObjects, { 100, 100, .T., .T. } )
+	aAdd( aObjects, { 100, 100, .T., .T. } )
 	
 	aInfo   := { aSize[ 1 ],aSize[ 2 ],aSize[ 3 ],aSize[ 4 ],03,03 }
 	aPosObj := MsObjSize( aInfo, aObjects )
@@ -271,11 +255,8 @@ Return
 Programa----------: AGLT053V
 Autor-------------: Alex Wallauer
 Data da Criacao---: 23/05/2018
-===============================================================================================================================
 Descrição---------: Validação dos dados preenchidos
-===============================================================================================================================
 Parametros--------: iopc: opcao
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -283,43 +264,40 @@ Static Function AGLT053V( iopc )
 
 Local _lRet		:= .T. , I
 
-If iopc == 3 .OR. iopc = 4
+If iopc == 3 .Or. iopc = 4
 	                                                              //DELETADO
-	If _lRet .And. ( Len(aCols) = 0 .OR. ( Len(aCols) == 1 .AND. ( aCols[1,LEN(aCols[1])]  .OR. (aCols[1,2] = 0 .or. aCols[1,3] = 0) )  ))
+	If _lRet .And. ( Len(aCols) = 0 .Or. ( Len(aCols) == 1 .And. ( aCols[1,Len(aCols[1])]  .Or. (aCols[1,2] = 0 .Or. aCols[1,3] = 0) )  ))
           
 		MsgStop("Favor informar pelo uma faixa de frete com valores.","AGLT05301")
-  		_lret := .F.
+  		_lRet := .F.
 		
 	EndIf
 	
     _nFaixa:=0
 	For I := 1 To Len( aCols )
-	    If !aCols[I,LEN(aCols[I])]//Se não é DELETADO
-           If aCols[I,2] <= 0 .OR. aCols[I,3]  <= 0
+	    If !aCols[I,Len(aCols[I])]//Se não é DELETADO
+           If aCols[I,2] <= 0 .Or. aCols[I,3]  <= 0
 		      MsgStop("KM e Preço da sequencia "+aCols[I,1]+" deve ser informado","AGLT05302")
-  		      _lret := .F.
+  		      _lRet := .F.
            EndIf
-           IF _nFaixa <> 0 .AND. aCols[I,2] <= _nFaixa
+           If _nFaixa <> 0 .And. aCols[I,2] <= _nFaixa
 		      MsgStop("Faixa da sequencia "+aCols[I,1]+" menor ou igual a anterior As faixas 'KM Ate' tem que ir aumentando da primeira sequencia ate a ultima","AGLT05303")
-  		      _lret := .F.
+  		      _lRet := .F.
            EndIf
            _nFaixa:=aCols[I,2]
         EndIf
     Next
 EndIf
 
-Return( _lret )
+Return( _lRet )
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT053G
 Autor-------------: Alex Wallauer
 Data da Criacao---: 23/05/2018   
-===============================================================================================================================
 Descrição---------: Grava dados do cabecalho e itens do RPA AVULSO
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -328,7 +306,7 @@ Static Function AGLT053G(oDlg)
 Local _nX := 0
 
 //================================================================================
-//| Quando não for consulta                                                      |
+//| Quando não For consulta                                                      |
 //================================================================================
 If nOpcG # 2
 
@@ -345,7 +323,7 @@ If nOpcG # 2
 		
 		ZFF->ZFF_FILIAL  := xFilial("ZFF")
 		AVREPLACE("M","ZFF")
-		ZFF->( MsUnlock() )
+		ZFF->( MSUnLock() )
 		
 		If Inclui
 			ConfirmSx8()
@@ -355,7 +333,7 @@ If nOpcG # 2
 	
 		ZFF->( RecLock( "ZFF" , .F. ) )
 		ZFF->( DBDelete() )
-		ZFF->( MsUnlock() )
+		ZFF->( MSUnLock() )
 	
 	//================================================================================
 	//| Deleta todos os itens                                                        |
@@ -364,11 +342,11 @@ If nOpcG # 2
 		
 		lProcura := ZFG->( DBSeek( xFilial("ZFG") + M->ZFF_CODIGO ) )
 		
-		Do While ( ZFG->(!EOF()) .And. ( XFILIAL("ZFG") + ZFG->ZFG_CODIGO == xFilial("ZFG") + M->ZFF_CODIGO ) )
+		While ( ZFG->(!Eof()) .And. ( xFilial("ZFG") + ZFG->ZFG_CODIGO == xFilial("ZFG") + M->ZFF_CODIGO ) )
 			
 			ZFG->( RecLock("ZFG",.F.,.T.) )
 			ZFG->( DBDelete() )
-			ZFG->( MsUnlock() )
+			ZFG->( MSUnLock() )
 			ZFG->( DBSkip() )
 			
 		EndDo
@@ -386,23 +364,23 @@ If nOpcG # 2
 		
 		If nOpcG # 5
 		
-			If aCols[_nX,len(aCols[_nX])] .And. lProcura // exclusao
+			If aCols[_nX,Len(aCols[_nX])] .And. lProcura // exclusao
 			
 				ZFG->(RecLock("ZFG",.F.,.T.))
 				ZFG->(dbdelete())
-				ZFG->(MsUnlock())
+				ZFG->(MSUnLock())
 				
 			Else
 			
-				If !aCols[_nX,len(aCols[_nX])]  
+				If !aCols[_nX,Len(aCols[_nX])]  
 				
 					ZFG->( RecLock( "ZFG" , IIf( lProcura , .F. , .T. ) ) )
-					ZFG->ZFG_FILIAL   := XFILIAL("ZFG")
+					ZFG->ZFG_FILIAL   := xFilial("ZFG")
 					ZFG->ZFG_CODIGO   := M->ZFF_CODIGO
 					ZFG->ZFG_SEQ      := aCols[_nX][01]
 					ZFG->ZFG_KM_ATE   := aCols[_nX][02]
 					ZFG->ZFG_KMPREC   := aCols[_nX][03]
-					ZFG->( MsUnlock() )
+					ZFG->( MSUnLock() )
 					
 					If Inclui
 						ConfirmSx8()

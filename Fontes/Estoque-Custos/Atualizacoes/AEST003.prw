@@ -2,30 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Josué Danich  | 16/09/2015 | Chamado 11890. Incluida validação de usuário da ZZL para manutenção no cadastro
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 10/09/2024 | Chamado 48465. Removendo warning de compilação.
+Josué Danich  |16/09/2015| Chamado 11890. Incluida validação de usuário da ZZL para manutenção no cadastro
+Lucas Borges  |10/09/2024| Chamado 48465. Removendo warning de compilação.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: AEST003
 Autor-------------: Tiago Correa Castro
 Data da Criacao---: 14/07/2008
-===============================================================================================================================
 Descrição---------: Programa de Criacao de Tela de Cadastro do Nivel 4. As informacoes desse cadastro sera utilizado pelo campo
 					SB1->B1_I_NIV4
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -35,11 +28,11 @@ Local 	_cAlias		:= "ZA3"
 Private cCadastro	:= "Cadastro de Nivel 4"
 Private aRotina		:= {}                
 
-AADD(aRotina,{"Pesquisar"	,"AxPesqui",0,1})
-AADD(aRotina,{"Visualizar"	,"AxVisual",0,2})
-AADD(aRotina,{"Incluir"		,"U_AEST003V",0,3})
-AADD(aRotina,{"Alterar"		,"U_AEST003V",0,4})
-AADD(aRotina,{"Excluir"		,"U_AEST003V",0,5})
+aAdd(aRotina,{"Pesquisar"	,"AxPesqui",0,1})
+aAdd(aRotina,{"Visualizar"	,"AxVisual",0,2})
+aAdd(aRotina,{"Incluir"		,"U_AEST003V",0,3})
+aAdd(aRotina,{"Alterar"		,"U_AEST003V",0,4})
+aAdd(aRotina,{"Excluir"		,"U_AEST003V",0,5})
 	
 mBrowse(6,1,22,75,_cAlias)
 
@@ -50,13 +43,10 @@ Return
 Programa----------: AEST003V
 Autor-------------: Tiago Correa Castro
 Data da Criacao---: 14/07/2008
-===============================================================================================================================
 Descrição---------: Programa de Validacao da Alteracao e Exclusao, chamado pelo programa AEST003(). Valida a alteracao e 
 					exclusao dos dados na tabela ZA3010, caso o codigo a ser excluido ja tenha amarracao na tabela SB1010 o 
 					programa nao permite a alteracao ou exclusao.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Retorno Logico (.T. ou .F.) para inclusao, exclusao ou alteracao   
 ===============================================================================================================================
 */
@@ -90,7 +80,7 @@ If (nOpc == 4 .Or. nOpc == 5)
 		FWAlertWarning("Cadastro já utilizado em produtos! Caso necessário modifique o grupo 4 utilizado nos produtos antes de alterar esse cadastro.","AEST00302")
 	EndIf
 
-	(_cAlias)->(DbCloseArea())
+	(_cAlias)->(DBCloseArea())
 EndIf
 
 //==============================================================================

@@ -2,32 +2,24 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alexandre V.  | 09/01/2014 | Ajustes no relatório para não dar erro nas chamadas da rotina AGLT012 quando não encontrar
-              |            | registros para imprimir. Chamado 8049
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 27/03/2019 | Ajuste para imprimir empréstimos do Leite de Terceiros. Chamado 11132
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 14/05/2019 | Ajuste no layout do relatório. Chamado 29246
+Alexandre V.  |09/01/2014| Chamado 8049. Ajustes no relatório para não dar erro nas chamadas da rotina AGLT012 quando não 
+              |          | encontrar registros para imprimir.
+Lucas Borges  |27/03/2019| Chamado 11132. Ajuste para imprimir empréstimos do Leite de Terceiros.
+Lucas Borges  |14/05/2019| Chamado 29246. Ajuste no layout do relatório.
 ===============================================================================================================================
 */
 
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT030
 Autor-------------: Italac
 Data da Criacao---: 21/05/2009
-===============================================================================================================================
 Descrição---------: Relação de Empréstimos e Adiantamentos
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -66,14 +58,14 @@ DBSelectArea(cString)
 wnrel := SetPrint( cString , NomeProg , "" , @titulo , cDesc1 , cDesc2 , cDesc3 , .T. , aOrd , .T. , Tamanho ,, .T. )
 
 If nLastKey == 27
-	Return()
-Endif
+	Return
+EndIf
 
 SetDefault( aReturn , cString )
 
 If nLastKey == 27
-   Return()
-Endif
+   Return
+EndIf
 
 nTipo := If( aReturn[4] == 1 , 15 , 18 )
 
@@ -82,18 +74,15 @@ nTipo := If( aReturn[4] == 1 , 15 , 18 )
 //================================================================================
 RptStatus( {|| RunReport( Cabec1 , Cabec2 , Titulo , nLin ) } , Titulo )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: RUNREPORT
 Autor-------------: Italac
 Data da Criacao---: 21/05/2009
-===============================================================================================================================
 Descrição---------: Função para controle do processamento do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -110,7 +99,7 @@ DBSelectArea(cString)
 //================================================================================
 SetRegua( Len( aDados ) )
 
-For _nI := 1 to len(aDados)
+For _nI := 1 to Len(aDados)
 
 	//================================================================================
 	// Verifica o cancelamento pelo usuario.
@@ -126,7 +115,7 @@ For _nI := 1 to len(aDados)
 	If nLin > 55
 		Cabec( Titulo , Cabec1 , Cabec2 , NomeProg , Tamanho , nTipo )
 		nLin := 8
-	Endif
+	EndIf
 	
 	@ nLin , 000 PSAY aDados[_nI][02]																// Codigo
 	If _nTp == 1
@@ -141,8 +130,8 @@ For _nI := 1 to len(aDados)
 		@ nLin , 114 PSAY IIf(_nTp==1,Transform( aDados[_nI][09] , "@E 999,999,999"		),"")							// Producao
 		@ nLin , 127 PSAY IIf(_nTp==1,Transform( aDados[_nI][10] , "@E 999,999,999.99"	),"")							// Faturamento
 	EndIf
-	@ nLin , IIf(_nTp==1,146,102) PSAY DtoC( StoD( aDados[_nI][IIf(_nTp==1,13,10)] ) )												// Data do 1 vencimento
-	@ nLin , IIf(_nTp==1,165,120) PSAY DtoC( StoD( aDados[_nI][IIf(_nTp==1,14,11)] ) )												// Data do credito
+	@ nLin , IIf(_nTp==1,146,102) PSAY DToC( SToD( aDados[_nI][IIf(_nTp==1,13,10)] ) )												// Data do 1 vencimento
+	@ nLin , IIf(_nTp==1,165,120) PSAY DToC( SToD( aDados[_nI][IIf(_nTp==1,14,11)] ) )												// Data do credito
 	@ nLin , IIf(_nTp==1,181,137) PSAY aDados[_nI][IIf(_nTp==1,15,12)]																// Obs
 	
 	//================================================================================
@@ -193,7 +182,7 @@ EndIf
 SET DEVICE TO SCREEN
 
 //================================================================================
-// Se impressao for em disco, chama o gerenciador de impressao.
+// Se impressao For em disco, chama o gerenciador de impressao.
 //================================================================================
 If aReturn[5] == 1
 
@@ -201,8 +190,8 @@ If aReturn[5] == 1
    SET PRINTER TO
    OurSpool(wnrel)
    
-Endif
+EndIf
 
 MS_FLUSH()
 
-Return()
+Return

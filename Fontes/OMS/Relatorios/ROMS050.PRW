@@ -1,38 +1,30 @@
-/* 
+/*
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-Autor         |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Josué Danich  | 09/08/2018 | Chamado 25803. Inclusão de campos de nota fiscal e série. 
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 17/10/2019 | Chamado 28346. Removidos os Warning na compilação da release 12.1.25. 
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 25/04/2023 | Chamado 43284. Incluidas 8 novas colunas para impressao.
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 08/02/2024 | Chamado 44782. Jerry. Ajustes para a nova opcao de tipo de entrega: O = Agendado pelo Op.Log.
+Alex Wallauer |25/04/2023| Chamado 43284. Incluidas 8 novas colunas para impressao.
+Alex Wallauer |08/02/2024| Chamado 44782. Jerry. Ajustes para a nova opcao de tipo de entrega: O = Agendado pelo Op.Log.
+Lucas Borges  |02/10/2025| Chamado 51526. Modificada forma para recuperar a matrícula do usuário.
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes e Defines da Rotina.
-//===================================================================================================
-#Include 'Protheus.ch'
-#INCLUDE 'TOPCONN.CH'
+
+#Include "TOTVS.ch"
+#Include 'TOPCONN.CH'
 
 /*
 ===============================================================================================================================
 Programa----------: ROMS050
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 02/01/2018
-===============================================================================================================================
 Descrição---------: Relatório Relatório Lista de Pedidos Liberados. Chamado 22940.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function ROMS050()
+
 Local oReport := Nil
 Private cPerg := "ROMS050"
 Private aOrd  := {"Filial","Pedido","Entrega","Cliente","Estado"} 
@@ -42,22 +34,20 @@ Pergunte(cPerg,.T.)
 oReport := ROMS050P(cPerg)
 oReport:PrintDialog()
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: ROMS050P
 Autor-------------: Julio de Paula PAz
 Data da Criacao---: 02/01/2018
-===============================================================================================================================
 Descrição---------: Função que faz a montagem do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function ROMS050P(cNome)
+
 Local oReport	:= Nil
 Local oSection1	:= Nil
 	
@@ -106,15 +96,13 @@ Return(oReport)
 Programa----------: ROMS050P
 Autor-------------: Julio de Paula PAz
 Data da Criacao---: 02/01/2018
-===============================================================================================================================
 Descrição---------: Função que imprime o relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function ROMS050R(oReport)
+
 Local oSection1 := oReport:Section(1)
 Local cQry1		:= ""
 Local _cSituacao
@@ -132,70 +120,67 @@ cQry1 += " WHERE SC5.D_E_L_E_T_ = ' ' "
 cQry1 += "   AND SC9.D_E_L_E_T_ = ' ' "
 cQry1 += "   AND SC5.C5_FILIAL  = SC9.C9_FILIAL "
 cQry1 += "   AND SC5.C5_NUM     = SC9.C9_PEDIDO "   
-//cQry1 += "AND ZZL_FILIAL = '" + XFilial("ZZL") + "'"
-//cQry1 += "AND ZZL_MATRIC = C9_I_USLIB "      
-
  
-If !EMPTY(Alltrim(MV_PAR01))	
-	If Len(Alltrim(MV_PAR01)) <= 2
-	   cQry1 += " AND C9_FILIAL = '" + Alltrim(MV_PAR01) + "' "
+If !Empty(AllTrim(MV_PAR01))	
+	If Len(AllTrim(MV_PAR01)) <= 2
+	   cQry1 += " AND C9_FILIAL = '" + AllTrim(MV_PAR01) + "' "
 	Else
 	   cQry1 += " AND C9_FILIAL IN " +  FormatIn(MV_PAR01,";") + " "
-	Endif	  
+	EndIf	  
 EndIf        
 
 // Dt Liberacao de -- MV_PAR09
-If !EMPTY(MV_PAR09) 
-   cQry1 += " AND C9_DATALIB  >= '" + DTOS(MV_PAR09) + "' "
-Endif
+If !Empty(MV_PAR09) 
+   cQry1 += " AND C9_DATALIB  >= '" + DToS(MV_PAR09) + "' "
+EndIf
 
 // Dt Liberacao ate -- MV_PAR10
-If !EMPTY(MV_PAR10)
-   cQry1 += " AND C9_DATALIB  <= '" + DTOS(MV_PAR10) + "' "
-Endif
+If !Empty(MV_PAR10)
+   cQry1 += " AND C9_DATALIB  <= '" + DToS(MV_PAR10) + "' "
+EndIf
 
 	
 // Estado -- MV_PAR02
-If !EMPTY(Alltrim(MV_PAR02))
-	If Len(Alltrim(MV_PAR02)) <= 2
-	   cQry1 += "  AND C5_I_EST = '" + Alltrim(MV_PAR02)  + "' "
+If !Empty(AllTrim(MV_PAR02))
+	If Len(AllTrim(MV_PAR02)) <= 2
+	   cQry1 += "  AND C5_I_EST = '" + AllTrim(MV_PAR02)  + "' "
 	Else
 	   cQry1 += "  AND C5_I_EST IN " +  FormatIn(MV_PAR02,";")  + " "
 	EndIf
 EndIf	
 
 // Pedido de -- MV_PAR03
-If !EMPTY(MV_PAR03)
+If !Empty(MV_PAR03)
 	cQry1 += " AND C9_PEDIDO >= '" + MV_PAR03 + "' "
-Endif
+EndIf
 
 // Pedido ate -- MV_PAR04
-If !EMPTY(MV_PAR04)
+If !Empty(MV_PAR04)
 	cQry1 += " AND C9_PEDIDO <= '" + MV_PAR04 + "' "
-Endif
+EndIf
 
 // Cliente de -- MV_PAR05
-If !EMPTY(MV_PAR05) 
+If !Empty(MV_PAR05) 
    cQry1 += " AND C9_CLIENTE >= '" + MV_PAR05 + "' "
-Endif
+EndIf
 
 // Loja de -- MV_PAR06
-If !EMPTY(MV_PAR06)
+If !Empty(MV_PAR06)
    cQry1 += " AND C9_LOJA >= '" + MV_PAR06 + "' "
-Endif
+EndIf
 
 // Cliente ate -- MV_PAR07
-If !EMPTY(MV_PAR07)
+If !Empty(MV_PAR07)
    cQry1 += " AND C9_CLIENTE <= '" + MV_PAR07 + "' "
-Endif
+EndIf
 
 // Loja ate -- MV_PAR08
-If !EMPTY(MV_PAR08) 
+If !Empty(MV_PAR08) 
    cQry1 += " AND C9_LOJA <= '" + MV_PAR08 + "' "
-Endif
+EndIf
 
 // Situação Pedido -- MV_PAR11
-If !EMPTY(MV_PAR11) 
+If !Empty(MV_PAR11) 
 	If MV_PAR11 == 1 // Faturado
 		cQry1 += " AND C9_NFISCAL <> ' ' "       
 	EndIf
@@ -208,8 +193,8 @@ EndIf
 // Filtra Produto
 //================================================================================
 If !Empty( MV_PAR12 )         
-	If Len(Alltrim(MV_PAR12)) <= 11
-		cQry1 += " AND C9_PRODUTO = '" + Alltrim(MV_PAR12) + "' " 		
+	If Len(AllTrim(MV_PAR12)) <= 11
+		cQry1 += " AND C9_PRODUTO = '" + AllTrim(MV_PAR12) + "' " 		
 	Else
 		cQry1 += " AND C9_PRODUTO IN   "  + FormatIn( MV_PAR12 , ";" )
 	EndIf
@@ -228,44 +213,44 @@ ElseIf oReport:nOrder == 5
 EndIf
 
 If Select("TRBSC9") <> 0
-	DbSelectArea("TRBSC9")
-	DbCloseArea()
+	DBSelectArea("TRBSC9")
+	DBCloseArea()
 EndIf
 
 TCQUERY cQry1 NEW ALIAS "TRBSC9"
 	
-dbSelectArea("TRBSC9")
-TRBSC9->(dbGoTop())
+DBSelectArea("TRBSC9")
+TRBSC9->(DBGoTop())
 
-DAI->(DbSetOrder(4)) // ORDEM 4 - DAI_FILIAL+DAI_PEDIDO+DAI_COD+DAI_SEQCAR          
-SC9->(DbSetOrder(1)) // ORDEM 1 - C9_FILIAL+C9_PEDIDO+C9_ITEM+C9_SEQUEN+C9_PRODUTO+C9_BLEST+C9_BLCRED                                                            
-SC6->(Dbsetorder(1)) // ORDEM 1 - C6_FILIAL+C6_NUM+C6_ITEM+C6_PRODUTO  
-SB1->(Dbsetorder(1)) // ORDEM 1 - B1_FILIAL  + B1_COD
+DAI->(DBSetOrder(4)) // ORDEM 4 - DAI_FILIAL+DAI_PEDIDO+DAI_COD+DAI_SEQCAR          
+SC9->(DBSetOrder(1)) // ORDEM 1 - C9_FILIAL+C9_PEDIDO+C9_ITEM+C9_SEQUEN+C9_PRODUTO+C9_BLEST+C9_BLCRED                                                            
+SC6->(DBSetOrder(1)) // ORDEM 1 - C6_FILIAL+C6_NUM+C6_ITEM+C6_PRODUTO  
+SB1->(DBSetOrder(1)) // ORDEM 1 - B1_FILIAL  + B1_COD
 
 
 Count To _nTotRegs
-_cTot:=ALLTRIM(STR(_nTotRegs))		
+_cTot:=AllTrim(Str(_nTotRegs))		
 _nConta:=0
 oReport:SetMeter(_nTotRegs)
-TRBSC9->(DbGoTop())
+TRBSC9->(DBGoTop())
 
-DO While !TRBSC9->(Eof())
+While !TRBSC9->(Eof())
 
    oReport:IncMeter()
    _nConta++
-   oReport:SetMsgPrint("Imprimindo Registro : "+ALLTRIM(STR(_nConta)) +" de "+ _cTot)
-   //IncProc("Imprimindo Filial " + Alltrim(TRBSC9->C9_FILIAL) + " - " + AllTrim(FWFilialName(cEmpAnt,TRBSC9->C9_FILIAL)))
+   oReport:SetMsgPrint("Imprimindo Registro : "+AllTrim(Str(_nConta)) +" de "+ _cTot)
+   //IncProc("Imprimindo Filial " + AllTrim(TRBSC9->C9_FILIAL) + " - " + AllTrim(FWFilialName(cEmpAnt,TRBSC9->C9_FILIAL)))
 
    If oReport:Cancel()
       Exit
    EndIf
    
    _cSituacao := "LIBERADO"
-   If !EMPTY(TRBSC9->C9_NFISCAL)
+   If !Empty(TRBSC9->C9_NFISCAL)
       _cSituacao := "FATURADO"
-   ElseIf !EMPTY(TRBSC9->C9_CARGA)
+   ElseIf !Empty(TRBSC9->C9_CARGA)
       _cSituacao := "EM OC"    
-   ElseIf !EMPTY(TRBSC9->C9_BLEST) .And. TRBSC9->C9_BLEST <> '10'
+   ElseIf !Empty(TRBSC9->C9_BLEST) .And. TRBSC9->C9_BLEST <> '10'
 	  _cSituacao := "BLQ.ESTQ"
    EndIf
 
@@ -287,14 +272,14 @@ DO While !TRBSC9->(Eof())
    oSection1:Init()
    
 
-   SC6->(Dbseek(TRBSC9->C9_FILIAL+TRBSC9->C9_PEDIDO+TRBSC9->C9_ITEM+TRBSC9->C9_PRODUTO ))
-   SB1->(Dbseek(xFilial("SB1")+TRBSC9->C9_PRODUTO ))
+   SC6->(DBSeek(TRBSC9->C9_FILIAL+TRBSC9->C9_PEDIDO+TRBSC9->C9_ITEM+TRBSC9->C9_PRODUTO ))
+   SB1->(DBSeek(xFilial("SB1")+TRBSC9->C9_PRODUTO ))
 
    oSection1:Cell("C9_FILIAL") :SetValue(TRBSC9->C9_FILIAL)
    oSection1:Cell("C9_PEDIDO") :SetValue(TRBSC9->C9_PEDIDO)   
    oSection1:Cell("C5_I_OPER") :SetValue(TRBSC9->C5_I_OPER)   
-   oSection1:Cell("C5_I_DTENT"):SetValue(STOD(TRBSC9->C5_I_DTENT))
-   oSection1:Cell("C5_I_LIBL") :SetValue(STOD(TRBSC9->C5_I_LIBL))
+   oSection1:Cell("C5_I_DTENT"):SetValue(SToD(TRBSC9->C5_I_DTENT))
+   oSection1:Cell("C5_I_LIBL") :SetValue(SToD(TRBSC9->C5_I_LIBL))
    oSection1:Cell("C9_CLIENTE"):SetValue(TRBSC9->C9_CLIENTE)
    oSection1:Cell("C9_LOJA")	 :SetValue(TRBSC9->C9_LOJA)
    oSection1:Cell("C5_I_NOME") :SetValue(TRBSC9->C5_I_NOME)    
@@ -311,8 +296,8 @@ DO While !TRBSC9->(Eof())
    oSection1:Cell("C5_I_EST")	 :SetValue(TRBSC9->C5_I_EST)
    oSection1:Cell("C5_I_MUN")	 :SetValue(TRBSC9->C5_I_MUN)   
    oSection1:Cell("SITUACAO")	 :SetValue(_cSituacao)
-   oSection1:Cell("ZZL_NOME")	 :SetValue(Posicione("ZZL",1,xfilial("ZZL")+AllTrim(TRBSC9->C9_I_USLIB),"ZZL_NOME"))
-   oSection1:Cell("C9_I_DTLIB"):SetValue(STOD(TRBSC9->C9_I_DTLIB))
+   oSection1:Cell("ZZL_NOME")	 :SetValue(Posicione("ZZL",1,xFilial("ZZL")+AllTrim(TRBSC9->C9_I_USLIB),"ZZL_NOME"))
+   oSection1:Cell("C9_I_DTLIB"):SetValue(SToD(TRBSC9->C9_I_DTLIB))
    oSection1:Cell("C9_I_HRLIB"):SetValue(TRBSC9->C9_I_HRLIB)
    oSection1:Cell("C9_CARGA")	 :SetValue(TRBSC9->C9_CARGA)   
    oSection1:Cell("C9_NFISCAL"):SetValue(TRBSC9->C9_NFISCAL)   
@@ -323,9 +308,9 @@ DO While !TRBSC9->(Eof())
    oSection1:Cell("C9_QTDLIB") :SetValue(TRBSC9->C9_QTDLIB)
    oSection1:Cell("C9_QTDLIB2"):SetValue(TRBSC9->C9_QTDLIB2)
  
-   oSection1:Printline()
+   oSection1:PrintLine()
 
-   TRBSC9->(dbSkip())
+   TRBSC9->(DBSkip())
 
 End
 oSection1:Finish()

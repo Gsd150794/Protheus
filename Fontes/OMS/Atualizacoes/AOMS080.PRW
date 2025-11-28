@@ -5,7 +5,7 @@
 -------------------------------------------------------------------------------------------------------------------------------
 =============================================================================================================================== 
 */
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 /*
 ===============================================================================================================================
 Programa----------: AOMS080
@@ -28,22 +28,22 @@ Private cCadastro
 
 Begin Sequence
    cCadastro := "Integração dos Dados dos Veículos/Motorista Via Webservice: Italac <---> RDC"
-   Aadd(aRotina,{"Pesquisar" ,"AxPesqui" ,0,1})
-   Aadd(aRotina,{"Visualizar","AxVisual",0,2})
-   Aadd(aRotina,{"Legenda"   ,"U_AOMS080L" ,0,3})
+   aAdd(aRotina,{"Pesquisar" ,"AxPesqui" ,0,1})
+   aAdd(aRotina,{"Visualizar","AxVisual",0,2})
+   aAdd(aRotina,{"Legenda"   ,"U_AOMS080L" ,0,3})
    
-   Aadd(_aCores,{"ZFN_SITUAC == 'N'" ,"BR_VERDE" })
-   Aadd(_aCores,{"ZFN_SITUAC == 'P'" ,"BR_VERMELHO" })
-   Aadd(_aCores,{"ZFN_SITUAC == 'R'" ,"BR_AMARELO" })
+   aAdd(_aCores,{"ZFN_SITUAC == 'N'" ,"BR_VERDE" })
+   aAdd(_aCores,{"ZFN_SITUAC == 'P'" ,"BR_VERMELHO" })
+   aAdd(_aCores,{"ZFN_SITUAC == 'R'" ,"BR_AMARELO" })
 
-   DbSelectArea("ZFN")
-   ZFN->(DbSetOrder(1)) 
-   ZFN->(DbGoTop())
+   DBSelectArea("ZFN")
+   ZFN->(DBSetOrder(1)) 
+   ZFN->(DBGoTop())
    MBrowse(6,1,22,75,"ZFN", , , , , , _aCores)
    
 End Sequence
 
-Return Nil    
+Return    
 
 /*
 ===============================================================================================================================
@@ -64,14 +64,14 @@ User Function AOMS080L
 Local _aLegenda := {}
 
 Begin Sequence
-   Aadd(_aLegenda,{"BR_VERDE"    ,"Não Processado" })
-   Aadd(_aLegenda,{"BR_AMARELO"  ,"Rejeitada" })
-   Aadd(_aLegenda,{"BR_VERMELHO" ,"Processado" })
+   aAdd(_aLegenda,{"BR_VERDE"    ,"Não Processado" })
+   aAdd(_aLegenda,{"BR_AMARELO"  ,"Rejeitada" })
+   aAdd(_aLegenda,{"BR_VERMELHO" ,"Processado" })
 
    BrwLegenda(cCadastro, "Legenda", _aLegenda)
 
 End Sequence
 
-Return Nil
+Return
 
                      

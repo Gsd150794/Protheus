@@ -2,27 +2,21 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MCOM013
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 05/05/2020
-===============================================================================================================================
 Descrição---------: Função para replicar informação de linha para todos os produtores que possuem o Produtor corrente como dono
 					de tanque. Chamado 32851
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -36,7 +30,7 @@ Local _lRet		:= .T.
 Local _nCountRec:= 0
 
 If SA2->A2_I_CLASS == 'P'
-	BeginSQL alias _cAlias
+	BeginSql alias _cAlias
 		SELECT R_E_C_N_O_ RECNO 
 		FROM %Table:SA2%
 		WHERE D_E_L_E_T_ = ' '
@@ -44,15 +38,15 @@ If SA2->A2_I_CLASS == 'P'
 		AND A2_L_TANQ = %exp:SA2->A2_COD%
 		AND A2_L_TANLJ = %exp:SA2->A2_LOJA%
 		AND A2_L_LI_RO <> %exp:SA2->A2_L_LI_RO%
-	EndSQL
+	EndSql
 	Count To _nCountRec
-	(_cAlias)->( DbGotop() )
+	(_cAlias)->( DBGoTop() )
 	
 	If MsgYesNo("Serão alterados "+AllTrim(Str(_nCountRec))+" produtores. Deseja replicar a linha "+_cLinha+" para todos?","MCOM01301")
 		BeginTran()
 
-			While !(_cAlias)->(EOF()) .And. _lRet
-				SA2->(DBGoto((_cAlias)->RECNO))
+			While !(_cAlias)->(Eof()) .And. _lRet
+				SA2->(DBGoTo((_cAlias)->RECNO))
 				_oModel := FwLoadModel ("MATA020")
 				_oModel:SetOperation(4)
 				_oModel:Activate()
@@ -86,7 +80,7 @@ If SA2->A2_I_CLASS == 'P'
 			MsgInfo("Produtores alterados com sucesso!","MCOM01303")
 		EndIf
 	EndIf
-	SA2->(DBGoto(_nSaveRec))
+	SA2->(DBGoTo(_nSaveRec))
 Else
 	MsgStop("Essa função é exclusiva para Produtores!","MCOM01304")
 EndIf

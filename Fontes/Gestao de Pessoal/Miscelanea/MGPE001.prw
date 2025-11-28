@@ -2,32 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alexandre V.  | 20/01/2015 | Verificação para buscar apenas as cargas 'Faturadas' no período, pois existem casos onde as
-              |            | mesmas são geradas em um período e faturadas em outro. Chamado 8635
--------------------------------------------------------------------------------------------------------------------------------
-Alexandre V.  | 08/06/2015 | Atualização da rotina para correção da chamada da tabela na Query. Chamado 10463
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 17/09/2019 | Retirada chamada da função itputx1. Chamado 28346 
+Alexandre V.  |20/01/2015| Chamado 8635. Verificação para buscar apenas as cargas 'Faturadas' no período, pois existem casos 
+              |          | onde as mesmas são geradas em um período e faturadas em outro.
+Alexandre V.  |08/06/2015| Chamado 10463. Atualização da rotina para correção da chamada da tabela na Query.
+Lucas Borges  |17/09/2019| Chamado 28346. Retirada chamada da função itputx1.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "Protheus.ch"
-
-#Define CRLF	Chr(13)+Chr(10)
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MGPE001
 Autor-------------: Fabiano Dias
 Data da Criacao---: 10/09/2010
-===============================================================================================================================
 Descrição---------: Geração do arquivo TXT com o somatório total por Autônomo
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -58,11 +49,8 @@ Return
 Programa----------: MGPE001TXT
 Autor-------------: Fabiano Dias
 Data da Criacao---: 10/09/2010
-===============================================================================================================================
 Descrição---------: Geração do arquivo TXT com o somatório total por Autônomo
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -81,7 +69,7 @@ Local _nCont		:= 0
 If Empty( MV_PAR01 ) .Or. Empty( MV_PAR02 ) .Or. Empty( MV_PAR05 ) 
 
 	MessageBox( 'Os parâmetros obrigatórios não foram informados! Verifique os parâmetros para processar corretamente a rotina.' , 'Atencao!' , 16 )
-	Return()
+	Return
 
 EndIf
 
@@ -93,8 +81,8 @@ _nHdl		:= FCreate( _cArqTxt )
 //====================================================================================================
 If _nHdl == -1
 	MessageBox( 'O arquivo: '+ _cArqTxt +' não foi criado! Verifique os parâmetros e o acesso ao diretório de destino.' , 'Atencao!' , 16 )
-	Return()
-Endif     
+	Return
+EndIf     
 
 //====================================================================================================
 // Seleciona os produtores donos de tanque e seu volume de Leite no período
@@ -115,7 +103,7 @@ _cQuery += "        AND ZZ2.ZZ2_AUTONO BETWEEN '"+ MV_PAR03       +"' AND '"+ MV
 _cQuery += "        AND EXISTS ( SELECT 1 FROM "+ RetSqlName('SF2') +" SF2 "
 _cQuery += "                     WHERE "
 _cQuery += "                         SF2.D_E_L_E_T_ = ' ' "
-_cQuery += "                     AND SF2.F2_EMISSAO BETWEEN '"+ DtoS(MV_PAR01) +"' AND '"+ DtoS(MV_PAR02) +"' "
+_cQuery += "                     AND SF2.F2_EMISSAO BETWEEN '"+ DToS(MV_PAR01) +"' AND '"+ DToS(MV_PAR02) +"' "
 _cQuery += "                     AND SF2.F2_FILIAL  = ZZ2.ZZ2_FILIAL "
 _cQuery += "                     AND SF2.F2_CARGA   = ZZ2.ZZ2_CARGA ) "
 _cQuery += "        GROUP BY ZZ2.ZZ2_AUTONO "
@@ -144,7 +132,7 @@ _cQuery += "        WHERE
 _cQuery += "            ZZ2.D_E_L_E_T_ = ' '
 _cQuery += "        AND ZZ2.ZZ2_CARGA  = ' '
 _cQuery += "        AND ZZ2.ZZ2_AUTONO BETWEEN '"+ MV_PAR03       +"' AND '"+ MV_PAR04       +"' "
-_cQuery += "        AND SE2.E2_EMISSAO BETWEEN '"+ DtoS(MV_PAR01) +"' AND '"+ DtoS(MV_PAR02) +"' "
+_cQuery += "        AND SE2.E2_EMISSAO BETWEEN '"+ DToS(MV_PAR01) +"' AND '"+ DToS(MV_PAR02) +"' "
 _cQuery += "        GROUP BY ZZ2_AUTONO "
 
 _cQuery += " ) QRY "
@@ -160,14 +148,14 @@ DBUseArea( .T. , "TOPCONN" , TcGenQry(,,_cQuery) , _cAlias , .T. , .T. )
 ProcRegua(0)
 
 DBSelectArea(_cAlias)
-(_cAlias)->( DBGotop() )
+(_cAlias)->( DBGoTop() )
 While (_cAlias)->( !Eof() )
 
 	_nCont++
 	IncProc( "Processando registros... ["+ StrZero( _nCont , 6 ) +"]" )
 	
-	_cLin 	:= PADR( (_cAlias)->AUTONOMO , 6 ) +" "								// Codigo do Autonomo
-	_cLin 	+= PADL( AllTrim( Str( (_cAlias)->TOTAL , 17 , 2 ) ) , 17 , "0" )	// Valor total
+	_cLin 	:= PadR( (_cAlias)->AUTONOMO , 6 ) +" "								// Codigo do Autonomo
+	_cLin 	+= PadL( AllTrim( Str( (_cAlias)->TOTAL , 17 , 2 ) ) , 17 , "0" )	// Valor total
 	_cLin	+= CRLF
 	
 	FWrite( _nHdl , _cLin )
@@ -184,4 +172,4 @@ FClose( _nHdl )
 
 Aviso( 'Concluído!' , 'Arquivo gerado com sucesso em:' +CRLF+ _cArqTxt , {'Ok'} , 2 )
 
-Return()
+Return

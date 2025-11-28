@@ -10,9 +10,8 @@ Lucas Borges  |09/05/2025| Chamado 50617. Corrigir chamada estática no nome das 
 ===============================================================================================================================
 */
 
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "Colors.ch"
+#Include "FWMVCDEF.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -29,9 +28,9 @@ User Function CEST002()
 Local _aStru 		:= {}
 Local _cQry 		:= ''
 
-IF !MSGYESNO("Deseja iniciar a leitura dos dados para a analise gerencial?")
-   RETURN .T.
-ENDIF
+If !MSGYESNO("Deseja iniciar a leitura dos dados para a analise gerencial?")
+   Return .T.
+EndIf
 
 //Log de utilização
 U_ITLOGACS()
@@ -40,38 +39,38 @@ Private cAlias:= GetNextAlias()
 Private _aCpos := {}
 
 //criar estrutura de arquivo temporario
-AADD(_aStru,{"MESANO"	,"C",8,0})
-AADD(_aStru,{"COMPOR"	,"C",8,0})
-AADD(_aStru,{"PRODUTO"	,"C",TamSx3("B1_COD")[1],TamSx3("B1_COD")[2]})
-AADD(_aStru,{"DESCR"   	,"C",TamSx3("B1_DESC")[1],TamSx3("B1_DESC")[2]})
-AADD(_aStru,{"CUSTO"	,"N",18,7})
-AADD(_aStru,{"CUSTOO"	,"N",18,7})
-AADD(_aStru,{"CUSTOP"	,"N",18,7})
-AADD(_aStru,{"PRCMIN"	,"N",18,7})
-AADD(_aStru,{"PRCMED"	,"N",18,7})
-AADD(_aStru,{"PRECOR"	,"N",18,7})
-AADD(_aStru,{"PRCMAX"	,"N",18,7})
-AADD(_aStru,{"MRGP"		,"N",18,7})
-AADD(_aStru,{"MRG"		,"N",18,7})
-AADD(_aStru,{"QTDPRO"	,"N",18,7})
-AADD(_aStru,{"QTDFAT"	,"N",18,7})
-AADD(_aStru,{"FATURA"	,"N",18,7})
-AADD(_aStru,{"CUSTOE"	,"N",18,7})
-AADD(_aStru,{"CUSTOF"	,"N",18,7})
-AADD(_aStru,{"CUSTOI"	,"N",18,7})
-AADD(_aStru,{"CUSTOU"	,"N",18,7})
-AADD(_aStru,{"CUSTOL"	,"N",18,7})
-AADD(_aStru,{"REAJL"    ,"N",18,7})
-AADD(_aStru,{"REJCC"    ,"N",18,7})
-AADD(_aStru,{"REJVBA"   ,"N",18,7})
-AADD(_aStru,{"REJIMP"   ,"N",18,7})
-AADD(_aStru,{"REAJE"	,"N",18,7})
-AADD(_aStru,{"REAJI"	,"N",18,7})
-AADD(_aStru,{"REAJF"	,"N",18,7})
-AADD(_aStru,{"REAJU"	,"N",18,7})
-AADD(_aStru,{"REAJO"	,"N",18,7})
-AADD(_aStru,{"GRUPO"	,"C",30,0})
-AADD(_aStru,{"MARGEM"	,"N",18,7})
+aAdd(_aStru,{"MESANO"	,"C",8,0})
+aAdd(_aStru,{"COMPOR"	,"C",8,0})
+aAdd(_aStru,{"PRODUTO"	,"C",TamSX3("B1_COD")[1],TamSX3("B1_COD")[2]})
+aAdd(_aStru,{"DESCR"   	,"C",TamSX3("B1_DESC")[1],TamSX3("B1_DESC")[2]})
+aAdd(_aStru,{"CUSTO"	,"N",18,7})
+aAdd(_aStru,{"CUSTOO"	,"N",18,7})
+aAdd(_aStru,{"CUSTOP"	,"N",18,7})
+aAdd(_aStru,{"PRCMIN"	,"N",18,7})
+aAdd(_aStru,{"PRCMED"	,"N",18,7})
+aAdd(_aStru,{"PRECOR"	,"N",18,7})
+aAdd(_aStru,{"PRCMAX"	,"N",18,7})
+aAdd(_aStru,{"MRGP"		,"N",18,7})
+aAdd(_aStru,{"MRG"		,"N",18,7})
+aAdd(_aStru,{"QTDPRO"	,"N",18,7})
+aAdd(_aStru,{"QTDFAT"	,"N",18,7})
+aAdd(_aStru,{"FATURA"	,"N",18,7})
+aAdd(_aStru,{"CUSTOE"	,"N",18,7})
+aAdd(_aStru,{"CUSTOF"	,"N",18,7})
+aAdd(_aStru,{"CUSTOI"	,"N",18,7})
+aAdd(_aStru,{"CUSTOU"	,"N",18,7})
+aAdd(_aStru,{"CUSTOL"	,"N",18,7})
+aAdd(_aStru,{"REAJL"    ,"N",18,7})
+aAdd(_aStru,{"REJCC"    ,"N",18,7})
+aAdd(_aStru,{"REJVBA"   ,"N",18,7})
+aAdd(_aStru,{"REJIMP"   ,"N",18,7})
+aAdd(_aStru,{"REAJE"	,"N",18,7})
+aAdd(_aStru,{"REAJI"	,"N",18,7})
+aAdd(_aStru,{"REAJF"	,"N",18,7})
+aAdd(_aStru,{"REAJU"	,"N",18,7})
+aAdd(_aStru,{"REAJO"	,"N",18,7})
+aAdd(_aStru,{"GRUPO"	,"C",30,0})
+aAdd(_aStru,{"MARGEM"	,"N",18,7})
 
 
 _otemp := FWTemporaryTable():New( "ZTRB", _aStru )
@@ -124,14 +123,14 @@ MPSysOpenQuery(_cQry,cAlias)
 Processa( {|| CEST002A() },,"Filtrando registros...")
 
 If Select(cAlias) > 0 
-   cAlias->(DbCloseArea())
-ENDIF
+   cAlias->(DBCloseArea())
+EndIf
 
 If Select("ZTRB") > 0 
    ZTRB->(E_EraseArq(cFile,cFile2,cFile3))
-ENDIF
+EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -158,22 +157,22 @@ Private _oBrw	:= FWMBrowse():New()
 
 
 //atualizar arquivo de trabalho
-(cAlias)->(DbGoTop())
+(cAlias)->(DBGoTop())
 
-dbselectarea(cAlias)
+DBSelectArea(cAlias)
 count to nTot
 
-ZTRB->( dbsetorder(2) )
+ZTRB->( DBSetOrder(2) )
 
 ProcRegua( nTot )
-(cAlias)->(DbGoTop())
+(cAlias)->(DBGoTop())
 
-While (cAlias)->(!EOF())
+While (cAlias)->(!Eof())
 	
 	IncProc("Processando produto "+AllTrim((cAlias)->ZE1_PRODUT))
 	ZTRB->(DBAPPEND())
 		
-	If 	alltrim((cAlias)->ZE1_COMP) == "ATUAL" //LE VALORES COM REAJUSTES
+	If 	AllTrim((cAlias)->ZE1_COMP) == "ATUAL" //LE VALORES COM REAJUSTES
 	 
 		ZTRB->MESANO 	:= "ATUAL" 
 		_ncustoop		:=	(cAlias)->ZE1_CUSTOO + ( (cAlias)->ZE1_CUSTOO * (cAlias)->ZE1_REAJO / 100 ) 
@@ -197,33 +196,33 @@ While (cAlias)->(!EOF())
 		
 		Else
 		
-			ZTRB->PRCMED	:= ROUND(((cAlias)->ZE1_FATURA / (cAlias)->ZE1_QTDFAT),2)
+			ZTRB->PRCMED	:= Round(((cAlias)->ZE1_FATURA / (cAlias)->ZE1_QTDFAT),2)
 			ZTRB->PRCMIN	:= 0
 			ZTRB->PRCMAX	:= 0
-			ZTRB->MRGP		:=	ROUND((((((cAlias)->ZE1_QTDPRO * ZTRB->PRCMED) - ((cAlias)->ZE1_CUSTOP + (cAlias)->ZE1_CUSTOO)))/((cAlias)->ZE1_QTDPRO * ZTRB->PRCMED))*100 ,2)
+			ZTRB->MRGP		:=	Round((((((cAlias)->ZE1_QTDPRO * ZTRB->PRCMED) - ((cAlias)->ZE1_CUSTOP + (cAlias)->ZE1_CUSTOO)))/((cAlias)->ZE1_QTDPRO * ZTRB->PRCMED))*100 ,2)
 			ZTRB->MARGEM	:= (cAlias)->ZE1_MARGEM
 					
-		Endif
+		EndIf
 	
 	Else
 	
-		ZTRB->MESANO	:= SUBSTR(alltrim((cAlias)->ZE1_COMP),1,2) + "/" + SUBSTR(alltrim((cAlias)->ZE1_COMP),3,4) 
+		ZTRB->MESANO	:= SubStr(AllTrim((cAlias)->ZE1_COMP),1,2) + "/" + SubStr(AllTrim((cAlias)->ZE1_COMP),3,4) 
 		ZTRB->CUSTO	    := ((cAlias)->ZE1_CUSTOP + (cAlias)->ZE1_CUSTOO+(cAlias)->ZE1_REJCC+(cAlias)->ZE1_REJIMP+(cAlias)->ZE1_REJVBA) / (cAlias)->ZE1_QTDPRO
 		ZTRB->CUSTOP	:= (cAlias)->ZE1_CUSTOP
 		_ncustopr 		:= (cAlias)->ZE1_CUSTOP
 		ZTRB->CUSTOO	:= (cAlias)->ZE1_CUSTOO
 		_ncustoop		:= (cAlias)->ZE1_CUSTOO
-		ZTRB->PRCMED	:= ROUND(((cAlias)->ZE1_FATURA / (cAlias)->ZE1_QTDFAT),2)
+		ZTRB->PRCMED	:= Round(((cAlias)->ZE1_FATURA / (cAlias)->ZE1_QTDFAT),2)
 		ZTRB->PRCMIN	:= (cAlias)->ZE1_PRCMIN
 		ZTRB->PRCMAX	:= (cAlias)->ZE1_PRCMAX
-		ZTRB->MRGP		:= ROUND((((((cAlias)->ZE1_QTDPRO * ZTRB->PRCMED) - ((cAlias)->ZE1_CUSTOP + (cAlias)->ZE1_CUSTOO)))/((cAlias)->ZE1_QTDPRO * ZTRB->PRCMED))*100 ,2)
-		ZTRB->MRG		:= ROUND((((cAlias)->ZE1_QTDPRO * ZTRB->PRCMED) - ((cAlias)->ZE1_CUSTOP + (cAlias)->ZE1_CUSTOO)) ,2)
+		ZTRB->MRGP		:= Round((((((cAlias)->ZE1_QTDPRO * ZTRB->PRCMED) - ((cAlias)->ZE1_CUSTOP + (cAlias)->ZE1_CUSTOO)))/((cAlias)->ZE1_QTDPRO * ZTRB->PRCMED))*100 ,2)
+		ZTRB->MRG		:= Round((((cAlias)->ZE1_QTDPRO * ZTRB->PRCMED) - ((cAlias)->ZE1_CUSTOP + (cAlias)->ZE1_CUSTOO)) ,2)
 		ZTRB->MARGEM	:= (cAlias)->ZE1_MARGEM
 	
-	Endif
+	EndIf
 	
-	ZTRB->PRODUTO   := alltrim((cAlias)->ZE1_PRODUT)
-	ZTRB->DESCR      := alltrim(posicione("SB1",1,Xfilial("SB1")+(cAlias)->ZE1_PRODUT,"B1_DESC"))
+	ZTRB->PRODUTO   := AllTrim((cAlias)->ZE1_PRODUT)
+	ZTRB->DESCR      := AllTrim(Posicione("SB1",1,xFilial("SB1")+(cAlias)->ZE1_PRODUT,"B1_DESC"))
 	ZTRB->QTDPRO	:= (cAlias)->ZE1_QTDPRO
 	ZTRB->QTDFAT	:= (cAlias)->ZE1_QTDFAT
 	ZTRB->FATURA	:= (cAlias)->ZE1_FATURA
@@ -243,29 +242,29 @@ While (cAlias)->(!EOF())
 	ZTRB->REJVBA	:= (cAlias)->ZE1_REJVBA
 	ZTRB->GRUPO	    := (cAlias)->ZE1_GRUPO
 
-	(cAlias)->(DbSkip())
+	(cAlias)->(DBSkip())
 	
 EndDo 
 
-(cAlias)->(DbCloseArea())
+(cAlias)->(DBCloseArea())
 
-ZTRB->( Dbgotop() )
+ZTRB->( DBGoTop() )
 _oBrw:Refresh()
 
 //Se não existir nenhum registro para a filial oferece a opção de gerar pelo cadastro
 If ZTRB->( Eof() )
-	If messagebox("Não existem registros, gera a partir do cadastro de produtos?","Alerta!", 49) == 2
+	If MessageBox("Não existem registros, gera a partir do cadastro de produtos?","Alerta!", 49) == 2
 		Return
 	Else
 		CEST002G( nil, "CADASTRO PROD.")	
-	Endif
-Endif
+	EndIf
+EndIf
 
 //refazer os campos que apareceram no browse
 _aCpos := {;
 {"Mes/Ano" 	    ,"MESANO" 		,"C","@!"							,2,08,0},;	
 {"Grupo" 		,"GRUPO" 		,"C","@!"	                        ,1,15,0},;
-{"Produto" 	    ,"PRODUTO" 	    ,"C",PesqPict("SB1","B1_COD")	    ,2,TamSx3("B1_COD")[1],TamSx3("B1_COD")[2]},;
+{"Produto" 	    ,"PRODUTO" 	    ,"C",PesqPict("SB1","B1_COD")	    ,2,TamSX3("B1_COD")[1],TamSX3("B1_COD")[2]},;
 {"Descricao" 	,"DESCR" 		,"C",PesqPict("SB1","B1_DESC")	    ,1,20,0},;
 {"Custo Unit"   ,"CUSTO" 		,"N","@E 999,999,999.99"			,18,7,0},;	
 {"Preco Min" 	,"PRCMIN" 		,"N","@E 999,999,999.99"			,18,7,0},;	
@@ -274,10 +273,10 @@ _aCpos := {;
 {"% Margem" 	,"MRGP" 		,"N","@E 999,999,999.99"		    ,18,7,0},;
 {"Margem" 		,"MARGEM" 		,"N","@E 999,999,999.99"			,18,7,0}}
 
-RestArea(_aAreaSM0)
+FWRestArea(_aAreaSM0)
 
 //apresentar a planilha de registros
-ZTRB->(DbGoTop())
+ZTRB->(DBGoTop())
 
 //Instaciamento de duplo clique e filtro
 _oBrw:bldblclick        := {|| CEST002C() }
@@ -296,35 +295,35 @@ _oBrw:SetFields(_aCpos)
 _apesq  := {}
 _apesq2 := {}
 
-aadd(_apesq,"Grupo")
-aadd(_apesq,{{"     " ,"C",TamSx3("B1_COD")[1],TamSx3("B1_COD")[2],"Grupo + Código Produto",PesqPict("SB1","B1_COD"),"GRUPO + PRODUTO"}})
-aadd(_apesq,1)
-aadd(_apesq,.T.)
-aadd(_apesq2,_apesq)
+aAdd(_apesq,"Grupo")
+aAdd(_apesq,{{"     " ,"C",TamSX3("B1_COD")[1],TamSX3("B1_COD")[2],"Grupo + Código Produto",PesqPict("SB1","B1_COD"),"GRUPO + PRODUTO"}})
+aAdd(_apesq,1)
+aAdd(_apesq,.T.)
+aAdd(_apesq2,_apesq)
 _apesq := {}
 
-aadd(_apesq,"MesAno")
-aadd(_apesq,{{"     " ,"C",TamSx3("B1_DESC")[1],TamSx3("B1_DESC")[2],"Descrição",PesqPict("SB1","B1_DESC"),"DESCR"}})
-aadd(_apesq,2)
-aadd(_apesq,.T.)
+aAdd(_apesq,"MesAno")
+aAdd(_apesq,{{"     " ,"C",TamSX3("B1_DESC")[1],TamSX3("B1_DESC")[2],"Descrição",PesqPict("SB1","B1_DESC"),"DESCR"}})
+aAdd(_apesq,2)
+aAdd(_apesq,.T.)
 
-aadd(_apesq2,_apesq)
+aAdd(_apesq2,_apesq)
 _apesq := {}
 
-aadd(_apesq,"Produto")
-aadd(_apesq,{{"     " ,"C",TamSx3("B1_COD")[1],TamSx3("B1_COD")[2],"Grupo + Código Produto",PesqPict("SB1","B1_COD"),"GRUPO + PRODUTO"}})
-aadd(_apesq,4)
-aadd(_apesq,.T.)
+aAdd(_apesq,"Produto")
+aAdd(_apesq,{{"     " ,"C",TamSX3("B1_COD")[1],TamSX3("B1_COD")[2],"Grupo + Código Produto",PesqPict("SB1","B1_COD"),"GRUPO + PRODUTO"}})
+aAdd(_apesq,4)
+aAdd(_apesq,.T.)
 
-aadd(_apesq2,_apesq)
+aAdd(_apesq2,_apesq)
 _apesq := {}
 
-aadd(_apesq,"Descricao")
-aadd(_apesq,{{"     " ,"C",TamSx3("B1_COD")[1],TamSx3("B1_COD")[2],"Grupo + Código Produto",PesqPict("SB1","B1_COD"),"GRUPO + PRODUTO"}})
-aadd(_apesq,3)
-aadd(_apesq,.T.)
+aAdd(_apesq,"Descricao")
+aAdd(_apesq,{{"     " ,"C",TamSX3("B1_COD")[1],TamSX3("B1_COD")[2],"Grupo + Código Produto",PesqPict("SB1","B1_COD"),"GRUPO + PRODUTO"}})
+aAdd(_apesq,3)
+aAdd(_apesq,.T.)
 
-aadd(_apesq2,_apesq)
+aAdd(_apesq2,_apesq)
 _apesq := {}
 
 _oBrw:SetSeek(.T.,_apesq2)
@@ -332,7 +331,7 @@ _oBrw:SetSeek(.T.,_apesq2)
 //define as legendas
 _oBrw:AddLegend('MESANO = "ATUAL" ',"BR_AMARELO" ,"Simulacao")
 _oBrw:AddLegend('MRGP > 0 ',"BR_VERDE" ,"Margem Positiva")
-_oBrw:AddLegend('MRGP < 0 .OR. MRGP == 0 ',"BR_VERMELHO","Margem total zerada ou negativa")
+_oBrw:AddLegend('MRGP < 0 .Or. MRGP == 0 ',"BR_VERMELHO","Margem total zerada ou negativa")
 
 //Desabilita tela de detalhes e walthru e ambiente
 _oBrw:SetWalkThru(.F.)
@@ -348,7 +347,7 @@ ADD OPTION aRotina Title "Legenda"    	           Action 'U_CEST002L()'		OPERATI
 //ativa
 _oBrw:Activate()
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -360,7 +359,7 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-USER Function CEST002L()
+User Function CEST002L()
 
 Local _aCores := {	{ 'BR_VERDE'	, "Margem Positiva"		  		    },;
 					{ 'BR_AMARELO'	, "Simulacao"	                    },;
@@ -368,7 +367,7 @@ Local _aCores := {	{ 'BR_VERDE'	, "Margem Positiva"		  		    },;
 
 BrwLegenda('Legenda','Status',_aCores)
 
-RETURN .T.
+Return .T.
 /*
 ===============================================================================================================================
 Programa----------: CEST002C
@@ -384,8 +383,8 @@ Static Function CEST002C()
 Local _alist 		:= {}
 Local _oDlg1 	:= nil
 Local _oPanel 	:= nil
-Local _nprod	:= iif(ZTRB->QTDPRO > 0, ZTRB->QTDPRO, 1)
-Local _nMargem	:= IF( ZTRB->MARGEM # 0 .OR. ZTRB->PRCMED = 0, ZTRB->MARGEM , (ZTRB->PRCMED-ZTRB->CUSTO) )
+Local _nprod	:= IIf(ZTRB->QTDPRO > 0, ZTRB->QTDPRO, 1)
+Local _nMargem	:= If( ZTRB->MARGEM # 0 .Or. ZTRB->PRCMED = 0, ZTRB->MARGEM , (ZTRB->PRCMED-ZTRB->CUSTO) )
 Local _np00		:= ( (_nMargem*_nprod) / (ZTRB->PRCMED * _nprod)) * 100
 Local _np01 	:= ((100 - _np00) * ZTRB->CUSTOP) / ( ZTRB->CUSTOP+ZTRB->CUSTOO+ZTRB->REJCC+ZTRB->REJIMP+ZTRB->REJVBA)
 Local _np02		:= ((100 - _np00) * ZTRB->CUSTOO) / ( ZTRB->CUSTOP+ZTRB->CUSTOO+ZTRB->REJCC+ZTRB->REJIMP+ZTRB->REJVBA)
@@ -393,7 +392,7 @@ Local _np11		:= ((100 - _np00) * ZTRB->REJIMP) / ( ZTRB->CUSTOP+ZTRB->CUSTOO+ZTR
 Local _np12		:= ((100 - _np00) * ZTRB->REJVBA) / ( ZTRB->CUSTOP+ZTRB->CUSTOO+ZTRB->REJCC+ZTRB->REJIMP+ZTRB->REJVBA)
 Local _np03		:= 100 - _np00
 Local _np04		:= ((ZTRB->FATURA - ( ZTRB->CUSTOP+ZTRB->CUSTOO+ZTRB->REJCC+ZTRB->REJIMP+ZTRB->REJVBA ))  / ZTRB->FATURA) * 100
-Local _np13		:= ((ROUND((ZTRB->FATURA / ZTRB->QTDFAT),2)*_nprod) - ( ZTRB->CUSTOP+ZTRB->CUSTOO+ZTRB->REJCC+ZTRB->REJIMP+ZTRB->REJVBA ))  / (ROUND((ZTRB->FATURA / ZTRB->QTDFAT),2)*_nprod) * 100
+Local _np13		:= ((Round((ZTRB->FATURA / ZTRB->QTDFAT),2)*_nprod) - ( ZTRB->CUSTOP+ZTRB->CUSTOO+ZTRB->REJCC+ZTRB->REJIMP+ZTRB->REJVBA ))  / (Round((ZTRB->FATURA / ZTRB->QTDFAT),2)*_nprod) * 100
 Local _np05		:= ((100 - _np00) * ZTRB->CUSTOL) / ( ZTRB->CUSTOP+ZTRB->CUSTOO+ZTRB->REJCC+ZTRB->REJIMP+ZTRB->REJVBA)
 Local _np06		:= ((100 - _np00) * ZTRB->CUSTOE) / ( ZTRB->CUSTOP+ZTRB->CUSTOO+ZTRB->REJCC+ZTRB->REJIMP+ZTRB->REJVBA)
 Local _np07		:= ((100 - _np00) * ZTRB->CUSTOI) / ( ZTRB->CUSTOP+ZTRB->CUSTOO+ZTRB->REJCC+ZTRB->REJIMP+ZTRB->REJVBA)
@@ -401,41 +400,41 @@ Local _np08		:= ((100 - _np00) * ZTRB->CUSTOF) / ( ZTRB->CUSTOP+ZTRB->CUSTOO+ZTR
 Local _np09		:= ((100 - _np00) * ZTRB->CUSTOU) / ( ZTRB->CUSTOP+ZTRB->CUSTOO+ZTRB->REJCC+ZTRB->REJIMP+ZTRB->REJVBA)
 
 Private _oBrowse	:= nil
-Private arotina	:= {}
+Private aRotina	:= {}
 
-//prepara margem e zera tudo se valor unitario for zero
+//prepara margem e zera tudo se valor unitario For zero
 
 //===================================================================================================
 //prepara itens da janela de análise
 //===================================================================================================
-AADD(_alist,{"Custo Producao"				,ZTRB->CUSTOP , ZTRB->CUSTOP/_nprod , _np01 , 0})			//01 CT
-AADD(_alist,{"      Leite/MP"				,ZTRB->CUSTOL , ZTRB->CUSTOL/_nprod , _np05 , ZTRB->REAJL})	//02
-AADD(_alist,{"      Embalagens"				,ZTRB->CUSTOE , ZTRB->CUSTOE/_nprod , _np06 , ZTRB->REAJE})	//03
-AADD(_alist,{"      Insumos"				,ZTRB->CUSTOI , ZTRB->CUSTOI/_nprod , _np07 , ZTRB->REAJI})	//04
-AADD(_alist,{"      Frete"		 		  	,ZTRB->CUSTOF , ZTRB->CUSTOF/_nprod , _np08 , ZTRB->REAJF})	//05
-AADD(_alist,{"      Outros"		 		  	,ZTRB->CUSTOU , ZTRB->CUSTOU/_nprod , _np09 , ZTRB->REAJU})	//06
-AADD(_alist,{" "								," ","  ","  ","  "," "})				  				//  
-AADD(_alist,{"Custo Operacional"			,ZTRB->CUSTOO , ZTRB->CUSTOO/_nprod , _np02 , ZTRB->REAJO})	//08 CT
-AADD(_alist,{" "								," ","  ","  ","  "," "})								//  
-AADD(_alist,{" "								," ","  ","  ","  "," "})								//  
-AADD(_alist,{"Verba "						,ZTRB->REJVBA* _nprod ,ZTRB->REJVBA , _np12 ,ZTRB->REJVBA}) //11 CT
-AADD(_alist,{"Impostos "					,ZTRB->REJIMP* _nprod ,ZTRB->REJIMP , _np11 ,ZTRB->REJIMP}) //12 CT
-AADD(_alist,{"Custo corporativo "			,ZTRB->REJCC * _nprod ,ZTRB->REJCC  , _np11 ,ZTRB->REJCC})	//13 CT
-AADD(_alist,{" "								," ","  ","  ","  "," "})								//  
-AADD(_alist,{"Custo Total"					,0                    ,0            , _np03 ,0})		    //15
-AADD(_alist,{" "								," ","  ","  ","  "," "})								//  
-AADD(_alist,{"Margem"						,_nMargem    * _nprod ,_nMargem     , _np00 ,0})            //17
-AADD(_alist,{" "								," ","  ","  ","  "," "})                               //
-AADD(_alist,{"Fat Potencial/Preco"			,ZTRB->PRCMED* _nprod ,ZTRB->PRCMED , 100  ,0})             //19
-AADD(_alist,{" "							," "          ," ","  "," "})                               //
-AADD(_alist,{"Total Qtde Produzido"		     ,ZTRB->QTDPRO," ","  "," "})                               //21
-AADD(_alist,{"Total Qtde Faturado"			 ,ZTRB->QTDFAT," ","  "," "})                               //22
-AADD(_alist,{"Faturado / Mrg Real / Mrg Orig",ZTRB->FATURA,ZTRB->FATURA/ZTRB->QTDFAT,_np04,_np13})      //23
+aAdd(_alist,{"Custo Producao"				,ZTRB->CUSTOP , ZTRB->CUSTOP/_nprod , _np01 , 0})			//01 CT
+aAdd(_alist,{"      Leite/MP"				,ZTRB->CUSTOL , ZTRB->CUSTOL/_nprod , _np05 , ZTRB->REAJL})	//02
+aAdd(_alist,{"      Embalagens"				,ZTRB->CUSTOE , ZTRB->CUSTOE/_nprod , _np06 , ZTRB->REAJE})	//03
+aAdd(_alist,{"      Insumos"				,ZTRB->CUSTOI , ZTRB->CUSTOI/_nprod , _np07 , ZTRB->REAJI})	//04
+aAdd(_alist,{"      Frete"		 		  	,ZTRB->CUSTOF , ZTRB->CUSTOF/_nprod , _np08 , ZTRB->REAJF})	//05
+aAdd(_alist,{"      Outros"		 		  	,ZTRB->CUSTOU , ZTRB->CUSTOU/_nprod , _np09 , ZTRB->REAJU})	//06
+aAdd(_alist,{" "								," ","  ","  ","  "," "})				  				//  
+aAdd(_alist,{"Custo Operacional"			,ZTRB->CUSTOO , ZTRB->CUSTOO/_nprod , _np02 , ZTRB->REAJO})	//08 CT
+aAdd(_alist,{" "								," ","  ","  ","  "," "})								//  
+aAdd(_alist,{" "								," ","  ","  ","  "," "})								//  
+aAdd(_alist,{"Verba "						,ZTRB->REJVBA* _nprod ,ZTRB->REJVBA , _np12 ,ZTRB->REJVBA}) //11 CT
+aAdd(_alist,{"Impostos "					,ZTRB->REJIMP* _nprod ,ZTRB->REJIMP , _np11 ,ZTRB->REJIMP}) //12 CT
+aAdd(_alist,{"Custo corporativo "			,ZTRB->REJCC * _nprod ,ZTRB->REJCC  , _np11 ,ZTRB->REJCC})	//13 CT
+aAdd(_alist,{" "								," ","  ","  ","  "," "})								//  
+aAdd(_alist,{"Custo Total"					,0                    ,0            , _np03 ,0})		    //15
+aAdd(_alist,{" "								," ","  ","  ","  "," "})								//  
+aAdd(_alist,{"Margem"						,_nMargem    * _nprod ,_nMargem     , _np00 ,0})            //17
+aAdd(_alist,{" "								," ","  ","  ","  "," "})                               //
+aAdd(_alist,{"Fat Potencial/Preco"			,ZTRB->PRCMED* _nprod ,ZTRB->PRCMED , 100  ,0})             //19
+aAdd(_alist,{" "							," "          ," ","  "," "})                               //
+aAdd(_alist,{"Total Qtde Produzido"		     ,ZTRB->QTDPRO," ","  "," "})                               //21
+aAdd(_alist,{"Total Qtde Faturado"			 ,ZTRB->QTDFAT," ","  "," "})                               //22
+aAdd(_alist,{"Faturado / Mrg Real / Mrg Orig",ZTRB->FATURA,ZTRB->FATURA/ZTRB->QTDFAT,_np04,_np13})      //23
 
 //=====================================================================================================
-//Se for competência ATUAL aplica reajustes
+//Se For competência ATUAL aplica reajustes
 //=====================================================================================================
-If alltrim(ZTRB->MESANO) == "ATUAL"
+If AllTrim(ZTRB->MESANO) == "ATUAL"
 
 	//Atualiza campo de valores do custo por partes
 	
@@ -459,7 +458,7 @@ If alltrim(ZTRB->MESANO) == "ATUAL"
 	//Atualiza campo de faturamento potencial e preco medio/sugerio
 	If ZTRB->PRECOR > 0
 		_aList[19][3] := ZTRB->PRECOR
-	Endif
+	EndIf
 	
 	_aList[19][2] := _aList[19][3] * _nprod
 	
@@ -468,7 +467,7 @@ If alltrim(ZTRB->MESANO) == "ATUAL"
 	_aList[17][3] :=  _nMargem
 	_aList[17][4] :=  (_aList[17][2] / ( _aList[19][3] * _nprod )) * 100
 	
-Endif
+EndIf
 
 //atualiza campos de "Custo de Producao" := Leite/MP" + Embalagens" +Insumos"  + Frete" + Outros"
 _aList[1][2] := _aList[2][2] + _aList[3][2] + _aList[4][2] + _aList[5][2] + _aList[6][2]  //custo produção
@@ -503,18 +502,18 @@ DEFINE MSDIALOG _oDlg1 TITLE OemToAnsi("Analise Custo x Precos") From 0,0 To 525
 _oPanel       := TPanel():New(0,0,'',_oDlg1,, .T., .T.,, ,160,20,.T.,.T. )
 _oPanel:Align := CONTROL_ALIGN_TOP // Somente Interface MDI
 	
-@ 0.8 ,00.8 Say OemToAnsi("Produto:   " + alltrim(ZTRB->PRODUTO) + " - " + posicione("SB1",1,xfilial("SB1")+ ZTRB->PRODUTO,"B1_DESC" )) OF _oPanel
+@ 0.8 ,00.8 Say OemToAnsi("Produto:   " + AllTrim(ZTRB->PRODUTO) + " - " + Posicione("SB1",1,xFilial("SB1")+ ZTRB->PRODUTO,"B1_DESC" )) OF _oPanel
 
 
-If alltrim(ZTRB->MESANO) == "ATUAL"
+If AllTrim(ZTRB->MESANO) == "ATUAL"
 
-   @ 0.8 ,30.8 Say OemToAnsi(alltrim(ZTRB->MESANO) + " com origem na competência " + alltrim(ZTRB->COMPOR)  ) OF _oPanel
+   @ 0.8 ,30.8 Say OemToAnsi(AllTrim(ZTRB->MESANO) + " com origem na competência " + AllTrim(ZTRB->COMPOR)  ) OF _oPanel
 
 Else
 
-   @ 0.8 ,30.8 Say OemToAnsi("Competencia:   " + alltrim(ZTRB->MESANO)  ) OF _oPanel
+   @ 0.8 ,30.8 Say OemToAnsi("Competencia:   " + AllTrim(ZTRB->MESANO)  ) OF _oPanel
 
-Endif
+EndIf
 	
 _oBrowse := TCBrowse():New( 020 , 003, 422, 218,,; 
 {"Item","Valor Total","Valor Unit","  % ", "Reajuste"},{150,60,60,60,10},_oDlg1,,,,,{||},,,,,,,.F.,,.T.,,.F.,,, )
@@ -545,16 +544,16 @@ _oBrowse:bLDblClick := {|| CEST002B(_aList,_oBrowse) }
 //===================================================================================================
 
 _aPos := PosDlg(_oDlg1)
-nLinha:=_aPos[3]-IF((AllTrim(cVersao) = "12"),12,22)
+nLinha:=_aPos[3]-If((AllTrim(cVersao) = "12"),12,22)
 _nCol :=_aPos[4]-50
 _nCol1:=_nCol-70
 
-//Aadd( _aButtons, {"Grava Reajuste", {|| CEST002N(_aList)}, "Gravando dados...", "Grava Reajuste" , {|| .T.}} )
+//aAdd( _aButtons, {"Grava Reajuste", {|| CEST002N(_aList)}, "Gravando dados...", "Grava Reajuste" , {|| .T.}} )
 @ nLinha,_nCol1 Button oButton PROMPT "Grava dados" SIZE 50,15 ACTION ( Processa( {|| CEST002N(_aList) },, "Grava Reajuste..." ) , _oDlg1:End()) Pixel 
 
-If !alltrim(ZTRB->MESANO) == "ATUAL"
+If !AllTrim(ZTRB->MESANO) == "ATUAL"
 	oButton:Disable()
-Endif
+EndIf
 
 @ nLinha,_nCol Button "Cancela"      SIZE 40,15 ACTION ( _oDlg1:End() ) Pixel 
      	
@@ -578,7 +577,7 @@ Static Function CEST002B(_aList,_oBrowse)
 Local _npos 	:= _oBrowse:nAt
 Local _nori	:= 0
 Local _nval	:= 0
-Local _nprod	:= iif(ZTRB->QTDPRO > 0, ZTRB->QTDPRO,1)
+Local _nprod	:= IIf(ZTRB->QTDPRO > 0, ZTRB->QTDPRO,1)
 Local _nvalini := 0
 
 //Reajustes
@@ -604,7 +603,7 @@ If  _aList[_oBrowse:nAt][1] == "      Leite/MP" 	.or.;
 		If _oBrowse:ncolpos == 5
 			//Edita campo de  reajuste
 			lEditCell(_aList,_oBrowse,"@E 999,999,999.999999",5)
-		Elseif _oBrowse:ncolpos == 3
+		ElseIf _oBrowse:ncolpos == 3
 		
 			//guarda valor inicial
 			_nvalini := _aList[_oBrowse:nAt][3]
@@ -616,9 +615,9 @@ If  _aList[_oBrowse:nAt][1] == "      Leite/MP" 	.or.;
 			_aList[_oBrowse:nAt][5] := _aList[_oBrowse:nAt][5] + ( _aList[_oBrowse:nAt][3] - _nvalini )
 			_aList[_oBrowse:nAt][3] := _nvalini
 			
-		Endif
+		EndIf
 	
-	Endif
+	EndIf
 	
 	_oBrowse:DrawSelect()
 	_oBrowse:gotop()
@@ -626,42 +625,42 @@ If  _aList[_oBrowse:nAt][1] == "      Leite/MP" 	.or.;
 	
 	If _npos == 2
 	
-		_nval := IIF(ZTRB->COMPOR == 'CADASTRO', _aList[_oBrowse:nAt][2], ZTRB->CUSTOL)
+		_nval := IIf(ZTRB->COMPOR == 'CADASTRO', _aList[_oBrowse:nAt][2], ZTRB->CUSTOL)
 		
-	Elseif _npos == 3
+	ElseIf _npos == 3
 	
-		_nval := IIF(ZTRB->COMPOR == 'CADASTRO', _aList[_oBrowse:nAt][2],ZTRB->CUSTOE)
+		_nval := IIf(ZTRB->COMPOR == 'CADASTRO', _aList[_oBrowse:nAt][2],ZTRB->CUSTOE)
 			
-	Elseif _npos == 4
+	ElseIf _npos == 4
 	
-		_nval := IIF(ZTRB->COMPOR == 'CADASTRO', _aList[_oBrowse:nAt][2],ZTRB->CUSTOI)
+		_nval := IIf(ZTRB->COMPOR == 'CADASTRO', _aList[_oBrowse:nAt][2],ZTRB->CUSTOI)
 			
-	Elseif _npos == 5
+	ElseIf _npos == 5
 	
-		_nval := IIF(ZTRB->COMPOR == 'CADASTRO', _aList[_oBrowse:nAt][2],ZTRB->CUSTOF)
+		_nval := IIf(ZTRB->COMPOR == 'CADASTRO', _aList[_oBrowse:nAt][2],ZTRB->CUSTOF)
 			
-	Elseif _npos == 6
+	ElseIf _npos == 6
 	
-		_nval := IIF(ZTRB->COMPOR == 'CADASTRO', _aList[_oBrowse:nAt][2],ZTRB->CUSTOU)
+		_nval := IIf(ZTRB->COMPOR == 'CADASTRO', _aList[_oBrowse:nAt][2],ZTRB->CUSTOU)
 	
-	Elseif _npos == 11
+	ElseIf _npos == 11
 	
-		_nval := IIF(ZTRB->COMPOR == 'CADASTRO', _aList[_oBrowse:nAt][2],ZTRB->REJCC)
+		_nval := IIf(ZTRB->COMPOR == 'CADASTRO', _aList[_oBrowse:nAt][2],ZTRB->REJCC)
 		
-	Elseif _npos == 12
+	ElseIf _npos == 12
 	
-		_nval := IIF(ZTRB->COMPOR == 'CADASTRO', _aList[_oBrowse:nAt][2],ZTRB->REJIMP)
+		_nval := IIf(ZTRB->COMPOR == 'CADASTRO', _aList[_oBrowse:nAt][2],ZTRB->REJIMP)
 		
-	Elseif _npos == 13
+	ElseIf _npos == 13
 	
-		_nval := IIF(ZTRB->COMPOR == 'CADASTRO', _aList[_oBrowse:nAt][2],ZTRB->REJVBA)	
+		_nval := IIf(ZTRB->COMPOR == 'CADASTRO', _aList[_oBrowse:nAt][2],ZTRB->REJVBA)	
 			
-	Elseif _npos == 8
+	ElseIf _npos == 8
 	
 		//Atualiza campo de valores do custo operacional
-		_nval := IIF(ZTRB->COMPOR == 'CADASTRO', _aList[_oBrowse:nAt][2],ZTRB->CUSTOO)
+		_nval := IIf(ZTRB->COMPOR == 'CADASTRO', _aList[_oBrowse:nAt][2],ZTRB->CUSTOO)
 		
-		IF ZTRB->COMPOR == 'CADASTRO'
+		If ZTRB->COMPOR == 'CADASTRO'
 		
 			_aList[_npos][2] :=	(_nprod * _aList[_npos][3] )
 				
@@ -670,11 +669,11 @@ If  _aList[_oBrowse:nAt][1] == "      Leite/MP" 	.or.;
 			_aList[_npos][2] :=	ZTRB->CUSTOO + (_nprod * _aList[_npos][5] )
 			_aList[_npos][3] :=	(ZTRB->CUSTOO/_nprod) +  _aList[_npos][5]
 			
-		Endif 
+		EndIf 
 			
-	Endif
+	EndIf
 	
-	If _npos != 8 .and. _npos != 11 .and. _npos != 12 .and. _npos != 13
+	If _npos != 8 .And. _npos != 11 .And. _npos != 12 .And. _npos != 13
 	
 		//Atualiza campo de valores do leite e do custo total
 		_aList[_npos][2] :=	_nval +  (_aList[_npos][5]  * _nprod) 
@@ -685,15 +684,15 @@ If  _aList[_oBrowse:nAt][1] == "      Leite/MP" 	.or.;
 		_aList[1][2] := _aList[2][2] + _aList[3][2] + _aList[4][2] + _aList[5][2] + _aList[6][2]  //custo produção
 		_aList[1][3] := _aList[2][3] + _aList[3][3] + _aList[4][3] + _aList[5][3] + _aList[6][3]  //custo produção unitario
 	
-	Endif                                                              
+	EndIf                                                              
 	
-	If _npos == 11 .or. _npos == 12 .or. _npos == 13
+	If _npos == 11 .Or. _npos == 12 .Or. _npos == 13
 	
 		//Atualiza campo de valores do leite e do custo total
 		_aList[_npos][2] :=	_nval +  (_aList[_npos][5]  * _nprod) 
 	   	_aList[_npos][3] :=	_aList[_npos][2] / _nprod  
 
-	Endif 
+	EndIf 
 	
 	//atualiza campos intermediários para origem de cadastro
 	If ZTRB->COMPOR == 'CADASTRO'
@@ -701,7 +700,7 @@ If  _aList[_oBrowse:nAt][1] == "      Leite/MP" 	.or.;
 		_aList[1][2] := _aList[2][2] + _aList[3][2] + _aList[4][2] + _aList[5][2] + _aList[6][2]  //custo produção
 		_aList[1][3] := _aList[2][3] + _aList[3][3] + _aList[4][3] + _aList[5][3] + _aList[6][3]  //custo produção unitario
 		
-	Endif	
+	EndIf	
 	
 	//atualiza campos de custo total
 	_aList[15][2]	:= _aList[1][2] + _aList[8][2] + _aList[11][2] + _aList[12][2] + _aList[13][2]
@@ -728,7 +727,7 @@ If  _aList[_oBrowse:nAt][1] == "      Leite/MP" 	.or.;
 	_aList[12][4] := (_aList[15][4] * _aList[12][2])/_aList[15][2]
 	_aList[13][4] := (_aList[15][4] * _aList[13][2])/_aList[15][2]
 	
-Endif
+EndIf
 
 
 If _aList[_oBrowse:nAt][1] == "Margem"
@@ -743,7 +742,7 @@ If _aList[_oBrowse:nAt][1] == "Margem"
 		_aList[17][3] :=  (_aList[15][3] / _aList[15][4]) * _aList[17][4]
 		_aList[17][2] :=  (_aList[15][2] / _aList[15][4]) * _aList[17][4]
 		
-	Elseif _oBrowse:ncolpos == 3
+	ElseIf _oBrowse:ncolpos == 3
 	
 		//Edita campo de valor da margem
 		_lsai := .T.
@@ -753,7 +752,7 @@ If _aList[_oBrowse:nAt][1] == "Margem"
 		_aList[17][4] :=  (_aList[17][3] / (_aList[17][3] + _aList[15][3])) * 100 
 		_aList[17][2] :=  (_aList[15][2] / _aList[15][4]) * _aList[17][4]
 		
-	Endif
+	EndIf
 	//Atualiza campos de porcentagem de custos
 	_aList[15][4] := 100 - _aList[17][4]
 	_aList[1][4] := (_aList[15][4] * _aList[1][2])/_aList[15][2]
@@ -791,11 +790,11 @@ ElseIf _aList[_oBrowse:nAt][1] == "Fat Potencial/Preco"
 	_aList[6][4] := (_aList[15][4] * _aList[6][2])/_aList[15][2]
 	_aList[8][4] := (_aList[15][4] * _aList[8][2])/_aList[15][2]
 	
-Endif
+EndIf
 
 If ZTRB->COMPOR == 'CADASTRO' //ATUALIZA MARGEM REALIZADA SE É PREÇO POR CADASTRO
 	_aList[17][4] :=  ((_aList[19][2] - _aList[15][2]) / _aList[19][2]) * 100
-Endif
+EndIf
 	
 _oBrowse:DrawSelect()
 _oBrowse:gotop()
@@ -822,26 +821,26 @@ Local _ocomps		:= nil
 Local _ccomps		:= ""
 
 //Carrega competências disponíveis
-Dbselectarea("ZTRB")
-ZTRB->( Dbgotop() )
+DBSelectArea("ZTRB")
+ZTRB->( DBGoTop() )
 
 //Adiciona opção de origem do cadastro de produtos
-aadd(_acomps, "CADASTRO PROD.")
-aadd(_acomps, "LIMPA ATUAL")
+aAdd(_acomps, "CADASTRO PROD.")
+aAdd(_acomps, "LIMPA ATUAL")
 
-Do while .not. ZTRB->( Eof() )
+While .not. ZTRB->( Eof() )
 
-	_np := ascan(_acomps, alltrim(ZTRB->MESANO) )
+	_np := aScan(_acomps, AllTrim(ZTRB->MESANO) )
 	
-	If _np == 0 .and. alltrim(ZTRB->MESANO) != "ATUAL"
+	If _np == 0 .And. AllTrim(ZTRB->MESANO) != "ATUAL"
 	
-		aadd(_acomps, alltrim(ZTRB->MESANO))
+		aAdd(_acomps, AllTrim(ZTRB->MESANO))
 		
-	Endif
+	EndIf
 	
-	ZTRB->( Dbskip() )
+	ZTRB->( DBSkip() )
 	
-Enddo
+EndDo
 
 nLinha:=10
 _nCol:=15
@@ -851,8 +850,8 @@ DEFINE MSDIALOG _oDlg2 TITLE ("Refaz Dados Atuais") From 0,0 To 185, 300 OF oMai
 @ nLinha,_nCol Say OemToAnsi("Escolha a competência de origem:")
 nLinha+=12
 
-_ocomps := TComboBox():New(nLinha,_nCol,{|u|if(PCount()>0,_ccomps:=u,_ccomps)}, _acomps,100,20,_oDlg2,,,,,,.T.,,,,,,,,,'') //40
-//Aadd( _aButtons, {"Gera dados", {|| Processa({|| CEST002G(_odlg2,_acomps[_ocomps:nAt]),_oDlg2:End()},"Gera dados","Aguarde a geração de dados...")}, "Gerando dados...", "Gera Dados" , {|| .T.}} )     	
+_ocomps := TComboBox():New(nLinha,_nCol,{|u|If(PCount()>0,_ccomps:=u,_ccomps)}, _acomps,100,20,_oDlg2,,,,,,.T.,,,,,,,,,'') //40
+//aAdd( _aButtons, {"Gera dados", {|| Processa({|| CEST002G(_odlg2,_acomps[_ocomps:nAt]),_oDlg2:End()},"Gera dados","Aguarde a geração de dados...")}, "Gerando dados...", "Gera Dados" , {|| .T.}} )     	
 nLinha+=38
 
 @ nLinha,_nCol    Button "Refaz dados" SIZE 41,15 ACTION ( Processa( {|| CEST002G(_odlg2,_acomps[_ocomps:nAt])},,"Aguarde a geração de dados...") , _oDlg2:End()) Pixel 
@@ -881,85 +880,85 @@ Local _nqtdpro 	:= 0
 Local _nqtdfat 	:= 0
 Local _nPrcmin 	:= 0
 Local _nPrcmax 	:= 0
-Local _cquery 	:= ""
+Local _cQuery 	:= ""
 Local _ddtini		:= ddatabase
 Local _ddtfim		:= ddatabase
 
 ProcRegua( 0 )
    
-_ddtfim := stod(strzero(year(_ddtini),4) + strzero(month(_ddtini),2)+"01") - 1
+_ddtfim := SToD(StrZero(year(_ddtini),4) + StrZero(month(_ddtini),2)+"01") - 1
 
 If month(_ddtini) == 01
-	_ddtini:= stod(strzero(year(_ddtini)-1,4) + "1201")	
+	_ddtini:= SToD(StrZero(year(_ddtini)-1,4) + "1201")	
 Else
-	_ddtini := stod(strzero(year(_ddtini),4) + strzero(month(_ddtini)-1,2)+"01")
-Endif
+	_ddtini := SToD(StrZero(year(_ddtini),4) + StrZero(month(_ddtini)-1,2)+"01")
+EndIf
 
 //apaga registros se existirem após avisar
-Dbselectarea("ZE1")
-ZE1->( dbSetFilter( { || ALLTRIM(ZE1->ZE1_COMP) == 'ATUAL' .AND. ZE1->ZE1_FILIAL = xfilial("ZE1") },;
-			 "ALLTRIM(ZE1->ZE1_COMP) == 'ATUAL' .AND. ZE1->ZE1_FILIAL = xfilial('ZE1')") )
-ZE1->( Dbgotop() )
+DBSelectArea("ZE1")
+ZE1->( dbSetFilter( { || AllTrim(ZE1->ZE1_COMP) == 'ATUAL' .And. ZE1->ZE1_FILIAL = xFilial("ZE1") },;
+			 "AllTrim(ZE1->ZE1_COMP) == 'ATUAL' .And. ZE1->ZE1_FILIAL = xFilial('ZE1')") )
+ZE1->( DBGoTop() )
 
 If .not. ZE1->( Eof() )
 
-	_nret := messagebox("Existem registros de análise atual, serão apagados, continua?","Alerta!", 49)
+	_nret := MessageBox("Existem registros de análise atual, serão apagados, continua?","Alerta!", 49)
 	
 	If _nret == 2
 		Return
-	Endif
+	EndIf
 	
-Endif
+EndIf
 
 ProcRegua( ZTRB->( Lastrec())*2 )
 
-Do while .not. ZE1->( Eof() ) 
+While .not. ZE1->( Eof() ) 
 
     IncProc()
 	RecLock("ZE1",.F.)
 	ZE1->( Dbdelete() )
-	ZE1->(MsUnlock()) 
+	ZE1->(MSUnLock()) 
 	
-	ZE1->( DbSkip() )
+	ZE1->( DBSkip() )
 	
-Enddo
+EndDo
 
 ZE1->( Dbclearfilter() )    
 
-Dbselectarea("ZTRB")
-ZTRB->( dbSetFilter( { || ALLTRIM(ZTRB->MESANO) = 'ATUAL' }, "ALLTRIM(ZTRB->MESANO) = 'ATUAL'" ) )
-ZTRB->( Dbgotop() )
+DBSelectArea("ZTRB")
+ZTRB->( dbSetFilter( { || AllTrim(ZTRB->MESANO) = 'ATUAL' }, "AllTrim(ZTRB->MESANO) = 'ATUAL'" ) )
+ZTRB->( DBGoTop() )
 
-Do while .not. ZTRB->( Eof() ) 
+While .not. ZTRB->( Eof() ) 
    IncProc()
 	ZTRB->( Dbdelete() )
-	ZTRB->( DbSkip() )
-Enddo
+	ZTRB->( DBSkip() )
+EndDo
 
 ZTRB->( Dbclearfilter() )
 
 _oBrw:Refresh()
-//Se for só para limpar o atual já sai da rotina
+//Se For só para limpar o atual já sai da rotina
 If _ccomp == "LIMPA ATUAL"
-	messagebox("Registros da competência atual deletados com sucesso","Processo Concluido", 64)
+	MessageBox("Registros da competência atual deletados com sucesso","Processo Concluido", 64)
 	Return
-Endif
+EndIf
 
 If _ccomp != "CADASTRO PROD."
 	//cria novos registros para análise de preço atual
-	Dbselectarea("ZTRB")
-	ZTRB->( dbSetFilter( { || ALLTRIM(ZTRB->MESANO) = ALLTRIM(_ccomp) }, "ALLTRIM(ZTRB->MESANO) = '" + ALLTRIM(_ccomp) + "'" ) )
+	DBSelectArea("ZTRB")
+	ZTRB->( dbSetFilter( { || AllTrim(ZTRB->MESANO) = AllTrim(_ccomp) }, "AllTrim(ZTRB->MESANO) = '" + AllTrim(_ccomp) + "'" ) )
 	count to nTot
-	ZTRB->( Dbgotop() )
+	ZTRB->( DBGoTop() )
 
     ProcRegua( nTot )
 
-	Do while .not. ZTRB->( Eof() )
+	While .not. ZTRB->( Eof() )
 
        IncProc()
 		RecLock("ZE1",.T.)    
 		
-		ZE1->ZE1_FILIAL 	:= xfilial("ZE1")
+		ZE1->ZE1_FILIAL 	:= xFilial("ZE1")
 		ZE1->ZE1_PRODUT 	:= ZTRB->PRODUTO
 		ZE1->ZE1_CUSTOP		:= ZTRB->CUSTOP
 		ZE1->ZE1_FATURA		:= ZTRB->FATURA
@@ -976,45 +975,45 @@ If _ccomp != "CADASTRO PROD."
 		ZE1->ZE1_GRUPO		:= ZTRB->GRUPO
 		ZE1->ZE1_MARGEM		:= (ZTRB->FATURA/ZTRB->QTDFAT)-((ZTRB->CUSTOO+ZTRB->CUSTOP)/ZTRB->QTDPRO)
 		
-		ZE1->(MsUnlock())       
-		ZTRB->( DbSkip() )
-	Enddo
+		ZE1->(MSUnLock())       
+		ZTRB->( DBSkip() )
+	EndDo
 
 	ZTRB->( Dbclearfilter() )
 
-Elseif _ccomp == "CADASTRO PROD."
+ElseIf _ccomp == "CADASTRO PROD."
 
-	Dbselectarea("SB1")
-	SB1->( dbSetFilter( { || ALLTRIM(B1_TIPO) = "PA" .AND. ALLTRIM(B1_MSBLQL) != "1" .AND. POSICIONE("SBZ",1,SB1->B1_FILIAL+SB1->B1_COD,"BZ_I_OBSOL") != "S" },;
-				 'ALLTRIM(B1_TIPO) = "PA" .AND. ALLTRIM(B1_MSBLQL) != "1" .AND. POSICIONE("SBZ",1,SB1->B1_FILIAL+SB1->B1_COD,"BZ_I_OBSOL") != "S"' ) )
+	DBSelectArea("SB1")
+	SB1->( dbSetFilter( { || AllTrim(B1_TIPO) = "PA" .And. AllTrim(B1_MSBLQL) != "1" .And. Posicione("SBZ",1,SB1->B1_FILIAL+SB1->B1_COD,"BZ_I_OBSOL") != "S" },;
+				 'AllTrim(B1_TIPO) = "PA" .And. AllTrim(B1_MSBLQL) != "1" .And. Posicione("SBZ",1,SB1->B1_FILIAL+SB1->B1_COD,"BZ_I_OBSOL") != "S"' ) )
 	count to nTot
-	SB1->( Dbgotop() )
+	SB1->( DBGoTop() )
 
     ProcRegua( nTot )
 
-	Do while .not. SB1->( Eof() )
+	While .not. SB1->( Eof() )
 	   IncProc()
 		//procura preço mínimo, preço máximo, total de faturamento e quantidade faturada
-		_cquery	:= " SELECT " 
+		_cQuery	:= " SELECT " 
 	
-		_cquery  	+= " D2_COD, " 
-		_cquery  	+= " ROUND(MAX( ( D2_VALBRUT - ( D2_I_FRET + D2_VALICM + D2_VALIMP5 + D2_VALIMP6 + D2_VALIPI ) ) / D2_QUANT ),2) AS PRCMAX, "
-		_cquery  	+= " ROUND(MIN( ( D2_VALBRUT - ( D2_I_FRET + D2_VALICM + D2_VALIMP5 + D2_VALIMP6 + D2_VALIPI ) ) / D2_QUANT ),2) AS PRCMIN, "
-	 	_cquery  	+= " SUM( D2_QUANT ) AS QTDE, "
-	 	_cquery  	+= " SUM( D2_VALBRUT - ( D2_I_FRET + D2_VALICM + D2_VALIMP5 + D2_VALIMP6 + D2_VALIPI ) ) AS FATUR "
-		_cquery  	+= " FROM " + RetSqlName("SD2") + " SD2 JOIN  " + RetSqlName("SF4") + " SF4 ON  SF4.F4_FILIAL = SD2.D2_FILIAL AND SF4.F4_CODIGO = SD2.D2_TES"
-		_cquery  	+= " WHERE SD2.D2_FILIAL = '" + xFilial("SD2") + "'"
-		_cquery   	+= " AND SD2.D2_EMISSAO >= '" + dtos(_ddtini) + "' AND D2_EMISSAO <= '" + dtos(_ddtfim) + "' "
-		_cquery   	+= " AND SD2.D2_QUANT > 0 "
-		_cquery  	+= " AND SD2.D2_COD = '" + alltrim(SB1->B1_COD)	 +  "' "
-		_cquery  	+= " AND SF4.D_E_L_E_T_ = ' ' "
-		_cquery  	+= " AND SF4.F4_FILIAL = '" + xfilial("SF4") + "' "
-		_cquery 	+= " AND SF4.F4_DUPLIC = 'S'	"
-		_cquery 	+= " AND SF4.F4_ESTOQUE= 'S'	"
-		_cquery 	+= " GROUP BY D2_COD "
-		_cquery := ChangeQuery(_cquery)
+		_cQuery  	+= " D2_COD, " 
+		_cQuery  	+= " Round(MAX( ( D2_VALBRUT - ( D2_I_FRET + D2_VALICM + D2_VALIMP5 + D2_VALIMP6 + D2_VALIPI ) ) / D2_QUANT ),2) AS PRCMAX, "
+		_cQuery  	+= " Round(MIN( ( D2_VALBRUT - ( D2_I_FRET + D2_VALICM + D2_VALIMP5 + D2_VALIMP6 + D2_VALIPI ) ) / D2_QUANT ),2) AS PRCMIN, "
+	 	_cQuery  	+= " SUM( D2_QUANT ) AS QTDE, "
+	 	_cQuery  	+= " SUM( D2_VALBRUT - ( D2_I_FRET + D2_VALICM + D2_VALIMP5 + D2_VALIMP6 + D2_VALIPI ) ) AS FATUR "
+		_cQuery  	+= " FROM " + RetSqlName("SD2") + " SD2 JOIN  " + RetSqlName("SF4") + " SF4 ON  SF4.F4_FILIAL = SD2.D2_FILIAL AND SF4.F4_CODIGO = SD2.D2_TES"
+		_cQuery  	+= " WHERE SD2.D2_FILIAL = '" + xFilial("SD2") + "'"
+		_cQuery   	+= " AND SD2.D2_EMISSAO >= '" + DToS(_ddtini) + "' AND D2_EMISSAO <= '" + DToS(_ddtfim) + "' "
+		_cQuery   	+= " AND SD2.D2_QUANT > 0 "
+		_cQuery  	+= " AND SD2.D2_COD = '" + AllTrim(SB1->B1_COD)	 +  "' "
+		_cQuery  	+= " AND SF4.D_E_L_E_T_ = ' ' "
+		_cQuery  	+= " AND SF4.F4_FILIAL = '" + xFilial("SF4") + "' "
+		_cQuery 	+= " AND SF4.F4_DUPLIC = 'S'	"
+		_cQuery 	+= " AND SF4.F4_ESTOQUE= 'S'	"
+		_cQuery 	+= " GROUP BY D2_COD "
+		_cQuery := ChangeQuery(_cQuery)
 
-		MPSysOpenQuery(_cquery,"SD2T")
+		MPSysOpenQuery(_cQuery,"SD2T")
  	
 		If !SD2T->( Eof() )
 			_nPrcmin := SD2T->PRCMIN
@@ -1026,31 +1025,31 @@ Elseif _ccomp == "CADASTRO PROD."
 			_nqtdfat := 0
 			_nPrcmin := 0
 			_nPrcmax := 0
-		Endif
+		EndIf
 		
 		//procura total produzido
-		_cquery	:= " SELECT " 
-		_cquery  	+= " SUM( D3_QUANT ) AS QTDE "
-		_cquery  	+= " FROM " + RetSqlName("SD3") + " SD3"
-		_cquery  	+= " WHERE SD3.D3_FILIAL = '" + xFilial("SD3") + "'"
-		_cquery   	+= " AND SD3.D3_EMISSAO >= '" + dtos(_ddtini) + "' AND SD3.D3_EMISSAO <= '" + dtos(_ddtfim) + "' "
-		_cquery   	+= " AND SD3.D3_CF = 'PR0' "
-		_cquery  	+= " AND SD3.D3_COD = '" + alltrim(SB1->B1_COD)	 +  "' "
-		_cquery  	+= " AND SD3.D3_ESTORNO <> 'S' "
-		_cquery  	+= " AND SD3.D_E_L_E_T_ = ' '"
-		_cquery := ChangeQuery(_cquery)
+		_cQuery	:= " SELECT " 
+		_cQuery  	+= " SUM( D3_QUANT ) AS QTDE "
+		_cQuery  	+= " FROM " + RetSqlName("SD3") + " SD3"
+		_cQuery  	+= " WHERE SD3.D3_FILIAL = '" + xFilial("SD3") + "'"
+		_cQuery   	+= " AND SD3.D3_EMISSAO >= '" + DToS(_ddtini) + "' AND SD3.D3_EMISSAO <= '" + DToS(_ddtfim) + "' "
+		_cQuery   	+= " AND SD3.D3_CF = 'PR0' "
+		_cQuery  	+= " AND SD3.D3_COD = '" + AllTrim(SB1->B1_COD)	 +  "' "
+		_cQuery  	+= " AND SD3.D3_ESTORNO <> 'S' "
+		_cQuery  	+= " AND SD3.D_E_L_E_T_ = ' '"
+		_cQuery := ChangeQuery(_cQuery)
 
-		MPSysOpenQuery(_cquery,"SD3T")			
+		MPSysOpenQuery(_cQuery,"SD3T")			
 		
 		If !SD3T->( Eof() )
 			_nqtdpro := SD3T->QTDE
 		Else
 			_nqtdpro := 0
-		Endif
+		EndIf
 
 		RecLock("ZE1",.T.)    
 		
-		ZE1->ZE1_FILIAL 	:= xfilial("ZE1")
+		ZE1->ZE1_FILIAL 	:= xFilial("ZE1")
 		ZE1->ZE1_PRODUT 	:= SB1->B1_COD
 		ZE1->ZE1_CUSTOP		:= 0
 		ZE1->ZE1_FATURA		:= _nfatura
@@ -1058,42 +1057,42 @@ Elseif _ccomp == "CADASTRO PROD."
 		ZE1->ZE1_QTDPRO		:= _nqtdpro
 		ZE1->ZE1_COMP			:= 'ATUAL'
 		ZE1->ZE1_COMPOR		:= 'CADASTRO'   
-		ZE1->ZE1_GRUPO		:= POSICIONE("SBM",1,xfilial("SBM")+SB1->B1_GRUPO,"BM_DESC")
+		ZE1->ZE1_GRUPO		:= Posicione("SBM",1,xFilial("SBM")+SB1->B1_GRUPO,"BM_DESC")
 		ZE1->ZE1_PRCMIN		:= _nPrcmin
 		ZE1->ZE1_PRCMAX		:= _nPrcmax
 				
-		ZE1->(MsUnlock()) 
+		ZE1->(MSUnLock()) 
 		      
-		SD2T->( Dbclosearea() )
-		SD3T->( Dbclosearea() )
-		SB1->( DbSkip() )
-	Enddo
+		SD2T->( DBCloseArea() )
+		SD3T->( DBCloseArea() )
+		SB1->( DBSkip() )
+	EndDo
 
 	SB1->( Dbclearfilter() )
-Endif
+EndIf
 
 //======================================================================
 //Atualiza browse a partir das alterações na ZE1
 //======================================================================
 
-Dbselectarea("ZE1")
-ZE1->( dbSetFilter( { || ALLTRIM(ZE1->ZE1_COMP) = 'ATUAL' .AND. ZE1->ZE1_FILIAL = xfilial('ZE1') },;
-					 "ALLTRIM(ZE1->ZE1_COMP) = 'ATUAL' .AND. ZE1->ZE1_FILIAL = xfilial('ZE1')" ) )
+DBSelectArea("ZE1")
+ZE1->( dbSetFilter( { || AllTrim(ZE1->ZE1_COMP) = 'ATUAL' .And. ZE1->ZE1_FILIAL = xFilial('ZE1') },;
+					 "AllTrim(ZE1->ZE1_COMP) = 'ATUAL' .And. ZE1->ZE1_FILIAL = xFilial('ZE1')" ) )
 count to nTot
-ZE1->( Dbgotop() )
+ZE1->( DBGoTop() )
 
 ProcRegua( nTot )
 
-Do while !ZE1->( Eof() )
+While !ZE1->( Eof() )
 
    IncProc("Atualizando Prod.: "+ZE1->ZE1_PRODUT)
 	ZTRB->(DBAPPEND())    
 	
 	ZTRB->MESANO	:= 'ATUAL'	
-	ZTRB->PRODUTO   := alltrim(ZE1->ZE1_PRODUT)
-	ZTRB->DESCR      := alltrim(posicione("SB1",1,Xfilial("SB1")+ZE1->ZE1_PRODUT,"B1_DESC"))
-	ZTRB->CUSTO	    := ROUND(((ZE1->ZE1_CUSTOP + ZE1->ZE1_CUSTOO+ ZE1->ZE1_REJCC + ZE1->ZE1_REJIMP + ZE1->ZE1_REJVBA ) / IIF(ZE1->ZE1_QTDPRO > 0, ZE1->ZE1_QTDPRO,1)),2)
-	ZTRB->PRCMED	:= ROUND((ZE1->ZE1_FATURA / ZE1->ZE1_QTDFAT),2)
+	ZTRB->PRODUTO   := AllTrim(ZE1->ZE1_PRODUT)
+	ZTRB->DESCR      := AllTrim(Posicione("SB1",1,xFilial("SB1")+ZE1->ZE1_PRODUT,"B1_DESC"))
+	ZTRB->CUSTO	    := Round(((ZE1->ZE1_CUSTOP + ZE1->ZE1_CUSTOO+ ZE1->ZE1_REJCC + ZE1->ZE1_REJIMP + ZE1->ZE1_REJVBA ) / IIf(ZE1->ZE1_QTDPRO > 0, ZE1->ZE1_QTDPRO,1)),2)
+	ZTRB->PRCMED	:= Round((ZE1->ZE1_FATURA / ZE1->ZE1_QTDFAT),2)
 	ZTRB->QTDPRO	:= ZE1->ZE1_QTDPRO
 	ZTRB->QTDFAT	:= ZE1->ZE1_QTDFAT
 	ZTRB->CUSTOO	:= ZE1->ZE1_CUSTOO
@@ -1106,18 +1105,18 @@ Do while !ZE1->( Eof() )
 	ZTRB->CUSTOL	:= ZE1->ZE1_CUSTOL
 	ZTRB->COMPOR	:= ZE1->ZE1_COMPOR
 	ZTRB->GRUPO	    := ZE1->ZE1_GRUPO
-	ZTRB->MRGP		:= ROUND(((((IIF(ZE1->ZE1_QTDPRO > 0,ZE1->ZE1_QTDPRO,1) * ZTRB->PRCMED) - (ZE1->ZE1_CUSTOP + ZE1->ZE1_CUSTOO)))/(IIF(ZE1->ZE1_QTDPRO>0,ZE1->ZE1_QTDPRO,1) * ZTRB->PRCMED))*100 ,2)
+	ZTRB->MRGP		:= Round(((((IIf(ZE1->ZE1_QTDPRO > 0,ZE1->ZE1_QTDPRO,1) * ZTRB->PRCMED) - (ZE1->ZE1_CUSTOP + ZE1->ZE1_CUSTOO)))/(IIf(ZE1->ZE1_QTDPRO>0,ZE1->ZE1_QTDPRO,1) * ZTRB->PRCMED))*100 ,2)
 	ZTRB->MARGEM	:= ZE1->ZE1_MARGEM
 		
-	ZE1->( DbSkip() )
+	ZE1->( DBSkip() )
 	
-Enddo
+EndDo
 
 ZE1->( Dbclearfilter() )
 
 _oBrw:Refresh()
 
-messagebox("Registros da competência atual criados com sucesso","Processo Concluido", 64)
+MessageBox("Registros da competência atual criados com sucesso","Processo Concluido", 64)
 
 Return
 
@@ -1133,11 +1132,11 @@ Retorno-----------: Nenhum
 */
 Static Function CEST002N(_aList)
 
-Dbselectarea("ZE1")
-ZE1->( dbSetFilter( { || ALLTRIM(ZE1_COMP) = 'ATUAL' .AND. ALLTRIM(ZE1_PRODUT) == ALLTRIM(ZTRB->PRODUTO) .AND. ZE1_FILIAL = Xfilial('ZE1') },;
-			 "ALLTRIM(ZE1->ZE1_COMP) = 'ATUAL' .AND. ALLTRIM(ZE1_PRODUT) == ALLTRIM(ZTRB->PRODUTO) .AND. ZE1_FILIAL = Xfilial('ZE1')" ) )
+DBSelectArea("ZE1")
+ZE1->( dbSetFilter( { || AllTrim(ZE1_COMP) = 'ATUAL' .And. AllTrim(ZE1_PRODUT) == AllTrim(ZTRB->PRODUTO) .And. ZE1_FILIAL = xFilial('ZE1') },;
+			 "AllTrim(ZE1->ZE1_COMP) = 'ATUAL' .And. AllTrim(ZE1_PRODUT) == AllTrim(ZTRB->PRODUTO) .And. ZE1_FILIAL = xFilial('ZE1')" ) )
 count to nTot
-ZE1->( Dbgotop() )
+ZE1->( DBGoTop() )
 
 ProcRegua( nTot )
 If !ZE1->( Eof() )
@@ -1169,12 +1168,12 @@ If !ZE1->( Eof() )
 		ZTRB->MRGP	   	:= _aList[17][4]
 		ZTRB->MARGEM 	:= _aList[17][3]
 	Else
-		ZTRB->CUSTO	    := _aList[15][3]//ROUND(((_ncustopr + _ncustoop) / IIF(ZE1->ZE1_QTDPRO>0,ZE1->ZE1_QTDPRO,1)),2)
-		ZTRB->CUSTOP	:= _aList[01][2]//ROUND((_ncustopr),2)
-		ZTRB->CUSTOO	:= _aList[08][2]//ROUND((_ncustoop),2)
+		ZTRB->CUSTO	    := _aList[15][3]//Round(((_ncustopr + _ncustoop) / IIf(ZE1->ZE1_QTDPRO>0,ZE1->ZE1_QTDPRO,1)),2)
+		ZTRB->CUSTOP	:= _aList[01][2]//Round((_ncustopr),2)
+		ZTRB->CUSTOO	:= _aList[08][2]//Round((_ncustoop),2)
 		ZTRB->MRGP		:= _aList[17][4]	
 		ZTRB->MARGEM 	:= _aList[17][3]
-	Endif
+	EndIf
 		
 	//Atualiza valores de reajuste na base de dados
 	RecLock("ZE1",.F.) 
@@ -1203,10 +1202,10 @@ If !ZE1->( Eof() )
 		ZE1->ZE1_CUSTOI := _aList[4][2]
 		ZE1->ZE1_CUSTOU := _aList[6][2]
 		ZE1->ZE1_CUSTOP := _aList[1][2]
-	Endif
+	EndIf
 	
-	ZE1->(MsUnlock())
-Endif
+	ZE1->(MSUnLock())
+EndIf
 
 ZE1->( DbClearFilter() )
 _oBrw:Refresh()
@@ -1236,43 +1235,43 @@ Local _cgrup		:= ""
 Local _agrup		:= {}
 Local _nvval		:= 0
 	
-aadd(_acomps, "Leite - MP")
-aadd(_acomps, "Embalagens")
-aadd(_acomps, "Insumos")
-aadd(_acomps, "Frete")
-aadd(_acomps, "Outros")
-aadd(_acomps, "Custo Operacional")
-aadd(_acomps, "Preco")
-aadd(_acomps, "Margem")
-aadd(_acomps, "Custo Corporativo")
-aadd(_acomps, "Imposto")
-aadd(_acomps, "Verba")
+aAdd(_acomps, "Leite - MP")
+aAdd(_acomps, "Embalagens")
+aAdd(_acomps, "Insumos")
+aAdd(_acomps, "Frete")
+aAdd(_acomps, "Outros")
+aAdd(_acomps, "Custo Operacional")
+aAdd(_acomps, "Preco")
+aAdd(_acomps, "Margem")
+aAdd(_acomps, "Custo Corporativo")
+aAdd(_acomps, "Imposto")
+aAdd(_acomps, "Verba")
 
 //monta array de grupos de produtos
-ZTRB->( Dbgotop() )
+ZTRB->( DBGoTop() )
 
-aadd(_agrup,"  TODOS")
+aAdd(_agrup,"  TODOS")
 _ccomps := "  TODOS"
 
-Do while !ZTRB->( Eof() )
-	If ascan(_agrup, alltrim( ZTRB->GRUPO ) ) == 0 .and. alltrim(ZTRB->MESANO) == "ATUAL" 
-		aadd(_agrup, alltrim( ZTRB->GRUPO ))
-	Endif
+While !ZTRB->( Eof() )
+	If aScan(_agrup, AllTrim( ZTRB->GRUPO ) ) == 0 .And. AllTrim(ZTRB->MESANO) == "ATUAL" 
+		aAdd(_agrup, AllTrim( ZTRB->GRUPO ))
+	EndIf
 	
-	ZTRB->( dBSKIP() )
-Enddo		
+	ZTRB->( DBSkip() )
+EndDo		
 
-_agrup := asort(_agrup)
+_agrup := aSort(_agrup)
 		
 DEFINE MSDIALOG _oDlg2 TITLE OemToAnsi("Reajusta Dados Atuais") From 0,0 To 350, 280 OF oMainWnd PIXEL
 
 @ 10 ,10.8 Say OemToAnsi("Escolha o tipo de custo:")
 
-_ocomps := TComboBox():New(20,10.8,{|u|if(PCount()>0,_ccomps:=u,_ccomps)}, _acomps,100,20,_oDlg2,,,,,,.T.,,,,,,,,,'')
+_ocomps := TComboBox():New(20,10.8,{|u|If(PCount()>0,_ccomps:=u,_ccomps)}, _acomps,100,20,_oDlg2,,,,,,.T.,,,,,,,,,'')
 
 @ 40 ,10.8 Say OemToAnsi("Escolha o grupo:")
 
-_ogrup := TComboBox():New(50,10.8,{|u|if(PCount()>0,_cgrup:=u,_cgrup)}, _agrup,100,20,_oDlg2,,,,,,.T.,,,,,,,,,'')
+_ogrup := TComboBox():New(50,10.8,{|u|If(PCount()>0,_cgrup:=u,_cgrup)}, _agrup,100,20,_oDlg2,,,,,,.T.,,,,,,,,,'')
 
 nLinha:=70
 _nCol :=10
@@ -1309,7 +1308,7 @@ Retorno-----------: Nenhum
 */
 User Function CEST002P()
 
-Local _bOK  :={|| NaoVazio(_nMaximo) .AND. Positivo(_nMaximo) .AND. NaoVazio(_nMinimo) .AND. Positivo(_nMinimo)} 
+Local _bOK  :={|| NaoVazio(_nMaximo) .And. Positivo(_nMaximo) .And. NaoVazio(_nMinimo) .And. Positivo(_nMinimo)} 
 Local _oDlg2:= nil
 Local nLinha:=10
 Local _nCol :=10
@@ -1325,14 +1324,14 @@ DEFINE MSDIALOG _oDlg2 TITLE OemToAnsi("Gera Tabela de Preços") From 0,0 To 200,
 nLinha+=15
 
 @ nLinha,_nCol  Say OemToAnsi("Multiplicador de Preço Máximo:")
-@ nLinha,_nCol2 Get _nMaximo picture "@E 99.99" SIZE 42,10 VALID NaoVazio(_nMaximo) .AND. Positivo(_nMaximo)
+@ nLinha,_nCol2 Get _nMaximo picture "@E 99.99" SIZE 42,10 VALID NaoVazio(_nMaximo) .And. Positivo(_nMaximo)
 nLinha+=15
 
 @ nLinha,_nCol  Say OemToAnsi("Multiplicador de Preço Mínimo:")
-@ nLinha,_nCol2 Get _nMinimo picture "@E 99.99" SIZE 42,10 VALID NaoVazio(_nMinimo) .AND. Positivo(_nMinimo)
+@ nLinha,_nCol2 Get _nMinimo picture "@E 99.99" SIZE 42,10 VALID NaoVazio(_nMinimo) .And. Positivo(_nMinimo)
 nLinha+=20
 
-@ nLinha,_nCol  Button "Gera tabela de preços"  SIZE 65,15 ACTION ( IF(EVAL(_bOK),(Processa( {|| U_CEST002D() },, "Gera Tabela de Preços..." ) , _oDlg2:End()) ,)) Pixel 
+@ nLinha,_nCol  Button "Gera tabela de preços"  SIZE 65,15 ACTION ( If(EVAL(_bOK),(Processa( {|| U_CEST002D() },, "Gera Tabela de Preços..." ) , _oDlg2:End()) ,)) Pixel 
 @ nLinha,_nCol2 Button "Cancela"                SIZE 42,15 ACTION ( _oDlg2:End() ) Pixel 
 
 ACTIVATE MSDIALOG _oDlg2 
@@ -1362,44 +1361,44 @@ Local _nprod		:= 0
 Local _lzera		:= .F.
 
 //Verifica se apenas um dos valores foi preenchido
-If (_nval != 0 .and. _npval != 0) .or. (_nval != 0 .and. _nvval != 0) .or. (_npval != 0 .and. _nvval != 0)
-	messagebox("Preencha apenas uma das opções.","Alerta", 16)
+If (_nval != 0 .And. _npval != 0) .Or. (_nval != 0 .And. _nvval != 0) .Or. (_npval != 0 .And. _nvval != 0)
+	MessageBox("Preencha apenas uma das opções.","Alerta", 16)
 	Return
-Endif
+EndIf
 
 //Verifica se nenhum dos valores foi preenchido
-If _nval == 0 .and. _npval == 0 .and. _nvval == 0
-	If messagebox("Zera valores?","Atenção", 4) == 6
+If _nval == 0 .And. _npval == 0 .And. _nvval == 0
+	If MessageBox("Zera valores?","Atenção", 4) == 6
 		_lzera := .T.
-	Endif
-Endif
+	EndIf
+EndIf
 
 //Atualiza reajuste escolhido para todos os itens da tela
-Dbselectarea("ZTRB")
+DBSelectArea("ZTRB")
 
 If _cgrupo == "  TODOS"
-	ZTRB->( dbSetFilter( { || ALLTRIM(ZTRB->MESANO) = "ATUAL" }, "ALLTRIM(ZTRB->MESANO) = 'ATUAL'" ) )
+	ZTRB->( dbSetFilter( { || AllTrim(ZTRB->MESANO) = "ATUAL" }, "AllTrim(ZTRB->MESANO) = 'ATUAL'" ) )
 Else
-	ZTRB->( dbSetFilter( { || ALLTRIM(ZTRB->MESANO) = "ATUAL" .AND. ALLTRIM(ZTRB->GRUPO) == ALLTRIM(_cgrupo)},;
-						 "ALLTRIM(ZTRB->MESANO) = 'ATUAL' .AND. ALLTRIM(ZTRB->GRUPO) == ALLTRIM(_cgrupo)" ) )
-Endif
+	ZTRB->( dbSetFilter( { || AllTrim(ZTRB->MESANO) = "ATUAL" .And. AllTrim(ZTRB->GRUPO) == AllTrim(_cgrupo)},;
+						 "AllTrim(ZTRB->MESANO) = 'ATUAL' .And. AllTrim(ZTRB->GRUPO) == AllTrim(_cgrupo)" ) )
+EndIf
 
 count to nTot
-ZTRB->( Dbgotop() )
+ZTRB->( DBGoTop() )
 
 ProcRegua( nTot )
-ZE1->(Dbsetorder(1))
+ZE1->(DBSetOrder(1))
 
-Do while !ZTRB->( Eof() )
+While !ZTRB->( Eof() )
    IncProc()
-	IF !ZE1->(Dbseek(Xfilial("ZE1") + 'ATUAL     ' + ZTRB->PRODUTO))
-	   ZTRB->( DBSKIP() )
-	   LOOP
-	ENDIF
+	If !ZE1->(DBSeek(xFilial("ZE1") + 'ATUAL     ' + ZTRB->PRODUTO))
+	   ZTRB->( DBSkip() )
+	   Loop
+	EndIf
 	
 	//=========================================================================
-	//Se for preco de origem do cadastro grava reajuste direto em custos
-	//se for de origem de uma competencia grava % de reajuste
+	//Se For preco de origem do cadastro grava reajuste direto em custos
+	//se For de origem de uma competencia grava % de reajuste
 	//==========================================================================
 	
 	If ZTRB->COMPOR == 'CADASTRO'
@@ -1407,169 +1406,169 @@ Do while !ZTRB->( Eof() )
 			_nprod := 1
 		Else
 			_nprod := ZE1->ZE1_QTDPRO
-		Endif
+		EndIf
 	
 		If _ctipo ==  "Leite - MP"
 			If _npval != 0 
 				ZTRB->CUSTOL += ((_npval * ZTRB->CUSTOL) / 100) * _nprod
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->CUSTOL := _nval * _nprod 
 			Else
 				ZTRB->CUSTOL :=  ( _nvval * _nprod) + ZTRB->CUSTOL
-			Endif
+			EndIf
 			
 			If _lzera 
 				ZTRB->CUSTOL := 0
-			Endif
-		Endif 
+			EndIf
+		EndIf 
 	
 		If _ctipo ==  "Insumos"
 			If _npval != 0
 				ZTRB->CUSTOI += (_npval * ZTRB->CUSTOI) / 100
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->CUSTOI := _nval * _nprod
 			Else
 				ZTRB->CUSTOI :=  ( _nvval * _nprod) + ZTRB->CUSTOI
-			Endif
+			EndIf
 			
 			If _lzera 
 				ZTRB->CUSTOI := 0
-			Endif
-		Endif 
+			EndIf
+		EndIf 
 	
 		If _ctipo ==  "Frete"
 			If _npval != 0
 				ZTRB->CUSTOF += (_npval * ZTRB->CUSTOF) / 100
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->CUSTOF := _nval * _nprod
 			Else
 				ZTRB->CUSTOF :=  ( _nvval * _nprod) + ZTRB->CUSTOF
-			Endif
+			EndIf
 			
 			If _lzera 
 				ZTRB->CUSTOF := 0
-			Endif
-		Endif 
+			EndIf
+		EndIf 
 	
 		If _ctipo ==  "Custo Operacional"
 			If _npval != 0
 				ZTRB->CUSTOO += (_npval * ZTRB->CUSTOO) / 100
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->CUSTOO := _nval * _nprod
 			Else
 				ZTRB->CUSTOO :=  ( _nvval * _nprod) + ZTRB->CUSTOO
-			Endif
+			EndIf
 			
 			If _lzera 
 				ZTRB->CUSTOO := 0
-			Endif
-		Endif 
+			EndIf
+		EndIf 
 	
 		If _ctipo ==  "Preco"
 			If _npval != 0
 				ZTRB->PRECOR := ZTRB->PRCMED + ((ZTRB->PRCMED * _npval) / 100 )
 				ZTRB->PRCMED := ZTRB->PRCMED + ((ZTRB->PRCMED * _npval) / 100 )
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->PRECOR := _nval 
 				ZTRB->PRCMED := _nval 
 			Else
 				ZTRB->PRECOR := _nvval + ZE1->ZE1_PRCMED 
 				ZTRB->PRCMED := _nvval + ZE1->ZE1_PRCMED
-			Endif
+			EndIf
 			
 			If _lzera 
 				ZTRB->PRECOR := 0 
 				ZTRB->PRCMED := 0
-			Endif
-		Endif 
+			EndIf
+		EndIf 
 	
 		If _ctipo ==  "Margem"
 			If _npval != 0
 				ZTRB->MARGEM := (ZTRB->CUSTO * (_npval/100)) / ( 1 - (_npval/100))
 				//Se arredondamento joga margem para baixo vai aumentando para garantir o percentual minimo
-				Do while (ZTRB->MARGEM / ZTRB->PRCMED * 100) < _npval
+				While (ZTRB->MARGEM / ZTRB->PRCMED * 100) < _npval
 					ZTRB->MARGEM := ZTRB->MARGEM + 0.01
-				Enddo
-			Elseif _nval != 0
+				EndDo
+			ElseIf _nval != 0
 				ZTRB->MARGEM :=  _nval
 			Else
 				ZTRB->MARGEM :=  ZTRB->MARGEM + _nvval
-			Endif
+			EndIf
 			
 			If _lzera 
 				ZTRB->MARGEM :=  0
-			Endif
-		Endif 
+			EndIf
+		EndIf 
 	
 		If _ctipo ==  "Embalagens"
 			If _npval != 0
 				ZTRB->CUSTOE += (_npval * ZTRB->CUSTOE) / 100
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->CUSTOE := _nval * _nprod
 			Else
 				ZTRB->CUSTOE :=  ( _nvval * _nprod) + ZTRB->CUSTOE				
-			Endif
+			EndIf
 			
 			If _lzera 
 				ZTRB->CUSTOE := 0
-			Endif
-		Endif 
+			EndIf
+		EndIf 
 	
 		If _ctipo ==  "Outros"
 			If _npval != 0
 				ZTRB->CUSTOU += (_npval * ZTRB->CUSTOU) / 100
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->CUSTOU := _nval * _nprod
 			Else
 				ZTRB->CUSTOU :=  ( _nvval * _nprod) + ZTRB->CUSTOU
-			Endif
+			EndIf
 			
 			If _lzera 
 				ZTRB->CUSTOU := 0
-			Endif
-		Endif 
+			EndIf
+		EndIf 
 		
 		If _ctipo ==  "Custo Corporativo"
 			If _npval > 0
 				ZTRB->REJCC := ( _npval * ( ZTRB->REJCC ) ) /100 
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->REJCC := _nval 
 			Else
 				ZTRB->REJCC :=  ( _nvval) + ZTRB->REJCC
-			Endif
+			EndIf
 			
 			If _lzera 
 				ZTRB->REJCC := 0
-			Endif
-		Endif
+			EndIf
+		EndIf
 		
 		If _ctipo ==  "Imposto"
 			If _npval > 0
 				ZTRB->REJIMP := ( _npval * ( ZTRB->REJIMP ) ) /100 
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->REJIMP := _nval 
 			Else
 				ZTRB->REJIMP :=  ( _nvval ) + ZTRB->REJIMP
-			Endif
+			EndIf
 			
 			If _lzera 
 				ZTRB->REJIMP := 0
-			Endif
-		Endif
+			EndIf
+		EndIf
 		
 		If _ctipo ==  "Verba"
 			If _npval > 0
 				ZTRB->REJVBA := ( _npval * ( ZTRB->REJVBA ) ) /100 
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->REJVBA := _nval 
 			Else
 				ZTRB->REJVBA :=  ( _nvval ) + ZTRB->REJVBA
-			Endif
+			EndIf
 	
 			If _lzera 
 				ZTRB->REJVBA := 0
-			Endif
-		Endif
+			EndIf
+		EndIf
 		
 		ZTRB->CUSTOP:= ZTRB->CUSTOL + ZTRB->CUSTOE + ZTRB->CUSTOI + ZTRB->CUSTOF + ZTRB->CUSTOU
 		ZTRB->CUSTO	:= (ZTRB->CUSTOP + ZTRB->CUSTOO +ZTRB->REJCC + ZTRB->REJIMP + ZTRB->REJVBA) / _nprod
@@ -1581,170 +1580,170 @@ Do while !ZTRB->( Eof() )
 			ZTRB->PRECOR := ZTRB->CUSTO + ZTRB->MARGEM
 			ZTRB->PRCMED := ZTRB->CUSTO + ZTRB->MARGEM 
 			ZTRB->MRGP		:= ZTRB->MARGEM / ZTRB->PRCMED * 100 
-		Endif
+		EndIf
 	Else
 		If _ctipo ==  "Leite - MP"
 			If _npval > 0
 				ZTRB->REAJL := ( _npval * ( ZE1->ZE1_CUSTOL / ZE1->ZE1_QTDPRO ) ) /100 
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->REAJL := _nval - (ZE1->ZE1_CUSTOL / ZE1->ZE1_QTDPRO )
 			Else
 				ZTRB->REAJL :=  ( _nvval ) + ZTRB->REAJL
-			Endif
+			EndIf
 			
 			If _lzera 
 				ZTRB->REAJL := - (ZTRB->CUSTOL / ZTRB->QTDPRO )
-			Endif
-		Endif 
+			EndIf
+		EndIf 
 	
 		If _ctipo ==  "Insumos"
 		   	If _npval > 0
 				ZTRB->REAJI := ( _npval * ( ZE1->ZE1_CUSTOI / ZE1->ZE1_QTDPRO ) ) /100 
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->REAJI := _nval - (ZE1->ZE1_CUSTOI / ZE1->ZE1_QTDPRO )
 			Else
 				ZTRB->REAJI :=  ( _nvval ) + ZTRB->REAJI
-			Endif
+			EndIf
 			
 			If _lzera 
 				ZTRB->REAJI := - (ZTRB->CUSTOI / ZTRB->QTDPRO )
-			Endif
-		Endif 
+			EndIf
+		EndIf 
 	
 		If _ctipo ==  "Frete"
 	       If _npval > 0
 				ZTRB->REAJF := ( _npval * ( ZE1->ZE1_CUSTOF / ZE1->ZE1_QTDPRO ) ) /100 
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->REAJF := _nval - (ZE1->ZE1_CUSTOF / ZE1->ZE1_QTDPRO )
 			Else
 				ZTRB->REAJF :=  ( _nvval ) + ZTRB->REAJF
-			Endif
+			EndIf
 			
 			If _lzera 
 				ZTRB->REAJF := - (ZTRB->CUSTOF / ZTRB->QTDPRO )
-			Endif
-		Endif 
+			EndIf
+		EndIf 
 	
 		If _ctipo ==  "Custo Operacional"
 		   If _npval > 0
 				ZTRB->REAJO := ( _npval * ( ZE1->ZE1_CUSTOO / ZE1->ZE1_QTDPRO ) ) /100 
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->REAJO := _nval - (ZE1->ZE1_CUSTOO / ZE1->ZE1_QTDPRO )	
 			Else
 				ZTRB->REAJO :=  ( _nvval) + ZTRB->REAJO
-			Endif
+			EndIf
 			
 			If _lzera 
 				ZTRB->REAJO := - (ZE1->ZE1_CUSTOO / ZE1->ZE1_QTDPRO )
-			Endif
-		Endif 
+			EndIf
+		EndIf 
 	
 		If _ctipo ==  "Preco"
 			If _npval != 0
 				ZTRB->PRECOR := ZTRB->PRCMED + ((ZTRB->PRCMED * _npval) / 100 )
 				ZTRB->PRCMED := ZTRB->PRCMED + ((ZTRB->PRCMED * _npval) / 100 )
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->PRECOR := _nval 
 				ZTRB->PRCMED := _nval 
 			Else
 				ZTRB->PRECOR := _nval + ZTRB->PRECOR
 				ZTRB->PRCMED := _nval + ZTRB->PRCMED			
-			Endif
+			EndIf
 			
 			If _lzera 
 				ZTRB->PRECOR := 0
 				ZTRB->PRCMED := 0
-			Endif
-		Endif 
+			EndIf
+		EndIf 
 	
 		If _ctipo ==  "Margem"
 			If _npval != 0
 				ZTRB->MARGEM := (ZTRB->CUSTO * (_npval/100)) / ( 1 - (_npval/100))
 				//Se arredondamento joga margem para baixo vai aumentando para garantir o percentual minimo
-				Do while (ZTRB->MARGEM / ZTRB->PRCMED * 100) < _npval
+				While (ZTRB->MARGEM / ZTRB->PRCMED * 100) < _npval
 					ZTRB->MARGEM := ZTRB->MARGEM + 0.01
-				Enddo
+				EndDo
 		
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->MARGEM :=  _nval
 			Else
 				ZTRB->MARGEM :=  ZTRB->MARGEM + _nvval
-			Endif
+			EndIf
 			
 			If _lzera 
 				ZTRB->MARGEM :=  0
-			Endif
-		Endif 
+			EndIf
+		EndIf 
 	
 		If _ctipo ==  "Embalagens"
 		   If _npval > 0
 				ZTRB->REAJE := ( _npval * ( ZE1->ZE1_CUSTOE / ZE1->ZE1_QTDPRO ) ) /100 
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->REAJE := _nval - (ZE1->ZE1_CUSTOE / ZE1->ZE1_QTDPRO )
 			Else
 				ZTRB->REAJE :=  ( _nvval ) + ZTRB->REAJE
-			Endif
+			EndIf
 
 			If _lzera 
 				ZTRB->REAJE := -(ZTRB->CUSTOE / ZTRB->QTDPRO )
-			Endif
-		Endif 
+			EndIf
+		EndIf 
 	
 		If _ctipo ==  "Outros"
 			If _npval > 0
 				ZTRB->REAJU := ( _npval * ( ZE1->ZE1_CUSTOU / ZE1->ZE1_QTDPRO ) ) /100 
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->REAJU := _nval - (ZE1->ZE1_CUSTOU / ZE1->ZE1_QTDPRO )
 			Else
 				ZTRB->REAJU :=  ( _nvval ) + ZTRB->REAJU
-			Endif
+			EndIf
 	
 			If _lzera 
 				ZTRB->REAJU := - (ZTRB->CUSTOU / ZTRB->QTDPRO )
-			Endif
-		Endif
+			EndIf
+		EndIf
 		
 		If _ctipo ==  "Custo Corporativo"
 			If _npval > 0
 				ZTRB->REJCC := ( _npval * ( ZTRB->REJCC ) ) /100 
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->REJCC := _nval 
 			Else
 				ZTRB->REJCC :=  ( _nvval ) + ZTRB->REJCC
-			Endif
+			EndIf
 	
 			If _lzera 
 				ZTRB->REJCC := 0
-			Endif
-		Endif
+			EndIf
+		EndIf
 		
 		If _ctipo ==  "Imposto"
 			If _npval > 0
 				ZTRB->REJIMP := ( _npval * ( ZTRB->REJIMP ) ) /100 
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->REJIMP := _nval 
 			Else
 				ZTRB->REJIMP :=  ( _nvval ) + ZTRB->REJIMP	
-			Endif
+			EndIf
 			
 			If _lzera 
 				ZTRB->REJIMP := 0
-			Endif
-		Endif
+			EndIf
+		EndIf
 		
 		If _ctipo ==  "Verba"
 			If _npval > 0
 				ZTRB->REJVBA := ( _npval * ( ZTRB->REJVBA ) ) /100 
-			Elseif _nval != 0
+			ElseIf _nval != 0
 				ZTRB->REJVBA := _nval 
 			Else
 				ZTRB->REJVBA :=  ( _nvval ) + ZTRB->REJVBA
-			Endif
+			EndIf
 	
 			If _lzera 
 				ZTRB->REJVBA := 0
-			Endif
-		Endif
+			EndIf
+		EndIf
 
 		_ncustoop		:=	ZE1->ZE1_CUSTOO + (ZTRB->REAJO * ZE1->ZE1_QTDPRO)  
 		_ncustopr		:= 	ZE1->ZE1_CUSTOL + (ZTRB->REAJL * ZE1->ZE1_QTDPRO)
@@ -1752,8 +1751,8 @@ Do while !ZTRB->( Eof() )
 		_ncustopr		+= 	ZE1->ZE1_CUSTOI + (ZTRB->REAJI * ZE1->ZE1_QTDPRO)
 		_ncustopr		+= 	ZE1->ZE1_CUSTOU + (ZTRB->REAJU * ZE1->ZE1_QTDPRO)
 
-		ZTRB->CUSTO	    := ROUND(((_ncustopr + _ncustoop + ZTRB->REJCC+ZTRB->REJIMP+ZTRB->REJVBA) / ZE1->ZE1_QTDPRO),2)
-		ZTRB->CUSTOP	:= ROUND((_ncustopr),2)
+		ZTRB->CUSTO	    := Round(((_ncustopr + _ncustoop + ZTRB->REJCC+ZTRB->REJIMP+ZTRB->REJVBA) / ZE1->ZE1_QTDPRO),2)
+		ZTRB->CUSTOP	:= Round((_ncustopr),2)
 			
 		If _ctipo ==  "Preco"
 			ZTRB->MARGEM := ZTRB->PRECOR - ZTRB->CUSTO
@@ -1762,8 +1761,8 @@ Do while !ZTRB->( Eof() )
 			ZTRB->PRECOR := ZTRB->CUSTO + ZTRB->MARGEM
 			ZTRB->PRCMED := ZTRB->CUSTO + ZTRB->MARGEM 
 			ZTRB->MRGP		:= ZTRB->MARGEM / ZTRB->PRCMED * 100 
-		Endif
-	Endif
+		EndIf
+	EndIf
 				
 	If !ZE1->( Eof() )
 	
@@ -1791,18 +1790,18 @@ Do while !ZTRB->( Eof() )
 			ZE1->ZE1_CUSTOU := ZTRB->CUSTOU
 			ZE1->ZE1_CUSTOP := ZTRB->CUSTOP
 		
-		Endif
+		EndIf
 	
-		ZE1->(MsUnlock())
-	Endif
+		ZE1->(MSUnLock())
+	EndIf
 
-	ZTRB->( Dbskip() )
-Enddo
+	ZTRB->( DBSkip() )
+EndDo
 
 ZTRB->(DbclearFilter() )
 _oBrw:Refresh()
 
-messagebox("Reajuste realizado com sucesso","Reajuste", 64)
+MessageBox("Reajuste realizado com sucesso","Reajuste", 64)
 
 _oDlg2:End()
 
@@ -1818,105 +1817,105 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-USER Function CEST002D()
+User Function CEST002D()
 
 Local _lLimpaTabPreco:=.F.
 Local _cAlias   := GetNextAlias()
 Local _cTabCopia:="001"
 Local _aRecTRB  :={},R
-Dbselectarea("ZTRB")
+DBSelectArea("ZTRB")
 
-ZTRB->( dbSetFilter( { || ALLTRIM(ZTRB->MESANO) = "ATUAL" },"ALLTRIM(ZTRB->MESANO) = 'ATUAL'") )
+ZTRB->( dbSetFilter( { || AllTrim(ZTRB->MESANO) = "ATUAL" },"AllTrim(ZTRB->MESANO) = 'ATUAL'") )
 count to nTot
-ZTRB->( Dbgotop() )
+ZTRB->( DBGoTop() )
 
-IF nTot = 0 
+If nTot = 0 
    MSGSTOP("Não existe regitros VÁLIDOS para geracao da Tabela de preços.")
-ENDIF
+EndIf
 
 ProcRegua( nTot )
 
-ZE1->(Dbsetorder(1))
+ZE1->(DBSetOrder(1))
 
-Do while .not. ZTRB->( Eof() )
+While .not. ZTRB->( Eof() )
 
    IncProc()
-   IF !ZE1->(Dbseek(Xfilial("ZE1") + 'ATUAL     ' + ZTRB->PRODUTO)) .OR. ZTRB->PRCMED = 0
-	  ZTRB->( DBSKIP() )
-	  LOOP
-   ENDIF
+   If !ZE1->(DBSeek(xFilial("ZE1") + 'ATUAL     ' + ZTRB->PRODUTO)) .Or. ZTRB->PRCMED = 0
+	  ZTRB->( DBSkip() )
+	  Loop
+   EndIf
 
-   AADD(_aRecTRB, ZTRB->(RECNO()) )
+   aAdd(_aRecTRB, ZTRB->(RECNO()) )
    
-   ZTRB->( Dbskip() )
+   ZTRB->( DBSkip() )
 	
-Enddo
+EndDo
 
-IF LEN(_aRecTRB) = 0 
+If Len(_aRecTRB) = 0 
    MSGSTOP("Não existe regitros VÁLIDOS para geracao da Tabela de preços.")
-   RETURN .F.
-ENDIF
+   Return .F.
+EndIf
 
 ProcRegua( 0 )
 
-DA0->(Dbsetorder(1))
-DA1->(Dbsetorder(1))
+DA0->(DBSetOrder(1))
+DA1->(DBSetOrder(1))
 
 Begin Transaction   
 
 Begin Sequence
 
-IF DA0->(DBSEEK(xFilial("DA0")+"001"))
+If DA0->(DBSeek(xFilial("DA0")+"001"))
 
-   IF DA0->DA0_DATDE = dDatabase
-      IF MSGYESNO("A tabela de precos já foi gerada hoje deseja APAGA-LA e gerar novamente?")
+   If DA0->DA0_DATDE = dDatabase
+      If MSGYESNO("A tabela de precos já foi gerada hoje deseja APAGA-LA e gerar novamente?")
          _lLimpaTabPreco:=.T.
-      ENDIF
-   ENDIF
+      EndIf
+   EndIf
 
-   IF !DA0->(RecLock("DA0",.F.,,.T.))
+   If !DA0->(RecLock("DA0",.F.,,.T.))
       MSGSTOP("NÃO foi possivel atualizar a tabela de precos porque esta em uso por outro usuario.")
       BREAK
-   ENDIF
+   EndIf
 
-   IF !_lLimpaTabPreco
+   If !_lLimpaTabPreco
       _cQuery := " SELECT MAX(DA0_CODTAB)	AS PROX_COD FROM "+ RetSqlName("DA0") +" DA0 "
       _cQuery += " WHERE DA0.DA0_FILIAL = '"+xFilial("DA0")+"' AND DA0.D_E_L_E_T_ = ' ' "
       If(Select(_cAlias) > 0 , (_cAlias)->( DBCloseArea() ) ,)
 	  _cQuery := ChangeQuery(_cQuery)
 		MPSysOpenQuery(_cQuery,_cAlias)
 
-      _cTabCopia:= STRZERO( ( VAL((_cAlias)->PROX_COD) + 1 ) ,3)
+      _cTabCopia:= StrZero( ( Val((_cAlias)->PROX_COD) + 1 ) ,3)
 
-   ENDIF
+   EndIf
    
-   IF DA1->(DBSEEK(xFilial("DA0")+"001"))
+   If DA1->(DBSeek(xFilial("DA0")+"001"))
 
-      DO WHILE DA1->(DBSEEK(xFilial("DA0")+"001"))
+      While DA1->(DBSeek(xFilial("DA0")+"001"))
 
          IncProc("Fazendo copia da Tab atual...")
 
          DA1->(RecLock("DA1",.F.))
-         IF _lLimpaTabPreco
+         If _lLimpaTabPreco
             DA1->(DBDELETE())
-         ELSE
+         Else
             DA1->DA1_CODTAB:=_cTabCopia
-         ENDIF
-         DA1->(MSUNLOCK())
-      ENDDO
+         EndIf
+         DA1->(MSUnLock())
+      EndDo
 
-   ENDIF
+   EndIf
 
-   IF _lLimpaTabPreco
+   If _lLimpaTabPreco
       DA0->(DBDELETE())
-      DA0->(MSUNLOCK())
-   ELSE
+      DA0->(MSUnLock())
+   Else
       DA0->DA0_CODTAB:=_cTabCopia
-   ENDIF
+   EndIf
 
-ENDIF
+EndIf
 
-ProcRegua( LEN(_aRecTRB) )
+ProcRegua( Len(_aRecTRB) )
 
 DA0->(RecLock("DA0",.T.))
 DA0->DA0_FILIAL:=xFilial("DA0")
@@ -1929,14 +1928,14 @@ DA0->DA0_HORATE:="23:59"
 DA0->DA0_TPHORA:="1"
 DA0->DA0_ATIVO :="1"
 	
-FOR R := 1 TO LEN(_aRecTRB)
+For R := 1 TO Len(_aRecTRB)
 
    IncProc("Gerando tabela de preco...")
-   ZTRB->( DbGOTO(_aRecTRB[R]) )
+   ZTRB->( DBGoTo(_aRecTRB[R]) )
 
    DA1->(RecLock("DA1",.T.))                                  
    DA1->DA1_FILIAL:=xFilial("DA1")
-   DA1->DA1_ITEM  :=STRZERO(R,4)
+   DA1->DA1_ITEM  :=StrZero(R,4)
    DA1->DA1_CODTAB:="001"
    DA1->DA1_CODPRO:=ZTRB->PRODUTO
    DA1->DA1_PRCVEN:=ZTRB->PRCMED
@@ -1948,15 +1947,15 @@ FOR R := 1 TO LEN(_aRecTRB)
    DA1->DA1_DATVIG:=_dData
    DA1->DA1_PRCMAX:=(ZTRB->PRCMED*_nMaximo)
    DA1->DA1_I_PRMP:=(ZTRB->PRCMED*_nMinimo)
-   DA1->(MSUNLOCK())
+   DA1->(MSUnLock())
 	
-NEXT
+Next
 
-DA0->(MSUNLOCK())//Destrava a capa do Registro gravado
+DA0->(MSUnLock())//Destrava a capa do Registro gravado
 
-IF !_lLimpaTabPreco .AND. DA0->(DBSEEK(xFilial("DA0")+_cTabCopia))
-   DA0->(MSUNLOCK())//Destrava a capa do Registro copiado
-ENDIF
+If !_lLimpaTabPreco .And. DA0->(DBSeek(xFilial("DA0")+_cTabCopia))
+   DA0->(MSUnLock())//Destrava a capa do Registro copiado
+EndIf
 
 MessageBox("Tabela de preços gravada com sucesso","Tabela de preços", 64)
 
@@ -1965,6 +1964,6 @@ End Sequence
 End Transaction
 
 ZTRB->(DbclearFilter() )
-ZTRB->( Dbgotop() )
+ZTRB->( DBGoTop() )
 
 Return 

@@ -2,23 +2,20 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
 ===============================================================================================================================
 */
 
-#INCLUDE 'Protheus.ch' 
-#INCLUDE 'Fileio.ch'
+#Include "TOTVS.ch" 
+
 /*
 ===============================================================================================================================
 Programa----------: MCOM021
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 16/11/2023
-===============================================================================================================================
 Descrição---------: Rotina para exportar os XMLs escriturados e recebidos pelo TOTVS Colaboração. Chamado 45591
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -27,9 +24,7 @@ User Function MCOM021()
 Local _cPerg		:= "MCOM021"
 Local _oSelf		:= nil
 
-//============================================
 //Cria interface principal
-//============================================
 tNewProcess():New(	_cPerg											,; // Função inicial
 					"Exporta XMLs"							,; // Descrição da Rotina
 					{|_oSelf| MCOM021P(_oSelf) }					,; // Função do processamento
@@ -43,16 +38,14 @@ tNewProcess():New(	_cPerg											,; // Função inicial
                     .T.                                              ) // Se .T. cria apenas uma regua de processamento.
 
 Return
+
 /*
 ===============================================================================================================================
 Programa----------: MGLT021P
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 16/11/2023
-===============================================================================================================================
 Descrição---------: Realiza o processamento da rotina.
-===============================================================================================================================
 Parametros--------: _oSelf
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -73,7 +66,7 @@ If MV_PAR09 == 1
 		_aSelFil := AdmGetFil(.F.,.F.,"SF1")
 	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
+	aAdd(_aSelFil,cFilAnt)
 EndIf
 _cFiltro += GetRngFil( _aSelFil, "SF1", .T.,)
 If MV_PAR10 == 1
@@ -84,11 +77,11 @@ EndIf
 _cFiltro += ' %'
 
 BeginSql alias _cAlias
-    SELECT F1_CHVNFE, F1_ESPECIE, CASE WHEN CKO_I_ALTX = 'N' THEN CKO_XMLRET ELSE CKO_I_ORIG END CKO_XMLRET
+    SELECT F1_CHVNFE, F1_ESPECIE, Case WHEN CKO_I_ALTX = 'N' THEN CKO_XMLRET Else CKO_I_ORIG END CKO_XMLRET
     FROM %Table:CKO% CKO, %Table:SF1% SF1
     WHERE F1_FILIAL %Exp:_cFiltro%
     AND F1_FILIAL = CKO_FILPRO
-    AND F1_CHVNFE = SUBSTR(CKO_ARQUIV,4,44)
+    AND F1_CHVNFE = SubStr(CKO_ARQUIV,4,44)
     AND F1_EMISSAO BETWEEN %exp:MV_PAR01% AND %exp:MV_PAR02%
     AND F1_DTDIGIT BETWEEN %exp:MV_PAR03% AND %exp:MV_PAR04%
     AND F1_FORNECE BETWEEN %exp:MV_PAR05% AND %exp:MV_PAR06%
@@ -99,9 +92,9 @@ BeginSql alias _cAlias
 EndSql
 
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 
-While (_cAlias)->(!EOF())
+While (_cAlias)->(!Eof())
 
     _oSelf:SetRegua1(_nCountRec)
     _oSelf:IncRegua1("Gerando arquivo...")
@@ -118,6 +111,7 @@ While (_cAlias)->(!EOF())
         MsgStop("Erro na criação do arquivo XML: "+(_cAlias)->F1_CHVNFE+". Ele será ignorado. Erro: "+ _oFile:Error():Message,"MCOM02102")
     EndIf
     FreeObj(_oFile)
-    (_cAlias)->(DbSkip())
+    (_cAlias)->(DBSkip())
 EndDo
+
 Return

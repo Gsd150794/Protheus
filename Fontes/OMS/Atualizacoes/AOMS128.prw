@@ -11,7 +11,7 @@
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include 'FWMVCDef.ch'
   
 /*
@@ -28,7 +28,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS128()
-Local _aArea   := GetArea()
+Local _aArea   := FWGetArea()
 Local _oBrowse
 Private _cTitulo  
 
@@ -43,9 +43,9 @@ Begin Sequence
 
 End Sequence       
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -87,8 +87,8 @@ Retorno-----------: Nenhum
 Static Function ModelDef()
 
 Local _oModel    := Nil 
-Local _oStruCab  := FWFormStruct(1, 'ZGL', {|cCampo| AllTRim(cCampo) $ "ZGL_FORNEC;ZGL_LOJA;ZGL_NOMFOR;"})
-Local _oStruGrid := FWFormStruct(1, 'ZGL', {|cCampo| AllTRim(cCampo) $ "ZGL_PRODUT;ZGL_DESCPR;ZGL_MSBLQL;"}) //fModStruct()
+Local _oStruCab  := FWFormStruct(1, 'ZGL', {|cCampo| AllTrim(cCampo) $ "ZGL_FORNEC;ZGL_LOJA;ZGL_NOMFOR;"})
+Local _oStruGrid := FWFormStruct(1, 'ZGL', {|cCampo| AllTrim(cCampo) $ "ZGL_PRODUT;ZGL_DESCPR;ZGL_MSBLQL;"}) //fModStruct()
  
 _oModel := MPFormModel():New('AOMS128M', /*bPreValidacao*/, /*{|| fValidGrid()}*/, /*bCommit*/, /*bCancel*/ )
  
@@ -124,9 +124,9 @@ Retorno-----------: Nenhum
 Static Function ViewDef()
 Local _oView     := NIL
 Local _oModel    := FWLoadModel('AOMS128')
-Local _oStruCab  := FWFormStruct(2, "ZGL", {|cCampo| AllTRim(cCampo) $ "ZGL_FORNEC;ZGL_LOJA;ZGL_NOMFOR;"})
-//Local _oStruGRID := FWFormStruct(2, "ZGL", {|cCampo| !AllTRim(cCampo) $ "ZGL_FORNEC;ZGL_LOJA;ZGL_NOMFOR;"}) //FViewStruct()
-Local _oStruGRID := FWFormStruct(2, "ZGL", {|cCampo| AllTRim(cCampo) $ "ZGL_PRODUT;ZGL_DESCPR;ZGL_MSBLQL;"}) //FViewStruct()
+Local _oStruCab  := FWFormStruct(2, "ZGL", {|cCampo| AllTrim(cCampo) $ "ZGL_FORNEC;ZGL_LOJA;ZGL_NOMFOR;"})
+//Local _oStruGRID := FWFormStruct(2, "ZGL", {|cCampo| !AllTrim(cCampo) $ "ZGL_FORNEC;ZGL_LOJA;ZGL_NOMFOR;"}) //FViewStruct()
+Local _oStruGRID := FWFormStruct(2, "ZGL", {|cCampo| AllTrim(cCampo) $ "ZGL_PRODUT;ZGL_DESCPR;ZGL_MSBLQL;"}) //FViewStruct()
  
 _oStruCab:SetNoFolder()
  
@@ -249,7 +249,7 @@ Begin Sequence
 
    If _cCampo == "ZGL_FORNEC"
       _cCod     := _oModelMain:GetValue('ZGL_FORNEC')
-      IF ! ExistCpo("SA2", _cCod)
+      If ! ExistCpo("SA2", _cCod)
          _lRet := .F.
       EndIf       
 
@@ -263,7 +263,7 @@ Begin Sequence
 
    ElseIf _cCampo == "ZGL_PRODUT"
       _cCod     := _oModelGRID:GetValue('ZGL_PRODUT')
-      IF ! ExistCpo("SB1", _cCod)
+      If ! ExistCpo("SB1", _cCod)
          _lRet := .F.
       EndIf  
    EndIf 

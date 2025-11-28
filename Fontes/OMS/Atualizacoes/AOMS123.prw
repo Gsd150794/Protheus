@@ -8,11 +8,11 @@
 ===============================================================================================================================
 */ 
 
-#INCLUDE "FWMBROWSE.CH"
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "TOPCONN.CH"
-#INCLUDE "RWMAKE.CH"
+#Include "FWMBROWSE.CH"
+#Include "FWMVCDEF.CH"
+#Include "TOTVS.ch"
+#Include "TOPCONN.CH"
+#Include "RWMAKE.CH"
 
 /*
 ===============================================================================================================================
@@ -36,7 +36,7 @@ _oBrowse:SetMenuDef( 'AOMS123' )
 _oBrowse:SetDescription("Cadastro de Mesoregião")
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -146,10 +146,10 @@ ElseIf _nOperation == MODEL_OPERATION_UPDATE
 EndIf
 
 If _lValida
-    Z21->(DbSetOrder(1))
-    If Z21->( Dbseek(xFilial("Z21")+_cCod) )
+    Z21->(DBSetOrder(1))
+    If Z21->( DBSeek(xFilial("Z21")+_cCod) )
         _lReturn := .F.
-        U_ITMSG("Código da Mesoregião informado já consta no cadastro. ",;
+        U_ITMsg("Código da Mesoregião informado já consta no cadastro. ",;
               "Atenção",;
               "Modifique o código digitado.  ",3 , , , .T.)
 
@@ -179,15 +179,15 @@ User Function AOMS123E(_cEst)
 Local _cRegiao := ""
 
 Do Case
-    Case Alltrim(_cEst) $ "SP/RJ/MG/ES"
+    Case AllTrim(_cEst) $ "SP/RJ/MG/ES"
        _cRegiao := "3"
-    Case Alltrim(_cEst) $ "SC/PR/RS"
+    Case AllTrim(_cEst) $ "SC/PR/RS"
        _cRegiao := "4"
-    Case Alltrim(_cEst) $ "MT/MS/GO/DF"
+    Case AllTrim(_cEst) $ "MT/MS/GO/DF"
        _cRegiao := "5"
-    Case Alltrim(_cEst) $ "AC/RO/AM/RR/PA/AP/TO"
+    Case AllTrim(_cEst) $ "AC/RO/AM/RR/PA/AP/TO"
        _cRegiao := "1"
-    Case Alltrim(_cEst) $ "BA/SE/AL/PE/PB/CE/RN/PI/MA"
+    Case AllTrim(_cEst) $ "BA/SE/AL/PE/PB/CE/RN/PI/MA"
        _cRegiao := "2"
 EndCase
 

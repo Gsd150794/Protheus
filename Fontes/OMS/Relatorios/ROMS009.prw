@@ -18,7 +18,7 @@ Jerry Santiago   - Igor Melgaço      - 29/01/2025 - 26/02/2025 -  48994  - Inclu
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
 #Include "report.ch"
-#Include "protheus.ch"
+#Include "TOTVS.ch"
 
 #DEFINE ENTER	Chr(13)+Chr(10)
 
@@ -32,7 +32,7 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum 
 ===============================================================================================================================
 */    
-User function ROMS009() As Logical
+User Function ROMS009() As Logical
 
 Local nOpc       := 0 As Numeric
 Local aDesc      := "Confirma impressao?" As Char
@@ -44,21 +44,21 @@ Private cPerg      := "ROMS009" As Char
 Private cFilter    := '' As Char
 Private _cAliasSD1 := GetNextAlias() As Char
 
-If ! Pergunte (cPerg,.t.)
+If ! Pergunte (cPerg,.T.)
 	Return
 EndIf
 
 nOpc := Aviso("Impressao de devolução de vendas",aDesc,{"Sim","Nao","Configura"})
-if nOpc == 3
+If nOpc == 3
 	U_ROMS009C()
 	nOpc := Aviso("Impressao de devolução de vendas",aDesc,{"Sim","Nao"})
-endif
+EndIf
 
 If nOpc == 1
    Processa({|lEnd|ROM009R()})
-Endif   
+EndIf   
 
-Return Nil   
+Return   
 
 /*
 ===============================================================================================================================
@@ -113,35 +113,35 @@ _nPag :=1
 _nLin :=10
 
 
-if mv_par26 == 2 .and. mv_par22 == 1 // Produto/sintetico              
+If MV_PAR26 == 2 .And. MV_PAR22 == 1 // Produto/sintetico              
 
      _cQuery := " SELECT A.D1_FILIAL, A.D1_COD, A.D1_UM, A.D1_SEGUM, SUM(A.D1_QUANT) AS QUANT, SUM(A.D1_QTSEGUM) AS QTSEGUM, SUM(A.D1_TOTAL) AS TOTAL, SUM(A.D1_ICMSRET) AS ICMSRET, SUM(A.D1_DESPESA) AS DESPESA "
-     If mv_par30 == 2 //Emissão Excel
+     If MV_PAR30 == 2 //Emissão Excel
         _cQuery += ", A.D1_LOCAL ,  F.F2_I_NFSED, A.D1_FORMUL "    
-	 ENDIF
+	 EndIf
 
      _aheader := {"Filial","Produto","Descrição","Unidade","Seg Unid", "Qtde"                ,"Qtde 2a.Unid"               ,"Valor"                  ,"Icms Retido"                ,"Despesa"                    ,"Armazem","SEDEX","Formul"}
 
 
-elseif mv_par26 == 3 .and. mv_par22 == 1 // Rede/sintetico              
+ElseIf MV_PAR26 == 3 .And. MV_PAR22 == 1 // Rede/sintetico              
 
      _cQuery := " SELECT A.D1_FILIAL, B.A1_GRPVEN, A.D1_COD, A.D1_UM, A.D1_SEGUM, SUM(A.D1_QUANT) AS QUANT, SUM(A.D1_QTSEGUM) AS QTSEGUM, SUM(A.D1_TOTAL) AS TOTAL, SUM(A.D1_ICMSRET) AS ICMSRET, SUM(A.D1_DESPESA) AS DESPESA "     
-     If mv_par30 == 2 //Emissão Excel
+     If MV_PAR30 == 2 //Emissão Excel
         _cQuery += ", A.D1_LOCAL ,  F.F2_I_NFSED, A.D1_FORMUL "    
-	 ENDIF
+	 EndIf
 
      _aheader := {"Filial","Grupo","Nome Grupo","Produto","Descrição","Unidade","Seg Unid", "Qtde"        ,"Qtde 2a.Unid"               ,"Valor"                  ,"Icms Retido"                ,"Despesa"                    ,"Armazem","SEDEX","Formul"}
 
-elseif mv_par26 == 4 .and. mv_par22 == 1 // Cliente/sintetico              
+ElseIf MV_PAR26 == 4 .And. MV_PAR22 == 1 // Cliente/sintetico              
 
      _cQuery := " SELECT A.D1_FILIAL, B.A1_GRPVEN, A.D1_FORNECE, A.D1_LOJA, A.D1_COD, A.D1_UM, A.D1_SEGUM, SUM(A.D1_QUANT) AS QUANT, SUM(A.D1_QTSEGUM) AS QTSEGUM, SUM(A.D1_TOTAL) AS TOTAL, SUM(A.D1_ICMSRET) AS ICMSRET, SUM(A.D1_DESPESA) AS DESPESA "    
-     If mv_par30 == 2 //Emissão Excel
+     If MV_PAR30 == 2 //Emissão Excel
         _cQuery += ", A.D1_LOCAL ,  F.F2_I_NFSED, A.D1_FORMUL "    
-	 ENDIF
+	 EndIf
 
      _aheader := {"Filial","Grupo","Nome Grupo","Cliente","Loja","Razão Social", "Produto","Descrição","Unidade","Seg Unid", "Qtde","Qtde 2a.Unid"               ,"Valor"                  ,"Icms Retido"                ,"Despesa"                    ,"Armazem","SEDEX","Formul"}
 
-else //ANALITICO ******************************************
+Else //ANALITICO ******************************************
   
     
       _cQuery := " SELECT D1_FILIAL,"
@@ -173,7 +173,7 @@ else //ANALITICO ******************************************
 	  _cQuery += "       F.F2_I_NFSED,
 	  _cQuery += "       A.d1_formul,
 	  
-	  If mv_par22 <> 1 // Analitico 
+	  If MV_PAR22 <> 1 // Analitico 
 	     _cQuery += "       G.A2_I_TPAVE, " 
 		 _cQuery += "       J.A3_COD AS CODVENDEDOR, " 
 		 _cQuery += "       J.A3_NOME AS VENDEDOR, " 
@@ -198,20 +198,20 @@ else //ANALITICO ******************************************
 
       _aheader := {"Filial"       ,"Emissão NFD" , "Entrada NFD"          ,"Nota Devolução"                       ,"Saldo NFD","DATA NFO"                   ,"Nota Original"                           ,"Saldo NFO"    ,"Grupo"         ,"Nome Grupo"                                                  ,"Cliente"       ,"Loja"        , "Razão Social"                                                           ,"Produto"   ,"Descrição"                                            ,"Unidade"   ,"Seg Unid"   , "Qtde"        ,"Qtde 2a.Unid"  ,"Valor"       ,"Icms Retido"   ,"Despesa","Armazem","SEDEX","Formul"}
      
-endif
+EndIf
 
-If mv_par22 == 1 // Sintetico           
+If MV_PAR22 == 1 // Sintetico           
    _cQuery += " FROM "+RetSqlName("SD1")+" A, "+RetSqlName("SF4")+" D ,"+RetSqlName("SA1")+" B, "+RetSqlName("SB1")+" C, "+RetSqlName("SF2")+" F "
 Else
    _cQuery += " FROM "+RetSqlName("SD1")+" A, "+RetSqlName("SF4")+" D ,"+RetSqlName("SA1")+" B, "+RetSqlName("SB1")+" C, "+RetSqlName("SF2")+" F, "+RetSqlName("SA2")+" G , "+RetSqlName("SD2")+" H, "+RetSqlName("SC5")+" I , "+RetSqlName("SA3")+" J , "+RetSqlName("SA3")+" L , "+RetSqlName("SA3")+" M "
 
-   Aadd(_aheader,"Tipo Averb.Carga") 
-   Aadd(_aheader,"Cod Vendedor") 
-   Aadd(_aheader,"Vendedor") 
-   Aadd(_aheader,"Cod Coordenador") 
-   Aadd(_aheader,"Coordenador") 
-   Aadd(_aheader,"Cod Gerente") 
-   Aadd(_aheader,"Gerente") 
+   aAdd(_aheader,"Tipo Averb.Carga") 
+   aAdd(_aheader,"Cod Vendedor") 
+   aAdd(_aheader,"Vendedor") 
+   aAdd(_aheader,"Cod Coordenador") 
+   aAdd(_aheader,"Coordenador") 
+   aAdd(_aheader,"Cod Gerente") 
+   aAdd(_aheader,"Gerente") 
 
 EndIf 
 
@@ -241,7 +241,7 @@ _cQuery += "       F.F2_CLIENTE (+)= A.D1_FORNECE AND "
 _cQuery += "       F.F2_LOJA    (+)= A.D1_LOJA "
 
 //--------------------------------------------------
-If mv_par22 <> 1 // Analítico  
+If MV_PAR22 <> 1 // Analítico  
    _cQuery += "       AND F.F2_I_CTRA  = G.A2_COD "  
    _cQuery += "       AND F.F2_I_LTRA  = G.A2_LOJA "
    _cQuery += "       AND G.D_E_L_E_T_ = ' ' "
@@ -292,186 +292,186 @@ If MV_PAR21 == 1 // gerou NCC - Gerou Financeiro
 EndIf
  
 // filtra filiais
-if !empty(alltrim(mv_par01))	
-   _cQuery += " AND A.D1_FILIAL IN " + FormatIn(mv_par01,";")
-endif                
+If !Empty(AllTrim(MV_PAR01))	
+   _cQuery += " AND A.D1_FILIAL IN " + FormatIn(MV_PAR01,";")
+EndIf                
 // filtra data de entrada 
-if !empty(mv_par02) .AND. 	!empty(mv_par03)
-   _cQuery += " AND A.D1_EMISSAO BETWEEN '"+DTOS(MV_PAR02)+"' AND '"+DTOS(MV_PAR03)+"' "
-endif                 
+If !Empty(MV_PAR02) .And. 	!Empty(MV_PAR03)
+   _cQuery += " AND A.D1_EMISSAO BETWEEN '"+DToS(MV_PAR02)+"' AND '"+DToS(MV_PAR03)+"' "
+EndIf                 
 // filtra data de digitacao
-if !empty(mv_par04) .AND. 	!empty(mv_par05)
-   _cQuery += " AND A.D1_DTDIGIT BETWEEN '"+DTOS(MV_PAR04)+"' AND '"+DTOS(MV_PAR05)+"' "
-endif                 
+If !Empty(MV_PAR04) .And. 	!Empty(MV_PAR05)
+   _cQuery += " AND A.D1_DTDIGIT BETWEEN '"+DToS(MV_PAR04)+"' AND '"+DToS(MV_PAR05)+"' "
+EndIf                 
 // filtra produto
-if !empty(alltrim(mv_par06)) .AND. 	!empty(alltrim(mv_par07))
+If !Empty(AllTrim(MV_PAR06)) .And. 	!Empty(AllTrim(MV_PAR07))
    _cQuery += " AND A.D1_COD BETWEEN '"+MV_PAR06+"' AND '"+MV_PAR07+"'  "
-endif                           			
+EndIf                           			
 // filtra Cliente
-if !empty(alltrim(mv_par08)) .AND. 	!empty(alltrim(mv_par10))
+If !Empty(AllTrim(MV_PAR08)) .And. 	!Empty(AllTrim(MV_PAR10))
    _cQuery += " AND A.D1_FORNECE BETWEEN '"+MV_PAR08+"' AND '"+MV_PAR10+"' "
-endif                           			
+EndIf                           			
 // filtra loja
-if !empty(alltrim(mv_par09)) .AND. 	!empty(alltrim(mv_par11))
+If !Empty(AllTrim(MV_PAR09)) .And. 	!Empty(AllTrim(MV_PAR11))
    _cQuery += " AND A.D1_LOJA BETWEEN '"+MV_PAR09+"' AND '"+MV_PAR11+"' "
-endif                           			
+EndIf                           			
 //Filtra Rede Cliente
-if !empty(mv_par12)
-   _cQuery+= " AND B.A1_GRPVEN IN " + FormatIn(mv_par12,";")
-endif
+If !Empty(MV_PAR12)
+   _cQuery+= " AND B.A1_GRPVEN IN " + FormatIn(MV_PAR12,";")
+EndIf
 //Filtra Estado Cliente
-if !empty(mv_par13) 
-   _cQuery+= " AND B.A1_EST IN " + FormatIn(mv_par13,";")
-endif
+If !Empty(MV_PAR13) 
+   _cQuery+= " AND B.A1_EST IN " + FormatIn(MV_PAR13,";")
+EndIf
 //Filtra Cod Municipio Cliente
-if !empty(mv_par14) 
-   _cQuery+= " AND B.A1_COD_MUN IN " + FormatIn(mv_par14,";")
-endif                        
+If !Empty(MV_PAR14) 
+   _cQuery+= " AND B.A1_COD_MUN IN " + FormatIn(MV_PAR14,";")
+EndIf                        
 
 //Filtra vendedor
-if !empty(mv_par15) 
+If !Empty(MV_PAR15) 
     
    _cQuery+= " AND (A.D1_NFORI <> '.' AND A.D1_NFORI IN (SELECT F2_DOC FROM " + RetSqlName("SF2") + " WHERE D_E_L_E_T_= ' ' AND A.D1_FILIAL = F2_FILIAL AND A.D1_NFORI = F2_DOC AND A.D1_SERIORI = F2_SERIE AND F2_CLIENTE = A.D1_FORNECE AND F2_LOJA = A.D1_LOJA AND F2_VEND1 = '" + MV_PAR15 + "' ))"
       
-endif
+EndIf
           
 //Supervisor
-if !empty(mv_par16) 
+If !Empty(MV_PAR16) 
    
 	_cQuery+= " AND (A.D1_NFORI <> '.' AND A.D1_NFORI IN (SELECT F2_DOC FROM " + RetSqlName("SF2") + " WHERE D_E_L_E_T_= ' ' AND A.D1_FILIAL = F2_FILIAL AND A.D1_NFORI = F2_DOC AND A.D1_SERIORI = F2_SERIE AND F2_CLIENTE = A.D1_FORNECE AND F2_LOJA = A.D1_LOJA AND F2_VEND2 = '" + MV_PAR16 + "' ))"    
        			    
-endif
+EndIf
 
 //Filtra Grupo de produtos
-if !empty(mv_par17) 
-   _cQuery+= " AND C.B1_GRUPO IN " + FormatIn(mv_par17,";")
-endif 
+If !Empty(MV_PAR17) 
+   _cQuery+= " AND C.B1_GRUPO IN " + FormatIn(MV_PAR17,";")
+EndIf 
 
 //Filtra produtos
-if !empty(mv_par18) 
-   _cQuery+= " AND C.B1_I_NIV2 IN " + FormatIn(mv_par18,";")
-endif         
+If !Empty(MV_PAR18) 
+   _cQuery+= " AND C.B1_I_NIV2 IN " + FormatIn(MV_PAR18,";")
+EndIf         
 
 //Filtra Tipos de produtos
-if !empty(mv_par19) 
-   _cQuery+= " AND C.B1_I_NIV3 IN " + FormatIn(mv_par19,";")
-endif
+If !Empty(MV_PAR19) 
+   _cQuery+= " AND C.B1_I_NIV3 IN " + FormatIn(MV_PAR19,";")
+EndIf
 
 //Filtra marcas de produtos
-if !empty(mv_par20) 
-   _cQuery+= " AND C.B1_I_NIV4 IN " + FormatIn(mv_par20,";")
-endif
+If !Empty(MV_PAR20) 
+   _cQuery+= " AND C.B1_I_NIV4 IN " + FormatIn(MV_PAR20,";")
+EndIf
 
 //Filtra Tipo de devolucao     
-If mv_par21 == 1 // gerou NCC
+If MV_PAR21 == 1 // gerou NCC
    _cQuery+= " AND D.F4_DUPLIC='S' "
-elseif mv_par21 == 2 // nao gerou NCC
+ElseIf MV_PAR21 == 2 // nao gerou NCC
    _cQuery+= " AND D.F4_DUPLIC<>'S' "
-endif                                   
+EndIf                                   
 
 // filtra data de faturamento
-if !empty(mv_par23) .AND. 	!empty(mv_par24)
+If !Empty(MV_PAR23) .And. 	!Empty(MV_PAR24)
    
-   _cQuery+= " AND (A.D1_NFORI='.' OR (A.D1_NFORI<>'.' AND A.D1_NFORI IN (SELECT F2_DOC FROM " + RetSqlName("SF2") + " WHERE D_E_L_E_T_= ' ' AND A.D1_FILIAL = F2_FILIAL AND A.D1_NFORI = F2_DOC AND A.D1_SERIORI = F2_SERIE AND F2_CLIENTE = A.D1_FORNECE AND F2_LOJA = A.D1_LOJA AND F2_EMISSAO BETWEEN '"+dtos(MV_PAR23)+"' AND '"+dtos(MV_PAR24)+"')))"
+   _cQuery+= " AND (A.D1_NFORI='.' OR (A.D1_NFORI<>'.' AND A.D1_NFORI IN (SELECT F2_DOC FROM " + RetSqlName("SF2") + " WHERE D_E_L_E_T_= ' ' AND A.D1_FILIAL = F2_FILIAL AND A.D1_NFORI = F2_DOC AND A.D1_SERIORI = F2_SERIE AND F2_CLIENTE = A.D1_FORNECE AND F2_LOJA = A.D1_LOJA AND F2_EMISSAO BETWEEN '"+DToS(MV_PAR23)+"' AND '"+DToS(MV_PAR24)+"')))"
    
-endif
+EndIf
 
 //Filtra Tipo de formulario
-If mv_par25 == 1 // formulario proprio
+If MV_PAR25 == 1 // formulario proprio
    _cQuery+= " AND A.D1_FORMUL='S' "
-elseif mv_par25 == 2 // formulario do cliente
+ElseIf MV_PAR25 == 2 // formulario do cliente
    _cQuery+= " AND A.D1_FORMUL<>'S' "
-Endif         
+EndIf         
 //Filtra Sub Grupo de produtos
-if !empty(mv_par28) 
-   _cQuery+= " AND C.B1_I_SUBGR IN " + FormatIn(mv_par28,";")
-endif 
+If !Empty(MV_PAR28) 
+   _cQuery+= " AND C.B1_I_SUBGR IN " + FormatIn(MV_PAR28,";")
+EndIf 
 
 //Filtro para desconsiderar o tes
-If !Empty(mv_par29) 
-   _cQuery+= " AND A.D1_TES NOT IN " + FormatIn(mv_par29,";")
-Endif
+If !Empty(MV_PAR29) 
+   _cQuery+= " AND A.D1_TES NOT IN " + FormatIn(MV_PAR29,";")
+EndIf
 
 // Filtra armazém
 If !Empty(MV_PAR31) 
    _cQuery+= " AND A.D1_LOCAL IN " + FormatIn(MV_PAR31,";")
-Endif
+EndIf
 
 // Ordem
-If mv_par26 == 1 // emissao
+If MV_PAR26 == 1 // emissao
    _cQuery+= " ORDER BY A.D1_FILIAL, A.D1_DTDIGIT, A.D1_DOC, A.D1_SERIE, A.D1_FORNECE, A.D1_LOJA, A.D1_ITEM"
-elseif mv_par26 == 2 // Produto              
-    if mv_par22 == 1 // sintetico
+ElseIf MV_PAR26 == 2 // Produto              
+    If MV_PAR22 == 1 // sintetico
        _cQuery+= " GROUP BY A.D1_FILIAL, A.D1_COD, A.D1_UM, A.D1_SEGUM "
-       If mv_par30 == 2 //Emissão Excel
+       If MV_PAR30 == 2 //Emissão Excel
           _cQuery += ", A.D1_LOCAL ,  F.F2_I_NFSED, A.D1_FORMUL "    
-	   ENDIF
+	   EndIf
 
        _cQuery+= " ORDER BY A.D1_FILIAL, A.D1_COD, A.D1_UM, A.D1_SEGUM " 
-    else // analitico
+    Else // analitico
        _cQuery+= " ORDER BY A.D1_FILIAL, A.D1_COD, A.D1_DTDIGIT, A.D1_DOC, A.D1_SERIE, A.D1_FORNECE, A.D1_LOJA "    
-    Endif       
-elseif mv_par26 == 3 // Rede
-    if mv_par22 == 1 // sintetico
+    EndIf       
+ElseIf MV_PAR26 == 3 // Rede
+    If MV_PAR22 == 1 // sintetico
        _cQuery+= " GROUP BY A.D1_FILIAL, B.A1_GRPVEN, A.D1_COD, A.D1_UM, A.D1_SEGUM "
-       If mv_par30 == 2 //Emissão Excel
+       If MV_PAR30 == 2 //Emissão Excel
           _cQuery += ", A.D1_LOCAL ,  F.F2_I_NFSED, A.D1_FORMUL "    
-	   ENDIF
+	   EndIf
 
        _cQuery+= " ORDER BY A.D1_FILIAL, B.A1_GRPVEN, A.D1_COD, A.D1_UM, A.D1_SEGUM "
-    else // analitico
+    Else // analitico
        _cQuery+= " ORDER BY A.D1_FILIAL, B.A1_GRPVEN, A.D1_DTDIGIT, A.D1_DOC, A.D1_SERIE "   
-    Endif       
-elseif mv_par26 == 4 // Cliente
-    if mv_par22 == 1 // sintetico
+    EndIf       
+ElseIf MV_PAR26 == 4 // Cliente
+    If MV_PAR22 == 1 // sintetico
        _cQuery+= " GROUP BY A.D1_FILIAL, B.A1_GRPVEN, A.D1_FORNECE, A.D1_LOJA, A.D1_COD, A.D1_UM, A.D1_SEGUM "
-       If mv_par30 == 2 //Emissão Excel
+       If MV_PAR30 == 2 //Emissão Excel
           _cQuery += ", A.D1_LOCAL ,  F.F2_I_NFSED, A.D1_FORMUL "    
-	   ENDIF
+	   EndIf
 
        _cQuery+= " ORDER BY A.D1_FILIAL, B.A1_GRPVEN, A.D1_FORNECE, A.D1_LOJA, A.D1_COD, A.D1_UM, A.D1_SEGUM "
-    else// analitico
+    Else// analitico
        _cQuery+= " ORDER BY A.D1_FILIAL, B.A1_GRPVEN, A.D1_FORNECE, A.D1_LOJA, A.D1_DTDIGIT, A.D1_DOC, A.D1_SERIE "   
-    Endif       
-endif
+    EndIf       
+EndIf
 
 _cQuery := ChangeQuery(_cQuery)
 MPSysOpenQuery( _cQuery , _cAliasSD1)
 
-DbSelectArea(_cAliasSD1)
+DBSelectArea(_cAliasSD1)
 
-If mv_par30 == 2 //Emissão Excel
+If MV_PAR30 == 2 //Emissão Excel
 
 	//Monta Acols
-	(_cAliasSD1)->(Dbgotop())
+	(_cAliasSD1)->(DBGoTop())
 	_acols := {}
 	
-	Do while !((_cAliasSD1)->(Eof()))
+	While !((_cAliasSD1)->(Eof()))
 
-		if mv_par26 == 2 .and. mv_par22 == 1 // Produto/sintetico              
+		If MV_PAR26 == 2 .And. MV_PAR22 == 1 // Produto/sintetico              
 
-			aadd(_acols, {(_cAliasSD1)->D1_FILIAL,(_cAliasSD1)->D1_COD,posicione("SB1",1,xfilial("SB1")+(_cAliasSD1)->D1_COD,"B1_DESC"),(_cAliasSD1)->D1_UM,(_cAliasSD1)->D1_SEGUM,(_cAliasSD1)->QUANT,(_cAliasSD1)->QTSEGUM,(_cAliasSD1)->TOTAL,(_cAliasSD1)->ICMSRET,(_cAliasSD1)->DESPESA,(_cAliasSD1)->D1_LOCAL, If(AllTrim((_cAliasSD1)->F2_I_NFSED)=="S","Sim",If(AllTrim((_cAliasSD1)->F2_I_NFSED)=="N","Não","Vazio")),If(AllTrim((_cAliasSD1)->D1_FORMUL)=="S","Sim",If(AllTrim((_cAliasSD1)->D1_FORMUL)==" "," "," ")) }) 
+			aAdd(_acols, {(_cAliasSD1)->D1_FILIAL,(_cAliasSD1)->D1_COD,Posicione("SB1",1,xFilial("SB1")+(_cAliasSD1)->D1_COD,"B1_DESC"),(_cAliasSD1)->D1_UM,(_cAliasSD1)->D1_SEGUM,(_cAliasSD1)->QUANT,(_cAliasSD1)->QTSEGUM,(_cAliasSD1)->TOTAL,(_cAliasSD1)->ICMSRET,(_cAliasSD1)->DESPESA,(_cAliasSD1)->D1_LOCAL, If(AllTrim((_cAliasSD1)->F2_I_NFSED)=="S","Sim",If(AllTrim((_cAliasSD1)->F2_I_NFSED)=="N","Não","Vazio")),If(AllTrim((_cAliasSD1)->D1_FORMUL)=="S","Sim",If(AllTrim((_cAliasSD1)->D1_FORMUL)==" "," "," ")) }) 
 
-		elseif mv_par26 == 3 .and. mv_par22 == 1 // Rede/sintetico              
+		ElseIf MV_PAR26 == 3 .And. MV_PAR22 == 1 // Rede/sintetico              
 
-     		aadd(_acols, {(_cAliasSD1)->D1_FILIAL,(_cAliasSD1)->A1_GRPVEN,POSICIONE("ACY",1,xfilial("ACY")+(_cAliasSD1)->A1_GRPVEN,"ACY_DESCRI"),(_cAliasSD1)->D1_COD,posicione("SB1",1,xfilial("SB1")+(_cAliasSD1)->D1_COD,"B1_DESC"),(_cAliasSD1)->D1_UM,(_cAliasSD1)->D1_SEGUM,(_cAliasSD1)->QUANT,(_cAliasSD1)->QTSEGUM,(_cAliasSD1)->TOTAL,(_cAliasSD1)->ICMSRET,(_cAliasSD1)->DESPESA,(_cAliasSD1)->D1_LOCAL, If(AllTrim((_cAliasSD1)->F2_I_NFSED)=="S","Sim",If(AllTrim((_cAliasSD1)->F2_I_NFSED)=="N","Não","Vazio")), If(AllTrim((_cAliasSD1)->D1_FORMUL)=="S","Sim",If(AllTrim((_cAliasSD1)->D1_FORMUL)==" "," "," ")) }) 
+     		aAdd(_acols, {(_cAliasSD1)->D1_FILIAL,(_cAliasSD1)->A1_GRPVEN,Posicione("ACY",1,xFilial("ACY")+(_cAliasSD1)->A1_GRPVEN,"ACY_DESCRI"),(_cAliasSD1)->D1_COD,Posicione("SB1",1,xFilial("SB1")+(_cAliasSD1)->D1_COD,"B1_DESC"),(_cAliasSD1)->D1_UM,(_cAliasSD1)->D1_SEGUM,(_cAliasSD1)->QUANT,(_cAliasSD1)->QTSEGUM,(_cAliasSD1)->TOTAL,(_cAliasSD1)->ICMSRET,(_cAliasSD1)->DESPESA,(_cAliasSD1)->D1_LOCAL, If(AllTrim((_cAliasSD1)->F2_I_NFSED)=="S","Sim",If(AllTrim((_cAliasSD1)->F2_I_NFSED)=="N","Não","Vazio")), If(AllTrim((_cAliasSD1)->D1_FORMUL)=="S","Sim",If(AllTrim((_cAliasSD1)->D1_FORMUL)==" "," "," ")) }) 
 
-     	elseif mv_par26 == 4 .and. mv_par22 == 1 // Cliente/sintetico              
+     	ElseIf MV_PAR26 == 4 .And. MV_PAR22 == 1 // Cliente/sintetico              
 
-			aadd(_acols, {(_cAliasSD1)->D1_FILIAL,(_cAliasSD1)->A1_GRPVEN,POSICIONE("ACY",1,xfilial("ACY")+(_cAliasSD1)->A1_GRPVEN,"ACY_DESCRI"),(_cAliasSD1)->D1_FORNECE, (_cAliasSD1)->D1_LOJA,POSICIONE("SA1",1,xfilial("SA1")+(_cAliasSD1)->D1_FORNECE+(_cAliasSD1)->D1_LOJA,"A1_NOME"),(_cAliasSD1)->D1_COD,posicione("SB1",1,xfilial("SB1")+(_cAliasSD1)->D1_COD,"B1_DESC"),(_cAliasSD1)->D1_UM,(_cAliasSD1)->D1_SEGUM,(_cAliasSD1)->QUANT,(_cAliasSD1)->QTSEGUM,(_cAliasSD1)->TOTAL,(_cAliasSD1)->ICMSRET,(_cAliasSD1)->DESPESA,(_cAliasSD1)->D1_LOCAL, If(AllTrim((_cAliasSD1)->F2_I_NFSED)=="S","Sim",If(AllTrim((_cAliasSD1)->F2_I_NFSED)=="N","Não","Vazio")), If(AllTrim((_cAliasSD1)->D1_FORMUL)=="S","Sim",If(AllTrim((_cAliasSD1)->D1_FORMUL)==" "," "," ")) })  
+			aAdd(_acols, {(_cAliasSD1)->D1_FILIAL,(_cAliasSD1)->A1_GRPVEN,Posicione("ACY",1,xFilial("ACY")+(_cAliasSD1)->A1_GRPVEN,"ACY_DESCRI"),(_cAliasSD1)->D1_FORNECE, (_cAliasSD1)->D1_LOJA,Posicione("SA1",1,xFilial("SA1")+(_cAliasSD1)->D1_FORNECE+(_cAliasSD1)->D1_LOJA,"A1_NOME"),(_cAliasSD1)->D1_COD,Posicione("SB1",1,xFilial("SB1")+(_cAliasSD1)->D1_COD,"B1_DESC"),(_cAliasSD1)->D1_UM,(_cAliasSD1)->D1_SEGUM,(_cAliasSD1)->QUANT,(_cAliasSD1)->QTSEGUM,(_cAliasSD1)->TOTAL,(_cAliasSD1)->ICMSRET,(_cAliasSD1)->DESPESA,(_cAliasSD1)->D1_LOCAL, If(AllTrim((_cAliasSD1)->F2_I_NFSED)=="S","Sim",If(AllTrim((_cAliasSD1)->F2_I_NFSED)=="N","Não","Vazio")), If(AllTrim((_cAliasSD1)->D1_FORMUL)=="S","Sim",If(AllTrim((_cAliasSD1)->D1_FORMUL)==" "," "," ")) })  
      		
-     	else // Analitico ou Sintético
-            If mv_par22 == 1 // Sintetico    
-			   aadd(_acols, {(_cAliasSD1)->D1_FILIAL,dtoc(stod((_cAliasSD1)->D1_EMISSAO)), dtoc(stod((_cAliasSD1)->D1_DTDIGIT)) ,(_cAliasSD1)->D1_DOC + " - " + (_cAliasSD1)->D1_SERIE ,(_cAliasSD1)->SALDO, dtoc(stod((_cAliasSD1)->D1_DATORI)) , (_cAliasSD1)->D1_NFORI + " - " + (_cAliasSD1)->D1_SERIORI, (_cAliasSD1)->SALDOORI, (_cAliasSD1)->A1_GRPVEN,POSICIONE("ACY",1,xfilial("ACY")+(_cAliasSD1)->A1_GRPVEN,"ACY_DESCRI"),(_cAliasSD1)->D1_FORNECE, (_cAliasSD1)->D1_LOJA,POSICIONE("SA1",1,xfilial("SA1")+(_cAliasSD1)->D1_FORNECE+(_cAliasSD1)->D1_LOJA,"A1_NOME"),(_cAliasSD1)->D1_COD,posicione("SB1",1,xfilial("SB1")+(_cAliasSD1)->D1_COD,"B1_DESC"),(_cAliasSD1)->D1_UM,(_cAliasSD1)->D1_SEGUM,(_cAliasSD1)->D1_QUANT,(_cAliasSD1)->D1_QTSEGUM,(_cAliasSD1)->D1_TOTAL,(_cAliasSD1)->D1_ICMSRET,(_cAliasSD1)->D1_DESPESA,(_cAliasSD1)->D1_LOCAL, If(AllTrim((_cAliasSD1)->F2_I_NFSED)=="S","Sim",If(AllTrim((_cAliasSD1)->F2_I_NFSED)=="N","Não","Vazio")), If(AllTrim((_cAliasSD1)->D1_FORMUL)=="S","Sim",If(AllTrim((_cAliasSD1)->D1_FORMUL)=="N"," "," ")) }) 
+     	Else // Analitico ou Sintético
+            If MV_PAR22 == 1 // Sintetico    
+			   aAdd(_acols, {(_cAliasSD1)->D1_FILIAL,DToC(SToD((_cAliasSD1)->D1_EMISSAO)), DToC(SToD((_cAliasSD1)->D1_DTDIGIT)) ,(_cAliasSD1)->D1_DOC + " - " + (_cAliasSD1)->D1_SERIE ,(_cAliasSD1)->SALDO, DToC(SToD((_cAliasSD1)->D1_DATORI)) , (_cAliasSD1)->D1_NFORI + " - " + (_cAliasSD1)->D1_SERIORI, (_cAliasSD1)->SALDOORI, (_cAliasSD1)->A1_GRPVEN,Posicione("ACY",1,xFilial("ACY")+(_cAliasSD1)->A1_GRPVEN,"ACY_DESCRI"),(_cAliasSD1)->D1_FORNECE, (_cAliasSD1)->D1_LOJA,Posicione("SA1",1,xFilial("SA1")+(_cAliasSD1)->D1_FORNECE+(_cAliasSD1)->D1_LOJA,"A1_NOME"),(_cAliasSD1)->D1_COD,Posicione("SB1",1,xFilial("SB1")+(_cAliasSD1)->D1_COD,"B1_DESC"),(_cAliasSD1)->D1_UM,(_cAliasSD1)->D1_SEGUM,(_cAliasSD1)->D1_QUANT,(_cAliasSD1)->D1_QTSEGUM,(_cAliasSD1)->D1_TOTAL,(_cAliasSD1)->D1_ICMSRET,(_cAliasSD1)->D1_DESPESA,(_cAliasSD1)->D1_LOCAL, If(AllTrim((_cAliasSD1)->F2_I_NFSED)=="S","Sim",If(AllTrim((_cAliasSD1)->F2_I_NFSED)=="N","Não","Vazio")), If(AllTrim((_cAliasSD1)->D1_FORMUL)=="S","Sim",If(AllTrim((_cAliasSD1)->D1_FORMUL)=="N"," "," ")) }) 
 			Else // Analítico
-               aadd(_acols, {(_cAliasSD1)->D1_FILIAL,dtoc(stod((_cAliasSD1)->D1_EMISSAO)), dtoc(stod((_cAliasSD1)->D1_DTDIGIT)) ,(_cAliasSD1)->D1_DOC + " - " + (_cAliasSD1)->D1_SERIE ,(_cAliasSD1)->SALDO, dtoc(stod((_cAliasSD1)->D1_DATORI)) , (_cAliasSD1)->D1_NFORI + " - " + (_cAliasSD1)->D1_SERIORI, (_cAliasSD1)->SALDOORI, (_cAliasSD1)->A1_GRPVEN,POSICIONE("ACY",1,xfilial("ACY")+(_cAliasSD1)->A1_GRPVEN,"ACY_DESCRI"),(_cAliasSD1)->D1_FORNECE, (_cAliasSD1)->D1_LOJA,POSICIONE("SA1",1,xfilial("SA1")+(_cAliasSD1)->D1_FORNECE+(_cAliasSD1)->D1_LOJA,"A1_NOME"),(_cAliasSD1)->D1_COD,posicione("SB1",1,xfilial("SB1")+(_cAliasSD1)->D1_COD,"B1_DESC"),(_cAliasSD1)->D1_UM,(_cAliasSD1)->D1_SEGUM,(_cAliasSD1)->D1_QUANT,(_cAliasSD1)->D1_QTSEGUM,(_cAliasSD1)->D1_TOTAL,(_cAliasSD1)->D1_ICMSRET,(_cAliasSD1)->D1_DESPESA,(_cAliasSD1)->D1_LOCAL, If(AllTrim((_cAliasSD1)->F2_I_NFSED)=="S","Sim",If(AllTrim((_cAliasSD1)->F2_I_NFSED)=="N","Não","Vazio")), If(AllTrim((_cAliasSD1)->D1_FORMUL)=="S","Sim",If(AllTrim((_cAliasSD1)->D1_FORMUL)=="N"," "," ")) , If((_cAliasSD1)->A2_I_TPAVE=="E","EMBARCADOR",If((_cAliasSD1)->A2_I_TPAVE=="T","TRANSPORTADOR","")),(_cAliasSD1)->CODVENDEDOR,(_cAliasSD1)->VENDEDOR,(_cAliasSD1)->CODCOORDENADOR,(_cAliasSD1)->COORDENADOR,(_cAliasSD1)->CODGERENTE,(_cAliasSD1)->GERENTE }) 
+               aAdd(_acols, {(_cAliasSD1)->D1_FILIAL,DToC(SToD((_cAliasSD1)->D1_EMISSAO)), DToC(SToD((_cAliasSD1)->D1_DTDIGIT)) ,(_cAliasSD1)->D1_DOC + " - " + (_cAliasSD1)->D1_SERIE ,(_cAliasSD1)->SALDO, DToC(SToD((_cAliasSD1)->D1_DATORI)) , (_cAliasSD1)->D1_NFORI + " - " + (_cAliasSD1)->D1_SERIORI, (_cAliasSD1)->SALDOORI, (_cAliasSD1)->A1_GRPVEN,Posicione("ACY",1,xFilial("ACY")+(_cAliasSD1)->A1_GRPVEN,"ACY_DESCRI"),(_cAliasSD1)->D1_FORNECE, (_cAliasSD1)->D1_LOJA,Posicione("SA1",1,xFilial("SA1")+(_cAliasSD1)->D1_FORNECE+(_cAliasSD1)->D1_LOJA,"A1_NOME"),(_cAliasSD1)->D1_COD,Posicione("SB1",1,xFilial("SB1")+(_cAliasSD1)->D1_COD,"B1_DESC"),(_cAliasSD1)->D1_UM,(_cAliasSD1)->D1_SEGUM,(_cAliasSD1)->D1_QUANT,(_cAliasSD1)->D1_QTSEGUM,(_cAliasSD1)->D1_TOTAL,(_cAliasSD1)->D1_ICMSRET,(_cAliasSD1)->D1_DESPESA,(_cAliasSD1)->D1_LOCAL, If(AllTrim((_cAliasSD1)->F2_I_NFSED)=="S","Sim",If(AllTrim((_cAliasSD1)->F2_I_NFSED)=="N","Não","Vazio")), If(AllTrim((_cAliasSD1)->D1_FORMUL)=="S","Sim",If(AllTrim((_cAliasSD1)->D1_FORMUL)=="N"," "," ")) , If((_cAliasSD1)->A2_I_TPAVE=="E","EMBARCADOR",If((_cAliasSD1)->A2_I_TPAVE=="T","TRANSPORTADOR","")),(_cAliasSD1)->CODVENDEDOR,(_cAliasSD1)->VENDEDOR,(_cAliasSD1)->CODCOORDENADOR,(_cAliasSD1)->COORDENADOR,(_cAliasSD1)->CODGERENTE,(_cAliasSD1)->GERENTE }) 
 			EndIf 
      
-     	endif
+     	EndIf
      	
-     	(_cAliasSD1)->(Dbskip())
+     	(_cAliasSD1)->(DBSkip())
      	
-     Enddo
+     EndDo
 
 
      /*
@@ -485,7 +485,7 @@ If mv_par30 == 2 //Emissão Excel
 	----------------: _nCampo	- Posição do Array que deve ser retornada em caso de Tela de Seleção Simples
 	*/
     If Empty(_aCols)
-	   U_ItMsg("Não foram encontrados dados para emissão do relatório, com base nos filtros informados.","Atenção",,1)
+	   U_ITMsg("Não foram encontrados dados para emissão do relatório, com base nos filtros informados.","Atenção",,1)
 	Else 
 	   U_ITListBox("Relatório de Devoluções" , _aHeader , _aCols , .T. , 1 , "Exportação excel/arquivo")
     EndIf 
@@ -496,46 +496,46 @@ Else
 	oPrint:SetPortrait() // ou SetLandscape()
 	oPrint:StartPage()   // Inicia uma nova página
 	
-	if mv_par26==1 // emissao 
-		// O parametro .F. eh para nao imprimir o numero da pagina quando for montar a tela de parametros	  
+	If MV_PAR26==1 // emissao 
+		// O parametro .F. eh para nao imprimir o numero da pagina quando For montar a tela de parametros	  
 		ROMS009M(oPrint,1,.F.)
 		ROMS009P(oPrint)	
 		ROMS009I(oPrint)   
-	elseif mv_par26 == 2 .and. mv_par22 == 1 // Produto/sintetico 
+	ElseIf MV_PAR26 == 2 .And. MV_PAR22 == 1 // Produto/sintetico 
 		ROMS009M(oPrint,2,.F.)
 		ROMS009P(oPrint)
 		ROMS009I2(oPrint)   
-	elseif mv_par26 == 3 .and. mv_par22 == 1 // Rede/sintetico
+	ElseIf MV_PAR26 == 3 .And. MV_PAR22 == 1 // Rede/sintetico
 		ROMS009M(oPrint,3,.F.)
 		ROMS009P(oPrint)
 		ROMS009I3(oPrint)   
-	elseif mv_par26 == 4 .and. mv_par22 == 1  // Cliente/sintetico
+	ElseIf MV_PAR26 == 4 .And. MV_PAR22 == 1  // Cliente/sintetico
 		ROMS009M(oPrint,4,.F.)
 		ROMS009P(oPrint)
 		ROMS009I4(oPrint)  
-	elseif mv_par26 == 2 .and. mv_par22 == 2 // Produto/analitico
+	ElseIf MV_PAR26 == 2 .And. MV_PAR22 == 2 // Produto/analitico
 		ROMS009M(oPrint,5,.F.)
 		ROMS009P(oPrint)	
 		ROMS009I5(oPrint)   
-	elseif mv_par26 == 3 .and. mv_par22 == 2 // Rede/analitico
+	ElseIf MV_PAR26 == 3 .And. MV_PAR22 == 2 // Rede/analitico
 		ROMS009M(oPrint,6,.F.)
 		ROMS009P(oPrint)
 		ROMS009I6(oPrint)   
-	elseif mv_par26 == 4 .and. mv_par22 == 2  // Cliente/analitico
+	ElseIf MV_PAR26 == 4 .And. MV_PAR22 == 2  // Cliente/analitico
 		ROMS009M(oPrint,7,.F.)
 		ROMS009P(oPrint)
 		ROMS009I7(oPrint)  
-	endif
+	EndIf
 
 	oPrint:EndPage()     // Finaliza a página
 	oPrint:Preview()     // Visualiza antes de imprimir
 
-Endif
+EndIf
 
 (_cAliasSD1)->(DBCloseArea())
-dbselectarea("SD1")
+DBSelectArea("SD1")
 
-Return nil  
+Return  
 
 /*
 ===============================================================================================================================
@@ -568,16 +568,16 @@ Local _nTBrt   := 0 As Numeric
 oPrint:StartPage()   // Inicia uma nova página     
 ROMS009M(oPrint,1,.T.)
 	
-DbSelectArea(_cAliasSD1)
-While ! eof()	
+DBSelectArea(_cAliasSD1)
+While ! Eof()	
 	                    
 	//imprime cabecalho
-	if _nLin>2940
+	If _nLin>2940
 		oPrint:EndPage() // Finaliza a página
 	    _nPag++
 		oPrint:StartPage()   // Inicia uma nova página
 	    ROMS009M(oPrint,1,.T.)
-	endif
+	EndIf
 	 
 	// Quebra por filial
     _cFilial:=(_cAliasSD1)->D1_FILIAL
@@ -586,9 +586,9 @@ While ! eof()
     _nTFVlr :=0	    	               
     _nTFBrt :=0	    	               
     
-    dbselectarea("SM0")
-    _nRecno:=recno()
-    LOCATE FOR ALLTRIM(M0_CODFIL)=(_cAliasSD1)->D1_FILIAL
+    DBSelectArea("SM0")
+    _nRecno:=Recno()
+    LOCATE For AllTrim(M0_CODFIL)=(_cAliasSD1)->D1_FILIAL
     _cNomFil:=SM0->M0_FILIAL   
     oPrint:Box  (_nLin-030,0100,_nLin+100,2300)
 	oPrint:Say  (_nLin    ,0120,"Código"       ,oFont10n )
@@ -596,18 +596,18 @@ While ! eof()
 	oPrint:Say  (_nLin    ,0320,"Filial"       ,oFont10n )
 	oPrint:Say  (_nLin+050,0320,_cNomFil,oFont10 )
 	_nLin+=135
-	dbgoto(_nRecno)    
-	dbselectarea(_cAliasSD1)
+	DBGoTo(_nRecno)    
+	DBSelectArea(_cAliasSD1)
 
-    While ! eof() .and. _cFilial==(_cAliasSD1)->D1_FILIAL
+    While ! Eof() .And. _cFilial==(_cAliasSD1)->D1_FILIAL
 	    
 		//imprime cabecalho
-		if _nLin>2940
+		If _nLin>2940
 			oPrint:EndPage() // Finaliza a página     
 		    _nPag++
 			oPrint:StartPage()   // Inicia uma nova página
 			ROMS009M(oPrint,1,.T.)		
-		endif
+		EndIf
 
 		// Quebra por nota fiscal de devolucao
 	    _cDoc   :=(_cAliasSD1)->D1_DOC+(_cAliasSD1)->D1_SERIE+(_cAliasSD1)->D1_FORNECE+(_cAliasSD1)->D1_LOJA
@@ -617,17 +617,17 @@ While ! eof()
         _nTDBrt :=0	    	               
 
 		oPrint:Say  (_nLin    ,0120,"Dt.Entrada" ,oFont10n )
-		oPrint:Say  (_nLin+050,0120,dtoc(stod((_cAliasSD1)->D1_DTDIGIT)),oFont10 )
+		oPrint:Say  (_nLin+050,0120,DToC(SToD((_cAliasSD1)->D1_DTDIGIT)),oFont10 )
 		oPrint:Say  (_nLin    ,0320,"NFD - Serie"  ,oFont10n )
 		oPrint:Say  (_nLin+050,0320,(_cAliasSD1)->D1_DOC+"-"+(_cAliasSD1)->D1_SERIE,oFont10 )
 		oPrint:Say  (_nLin    ,0590,"NF Ref - Serie" ,oFont10n )
-		If alltrim((_cAliasSD1)->D1_NFORI)<>'.'
+		If AllTrim((_cAliasSD1)->D1_NFORI)<>'.'
 		   oPrint:Say  (_nLin+050,0590,(_cAliasSD1)->D1_NFORI+"-"+(_cAliasSD1)->D1_SERIORI,oFont10 )
-		Endif
+		EndIf
 		oPrint:Say  (_nLin    ,0840,"Cliente-Loja"   ,oFont10n )
 		oPrint:Say  (_nLin+050,0840,(_cAliasSD1)->D1_FORNECE+"-"+(_cAliasSD1)->D1_LOJA,oFont10 )
 		oPrint:Say  (_nLin    ,1100,"Nome"          ,oFont10n )
-		oPrint:Say  (_nLin+050,1100,SUBSTR((_cAliasSD1)->A1_NREDUZ,1,30) ,oFont10 )
+		oPrint:Say  (_nLin+050,1100,SubStr((_cAliasSD1)->A1_NREDUZ,1,30) ,oFont10 )
 		oPrint:Say  (_nLin    ,1600,"Municipio"     ,oFont10n )
 		oPrint:Say  (_nLin+050,1600,(_cAliasSD1)->A1_MUN   ,oFont10 )
 		oPrint:Say  (_nLin    ,2000,"Estado"        ,oFont10n )
@@ -638,12 +638,12 @@ While ! eof()
 	    _nLin+=140
 
 		//imprime cabecalho
-		if _nLin>2940
+		If _nLin>2940
 			oPrint:EndPage() // Finaliza a página
 		    _nPag++
 			oPrint:StartPage()   // Inicia uma nova página
 		    ROMS009M(oPrint,1,.T.)
-		endif
+		EndIf
           
 		oPrint:Say (_nLin,0120,"Item"     ,oFont8n )
 		oPrint:Say (_nLin,0220,"Produto"  ,oFont8n )
@@ -667,16 +667,16 @@ While ! eof()
         oPrint:Line(_nLin+050,0100,_nLin+050,2300)
 		_nLin+=50
 		
-	    While ! eof() .and. _cFilial==(_cAliasSD1)->D1_FILIAL .and. _cDoc==(_cAliasSD1)->D1_DOC+(_cAliasSD1)->D1_SERIE+(_cAliasSD1)->D1_FORNECE+(_cAliasSD1)->D1_LOJA
+	    While ! Eof() .And. _cFilial==(_cAliasSD1)->D1_FILIAL .And. _cDoc==(_cAliasSD1)->D1_DOC+(_cAliasSD1)->D1_SERIE+(_cAliasSD1)->D1_FORNECE+(_cAliasSD1)->D1_LOJA
 			//imprime cabecalho
-			if _nLin>2940
+			If _nLin>2940
 			    oPrint:EndPage() // Finaliza a página
 			    _nPag++
 				oPrint:StartPage()   // Inicia uma nova página
 				ROMS009M(oPrint,1,.T.)
-			endif
+			EndIf
 			oPrint:Say (_nLin,0120,(_cAliasSD1)->D1_ITEM    ,oFont8 )
-			oPrint:Say (_nLin,0220,SUBSTR((_cAliasSD1)->B1_DESC,1,52)    ,oFont8 ) //GUILHERME 23/11/2012 - LIMITE DE IMPRESSAO DESC PRODUTO
+			oPrint:Say (_nLin,0220,SubStr((_cAliasSD1)->B1_DESC,1,52)    ,oFont8 ) //GUILHERME 23/11/2012 - LIMITE DE IMPRESSAO DESC PRODUTO
 			oPrint:Say (_nLin,0880,transform((_cAliasSD1)->D1_QUANT  ,"@re 999,999,999.99")   ,oFont8 )
 			oPrint:Say (_nLin,1100,(_cAliasSD1)->D1_UM      ,oFont8 )
 			oPrint:Say (_nLin,1245,transform((_cAliasSD1)->D1_QTSEGUM,"@re 999,999,999.99") ,oFont8 )
@@ -709,10 +709,10 @@ While ! eof()
 	        oPrint:Line(_nLin+050,0100,_nLin+050,2300)
             oPrint:Line(_nLin+050,0100,_nLin+050,2300)
 			_nLin+=050
-			(_cAliasSD1)->(dbskip())
+			(_cAliasSD1)->(DBSkip())
 	    End                         
 		_nLin+=020
-		oPrint:Say (_nLin,0120,"Subtotal NFD "+substr(_cDoc,1,9)+"-"+substr(_cDoc,10,3)   ,oFont8 )
+		oPrint:Say (_nLin,0120,"Subtotal NFD "+SubStr(_cDoc,1,9)+"-"+SubStr(_cDoc,10,3)   ,oFont8 )
 		oPrint:Say (_nLin,0880,transform(_nTDQtd1  ,"@re 999,999,999.99")  ,oFont8 )
 		oPrint:Say (_nLin,1245,transform(_nTDQtd2  ,"@re 999,999,999.99")  ,oFont8 )
 		oPrint:Say (_nLin,1800,transform(_nTDVlr   ,"@re 999,999,999.99")  ,oFont8 )
@@ -722,12 +722,12 @@ While ! eof()
         oPrint:Line(_nLin+050,0100,_nLin+050,2300)
     	_nLin+=100
 		//imprime cabecalho
-		if _nLin>2800
+		If _nLin>2800
 			oPrint:EndPage() // Finaliza a página
 		    _nPag++
 			oPrint:StartPage()   // Inicia uma nova página
 		    ROMS009M(oPrint,1,.T.)
-		endif
+		EndIf
 	    
 	End   
     oPrint:Box  (_nLin-050,0100,_nLin+050,2300)
@@ -738,12 +738,12 @@ While ! eof()
 	oPrint:Say (_nLin,2050,transform(_nTFBrt   ,"@re 999,999,999.99")  ,oFont8 )
 	_nLin+=200      
 	//imprime cabecalho
-	if _nLin>2900
+	If _nLin>2900
 		oPrint:EndPage() // Finaliza a página
 	    _nPag++
 		oPrint:StartPage()   // Inicia uma nova página
 	    ROMS009M(oPrint,1,.T.)
-	endif
+	EndIf
 	
 End   
 oPrint:Box  (_nLin-50,0100,_nLin+100,2300)
@@ -755,7 +755,7 @@ oPrint:Say (_nLin,2050,transform(_nTBrt ,"@re 999,999,999.99")  ,oFont8 )
 
 oPrint:EndPage() // Finaliza a página
 	
-Return Nil       
+Return       
 
 /*
 ===============================================================================================================================
@@ -783,16 +783,16 @@ Local _nTBrt   := 0 As Numeric
 oPrint:StartPage()   // Inicia uma nova página
 ROMS009M(oPrint,2,.T.)
 
-DbSelectArea(_cAliasSD1)
-While ! eof()
+DBSelectArea(_cAliasSD1)
+While ! Eof()
 	
 	//imprime cabecalho
-	if _nLin>2940
+	If _nLin>2940
 		oPrint:EndPage() // Finaliza a página
 		_nPag++
 		oPrint:StartPage()   // Inicia uma nova página
 		ROMS009M(oPrint,2,.T.)
-	endif
+	EndIf
 	
 	// Quebra por filial
 	_cFilial:=(_cAliasSD1)->D1_FILIAL
@@ -801,9 +801,9 @@ While ! eof()
 	_nTFVlr :=0
 	_nTFBrt :=0
 	
-	dbselectarea("SM0")
-	_nRecno:=recno()
-	LOCATE FOR ALLTRIM(M0_CODFIL)=(_cAliasSD1)->D1_FILIAL
+	DBSelectArea("SM0")
+	_nRecno:=Recno()
+	LOCATE For AllTrim(M0_CODFIL)=(_cAliasSD1)->D1_FILIAL
 	_cNomFil:=SM0->M0_FILIAL
 	oPrint:Box  (_nLin-030,0100,_nLin+100,2300)
 	oPrint:Say  (_nLin    ,0120,"Código"       ,oFONT10n )
@@ -811,8 +811,8 @@ While ! eof()
 	oPrint:Say  (_nLin    ,0320,"Filial"       ,oFONT10n )
 	oPrint:Say  (_nLin+050,0320,_cNomFil,oFONT10 )
 	_nLin+=135
-	dbgoto(_nRecno)
-	dbselectarea(_cAliasSD1)
+	DBGoTo(_nRecno)
+	DBSelectArea(_cAliasSD1)
 	
 	oPrint:Say (_nLin,0120,"Produto"  ,oFONT10n )
 	oPrint:Say (_nLin,0340,"Descrição",oFONT10n )
@@ -836,18 +836,18 @@ While ! eof()
 	oPrint:Line(_nLin+050,0100,_nLin+050,2300)
 	_nLin+=50
 	
-	While ! eof() .and. _cFilial==(_cAliasSD1)->D1_FILIAL
+	While ! Eof() .And. _cFilial==(_cAliasSD1)->D1_FILIAL
 		
 		//imprime cabecalho
-		if _nLin>2940
+		If _nLin>2940
 			oPrint:EndPage() // Finaliza a página
 			_nPag++
 			oPrint:StartPage()   // Inicia uma nova página
 			ROMS009M(oPrint,2,.T.)
-		endif
-		SB1->(dbseek(xfilial("SB1")+(_cAliasSD1)->D1_COD))
+		EndIf
+		SB1->(DBSeek(xFilial("SB1")+(_cAliasSD1)->D1_COD))
 		oPrint:Say (_nLin,0120,(_cAliasSD1)->D1_COD     ,oFONT10 )
-		oPrint:Say (_nLin,0340,SUBSTR(SB1->B1_DESC,1,35)    ,oFONT10 ) // - LIMITE DE IMPRESSAO DESC PRODUTO
+		oPrint:Say (_nLin,0340,SubStr(SB1->B1_DESC,1,35)    ,oFONT10 ) // - LIMITE DE IMPRESSAO DESC PRODUTO
 		oPrint:Say (_nLin,0900,transform((_cAliasSD1)->QUANT  ,"@re 999,999,999.99")   ,oFONT10 )
 		oPrint:Say (_nLin,1175,(_cAliasSD1)->D1_UM      ,oFONT10 )
 		oPrint:Say (_nLin,1260,transform((_cAliasSD1)->QTSEGUM,"@re 999,999,999.99") ,oFONT10 )
@@ -876,7 +876,7 @@ While ! eof()
 		oPrint:Line(_nLin+050,0100,_nLin+050,2300)
 
 		_nLin+=050
-		(_cAliasSD1)->(dbskip())
+		(_cAliasSD1)->(DBSkip())
 	End
 	oPrint:Box (_nLin-050,0100,_nLin+050,2300)
 	oPrint:Say (_nLin,0120,"Subtotal filial: "+_cFilial+"-"+_cNomFil ,oFONT10 )
@@ -886,12 +886,12 @@ While ! eof()
 	oPrint:Say (_nLin,2070,transform(_nTFBrt   ,"@re 999,999,999.99")  ,oFONT10 )
 	_nLin+=200
 	//imprime cabecalho
-	if _nLin>2900
+	If _nLin>2900
 		oPrint:EndPage() // Finaliza a página
 		_nPag++
 		oPrint:StartPage()   // Inicia uma nova página
 		ROMS009M(oPrint,2,.T.)
-	endif
+	EndIf
 	
 End
 oPrint:Box  (_nLin-50,0100,_nLin+100,2300)
@@ -903,7 +903,7 @@ oPrint:Say (_nLin,2070,transform(_nTBrt ,"@re 999,999,999.99")  ,oFONT10 )
 
 oPrint:EndPage() // Finaliza a página
 	
-Return Nil    
+Return    
 
 /*
 ===============================================================================================================================
@@ -936,16 +936,16 @@ Local _cGrupo  := " " As Char
 oPrint:StartPage()   // Inicia uma nova página
 ROMS009M(oPrint,3,.T.)
 
-DbSelectArea(_cAliasSD1)
-While ! eof()
+DBSelectArea(_cAliasSD1)
+While ! Eof()
 	
 	//imprime cabecalho
-	if _nLin>2940
+	If _nLin>2940
 		oPrint:EndPage() // Finaliza a página
 		_nPag++
 		oPrint:StartPage()   // Inicia uma nova página
 		ROMS009M(oPrint,3,.T.)
-	endif
+	EndIf
 	
 	// Quebra por filial
 	_cFilial:=(_cAliasSD1)->D1_FILIAL
@@ -954,9 +954,9 @@ While ! eof()
 	_nTFVlr :=0
 	_nTFBrt :=0
 	
-	dbselectarea("SM0")
-	_nRecno:=recno()
-	LOCATE FOR ALLTRIM(M0_CODFIL)=(_cAliasSD1)->D1_FILIAL
+	DBSelectArea("SM0")
+	_nRecno:=Recno()
+	LOCATE For AllTrim(M0_CODFIL)=(_cAliasSD1)->D1_FILIAL
 	_cNomFil:=SM0->M0_FILIAL
 	oPrint:Box  (_nLin-030,0100,_nLin+100,2300)
 	oPrint:Say  (_nLin    ,0120,"Código"       ,oFont10n )
@@ -964,18 +964,18 @@ While ! eof()
 	oPrint:Say  (_nLin    ,0400,"Filial"       ,oFont10n )
 	oPrint:Say  (_nLin+050,0400,_cNomFil,oFont10 )
 	_nLin+=135
-	dbgoto(_nRecno)
-	dbselectarea(_cAliasSD1)
+	DBGoTo(_nRecno)
+	DBSelectArea(_cAliasSD1)
 	
-	While ! eof() .and. _cFilial==(_cAliasSD1)->D1_FILIAL
+	While ! Eof() .And. _cFilial==(_cAliasSD1)->D1_FILIAL
 		
 		//imprime cabecalho
-		if _nLin>2940
+		If _nLin>2940
 			oPrint:EndPage() // Finaliza a página
 			_nPag++
 			oPrint:StartPage()   // Inicia uma nova página
 			ROMS009M(oPrint,3,.T.)
-		endif
+		EndIf
 		
 		// Quebra por grupo de vendas
 		_cGrupo :=(_cAliasSD1)->A1_GRPVEN
@@ -984,7 +984,7 @@ While ! eof()
 		_nTGVlr :=0
 		_nTGBrt :=0
 		
-		ACY->(dbseek(xfilial("ACY")+_cGrupo))
+		ACY->(DBSeek(xFilial("ACY")+_cGrupo))
 		oPrint:Say  (_nLin    ,0120,"Grupo de vendas" ,oFont10n )
 		oPrint:Say  (_nLin+050,0120,_cGrupo			,oFont10 )
 		oPrint:Say  (_nLin    ,0400,"Descrição"  ,oFont10n )
@@ -995,12 +995,12 @@ While ! eof()
 		_nLin+=140
 		
 		//imprime cabecalho
-		if _nLin>2940
+		If _nLin>2940
 			oPrint:EndPage() // Finaliza a página
 			_nPag++
 			oPrint:StartPage()   // Inicia uma nova página
 			ROMS009M(oPrint,3,.T.)
-		endif
+		EndIf
 		oPrint:Say (_nLin,0120,"Produto"  ,oFONT10n )
 		oPrint:Say (_nLin,0340,"Descrição",oFONT10n )
 		oPrint:Say (_nLin,0920,"Qtde"     ,oFONT10n )
@@ -1023,17 +1023,17 @@ While ! eof()
 		oPrint:Line(_nLin+050,0100,_nLin+050,2300)
 		_nLin+=50
 		
-		While ! eof() .and. _cFilial==(_cAliasSD1)->D1_FILIAL .and. _cGrupo==(_cAliasSD1)->A1_GRPVEN
+		While ! Eof() .And. _cFilial==(_cAliasSD1)->D1_FILIAL .And. _cGrupo==(_cAliasSD1)->A1_GRPVEN
 			//imprime cabecalho
-			if _nLin>2940
+			If _nLin>2940
 				oPrint:EndPage() // Finaliza a página
 				_nPag++
 				oPrint:StartPage()   // Inicia uma nova página
 				ROMS009M(oPrint,3,.T.)
-			endif
-			SB1->(dbseek(xfilial("SB1")+(_cAliasSD1)->D1_COD))
+			EndIf
+			SB1->(DBSeek(xFilial("SB1")+(_cAliasSD1)->D1_COD))
 			oPrint:Say (_nLin,0120,(_cAliasSD1)->D1_COD     ,oFONT10 )
-			oPrint:Say (_nLin,0340,SUBSTR(SB1->B1_DESC,1,35)    ,oFONT10 )//GUILHERME 23/11/2012 - LIMITE DE IMPRESSAO DESC PRODUTO
+			oPrint:Say (_nLin,0340,SubStr(SB1->B1_DESC,1,35)    ,oFONT10 )//GUILHERME 23/11/2012 - LIMITE DE IMPRESSAO DESC PRODUTO
 			oPrint:Say (_nLin,0900,transform((_cAliasSD1)->QUANT  ,"@re 999,999,999.99")   ,oFONT10 )
 			oPrint:Say (_nLin,1175,(_cAliasSD1)->D1_UM      ,oFONT10 )
 			oPrint:Say (_nLin,1260,transform((_cAliasSD1)->QTSEGUM,"@re 999,999,999.99") ,oFONT10 )
@@ -1065,7 +1065,7 @@ While ! eof()
 			oPrint:Line(_nLin-30,2300,_nLin+050,2300)
 			oPrint:Line(_nLin+050,0100,_nLin+050,2300)
 			_nLin+=050
-			(_cAliasSD1)->(dbskip())
+			(_cAliasSD1)->(DBSkip())
 		End
 		
 		
@@ -1080,12 +1080,12 @@ While ! eof()
 		oPrint:Line(_nLin+050,0100,_nLin+050,2300)
 		_nLin+=100
 		//imprime cabecalho
-		if _nLin>2800
+		If _nLin>2800
 			oPrint:EndPage() // Finaliza a página
 			_nPag++
 			oPrint:StartPage()   // Inicia uma nova página
 			ROMS009M(oPrint,3,.T.)
-		endif
+		EndIf
 		
 	End
 	oPrint:Box  (_nLin-050,0100,_nLin+050,2300)
@@ -1096,12 +1096,12 @@ While ! eof()
 	oPrint:Say (_nLin,2070,transform(_nTFBrt   ,"@re 999,999,999.99")  ,oFont10 )
 	_nLin+=200
 	//imprime cabecalho
-	if _nLin>2900
+	If _nLin>2900
 		oPrint:EndPage() // Finaliza a página
 		_nPag++
 		oPrint:StartPage()   // Inicia uma nova página
 		ROMS009M(oPrint,3,.T.)
-	endif
+	EndIf
 	
 End
 oPrint:Box  (_nLin-50,0100,_nLin+100,2300)
@@ -1113,7 +1113,7 @@ oPrint:Say (_nLin,2070,transform(_nTBrt ,"@re 999,999,999.99")  ,oFont10 )
 
 oPrint:EndPage() // Finaliza a página
 
-Return Nil    
+Return    
 
 /*
 ===============================================================================================================================
@@ -1151,16 +1151,16 @@ Local _cCliente := " " As Char
 oPrint:StartPage()   // Inicia uma nova página
 ROMS009M(oPrint,4,.T.)
 
-DbSelectArea(_cAliasSD1)
-While ! eof()
+DBSelectArea(_cAliasSD1)
+While ! Eof()
 	
 	//imprime cabecalho
-	if _nLin>2940
+	If _nLin>2940
 		oPrint:EndPage() // Finaliza a página
 		_nPag++
 		oPrint:StartPage()   // Inicia uma nova página
 		ROMS009M(oPrint,4,.T.)
-	endif
+	EndIf
 	
 	// Quebra por filial
 	_cFilial:=(_cAliasSD1)->D1_FILIAL
@@ -1169,9 +1169,9 @@ While ! eof()
 	_nTFVlr :=0
 	_nTFBrt :=0
 	
-	dbselectarea("SM0")
-	_nRecno:=recno()
-	LOCATE FOR ALLTRIM(M0_CODFIL)=(_cAliasSD1)->D1_FILIAL
+	DBSelectArea("SM0")
+	_nRecno:=Recno()
+	LOCATE For AllTrim(M0_CODFIL)=(_cAliasSD1)->D1_FILIAL
 	_cNomFil:=SM0->M0_FILIAL
 	oPrint:Box  (_nLin-030,0100,_nLin+100,2300)
 	oPrint:Say  (_nLin    ,0120,"Código"       ,oFont10n )
@@ -1179,18 +1179,18 @@ While ! eof()
 	oPrint:Say  (_nLin    ,0400,"Filial"       ,oFont10n )
 	oPrint:Say  (_nLin+050,0400,_cNomFil,oFont10 )
 	_nLin+=135
-	dbgoto(_nRecno)
-	dbselectarea(_cAliasSD1)
+	DBGoTo(_nRecno)
+	DBSelectArea(_cAliasSD1)
 	
-	While ! eof() .and. _cFilial==(_cAliasSD1)->D1_FILIAL
+	While ! Eof() .And. _cFilial==(_cAliasSD1)->D1_FILIAL
 		
 		//imprime cabecalho
-		if _nLin>2940
+		If _nLin>2940
 			oPrint:EndPage() // Finaliza a página
 			_nPag++
 			oPrint:StartPage()   // Inicia uma nova página
 			ROMS009M(oPrint,4,.T.)
-		endif
+		EndIf
 		
 		// Quebra por grupo de vendas
 		_cGrupo :=(_cAliasSD1)->A1_GRPVEN
@@ -1199,7 +1199,7 @@ While ! eof()
 		_nTGVlr :=0
 		_nTGBrt :=0
 		
-		ACY->(dbseek(xfilial("ACY")+_cGrupo))
+		ACY->(DBSeek(xFilial("ACY")+_cGrupo))
 		oPrint:Say  (_nLin    ,0120,"Grupo de vendas" ,oFont10n )
 		oPrint:Say  (_nLin+050,0120,_cGrupo			,oFont10 )
 		oPrint:Say  (_nLin    ,0400,"Descrição"  ,oFont10n )
@@ -1209,15 +1209,15 @@ While ! eof()
 		oPrint:Line (_nLin+100,0100,_nLin+100,2300)
 		_nLin+=140
 		
-		While ! eof() .and. _cFilial==(_cAliasSD1)->D1_FILIAL .and. _cGrupo ==(_cAliasSD1)->A1_GRPVEN
+		While ! Eof() .And. _cFilial==(_cAliasSD1)->D1_FILIAL .And. _cGrupo ==(_cAliasSD1)->A1_GRPVEN
 			
 			//imprime cabecalho
-			if _nLin>2940
+			If _nLin>2940
 				oPrint:EndPage() // Finaliza a página
 				_nPag++
 				oPrint:StartPage()   // Inicia uma nova página
 				ROMS009M(oPrint,4,.T.)
-			endif
+			EndIf
 			
 			// Quebra por cliente
 			_cCliente:=(_cAliasSD1)->D1_FORNECE+(_cAliasSD1)->D1_LOJA
@@ -1225,7 +1225,7 @@ While ! eof()
 			_nTCQtd2:=0
 			_nTCVlr :=0
 			_nTCBrt :=0
-			SA1->(dbseek(xfilial("SA1")+(_cAliasSD1)->D1_FORNECE+(_cAliasSD1)->D1_LOJA))
+			SA1->(DBSeek(xFilial("SA1")+(_cAliasSD1)->D1_FORNECE+(_cAliasSD1)->D1_LOJA))
 			oPrint:Say  (_nLin    ,0120,"Código" ,oFont10n )
 			oPrint:Say  (_nLin+050,0120,(_cAliasSD1)->D1_FORNECE ,oFont10 )
 			oPrint:Say  (_nLin    ,0320,"Loja" ,oFont10n )
@@ -1245,12 +1245,12 @@ While ! eof()
 			
 			
 			//imprime cabecalho
-			if _nLin>2940
+			If _nLin>2940
 				oPrint:EndPage() // Finaliza a página
 				_nPag++
 				oPrint:StartPage()   // Inicia uma nova página
 				ROMS009M(oPrint,4,.T.)
-			endif
+			EndIf
 			
 			oPrint:Say (_nLin,0120,"Produto"  ,oFONT10n )
 			oPrint:Say (_nLin,0340,"Descrição",oFONT10n )
@@ -1274,18 +1274,18 @@ While ! eof()
 			oPrint:Line(_nLin+050,0100,_nLin+050,2300)
 			_nLin+=50
 			
-			While ! eof() .and. _cFilial==(_cAliasSD1)->D1_FILIAL .and. _cCliente==(_cAliasSD1)->D1_FORNECE+(_cAliasSD1)->D1_LOJA
+			While ! Eof() .And. _cFilial==(_cAliasSD1)->D1_FILIAL .And. _cCliente==(_cAliasSD1)->D1_FORNECE+(_cAliasSD1)->D1_LOJA
 				//imprime cabecalho
-				if _nLin>2940
+				If _nLin>2940
 					oPrint:EndPage() // Finaliza a página
 					_nPag++
 					oPrint:StartPage()   // Inicia uma nova página
 					ROMS009M(oPrint,4,.T.)
-				endif
-				SB1->(dbseek(xfilial("SB1")+(_cAliasSD1)->D1_COD))
+				EndIf
+				SB1->(DBSeek(xFilial("SB1")+(_cAliasSD1)->D1_COD))
 				oPrint:Say (_nLin,0120,(_cAliasSD1)->D1_COD     ,oFONT10 )
 				//oPrint:Say (_nLin,0340,SB1->B1_DESC    ,oFONT10 )
-				oPrint:Say (_nLin,0340,SUBSTR(SB1->B1_DESC,1,35)    ,oFONT10 )//GUILHERME 23/11/2012 - LIMITE DE IMPRESSAO DESC PRODUTO
+				oPrint:Say (_nLin,0340,SubStr(SB1->B1_DESC,1,35)    ,oFONT10 )//GUILHERME 23/11/2012 - LIMITE DE IMPRESSAO DESC PRODUTO
 				oPrint:Say (_nLin,0900,transform((_cAliasSD1)->QUANT  ,"@re 999,999,999.99")   ,oFONT10 )
 				oPrint:Say (_nLin,1175,(_cAliasSD1)->D1_UM      ,oFONT10 )
 				oPrint:Say (_nLin,1260,transform((_cAliasSD1)->QTSEGUM,"@re 999,999,999.99") ,oFONT10 )
@@ -1321,11 +1321,11 @@ While ! eof()
 				oPrint:Line(_nLin-30,2300,_nLin+050,2300)
 				oPrint:Line(_nLin+050,0100,_nLin+050,2300)
 				_nLin+=050
-				(_cAliasSD1)->(dbskip())
+				(_cAliasSD1)->(DBSkip())
 			End
 			
 			_nLin+=020
-			oPrint:Say (_nLin,0120,"Subtotal cliente"+substr(_cCliente,1,6)+" - "+substr(_cCliente,7,2)+" "+substr(SA1->A1_NREDUZ,1,20),oFont10 )
+			oPrint:Say (_nLin,0120,"Subtotal cliente"+SubStr(_cCliente,1,6)+" - "+SubStr(_cCliente,7,2)+" "+SubStr(SA1->A1_NREDUZ,1,20),oFont10 )
 			oPrint:Say (_nLin,0900,transform(_nTCQtd1  ,"@re 999,999,999.99")  ,oFont10 )
 			oPrint:Say (_nLin,1260,transform(_nTCQtd2  ,"@re 999,999,999.99")  ,oFont10 )
 			oPrint:Say (_nLin,1820,transform(_nTCVlr   ,"@re 999,999,999.99")  ,oFont10 )
@@ -1335,12 +1335,12 @@ While ! eof()
 			oPrint:Line(_nLin+050,0100,_nLin+050,2300)
 			_nLin+=100
 			//imprime cabecalho
-			if _nLin>2800
+			If _nLin>2800
 				oPrint:EndPage() // Finaliza a página
 				_nPag++
 				oPrint:StartPage()   // Inicia uma nova página
 				ROMS009M(oPrint,4,.T.)
-			endif
+			EndIf
 			
 		End
 		
@@ -1356,12 +1356,12 @@ While ! eof()
 		oPrint:Line(_nLin+050,0100,_nLin+050,2300)
 		_nLin+=100
 		//imprime cabecalho
-		if _nLin>2800
+		If _nLin>2800
 			oPrint:EndPage() // Finaliza a página
 			_nPag++
 			oPrint:StartPage()   // Inicia uma nova página
 			ROMS009M(oPrint,4,.T.)
-		endif
+		EndIf
 		
 	End
 	oPrint:Box  (_nLin-050,0100,_nLin+050,2300)
@@ -1372,12 +1372,12 @@ While ! eof()
 	oPrint:Say (_nLin,2070,transform(_nTFBrt   ,"@re 999,999,999.99")  ,oFont10 )
 	_nLin+=200
 	//imprime cabecalho
-	if _nLin>2900
+	If _nLin>2900
 		oPrint:EndPage() // Finaliza a página
 		_nPag++
 		oPrint:StartPage()   // Inicia uma nova página
 		ROMS009M(oPrint,4,.T.)
-	endif
+	EndIf
 	
 End
 
@@ -1390,7 +1390,7 @@ oPrint:Say (_nLin,2070,transform(_nTBrt ,"@re 999,999,999.99")  ,oFont10 )
 
 oPrint:EndPage() // Finaliza a página
 
-Return Nil      
+Return      
 
 /*
 ===============================================================================================================================
@@ -1423,16 +1423,16 @@ Local _nTBrt   := 0 As Numeric
 oPrint:StartPage()   // Inicia uma nova página
 ROMS009M(oPrint,5,.T.)
 
-DbSelectArea(_cAliasSD1)
-While ! eof()
+DBSelectArea(_cAliasSD1)
+While ! Eof()
 	
 	//imprime cabecalho
-	if _nLin>2940
+	If _nLin>2940
 		oPrint:EndPage() // Finaliza a página
 		_nPag++
 		oPrint:StartPage()   // Inicia uma nova página
 		ROMS009M(oPrint,5,.T.)
-	endif
+	EndIf
 	
 	// Quebra por filial
 	_cFilial:=(_cAliasSD1)->D1_FILIAL
@@ -1441,9 +1441,9 @@ While ! eof()
 	_nTFVlr :=0
 	_nTFBrt :=0
 	
-	dbselectarea("SM0")
-	_nRecno:=recno()
-	LOCATE FOR ALLTRIM(M0_CODFIL)=(_cAliasSD1)->D1_FILIAL
+	DBSelectArea("SM0")
+	_nRecno:=Recno()
+	LOCATE For AllTrim(M0_CODFIL)=(_cAliasSD1)->D1_FILIAL
 	_cNomFil:=SM0->M0_FILIAL
 	oPrint:Box  (_nLin-030,0100,_nLin+100,2300)
 	oPrint:Say  (_nLin    ,0120,"Código"       ,oFont10n )
@@ -1451,18 +1451,18 @@ While ! eof()
 	oPrint:Say  (_nLin    ,0370,"Filial"       ,oFont10n )
 	oPrint:Say  (_nLin+050,0370,_cNomFil,oFont10 )
 	_nLin+=150
-	dbgoto(_nRecno)
-	dbselectarea(_cAliasSD1)
+	DBGoTo(_nRecno)
+	DBSelectArea(_cAliasSD1)
 	
-	While ! eof() .and. _cFilial==(_cAliasSD1)->D1_FILIAL
+	While ! Eof() .And. _cFilial==(_cAliasSD1)->D1_FILIAL
 		
 		//imprime cabecalho
-		if _nLin>2940
+		If _nLin>2940
 			oPrint:EndPage() // Finaliza a página
 			_nPag++
 			oPrint:StartPage()   // Inicia uma nova página
 			ROMS009M(oPrint,5,.T.)
-		endif
+		EndIf
 		
 		// Quebra por produto
 		oPrint:Say (_nLin,0120,"Produto"  ,oFont10n )
@@ -1473,7 +1473,7 @@ While ! eof()
 		_nLin+=75
 		
 		
-		SB1->(dbseek(xfilial("SB1")+(_cAliasSD1)->D1_COD))
+		SB1->(DBSeek(xFilial("SB1")+(_cAliasSD1)->D1_COD))
 		oPrint:Say (_nLin,0120,(_cAliasSD1)->D1_COD     ,oFont10 )
 		oPrint:Say (_nLin,0370,SB1->B1_I_DESCD  ,oFont10 )
 		oPrint:Line(_nLin-35,0100,_nLin+050,0100)
@@ -1515,23 +1515,23 @@ While ! eof()
 		oPrint:Line(_nLin+050,0100,_nLin+050,2300)
 		_nLin+=50
 		
-		While ! eof() .and. _cFilial==(_cAliasSD1)->D1_FILIAL .AND. _cProd==(_cAliasSD1)->D1_COD
+		While ! Eof() .And. _cFilial==(_cAliasSD1)->D1_FILIAL .And. _cProd==(_cAliasSD1)->D1_COD
 			//imprime cabecalho
-			if _nLin>2940
+			If _nLin>2940
 				oPrint:EndPage() // Finaliza a página
 				_nPag++
 				oPrint:StartPage()   // Inicia uma nova página
 				ROMS009M(oPrint,5,.T.)
-			endif
+			EndIf
 			
 			
-			oPrint:Say  (_nLin,0120,dtoc(stod((_cAliasSD1)->D1_DTDIGIT)),oFont8 )
+			oPrint:Say  (_nLin,0120,DToC(SToD((_cAliasSD1)->D1_DTDIGIT)),oFont8 )
 			oPrint:Say  (_nLin,0270,(_cAliasSD1)->D1_DOC+"-"+(_cAliasSD1)->D1_SERIE,oFont8 )
-			If alltrim((_cAliasSD1)->D1_NFORI)<>'.'
+			If AllTrim((_cAliasSD1)->D1_NFORI)<>'.'
 				oPrint:Say  (_nLin,0470,(_cAliasSD1)->D1_NFORI+"-"+(_cAliasSD1)->D1_SERIORI,oFont8 )
-			Endif
+			EndIf
 			oPrint:Say  (_nLin,0670,(_cAliasSD1)->D1_FORNECE+"-"+(_cAliasSD1)->D1_LOJA,oFont8 )
-			oPrint:Say  (_nLin,0870,substr((_cAliasSD1)->A1_NREDUZ,1,15) ,oFont8 )
+			oPrint:Say  (_nLin,0870,SubStr((_cAliasSD1)->A1_NREDUZ,1,15) ,oFont8 )
 			oPrint:Say (_nLin,1177,transform((_cAliasSD1)->D1_QUANT  ,"@re 999,999.99")   ,oFont8 )
 			oPrint:Say (_nLin,1340,(_cAliasSD1)->D1_UM      ,oFont8 )
 			oPrint:Say (_nLin,1435,transform((_cAliasSD1)->D1_QTSEGUM,"@re 999,999.99") ,oFont8 )
@@ -1566,11 +1566,11 @@ While ! eof()
 			oPrint:Line(_nLin-30,2300,_nLin+050,2300)
 			oPrint:Line(_nLin+050,0100,_nLin+050,2300)
 			_nLin+=050
-			(_cAliasSD1)->(dbskip())
+			(_cAliasSD1)->(DBSkip())
 		End
 		oPrint:Box (_nLin-050,0100,_nLin+100,2300)
 		//oPrint:Say (_nLin+40,0120,"Subtotal produto: "+_cProd+"-"+SB1->B1_DESC ,oFont10 )
-		oPrint:Say (_nLin+40,0120,"Subtotal produto: "+_cProd+"-"+SUBSTR(SB1->B1_DESC,1,52) ,oFont10 ) //GUILHERME 23/11/2012 - LIMITE DE IMPRESSAO DESC PRODUTO
+		oPrint:Say (_nLin+40,0120,"Subtotal produto: "+_cProd+"-"+SubStr(SB1->B1_DESC,1,52) ,oFont10 ) //GUILHERME 23/11/2012 - LIMITE DE IMPRESSAO DESC PRODUTO
 		oPrint:Say (_nLin+50,1180,transform(_nTPQtd1,"@re 999,999,999.99") ,oFont8 )
 		oPrint:Say (_nLin+50,1435,transform(_nTPQtd2,"@re 999,999,999.99") ,oFont8 )
 		oPrint:Say (_nLin+50,1830,transform(_nTPVlr ,"@re 999,999,999.99") ,oFont8 )
@@ -1578,12 +1578,12 @@ While ! eof()
 		//oPrint:Line(_nLin+050,0100,_nLin+050,2300)
 		_nLin+=150
 		//imprime cabecalho
-		if _nLin>2900
+		If _nLin>2900
 			oPrint:EndPage() // Finaliza a página
 			_nPag++
 			oPrint:StartPage()   // Inicia uma nova página
 			ROMS009M(oPrint,5,.T.)
-		endif
+		EndIf
 		
 	End
 	oPrint:Box (_nLin-050,0100,_nLin+050,2300)
@@ -1595,12 +1595,12 @@ While ! eof()
 	//oPrint:Line(_nLin+050,0100,_nLin+050,2300)
 	_nLin+=150
 	//imprime cabecalho
-	if _nLin>2900
+	If _nLin>2900
 		oPrint:EndPage() // Finaliza a página
 		_nPag++
 		oPrint:StartPage()   // Inicia uma nova página
 		ROMS009M(oPrint,5,.T.)
-	endif
+	EndIf
 	
 End
 
@@ -1614,7 +1614,7 @@ oPrint:Say (_nLin,2080,transform(_nTBrt ,"@re 999,999,999.99")  ,oFont8 )
 
 oPrint:EndPage() // Finaliza a página
 
-Return Nil      
+Return      
 
 /*
 ===============================================================================================================================
@@ -1647,16 +1647,16 @@ Local _nTBrt   := 0 As Numeric
 oPrint:StartPage()   // Inicia uma nova página
 ROMS009M(oPrint,6,.T.)
 
-DbSelectArea(_cAliasSD1)
-While ! eof()
+DBSelectArea(_cAliasSD1)
+While ! Eof()
 	
 	//imprime cabecalho
-	if _nLin>2940
+	If _nLin>2940
 		oPrint:EndPage() // Finaliza a página
 		_nPag++
 		oPrint:StartPage()   // Inicia uma nova página
 		ROMS009M(oPrint,6,.T.)
-	endif
+	EndIf
 	
 	// Quebra por filial
 	_cFilial:=(_cAliasSD1)->D1_FILIAL
@@ -1665,9 +1665,9 @@ While ! eof()
 	_nTFVlr :=0
 	_nTFBrt :=0
 	
-	dbselectarea("SM0")
-	_nRecno:=recno()
-	LOCATE FOR ALLTRIM(M0_CODFIL)=(_cAliasSD1)->D1_FILIAL
+	DBSelectArea("SM0")
+	_nRecno:=Recno()
+	LOCATE For AllTrim(M0_CODFIL)=(_cAliasSD1)->D1_FILIAL
 	_cNomFil:=SM0->M0_FILIAL
 	oPrint:Box  (_nLin-030,0100,_nLin+100,2300)
 	oPrint:Say  (_nLin    ,0120,"Código"       ,oFont8n )
@@ -1675,18 +1675,18 @@ While ! eof()
 	oPrint:Say  (_nLin    ,0370,"Filial"       ,oFont8n )
 	oPrint:Say  (_nLin+050,0370,_cNomFil,oFont8 )
 	_nLin+=150
-	dbgoto(_nRecno)
-	dbselectarea(_cAliasSD1)
+	DBGoTo(_nRecno)
+	DBSelectArea(_cAliasSD1)
 	
-	While ! eof() .and. _cFilial==(_cAliasSD1)->D1_FILIAL
+	While ! Eof() .And. _cFilial==(_cAliasSD1)->D1_FILIAL
 		
 		//imprime cabecalho
-		if _nLin>2940
+		If _nLin>2940
 			oPrint:EndPage() // Finaliza a página
 			_nPag++
 			oPrint:StartPage()   // Inicia uma nova página
 			ROMS009M(oPrint,6,.T.)
-		endif
+		EndIf
 		
 		// Quebra por grupo de vendas
 		_cGrupo :=(_cAliasSD1)->A1_GRPVEN
@@ -1695,7 +1695,7 @@ While ! eof()
 		_nTGVlr :=0
 		_nTGBrt :=0
 		                           
-		ACY->(dbseek(xfilial("ACY")+_cGrupo))
+		ACY->(DBSeek(xFilial("ACY")+_cGrupo))
 		oPrint:Say  (_nLin    ,0120,"Grupo de vendas" ,oFont8n )
 		oPrint:Say  (_nLin+050,0120,_cGrupo			,oFont8 )
 		oPrint:Say  (_nLin    ,0400,"Descrição"  ,oFont8n )
@@ -1735,25 +1735,25 @@ While ! eof()
 		oPrint:Line(_nLin+050,0100,_nLin+050,2300)
 		_nLin+=50
 		
-		While ! eof() .and. _cFilial==(_cAliasSD1)->D1_FILIAL .AND. _cGrupo==(_cAliasSD1)->A1_GRPVEN
+		While ! Eof() .And. _cFilial==(_cAliasSD1)->D1_FILIAL .And. _cGrupo==(_cAliasSD1)->A1_GRPVEN
 			//imprime cabecalho
-			if _nLin>2940
+			If _nLin>2940
 				oPrint:EndPage() // Finaliza a página
 				_nPag++
 				oPrint:StartPage()   // Inicia uma nova página
 				ROMS009M(oPrint,6,.T.)
-			endif
+			EndIf
 			           
-			SB1->(dbseek(xfilial("SB1")+(_cAliasSD1)->D1_COD))
+			SB1->(DBSeek(xFilial("SB1")+(_cAliasSD1)->D1_COD))
 			
-			oPrint:Say  (_nLin,0120,dtoc(stod((_cAliasSD1)->D1_DTDIGIT)),oFont8 )
+			oPrint:Say  (_nLin,0120,DToC(SToD((_cAliasSD1)->D1_DTDIGIT)),oFont8 )
 			oPrint:Say  (_nLin,0230,(_cAliasSD1)->D1_DOC+"-"+(_cAliasSD1)->D1_SERIE,oFont8 )
-			If alltrim((_cAliasSD1)->D1_NFORI)<>'.'
+			If AllTrim((_cAliasSD1)->D1_NFORI)<>'.'
 				oPrint:Say  (_nLin,0400,(_cAliasSD1)->D1_NFORI+"-"+(_cAliasSD1)->D1_SERIORI,oFont8 )
-			Endif
+			EndIf
 			oPrint:Say (_nLin,0570,(_cAliasSD1)->D1_FORNECE+"-"+(_cAliasSD1)->D1_LOJA ,oFont8 )
-			oPrint:Say (_nLin,0720,substr((_cAliasSD1)->A1_NREDUZ,1,15)       ,oFont8 )         
-			oPrint:Say (_nLin,0970,substr(SB1->B1_I_DESCD,1,35)       ,oFont8 ) 
+			oPrint:Say (_nLin,0720,SubStr((_cAliasSD1)->A1_NREDUZ,1,15)       ,oFont8 )         
+			oPrint:Say (_nLin,0970,SubStr(SB1->B1_I_DESCD,1,35)       ,oFont8 ) 
 			oPrint:Say (_nLin,1420,transform((_cAliasSD1)->D1_QUANT  ,"@re 999,999.99")   ,oFont8 )
 			oPrint:Say (_nLin,1570,(_cAliasSD1)->D1_UM      ,oFont8 )
 			oPrint:Say (_nLin,1670,transform((_cAliasSD1)->D1_QTSEGUM,"@re 999,999.99") ,oFont8 )
@@ -1789,7 +1789,7 @@ While ! eof()
 		oPrint:Line(_nLin-30,2300,_nLin+050,2300)
 		oPrint:Line(_nLin+050,0100,_nLin+050,2300)
 			_nLin+=050
-			(_cAliasSD1)->(dbskip())
+			(_cAliasSD1)->(DBSkip())
 		End
 		oPrint:Box (_nLin-050,0100,_nLin+100,2300)
 		oPrint:Say (_nLin+40,0120,"Subtotal rede: "+_cGrupo+"-"+ACY->ACY_DESCRI ,oFont8 )
@@ -1800,12 +1800,12 @@ While ! eof()
 
 		_nLin+=150
 		//imprime cabecalho
-		if _nLin>2900
+		If _nLin>2900
 			oPrint:EndPage() // Finaliza a página
 			_nPag++
 			oPrint:StartPage()   // Inicia uma nova página
 			ROMS009M(oPrint,6,.T.)
-		endif
+		EndIf
 		
 	End
 	oPrint:Box (_nLin-050,0100,_nLin+050,2300)
@@ -1817,12 +1817,12 @@ While ! eof()
 
 	_nLin+=150
 	//imprime cabecalho
-	if _nLin>2900
+	If _nLin>2900
 		oPrint:EndPage() // Finaliza a página
 		_nPag++
 		oPrint:StartPage()   // Inicia uma nova página
 		ROMS009M(oPrint,6,.T.)
-	endif
+	EndIf
 	
 End
 
@@ -1836,7 +1836,7 @@ oPrint:Say (_nLin,2150,transform(_nTBrt ,"@re 999,999,999.99")  ,oFont8 )
 
 oPrint:EndPage() // Finaliza a página
 	
-Return Nil   
+Return   
 
 /*
 ===============================================================================================================================
@@ -1874,16 +1874,16 @@ Local _nTBrt   := 0 As Numeric
 oPrint:StartPage()   // Inicia uma nova página
 ROMS009M(oPrint,7,.T.)
 
-DbSelectArea(_cAliasSD1)
-While ! eof()
+DBSelectArea(_cAliasSD1)
+While ! Eof()
 	
 	//imprime cabecalho
-	if _nLin>2940
+	If _nLin>2940
 		oPrint:EndPage() // Finaliza a página
 		_nPag++
 		oPrint:StartPage()   // Inicia uma nova página
 		ROMS009M(oPrint,7,.T.)
-	endif
+	EndIf
 	
 	// Quebra por filial
 	_cFilial:=(_cAliasSD1)->D1_FILIAL
@@ -1892,9 +1892,9 @@ While ! eof()
 	_nTFVlr :=0
 	_nTFBrt :=0
 	
-	dbselectarea("SM0")
-	_nRecno:=recno()
-	LOCATE FOR ALLTRIM(M0_CODFIL)=(_cAliasSD1)->D1_FILIAL
+	DBSelectArea("SM0")
+	_nRecno:=Recno()
+	LOCATE For AllTrim(M0_CODFIL)=(_cAliasSD1)->D1_FILIAL
 	_cNomFil:=SM0->M0_FILIAL
 	oPrint:Box  (_nLin-030,0100,_nLin+100,2300)
 	oPrint:Say  (_nLin    ,0120,"Código"       ,oFont10n )
@@ -1902,18 +1902,18 @@ While ! eof()
 	oPrint:Say  (_nLin    ,0400,"Filial"       ,oFont10n )
 	oPrint:Say  (_nLin+050,0400,_cNomFil,oFont10 )
 	_nLin+=150
-	dbgoto(_nRecno)
-	dbselectarea(_cAliasSD1)
+	DBGoTo(_nRecno)
+	DBSelectArea(_cAliasSD1)
 	
-	While ! eof() .and. _cFilial==(_cAliasSD1)->D1_FILIAL
+	While ! Eof() .And. _cFilial==(_cAliasSD1)->D1_FILIAL
 		
 		//imprime cabecalho
-		if _nLin>2940
+		If _nLin>2940
 			oPrint:EndPage() // Finaliza a página
 			_nPag++
 			oPrint:StartPage()   // Inicia uma nova página
 			ROMS009M(oPrint,7,.T.)
-		endif
+		EndIf
 		
 		// Quebra por grupo de vendas
 		_cGrupo :=(_cAliasSD1)->A1_GRPVEN
@@ -1922,7 +1922,7 @@ While ! eof()
 		_nTGVlr :=0
 		_nTGBrt :=0
 		
-		ACY->(dbseek(xfilial("ACY")+_cGrupo))
+		ACY->(DBSeek(xFilial("ACY")+_cGrupo))
 		oPrint:Say  (_nLin    ,0120,"Grupo de vendas" ,oFont10n )
 		oPrint:Say  (_nLin+050,0120,_cGrupo			,oFont10 )
 		oPrint:Say  (_nLin    ,0400,"Descrição"  ,oFont10n )
@@ -1933,15 +1933,15 @@ While ! eof()
 		_nLin+=150
 		
 		
-		While ! eof() .and. _cFilial==(_cAliasSD1)->D1_FILIAL .and. 	_cGrupo ==(_cAliasSD1)->A1_GRPVEN
+		While ! Eof() .And. _cFilial==(_cAliasSD1)->D1_FILIAL .And. 	_cGrupo ==(_cAliasSD1)->A1_GRPVEN
 			
 			//imprime cabecalho
-			if _nLin>2940
+			If _nLin>2940
 				oPrint:EndPage() // Finaliza a página
 				_nPag++
 				oPrint:StartPage()   // Inicia uma nova página
 				ROMS009M(oPrint,7,.T.)
-			endif
+			EndIf
 			
 			// Quebra por cliente
 			_cCliente:=(_cAliasSD1)->D1_FORNECE+(_cAliasSD1)->D1_LOJA
@@ -1950,15 +1950,15 @@ While ! eof()
 			_nTCVlr :=0
 			_nTCBrt :=0
 			
-			SA1->(dbseek(xfilial("SA1")+_cCliente))
+			SA1->(DBSeek(xFilial("SA1")+_cCliente))
 			oPrint:Say  (_nLin    ,0120,"Código" ,oFont10n )
 			oPrint:Say  (_nLin+050,0120,(_cAliasSD1)->D1_FORNECE ,oFont10 )
 			oPrint:Say  (_nLin    ,0320,"Loja" ,oFont10n )
 			oPrint:Say  (_nLin+050,0320,(_cAliasSD1)->D1_LOJA,oFont10 )
 			oPrint:Say  (_nLin    ,0520,"Nome Fantasia"  ,oFont10n )
-			oPrint:Say  (_nLin+050,0520,substr(SA1->A1_NREDUZ,1,15),oFont10 )
+			oPrint:Say  (_nLin+050,0520,SubStr(SA1->A1_NREDUZ,1,15),oFont10 )
 			oPrint:Say  (_nLin    ,0920,"Razão Social"  ,oFont10n )
-			oPrint:Say  (_nLin+050,0920,substr(SA1->A1_NOME,1,30),oFont10 )
+			oPrint:Say  (_nLin+050,0920,SubStr(SA1->A1_NOME,1,30),oFont10 )
 			oPrint:Say  (_nLin    ,1700,"Municipio"     ,oFont10n )
 			oPrint:Say  (_nLin+050,1700,(_cAliasSD1)->A1_MUN   ,oFont10 )
 			oPrint:Say  (_nLin    ,2150,"Estado"        ,oFont10n )
@@ -1994,24 +1994,24 @@ While ! eof()
 			oPrint:Line(_nLin+050,0100,_nLin+050,2300)
 			_nLin+=50
 			
-			While ! eof() .and. _cFilial==(_cAliasSD1)->D1_FILIAL .AND. _cCliente==(_cAliasSD1)->D1_FORNECE+(_cAliasSD1)->D1_LOJA
+			While ! Eof() .And. _cFilial==(_cAliasSD1)->D1_FILIAL .And. _cCliente==(_cAliasSD1)->D1_FORNECE+(_cAliasSD1)->D1_LOJA
 				//imprime cabecalho
-				if _nLin>2940
+				If _nLin>2940
 					oPrint:EndPage() // Finaliza a página
 					_nPag++
 					oPrint:StartPage()   // Inicia uma nova página
 					ROMS009M(oPrint,7,.T.)
-				endif
+				EndIf
 				
-				SB1->(dbseek(xfilial("SB1")+(_cAliasSD1)->D1_COD))
+				SB1->(DBSeek(xFilial("SB1")+(_cAliasSD1)->D1_COD))
 				
-				oPrint:Say  (_nLin,0120,dtoc(stod((_cAliasSD1)->D1_DTDIGIT)),oFont8 )
+				oPrint:Say  (_nLin,0120,DToC(SToD((_cAliasSD1)->D1_DTDIGIT)),oFont8 )
 				oPrint:Say  (_nLin,0270,(_cAliasSD1)->D1_DOC+"-"+(_cAliasSD1)->D1_SERIE,oFont8 )
-				If alltrim((_cAliasSD1)->D1_NFORI)<>'.'
+				If AllTrim((_cAliasSD1)->D1_NFORI)<>'.'
 					oPrint:Say  (_nLin,0470,(_cAliasSD1)->D1_NFORI+"-"+(_cAliasSD1)->D1_SERIORI,oFont8 )
-				Endif
+				EndIf
 				//oPrint:Say  (_nLin,0670,SB1->B1_I_DESCD          ,oFont8 )
-				oPrint:Say (_nLin,0670,SUBSTR(SB1->B1_I_DESCD,1,52)          ,oFont8 ) 
+				oPrint:Say (_nLin,0670,SubStr(SB1->B1_I_DESCD,1,52)          ,oFont8 ) 
 				oPrint:Say (_nLin,1270,transform((_cAliasSD1)->D1_QUANT  ,"@re 99,999.99")   ,oFont8 )
 				oPrint:Say (_nLin,1420,(_cAliasSD1)->D1_UM      ,oFont8 )
 				oPrint:Say (_nLin,1520,transform((_cAliasSD1)->D1_QTSEGUM,"@re 99,999.99") ,oFont8 )
@@ -2050,10 +2050,10 @@ While ! eof()
 				oPrint:Line(_nLin+050,0100,_nLin+050,2300)
 				
 				_nLin+=050
-				(_cAliasSD1)->(dbskip())
+				(_cAliasSD1)->(DBSkip())
 			End
 			oPrint:Box (_nLin-050,0100,_nLin+100,2300)
-			oPrint:Say (_nLin+40,0120,"Subtotal cliente: "+SA1->A1_COD+"-"+SA1->A1_LOJA+" - "+alltrim(SA1->A1_NREDUZ) ,oFont10 )
+			oPrint:Say (_nLin+40,0120,"Subtotal cliente: "+SA1->A1_COD+"-"+SA1->A1_LOJA+" - "+AllTrim(SA1->A1_NREDUZ) ,oFont10 )
 			oPrint:Say (_nLin+50,1270,transform(_nTCQtd1,"@re 999,999.99") ,oFont8 )
 			oPrint:Say (_nLin+50,1520,transform(_nTCQtd2,"@re 99,999.99") ,oFont8 )
 			oPrint:Say (_nLin+50,1870,transform(_nTCVlr ,"@re 99,999,999.99") ,oFont8 )
@@ -2062,12 +2062,12 @@ While ! eof()
 			//oPrint:Line(_nLin+050,0100,_nLin+050,2300)
 			_nLin+=150
 			//imprime cabecalho
-			if _nLin>2900
+			If _nLin>2900
 				oPrint:EndPage() // Finaliza a página
 				_nPag++
 				oPrint:StartPage()   // Inicia uma nova página
 				ROMS009M(oPrint,7,.T.)
-			endif
+			EndIf
 		End
 		
 		oPrint:Box (_nLin-050,0100,_nLin+100,2300)
@@ -2079,12 +2079,12 @@ While ! eof()
 
 		_nLin+=150
 		//imprime cabecalho
-		if _nLin>2900
+		If _nLin>2900
 			oPrint:EndPage() // Finaliza a página
 			_nPag++
 			oPrint:StartPage()   // Inicia uma nova página
 			ROMS009M(oPrint,7,.T.)
-		endif
+		EndIf
 		
 	End
 	oPrint:Box (_nLin-050,0100,_nLin+050,2300)
@@ -2096,12 +2096,12 @@ While ! eof()
 
 	_nLin+=150
 	//imprime cabecalho
-	if _nLin>2900
+	If _nLin>2900
 		oPrint:EndPage() // Finaliza a página
 		_nPag++
 		oPrint:StartPage()   // Inicia uma nova página
 		ROMS009M(oPrint,7,.T.)
-	endif
+	EndIf
 	
 End
 
@@ -2115,7 +2115,7 @@ oPrint:Say (_nLin,2120,transform(_nTBrt ,"@re 999,999,999.99")  ,oFont8 )
 
 oPrint:EndPage() // Finaliza a página
 	
-Return Nil   
+Return   
 
 /*
 ===============================================================================================================================
@@ -2148,27 +2148,27 @@ Static Function ROMS009M(oPrint As Object, _nOpc As Numeric, lPrintNrPg As Logic
 Private cBitmap := 'lgrl01.bmp' As Char
 
 _nLin:=160                          
-if _nOpc==1
-   oPrint:Say(_nLin,0400,"RELACAO DE DEVOLUÇÕES - ORDEM DE EMISSÃO - DE "+DTOC(MV_PAR02)+" A "+DTOC(MV_PAR03),oFont16n )
-elseif _nopc==2      
-   oPrint:Say(_nLin,0500,"DEVOLUÇÕES - SINTÉTICO POR PRODUTO - DE "+DTOC(MV_PAR02)+" A "+DTOC(MV_PAR03),oFont16n )
-elseif _nopc==3
-   oPrint:Say(_nLin,0500,"DEVOLUÇÕES - SINTÉTICO POR REDE - DE "+DTOC(MV_PAR02)+" A "+DTOC(MV_PAR03),oFont16n )
-elseif _nopc==4
-   oPrint:Say(_nLin,0500,"DEVOLUÇÕES - SINTÉTICO POR CLIENTE - DE "+DTOC(MV_PAR02)+" A "+DTOC(MV_PAR03),oFont16n )
-elseif _nopc==5
-   oPrint:Say(_nLin,0500,"DEVOLUÇÕES - ANALÍTICO POR PRODUTO - DE "+DTOC(MV_PAR02)+" A "+DTOC(MV_PAR03),oFont16n )
-elseif _nopc==6
-   oPrint:Say(_nLin,0500,"DEVOLUÇÕES - ANALÍTICO POR REDE - DE "+DTOC(MV_PAR02)+" A "+DTOC(MV_PAR03),oFont16n )
-elseif _nopc==7
-   oPrint:Say(_nLin,0500,"DEVOLUÇÕES - ANALÍTICO POR CLIENTE - DE "+DTOC(MV_PAR02)+" A "+DTOC(MV_PAR03),oFont16n )
-endif
+If _nOpc==1
+   oPrint:Say(_nLin,0400,"RELACAO DE DEVOLUÇÕES - ORDEM DE EMISSÃO - DE "+DToC(MV_PAR02)+" A "+DToC(MV_PAR03),oFont16n )
+ElseIf _nopc==2      
+   oPrint:Say(_nLin,0500,"DEVOLUÇÕES - SINTÉTICO POR PRODUTO - DE "+DToC(MV_PAR02)+" A "+DToC(MV_PAR03),oFont16n )
+ElseIf _nopc==3
+   oPrint:Say(_nLin,0500,"DEVOLUÇÕES - SINTÉTICO POR REDE - DE "+DToC(MV_PAR02)+" A "+DToC(MV_PAR03),oFont16n )
+ElseIf _nopc==4
+   oPrint:Say(_nLin,0500,"DEVOLUÇÕES - SINTÉTICO POR CLIENTE - DE "+DToC(MV_PAR02)+" A "+DToC(MV_PAR03),oFont16n )
+ElseIf _nopc==5
+   oPrint:Say(_nLin,0500,"DEVOLUÇÕES - ANALÍTICO POR PRODUTO - DE "+DToC(MV_PAR02)+" A "+DToC(MV_PAR03),oFont16n )
+ElseIf _nopc==6
+   oPrint:Say(_nLin,0500,"DEVOLUÇÕES - ANALÍTICO POR REDE - DE "+DToC(MV_PAR02)+" A "+DToC(MV_PAR03),oFont16n )
+ElseIf _nopc==7
+   oPrint:Say(_nLin,0500,"DEVOLUÇÕES - ANALÍTICO POR CLIENTE - DE "+DToC(MV_PAR02)+" A "+DToC(MV_PAR03),oFont16n )
+EndIf
 oPrint:SayBitMap(_nLin-40,120,cBitMap,230,090)
-oPrint:Say(_nLin-60,2000 ,"Dt.Emissão: "+dtoc(dDatabase),oFont10n )
+oPrint:Say(_nLin-60,2000 ,"Dt.Emissão: "+DToC(dDatabase),oFont10n )
 
 
 If lPrintNrPg
-	oPrint:Say(_nLin-30,2000 ,"Página: "+strzero(_nPag,3),oFont10n )  
+	oPrint:Say(_nLin-30,2000 ,"Página: "+StrZero(_nPag,3),oFont10n )  
 		Else
 			oPrint:Say(_nLin-30,2000 ,"SIGA\ROMS009",oFont10n ) 
 			oPrint:Say(_nLin+60,120 ,"Empresa: " + AllTrim(SM0->M0_NOME) + '/'+ AllTrim(SM0->M0_FILIAL),oFont10n )
@@ -2196,105 +2196,105 @@ Static Function ROMS009P(oPrint As Object) As Logical
 Local nAux     := 1 As Numeric
 
 _aDadosParam := {}
-Aadd(_aDadosParam,{"01","Da Filial",mv_par01})
-Aadd(_aDadosParam,{"02","De Emissao",dtoc(mv_par02)})
-Aadd(_aDadosParam,{"03","Ate Emissao",dtoc(mv_par03)})
-Aadd(_aDadosParam,{"04","De Dt.entrada",dtoc(mv_par04)})
-Aadd(_aDadosParam,{"05","Ate Dt.entrada",dtoc(mv_par05)})
-Aadd(_aDadosParam,{"06","De Produto",mv_par06})
-Aadd(_aDadosParam,{"07","Ate Produto ",mv_par07})
-Aadd(_aDadosParam,{"08","De Cliente",mv_par08})
-Aadd(_aDadosParam,{"09","Loja ",mv_par09})
-Aadd(_aDadosParam,{"10","Ate Cliente",mv_par10})
-Aadd(_aDadosParam,{"11","Loja",mv_par11})
-Aadd(_aDadosParam,{"12","Rede",mv_par12})
-Aadd(_aDadosParam,{"13","Estado",mv_par13})
-Aadd(_aDadosParam,{"14","Municipio",mv_par14})
-Aadd(_aDadosParam,{"15","Vendedor",mv_par15})
-Aadd(_aDadosParam,{"16","Supervisor",mv_par16})
-Aadd(_aDadosParam,{"17","Grupo Produto",mv_par17})
-Aadd(_aDadosParam,{"18","Produto Nivel 2",mv_par18})
-Aadd(_aDadosParam,{"19","Produto Nivel 3",mv_par19})
-Aadd(_aDadosParam,{"20","Produto Nivel 4",mv_par20})
+aAdd(_aDadosParam,{"01","Da Filial",MV_PAR01})
+aAdd(_aDadosParam,{"02","De Emissao",DToC(MV_PAR02)})
+aAdd(_aDadosParam,{"03","Ate Emissao",DToC(MV_PAR03)})
+aAdd(_aDadosParam,{"04","De Dt.entrada",DToC(MV_PAR04)})
+aAdd(_aDadosParam,{"05","Ate Dt.entrada",DToC(MV_PAR05)})
+aAdd(_aDadosParam,{"06","De Produto",MV_PAR06})
+aAdd(_aDadosParam,{"07","Ate Produto ",MV_PAR07})
+aAdd(_aDadosParam,{"08","De Cliente",MV_PAR08})
+aAdd(_aDadosParam,{"09","Loja ",MV_PAR09})
+aAdd(_aDadosParam,{"10","Ate Cliente",MV_PAR10})
+aAdd(_aDadosParam,{"11","Loja",MV_PAR11})
+aAdd(_aDadosParam,{"12","Rede",MV_PAR12})
+aAdd(_aDadosParam,{"13","Estado",MV_PAR13})
+aAdd(_aDadosParam,{"14","Municipio",MV_PAR14})
+aAdd(_aDadosParam,{"15","Vendedor",MV_PAR15})
+aAdd(_aDadosParam,{"16","Supervisor",MV_PAR16})
+aAdd(_aDadosParam,{"17","Grupo Produto",MV_PAR17})
+aAdd(_aDadosParam,{"18","Produto Nivel 2",MV_PAR18})
+aAdd(_aDadosParam,{"19","Produto Nivel 3",MV_PAR19})
+aAdd(_aDadosParam,{"20","Produto Nivel 4",MV_PAR20})
 
 If MV_PAR21 == 1
 	_ctipo := "Gerou financeiro"
-Elseif MV_PAR21 == 2
+ElseIf MV_PAR21 == 2
 	_ctipo := "Nao gerou"
 Else
 	_ctipo := "Ambas"
-Endif
+EndIf
 
-Aadd(_aDadosParam,{"21","Tipo devolucao",_ctipo})
+aAdd(_aDadosParam,{"21","Tipo devolucao",_ctipo})
 
 If MV_PAR22 == 1
 	_crela := "Sintetico"
 Else
 	_crela := "Analítico"
-Endif
+EndIf
 
-Aadd(_aDadosParam,{"22","Relatorio",_crela})
-Aadd(_aDadosParam,{"23","De Dt.Faturamento inicial",dtoc(MV_PAR23)})
-Aadd(_aDadosParam,{"24","Ate Dt.Faturamento final",dtoc(MV_PAR24)})
+aAdd(_aDadosParam,{"22","Relatorio",_crela})
+aAdd(_aDadosParam,{"23","De Dt.Faturamento inicial",DToC(MV_PAR23)})
+aAdd(_aDadosParam,{"24","Ate Dt.Faturamento final",DToC(MV_PAR24)})
 
 If MV_PAR25 == 1
 	_cform := "Sim"
-Elseif MV_PAR25 == 2
+ElseIf MV_PAR25 == 2
 	_cform := "Não"
 Else
 	_cform := "Ambas"
-Endif
+EndIf
 
-Aadd(_aDadosParam,{"25","Formulario proprio",_cform})
+aAdd(_aDadosParam,{"25","Formulario proprio",_cform})
 
 If MV_PAR26 == 1
 	_cordem := "Emissao"
-Elseif MV_PAR26 == 2
+ElseIf MV_PAR26 == 2
 	_cordem := "Produto"
-Elseif MV_PAR26 == 3
+ElseIf MV_PAR26 == 3
 	_cordem := "Rede"
 Else
 	_cordem := "Cliente"
-Endif
+EndIf
 
-Aadd(_aDadosParam,{"26","Ordem",_cordem})
+aAdd(_aDadosParam,{"26","Ordem",_cordem})
 
 If MV_PAR27 == 1
 	_cncc := "Ambas"
-Elseif MV_PAR27 == 2
+ElseIf MV_PAR27 == 2
 	_cncc := "Sim"
 Else
 	_cncc := "Não"
-Endif
+EndIf
 
-Aadd(_aDadosParam,{"27","NCC Compensadas",_cncc})
-Aadd(_aDadosParam,{"28","Sub Grupo Produto",MV_PAR28})
-Aadd(_aDadosParam,{"29","TES a Desconsiderar",MV_PAR29})
+aAdd(_aDadosParam,{"27","NCC Compensadas",_cncc})
+aAdd(_aDadosParam,{"28","Sub Grupo Produto",MV_PAR28})
+aAdd(_aDadosParam,{"29","TES a Desconsiderar",MV_PAR29})
 
 If MV_PAR30 == 1
 	_csaida := "Impresso"
 Else
 	_csaida := "Excel"
-Endif
+EndIf
 
-Aadd(_aDadosParam,{"30","Impresso ou Excel",_csaida})
-Aadd(_aDadosParam,{"31","Armazem",MV_PAR31})
+aAdd(_aDadosParam,{"30","Impresso ou Excel",_csaida})
+aAdd(_aDadosParam,{"31","Armazem",MV_PAR31})
 
 If MV_PAR32 == 1
 	_cform := "Sim"
-Elseif MV_PAR32 == 2
+ElseIf MV_PAR32 == 2
 	_cform := "Não"
 Else
 	_cform := "Ambas"
-Endif
-Aadd(_aDadosParam,{"32","Considera SEDEX",_cform})
+EndIf
+aAdd(_aDadosParam,{"32","Considera SEDEX",_cform})
 
 
 _nLin+= 120
      
-For nAux:= 1  to len(_aDadosParam)
+For nAux:= 1  to Len(_aDadosParam)
 	  	
-	  		if _nLin > 2840
+	  		If _nLin > 2840
 	  		
 	  				oPrint:Box  (0300,0100,_nLin+100,2300)        
 	  		
@@ -2302,22 +2302,22 @@ For nAux:= 1  to len(_aDadosParam)
 					oPrint:StartPage()   // Inicia uma nova página
 
 					//Quebra de Pagina  
-					if mv_par26==1 // emissao 
-			   		// O parametro .F. eh para nao imprimir o numero da pagina quando for montar a tela de parametros	  
+					If MV_PAR26==1 // emissao 
+			   		// O parametro .F. eh para nao imprimir o numero da pagina quando For montar a tela de parametros	  
 					   ROMS009M(oPrint,1,.F.)
-					elseif mv_par26 == 2 .and. mv_par22 == 1 // Produto/sintetico 
+					ElseIf MV_PAR26 == 2 .And. MV_PAR22 == 1 // Produto/sintetico 
 					   ROMS009M(oPrint,2,.F.)
-					elseif mv_par26 == 3 .and. mv_par22 == 1 // Rede/sintetico
+					ElseIf MV_PAR26 == 3 .And. MV_PAR22 == 1 // Rede/sintetico
 					   ROMS009M(oPrint,3,.F.)
-					elseif mv_par26 == 4 .and. mv_par22 == 1  // Cliente/sintetico
+					ElseIf MV_PAR26 == 4 .And. MV_PAR22 == 1  // Cliente/sintetico
 					   ROMS009M(oPrint,4,.F.)
-					elseif mv_par26 == 2 .and. mv_par22 == 2 // Produto/analitico
+					ElseIf MV_PAR26 == 2 .And. MV_PAR22 == 2 // Produto/analitico
 					   ROMS009M(oPrint,5,.F.)	  
-					elseif mv_par26 == 3 .and. mv_par22 == 2 // Rede/analitico
+					ElseIf MV_PAR26 == 3 .And. MV_PAR22 == 2 // Rede/analitico
 					   ROMS009M(oPrint,6,.F.)
-					elseif mv_par26 == 4 .and. mv_par22 == 2  // Cliente/analitico
+					ElseIf MV_PAR26 == 4 .And. MV_PAR22 == 2  // Cliente/analitico
 					   ROMS009M(oPrint,7,.F.)
-					endif  
+					EndIf  
 					
 					_nLin+= 120  
 			

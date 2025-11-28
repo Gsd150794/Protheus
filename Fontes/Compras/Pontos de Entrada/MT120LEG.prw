@@ -1,35 +1,30 @@
 /*
 ===============================================================================================================================
-                                    ATUALIZACOES SOFRIDAS DESDE A CONSTRUÇAO INICIAL
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                           |
-------------------:------------:----------------------------------------------------------------------------------------------:
- Darcio Sporl     | 07/12/2015 | Foi incluído o ponto de entrada para inclusão de novas legendas. Chamado 11737	e 11831		  |
-------------------:------------:----------------------------------------------------------------------------------------------:
- Jerry            | 01/04/2016 | Foi incluído legenda para PC Rejeitado:  Chamado 14908                              		  |
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+Darcio Sporl  |07/12/2015| Chamado 11737, 11831. Foi incluído o ponto de entrada para inclusão de novas legendas.
+Jerry         |01/04/2016| Chamado 14908. Foi incluído legenda para PC Rejeitado.
 ===============================================================================================================================
 */
-#Include 'Protheus.ch'
+
+#Include "TOTVS.ch"
+
 /*
 ===============================================================================================================================
 Programa--------: ACOM011
 Autor-----------: Darcio Sporl
 Data da Criacao-: 07/12/2015
-===============================================================================================================================
 Descrição-------: Ponto de Entrada criado para alterar/incluir novas legendas.
-===============================================================================================================================
-Uso-------------: Italac
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
-Setor-----------: TI
-===============================================================================================================================
 */
-User Function MT120LEG()
-Local aArea			:= GetArea()
-Local aNewLegenda	:= aClone(PARAMIXB[1]) //--aCores
+User Function MT120LEG
+
+Local aArea			:= FWGetArea()
+Local aNewLegenda	:= aClone(ParamIXB[1]) //--aCores
 Local nPosLib		:= aScan(aNewLegenda,{|x| x[1] == 'ENABLE'	})
 Local nPosBlq		:= aScan(aNewLegenda,{|x| x[1] == 'BR_AZUL'	})
 
@@ -39,6 +34,6 @@ aNewLegenda[nPosBlq][2] := "Pendente Aprovação"
 aAdd(aNewLegenda,{'BR_MARROM'	, 'Pendente Liberação por Compras'	})
 aAdd(aNewLegenda,{'F12_VERM'	, 'Pedidos Rejeitados'	})
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return(aNewLegenda)

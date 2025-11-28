@@ -10,18 +10,17 @@
 ========================================================================================================================================================================
 Analista    - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
 ========================================================================================================================================================================
-Andre       - Alex Wallauer - 09/05/25 -          - 50460   - Ajsutes para o novo layout de integração de dados dos vendedores via CSV.
+Andre       - Alex Wallauer - 09/05/25 - 31/07/25 - 50460   - Ajsutes para o novo layout de integração de dados dos vendedores via CSV.
+Vanderlei   - Alex Wallauer - 03/10/25 - 07/10/25 - 52365   - Retirado o travamento na importação de metas quando o vendedor/produto está bloqueado.
+Vanderlei   - Alex Wallauer - 09/10/25 - 13/10/25 - 52365   - Somatoria das quantidades e valores das linhas duplicadas Vendedor/Coordenador+Produto.
 ==============================================================================================================================================================================================
 */
 
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#INCLUDE "RWMAKE.CH"
-#INCLUDE "TopConn.ch"
-#INCLUDE "vKey.ch"
-#INCLUDE "TOTVS.CH"
-#INCLUDE 'protheus.ch'
+#Include "RWMAKE.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -34,78 +33,94 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS063()
- Local _bBotaoImp  as codeblock
- Local _bBotaoExc  as codeblock
- Local _bBotaoI    as codeblock
- Local _bBotaoY    as codeblock
- Local _bBotaoC    as codeblock
- Local _bBotaoZ    as codeblock
- Local _bBotaoG    as codeblock
- Local nI    := 0  as Numeric
- Local _aParAux    := {} as Array
- Local _aParRet    := {} as Array
- Private aCpoBrw   := {} as Array
- Private aCpoTmp   := {} as Array
- Private cArq      := "" as Character
- Private cPesq     := Space(50) as Character
- Private lCheck1   := .t. as Logical
- Private lCheck2   := .t. as Logical
- Private lCheck3   := .t. as Logical
- Private _cOrdem   := "Ano+Mes+Nome" as Character
- Private aOrdem	   := {"Ano+Mes+Nome","Coord./Vend.+Ano+Mes","Nome Coord./Vend."} as Array
- Private cPESQUISA := SPACE(200) as Character
- Private cAnoMes   := "" as Character
- Private cCoord    := "" as Character
- Private _cUserName:= UsrFullName(RetCodUsr()) as Character
- Private _nLB      := 20 as Numeric
- Private _nMSS     := 24 as Numeric
- Private cChama    := "RECARREGA" as Character
- Private aSize     := {} as Array
- Private aObjects  := {} as Array
- Private aInfo     := {} as Array
- Private aPosObj   := {} as Array
- Private _cAnoIni  := LEFT(DTOS(dDataBase),6) as Character
- Private _cAnoFim  := LEFT(DTOS(dDataBase),6) as Character
- Private oPesquisa as Object
+ Local _bBotaoImp  As CodeBlock
+ Local _bBotaoExc  As CodeBlock
+ Local _bBotaoI    As CodeBlock
+ Local _bBotaoY    As CodeBlock
+ Local _bBotaoC    As CodeBlock
+ Local _bBotaoZ    As CodeBlock
+ Local _bBotaoG    As CodeBlock
+ Local _aParAux    := {} As Array
+ Local _aParRet    := {} As Array
+ Local nI          := 0 As Numeric
+ Local nLinha      := 0 As Numeric
+ Local nCol1       := 0 As Numeric
+ Local nColB       := 0 As Numeric
+ Local nLar1       := 0 As Numeric
+ Local nAlt1       := 0 As Numeric
+ Local nAlt2       := 0 As Numeric
+ Private aCpoBrw   := {} As Array
+ Private aCpoTmp   := {} As Array
+ Private cArq      := "" As Char
+ Private cPesq     := Space(50) As Char
+ Private lCheck1   := .T. As Logical
+ Private lCheck2   := .T. As Logical
+ Private lCheck3   := .T. As Logical
+ Private _cOrdem   := "Ano+Mes+Nome" As Char
+ Private aOrdem	   := {"Ano+Mes+Nome","Coord./Vend.+Ano+Mes","Nome Coord./Vend."} As Array
+ Private cPesquisa := Space(200) As Char
+ Private cAnoMes   := "" As Char
+ Private cCoord    := "" As Char
+ Private cTipoor   := "" As Char
+ Private _cUserName:= UsrFullName(RetCodUsr()) As Char
+ Private _nLB      := 20 As Numeric
+ Private _nMSS     := 24 As Numeric
+ Private cChama    := "RECARREGA" As Char
+ Private aSize     := {} As Array
+ Private aObjects  := {} As Array
+ Private aInfo     := {} As Array
+ Private aPosObj   := {} As Array
+ Private _cAnoIni  := LEFT(DToS(dDataBase),6) As Char
+ Private _cAnoFim  := LEFT(DToS(dDataBase),6) As Char
+ Private oPesquisa As Object
  Private _oTemp    As Object
- Private lGravouDados:=.F. as Logical
+ Private oDlgLib   As Object
+ Private oMark     As Object
+ Private lGravouDados:=.F. As Logical
 
- MV_PAR01:=LEFT(DTOS(dDataBase),6)
- MV_PAR02:=LEFT(DTOS(dDataBase),6)
+ MV_PAR01:=LEFT(DToS(dDataBase),6)
+ MV_PAR02:=LEFT(DToS(dDataBase),6)
 
- AADD( _aParAux , { 1 , "Ano-Mes Inicial:", MV_PAR01, "@R 9999-99","","","", 060 , .T. } )
- AADD( _aParAux , { 1 , "Ano-Mes Final:"  , MV_PAR02, "@R 9999-99","","","", 060 , .F. } )
+ AAdd( _aParAux , { 1 , "Ano-Mes Inicial:", MV_PAR01, "@R 9999-99","","","", 060 , .T. } )
+ AAdd( _aParAux , { 1 , "Ano-Mes Final:"  , MV_PAR02, "@R 9999-99","","","", 060 , .F. } )
 
  For nI := 1 To Len( _aParAux )
-    aAdd( _aParRet , _aParAux[nI][03] )
+    AAdd( _aParRet , _aParAux[nI][03] )
  Next nI
 
- IF !ParamBox( _aParAux , "Intervalo de Anos da Meta de Vendedores/Coordenadores" , @_aParRet, {|| .T. } )
+ If !ParamBox( _aParAux , "Intervalo de Anos da Meta de Vendedores/Coordenadores" , @_aParRet, {|| .T. } )
     Return .F.
  EndIf
 
- _cAnoIni:=Left(Alltrim(MV_PAR01)+"000000",6)
- _cAnoFim:=Left(Alltrim(MV_PAR02)+"999999",6)
+ _cAnoIni:=Left(AllTrim(MV_PAR01)+"000000",6)
+ _cAnoFim:=Left(AllTrim(MV_PAR02)+"999999",6)
 
- IF !Empty(MV_PAR02) .and. _cAnoIni > _cAnoFim
-  	U_ITMSG("Intervalo de Anos invalido.","Ano inicial dever ser menor ou igual ao ano final.",3)
+ If !Empty(MV_PAR02) .And. _cAnoIni > _cAnoFim
+  	U_ITMsg("Intervalo de Anos invalido.","Ano inicial dever ser menor ou igual ao ano final.",3)
     Return .F.
- EndIF
+ EndIf
 
- _cAnoIni:=Alltrim(MV_PAR01)
- _cAnoFim:=Alltrim(MV_PAR02)
+ _cAnoIni:=AllTrim(MV_PAR01)
+ _cAnoFim:=AllTrim(MV_PAR02)
 
- _bBotaoImp:= {|| FwMsgRun( ,{|oProc| AOMS063K(oProc) } , TIME()+" - Processando..." , "Iniciando o processamento..." ) }
- _bBotaoExc:= {|| FwMsgRun( ,{|oProc| AOMS063N(oProc) } , TIME()+" - Processando..." , "Iniciando o processamento..." ) }
- _bBotaoY  := {|| FwMsgRun( ,{|oProc| AOMS063Y(oProc) } , TIME()+" - Processando..." , "Iniciando o processamento..." ) }
- _bBotaoI  := {|| FwMsgRun( ,{|oProc| AOMS063IM(oProc)} , TIME()+" - Processando..." , "Iniciando o processamento..." ) }
- _bBotaoC  := {|| FwMsgRun( ,{|oProc| AOMS063C(oProc) } , TIME()+" - Processando..." , "Iniciando o processamento..." ) }
- _bBotaoZ  := {|| FwMsgRun( ,{|oProc| AOMS063Z(oProc) } , TIME()+" - Processando..." , "Iniciando o processamento..." ) }
- _bBotaoG  := {|| FwMsgRun( ,{|oProc| AOMS063G(oProc) } , TIME()+" - Processando..." , "Iniciando o processamento..." ) }
+ _bBotaoImp:= {|| FWMsgRun( ,{|oProc| AOMS063K(oProc) } , TIME()+" - Processando..." , "Iniciando o processamento..." ) }
+ _bBotaoExc:= {|| FWMsgRun( ,{|oProc| AOMS063N(oProc) } , TIME()+" - Processando..." , "Iniciando o processamento..." ) }
+ _bBotaoY  := {|| FWMsgRun( ,{|oProc| AOMS063Y(oProc) } , TIME()+" - Processando..." , "Iniciando o processamento..." ) }
+ _bBotaoI  := {|| FWMsgRun( ,{|oProc| AOMS063IM(oProc)} , TIME()+" - Processando..." , "Iniciando o processamento..." ) }
+ _bBotaoC  := {|| FWMsgRun( ,{|oProc| AOMS063C(oProc) } , TIME()+" - Processando..." , "Iniciando o processamento..." ) }
+ _bBotaoZ  := {|| FWMsgRun( ,{|oProc| AOMS063Z(oProc) } , TIME()+" - Processando..." , "Iniciando o processamento..." ) }
+ _bBotaoG  := {|| FWMsgRun( ,{|oProc| AOMS063G(oProc) } , TIME()+" - Processando..." , "Iniciando o processamento..." ) }
 
- AOMS063TT()//Prepara variaveis de tamanho de tela aSize,aObjects,aInfo,aPosObj
+ //Prepara variaveis de tamanho de tela aSize,aObjects,aInfo,aPosObj
+ // Obtém a a área de trabalho e tamanho da dialog
+ aSize := MsAdvSize()
+ AAdd( aObjects, { 000, 000, .T., .T. } ) // Dados da Enchoice
+ AAdd( aObjects, { 000, 000, .T., .T. } ) // Dados da getdados
+ // Dados da área de trabalho e separação
+ aInfo 	:= { aSize[ 1 ], aSize[ 2 ], aSize[ 3 ], aSize[ 4 ], 3, 3 } // Chama MsObjSize e recebe Array e tamanhos
+ aPosObj := MsObjSize( aInfo, aObjects,.T.)
 
- Do While cChama != "SAIR"
+ While cChama != "SAIR"
 
     nLinha:=15
     nCol1:=13
@@ -114,12 +129,12 @@ User Function AOMS063()
     nAlt1:=15
     nAlt2:=15
 
-    IF cChama = "RECARREGA"
-       FwMsgRun( ,{|oProc| AOMS063U(oProc) }, 'Aguarde!' , 'Carregando os dados...'  ) //CARREGA O aCols
-    ENDIF
+    If cChama = "RECARREGA"
+       FWMsgRun( ,{|oProc| AOMS063U(oProc) }, 'Aguarde!' , 'Carregando os dados...'  ) //CARREGA O aCols
+    EndIf
 
     cChama := "SAIR"
-    @ aSize[7],000 TO aSize[6],aSize[5] DIALOG oDlgLib TITLE " Metas de Vendas "
+    DEFINE MSDIALOG oDlgLib FROM aSize[7],000 TO aSize[6],aSize[5] PIXEL TITLE " Metas de Vendas "
 
     oMark:=MsSelect():New("TMP","",,aCpoBrw,.T.,"XX",{040,005,aSize[4]-_nMSS,aSize[3]},,,,,)
     oMark:oBrowse:lHasMark := .T.
@@ -128,7 +143,7 @@ User Function AOMS063()
     @ 003,006 To 034,315 Title " Metas / Ordem "
 
     @ nLinha,nCol1 ComboBox _cOrdem ITEMS aOrdem Size nLar1,nAlt1 Object oOrdem
-    @ nLinha,090   Get      cPESQUISA            Size 00200,nAlt2 Object oPesquisa
+    @ nLinha,090   Get      cPesquisa            Size 00200,nAlt2 Object oPesquisa
     oOrdem:bChange := {|| AOMS063FO(_cOrdem),oMark:oBrowse:Refresh(.T.)}
 
     @ 015,330 Button "Pesquisar"       	    Size 55,13 Action AOMS063PC(_cOrdem) Object oBotao1
@@ -138,7 +153,7 @@ User Function AOMS063()
     //@ aSize[4]-_nLB,nColB Button "Exportar" Size 40,13 Action AOMS063E()// NÃO TEM MAIS POR ENQUANTO SEGUNDO VANDERLEI
     @ aSize[4]-_nLB,nColB Button "Importar"   Size 40,13 Action Eval(_bBotaoImp) Object oBotao3//AOMS063K( )
     nColB+=045
-    @ aSize[4]-_nLB,nColB Button "Visualizar" Size 40,13 Action Eval(_bBotaoY)   Object oBotao4//AOMS063Y( ) 
+    @ aSize[4]-_nLB,nColB Button "Visualizar" Size 40,13 Action Eval(_bBotaoY)   Object oBotao4//AOMS063Y( )
     nColB+=045
     @ aSize[4]-_nLB,nColB Button "Incluir"    Size 40,13 Action Eval(_bBotaoI)   Object oBotao5//AOMS063IM( )
     nColB+=045
@@ -159,9 +174,9 @@ User Function AOMS063()
     //Grava Log de execução da rotina
     U_ITLOGACS()
 
- Enddo
+ EndDo
 
- If Select("TMP") > 0 .AND. TYPE("_oTemp") == "O"
+ If Select("TMP") > 0 .And. Type("_oTemp") == "O"
     _oTemp:Delete()
  EndIf
 
@@ -177,10 +192,10 @@ Parametros--------: _cOrdem - indice a ser usado
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function AOMS063PC(_cOrdem)
- TMP->( DbSetOrder(Ascan(aOrdem,_cOrdem)) )
- TMP->( DbGoTop() )
- TMP->( MsSeek(AllTrim(cPesquisa),.T.) )
+Static Function AOMS063PC(_cOrdem As Char)
+ TMP->( DBSetOrder(AScan(aOrdem,_cOrdem)) )
+ TMP->( DBGoTop() )
+ TMP->( MSSeek(AllTrim(cPesquisa),.T.) )
  oMark:oBrowse:Refresh(.T.)
 Return
 
@@ -194,38 +209,13 @@ Parametros--------: _cOrdem - indice a ser usado
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function AOMS063FO(_cOrdem)
- //Local _nReg:=Recno()
+Static Function AOMS063FO(_cOrdem As Char)
  cPesquisa:=Space(200)
  oPesquisa:Refresh()
- TMP->(DbSetOrder(Ascan(aOrdem,_cOrdem)))
- TMP->(DbGoTop())
- //TMP->(DbGoTo(_nReg))     //Mantendo no mesmo registro que estava posicionado anteriormente
+ TMP->(DBSetOrder(AScan(aOrdem,_cOrdem)))
+ TMP->(DBGoTop())
  oMark:oBrowse:Refresh(.T.)
 Return
-
-
-/*
-===============================================================================================================================
-Programa----------: AOMS063TT
-Autor-------------: Erich Buttner
-Data da Criacao---: 22/04/13
-Descrição---------: Define tamanho da tela
-Parametros--------: Nenhum
-Retorno-----------: aposobj - array com linhas e colunas
-===============================================================================================================================
-*/
-Static Function AOMS063TT()
-
- // Obtém a a área de trabalho e tamanho da dialog
- aSize := MsAdvSize()
- Aadd( aObjects, { 000, 000, .T., .T. } ) // Dados da Enchoice
- Aadd( aObjects, { 000, 000, .T., .T. } ) // Dados da getdados
- // Dados da área de trabalho e separação
- aInfo 	:= { aSize[ 1 ], aSize[ 2 ], aSize[ 3 ], aSize[ 4 ], 3, 3 } // Chama MsObjSize e recebe array e tamanhos
- aPosObj := MsObjSize( aInfo, aObjects,.T.)
-
-Return aPosObj
 
 /*
 ===============================================================================================================================
@@ -237,153 +227,157 @@ Parametros--------: oProc - Objeto de processo
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function AOMS063IM(oProc)
+Static Function AOMS063IM(oProc As Object)
 
-    Local cTitulo := "Inclusão de Metas de Vendas",_l
-    Local lRetMod2:= .F. // Retorno da função Modelo2 - .T. Confirmou / .F. Cancelou
-    Private nOpcx := 3
+ Local cTitulo    := "Inclusão de Metas de Vendas" As Char
+ Local lRetMod2   :=.F. As Logical // Retorno da função Modelo2 - .T. Confirmou / .F. Cancelou
+ Local aYesFields := {} As Array
+ Local aCGD       := {} As Array
+ Local ACORDW     := {} As Array
+ Local _l         := 00 As Numeric
+ Private nOpcx    := 03 As Numeric
 
-    nUsado:=0
-    aHeader:={}
-    aCols:={}
+ nUsado:=0
+ aHeader:={}
+ aCols:={}
 
-    //Carrega aheader
-    aYesFields := {"ZZS_COD","ZZS_DESCR","ZZS_DESCD","ZZS_QTD","ZZS_UM","ZZS_QTD2UM","ZZS_2UM","ZZS_QTD3UM","ZZS_3UM","ZZS_VALOR"}
-    FillGetDados(2,"ZZS",1,,,,, aYesFields ,,,, .T. ,,,,,, )
+ //Carrega aheader
+ aYesFields := {"ZZS_COD","ZZS_DESCR","ZZS_DESCD","ZZS_QTD","ZZS_UM","ZZS_QTD2UM","ZZS_2UM","ZZS_QTD3UM","ZZS_3UM","ZZS_VALOR"}
+ FillGetDados(2,"ZZS",1,,,,, aYesFields ,,,, .T. ,,,,,, )
 
-    //Limpa dois ultimos campos do aheader
-    asize(aheader,Len(aheader)-2)
+ //Limpa dois ultimos campos do aheader
+ asize(aheader,Len(aheader)-2)
 
-    cAnoMes:= Space(06)
-    cCoord := Space(06)
-    cNmCoor:= Space(60)
-    cTipoor:= Space(25)
+ cAnoMes:= Space(06)
+ cCoord := Space(06)
+ cNmCoor:= Space(60)
+ cTipoor:= Space(25)
 
-    aC:={}
-    // aC[n,1] = Nome da Variavel Ex.:"cCliente"
-    // aC[n,2] = Array com coordenadas do Get [x,y], em Windows estao em PIXEL
-    // aC[n,3] = Titulo do Campo
-    // aC[n,4] = Picture
-    // aC[n,5] = Validacao
-    // aC[n,6] = F3
-    // aC[n,7] = Se campo e' editavel .t. se nao .f.
+ aC:={}
+ // aC[n,1] = Nome da Variavel Ex.:"cCliente"
+ // aC[n,2] = Array com coordenadas do Get [x,y], em Windows estao em PIXEL
+ // aC[n,3] = Titulo do Campo
+ // aC[n,4] = Picture
+ // aC[n,5] = Validacao
+ // aC[n,6] = F3
+ // aC[n,7] = Se campo e' editavel .T. se nao .F.
 
-    //"Inclusão de Metas de Vendas"
-    Aadd(aC,{"cAnoMes",{15,003}," Ano-Mes ","@R 9999-99",,,.T.})
-    Aadd(aC,{"cCoord" ,{15,080}," Codigo " ,"@!","U_AOMS063V('CCOORD') .And. (ExistCPO('SA3'))","SA3",.T.})
-    Aadd(aC,{"cNmCoor",{15,155}," Nome "   ,"@!",,,.F.})
-    Aadd(aC,{"cTipoor",{30,003}," Tipo "   ,"@!",,,.F.})
+ //"Inclusão de Metas de Vendas"
+ AAdd(aC,{"cAnoMes",{15,003}," Ano-Mes ","@R 9999-99",,,.T.})
+ AAdd(aC,{"cCoord" ,{15,080}," Codigo " ,"@!","U_AOMS063V('CCOORD') .And. (ExistCPO('SA3'))","SA3",.T.})
+ AAdd(aC,{"cNmCoor",{15,155}," Nome "   ,"@!",,,.F.})
+ AAdd(aC,{"cTipoor",{30,003}," Tipo "   ,"@!",,,.F.})
 
-    // Array com descricao dos campos do Rodape do Modelo 2
-    aR:={}
-    // aR[n,1] = Nome da Variavel Ex.:"cCliente"
-    // aR[n,2] = Array com coordenadas do Get [x,y], em Windows estao em PIXEL
-    // aR[n,3] = Titulo do Campo
-    // aR[n,4] = Picture
-    // aR[n,5] = Validacao
-    // aR[n,6] = F3
-    // aR[n,7] = Se campo e' editavel .t. se nao .f.
+ // Array com descricao dos campos do Rodape do Modelo 2
+ aR:={}
+ // aR[n,1] = Nome da Variavel Ex.:"cCliente"
+ // aR[n,2] = Array com coordenadas do Get [x,y], em Windows estao em PIXEL
+ // aR[n,3] = Titulo do Campo
+ // aR[n,4] = Picture
+ // aR[n,5] = Validacao
+ // aR[n,6] = F3
+ // aR[n,7] = Se campo e' editavel .T. se nao .F.
 
-    aButtons := {}
-    Aadd(aButtons,{"S4WB011N",	{||U_AOMS063D(cAnoMes,cCoord)},"Imp. Produtos","Imp. Produtos"})
+ aButtons := {}
+ AAdd(aButtons,{"",{||U_AOMS063D(cAnoMes,cCoord)},"Importação Produtos","Importação Produtos"})
 
-    // Array com coordenadas da GetDados no modelo2
-    aCGD:={60,06,26,74}
-    ACORDW  := {ASIZE[7],0,ASIZE[6],ASIZE[5]}
+ // Array com coordenadas da GetDados no modelo2
+ aCGD:={60,06,26,74}
+ ACORDW  := {ASIZE[7],0,ASIZE[6],ASIZE[5]}
 
-    cLinhaOk:="U_AOMS063O()"
-    cTudoOk :="U_AOMS063Z(.T.)"//"INCLUSÃO DE METAS DE VENDAS"
+ cLinhaOk:="U_AOMS063O()"
+ cTudoOk :="U_AOMS063Z(.T.)"//"INCLUSÃO DE METAS DE VENDAS"
 
-    // Chamada da Modelo2
-    // lRetMod2 = .t. se confirmou
-    // lRetMod2 = .f. se cancelou
-    //                cTitulo [ aC ] [ aR ] [ aGd ] [ nOp ] [ cLinhaOk ] [ cTudoOk ]aGetsD [ bF4 ] [ cIniCpos ] [ nMax ] [ aCordW ] [lDelGetD ] [lMaximazed ] [ aButtons ]
-    lRetMod2:=Modelo2(cTitulo,aC	,  aR	, aCGD	,nOpcx	,  cLinhaOk	,  cTudoOk ,	  ,		  ,		   		,  9999	,   ACORDW ,            ,    .T.      , aButtons  )
+ // Chamada da Modelo2
+ // lRetMod2 = .T. se confirmou
+ // lRetMod2 = .F. se cancelou
+ //                cTitulo [ aC ] [ aR ] [ aGd ] [ nOp ] [ cLinhaOk ] [ cTudoOk ]aGetsD [ bF4 ] [ cIniCpos ] [ nMax ] [ aCordW ] [lDelGetD ] [lMaximazed ] [ aButtons ]
+ lRetMod2:=Modelo2(cTitulo,aC	,  aR	, aCGD	,nOpcx	,  cLinhaOk	,  cTudoOk ,	  ,		  ,		   		,  9999	,   ACORDW ,            ,    .T.      , aButtons  )
 
-    cChama := "NÃO RECARREGAR" //Se Cancelou
+ cChama := "NÃO RECARREGAR" //Se Cancelou
 
-    If lRetMod2 // Gravacao. . .
-        lGravouDados:=.T.
+ If lRetMod2 // Gravacao. . .
+     lGravouDados:=.T.
 
-        nPosProd:= Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'} )
-        nPosDesc:= Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCR'} )
-        nPosDesD:= Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCD'} )
-        nPosUM	:= Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_UM'} )
-        nPosQtd	:= Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD'} )
-        nPos2UM	:= Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_2UM'} )
-        nPos2Qtd:= Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD2UM'} )
-        nPos3UM	:= Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_3UM'   } )//Novo
-        nPos3Qtd:= Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD3UM'} )//Novo
-        nPosVal := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_VALOR' } )//Novo
+     nPosProd:= AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'} )
+     nPosDesc:= AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCR'} )
+     nPosDesD:= AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCD'} )
+     nPosUM	 := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_UM'} )
+     nPosQtd := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD'} )
+     nPos2UM := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_2UM'} )
+     nPos2Qtd:= AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD2UM'} )
+     nPos3UM := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_3UM'   } )//Novo
+     nPos3Qtd:= AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD3UM'} )//Novo
+     nPosVal := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_VALOR' } )//Novo
 
-        _cReg:=AllTrim(Str(Len(aCols)))
-        _nCont:=0
+     _cReg:=AllTrim(Str(Len(aCols)))
+     _nCont:=0
 
-        For _l := 1 To Len(aCols)
+     For _l := 1 To Len(aCols)
 
-            _nCont++
-            oProc:cCaption := ( "Incluindo Metas: " + StrZero(_nCont,5) + " de " + _cReg)
-            ProcessMessages()
+         _nCont++
+         oProc:cCaption := ( "Incluindo Metas: " + StrZero(_nCont,5) + " de " + _cReg)
+         ProcessMessages()
 
-            If ! Atail(aCols[_l])
+         If ! Atail(aCols[_l])
 
-                ZZS->(RecLock("ZZS",.T.))//INCLUSAO1
-                ZZS->ZZS_FILIAL	:= xFilial("ZZS")
-                ZZS->ZZS_COD	:= aCols [_l,nPosProd]
-                ZZS->ZZS_DESCR	:= aCols [_l,nPosDesc]
-                ZZS->ZZS_DESCD	:= aCols [_l,nPosDesD]
-                ZZS->ZZS_UM		:= aCols [_l,nPosUM]
-                ZZS->ZZS_QTD   	:= aCols [_l,nPosQtd]
-                ZZS->ZZS_2UM	:= aCols [_l,nPos2UM]
-                ZZS->ZZS_QTD2UM	:= aCols [_l,nPos2Qtd]
-                ZZS->ZZS_3UM	:= aCols [_l,nPos3UM] //Novo
-                ZZS->ZZS_QTD3UM	:= aCols [_l,nPos3Qtd]//Novo
-                ZZS->ZZS_VALOR  := aCols [_l,nPosVal] //Novo
-                ZZS->ZZS_TIPOV  := POSICIONE("SA3",1,xFilial("SA3")+cCoord,"A3_I_TIPV")//Novo
-                ZZS->ZZS_COOR	:= cCoord
-                ZZS->ZZS_NMCOOR	:= cNmCoor
-                ZZS->ZZS_ANOMES	:= cAnoMes
-                ZZS->(MsUnLock())
+             ZZS->(RecLock("ZZS",.T.))//INCLUSAO1
+             ZZS->ZZS_FILIAL	:= FWxfilial("ZZS")
+             ZZS->ZZS_COD	:= aCols [_l,nPosProd]
+             ZZS->ZZS_DESCR	:= aCols [_l,nPosDesc]
+             ZZS->ZZS_DESCD	:= aCols [_l,nPosDesD]
+             ZZS->ZZS_UM		:= aCols [_l,nPosUM]
+             ZZS->ZZS_QTD   	:= aCols [_l,nPosQtd]
+             ZZS->ZZS_2UM	:= aCols [_l,nPos2UM]
+             ZZS->ZZS_QTD2UM	:= aCols [_l,nPos2Qtd]
+             ZZS->ZZS_3UM	:= aCols [_l,nPos3UM] //Novo
+             ZZS->ZZS_QTD3UM	:= aCols [_l,nPos3Qtd]//Novo
+             ZZS->ZZS_VALOR  := aCols [_l,nPosVal] //Novo
+             ZZS->ZZS_TIPOV  := Posicione("SA3",1,FWxfilial("SA3")+cCoord,"A3_I_TIPV")//Novo
+             ZZS->ZZS_COOR	:= cCoord
+             ZZS->ZZS_NMCOOR	:= cNmCoor
+             ZZS->ZZS_ANOMES	:= cAnoMes
+             ZZS->(MSUnLock())
 
-                ZGW->(RecLock("ZGW",.T.))//INCLUSAO1
-                ZGW->ZGW_FILIAL	:= xFilial("ZGW")
-                ZGW->ZGW_COD	:= aCols[_l,nPosProd]
-                ZGW->ZGW_DESCR	:= aCols[_l,nPosDesc]
-                ZGW->ZGW_DESCD	:= aCols[_l,nPosDesD]
-                ZGW->ZGW_UM		:= aCols[_l,nPosUM]
-                ZGW->ZGW_QTD   	:= aCols[_l,nPosQtd]
-                ZGW->ZGW_2UM	:= aCols[_l,nPos2UM]
-                ZGW->ZGW_QTD2UM	:= aCols[_l,nPos2Qtd]
-                ZGW->ZGW_3UM	:= aCols[_l,nPos3UM] //Novo
-                ZGW->ZGW_QTD3UM	:= aCols[_l,nPos3Qtd]//Novo
-                ZGW->ZGW_VALOR	:= ZZS->ZZS_VALOR    //Novo
-                ZGW->ZGW_TIPOV	:= ZZS->ZZS_TIPOV    //Novo
-                ZGW->ZGW_DATAM  := ZZS->ZZS_DATA     //Novo
-                ZGW->ZGW_COOR	:= cCoord
-                ZGW->ZGW_NMCOOR	:= cNmCoor
-                ZGW->ZGW_ANOMES	:= cAnoMes
-                ZGW->ZGW_OPER   := "INCLUSAO1"
-                ZGW->ZGW_USER   := _cUserName
-                ZGW->ZGW_DATA   := DATE()
-                ZGW->ZGW_HORA   := TIME()
-                ZGW->(MsUnLock())
+             ZGW->(RecLock("ZGW",.T.))//INCLUSAO1
+             ZGW->ZGW_FILIAL	:= FWxfilial("ZGW")
+             ZGW->ZGW_COD	:= aCols[_l,nPosProd]
+             ZGW->ZGW_DESCR	:= aCols[_l,nPosDesc]
+             ZGW->ZGW_DESCD	:= aCols[_l,nPosDesD]
+             ZGW->ZGW_UM		:= aCols[_l,nPosUM]
+             ZGW->ZGW_QTD   	:= aCols[_l,nPosQtd]
+             ZGW->ZGW_2UM	:= aCols[_l,nPos2UM]
+             ZGW->ZGW_QTD2UM	:= aCols[_l,nPos2Qtd]
+             ZGW->ZGW_3UM	:= aCols[_l,nPos3UM] //Novo
+             ZGW->ZGW_QTD3UM	:= aCols[_l,nPos3Qtd]//Novo
+             ZGW->ZGW_VALOR	:= ZZS->ZZS_VALOR    //Novo
+             ZGW->ZGW_TIPOV	:= ZZS->ZZS_TIPOV    //Novo
+             ZGW->ZGW_DATAM  := ZZS->ZZS_DATA     //Novo
+             ZGW->ZGW_COOR	:= cCoord
+             ZGW->ZGW_NMCOOR	:= cNmCoor
+             ZGW->ZGW_ANOMES	:= cAnoMes
+             ZGW->ZGW_OPER   := "INCLUSAO1"
+             ZGW->ZGW_USER   := _cUserName
+             ZGW->ZGW_DATA   := Date()
+             ZGW->ZGW_HORA   := Time()
+             ZGW->(MSUnLock())
 
-                AOMS063Ger("GERAR_VALORES_POR_DATA",ZZS->ZZS_ANOMES)
+             AOMS063Ger("GERAR_VALORES_POR_DATA",ZZS->ZZS_ANOMES)
 
-            EndIf
+         EndIf
 
-        Next _l
+     Next _l
 
-        u_itmsg("Inclusão gravada com sucesso","Atenção",,2)
+     U_ITMsg("Inclusão gravada com sucesso","Atenção",,2)
 
-        cChama = "RECARREGA"
-        oDlgLIb:End()
+     cChama = "RECARREGA"
+     oDlgLIb:End()
 
-    Endif
+ EndIf
 
 
 
-Return .T.
+Return
 
 
 /*
@@ -396,31 +390,31 @@ Parametros--------: nPorc - Porcentagem de reajuste dos precos ,oProc - Objeto d
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AOMS063W(nPorc,oProc)
+User Function AOMS063W(nPorc As Numeric,oProc As Object)
 
- Local cPrd   := "" As Character
- Local _cAlias:= GetNextAlias() As Character
+ Local cPrd   := "" As Char
+ Local _cAlias:= GetNextAlias() As Char
  Local aItens := {} As Array
  Local nY:=nX := 0  As Numeric
- Local nPosProd:= Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'   } ) As Numeric
- Local nPosDesc:= Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCR' } ) As Numeric
- Local nPosDesD:= Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCD' } ) As Numeric
- Local nPosUM  := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_UM'    } ) As Numeric
- Local nPosQtd := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD'   } ) As Numeric
- Local nPos2UM := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_2UM'   } ) As Numeric
- Local nPos2Qtd:= Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD2UM'} ) As Numeric
- Local nPos3UM := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_3UM'   } ) As Numeric//Novo
- Local nPos3Qtd:= Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD3UM'} ) As Numeric//Novo
+ Local nPosProd:= AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'   } ) As Numeric
+ Local nPosDesc:= AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCR' } ) As Numeric
+ Local nPosDesD:= AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCD' } ) As Numeric
+ Local nPosUM  := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_UM'    } ) As Numeric
+ Local nPosQtd := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD'   } ) As Numeric
+ Local nPos2UM := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_2UM'   } ) As Numeric
+ Local nPos2Qtd:= AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD2UM'} ) As Numeric
+ Local nPos3UM := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_3UM'   } ) As Numeric//Novo
+ Local nPos3Qtd:= AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD3UM'} ) As Numeric//Novo
 
  oProc:cCaption := ( "Lendo Dados..." )
  ProcessMessages()
 
  cPrd := " SELECT D2_COD PRODUTO, B1_DESC DESCR, B1_I_DESCD DESCRDET,"
- cPrd += " ROUND((SUM(D2_QUANT  )/3)+((SUM(D2_QUANT  )/3)* '"+AllTrim(Str(nPorc))+ "'),2) QTDMEDIA1UM, "
- cPrd += " ROUND((SUM(D2_QTSEGUM)/3)+((SUM(D2_QTSEGUM)/3)* '"+AllTrim(Str(nPorc))+ "'),2) QTDMEDIA2UM,"
+ cPrd += " Round((SUM(D2_QUANT  )/3)+((SUM(D2_QUANT  )/3)* '"+AllTrim(Str(nPorc))+ "'),2) QTDMEDIA1UM, "
+ cPrd += " Round((SUM(D2_QTSEGUM)/3)+((SUM(D2_QTSEGUM)/3)* '"+AllTrim(Str(nPorc))+ "'),2) QTDMEDIA2UM,"
  cPrd += " D2_UM UM, D2_SEGUM SEGUM "
  cPrd += " FROM SD2010 SD2, SF2010 SF2, SB1010 SB1 "
- cPrd += " WHERE SF2.F2_EMISSAO > '"+DTOS(DATE()-90)+"' "
+ cPrd += " WHERE SF2.F2_EMISSAO > '"+DToS(DATE()-90)+"' "
  cPrd += " AND SF2.D_E_L_E_T_ = ' ' "
  cPrd += " AND SD2.D_E_L_E_T_ = ' ' "
  cPrd += " AND SB1.D_E_L_E_T_ = ' ' "
@@ -438,16 +432,13 @@ User Function AOMS063W(nPorc,oProc)
  cPrd += " AND SB1.B1_MSBLQL = '2' "
  cPrd += " GROUP BY D2_COD,B1_DESC, B1_I_DESCD, D2_UM, D2_SEGUM "
  cPrd += " ORDER BY D2_COD "
- //cPrd := ChangeQuery(cPrd)
 
- //==============================================
  // Monta Area de Trabalho executando a Query
- //==============================================
  MPSysOpenQuery( cPrd , _cAlias)
 
  aCols:={}
 
- Do While (_cAlias)->(!Eof())
+ While (_cAlias)->(!Eof())
 
     cProd   := (_cAlias)->PRODUTO
     cDescr  := (_cAlias)->DESCR
@@ -456,21 +447,21 @@ User Function AOMS063W(nPorc,oProc)
     nQtd	:= (_cAlias)->QTDMEDIA1UM
     c2UM	:= (_cAlias)->SEGUM
     nQtd2um	:= (_cAlias)->QTDMEDIA2UM
-    Aadd(aItens,{cProd,cDescr,cDescrD,cUM,nQtd,c2UM,nQtd2um})
-    (_cAlias)->(Dbskip())
+    AAdd(aItens,{cProd,cDescr,cDescrD,cUM,nQtd,c2UM,nQtd2um})
+    (_cAlias)->(DBSkip())
 
- Enddo
+ EndDo
 
  _cReg:=AllTrim(Str(Len(aItens)))
  _nCont:=0
 
- FOR nX:= 1 TO Len(aItens)
+ For nX:= 1 TO Len(aItens)
 
      _nCont++
      oProc:cCaption := ( "Lendo Item: " + StrZero(_nCont,5) + " de " + _cReg)
      ProcessMessages()
 
-     Aadd(aCols,Array(Len(aHeader)+1))
+     AAdd(aCols,Array(Len(aHeader)+1))
      For nY	:= 1 To Len(aHeader)
          aCols[Len(aCols)][nY] := CriaVar(aHeader[nY][2])
      Next nY
@@ -479,23 +470,23 @@ User Function AOMS063W(nPorc,oProc)
      aCols[N][Len(aCols[N])] := .F.
 
      aCols [N,nPosProd]:= aItens[nX][1]
-     aCols [N,nPosDesc]:= Posicione("SB1",1,Xfilial("SB1")+aItens[nX][1],"B1_DESC")
+     aCols [N,nPosDesc]:= Posicione("SB1",1,FWxfilial("SB1")+aItens[nX][1],"B1_DESC")
      aCols [N,nPosDesD]:= SB1->B1_I_DESCD
      aCols [N,nPosUM]  := SB1->B1_UM
      aCols [N,nPosQtd] := aItens[nX][5]
      aCols [N,nPos2UM] := SB1->B1_SEGUM
      aCols [N,nPos2Qtd]:= aItens[nX][7]
      aCols [N,nPos3UM] := SB1->B1_I_3UM
-     IF !EMPTY(SB1->B1_I_QT3UM)
+     If !Empty(SB1->B1_I_QT3UM)
         aCols [N,nPos3Qtd]:= (aItens[nX][5] / SB1->B1_I_QT3UM )
      EndIf
 
  Next nX
- (_cAlias)->(dbCloseArea())
+ (_cAlias)->(DBCloseArea())
  xObj := CallMod2Obj()
  xObj:oBrowse:Refresh()
 
-Return .T.
+Return
 
 /*
 ===============================================================================================================================
@@ -504,10 +495,10 @@ Autor-------------: Erich Buttner
 Data da Criacao---: 22/04/13
 Descrição---------: VALIDA LINHA DO aCols
 Parametros--------: Nenhum
-Retorno-----------: Nenhum
+Retorno-----------: _lRet - .T. se ok / .F. se erro
 ===============================================================================================================================
 */
-User Function AOMS063O()
+User Function AOMS063O() As Logical
  Local nPosQtd  := 0 As Numeric
  Local nPos2Qtd := 0 As Numeric
  Local nPosDesc := 0 As Numeric
@@ -520,38 +511,38 @@ User Function AOMS063O()
  Local nQtd     := 0 As Numeric
  Local nQtd2UM  := 0 As Numeric
  Local nQtd3UM  := 0 As Numeric//Novo
- Local nPosProd := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'} ) As Numeric
+ Local nPosProd := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'} ) As Numeric
  Local xObj     := CallMod2Obj() As Object
  Local N        := xObj:oBrowse:nat As Numeric
- Local cProd    := aCols[N,nPosProd] As Character
- Local cbloq    := Posicione("SB1",1,Xfilial("SB1")+cProd,"B1_MSBLQL") As Character
- Local _lRet    := .T.
+ Local cProd    := aCols[N,nPosProd] As Char
+ Local cbloq    := Posicione("SB1",1,FWxfilial("SB1")+cProd,"B1_MSBLQL") As Char
+ Local _lRet    := .T. As Logical
 
- if Atail(aCols[N])
+ If Atail(aCols[N])
     Return .T.
  EndIf
 
- If (Empty(AllTrim(cProd)) .OR. Empty(SB1->B1_COD))
-    u_itmsg("Escolha um Produto Valido.","Atenção",,1)
+ If (Empty(AllTrim(cProd)) .Or. Empty(SB1->B1_COD))
+    U_ITMsg("Escolha um Produto Valido.","Atenção",,1)
     _lRet	:= .F.
  EndIf
 
  If cbloq == '1'
-    U_ITMSG("Produto Bloqueado","Atenção",,1)
+    U_ITMsg("Produto Bloqueado","Atenção",,1)
     _lRet	:= .F.
- Endif
+ EndIf
 
  If _lRet
 
-    nPosQtd  := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD'   } )
-    nPosDesc := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCR' } )
-    nPosDesD := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCD' } )
-    nPosUM	 := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_UM'    } )
-    nPos2UM	 := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_2UM'   } )
-    nPos2Qtd := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD2UM'} )
-    nPos3UM  := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_3UM'   } )//Novo
-    nPos3Qtd := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD3UM'} )//Novo
-    nPosVal  := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_VALOR' } )//Novo
+    nPosQtd  := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD'   } )
+    nPosDesc := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCR' } )
+    nPosDesD := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCD' } )
+    nPosUM	 := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_UM'    } )
+    nPos2UM	 := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_2UM'   } )
+    nPos2Qtd := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD2UM'} )
+    nPos3UM  := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_3UM'   } )//Novo
+    nPos3Qtd := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD3UM'} )//Novo
+    nPosVal  := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_VALOR' } )//Novo
 
     aCols[N,nPosDesc] := SB1->B1_DESC
     aCols[N,nPosDesD] := SB1->B1_I_DESCD
@@ -563,19 +554,19 @@ User Function AOMS063O()
     nQtd2UM := aCols [n,nPos2Qtd]
     nQtd3UM := aCols [n,nPos3Qtd] //Novo
 
-    If nQtd <= 0 .Or. nQtd2UM <= 0 .and. nQtd3UM < 0
-        u_itmsg("Quantidade(s) com o conteudo invalido.","Atenção","Preencha as Quantidades da 1a e 2a e/ou 3a unidades com valor positivo.",1)
+    If nQtd <= 0 .Or. nQtd2UM <= 0 .And. nQtd3UM < 0
+        U_ITMsg("Quantidade(s) com o conteudo invalido.","Atenção","Preencha As Quantidades da 1a e 2a e/ou 3a unidades com valor positivo.",1)
         _lRet	:= .F.
     EndIf
 
     If aCols [N,nPosVal] <= 0
-        u_itmsg("Campo Valor (R$) com conteudo invalido.","Atenção","Preencha o valor com um numero positivo.",1)
+        U_ITMsg("Campo Valor (R$) com conteudo invalido.","Atenção","Preencha o valor com um numero positivo.",1)
         _lRet	:= .F.
     EndIf
 
  EndIf
 
-RETURN _lRet
+Return _lRet
 
 /*
 ===============================================================================================================================
@@ -583,50 +574,50 @@ Programa----------: AOMS063Z
 Autor-------------: Erich Buttner
 Data da Criacao---: 22/04/13
 Descrição---------: Validação geral das telas de inclusão e alteração
-Parametros--------: Nenhum
-Retorno-----------: Nenhum
+Parametros--------: _lInclui - .T. se inclusão / .F. se alteração
+Retorno-----------: _lRet - .T. se ok / .F. se erro
 ===============================================================================================================================
 */
-User Function AOMS063Z(_lInclui)
+User Function AOMS063Z(_lInclui As Logical) As Logical
  Local X       := 000 As Numeric
- Local _cErro  := " " As Character
+ Local _cErro  := " " As Char
  Local _aErros := { } As Array
  Local _lRet   := .T. As Logical
- Local nPosProd:= Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'   } ) As Numeric
- Local nPosVal := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_VALOR' } ) As Numeric
- Local nPosQtd := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD'   } ) As Numeric //Novo
- Local nPos2Qtd:= Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD2UM'} ) As Numeric //Novo
- Local nPos3Qtd:= Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD3UM'} ) As Numeric //Novo
+ Local nPosProd:= AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'   } ) As Numeric
+ Local nPosVal := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_VALOR' } ) As Numeric
+ Local nPosQtd := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD'   } ) As Numeric //Novo
+ Local nPos2Qtd:= AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD2UM'} ) As Numeric //Novo
+ Local nPos3Qtd:= AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD3UM'} ) As Numeric //Novo
 
- ZZS->(DbSetOrder(4))
+ ZZS->(DBSetOrder(4))
  If Empty(cAnoMes)
-     u_itmsg("Ano / Mês não Preenchido, Favor Prenche-lo Antes de Prosseguir","Atenção",,1)
+     U_ITMsg("Ano / Mês não Preenchido, Favor Prenche-lo Antes de Prosseguir","Atenção",,1)
      _lRet	:= .F.
  ElseIf AOMS063B()
-     u_itmsg("Nâo Há Produtos, Favor Preencher ou Importar Algum Produtos Antes de Prosseguir","Atenção",,1)
+     U_ITMsg("Nâo Há Produtos, Favor Preencher ou Importar Algum Produtos Antes de Prosseguir","Atenção",,1)
      _lRet	:= .F.
  ElseIf Empty(cCoord)
-     u_itmsg("Coord/Vend não Preenchido, Favor Prenche-lo Antes de Prosseguir","Atenção",,1)
+     U_ITMsg("Coord/Vend não Preenchido, Favor Prenche-lo Antes de Prosseguir","Atenção",,1)
      _lRet	:= .F.
  Else
-     If SA3->(MsSeek(xfilial("SA3")+cCoord))
+     If SA3->(MSSeek(FWxfilial("SA3")+cCoord))
         If SA3->A3_MSBLQL == '1'
-           u_itmsg("Coord/Vend Bloqueado.","Atenção",,1)
-        Endif
+           U_ITMsg("Coord/Vend Bloqueado.","Atenção",,1)
+        EndIf
      Else
-         u_itmsg("Coord/Vend não encontrado.","Atenção",,1)
-     Endif
- Endif
+         U_ITMsg("Coord/Vend não encontrado.","Atenção",,1)
+     EndIf
+ EndIf
 
- If _lInclui .AND. ZZS->(MsSeek(xFilial("ZZS")+AllTrim(cAnoMes)+AllTrim(cCoord)))
-     u_itmsg("Tabela Já Cadastrada, Favor alterar o Coordenador ou o Ano / Mês, para dar continuidade","Atenção",,1)
+ If _lInclui .And. ZZS->(MSSeek(FWxfilial("ZZS")+AllTrim(cAnoMes)+AllTrim(cCoord)))
+     U_ITMsg("Tabela Já Cadastrada, Favor alterar o Coordenador ou o Ano / Mês, para dar continuidade","Atenção",,1)
      _lRet	:= .F.
- ElseIf AllTrim(cAnoMes) < Substr(DtoS(dDataBase),1,6)
-     u_itmsg("Ano / Mes Menor que o Ano / Mês Atual","Atenção",,1)
+ ElseIf AllTrim(cAnoMes) < SubStr(DToS(dDataBase),1,6)
+     U_ITMsg("Ano / Mes Menor que o Ano / Mês Atual","Atenção",,1)
      _lRet	:= .F.
  EndIf
 
- aCols   := aSort(aCols,,,{|x, y| x[1] < y[1]})//REORDENA A TABELA
+ aCols   := ASort(aCols,,,{|x, y| x[1] < y[1]})//REORDENA A TABELA
  _cErro  := ""
 
  For X:= 1 To Len(aCols)
@@ -637,34 +628,34 @@ User Function AOMS063Z(_lInclui)
                 If aCols [X,nPosProd] == aCols [X+1,nPosProd]
                     If X < Len(aCols)
                         lRt := .T.
-                        _cErro += "[Produto: " + Alltrim(aCols[x,nPosProd])+ " duplicado] "
+                        _cErro += "[Produto: " + AllTrim(aCols[x,nPosProd])+ " duplicado] "
                     EndIf
                 EndIf
             EndIf
         EndIf
     EndIf
-    cbloq:= Posicione("SB1",1,Xfilial("SB1")+aCols[x,nPosProd],"B1_MSBLQL")
+    cbloq:= Posicione("SB1",1,FWxfilial("SB1")+aCols[x,nPosProd],"B1_MSBLQL")
     If cbloq == '1'
-       _cErro += "[Produto: " + Alltrim(aCols[x,nPosProd]) +" Bloqueado] "
-    Endif
-    If Empty(aCols[x,nPosVal])
-       _cErro += "[Produto: " + Alltrim(aCols[x,nPosProd]) + " com valor zerado] "
-    Endif
-    If aCols[X,nPos2Qtd] <= 0 .Or. aCols[X,nPosQtd] <= 0  .Or. aCols[X,nPos3Qtd] < 0
-       _cErro += "[Produto: " + Alltrim(aCols[x,nPosProd]) + " com Quantidade(s) invalida(s).]"
+       _cErro += "[Produto: " + AllTrim(aCols[x,nPosProd]) +" Bloqueado] "
     EndIf
-    If !EMPTY(_cErro)
+    If Empty(aCols[x,nPosVal])
+       _cErro += "[Produto: " + AllTrim(aCols[x,nPosProd]) + " com valor zerado] "
+    EndIf
+    If aCols[X,nPos2Qtd] <= 0 .Or. aCols[X,nPosQtd] <= 0  .Or. aCols[X,nPos3Qtd] < 0
+       _cErro += "[Produto: " + AllTrim(aCols[x,nPosProd]) + " com Quantidade(s) invalida(s).]"
+    EndIf
+    If !Empty(_cErro)
         _cErro:="Linha " + StrZero(X,6) + " com erro(s): "+ _cErro
-        Aadd(_aErros,{.F.,_cErro})
-    Endif
+        AAdd(_aErros,{.F.,_cErro})
+    EndIf
  Next X
 
- IF Len(_aErros) > 0
-     U_ITListBox("Quantidade de erros: "+ALLTRIM(STR(Len(_aErros))),{"","Erros"},_aErros,,4)
+ If Len(_aErros) > 0
+     U_ITListBox("Quantidade de erros: "+AllTrim(Str(Len(_aErros))),{"","Erros"},_aErros,,4)
      _lRet	:= .F.
- ENDIF
+ EndIf
 
-RETURN _lRet
+Return _lRet
 
 /*
 ===============================================================================================================================
@@ -676,7 +667,7 @@ Parametros--------: _cCampo: origem da chamada
 Retorno-----------: _xRet: Retorno de acorodo com a chamada
 ===============================================================================================================================
 */
-User Function AOMS063V(_cCampo)
+User Function AOMS063V(_cCampo As Char) As Logical
 
  Local _xRet  := 0 As Numeric
  Local _nPos  := 0 As Numeric
@@ -685,7 +676,7 @@ User Function AOMS063V(_cCampo)
  Local _dData As Date
  Local xObj   As Object
 
- IF _cCampo == "%" //U_AOMS063V("%")
+ If _cCampo == "%" //U_AOMS063V("%")
 
     _xRet := .T.
     N:=oMsMGet:oBrowse:nAt
@@ -693,78 +684,78 @@ User Function AOMS063V(_cCampo)
     aCols:=oMsMGet:aCols
     _dData:=aCols[N,C-1]
     _nPerc:=&(ReadVar())//aCols[N,C]
-    IF Empty(_dData) .OR. LEFT(DTOC(_dData),5) = "29/02"//ANOS BISEXTOS
+    If Empty(_dData) .Or. LEFT(DToC(_dData),5) = "29/02"//ANOS BISEXTOS
        aCols[N,C]  :=0
        &(ReadVar()):=0
     Else
-       RETURN NaoVazio(_nPerc) .AND. Positivo(_nPerc)
-    ENDIF
+       Return NaoVazio(_nPerc) .And. Positivo(_nPerc)
+    EndIf
     oMsMGet:aCols:=aCols
     oMsMGet:oBrowse:Refresh()
 
- ElseIF _cCampo == 'CCOORD'
+ ElseIf _cCampo == 'CCOORD'
     _xRet := .T.
-    cNmCoor:= POSICIONE("SA3",1,xFilial("SA3")+cCoord,"A3_NOME")
+    cNmCoor:= Posicione("SA3",1,FWxfilial("SA3")+cCoord,"A3_NOME")
     cTipoor:= SA3->A3_I_TIPV//V=VENDEDOR;C=COORDENADOR;G=GERENTE;S=SUPERVISOR;N=GERENCIA NACIONAL
-    IF cTipoor == "V"
+    If cTipoor == "V"
         cTipoor := "Vendedor"
-    ELSEIF cTipoor == "C"
+    ElseIf cTipoor == "C"
         cTipoor := "Coordenador"
-    ELSEIF cTipoor == "G"
+    ElseIf cTipoor == "G"
         cTipoor := "Gerente"
-    ELSEIF cTipoor == "S"
+    ElseIf cTipoor == "S"
         cTipoor := "Supervisor"
-    ELSEIF cTipoor == "N"
+    ElseIf cTipoor == "N"
         cTipoor := "Gerencia Nacional"
-    ELSE
+    Else
         cTipoor := "Tipo de Vendedor não encontrado"
-    ENDIF
-    If Len(aCols) > 0 .and. Len(aCols[1]) > 0 .and. aCols[1][1] == 'ZZS_COD'
+    EndIf
+    If Len(aCols) > 0 .And. Len(aCols[1]) > 0 .And. aCols[1][1] == 'ZZS_COD'
         _xRet := .F.
     EndIf
 
- ElseIF _cCampo == "ZZS_QTD"//Contra dominio ZZS_QTD2UM
+ ElseIf _cCampo == "ZZS_QTD"//Contra dominio ZZS_QTD2UM
 
     xObj          := CallMod2Obj()
     N             := xObj:oBrowse:nat
-    _nPos         := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'} )
+    _nPos         := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'} )
     M->ZZS_COD    := aCols[N,_nPos]
     _xRet         := U_ITConv(M->ZZS_COD,M->ZZS_QTD   ,1,2)//Retona no ZZS_QTD2UM
     M->ZZS_QTD3UM := U_ITConv(M->ZZS_COD,M->ZZS_QTD   ,1,3)//Retona no ZZS_QTD3UM
-    _nPos         := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD3UM'} )
+    _nPos         := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD3UM'} )
     aCols[N,_nPos]:= M->ZZS_QTD3UM
 
- ElseIF _cCampo == "ZZS_QTD2UM"//Contra dominio ZZS_QTD
+ ElseIf _cCampo == "ZZS_QTD2UM"//Contra dominio ZZS_QTD
 
     xObj          := CallMod2Obj()
     N             := xObj:oBrowse:nat
-    _nPos         := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'} )
+    _nPos         := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'} )
     M->ZZS_COD    := aCols[N,_nPos]
     _xRet         := U_ITConv(M->ZZS_COD,M->ZZS_QTD2UM,2,1)//Retona no ZZS_QTD
     M->ZZS_QTD3UM := U_ITConv(M->ZZS_COD,M->ZZS_QTD2UM,2,3)//Retona no ZZS_QTD3UM
-    _nPos         := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD3UM'} )
+    _nPos         := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD3UM'} )
     aCols[N,_nPos]:= M->ZZS_QTD3UM
 
- ElseIF _cCampo == "ZZS_QTD3UM"//Contra dominio ZZS_QTD
+ ElseIf _cCampo == "ZZS_QTD3UM"//Contra dominio ZZS_QTD
 
     xObj             := CallMod2Obj()
     N                := xObj:oBrowse:nat
-    _nPos            := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_3UM'} )
+    _nPos            := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_3UM'} )
     M->ZZS_3UM       := aCols[N,_nPos]
-    IF EMPTY(M->ZZS_3UM) 
-       //M->ZZS_QTD3UM := 0//Editado 
-       _nPos         := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD3UM'} )
+    If Empty(M->ZZS_3UM)
+       //M->ZZS_QTD3UM := 0//Editado
+       _nPos         := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD3UM'} )
        aCols[N,_nPos]:= 0
-       _nPos         := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD'} )
+       _nPos         := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD'} )
        _xRet         := aCols[N,_nPos]//Retona no ZZS_QTD o conteudo dele mesmo
-    Else    
-       _nPos         := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'} )
+    Else
+       _nPos         := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'} )
        M->ZZS_COD    := aCols[N,_nPos]
        _xRet         := U_ITConv(M->ZZS_COD,M->ZZS_QTD3UM,3,1)//Retona no ZZS_QTD
        M->ZZS_QTD2UM := U_ITConv(M->ZZS_COD,M->ZZS_QTD3UM,3,2)//Retona no ZZS_QTD2UM
-       _nPos         := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD2UM'} )
+       _nPos         := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD2UM'} )
        aCols[N,_nPos]:= M->ZZS_QTD2UM
-    EndIF
+    EndIf
 
  EndIf
 
@@ -775,33 +766,33 @@ Return _xRet
 Programa----------: AOMS063D
 Autor-------------: Erich Buttner
 Data da Criacao---: 22/04/13
-Descrição---------: Valida Dados
+Descrição---------: Botão Imp. Produtos - Importação de Produtos para Inclusão
 Parametros--------: cAnoMes,cCoord,nRet
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AOMS063D(cAnoMes,cCoord,nRet)
+User Function AOMS063D(cAnoMes As Char,cCoord As Char,nRet As Numeric)
  Local oDlgAno  As Object
  Local nGet1:=0 As Numeric
  Local nPorc:=0 As Numeric
 
- ZZS->(DbSetOrder(4))
+ ZZS->(DBSetOrder(4))
 
  If Empty(cCoord)
 
-     u_itmsg("Coord/Vend não Preenchido, Favor Prenche-lo Antes de Prosseguir","Atenção",,1)
+     U_ITMsg("Coord/Vend não Preenchido, Favor Prenche-lo Antes de Prosseguir","Atenção",,1)
 
- ElseIf ZZS->(MsSeek(xFilial("ZZS")+AllTrim(cAnoMes)+AllTrim(cCoord)))
+ ElseIf ZZS->(MSSeek(FWxfilial("ZZS")+AllTrim(cAnoMes)+AllTrim(cCoord)))
 
-     u_itmsg("Tabela Já Cadastrada, Favor alterar o Coordenador ou o Ano / Mês, para dar continuidade","Atenção",,1)
+     U_ITMsg("Tabela Já Cadastrada, Favor alterar o Coordenador ou o Ano / Mês, para dar continuidade","Atenção",,1)
 
- ElseIf EMPTY(cAnoMes)
+ ElseIf Empty(cAnoMes)
 
-     u_itmsg("Ano / Mês não Preenchido, Favor Prenche-lo Antes de Prosseguir","Atenção",,1)
+     U_ITMsg("Ano / Mês não Preenchido, Favor Prenche-lo Antes de Prosseguir","Atenção",,1)
 
- ElseIf AllTrim(cAnoMes) < Substr(DtoS(dDataBase),1,6)
+ ElseIf AllTrim(cAnoMes) < SubStr(DToS(dDataBase),1,6)
 
-     u_itmsg("Ano / Mes Menor Que o Ano / Mês Atual","Atenção",,1)
+     U_ITMsg("Ano / Mes Menor Que o Ano / Mês Atual","Atenção",,1)
 
  Else
 
@@ -816,7 +807,7 @@ User Function AOMS063D(cAnoMes,cCoord,nRet)
 
      nPorc:= nGet1/100
 
-     FwMsgRun( ,{|oProc| U_AOMS063W(nPorc,oProc) }, 'Aguarde!' , 'Carregando os dados...'  )
+     FWMsgRun( ,{|oProc| U_AOMS063W(nPorc,oProc) }, 'Aguarde!' , 'Carregando os dados...'  )
 
  EndIf
 
@@ -828,126 +819,123 @@ Programa----------: AOMS063Y ()
 Autor-------------: Erich Buttner
 Data da Criacao---: 22/04/13
 Descrição---------: Visualizar Cadastro de Previsão de Vendas
-Parametros--------: Nenhum
+Parametros--------: oProc As Object
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function AOMS063Y(oProc)
+Static Function AOMS063Y(oProc As Object)
 
-    Local cTitulo := "Visualização de Metas de Vendas"
-    Local lRetMod2:= .F. // Retorno da função Modelo2 - .T. Confirmou / .F. Cancelou
-    Private  nOpcx:= 2
+ Local cTitulo    := "Visualização de Metas de Vendas" As Char
+ Local _nCont     := 0 As Numeric
+ Local aYesFields := {} As Array
+ Local aCGD       := {} As Array
+ Local ACORDW     := {} As Array
 
-    If(EMPTY(TMP->ANOMES))
+ Private  nOpcx:= 2 As Numeric // Opção de Modelo da GetDados
 
-        u_itmsg("Não Há Tabela A ser Visualizada","Atenção",,1)
+ If(Empty(TMP->ANOMES))
 
+    U_ITMsg("Não Há Tabela A ser Visualizada","Atenção",,1)
+
+ Else
+
+    nUsado:=0
+    aHeader:={}
+    aCols:={}
+
+    //Carrega aheader
+    aYesFields := {"ZZS_COD","ZZS_DESCR","ZZS_DESCD","ZZS_QTD","ZZS_UM","ZZS_QTD2UM","ZZS_2UM","ZZS_QTD3UM","ZZS_3UM","ZZS_VALOR"}
+    FillGetDados(2,"ZZS",1,,,,, aYesFields ,,,, .T. ,,,,,, )
+
+    //Limpa dois ultimos campos do aheader
+    asize(aheader,Len(aheader)-2)
+
+    cAnoMes  := Space(06)
+    cCoord	 := Space(06)
+    cNmCoor	 := Space(60)
+
+
+    aC:={}
+    // aC[n,1] = Nome da Variavel Ex.:"cCliente"
+    // aC[n,2] = Array com coordenadas do Get [x,y], em Windows estao em PIXEL
+    // aC[n,3] = Titulo do Campo
+    // aC[n,4] = Picture
+    // aC[n,5] = Validacao
+    // aC[n,6] = F3
+    // aC[n,7] = Se campo e' editavel .T. se nao .F.
+
+    cAnoMes       := TMP->ANOMES
+    cCoord	      := TMP->COORD
+    cNmCoor		  := AllTrim(TMP->NMCOORD)
+    cTipoor		  := Posicione("SA3",1,FWxfilial("SA3")+TMP->COORD,"A3_I_TIPV")//V=VENDEDOR;C=COORDENADOR;G=GERENTE;S=SUPERVISOR;N=GERENCIA NACIONAL
+    If cTipoor == "V"
+        cTipoor := "Vendedor"
+    ElseIf cTipoor == "C"
+        cTipoor := "Coordenador"
+    ElseIf cTipoor == "G"
+        cTipoor := "Gerente"
+    ElseIf cTipoor == "S"
+        cTipoor := "Supervisor"
+    ElseIf cTipoor == "N"
+        cTipoor := "Gerencia Nacional"
     Else
-
-        nUsado:=0
-        aHeader:={}
-        aCols:={}
-
-        //Carrega aheader
-        aYesFields := {"ZZS_COD","ZZS_DESCR","ZZS_DESCD","ZZS_QTD","ZZS_UM","ZZS_QTD2UM","ZZS_2UM","ZZS_QTD3UM","ZZS_3UM","ZZS_VALOR"}
-        FillGetDados(2,"ZZS",1,,,,, aYesFields ,,,, .T. ,,,,,, )
-
-        //Limpa dois ultimos campos do aheader
-        asize(aheader,Len(aheader)-2)
-
-        cAnoMes  := Space(06)
-        cCoord	 := Space(06)
-        cNmCoor	 := Space(60)
-
-
-        aC:={}
-        // aC[n,1] = Nome da Variavel Ex.:"cCliente"
-        // aC[n,2] = Array com coordenadas do Get [x,y], em Windows estao em PIXEL
-        // aC[n,3] = Titulo do Campo
-        // aC[n,4] = Picture
-        // aC[n,5] = Validacao
-        // aC[n,6] = F3
-        // aC[n,7] = Se campo e' editavel .t. se nao .f.
-
-        cAnoMes       := TMP->ANOMES
-        cCoord	      := TMP->COORD
-        cNmCoor		  := AllTrim(TMP->NMCOORD)
-        cTipoor		  := POSICIONE("SA3",1,xFilial("SA3")+TMP->COORD,"A3_I_TIPV")//V=VENDEDOR;C=COORDENADOR;G=GERENTE;S=SUPERVISOR;N=GERENCIA NACIONAL
-        IF cTipoor == "V"
-            cTipoor := "Vendedor"
-        ELSEIF cTipoor == "C"
-            cTipoor := "Coordenador"
-        ELSEIF cTipoor == "G"
-            cTipoor := "Gerente"
-        ELSEIF cTipoor == "S"
-            cTipoor := "Supervisor"
-        ELSEIF cTipoor == "N"
-            cTipoor := "Gerencia Nacional"
-        ELSE
-            cTipoor := "Tipo de Vendedor não encontrado"
-        ENDIF
-
-        //"Visualização de Metas de Vendas"
-        Aadd(aC,{"cAnoMes",{15,003}," Ano-Mes ","@R 9999-99",,,.F.})
-        Aadd(aC,{"cCoord" ,{15,080}," Codigo " ,"@!","U_AOMS063V('CCOORD') .And. (ExistCPO('SA3'))","SA3",.F.})
-        Aadd(aC,{"cNmCoor",{15,155}," Nome "   ,"@!",,,.F.})
-        Aadd(aC,{"cTipoor",{30,003}," Tipo "   ,"@!",,,.F.})
-        //================================================================
-        // Array com descricao dos campos do Rodape do Modelo 2
-        //================================================================
-
-        aR:={}
-        // aR[n,1] = Nome da Variavel Ex.:"cCliente"
-        // aR[n,2] = Array com coordenadas do Get [x,y], em Windows estao em PIXEL
-        // aR[n,3] = Titulo do Campo
-        // aR[n,4] = Picture
-        // aR[n,5] = Validacao
-        // aR[n,6] = F3
-        // aR[n,7] = Se campo e' editavel .t. se nao .f.
-
-        aCols:= {}
-        _nCont:=0
-        //------------MONTA OS ITENS COM OS DADOS-----------------------//
-        ZZS->(DbSetOrder(7))//ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD+ZZS_DATA
-        ZZS->(MsSeek(xFilial("ZZS")+cAnoMes+cCoord))
-        Do While ZZS->(!EOF()).AND. cAnoMes == ZZS->ZZS_ANOMES .AND. cCoord == ZZS->ZZS_COOR
-           IF !EMPTY(ZZS->ZZS_DATA)
-              ZZS->(Dbskip())
-              Loop
-           Endif
-           _nCont++
-           oProc:cCaption := ( "V-Lendo Metas: " + StrZero(_nCont,5))
-           ProcessMessages()
-           Aadd(aCols,{ZZS->ZZS_COD,ZZS->ZZS_DESCR,ZZS->ZZS_DESCD,ZZS->ZZS_QTD,ZZS->ZZS_UM,ZZS->ZZS_QTD2UM,;
-                       ZZS->ZZS_2UM,ZZS->ZZS_QTD3UM,ZZS->ZZS_3UM,ZZS->ZZS_VALOR,.F.})//Novos
-           ZZS->(Dbskip())
-        Enddo
-
-        //================================================================
-        // Array com coordenadas da GetDados no modelo2
-        //================================================================
-        aButtons := {}
-        Aadd(aButtons,{"",{|| AOMS063X(.T.) },"xGerar XML"  ,"Gerar XML"  })
-        Aadd(aButtons,{"",{|| AOMS063X(.F.) },"xGerar Excel","Gerar Excel"})
-
-        _bProdDia:={|| FwMsgRun( ,{|oProc| AOMS063Ger("LISTA_META_POR_DIA",cAnoMes,cCoord) }, 'V-Aguarde!' , 'V-Lendo as datas/metas do Produto...'  )  }
-        Aadd(aButtons,{"",_bProdDia,"x% por Produto/Dia","% por Produto/Dia"})
-
-        aCGD:={60,06,26,74}
-        ACORDW  := {ASIZE[7],0,ASIZE[6],ASIZE[5]}
-
-        cLinhaOk:=".T."
-        cTudoOk :=".T."
-
-        //================================================================
-        // Chamada da Modelo2
-        //================================================================
-        // lRetMod2 = .t. se confirmou
-        // lRetMod2 = .f. se cancelou
-        //		          cTitulo [ aC ] [ aR ] [ aGd ] [ nOp ] [ cLinhaOk ] [ cTudoOk ]aGetsD [ bF4 ] [ cIniCpos ] [ nMax ] [ aCordW ] [ lDelGetD ] [ lMaximazed ] [ aButtons ]
-        lRetMod2:=Modelo2(cTitulo,aC	,  aR	, aCGD	,nOpcx	,  cLinhaOk	,  cTudoOk ,	  ,		  ,			   ,  9999	, ACORDW   ,  .F.       ,    .T.  		, aButtons)
-
+        cTipoor := "Tipo de Vendedor não encontrado"
     EndIf
+
+    //"Visualização de Metas de Vendas"
+    AAdd(aC,{"cAnoMes",{15,003}," Ano-Mes ","@R 9999-99",,,.F.})
+    AAdd(aC,{"cCoord" ,{15,080}," Codigo " ,"@!","U_AOMS063V('CCOORD') .And. (ExistCPO('SA3'))","SA3",.F.})
+    AAdd(aC,{"cNmCoor",{15,155}," Nome "   ,"@!",,,.F.})
+    AAdd(aC,{"cTipoor",{30,003}," Tipo "   ,"@!",,,.F.})
+    //================================================================
+    // Array com descricao dos campos do Rodape do Modelo 2
+    //================================================================
+
+    aR:={}
+    // aR[n,1] = Nome da Variavel Ex.:"cCliente"
+    // aR[n,2] = Array com coordenadas do Get [x,y], em Windows estao em PIXEL
+    // aR[n,3] = Titulo do Campo
+    // aR[n,4] = Picture
+    // aR[n,5] = Validacao
+    // aR[n,6] = F3
+    // aR[n,7] = Se campo e' editavel .T. se nao .F.
+
+    aCols:= {}
+    _nCont:=0
+    //------------MONTA OS ITENS COM OS DADOS-----------------------//
+    ZZS->(DBSetOrder(7))//ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD+ZZS_DATA
+    ZZS->(MSSeek(FWxfilial("ZZS")+cAnoMes+cCoord))
+    While ZZS->(!Eof()).AND. cAnoMes == ZZS->ZZS_ANOMES .And. cCoord == ZZS->ZZS_COOR
+       If !Empty(ZZS->ZZS_DATA)
+          ZZS->(DBSkip())
+          Loop
+       EndIf
+       _nCont++
+       oProc:cCaption := ( "V-Lendo Metas: " + StrZero(_nCont,5))
+       ProcessMessages()
+       AAdd(aCols,{ZZS->ZZS_COD,ZZS->ZZS_DESCR,ZZS->ZZS_DESCD,ZZS->ZZS_QTD,ZZS->ZZS_UM,ZZS->ZZS_QTD2UM,;
+                   ZZS->ZZS_2UM,ZZS->ZZS_QTD3UM,ZZS->ZZS_3UM,ZZS->ZZS_VALOR,.F.})//Novos
+       ZZS->(DBSkip())
+    EndDo
+
+    //================================================================
+    // Array com coordenadas da GetDados no modelo2
+    //================================================================
+    aButtons := {}
+    AAdd(aButtons,{"",{|| AOMS063X(.T.) },"xGerar XML"  ,"Gerar XML"  })
+    AAdd(aButtons,{"",{|| AOMS063X(.F.) },"xGerar Excel","Gerar Excel"})
+
+    _bProdDia:={|| FWMsgRun( ,{|oProc| AOMS063Ger("LISTA_META_POR_DIA",cAnoMes,cCoord) }, 'V-Aguarde!' , 'V-Lendo As datas/metas do Produto...'  )  }
+    AAdd(aButtons,{"",_bProdDia,"x% por Produto/Dia","% por Produto/Dia"})
+
+    aCGD:={60,06,26,74}
+    ACORDW  := {ASIZE[7],0,ASIZE[6],ASIZE[5]}
+
+    // Chamada da Modelo2
+    //    cTitulo [ aC ] [ aR ] [ aGd ] [ nOp ] [ cLinhaOk ] [ cTudoOk ]aGetsD [ bF4 ] [ cIniCpos ] [ nMax ] [ aCordW ] [ lDelGetD ] [ lMaximazed ] [ aButtons ]
+    Modelo2(cTitulo,aC	,  aR	, aCGD	,nOpcx	,  ".T."	,  ".T."   ,	  ,		  ,			   ,  9999	,  ACORDW   ,  .F.       ,    .T.  		, aButtons)
+
+ EndIf
 
 Return
 
@@ -962,194 +950,196 @@ Parametros--------: oProc - Objeto do processo
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function AOMS063C(oProc)
+Static Function AOMS063C(oProc As Object)
 
-    Local cTitulo	:= "Copia de Metas de Vendas",_l
-    Local lRetMod2  := .F. // Retorno da função Modelo2 - .T. Confirmou / .F. Cancelou
-    Private nOpcx := 3
+ Local cTitulo  := "Copia de Metas de Vendas" As Char
+ Local aCGD     := {}  As Array
+ Local ACORDW   := {}  As Array
+ Local _l       := 00  As Numeric
+ Local _nCont   := 00  As Numeric
+ Local lRetMod2 := .F. As Logical  // Retorno da função Modelo2 - .T. Confirmou / .F. Cancelou
+ Local cLinhaOk := ""  As Char
+ Local cTudoOk  := ""  As Char
+ Private nOpcx  := 03  As Numeric // Opção de Modelo da GetDados
 
-    If(EMPTY(TMP->ANOMES))
+ If(Empty(TMP->ANOMES))
 
-        u_itmsg("Não Há Tabela a ser Copiada","Atenção",,1)
+     U_ITMsg("Não Há Tabela a ser Copiada","Atenção",,1)
 
-    Else
+ Else
 
-        nUsado:=0
-        aHeader:={}
-        aCols:={}
+     nUsado:=0
+     aHeader:={}
+     aCols:={}
 
-        //Carrega aheader
-        aYesFields := {"ZZS_COD","ZZS_DESCR","ZZS_DESCD","ZZS_QTD","ZZS_UM","ZZS_QTD2UM","ZZS_2UM","ZZS_QTD3UM","ZZS_3UM","ZZS_VALOR"}
-        FillGetDados(2,"ZZS",1,,,,, aYesFields ,,,, .T. ,,,,,, )
+     //Carrega aheader
+     aYesFields := {"ZZS_COD","ZZS_DESCR","ZZS_DESCD","ZZS_QTD","ZZS_UM","ZZS_QTD2UM","ZZS_2UM","ZZS_QTD3UM","ZZS_3UM","ZZS_VALOR"}
+     FillGetDados(2,"ZZS",1,,,,, aYesFields ,,,, .T. ,,,,,, )
 
-        //Limpa dois ultimos campos do aheader
-        asize(aheader,Len(aheader)-2)
+     //Limpa dois ultimos campos do aheader
+     asize(aheader,Len(aheader)-2)
 
 
-        cAnoMes:= TMP->ANOMES
-        cCoord := TMP->COORD
-        cNmCoor:= TMP->NMCOORD
-        cTipoor:= POSICIONE("SA3",1,xFilial("SA3")+TMP->COORD,"A3_I_TIPV")//V=VENDEDOR;C=COORDENADOR;G=GERENTE;S=SUPERVISOR;N=GERENCIA NACIONAL
-        IF cTipoor == "V"
-            cTipoor:= "Vendedor"
-        ELSEIF cTipoor == "C"
-            cTipoor:= "Coordenador"
-        ELSEIF cTipoor == "G"
-            cTipoor:= "Gerente"
-        ELSEIF cTipoor == "S"
-            cTipoor:= "Supervisor"
-        ELSEIF cTipoor == "N"
-            cTipoor:= "Gerencia Nacional"
-        ELSE
-            cTipoor:= "Tipo de Vendedor não encontrado"
-        ENDIF
+     cAnoMes:= TMP->ANOMES
+     cCoord := TMP->COORD
+     cNmCoor:= TMP->NMCOORD
+     cTipoor:= Posicione("SA3",1,FWxfilial("SA3")+TMP->COORD,"A3_I_TIPV")//V=VENDEDOR;C=COORDENADOR;G=GERENTE;S=SUPERVISOR;N=GERENCIA NACIONAL
+     If cTipoor == "V"
+         cTipoor:= "Vendedor"
+     ElseIf cTipoor == "C"
+         cTipoor:= "Coordenador"
+     ElseIf cTipoor == "G"
+         cTipoor:= "Gerente"
+     ElseIf cTipoor == "S"
+         cTipoor:= "Supervisor"
+     ElseIf cTipoor == "N"
+         cTipoor:= "Gerencia Nacional"
+     Else
+         cTipoor:= "Tipo de Vendedor não encontrado"
+     EndIf
 
-        aC:={}
-        // aC[n,1] = Nome da Variavel Ex.:"cCliente"
-        // aC[n,2] = Array com coordenadas do Get [x,y], em Windows estao em PIXEL
-        // aC[n,3] = Titulo do Campo
-        // aC[n,4] = Picture
-        // aC[n,5] = Validacao
-        // aC[n,6] = F3
-        // aC[n,7] = Se campo e' editavel .t. se nao .f.
+     aC:={}
+     // aC[n,1] = Nome da Variavel Ex.:"cCliente"
+     // aC[n,2] = Array com coordenadas do Get [x,y], em Windows estao em PIXEL
+     // aC[n,3] = Titulo do Campo
+     // aC[n,4] = Picture
+     // aC[n,5] = Validacao
+     // aC[n,6] = F3
+     // aC[n,7] = Se campo e' editavel .T. se nao .F.
 
-        //"COPIA DE METAS DE VENDAS"
-        Aadd(aC,{"cAnoMes",{15,003}," Ano-Mes ","@R 9999-99",,,.T.})
-        Aadd(aC,{"cCoord" ,{15,080}," Codigo " ,"@!","U_AOMS063V('CCOORD') .And. (ExistCPO('SA3'))","SA3",.T.})
-        Aadd(aC,{"cNmCoor",{15,155}," Nome "   ,"@!",,,.F.})
-        Aadd(aC,{"cTipoor",{30,003}," Tipo "   ,"@!",,,.F.})
+     //"COPIA DE METAS DE VENDAS"
+     AAdd(aC,{"cAnoMes",{15,003}," Ano-Mes ","@R 9999-99",,,.T.})
+     AAdd(aC,{"cCoord" ,{15,080}," Codigo " ,"@!","U_AOMS063V('CCOORD') .And. (ExistCPO('SA3'))","SA3",.T.})
+     AAdd(aC,{"cNmCoor",{15,155}," Nome "   ,"@!",,,.F.})
+     AAdd(aC,{"cTipoor",{30,003}," Tipo "   ,"@!",,,.F.})
 
-        //================================================================
-        // Array com descricao dos campos do Rodape do Modelo 2
-        //================================================================
+     //================================================================
+     // Array com descricao dos campos do Rodape do Modelo 2
+     //================================================================
 
-        aR:={}
-        // aR[n,1] = Nome da Variavel Ex.:"cCliente"
-        // aR[n,2] = Array com coordenadas do Get [x,y], em Windows estao em PIXEL
-        // aR[n,3] = Titulo do Campo
-        // aR[n,4] = Picture
-        // aR[n,5] = Validacao
-        // aR[n,6] = F3
-        // aR[n,7] = Se campo e' editavel .t. se nao .f.
+     aR:={}
+     // aR[n,1] = Nome da Variavel Ex.:"cCliente"
+     // aR[n,2] = Array com coordenadas do Get [x,y], em Windows estao em PIXEL
+     // aR[n,3] = Titulo do Campo
+     // aR[n,4] = Picture
+     // aR[n,5] = Validacao
+     // aR[n,6] = F3
+     // aR[n,7] = Se campo e' editavel .T. se nao .F.
 
-        aCols:= {}
+     aCols:= {}
 
-        //------------MONTA OS ITENS COM OS DADOS-----------------------//
-        _nCont:=0
-        ZZS->(DbSetOrder(7))//ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD+ZZS_DATA
-        ZZS->(MsSeek(xFilial("ZZS")+cAnoMes+cCoord))
-        Do While ZZS->(!EOF()).AND. cAnoMes == ZZS->ZZS_ANOMES .AND. cCoord == ZZS->ZZS_COOR
-           IF !EMPTY(ZZS->ZZS_DATA)
-              ZZS->(Dbskip())
-              Loop
-           Endif
-           _nCont++
-           oProc:cCaption := ( "C-Lendo Metas: " + StrZero(_nCont,5))
-           ProcessMessages()
-           Aadd(aCols,{ZZS->ZZS_COD,ZZS->ZZS_DESCR,ZZS->ZZS_DESCD,ZZS->ZZS_QTD,ZZS->ZZS_UM,ZZS->ZZS_QTD2UM,;
-                       ZZS->ZZS_2UM,ZZS->ZZS_QTD3UM,ZZS->ZZS_3UM,ZZS->ZZS_VALOR,.F.})//Novos
-           ZZS->(Dbskip())
-        Enddo
+     //------------MONTA OS ITENS COM OS DADOS-----------------------//
+     _nCont:=0
+     ZZS->(DBSetOrder(7))//ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD+ZZS_DATA
+     ZZS->(MSSeek(FWxfilial("ZZS")+cAnoMes+cCoord))
+     While ZZS->(!Eof()).AND. cAnoMes == ZZS->ZZS_ANOMES .And. cCoord == ZZS->ZZS_COOR
+        If !Empty(ZZS->ZZS_DATA)
+           ZZS->(DBSkip())
+           Loop
+        EndIf
+        _nCont++
+        oProc:cCaption := ( "C-Lendo Metas: " + StrZero(_nCont,5))
+        ProcessMessages()
+        AAdd(aCols,{ZZS->ZZS_COD,ZZS->ZZS_DESCR,ZZS->ZZS_DESCD,ZZS->ZZS_QTD,ZZS->ZZS_UM,ZZS->ZZS_QTD2UM,;
+                    ZZS->ZZS_2UM,ZZS->ZZS_QTD3UM,ZZS->ZZS_3UM,ZZS->ZZS_VALOR,.F.})//Novos
+        ZZS->(DBSkip())
+     EndDo
 
-        //================================================================
-        // Array com coordenadas da GetDados no modelo2
-        //================================================================
+     // Array com coordenadas da GetDados no modelo2
+     aCGD:={60,06,26,74}
+     ACORDW  := {ASIZE[7],0,ASIZE[6],ASIZE[5]}
 
-        aCGD:={60,06,26,74}
-        ACORDW  := {ASIZE[7],0,ASIZE[6],ASIZE[5]}
+     cLinhaOk:="U_AOMS063O()"
+     cTudoOk :="U_AOMS063Z(.T.)"//"COPIA DE METAS DE VENDAS"
 
-        cLinhaOk:="U_AOMS063O()"
-        cTudoOk :="U_AOMS063Z(.T.)"//"COPIA DE METAS DE VENDAS"
+     aButtons:={}
+     _bProdDia:={|| FWMsgRun( ,{|oProc| AOMS063Ger("LISTA_META_POR_DIA",cAnoMes,cCoord) }, 'C-Aguarde!' , 'C-Lendo As datas/metas do Produto...'  )  }
+     AAdd(aButtons,{"",_bProdDia,"x% por Produto/Dia","% por Produto/Dia"})
 
-        aButtons:={}
-        _bProdDia:={|| FwMsgRun( ,{|oProc| AOMS063Ger("LISTA_META_POR_DIA",cAnoMes,cCoord) }, 'C-Aguarde!' , 'C-Lendo as datas/metas do Produto...'  )  }
-        Aadd(aButtons,{"",_bProdDia,"x% por Produto/Dia","% por Produto/Dia"})
-        //================================================================
-        // Chamada da Modelo2
-        //================================================================
-        // lRetMod2 = .t. se confirmou
-        // lRetMod2 = .f. se cancelou
-        //              cTitulo [ aC ] [ aR ] [ aGd ] [ nOp ] [ cLinhaOk ] [ cTudoOk ]aGetsD [ bF4 ] [ cIniCpos ] [ nMax ] [ aCordW ] [ lDelGetD ] [ lMaximazed ] [ aButtons ]
-        lRetMod2:=Modelo2(cTitulo,aC  ,  aR  , aCGD  ,nOpcx  ,  cLinhaOk  ,  cTudoOk ,      ,       ,            ,  9999  ,  ACORDW  ,            ,    .T.       ,  aButtons)
+     // Chamada da Modelo2
+     // lRetMod2 = .T. se confirmou
+     // lRetMod2 = .F. se cancelou
+     //              cTitulo [ aC ] [ aR ] [ aGd ] [ nOp ] [ cLinhaOk ] [ cTudoOk ]aGetsD [ bF4 ] [ cIniCpos ] [ nMax ] [ aCordW ] [ lDelGetD ] [ lMaximazed ] [ aButtons ]
+     lRetMod2:=Modelo2(cTitulo,aC  ,  aR  , aCGD  ,nOpcx  ,  cLinhaOk  ,  cTudoOk ,      ,       ,            ,  9999  ,  ACORDW  ,            ,    .T.       ,  aButtons)
 
-        cChama := "NÃO RECARREGAR" //Se Cancelou
+     cChama := "NÃO RECARREGAR" //Se Cancelou
 
-        If lRetMod2 // Gravacao. . .
-            lGravouDados:=.T.
+     If lRetMod2 // Gravacao. . .
+         lGravouDados:=.T.
 
-            nPosProd := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'   } )
-            nPosDesc := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCR' } )
-            nPosDesD := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCD' } )
-            nPosUM	 := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_UM'    } )
-            nPosQtd	 := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD'   } )
-            nPos2UM	 := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_2UM'   } )
-            nPos2Qtd := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD2UM'} )
-            nPos3UM  := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_3UM'   } )//Novo
-            nPos3Qtd := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD3UM'} )//Novo
-            nPosVal  := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_VALOR' } )//Novo
+         nPosProd := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'   } )
+         nPosDesc := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCR' } )
+         nPosDesD := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCD' } )
+         nPosUM	  := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_UM'    } )
+         nPosQtd  := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD'   } )
+         nPos2UM  := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_2UM'   } )
+         nPos2Qtd := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD2UM'} )
+         nPos3UM  := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_3UM'   } )//Novo
+         nPos3Qtd := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD3UM'} )//Novo
+         nPosVal  := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_VALOR' } )//Novo
 
-            _cReg:=AllTrim(Str(Len(aCols)))
-            _nCont:=0
+         _cReg:=AllTrim(Str(Len(aCols)))
+         _nCont:=0
 
-            For _l := 1 To Len(aCols)
+         For _l := 1 To Len(aCols)
 
-                _nCont++
-                oProc:cCaption := ( "Copiando Metas: " + StrZero(_nCont,5) + " de " + _cReg)
-                ProcessMessages()
+             _nCont++
+             oProc:cCaption := ( "Copiando Metas: " + StrZero(_nCont,5) + " de " + _cReg)
+             ProcessMessages()
 
-                If !aCols[_l,Len(aHeader)+1]
+             If !aCols[_l,Len(aHeader)+1]
 
-                    ZZS->(RecLock("ZZS",.T.))//INCLUSAO2
-                    ZZS->ZZS_FILIAL	:= xFilial("ZZS")
-                    ZZS->ZZS_COD	:= aCols[_l,nPosProd]
-                    ZZS->ZZS_DESCR	:= aCols[_l,nPosDesc]
-                    ZZS->ZZS_DESCD	:= aCols[_l,nPosDesD]
-                    ZZS->ZZS_UM		:= aCols[_l,nPosUM]
-                    ZZS->ZZS_QTD   	:= aCols[_l,nPosQtd]
-                    ZZS->ZZS_2UM	:= aCols[_l,nPos2UM]
-                    ZZS->ZZS_QTD2UM	:= aCols[_l,nPos2Qtd]
-                    ZZS->ZZS_3UM    := aCols[_l,nPos3UM ]//Novo
-                    ZZS->ZZS_QTD3UM := aCols[_l,nPos3Qtd]//Novo
-                    ZZS->ZZS_VALOR  := aCols[_l,nPosVal ]//Novo
-                    ZZS->ZZS_TIPOV  := POSICIONE("SA3",1,xFilial("SA3")+cCoord,"A3_I_TIPV")//Novo
-                    ZZS->ZZS_COOR	:= cCoord
-                    ZZS->ZZS_NMCOOR	:= cNmCoor
-                    ZZS->ZZS_ANOMES	:= cAnoMes
-                    ZZS->(MsUnLock())//SEM DATA
+                 ZZS->(RecLock("ZZS",.T.))//INCLUSAO2
+                 ZZS->ZZS_FILIAL	:= FWxfilial("ZZS")
+                 ZZS->ZZS_COD	:= aCols[_l,nPosProd]
+                 ZZS->ZZS_DESCR	:= aCols[_l,nPosDesc]
+                 ZZS->ZZS_DESCD	:= aCols[_l,nPosDesD]
+                 ZZS->ZZS_UM		:= aCols[_l,nPosUM]
+                 ZZS->ZZS_QTD   	:= aCols[_l,nPosQtd]
+                 ZZS->ZZS_2UM	:= aCols[_l,nPos2UM]
+                 ZZS->ZZS_QTD2UM	:= aCols[_l,nPos2Qtd]
+                 ZZS->ZZS_3UM    := aCols[_l,nPos3UM ]//Novo
+                 ZZS->ZZS_QTD3UM := aCols[_l,nPos3Qtd]//Novo
+                 ZZS->ZZS_VALOR  := aCols[_l,nPosVal ]//Novo
+                 ZZS->ZZS_TIPOV  := Posicione("SA3",1,FWxfilial("SA3")+cCoord,"A3_I_TIPV")//Novo
+                 ZZS->ZZS_COOR	:= cCoord
+                 ZZS->ZZS_NMCOOR	:= cNmCoor
+                 ZZS->ZZS_ANOMES	:= cAnoMes
+                 ZZS->(MSUnLock())//SEM DATA
 
-                    ZGW->(RecLock("ZGW",.T.))//INCLUSAO2
-                    ZGW->ZGW_FILIAL	:= xFilial("ZGW")
-                    ZGW->ZGW_COD	:= aCols[_l,nPosProd]
-                    ZGW->ZGW_DESCR	:= aCols[_l,nPosDesc]
-                    ZGW->ZGW_DESCD	:= aCols[_l,nPosDesD]
-                    ZGW->ZGW_UM		:= aCols[_l,nPosUM]
-                    ZGW->ZGW_QTD   	:= aCols[_l,nPosQtd]
-                    ZGW->ZGW_2UM	:= aCols[_l,nPos2UM]
-                    ZGW->ZGW_QTD2UM	:= aCols[_l,nPos2Qtd]
-                    ZGW->ZGW_3UM	:= ZZS->ZZS_3UM   //Novo
-                    ZGW->ZGW_QTD3UM	:= ZZS->ZZS_QTD3UM//Novo
-                    ZGW->ZGW_VALOR  := ZZS->ZZS_VALOR //Novo
-                    ZGW->ZGW_TIPOV  := ZZS->ZZS_TIPOV //Novo
-                    ZGW->ZGW_DATAM  := ZZS->ZZS_DATA  //Novo
-                    ZGW->ZGW_COOR	:= cCoord
-                    ZGW->ZGW_NMCOOR	:= cNmCoor
-                    ZGW->ZGW_ANOMES	:= cAnoMes
-                    ZGW->ZGW_OPER   := "INCLUSAO2"
-                    ZGW->ZGW_USER   := _cUserName
-                    ZGW->ZGW_DATA   := DATE()
-                    ZGW->ZGW_HORA   := TIME()
-                    ZGW->(MsUnLock())
+                 ZGW->(RecLock("ZGW",.T.))//INCLUSAO2
+                 ZGW->ZGW_FILIAL	:= FWxfilial("ZGW")
+                 ZGW->ZGW_COD	:= aCols[_l,nPosProd]
+                 ZGW->ZGW_DESCR	:= aCols[_l,nPosDesc]
+                 ZGW->ZGW_DESCD	:= aCols[_l,nPosDesD]
+                 ZGW->ZGW_UM		:= aCols[_l,nPosUM]
+                 ZGW->ZGW_QTD   	:= aCols[_l,nPosQtd]
+                 ZGW->ZGW_2UM	:= aCols[_l,nPos2UM]
+                 ZGW->ZGW_QTD2UM	:= aCols[_l,nPos2Qtd]
+                 ZGW->ZGW_3UM	:= ZZS->ZZS_3UM   //Novo
+                 ZGW->ZGW_QTD3UM	:= ZZS->ZZS_QTD3UM//Novo
+                 ZGW->ZGW_VALOR  := ZZS->ZZS_VALOR //Novo
+                 ZGW->ZGW_TIPOV  := ZZS->ZZS_TIPOV //Novo
+                 ZGW->ZGW_DATAM  := ZZS->ZZS_DATA  //Novo
+                 ZGW->ZGW_COOR	:= cCoord
+                 ZGW->ZGW_NMCOOR	:= cNmCoor
+                 ZGW->ZGW_ANOMES	:= cAnoMes
+                 ZGW->ZGW_OPER   := "INCLUSAO2"
+                 ZGW->ZGW_USER   := _cUserName
+                 ZGW->ZGW_DATA   := Date()
+                 ZGW->ZGW_HORA   := Time()
+                 ZGW->(MSUnLock())
 
-                    AOMS063Ger("GERAR_VALORES_POR_DATA",ZZS->ZZS_ANOMES)//COM DATA
+                 AOMS063Ger("GERAR_VALORES_POR_DATA",ZZS->ZZS_ANOMES)//COM DATA
 
-                EndIf
-            Next _l
+             EndIf
+         Next _l
 
-            cChama = "RECARREGA"
-            oDlgLIb:End()
+         cChama = "RECARREGA"
+         oDlgLIb:End()
 
-        Endif
-    EndIf
+     EndIf
+ EndIf
 
 Return
 
@@ -1160,41 +1150,41 @@ Autor-------------: Erich Buttner
 Data da Criacao---: 22/04/13
 Descrição---------: Replicar Cadastro de Previsão de Vendas - CHAMADO 3008
 Parametros--------: oProc
-Retorno-----------: Nenhum
+Retorno-----------: .T. - Se Cancelar / .F. Se Recarregar
 ===============================================================================================================================
 */
-Static Function AOMS063Z(oProc)
+Static Function AOMS063Z(oProc As Object)
 
- Local cAnoMes := TMP->ANOMES as Char
- Local cCoord  := TMP->COORD as Char
- Local cNmCoord:= TMP->NMCOORD as Char
- Local _aParAux:= {} as Array
- Local _aParRet:= {} as Array
- Local  I := 0 as Numeric
+ Local cAnoMes := TMP->ANOMES As Char
+ Local cCoord  := TMP->COORD As Char
+ Local cNmCoord:= TMP->NMCOORD As Char
+ Local _aParAux:= {} As Array
+ Local _aParRet:= {} As Array
+ Local  I := 0 As Numeric
 
  cChama := "NÃO RECARREGAR" //Se Cancelar
 
- If(EMPTY(TMP->ANOMES))
-     u_itmsg("Não Há Tabela a ser Replicada","Atenção","Posicione em Ano / mes Preenchido.",1)
-     RETURN .F.
+ If(Empty(TMP->ANOMES))
+     U_ITMsg("Não Há Tabela a ser Replicada","Atenção","Posicione em Ano / mes Preenchido.",1)
+     Return .F.
  EndIf
 
  MV_PAR01 := 0
 
- Aadd( _aParAux ,{ 1 ,"Qtde (Em Meses) a ser replicado" ,MV_PAR01,"@E 99","",""   ,"" ,020 ,.T. } )
+ AAdd( _aParAux ,{ 1 ,"Qtde (Em Meses) a ser replicado" ,MV_PAR01,"@E 99","",""   ,"" ,020 ,.T. } )
 
  For I := 1 To Len( _aParAux )
-     Aadd( _aParRet ,_aParAux[I][03] )
+     AAdd( _aParRet ,_aParAux[I][03] )
  Next I
 
  //          aParametros,cTitle                            ,@aRet    ,[bOk]  ,[ aButtons ] [ lCentered ] [ nPosX ] [ nPosy ] [ oDlgWizard ] [ cLoad ] [ lCanSave ] [ lUserSave ]
- IF !ParamBox( _aParAux ,"Qtde (Em Meses) a ser replicado" ,@_aParRet,       ,/*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
+ If !ParamBox( _aParAux ,"Qtde (Em Meses) a ser replicado" ,@_aParRet,       ,/*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
      Return .T.
  EndIf
 
- FwMsgRun( ,{|oProc| AOMS063Q(MV_PAR01,cAnoMes,cCoord,cNmCoord,oProc) } , "Processando..." , "Iniciando o processamento..." )
+ FWMsgRun( ,{|oProc| AOMS063Q(MV_PAR01,cAnoMes,cCoord,cNmCoord,oProc) } , "Processando..." , "Iniciando o processamento..." )
 
- Return
+Return .T.
 
 /*
 ===============================================================================================================================
@@ -1210,120 +1200,124 @@ Parametros--------: nPeriod - Quantidade de periodos a replicar
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function AOMS063Q(nPeriod,cAnoMes,cCoord,cNmCoor,oProc)
-    Local x
-    Local _cAlias:= GetNextAlias()
-    Local cAMes:= cAnoMes
-    Local cGravados:=""
-    Local cJaGravados:=""
-    lGravouDados:=.F.
-    ZZS->(DbSetOrder(4))
-    For x:=1 To nPeriod
+Static Function AOMS063Q(nPeriod As Numeric,cAnoMes As Char,cCoord As Char,cNmCoor As Char,oProc As Object)
+ Local x As Numeric
+ Local _nCont:=0 As Numeric
+ Local _cAlias:= GetNextAlias() As Char
+ Local _nTotal:= 0 As Numeric
+ Local cAMes:= cAnoMes As Char
+ Local cRep := "" As Char
+ Local cGravados:="" As Char
+ Local cJaGravados:="" As Char
 
-        ZZS->(MsSeek(xFilial("ZZS")+cAnoMes+cCoord))
+ lGravouDados:=.F.
+ ZZS->(DBSetOrder(4))
+ For x:=1 To nPeriod
 
-        If StrZero((VAL(SubStr(cAMes,5,2)) + 1 ),2) > "12"
-            cAMes:=StrZero((VAL(SubStr(cAMes,1,4)) + 1 ),4)+"01"
-        Else
-            cAMes:=StrZero( VAL(SubStr(cAMes,1,4))      ,4)+StrZero((VAL(SubStr(cAMes,5,2)) + 1 ),2)
-        EndIf
+     ZZS->(MSSeek(FWxfilial("ZZS")+cAnoMes+cCoord))
 
-        If !ZZS->(MsSeek(xFilial("ZZS")+cAMes+cCoord))
+     If StrZero((Val(SubStr(cAMes,5,2)) + 1 ),2) > "12"
+         cAMes:=StrZero((Val(SubStr(cAMes,1,4)) + 1 ),4)+"01"
+     Else
+         cAMes:=StrZero( Val(SubStr(cAMes,1,4))      ,4)+StrZero((Val(SubStr(cAMes,5,2)) + 1 ),2)
+     EndIf
 
-            cRep:= " SELECT ZZS_COD COD, ZZS_DESCR DESCR, ZZS_DESCD DESCD, ZZS_QTD QTD1UM, ZZS_UM UM1, ZZS_QTD2UM QTD2UM, "
-            cRep+= " ZZS_VALOR,ZZS_TIPOV,ZZS_QTD3UM,ZZS_3UM , "//Novos
-            cRep+= " ZZS_2UM UM2
-            cRep+= " FROM ZZS010
-            cRep+= " WHERE ZZS_ANOMES = '"+cAnoMes+"'
-            cRep+= " AND ZZS_COOR = '"+cCoord+"'
-            cRep+= " AND D_E_L_E_T_ = ' ' "
-            cRep+= " AND ZZS_DATA = ' ' "            
-            cRep+= " AND ZZS_FILIAL = '"+xFilial("ZZS")+"'
-            cRep+= " Order by ZZS_COD "
+     If !ZZS->(MSSeek(FWxfilial("ZZS")+cAMes+cCoord))
 
-            oProc:cCaption := ( "Criando Ano / Mes / Codigo: "+ cAMes+" / "+cCoord )
-            ProcessMessages()
+         cRep:= " SELECT ZZS_COD COD, ZZS_DESCR DESCR, ZZS_DESCD DESCD, ZZS_QTD QTD1UM, ZZS_UM UM1, ZZS_QTD2UM QTD2UM, "
+         cRep+= " ZZS_VALOR,ZZS_TIPOV,ZZS_QTD3UM,ZZS_3UM , "//Novos
+         cRep+= " ZZS_2UM UM2
+         cRep+= " FROM ZZS010
+         cRep+= " WHERE ZZS_ANOMES = '"+cAnoMes+"'
+         cRep+= " AND ZZS_COOR = '"+cCoord+"'
+         cRep+= " AND D_E_L_E_T_ = ' ' "
+         cRep+= " AND ZZS_DATA = ' ' "
+         cRep+= " AND ZZS_FILIAL = '"+FWxfilial("ZZS")+"'
+         cRep+= " ORDER BY ZZS_COD "
 
-            //==============================================
-            // Monta Area de Trabalho executando a Query
-            //==============================================
-            MPSysOpenQuery( cRep , _cAlias)
+         oProc:cCaption := ( "Criando Ano / Mes / Codigo: "+ cAMes+" / "+cCoord )
+         ProcessMessages()
 
-            _nCont:=0
-            _cReg:=0
-            dbSelectArea(_cAlias)
-            COUNT TO _cReg
-            _cReg:=AllTrim(Str(_cReg))
-            (_cAlias)->(DBGoTop())
+         //==============================================
+         // Monta Area de Trabalho executando a Query
+         //==============================================
+         MPSysOpenQuery( cRep , _cAlias)
 
-            DO While (_cAlias)->(!EoF())
+         _nCont:=0
+         _nTotal:=0
+         DBSelectArea(_cAlias)
+         COUNT TO _nTotal
+         _nTotal:=AllTrim(Str(_nTotal))
+         (_cAlias)->(DBGoTop())
 
-                _nCont++
-                oProc:cCaption := ( StrZero(X,2)+" Copia: " + StrZero(_nCont,4) + " de " + _cReg+" "+cGravados)
-                ProcessMessages()
+         While (_cAlias)->(!Eof())
 
-                ZZS->(RecLock("ZZS",.T.))//INCLUSAO3
-                ZZS->ZZS_FILIAL	:= xFilial("ZZS")
-                ZZS->ZZS_COD	:= (_cAlias)->COD
-                ZZS->ZZS_DESCR	:= (_cAlias)->DESCR
-                ZZS->ZZS_DESCD	:= (_cAlias)->DESCD
-                ZZS->ZZS_UM		:= (_cAlias)->UM1
-                ZZS->ZZS_QTD   	:= (_cAlias)->QTD1UM
-                ZZS->ZZS_2UM	:= (_cAlias)->UM2
-                ZZS->ZZS_QTD2UM	:= (_cAlias)->QTD2UM
-                ZZS->ZZS_3UM    := (_cAlias)->ZZS_3UM   //Novo
-                ZZS->ZZS_QTD3UM := (_cAlias)->ZZS_QTD3UM//Novo
-                ZZS->ZZS_VALOR  := (_cAlias)->ZZS_VALOR //Novo
-                ZZS->ZZS_TIPOV  := (_cAlias)->ZZS_TIPOV //Novo
-                ZZS->ZZS_COOR	:= cCoord
-                ZZS->ZZS_NMCOOR	:= cNmCoor
-                ZZS->ZZS_ANOMES	:= cAMes
-                ZZS->(MsUnLock())
+             _nCont++
+             oProc:cCaption := ( StrZero(X,2)+" Copia: " + StrZero(_nCont,4) + " de " + _nTotal+" "+cGravados)
+             ProcessMessages()
 
-                ZGW->(RecLock("ZGW",.T.))//INCLUSAO3
-                ZGW->ZGW_FILIAL	:= xFilial("ZGW")
-                ZGW->ZGW_COD	:= (_cAlias)->COD
-                ZGW->ZGW_DESCR	:= (_cAlias)->DESCR
-                ZGW->ZGW_DESCD	:= (_cAlias)->DESCD
-                ZGW->ZGW_UM		:= (_cAlias)->UM1
-                ZGW->ZGW_QTD   	:= (_cAlias)->QTD1UM
-                ZGW->ZGW_2UM	:= (_cAlias)->UM2
-                ZGW->ZGW_QTD2UM	:= (_cAlias)->QTD2UM
-                ZGW->ZGW_3UM    := ZZS->ZZS_3UM   //Novo
-                ZGW->ZGW_QTD3UM := ZZS->ZZS_QTD3UM//Novo
-                ZGW->ZGW_VALOR	:= ZZS->ZZS_VALOR //Novo
-                ZGW->ZGW_TIPOV	:= ZZS->ZZS_TIPOV //Novo
-                ZGW->ZGW_DATAM  := ZZS->ZZS_DATA  //Novo
-                ZGW->ZGW_COOR	:= cCoord
-                ZGW->ZGW_NMCOOR	:= cNmCoor
-                ZGW->ZGW_ANOMES	:= cAMes
-                ZGW->ZGW_OPER   := "INCLUSAO3"
-                ZGW->ZGW_USER   := _cUserName
-                ZGW->ZGW_DATA   := DATE()
-                ZGW->ZGW_HORA   := TIME()
-                ZGW->(MsUnLock())
+             ZZS->(RecLock("ZZS",.T.))//INCLUSAO3
+             ZZS->ZZS_FILIAL	:= FWxfilial("ZZS")
+             ZZS->ZZS_COD	:= (_cAlias)->COD
+             ZZS->ZZS_DESCR	:= (_cAlias)->DESCR
+             ZZS->ZZS_DESCD	:= (_cAlias)->DESCD
+             ZZS->ZZS_UM		:= (_cAlias)->UM1
+             ZZS->ZZS_QTD   	:= (_cAlias)->QTD1UM
+             ZZS->ZZS_2UM	:= (_cAlias)->UM2
+             ZZS->ZZS_QTD2UM	:= (_cAlias)->QTD2UM
+             ZZS->ZZS_3UM    := (_cAlias)->ZZS_3UM   //Novo
+             ZZS->ZZS_QTD3UM := (_cAlias)->ZZS_QTD3UM//Novo
+             ZZS->ZZS_VALOR  := (_cAlias)->ZZS_VALOR //Novo
+             ZZS->ZZS_TIPOV  := (_cAlias)->ZZS_TIPOV //Novo
+             ZZS->ZZS_COOR	:= cCoord
+             ZZS->ZZS_NMCOOR	:= cNmCoor
+             ZZS->ZZS_ANOMES	:= cAMes
+             ZZS->(MSUnLock())
 
-                AOMS063Ger("GERAR_VALORES_POR_DATA",ZZS->ZZS_ANOMES)
+             ZGW->(RecLock("ZGW",.T.))//INCLUSAO3
+             ZGW->ZGW_FILIAL	:= FWxfilial("ZGW")
+             ZGW->ZGW_COD	:= (_cAlias)->COD
+             ZGW->ZGW_DESCR	:= (_cAlias)->DESCR
+             ZGW->ZGW_DESCD	:= (_cAlias)->DESCD
+             ZGW->ZGW_UM		:= (_cAlias)->UM1
+             ZGW->ZGW_QTD   	:= (_cAlias)->QTD1UM
+             ZGW->ZGW_2UM	:= (_cAlias)->UM2
+             ZGW->ZGW_QTD2UM	:= (_cAlias)->QTD2UM
+             ZGW->ZGW_3UM    := ZZS->ZZS_3UM   //Novo
+             ZGW->ZGW_QTD3UM := ZZS->ZZS_QTD3UM//Novo
+             ZGW->ZGW_VALOR	:= ZZS->ZZS_VALOR //Novo
+             ZGW->ZGW_TIPOV	:= ZZS->ZZS_TIPOV //Novo
+             ZGW->ZGW_DATAM  := ZZS->ZZS_DATA  //Novo
+             ZGW->ZGW_COOR	:= cCoord
+             ZGW->ZGW_NMCOOR	:= cNmCoor
+             ZGW->ZGW_ANOMES	:= cAMes
+             ZGW->ZGW_OPER   := "INCLUSAO3"
+             ZGW->ZGW_USER   := _cUserName
+             ZGW->ZGW_DATA   := Date()
+             ZGW->ZGW_HORA   := Time()
+             ZGW->(MSUnLock())
 
-                (_cAlias)->(Dbskip())
-                lGravouDados:=.T.
-                IF !"["+cAMes+"] " $ cGravados
-                    cGravados+="["+cAMes+"] "
-                EndIf
-            Enddo
-           (_cAlias)->(dbCloseArea())
-        Else
-           cJaGravados+="["+cAMes+"] "
-        EndIf
-    Next x
+             AOMS063Ger("GERAR_VALORES_POR_DATA",ZZS->ZZS_ANOMES)
 
-    IF lGravouDados
-       u_itmsg("Replicação Concluida Com Sucesso","Atenção","Mes(es) gravado(s): "+cGravados,2)
-       cChama = "RECARREGA"
-       oDlgLIb:End()
-    ELSE
-       u_itmsg("Nenhum registro replicado. Esse(s) mes(es) já estão gravado(s): "+cJaGravados,"Atenção","Selecione um mes que não tenha metas no mes seguinte em diante.",2)
-    ENDIF
+             (_cAlias)->(DBSkip())
+             lGravouDados:=.T.
+             If !"["+cAMes+"] " $ cGravados
+                 cGravados+="["+cAMes+"] "
+             EndIf
+         EndDo
+        (_cAlias)->(DBCloseArea())
+     Else
+        cJaGravados+="["+cAMes+"] "
+     EndIf
+ Next x
+
+ If lGravouDados
+    U_ITMsg("Replicação Concluida Com Sucesso","Atenção","Mes(es) gravado(s): "+cGravados,2)
+    cChama = "RECARREGA"
+    oDlgLIb:End()
+ Else
+    U_ITMsg("Nenhum registro replicado. Esse(s) mes(es) já estão gravado(s): "+cJaGravados,"Atenção","Selecione um mes que não tenha metas no mes seguinte em diante.",2)
+ EndIf
 
 Return
 
@@ -1337,18 +1331,24 @@ Parametros--------: oProc - Objeto do processo
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function AOMS063G(oProc)
+Static Function AOMS063G(oProc As Object)
 
- Local cTitulo	:= "Alteração de Metas de Vendas",_l
- Local lRetMod2  := .F. // Retorno da função Modelo2 - .T. Confirmou / .F. Cancelou
- Private nOpcx := 4
+ Local cTitulo	:= "Alteração de Metas de Vendas" As Char
+ Local lRetMod2 := .F. As Logical // Retorno da função Modelo2 - .T. Confirmou / .F. Cancelou
+ Local _l := 0 As Numeric
+ Local cLinhaOk := "" As Char
+ Local cTudoOk  := "" As Char
+ Local aCGD     := {} As Array
+ Local ACORDW   := {} As Array
+ Local aButtons := {} As Array
+ Private nOpcx  := 4 As Numeric
 
- If(EMPTY(TMP->ANOMES))
-   u_itmsg("Não Há Tabela a ser alterada","Atenção",,1)
-   RETURN .F.
- ElseIf TMP->ANOMES < LEFT(DTOS(Date()),6)
-   u_itmsg("Metas com data menor que "+LEFT(DTOS(Date()),4)+"-"+Substr(DTOS(Date()),5,2)+" não podem serem alteradas.","Atenção",,1)
-   RETURN .F.
+ If(Empty(TMP->ANOMES))
+   U_ITMsg("Não Há Tabela a ser alterada","Atenção",,1)
+   Return
+ ElseIf TMP->ANOMES < LEFT(DToS(Date()),6)
+   U_ITMsg("Metas com data menor que "+LEFT(DToS(Date()),4)+"-"+SubStr(DToS(Date()),5,2)+" não podem serem alteradas.","Atenção",,1)
+   Return
  EndIf
 
  nUsado:=0
@@ -1366,20 +1366,20 @@ Static Function AOMS063G(oProc)
  cAnoMes:= TMP->ANOMES
  cCoord := TMP->COORD
  cNmCoor:= TMP->NMCOORD
- cTipoor:= POSICIONE("SA3",1,xFilial("SA3")+TMP->COORD,"A3_I_TIPV")//V=VENDEDOR;C=COORDENADOR;G=GERENTE;S=SUPERVISOR;N=GERENCIA NACIONAL
- IF cTipoor == "V"
+ cTipoor:= Posicione("SA3",1,FWxfilial("SA3")+TMP->COORD,"A3_I_TIPV")//V=VENDEDOR;C=COORDENADOR;G=GERENTE;S=SUPERVISOR;N=GERENCIA NACIONAL
+ If cTipoor == "V"
      cTipoor := "Vendedor"
- ELSEIF cTipoor == "C"
+ ElseIf cTipoor == "C"
      cTipoor := "Coordenador"
- ELSEIF cTipoor == "G"
+ ElseIf cTipoor == "G"
      cTipoor := "Gerente"
- ELSEIF cTipoor == "S"
+ ElseIf cTipoor == "S"
      cTipoor := "Supervisor"
- ELSEIF cTipoor == "N"
+ ElseIf cTipoor == "N"
      cTipoor := "Gerencia Nacional"
- ELSE
+ Else
      cTipoor := "Tipo de Vendedor não encontrado"
- ENDIF
+ EndIf
 
  aC:={}
  // aC[n,1] = Nome da Variavel Ex.:"cCliente"
@@ -1388,16 +1388,14 @@ Static Function AOMS063G(oProc)
  // aC[n,4] = Picture
  // aC[n,5] = Validacao
  // aC[n,6] = F3
- // aC[n,7] = Se campo e' editavel .t. se nao .f.
+ // aC[n,7] = Se campo e' editavel .T. se nao .F.
  //"ALTERAÇÃO DE METAS DE VENDAS"
- Aadd(aC,{"cAnoMes",{15,003}," Ano-Mes ","@R 9999-99",,,.F.})
- Aadd(aC,{"cCoord" ,{15,080}," Codigo " ,"@!","U_AOMS063V('CCOORD') .And. (ExistCPO('SA3'))","SA3",.F.})
- Aadd(aC,{"cNmCoor",{15,155}," Nome "   ,"@!",,,.F.})
- Aadd(aC,{"cTipoor",{30,003}," Tipo "   ,"@!",,,.F.})
+ AAdd(aC,{"cAnoMes",{15,003}," Ano-Mes ","@R 9999-99",,,.F.})
+ AAdd(aC,{"cCoord" ,{15,080}," Codigo " ,"@!","U_AOMS063V('CCOORD') .And. (ExistCPO('SA3'))","SA3",.F.})
+ AAdd(aC,{"cNmCoor",{15,155}," Nome "   ,"@!",,,.F.})
+ AAdd(aC,{"cTipoor",{30,003}," Tipo "   ,"@!",,,.F.})
 
- //================================================================
  // Array com descricao dos campos do Rodape do Modelo 2
- //================================================================
 
  aR:={}
  // aR[n,1] = Nome da Variavel Ex.:"cCliente"
@@ -1406,40 +1404,36 @@ Static Function AOMS063G(oProc)
  // aR[n,4] = Picture
  // aR[n,5] = Validacao
  // aR[n,6] = F3
- // aR[n,7] = Se campo e' editavel .t. se nao .f.
+ // aR[n,7] = Se campo e' editavel .T. se nao .F.
  aCols:= {}
  //------------MONTA OS ITENS COM OS DADOS-----------------------//
-_nCont:=0
- ZZS->(DbSetOrder(7))//ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD+ZZS_DATA
- ZZS->(MsSeek(xFilial("ZZS")+cAnoMes+cCoord))
- Do While ZZS->(!EOF()).AND. cAnoMes == ZZS->ZZS_ANOMES .AND. cCoord == ZZS->ZZS_COOR
-    IF !EMPTY(ZZS->ZZS_DATA)
-       ZZS->(Dbskip())
+ _nCont:=0
+ ZZS->(DBSetOrder(7))//ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD+ZZS_DATA
+ ZZS->(MSSeek(FWxfilial("ZZS")+cAnoMes+cCoord))
+ While ZZS->(!Eof()).AND. cAnoMes == ZZS->ZZS_ANOMES .And. cCoord == ZZS->ZZS_COOR
+    If !Empty(ZZS->ZZS_DATA)
+       ZZS->(DBSkip())
        Loop
-    Endif
+    EndIf
     _nCont++
     oProc:cCaption := ( "V-Lendo Metas: " + StrZero(_nCont,5))
     ProcessMessages()
-    Aadd(aCols,{ZZS->ZZS_COD,ZZS->ZZS_DESCR,ZZS->ZZS_DESCD,ZZS->ZZS_QTD,ZZS->ZZS_UM,ZZS->ZZS_QTD2UM,;
+    AAdd(aCols,{ZZS->ZZS_COD,ZZS->ZZS_DESCR,ZZS->ZZS_DESCD,ZZS->ZZS_QTD,ZZS->ZZS_UM,ZZS->ZZS_QTD2UM,;
                 ZZS->ZZS_2UM,ZZS->ZZS_QTD3UM,ZZS->ZZS_3UM,ZZS->ZZS_VALOR,.F.})//Novos
-    ZZS->(Dbskip())
- Enddo
+    ZZS->(DBSkip())
+ EndDo
 
- //================================================================
  // Array com coordenadas da GetDados no modelo2
- //================================================================
  aCGD:={60,06,26,74}
  ACORDW  := {ASIZE[7],0,ASIZE[6],ASIZE[5]}
  aButtons:={}
- _bProdDia:={|| FwMsgRun( ,{|oProc| AOMS063Ger("LISTA_META_POR_DIA",cAnoMes,cCoord) }, 'A-Aguarde!' , 'A-Lendo as datas/metas do Produto...'  )  }
- Aadd(aButtons,{"",_bProdDia,"x% por Produto/Dia","% por Produto/Dia"})
+ _bProdDia:={|| FWMsgRun( ,{|oProc| AOMS063Ger("LISTA_META_POR_DIA",cAnoMes,cCoord) }, 'A-Aguarde!' , 'A-Lendo As datas/metas do Produto...'  )  }
+ AAdd(aButtons,{"",_bProdDia,"x% por Produto/Dia","% por Produto/Dia"})
  cLinhaOk:="U_AOMS063O()"
  cTudoOk :="U_AOMS063Z(.F.)"//"ALTERAÇÃO DE METAS DE VENDAS"
- //================================================================
  // Chamada da Modelo2
- //================================================================
- // lRetMod2 = .t. se confirmou
- // lRetMod2 = .f. se cancelou
+ // lRetMod2 = .T. se confirmou
+ // lRetMod2 = .F. se cancelou
  //		          cTitulo [ aC ] [ aR ] [ aGd ] [ nOp ] [ cLinhaOk ] [ cTudoOk ] aGetsD [ bF4 ] [ cIniCpos ] [ nMax ] [ aCordW ] [ lDelGetD ] [ lMaximazed ] [ aButtons ]
  lRetMod2:=Modelo2(cTitulo,aC    ,  aR  , aCGD  ,nOpcx  ,  cLinhaOk  ,  cTudoOk  ,      ,       ,            ,  9999  ,  ACORDW  ,    .T.     ,    .T.       ,aButtons)
 
@@ -1448,21 +1442,21 @@ _nCont:=0
 
  If lRetMod2 // Gravacao. . .
 
-    nPosProd := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'   } )
-    nPosDesc := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCR' } )
-    nPosDesD := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCD' } )
-    nPosUM	 := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_UM'    } )
-    nPosQtd	 := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD'   } )
-    nPos2UM	 := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_2UM'   } )
-    nPos2Qtd := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD2UM'} )
-    nPos3UM  := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_3UM'   } )//Novo
-    nPos3Qtd := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD3UM'} )//Novo
-    nPosVal  := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_VALOR' } )//Novo
+    nPosProd := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'   } )
+    nPosDesc := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCR' } )
+    nPosDesD := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCD' } )
+    nPosUM	 := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_UM'    } )
+    nPosQtd	 := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD'   } )
+    nPos2UM	 := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_2UM'   } )
+    nPos2Qtd := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD2UM'} )
+    nPos3UM  := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_3UM'   } )//Novo
+    nPos3Qtd := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD3UM'} )//Novo
+    nPosVal  := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_VALOR' } )//Novo
 
     _cReg:=AllTrim(Str(Len(aCols)))
     _nCont:=0
 
-    ZZS->(DbSetOrder(7))//ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD+ZZS_DATA
+    ZZS->(DBSetOrder(7))//ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD+ZZS_DATA
     For _l := 1 To Len(aCols)
 
         _nCont++
@@ -1471,7 +1465,7 @@ _nCont:=0
 
         If !Atail(aCols[_l])
 
-            IF !ZZS->(MsSeek(xFilial("ZZS")+cAnoMes+cCoord+aCols[_l,nPosProd]+"      "))//INCLUSAO
+            If !ZZS->(MSSeek(FWxfilial("ZZS")+cAnoMes+cCoord+aCols[_l,nPosProd]+"      "))//INCLUSAO
                ZZS->(RecLock("ZZS",.T.))//INCLUSAO4
                ZZS->ZZS_ANOMES	:= cAnoMes
                ZZS->ZZS_COOR 	:= cCoord
@@ -1492,11 +1486,11 @@ _nCont:=0
             ZZS->ZZS_3UM    := aCols[_l,nPos3UM ]//Novo
             ZZS->ZZS_QTD3UM := aCols[_l,nPos3Qtd]//Novo
             ZZS->ZZS_VALOR  := aCols[_l,nPosVal ]//Novo
-            ZZS->ZZS_TIPOV  := POSICIONE("SA3",1,xFilial("SA3")+cCoord,"A3_I_TIPV")//Novo
-            ZZS->(MsUnLock())
+            ZZS->ZZS_TIPOV  := Posicione("SA3",1,FWxfilial("SA3")+cCoord,"A3_I_TIPV")//Novo
+            ZZS->(MSUnLock())
 
             ZGW->(RecLock("ZGW",.T.))//ALTERADO1 / INCLUSAO4
-            ZGW->ZGW_FILIAL := xFilial("ZGW")
+            ZGW->ZGW_FILIAL := FWxfilial("ZGW")
             ZGW->ZGW_COD    := ZZS->ZZS_COD
             ZGW->ZGW_DESCR  := ZZS->ZZS_DESCR
             ZGW->ZGW_DESCD  := ZZS->ZZS_DESCD
@@ -1514,18 +1508,18 @@ _nCont:=0
             ZGW->ZGW_ANOMES := ZZS->ZZS_ANOMES
             ZGW->ZGW_OPER   := _COPER
             ZGW->ZGW_USER   := _cUserName
-            ZGW->ZGW_DATA   := DATE()
-            ZGW->ZGW_HORA   := TIME()
-            ZGW->(MsUnLock())
+            ZGW->ZGW_DATA   := Date()
+            ZGW->ZGW_HORA   := Time()
+            ZGW->(MSUnLock())
             lGravouDados:=.T.
 
             AOMS063Ger("GERAR_VALORES_POR_DATA",ZZS->ZZS_ANOMES)
 
         Else//EXCLUSAO
 
-            IF ZZS->(MsSeek(xFilial("ZZS")+cAnoMes+cCoord+aCols[_l,nPosProd]+"      "))
+            If ZZS->(MSSeek(FWxfilial("ZZS")+cAnoMes+cCoord+aCols[_l,nPosProd]+"      "))
                ZGW->(RecLock("ZGW",.T.))//EXCLUSAO_LINHA_PRODUTO
-               ZGW->ZGW_FILIAL := xFilial("ZGW")
+               ZGW->ZGW_FILIAL := FWxfilial("ZGW")
                ZGW->ZGW_COD    := ZZS->ZZS_COD
                ZGW->ZGW_DESCR  := ZZS->ZZS_DESCR
                ZGW->ZGW_DESCD  := ZZS->ZZS_DESCD
@@ -1543,28 +1537,28 @@ _nCont:=0
                ZGW->ZGW_ANOMES := ZZS->ZZS_ANOMES
                ZGW->ZGW_OPER   := "EXCLUSAO_LINHA_PRODUTO"
                ZGW->ZGW_USER   := _cUserName
-               ZGW->ZGW_DATA   := DATE()
-               ZGW->ZGW_HORA   := TIME()
-               ZGW->(MsUnLock())
+               ZGW->ZGW_DATA   := Date()
+               ZGW->ZGW_HORA   := Time()
+               ZGW->(MSUnLock())
 
                AOMS063Ger("EXCLUIR_VALORES_POR_DATA")
 
                ZZS->(RecLock("ZZS",.F.))//EXCLUSAO_LINHA_PRODUTO
                ZZS->(dbDelete())
-               ZZS->(MsUnLock())
+               ZZS->(MSUnLock())
                lGravouDados:=.T.
 
-            ENDIF
+            EndIf
         EndIf
     Next _l
 
  EndIf
 
- IF lGravouDados
-    u_itmsg("Alteração Concluida Com Sucesso","Atenção",,2)
+ If lGravouDados
+    U_ITMsg("Alteração Concluida Com Sucesso","Atenção",,2)
     //cChama = "RECARREGA" Não precisa recarregar na alteração
     oDlgLIb:End()
- ENDIF
+ EndIf
 
 Return
 
@@ -1581,14 +1575,14 @@ Parametros--------: oProc - objeto de processamento
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function AOMS063N(oProc)
+Static Function AOMS063N(oProc As Object)
 
  Local _nOpcao:= 0 As Numeric
- Local cAno   := SUBSTR(TMP->ANOMES,5,2)+"-"+SUBSTR(TMP->ANOMES,1,4) // Mes/Ano  As Char
- Local cCoo   := TMP->COORD   As Char
+ Local cAno   := SubStr(TMP->ANOMES,5,2)+"-"+SubStr(TMP->ANOMES,1,4) As Char// Mes/Ano  As Char
+ Local cCoo   := TMP->COORD  As Char
  Local cCooD  := AllTrim(TMP->NMCOORD) As Char
 
- _nOpcao:=AVISO("AOMS063N - Exclusão de Metas de Vendas","Deseja Excluir as metas do Mes: "+cAno+" todo de todos os coordenadores ou somente as metas do Coord/Vend: "+cCoo+" - "+cCooD,;
+ _nOpcao:=AVISO("AOMS063N - Exclusão de Metas de Vendas","Deseja Excluir As metas do Mes: "+cAno+" todo de todos os coordenadores ou somente As metas do Coord/Vend: "+cCoo+" - "+cCooD,;
                {"SIM p/ Mes"        ,;   // 01
                 "SIM p/ Coordenador",;   // 02
                 "Cancelar"        },2)   // 03
@@ -1598,17 +1592,17 @@ Static Function AOMS063N(oProc)
  If _nOpcao <> 3// Se não Cancelou
      _nCont:=0
      lGravouDados:=.F.
-     ZZS->(DbSetOrder(4))
-     ZZS->(MsSeek(xFilial("ZZS")+TMP->ANOMES+IF(_nOpcao=2,TMP->COORD,"")))
+     ZZS->(DBSetOrder(4))
+     ZZS->(MSSeek(FWxfilial("ZZS")+TMP->ANOMES+If(_nOpcao=2,TMP->COORD,"")))
 
-     DO While !ZZS->(EoF()) .And. TMP->ANOMES == ZZS->ZZS_ANOMES .And. IF(_nOpcao=2,(TMP->COORD == ZZS->ZZS_COOR),.T.)
+     While !ZZS->(Eof()) .And. TMP->ANOMES == ZZS->ZZS_ANOMES .And. If(_nOpcao=2,(TMP->COORD == ZZS->ZZS_COOR),.T.)
 
          _nCont++
-         oProc:cCaption := ( "Excluindo metas: " + StrZero(_nCont,6)+" - Data: "+DTOC(ZZS->ZZS_DATA)  )
+         oProc:cCaption := ( "Excluindo metas: " + StrZero(_nCont,6)+" - Data: "+DToC(ZZS->ZZS_DATA)  )
          ProcessMessages()
 
          ZGW->(RecLock("ZGW",.T.))//EXCLUSAO_Mes-Ano_Coord/Vend - EXCLUSAO_Mes-Ano
-         ZGW->ZGW_FILIAL:= xFilial("ZGW")
+         ZGW->ZGW_FILIAL:= FWxfilial("ZGW")
          ZGW->ZGW_COD   := ZZS->ZZS_COD
          ZGW->ZGW_DESCR	:= ZZS->ZZS_DESCR
          ZGW->ZGW_DESCD	:= ZZS->ZZS_DESCD
@@ -1624,35 +1618,35 @@ Static Function AOMS063N(oProc)
          ZGW->ZGW_COOR  := ZZS->ZZS_COOR
          ZGW->ZGW_NMCOOR:= ZZS->ZZS_NMCOOR
          ZGW->ZGW_ANOMES:= ZZS->ZZS_ANOMES
-         ZGW->ZGW_OPER  := IF(_nOpcao=2,"EXCLUSAO_Mes-Ano_Coord/Vend","EXCLUSAO_Mes-Ano")
+         ZGW->ZGW_OPER  := If(_nOpcao=2,"EXCLUSAO_Mes-Ano_Coord/Vend","EXCLUSAO_Mes-Ano")
          ZGW->ZGW_USER  := _cUserName
-         ZGW->ZGW_DATA  := DATE()
-         ZGW->ZGW_HORA  := TIME()
-         ZGW->(MsUnLock())
+         ZGW->ZGW_DATA  := Date()
+         ZGW->ZGW_HORA  := Time()
+         ZGW->(MSUnLock())
 
          lGravouDados:=.T.
 
          ZZS->(RecLock("ZZS",.F.))//EXCLUSAO_Mes-Ano_Coord/Vend - EXCLUSAO_Mes-Ano
          ZZS->(DbDelete())
-         ZZS->(MsUnLock())
+         ZZS->(MSUnLock())
 
-        ZZS->(Dbskip())
-     Enddo
+        ZZS->(DBSkip())
+     EndDo
 
-     IF _nOpcao=2
+     If _nOpcao=2
          TMP->(DbDelete())   //Atual
-         TMP->(dbskip())     //VAI PARA O PROXIMO
-         iF TMP->(Eof())     //SE EOF()
-            TMP->(DbSkip(-1))//VOLTA UM
-         Endif
-         u_itmsg("Mes-Ano: "+cAno+" do Coord/Vend: "+cCoo+" - "+cCooD+" Excluida Com Sucesso","Atenção",,2)
+         TMP->(DBSkip())     //VAI PARA O PROXIMO
+         If TMP->(Eof())     //SE Eof()
+            TMP->(DBSkip(-1))//VOLTA UM
+         EndIf
+         U_ITMsg("Mes-Ano: "+cAno+" do Coord/Vend: "+cCoo+" - "+cCooD+" Excluida Com Sucesso","Atenção",,2)
          oMark:oBrowse:Refresh(.T.)
 
-     ELSE
-         u_itmsg("Mes-Ano: "+cAno+" Excluido Com Sucesso","Atenção",,2)
+     Else
+         U_ITMsg("Mes-Ano: "+cAno+" Excluido Com Sucesso","Atenção",,2)
          cChama := "RECARREGA" //Reinicia tela
          oDlgLIb:End()
-     Endif
+     EndIf
 
  EndIf
 
@@ -1669,16 +1663,15 @@ Parametros--------: Nenhum
 Retorno-----------: lRet - True se emcontro produtos
 ===============================================================================================================================
 */
-Static Function AOMS063B()
- Local I
- nPosProd := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'} )
- lRet := .T.
- For I:= 1 to Len(aCols)
+Static Function AOMS063B() As Logical
+ Local I As Numeric
+ Local nPosProd := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'} ) As Numeric
+  For I:= 1 to Len(aCols)
      If !Empty(aCols[I,nPosProd]) .And. !Atail(aCols[I])
          Return .F.
      EndIf
  Next I
-Return lRet
+Return .T.
 
 /*
 ===============================================================================================================================
@@ -1690,34 +1683,34 @@ Parametros--------: oProc
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function AOMS063U(oProc)
- Local _cAlias:=GetNextAlias()
- Local cQuery := " SELECT ZZS.ZZS_COOR COORD, ZZS.ZZS_NMCOOR NMCOORD, ZZS.ZZS_ANOMES ANOMES "
+Static Function AOMS063U(oProc As Object)
+ Local _cAlias:=GetNextAlias() As Char
+ Local cQuery := " SELECT ZZS.ZZS_COOR COORD, ZZS.ZZS_NMCOOR NMCOORD, ZZS.ZZS_ANOMES ANOMES " As Char
  cQuery += " FROM ZZS010 ZZS "
- cQuery += " WHERE ZZS_FILIAL = '"+xFilial("ZZS")+"' "
+ cQuery += " WHERE ZZS_FILIAL = '"+FWxfilial("ZZS")+"' "
  cQuery += " AND D_E_L_E_T_ = ' ' "
- IF LEN(_cAnoIni) = 4 
+ If Len(_cAnoIni) = 4
     cQuery += " AND SubStr(ZZS.ZZS_ANOMES,1,4) >= '" + _cAnoIni+"' "
  ElseIf !Empty(_cAnoIni)
     cQuery += " AND ZZS.ZZS_ANOMES >= '" + _cAnoIni+"' "
- Endif
- IF LEN(_cAnoFim) = 4 
+ EndIf
+ If Len(_cAnoFim) = 4
     cQuery += " AND SubStr(ZZS.ZZS_ANOMES,1,4) >= '" + _cAnoFim+"' "
  ElseIf !Empty(_cAnoFim)
     cQuery += " AND ZZS.ZZS_ANOMES <= '" + _cAnoFim+"' "
- Endif
+ EndIf
  cQuery += " GROUP BY ZZS.ZZS_COOR, ZZS_NMCOOR, ZZS.ZZS_ANOMES "
 
  MPSysOpenQuery( cQuery , _cAlias)
 
  aCpoTmp:={}
- Aadd(aCpoTmp,{"ANOMES" ,"C",06,0})
- Aadd(aCpoTmp,{"COORD"  ,"C",06,0})
- Aadd(aCpoTmp,{"NMCOORD","C",60,0})
- Aadd(aCpoTmp,{"TIPO"   ,"C",40,0})
- Aadd(aCpoTmp,{"BLOQ"   ,"C",03,0})
+ AAdd(aCpoTmp,{"ANOMES" ,"C",06,0})
+ AAdd(aCpoTmp,{"COORD"  ,"C",06,0})
+ AAdd(aCpoTmp,{"NMCOORD","C",60,0})
+ AAdd(aCpoTmp,{"TIPO"   ,"C",40,0})
+ AAdd(aCpoTmp,{"BLOQ"   ,"C",03,0})
 
- If Select("TMP") > 0 .AND. TYPE("_oTemp") == "O"
+ If Select("TMP") > 0 .And. Type("_oTemp") == "O"
      _oTemp:Delete()
  EndIf
 
@@ -1730,192 +1723,53 @@ Static Function AOMS063U(oProc)
 
  _nCont:=0
  _cReg:=0
- dbSelectArea(_cAlias)
+ DBSelectArea(_cAlias)
   COUNT TO _cReg
  _cReg:=AllTrim(Str(_cReg))
- (_cAlias)->(dbGoTop())
+ (_cAlias)->(DBGoTop())
 
- DO While !(_cAlias)->(EOF())
+ While !(_cAlias)->(Eof())
 
      _nCont++
      oProc:cCaption := ( "Lendo Metas: " + StrZero(_nCont,5) + " de " + _cReg)
      ProcessMessages()
 
-     cTipoor     := POSICIONE("SA3",1,xFilial("SA3")+(_cAlias)->COORD,"A3_I_TIPV")//V=VENDEDOR;C=COORDENADOR;G=GERENTE;S=SUPERVISOR;N=GERENCIA NACIONAL
-     IF cTipoor == "V"
+     cTipoor     := Posicione("SA3",1,FWxfilial("SA3")+(_cAlias)->COORD,"A3_I_TIPV")//V=VENDEDOR;C=COORDENADOR;G=GERENTE;S=SUPERVISOR;N=GERENCIA NACIONAL
+     If cTipoor == "V"
          cTipoor := "Vendedor"
-     ELSEIF cTipoor == "C"
+     ElseIf cTipoor == "C"
          cTipoor := "Coordenador"
-     ELSEIF cTipoor == "G"
+     ElseIf cTipoor == "G"
          cTipoor := "Gerente"
-     ELSEIF cTipoor == "S"
+     ElseIf cTipoor == "S"
          cTipoor := "Supervisor"
-     ELSEIF cTipoor == "N"
+     ElseIf cTipoor == "N"
          cTipoor := "Gerencia Nacional"
-     ELSE
+     Else
          cTipoor := "Tipo de Vendedor não encontrado"
-     ENDIF
+     EndIf
 
      TMP->(DbAppend())
      TMP->COORD  := (_cAlias)->COORD
      TMP->ANOMES := (_cAlias)->ANOMES
      TMP->NMCOORD:= (_cAlias)->NMCOORD
      TMP->TIPO   := cTipoor
-     TMP->BLOQ   := IF(SA3->A3_MSBLQL = '1', "SIM", "NAO")
-     (_cAlias)->(Dbskip())
+     TMP->BLOQ   := If(SA3->A3_MSBLQL = '1', "SIM", "NAO")
+     (_cAlias)->(DBSkip())
 
- Enddo
+ EndDo
 
- (_cAlias)->(dbCloseArea())
+ (_cAlias)->(DBCloseArea())
 
- TMP->(DBGOTOP())
+ TMP->(DBGoTop())
  aCpoBrw:={}
- Aadd(aCpoBrw,{"ANOMES" ,""	,"Ano - Mes"            ,"@R 9999-99","06","0"})
- Aadd(aCpoBrw,{"COORD"  ,""	,"Codigo"               ,"@!"        ,"06","0"})
- Aadd(aCpoBrw,{"NMCOORD",""	,"Nome"                 ,"@!"        ,"60","0"})
- Aadd(aCpoBrw,{"TIPO"   ,""	,"Tipo"                 ,"@!"        ,"40","0"})
- Aadd(aCpoBrw,{"BLOQ"   ,""	,"Coor.\Vend.Bloqueado?","@!"        ,"20","0"})
+ AAdd(aCpoBrw,{"ANOMES" ,""	,"Ano - Mes"            ,"@R 9999-99","06","0"})
+ AAdd(aCpoBrw,{"COORD"  ,""	,"Codigo"               ,"@!"        ,"06","0"})
+ AAdd(aCpoBrw,{"NMCOORD",""	,"Nome"                 ,"@!"        ,"60","0"})
+ AAdd(aCpoBrw,{"TIPO"   ,""	,"Tipo"                 ,"@!"        ,"40","0"})
+ AAdd(aCpoBrw,{"BLOQ"   ,""	,"Coor.\Vend.Bloqueado?","@!"        ,"20","0"})
 
 Return
-
-/*
-===============================================================================================================================
-Programa----------: AOMS063E
-Autor-------------: Josué Danich Prestes
-Data da Criacao---: 19/04/2018
-Descrição---------: Exporta tabela de dados
-Parametros--------: Nenhum
-Retorno-----------: Nenhum
-===============================================================================================================================
-Static Function AOMS063E()
- If Pergunte( 'AOMS063' )
-    If empty(MV_PAR01)
-        U_ITMSG("Preenchimento do mês e ano é obrigatório!","Atenção",,1)
-        Return
-    Else
-        FwMsgRun( ,{|| _aAlias := AOMS063L() } , 'Aguarde!' , 'Verificando os registros...' )
-    Endif
- EndIf
-Return*/
-
-/*
-===============================================================================================================================
-Programa----------: AOMS063L
-Autor-------------: Josué Danich Prestes
-Data da Criacao---: 19/04/2018
-Descrição---------: Gera tabela de exportação
-Parametros--------: Nenhum
-Retorno-----------: Nenhum
-===============================================================================================================================
-Static Function AOMS063L()
-
- Local _cquery := ""
- Local calias  := GetNextAlias()
- Local _aLista := {}
- Local _ni		:= 0
- Local _nii		:= 0
-
- _cQuery := " SELECT "
- _cQuery += "    ZZS_COD,ZZS_DESCR,ZZS_DESCD,ZZS_QTD,ZZS_UM,ZZS_QTD2UM,ZZS_2UM,ZZS_COOR,ZZS_NMCOOR,ZZS_ANOMES"
- _cQuery += " FROM "+ RetSqlName("ZZS") +" ZZS "
- _cQuery += " WHERE ZZS.D_E_L_E_T_	= ' ' "
- If !empty(MV_PAR01)
-     _cQuery += " AND	ZZS.ZZS_ANOMES	= '"+ MV_PAR01 +"' "
- Endif
- If !empty(MV_PAR02)
-     _cQuery += " AND	ZZS.ZZS_COOR	>= '"+ MV_PAR02 +"' "
-     _cQuery += " AND	ZZS.ZZS_COOR	<= '"+ MV_PAR03 +"' "
- Endif
- _cQuery += " ORDER BY ZZS_ANOMES,ZZS_COOR,ZZS_DESCR"
-
- MPSysOpenQuery( _cQuery , cAlias)
-
- //Popula array com coordenadores/vendedores
- _avend := {}
-
- Do While  (cAlias)->(!Eof())
-
-    If Ascan(_avend,(cAlias)->ZZS_COOR + "/" + (cAlias)->ZZS_NMCOOR) == 0  .and. !empty((cAlias)->ZZS_COOR)
-        Aadd(_avend,(cAlias)->ZZS_COOR+ "/" + (cAlias)->ZZS_NMCOOR)
-        Aadd(_avend,"UN")
-    Endif
-    (cAlias)->(Dbskip())
-
- Enddo
-
- (cAlias)->( DBGoTop() )
-
- Do While  (cAlias)->(!Eof())
-
-    _nposi := Ascan(_aLista,{|x| x[3] = AllTrim((cAlias)->ZZS_COD)})
-
-    If _nposi == 0
-
-        Aadd(_aLista,{ MV_PAR01,;
-                        AllTrim((cAlias)->ZZS_DESCR) ,;
-                        (cAlias)->ZZS_COD  })
-
-        For _ni := 1 to Len(_avend)
-
-            If Ascan(_avend,(cAlias)->ZZS_COOR + "/" + (cAlias)->ZZS_NMCOOR) == _ni
-
-                Aadd(_aLista[Len(_aLista)],(cAlias)->ZZS_QTD2UM)
-                Aadd(_aLista[Len(_aLista)],(cAlias)->ZZS_2UM)
-
-            Else
-
-                Aadd(_aLista[Len(_aLista)],0)
-                Aadd(_aLista[Len(_aLista)],(cAlias)->ZZS_2UM)
-
-            Endif
-
-        Next
-
-    Else
-
-        _aLista[_nposi][Ascan(_avend,(cAlias)->ZZS_COOR + "/" + (cAlias)->ZZS_NMCOOR)+3] := (cAlias)->ZZS_QTD2UM
-
-    Endif
-
-    (cAlias)->( Dbskip() )
-
- Enddo
-
- _aHead := {	"ANOMES","PRODUTO","CODIGO","VALOR"}
-
- For _ni := 1 to Len(_avend)
-    Aadd(_aHead,_avend[_ni])
- Next
-
-
- //Correcao de linhas para excluir colunas extras
- _atemp := {}
-
- For _ni := 1 to Len(_aLista)
-
-    Aadd(_atemp, {})
-    For _nii := 1 to Len(_aLista[_ni])
-
-        If _nii <= Len(_aHead)
-
-            Aadd(_atemp[Len(_atemp)],_aLista[_ni][_nii])
-
-        Endif
-
-    Next
-
- Next
- (_cAlias)->(dbCloseArea())
- _aLista := _atemp
-
- If Len(_aLista) > 0
-   U_ITListBox( "Metas Venda",	_aHead,	 _aLista , .F. , 1,"Metas Venda"  )
- Else
-    u_itmsg("Não foram Localizados registros com os parâmetros indicados","Atenção",,1)
- Endif
-
-Return*/
-
 
 /*
 ===============================================================================================================================
@@ -1927,219 +1781,286 @@ Parametros--------: oProc
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function AOMS063K(oProc)
+Static Function AOMS063K(oProc As Object)
+ Local _aHead    := {}  As Array
+ Local _aLinhas  := {}  As Array
+ Local _aParAux  := {}  As Array
+ Local _aParRet  := {}  As Array
+ Local _aErros   := {}  As Array
+ Local _aDados   := {}  As Array
+ Local I         := 000 As Numeric
+ Local _nRep     := 000 As Numeric
+ Local _nCont    := 000 As Numeric
+ Local _nReg     := 000 As Numeric
+ Local _nVolume  := 000 As Numeric
+ Local _nValor   := 000 As Numeric
+ Local _nPosDados:= 000 As Numeric
+ Local nColNome  := 000 As Numeric
+ Local nColNprd  := 000 As Numeric
+ Local _oFile    := Nil As Object
+ Local _cArq     := ""  As Char
+ Local _cDados   := ""  As Char
+ Local _cErro    := ""  As Char
+ Local _cAviso   := ""  As Char
+ Local _cValor   := ""  As Char
+ Local _cVolume  := ""  As Char
+ Local _cCodVend := ""  As Char
+ Local _cCodProd := ""  As Char
+ Local _cUnidade := ""  As Char
 
-    Local _cdados := ""
-    Local _aHead  := {}
-    Local _aLinhas:= {}
-    Local I:=_nRep:=0 As numeric
-    Local _aParAux:= {}
-    Local _aParRet:= {}
+ Private nColVen   := 0 As Numeric
+ Private nColPrd   := 0 As Numeric
+ Private nColVol   := 0 As Numeric
+ Private nColVal   := 0 As Numeric
+ Private nColUM    := 0 As Numeric
+ Private _nPosAviso:= 0 As Numeric
+ Private _nColVolCa  := 0 As Numeric
+ Private _nColValCa  := 0 As Numeric
 
-    MV_PAR01 := SPACE(6)
-    MV_PAR02 := SPACE(200)
+ MV_PAR01 := Space(6)
+ MV_PAR02 := Space(200)
 
-    Aadd( _aParAux ,{ 1 ,"Digite o Ano/mes (AAAA-MM)" ,MV_PAR01,"@R 9999-99","",""   ,"" ,015 ,.T. } )
-    Aadd( _aParAux ,{ 1 ,"Selecione arquivo de ajuste",MV_PAR02,"@!"        ,"","DIR","" ,100 ,.T. } )
+ AAdd( _aParAux ,{ 1 ,"Digite o Ano/mes (AAAA-MM)" ,MV_PAR01,"@R 9999-99","",""   ,"" ,015 ,.T. } )
+ AAdd( _aParAux ,{ 1 ,"Selecione arquivo de ajuste",MV_PAR02,"@!"        ,"","DIR","" ,100 ,.T. } )
 
-    For I := 1 To Len( _aParAux )
-        Aadd( _aParRet ,_aParAux[I][03] )
-    Next I
+ For I := 1 To Len( _aParAux )
+     AAdd( _aParRet ,_aParAux[I][03] )
+ Next I
 
-    //aParametros,cTitle                                   ,@aRet    ,[bOk]  ,[ aButtons ] [ lCentered ] [ nPosX ] [ nPosy ] [ oDlgWizard ] [ cLoad ] [ lCanSave ] [ lUserSave ]
-    IF !ParamBox( _aParAux ,"Selecione o Arquivo .CSV para Importar" ,@_aParRet,       ,/*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
-        Return .F.
-    EndIf
+ //aParametros,cTitle                                   ,@aRet    ,[bOk]  ,[ aButtons ] [ lCentered ] [ nPosX ] [ nPosy ] [ oDlgWizard ] [ cLoad ] [ lCanSave ] [ lUserSave ]
+ If !ParamBox( _aParAux ,"Selecione o Arquivo .CSV para Importar" ,@_aParRet,       ,/*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
+     Return
+ EndIf
 
-    _cArq  := AllTrim(MV_PAR02)
-    _oFile := FwFileReader():New(_cArq)
+ _cArq  := AllTrim(MV_PAR02)
+ _oFile := FwFileReader():New(_cArq)
 
-    If !_oFile:Open()
-        U_ItMsg("1-Falha ao abrir o arquivo: "+_cArq,"Erro",,1)
-        Return .F.
-    EndIf
+ If !_oFile:Open()
+     U_ITMsg("1-Falha ao abrir o arquivo: "+_cArq,"Erro",,1)
+     Return
+ EndIf
 
-    oProc:cCaption := ( "Lendo Dados: "+ _cArq )
-    ProcessMessages()
+ oProc:cCaption := ( "Lendo Dados: "+ _cArq )
+ ProcessMessages()
 
-    _cDados := _oFile:GetLine()
+ _cDados := _oFile:GetLine()
 
-    //Verifica segunda linha de headers
-    If !"REGIONAL;COOR.;COD. COOR.;MIX;" $ AllTrim(_cDados) .AND. !"REGIONAL;VEND.;COD. VENDEDOR;MIX;" $ AllTrim(_cDados)
-        u_itmsg("Arquivo não está no layout de metas de venda","Atenção",;
-            "Layout necessario: REGIONAL;COOR. ou VEND.;COD. COOR. ou VENDEDOR;MIX;FAMILIA;GRUPO - AJUSTADO;CODIGO;PRODUTO;VOLUME;UNI. VOL;VALOR (R$)",1)
-        Return .F.
-    Endif
+ //Verifica segunda linha de headers
+ If !"REGIONAL;COOR.;COD. COOR.;MIX;" $ AllTrim(_cDados) .And. !"REGIONAL;VEND.;COD. VENDEDOR;MIX;" $ AllTrim(_cDados)
+     U_ITMsg("Arquivo não está no layout de metas de venda","Atenção",;
+             "Layout necessario: REGIONAL;COOR. ou VEND.;COD. COOR. ou VENDEDOR;MIX;FAMILIA;GRUPO - AJUSTADO;CODIGO;PRODUTO;VOLUME;UNI. VOL;VALOR (R$)",1)
+     Return
+ EndIf
 
-    _aRegs := {}
-    LjMsgRun( "Lendo Arq: "+_cArq , TIME()+" - AGUARDE..." , {|| _aRegs := _oFile:getAllLines() } )
+ _cDados  := AllTrim(_cDados)
+ _aHead   := StrTokArr2(_cDados,";",.T.) //_aHead:={REGIONAL;COOR.;COD. COOR.;MIX;FAMILIA;GRUPO - AJUSTADO;CODIGO;PRODUTO;VOLUME;UNI. VOL;VALOR (R$);ANOMES}
+ _aHead[1]:= "ANO/MES"
+ nColVen  := AScan(_aHead,"COD. "     ) //DO VENDEDOR OU COORDENADOR
+ nColPrd  := AScan(_aHead,"CODIGO"    ) //CODIGO DO PRODUTO
+ nColVol  := AScan(_aHead,"VOLUME"    ) //QUANTIDADE
+ nColVal  := AScan(_aHead,"VALOR (R$)") //VALOR EM Real
+ nColUM   := AScan(_aHead,"UNI. VOL"  ) //UNIDADE DE MEDIDA
 
-    _cDados  := AllTrim(_cDados)
-    _aHead   := StrTokArr2(_cDados,";",.T.) //_aHead:={REGIONAL;COOR.;COD. COOR.;MIX;FAMILIA;GRUPO - AJUSTADO;CODIGO;PRODUTO;VOLUME;UNI. VOL;VALOR (R$);ANOMES}
-    _aHead[1]:= "ANO/MES"
+ If nColVen=0 .Or. nColPrd=0 .Or. nColVol=0 .Or. nColVal=0
+     U_ITMsg("Arquivo não está no layout de metas de venda","Atenção",'Um desses nomes de campo não esta no arquivo: "COD. ", "CODIGO" , "VOLUME", "UNI. VOL" ou "VALOR (R$)"',1)
+     Return
+ EndIf
 
-    Private nColVen:= Ascan(_aHead,"COD. ")//DO VENDEDOR OU COORDENADOR
-    Private nColPrd:= Ascan(_aHead,"CODIGO"    )
-    Private nColVol:= Ascan(_aHead,"VOLUME"    )
-    Private nColVal:= Ascan(_aHead,"VALOR (R$)")
-    Private nColUM := Ascan(_aHead,"UNI. VOL"  )
+ nColNome:=nColVen-1//coluna do nome do vendedor/coordenador
+ nColNprd:=nColPrd+1//coluna do nome do vendedor/coordenador
 
-    IF nColVen=0 .OR. nColPrd=0 .OR. nColVol=0 .OR. nColVal=0
-        u_itmsg("Arquivo não está no layout de metas de venda","Atenção","Um desses nomes de campo não esta no arquivo: COD. , CODIGO , VOLUME, UNI. VOL ou VALOR (R$)",1)
-        Return .F.
-    Endif
+ _aRegs := {}
+ LjMsgRun( "Lendo Arq: "+_cArq , TIME()+" - Aguarde..." , {|| _aRegs := _oFile:getAllLines() } )
 
-    nColNome:=nColVen-1//coluna do nome do vendedor/coordenador
-    nColNprd:=nColPrd+1//coluna do nome do vendedor/coordenador
+ _nReg:= Len(_aRegs)
 
-    _nReg:= Len(_aRegs)
-
-    If _nReg == 0 //O arquivo informado nao possui nenhuma linha de dados
-        U_ITMSG("O arquivo informado para relizar a importação não possui dados.",;
+ If _nReg == 0 //O arquivo informado nao possui nenhuma linha de dados
+    U_ITMsg("O arquivo informado para relizar a importação não possui dados.",;
             "Arquivo inválido",;
             "Favor verificar se o arquivo "+_cArq+" informado esta no formato correto.")
-        Return .F.
+    Return
+ EndIf
+ _nCont := 0
+ _aErros:= {}
+ _aDados:= {}
+ _aSomaDuplic:= {}
+ SB1->(DBSetOrder(1))
+ SA3->(DBSetOrder(1))
+
+ _aCab := {}
+ AAdd(_aCab," ")//COLUNA DAS BOLINHAS VERMELHA E VERDE
+ For _nRep := 1 to Len(_aHead)
+     AAdd(_aCab,_aHead[_nRep])
+ Next _nRep
+ AAdd(_aCab,"Erros")//COLUNA DOS ERROS
+ AAdd(_aCab,"Observações")//COLUNA DOS Avisos
+
+ _nPosAviso:= Len(_aCab)               
+ _nColVolCa:= AScan(_aCab,"VOLUME"    )
+ _nColValCa:= AScan(_aCab,"VALOR (R$)")
+
+ //While (_oFile:hasLine()) // É LENTO
+ For I := 1 To Len(_aRegs)
+
+     _nCont++
+     oProc:cCaption := ( "1/1 - Lendo / Validando linha " + StrZero(_nCont,6) + " de " + StrZero(_nReg,6) + ". Erros: "+StrZero(Len(_aErros),6) )
+     ProcessMessages()
+
+     _cErro :=""//para cada linha Limpa
+     _cAviso:=""//para cada linha Limpa
+     _cDados:= _aRegs[I]//AllTrim(_oFile:GetLine()) // É LENTO
+
+     AAdd(_aLinhas,StrTokArr2(_cDados,";",.T.))
+
+     _nI:= Len(_aLinhas)
+
+     Begin Sequence
+
+         If Len(_aLinhas[_nI]) < Len(_aHead)
+            _cErro += "[Linha " + StrZero(_nI,6) + " com divergência de colunas, verifique se todos As metas contém valores numéricos, em caso de meta zerada deve estar com número 0.] "
+            If Len(_aLinhas[_nI]) < nColVal
+               _nPosDados = 0
+               BREAK
+            EndIf
+         EndIf
+
+         //Normaliza campos de código
+         _aLinhas[_nI][1]      := SubStr(MV_PAR01,5,2)+"/"+SubStr(MV_PAR01,1,4) // Mes/Ano
+         _aLinhas[_nI][nColPrd]:= StrZero(Val(_aLinhas[_nI][nColPrd]),11)
+
+         //NORMALIZA CAMPOS DE VALORES PARA NUMÉRICO
+         _cVolume:=(StrTran(_aLinhas[_nI][nColVol],"." ,"" ))//Remove ponto
+         _cVolume:=(StrTran(_cVolume,"," ,"."))//Troca virgula por ponto das decimais
+
+         _aLinhas[_nI][nColVol]:=  Val(_cVolume) //VOLUME
+         _nVolume              := _aLinhas[_nI][nColVol]
+
+         _cValor:=AllTrim(StrTran(_aLinhas[_nI][nColVal],"R$",""))//Remove R$
+         _cValor:=(StrTran(_cValor,"." ,"" ))//Remove ponto
+         _cValor:=(StrTran(_cValor,"," ,"."))//Troca virgula por ponto das decimais
+
+         _aLinhas[_nI][nColVal]:= Val(_cValor) //VALOR
+         _nValor               := Val(_cValor)
+
+         _cCodVend:=_aLinhas[_nI][nColVen]
+         _cCodProd:=U_ITKey(_aLinhas[_nI][nColPrd],"ZZS_COD")
+         _cUnidade:=Upper(AllTrim(_aLinhas[_nI][nColUM]))
+         _lProd := .T.
+         If SB1->(MSSeek(FWxfilial("SB1")+_cCodProd))
+            If SB1->B1_MSBLQL == '1'
+                 //_lProd := .F.
+                 _cAviso += '[Cod. Produto "'+AllTrim(_cCodProd)+'" Bloqueado] '
+            ElseIf AllTrim(SB1->B1_UM) <> _cUnidade .And. AllTrim(SB1->B1_SEGUM) <> _cUnidade .And.  AllTrim(SB1->B1_I_3UM) <> _cUnidade
+                 _lProd := .F.
+                 _cErro += '[UM "'+_cUnidade+'" do Produto "'+AllTrim(_cCodProd)+'" Invalida, 1UM: "'+SB1->B1_UM+'", 2UM: "'+SB1->B1_SEGUM+'", 3UM: "'+SB1->B1_I_3UM+'".] '
+             EndIf
+         Else
+             _cErro += '[Cod. Produto "'+(_cCodProd)+'"  não encontrado] '
+         EndIf
+
+         _lVend := .T.
+         If SA3->(MSSeek(FWxfilial("SA3")+_cCodVend))
+             _cNome := AllTrim(SA3->A3_NOME)
+             If SA3->A3_MSBLQL == '1'
+                 //_lVend := .F.
+                 _cAviso += '[Cod. Vendedor "'+_cCodVend+'"-'+_cNome+" Bloqueado] "
+             EndIf
+         Else
+             _cNome := AllTrim(_aLinhas[_nI][nColNome])
+             _cErro += '[Cod. Vendedor "'+_cCodVend+'"-'+_cNome+" não encontrado] "
+             _lVend := .F.
+         EndIf
+
+     _aLinAux  := {}
+     _nLinAtual:= Len(_aLinhas)//LINHA DO _aLinhas no momento
+     _nPosDados:= 0
+
+     _nPos:=AScan(_aSomaDuplic ,{ |x| x[1] == _cCodProd+_cCodVend } )//Procura se já existe essa combinação
+     If _nPos = 0 .And. _lProd .And. _lVend
+        AAdd(_aSomaDuplic,{_cCodProd+_cCodVend,;//01
+                           Len(_aDados)+1,;     //02 - Soma mais 1 pq ele ainda não foi adicionado, mas vai ser com certeza
+                           _nVolume,;           //03
+                           _nValor,;            //04
+                           " Soma das linhas duplicadas: (Volume: "+AllTrim(Str(_nVolume,15,3))+" "+_cUnidade+", Valor: "+AllTrim(Str(_nValor,15,2))+")",;//05
+                           _cUnidade})          //06
+     ElseIf _nPos > 0 .And. _lProd .And. _lVend
+
+         If _cUnidade <> _aSomaDuplic[_nPos,6]
+            //Carrega fator de conversão se existir
+            _nVolume := AOMS063Conv(_nVolume,_cUnidade,_aSomaDuplic[_nPos,6],0,0,0)//CONVERTE PARA 1UM, 2UM E 3UM
+            _aSomaDuplic[_nPos,5] := _aSomaDuplic[_nPos,5]+" (Volume : "+AllTrim(Str(_nVolume,15,3))+" "+_aSomaDuplic[_nPos,6]+", convertido de "+_cUnidade+", Valor: "+AllTrim(Str(_nValor,15,2))+")"
+         Else
+            _aSomaDuplic[_nPos,5] := _aSomaDuplic[_nPos,5]+" (Volume: "+AllTrim(Str(_nVolume,15,3))+" "+_cUnidade+", Valor: "+AllTrim(Str(_nValor,15,2))+")"
+         EndIf
+
+        _aSomaDuplic[_nPos,3] += _nVolume    //Soma os duplicados
+        _aSomaDuplic[_nPos,4] += _nValor     //Soma os duplicados
+        _nPosDados:= _aSomaDuplic[_nPos,2]  //Recupera a linha que já existe
+        _nVolume  := _aSomaDuplic[_nPos,3]
+        _nValor   := _aSomaDuplic[_nPos,4]
+        _cAviso   := _aSomaDuplic[_nPos,5]
+     EndIf
+
+     If !Empty(_cErro) .Or. !Empty(_cAviso)
+        If !Empty(_cErro)
+           _cErro:="Linha " + StrZero(_nI,6) + " com erro(s): "+ _cErro
+        EndIf
+        If !Empty(_cAviso)
+           _cAviso:="Linha " + StrZero(_nI,6) + " com aviso(s): "+ _cAviso
+        EndIf
+        AAdd(_aErros,{Empty(_cErro),_cErro,_cAviso})
+     EndIf
+
+     End Sequence
+
+     If _nPosDados = 0
+        AAdd(_aLinAux,Empty(_cErro))//COLUNA DAS BOLINHAS VERMELHA E VERDE
+        For _nRep := 1 to Len(_aHead)//TODAS As COLUNAS DO _aLinhas
+            If _nRep <= Len(_aLinhas[_nLinAtual])
+                AAdd(_aLinAux,_aLinhas[_nLinAtual,_nRep])
+            Else
+                AAdd(_aLinAux,"")
+            EndIf
+        Next _nRep
+        AAdd(_aLinAux, _cErro )//COLUNA DOS ERROS
+        AAdd(_aLinAux, _cAviso)//COLUNA DE AVISOS
+
+        AAdd(_aDados,_aLinAux)
+    Else
+        _aDados[_nPosDados][_nColVolCa] := _nVolume    //Grava a Soma dos duplicados
+        _aDados[_nPosDados][_nColValCa] := _nValor     //Grava a Soma dos duplicados
+        _aDados[_nPosDados][_nPosAviso] := _cAviso
     EndIf
-    _nCont :=0
-    _aErros:= {}
-    _aDados:= {}
-    SB1->(DbSetOrder(1))
-    SA3->(DbSetOrder(1))
 
-    For I := 2 To Len(_aRegs)
-    //Do While (_oFile:hasLine()) // É LENTO
+ Next I
 
-        _nCont++
-        oProc:cCaption := ( "1/1 - Lendo / Validando linha " + StrZero(_nCont,6) + " de " + StrZero(_nReg,6) + ". Erros: "+StrZero(Len(_aErros),6) )
-        ProcessMessages()
+ _oFile:Close()
 
-        _cErro :=""//para cada linha Limpa
-        _cDados:= _aRegs[I]//AllTrim(_oFile:GetLine()) // É LENTO
+ If Len(_aDados) > 0
 
-        Aadd(_aLinhas,StrTokArr2(_cDados,";",.T.))
+     _aLegenda := {{ "BR_VERDE", "Aceitos"},{"BR_VERMELHO","Rejeitados"} }
+     _aButtons:={}
+     AAdd(_aButtons,{"",{|| BRWLEGENDA( "Legenda", "Legenda", _aLegenda ) },"","Legenda"} )
 
-        _ni:= Len(_aLinhas)
+    _cMsgTop := 'PARA REALIZAR A GRAVAÇÃO DAS METAS DE VENDAS ACEITAS ABAIXO CLIQUE EM "CONFIRMAR"'
+    If Len(_aErros) > 0
+       _cMsgTop += " - Para ver a lista dos "+AllTrim(Str(Len(_aErros)))+' Erros, clique em "Outras Açoões" e depois clique em "Erros" '
+       AAdd(_aButtons,{"",{|| U_ITListBox("Erros e Avisos: "+AllTrim(Str(Len(_aErros))),{"","Erros","Avisos"},_aErros,,4) },"","Erros"} )
+    EndIf
 
-        BEGIN SEQUENCE
-
-            If Len(_aLinhas[_ni]) <> Len(_aHead)
-                _cErro += "[Linha com divergência de colunas, verifique se todos as metas contém valores numéricos, em caso de meta zerada deve estar com número 0.] "
-                IF Len(_aLinhas[_ni]) < nColVal
-                    BREAK
-                ENDIF
-            Endif
-
-            //Normaliza campos de código
-            _aLinhas[_ni][1] :=  SUBSTR(MV_PAR01,5,2)+"/"+SUBSTR(MV_PAR01,1,4) // Mes/Ano
-            _aLinhas[_ni][nColPrd] := StrZero(val(_aLinhas[_ni][nColPrd]),11)
-
-            //Normaliza campos de valores para numérico
-            _aLinhas[_ni][nColVol]  :=  Val(_aLinhas[_ni][nColVol])
-
-            _xValor:=AllTrim(StrTran(_aLinhas[_ni][nColVal],"R$",""))//Remove R$
-            _xValor:=(StrTran(_xValor,"." ,"" ))//Remove ponto
-            _xValor:=(StrTran(_xValor,"," ,"."))//Troca virgula por ponto das decimais
-
-            _aLinhas[_ni][nColVal]:=Val(_xValor)
-
-            _cCodVend:=_aLinhas[_ni][nColVen]
-            _cCodProd:=U_ITKey(_aLinhas[_ni][nColPrd],"ZZS_COD")
-            _cUnidade:=UPPER(ALLTRIM(_aLinhas[_ni][nColUM]))
-            _lprod := .T.
-            If SB1->(MsSeek(xfilial("SB1")+_cCodProd))
-                If SB1->B1_MSBLQL == '1'
-                    _lprod := .F.
-                    _cErro += '[Cod. Produto "'+AllTrim(_cCodProd)+'" Bloqueado] '
-                ElseIF ALLTRIM(SB1->B1_UM) <> _cUnidade .AND. ALLTRIM(SB1->B1_SEGUM) <> _cUnidade .AND.  ALLTRIM(SB1->B1_I_3UM) <> _cUnidade
-                    _lprod := .F.
-                    _cErro += '[UM "'+_cUnidade+'" do Produto "'+AllTrim(_cCodProd)+'" Invalida, 1UM: "'+SB1->B1_UM+'", 2UM: "'+SB1->B1_SEGUM+'", 3UM: "'+SB1->B1_I_3UM+'".] '
-                Endif
-            Else
-                _cErro += '[Cod. Produto "'+(_cCodProd)+'"  não encontrado] '
-            Endif
-
-            _lvend := .T.
-            If SA3->(MsSeek(xfilial("SA3")+_cCodVend))
-                _cNome := ALLTRIM(SA3->A3_NOME)
-                If SA3->A3_MSBLQL == '1'
-                    _lvend := .F.
-                    _cErro += '[Cod. Vendedor "'+_cCodVend+'"-'+_cNome+" Bloqueado] "
-                Endif
-            Else
-                _cNome := ALLTRIM(_aLinhas[_ni][nColNome])
-                _cErro += '[Cod. Vendedor "'+_cCodVend+'"-'+_cNome+" não encontrado] "
-                _lvend := .F.
-            Endif
-
-            //Valida se não está repetido na lista
-            If _lprod
-                For _nRep := 1 to Len(_aLinhas)
-                    If _lprod .and.  AllTrim(_aLinhas[_nRep][nColPrd]) == AllTrim(SB1->B1_COD) .and. _nRep != _ni .and.;
-                            AllTrim(_aLinhas[_nRep][nColVen]) == AllTrim(_cCodVend)
-                        _lprod := .F.
-                        _cErro += '[Cod. Produto + Cod. Vendedor "'+AllTrim(SB1->B1_COD)+'" + "'+_cCodVend+'" duplicado na tabela linha: '+Alltrim(Str(_nRep))+" ] "
-                    Endif
-                Next _nRep
-            Endif
-
-        END SEQUENCE
-
-        If !EMPTY(_cErro)
-            _cErro:="Linha " + StrZero(_ni,6) + " com erro(s): "+ _cErro
-            Aadd(_aErros,{.F.,_cErro})
-        Endif
-
-        _aLinAux:={}
-        _nTot:=Len(_aLinhas)//ULTIMA LINHA DO ARRAY ADIONADA
-
-        Aadd(_aLinAux,EMPTY(_cErro))//COLUNA DAS BOLINHAS VERMELHA E VERDE
-        For _nRep := 1 to Len(_aHead)//TODAS AS COLUNAS DO _aLinhas
-            IF _nRep <= Len(_aLinhas[_nTot])
-                Aadd(_aLinAux,_aLinhas[_nTot,_nRep])
-            ELSE
-                Aadd(_aLinAux,"")
-            ENDIF
-        Next _nRep
-        Aadd(_aLinAux, _cErro )//COLUCNA DOS ERROS
-
-        Aadd(_aDados,_aLinAux)
-
-    Next I
-
-    _oFile:Close()
-
-    If Len(_aDados) > 0
-
-        _aCab := {}
-        Aadd(_aCab," ")//COLUNA DAS BOLINHAS VERMELHA E VERDE
-        For _nRep := 1 to Len(_aHead)
-            Aadd(_aCab,_aHead[_nRep])
-        Next _nRep
-        Aadd(_aCab,"Erros")//COLUCNA DOS ERROS
-
-        _aLegenda := {{ "BR_VERDE", "Aceitos"},{"BR_VERMELHO","Rejeitados"} }
-        _aButtons:={}
-        aAdd(_aButtons,{"",{|| BRWLEGENDA( "Legenda", "Legenda", _aLegenda ) },"","Legenda"} )
-
-       _cMsgTop := 'PARA REALIZAR A GRAVAÇÃO DAS METAS DE VENDAS ACEITAS ABAIXO CLIQUE EM "CONFIRMAR"'
-       IF Len(_aErros) > 0
-          _cMsgTop += " - Para ver a lista dos "+Alltrim(Str(Len(_aErros)))+' Erros, clique em "Outras Açoões" e depois clique em "Erros" '
-          aAdd(_aButtons,{"",{|| U_ITListBox("ERROS: "+ALLTRIM(STR(Len(_aErros))),{"","Erros"},_aErros,,4) },"","Erros"} )
-       ENDIF
-
-            //ITListBox( _cTitAux                   ,_aHeader, _aCols , _lMaxSiz,_nTipo, _cMsgTop, _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _aButtons, _aCab , bDblClk , _aColXML , bCondMarca,_bLegenda,_lHasOk,_bHeadClk,_aSX1,_lComCab)
-        IF  U_ITListBox( 'Ajuste de meta de vendas' , _aCab  , _aDados, .T.     , 4    , _cMsgTop,          ,         ,         ,     ,        , _aButtons)
-            _aLinhas := {}
-            For _nRep := 1 to Len(_aDados)
-                IF _aDados[_nRep][1]
-                    aDel(_aDados[_nRep],1)//Remove a primeira coluna
-                    Aadd(_aLinhas,_aDados[_nRep])
-                ENDIF
-            Next _nRep
-            lGravouDados:=.T.
-            FwMsgRun( ,{|oProc| _aAlias := AOMS063A(_aLinhas,_aHead,oProc) } , 'Aguarde!' , 'Importando metas...' )
-        Endif
-    Endif
+         //ITListBox( _cTitAux                   ,_aHeader, _aCols , _lMaxSiz,_nTipo, _cMsgTop, _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _aButtons, _aCab , bDblClk , _aColXML , bCondMarca,_bLegenda,_lHasOk,_bHeadClk,_aSX1,_lComCab)
+     If  U_ITListBox( 'Ajuste de meta de vendas' , _aCab  , _aDados, .T.     , 4    , _cMsgTop,          ,         ,         ,     ,        , _aButtons)
+         _aLinhas := {}
+         For _nRep := 1 to Len(_aDados)
+             If _aDados[_nRep][1]
+                 aDel(_aDados[_nRep],1)//Remove a primeira coluna
+                 AAdd(_aLinhas,_aDados[_nRep])
+             EndIf
+         Next _nRep
+         lGravouDados:=.T.
+         FWMsgRun( ,{|oProc| _aAlias := AOMS063A(_aLinhas,_aHead,oProc) } , 'Aguarde!' , 'Importando metas...' )
+     EndIf
+ EndIf
 
 Return
 
@@ -2151,313 +2072,244 @@ Data da Criacao-: 29/03/2018
 Descrição-------: Ajusta metas de vendas
 Parametros------: _aLista - dados
                   _aHead - cabecalho
+                  oProc As Object - objeto de processamento
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-Static Function AOMS063A(_aLista,_aHead,oProc)
+Static Function AOMS063A(_aLista As Array,_aHead As Array,oProc As Object)
+ Local _nI       := 0 As Numeric
+ Local _aErros   := {} As Array
+ Local _cprod    := "N/C" As char
+ Local _cvend    := "N/C" As char
+ Local aVend     := {} As Array
+ Local nAlterados:= 0 As Numeric
+ Local _nOpcao   := 0 As Numeric
+ Local _nQtde1um := 0 As Numeric
+ Local _nQtde2um := 0 As Numeric
+ Local _nQtde3um := 0 As Numeric
+ Local _nCont    := 0 As Numeric
+ Local _cReg:=AllTrim(Str(Len(_aLista))) As Char
+ Local _aAlterados := {} As Char
+ 
+ SA3->(DBSetOrder(1))
+ ZZS->(DBSetOrder(6))//ZZS_FILIAL+ZZS_ANOMES+ZZS_COD+ZZS_COOR
 
-    Local _ni       := 0 as Numeric
-    Local _aErros   := {} as array
-    Local _cprod    := "N/C" as char
-    Local _cvend    := "N/C" as char
-    Local aVend     := {} as array
-    Local nAlterados:= 0 as numeric
-    Local _nOpcao   := 0 as numeric
+ For _nI := 1 to Len(_aLista)
 
-    SA3->(DbSetOrder(1))
-    ZZS->(DbSetOrder(6))//ZZS_FILIAL+ZZS_ANOMES+ZZS_COD+ZZS_COOR
-    _nCont:=0
-    _cReg:=AllTrim(Str(Len(_aLista)))
-    _aAlterados := {}
-    For _ni := 1 to Len(_aLista)
+     _nCont++
+     oProc:cCaption := ( "1/2 - Verificando Metas: " + StrZero(_nCont,5) + " de " + _cReg + ". Alterações: "+StrZero((nAlterados),6) )
+     ProcessMessages()
+     _cCodVend:=_aLista[_nI][nColVen]
+     _cCodProd:=U_ITKey(_aLista[_nI][nColPrd],"ZZS_COD")
 
-        _nCont++
-        oProc:cCaption := ( "1/2 - Verificando Metas: " + StrZero(_nCont,5) + " de " + _cReg + ". Alterações: "+StrZero((nAlterados),6) )
-        ProcessMessages()
-        _cCodVend:=_aLista[_ni][nColVen]
-        _cCodProd:=U_ITKey(_aLista[_ni][nColPrd],"ZZS_COD")
+     //Procura se existe o produto e vendedor e deleta
+     If (ZZS->(MSSeek(FWxfilial("ZZS")+AllTrim(MV_PAR01)+_cCodProd+_cCodVend ) ))
 
-        //Procura se existe o produto e vendedor e deleta
-        If (ZZS->(MsSeek(xfilial("ZZS")+AllTrim(MV_PAR01)+_cCodProd+_cCodVend ) ))
+         If _nOpcao = 2 // "NÃO" - ENQUANTO O CODIGO DO VENDEDOR ESTIVER NA TABELA aVend Loop SEM PERGUNTAR
+             If AScan(aVend,AllTrim(ZZS->ZZS_COOR)) > 0
+                 Loop // *** Loop *** //
+             Else
+                 _nOpcao = 0 //PERGUNTO DE NOVO NO PROXIMO VEDENDOR
+             EndIf
 
-            If _nOpcao = 2 // "NÃO" - ENQUANTO O CODIGO DO VENDEDOR ESTIVER NA TABELA aVend LOOP SEM PERGUNTAR
-                IF Ascan(aVend,AllTrim(ZZS->ZZS_COOR)) > 0
-                    LOOP // *** LOOP *** //
-                Else
-                    _nOpcao = 0 //PERGUNTO DE NOVO NO PROXIMO VEDENDOR
-                Endif
+         ElseIf _nOpcao = 3 // "SIM" - ENQUANTO O CODIGO DO VENDEDOR ESTIVER NA TABELA aVend GRAVA A LINHA SEM PERGUNTAR
+             If AScan(aVend,AllTrim(ZZS->ZZS_COOR)) = 0
+                 _nOpcao = 0 //PERGUNTO DE NOVO NO PROXIMO VEDENDOR
+             EndIf
 
-            ElseIf _nOpcao = 3 // "SIM" - ENQUANTO O CODIGO DO VENDEDOR ESTIVER NA TABELA aVend GRAVA A LINHA SEM PERGUNTAR
-                If Ascan(aVend,AllTrim(ZZS->ZZS_COOR)) = 0
-                    _nOpcao = 0 //PERGUNTO DE NOVO NO PROXIMO VEDENDOR
-                Endif
+         EndIf
 
-            Endif
+         If _nOpcao = 0 //PERGUNTAR
+           _nOpcao:=AVISO("AOMS063A - Todos os dados das Metas serão sobrescritos pelos dados da tabela desse vendedor.","Já Existem dados gravados para o mês "+MV_PAR01+" do vendedor "+ZZS->ZZS_COOR+'-'+AllTrim(ZZS->ZZS_NMCOOR)+" importado, sobscrever?",;
+                         {"SIM p/ Todos",;   // 01
+                          "NÃO"         ,;   // 02
+                          "SIM"         ,;   // 03
+                          "NÃO p/ Todos"} ,2)// 04
+         EndIf
 
-            If _nOpcao = 0 //PERGUNTAR
-              _nOpcao:=AVISO("AOMS063A - Todos os dados das Metas serão sobrescritos pelos dados da tabela desse vendedor.","Já Existem dados gravados para o mês "+MV_PAR01+" do vendedor "+ZZS->ZZS_COOR+'-'+AllTrim(ZZS->ZZS_NMCOOR)+" importado, sobscrever?",;
-                            {"SIM p/ Todos",;   // 01
-                             "NÃO"         ,;   // 02
-                             "SIM"         ,;   // 03
-                             "NÃO p/ Todos"} ,2)// 04
-            Endif
+         If AScan(aVend,AllTrim(ZZS->ZZS_COOR)) = 0
+            AAdd(aVend,AllTrim(ZZS->ZZS_COOR))
+         EndIf
 
-            If Ascan(aVend,AllTrim(ZZS->ZZS_COOR)) = 0
-               Aadd(aVend,AllTrim(ZZS->ZZS_COOR))
-            Endif
+         If _nOpcao = 4 // "NÃO p/ Todos" - Sair do For
+             U_ITMsg("Serão somente processadas As metas não existentes e ACEITAS de todos os vendedores/coordenadores dessa integração para o periodo selecionado.","Atenção",,3)
+             Exit //*** SAIR DO For ***//
+         ElseIf _nOpcao = 2// "NÃO" - 1o Loop DO "NÃO"
+             Loop // *** Loop *** //
+         EndIf
 
-            If _nOpcao = 4 // "NÃO p/ Todos" - Sair do FOR
-                U_ITMSG("Serão somente processadas as metas não existentes e ACEITAS de todos os vendedores/coordenadores dessa integração para o periodo selecionado.","Atenção",,3)
-                EXIT //*** SAIR DO FOR ***//
-            ElseIf _nOpcao = 2// "NÃO" - 1o LOOP DO "NÃO"
-                LOOP // *** LOOP *** //
-            Endif
+         AAdd(_aAlterados,ZZS->(Recno()))
+         nAlterados++
 
-            AADD(_aAlterados,ZZS->(Recno()))
-            nAlterados++
+     EndIf
 
-        Endif
+ Next _nI
 
-    NEXT _ni
+ _nI:=0
+ nGravados:=0
+ _nErros:=0
+ lGravouDados:=.F.
+ SB1->(DBSetOrder(1))
+ ZZS->(DBSetOrder(6))//ZZS_FILIAL+ZZS_ANOMES+ZZS_COD+ZZS_COOR
+ _nCont:=0
+ _aErros:={}
+ _cReg:=AllTrim(Str(Len(_aLista)))
 
-    _ni:=0
-    nGravados:=0
-    _nErros:=0
-    lGravouDados:=.F.
-    SB1->(DbSetOrder(1))
-    ZZS->(DbSetOrder(6))//ZZS_FILIAL+ZZS_ANOMES+ZZS_COD+ZZS_COOR
-    _nCont:=0
-    _aErros:={}
-    _cReg:=AllTrim(Str(Len(_aLista)))
+ For _nI := 1 to Len(_aLista)
 
-    For _ni := 1 to Len(_aLista)
+     _nCont++
+     oProc:cCaption := ( "2/2 - Incluindo Metas: " + StrZero(_nCont,5) + " de " + _cReg + ". Erros: "+StrZero(_nErros,6) )
+     ProcessMessages()
 
-        _nCont++
-        oProc:cCaption := ( "2/2 - Incluindo Metas: " + StrZero(_nCont,5) + " de " + _cReg + ". Erros: "+StrZero(_nErros,6) )
-        ProcessMessages()
+     _cCodVend:=_aLista[_nI][nColVen]
+     _cCodProd:=U_ITKey(_aLista[_nI][nColPrd],"ZZS_COD")
+     _cUnidade:=Upper(AllTrim(_aLista[_nI][nColUM]))
+     _cErro   :=""
 
-        _cCodVend:=_aLista[_ni][nColVen]
-        _cCodProd:=U_ITKey(_aLista[_ni][nColPrd],"ZZS_COD")
-        _cUnidade:=UPPER(ALLTRIM(_aLista[_ni][nColUM]))
-        _cErro   :=""
+     _lProd := .T.
+     If SB1->(MSSeek(FWxfilial("SB1")+_cCodProd))
+         _cprod := AllTrim(SB1->B1_DESC)
+         //If SB1->B1_MSBLQL == '1'
+         //    //_lProd := .F.
+         //    _cErro += '[Cod. Produto "'+_cCodProd+'" Bloqueado] '
+         If AllTrim(SB1->B1_UM) <> _cUnidade .And. AllTrim(SB1->B1_SEGUM) <> _cUnidade .And.  AllTrim(SB1->B1_I_3UM) <> _cUnidade
+             _lProd := .F.
+             _cErro += '[UM "'+_cUnidade+'" do Produto "'+_cCodProd+'" Invalida, 1UM: "'+SB1->B1_UM+'", 2UM: "'+SB1->B1_SEGUM+'", 3UM: "'+SB1->B1_I_3UM+'".] '
+         EndIf
+     Else
+         _cErro += '[Cod. Produto "'+_cCodProd+'"  não encontrado] '
+         _lProd := .F.
+         _cprod := "N/C "+_aLista[_nI][nColNprd]
+     EndIf
 
-        _lprod := .T.
-        If SB1->(MsSeek(xfilial("SB1")+_cCodProd))
-            _cprod := ALLTRIM(SB1->B1_DESC)
-            If SB1->B1_MSBLQL == '1'
-                _lprod := .F.
-                _cErro += '[Cod. Produto "'+_cCodProd+'" Bloqueado] '
-            ElseIF ALLTRIM(SB1->B1_UM) <> _cUnidade .AND. ALLTRIM(SB1->B1_SEGUM) <> _cUnidade .AND.  ALLTRIM(SB1->B1_I_3UM) <> _cUnidade
-                _lprod := .F.
-                _cErro += '[UM "'+_cUnidade+'" do Produto "'+_cCodProd+'" Invalida, 1UM: "'+SB1->B1_UM+'", 2UM: "'+SB1->B1_SEGUM+'", 3UM: "'+SB1->B1_I_3UM+'".] '
-            Endif
-        Else
-            _cErro += '[Cod. Produto "'+_cCodProd+'"  não encontrado] '
-            _lprod := .F.
-            _cprod := "N/C "+_aLista[_ni][nColNprd]
-        Endif
+     _lVend := .T.
+     If SA3->(MSSeek(FWxfilial("SA3")+_cCodVend))
+         _cvend := AllTrim(SA3->A3_NOME)
+         //If SA3->A3_MSBLQL == '1'
+         //    //_lVend := .F.
+         //    _cErro += '[Cod. Vendedor "'+_cCodVend+'"-'+_cvend+" Bloqueado] "
+         //EndIf
+     Else
+         _cErro += '[Cod. Vendedor "'+_cCodVend+'"-'+_cvend+" não encontrado] "
+         _lVend := .F.
+         _cvend := "N/C "+_aLista[_nI][nColNome]
+     EndIf
 
-        _lvend := .T.
-        If SA3->(MsSeek(xfilial("SA3")+_cCodVend))
-            _cvend := AllTrim(SA3->A3_NOME)
-            If SA3->A3_MSBLQL == '1'
-                _lvend := .F.
-                _cErro += '[Cod. Vendedor "'+_cCodVend+'"-'+_cvend+" Bloqueado] "
-            Endif
-        Else
-            _cErro += '[Cod. Vendedor "'+_cCodVend+'"-'+_cvend+" não encontrado] "
-            _lvend := .F.
-            _cvend := "N/C "+_aLista[_ni][nColNome]
-        Endif
+     If !_lProd .Or. !_lVend
+        _nErros++
+        AAdd(_aErros,{.F.,_aLista[_nI][1],;
+                      _cCodVend,_cvend,;
+                      _cCodProd,_cprod,;
+                      _aLista[_nI][nColVol],;
+                      _cUnidade, 0,;
+                      SB1->B1_UM,0,;
+                      SB1->B1_SEGUM,0,;
+                      SB1->B1_I_3UM,;
+                      _aLista[_nI][nColVal],;
+                      _cErro})
+     Else
 
-        If !_lprod .or. !_lvend
-           _nErros++
-           Aadd(_aErros,{.F.,_aLista[_ni][1],;
-                         _cCodVend,_cvend,;
-                         _cCodProd,_cprod,;
-                         _aLista[_ni][nColVol],;
-                         _cUnidade, 0,;
-                         SB1->B1_UM,0,;
-                         SB1->B1_SEGUM,0,;
-                         SB1->B1_I_3UM,;
-                         _aLista[_ni][nColVal],;
-                         _cErro})
-        Else
+         //Procura se existe o produto e Coord/vendedor, e inclui se não achar, e altera se achar
+         _lAchouAlt:=(ZZS->(MSSeek(FWxfilial("ZZS")+AllTrim(MV_PAR01)+_cCodProd+_cCodVend+"   ") ))
+         If _lAchouAlt
+            _lAchou:=AScan(_aAlterados,ZZS->(Recno())) > 0//Se achou na lista de alterados, altera, senão não faz nada
+         Else
+            _lAchou:=.F.
+         EndIf
+         If !_lAchouAlt .Or. _lAchou//SE NÃO ACHOU OU ACHOU NA LISTA DE ALTERADOS
 
-            //Procura se existe o produto e Coord/vendedor, e inclui se não achar, e altera se achar
-            _lAchouAlt:=(ZZS->(MsSeek(xfilial("ZZS")+AllTrim(MV_PAR01)+_cCodProd+_cCodVend+"   ") ))
-            If _lAchouAlt
-               _lAchou:=Ascan(_aAlterados,ZZS->(Recno())) > 0//Se achou na lista de alterados, altera, senão não faz nada
-            Else
-               _lAchou:=.F.
-            EndIf
-            If !_lAchouAlt .OR. _lAchou//SE NÃO ACHOU OU ACHOU NA LISTA DE ALTERADOS
+             //Carrega fator de conversão se existir
+             _nQtde1um:=0
+             _nQtde2um:=0
+             _nQtde3um:=0
+             AOMS063Conv(_aLista[_nI][nColVol],_cUnidade,"",@_nQtde1um,@_nQtde2um,@_nQtde3um)//CONVERTE PARA 1UM, 2UM E 3UM
 
-                //Carrega fator de conversão se existir
-                _nQtde1um:=0
-                _nQtde2um:=0
-                _nQtde3um:=0
-                _nfator  :=0
-                 //**************************************************
-                IF _cUnidade == SB1->B1_UM // Conversão da PRIMEIRA UM para...
+             AAdd(_aErros,{.T.,_aLista[_nI][1],;
+                           _cCodVend,_cvend,;
+                           _cCodProd,_cprod,;
+                           _aLista[_nI][nColVol],;
+                           _cUnidade,;
+                           _nQtde1um,SB1->B1_UM,;
+                           _nQtde2um,SB1->B1_SEGUM,;
+                           _nQtde3um,SB1->B1_I_3UM,;
+                           _aLista[_nI][nColVal],;
+                           If(_lAchou,"Alterado com sucesso","Incluido com sucesso")})
 
-                    If SB1->B1_CONV == 0
-                        If SB1->B1_I_QQUEI == 'S' .and. SB1->B1_I_FATCO > 0
-                            _nfator := IF(SB1->B1_TIPCONV=="D", 1/SB1->B1_I_FATCO,SB1->B1_I_FATCO)
-                        Endif
-                    Else
-                        _nfator := IF(SB1->B1_TIPCONV=="D", 1/SB1->B1_CONV,SB1->B1_CONV)
-                    Endif
-                    _nQtde1um:=_aLista[_ni][nColVol]
-                    _nQtde2um:=IF(_nfator>0,_aLista[_ni][nColVol]*_nfator,_aLista[_ni][nColVol])
-                    If SB1->B1_I_QQUEI == 'S' .AND. SB1->B1_SEGUM = 'PC' .AND. SB1->B1_I_3UM = 'CX'
-                       _nQtde3um:=( _nQtde2um / SB1->B1_I_QT3UM)// Conversão da SEGUNDA UM para a Terceira UM
-                    Else
-                       _nQtde3um:=( _nQtde1um * SB1->B1_I_QT3UM )// Conversão da PRIMEIRA UM para a Terceira UM
-                    Endif
+             ZZS->(RecLock("ZZS",!_lAchou))//"ALTERACAO/IMPORTACAO","INCLUSAO/IMPORTACAO"
+             ZZS->ZZS_COD    := SB1->B1_COD
+             ZZS->ZZS_DESCR  := SB1->B1_DESC
+             ZZS->ZZS_DESCD  := SB1->B1_I_DESCD
+             ZZS->ZZS_UM     := SB1->B1_UM
+             ZZS->ZZS_2UM    := SB1->B1_SEGUM
+             ZZS->ZZS_3UM    := SB1->B1_I_3UM        //Novo
+             ZZS->ZZS_COOR   := SA3->A3_COD
+             ZZS->ZZS_NMCOOR := SA3->A3_NOME
+             ZZS->ZZS_ANOMES := MV_PAR01
+             ZZS->ZZS_QTD    := _nQtde1um
+             ZZS->ZZS_QTD2UM := _nQtde2um
+             ZZS->ZZS_QTD3UM := _nQtde3um            //Novo
+             ZZS->ZZS_VALOR  := _aLista[_nI][nColVal]//Novo
+             ZZS->ZZS_TIPOV  := SA3->A3_I_TIPV       //Novo
+             ZZS->(MSUnLock())
 
-                 //**************************************************
-                Elseif _cUnidade == SB1->B1_SEGUM // Conversão da SEGUNDA UM para...
+             ZGW->(RecLock("ZGW",.T.))//"ALTERACAO/IMPORTACAO","INCLUSAO/IMPORTACAO"
+             ZGW->ZGW_FILIAL:= FWxfilial("ZGW")
+             ZGW->ZGW_COD   := ZZS->ZZS_COD
+             ZGW->ZGW_DESCR := ZZS->ZZS_DESCR
+             ZGW->ZGW_DESCD := ZZS->ZZS_DESCD
+             ZGW->ZGW_UM    := ZZS->ZZS_UM
+             ZGW->ZGW_QTD   := ZZS->ZZS_QTD
+             ZGW->ZGW_QTD2UM:= ZZS->ZZS_QTD2UM
+             ZGW->ZGW_2UM   := ZZS->ZZS_2UM
+             ZGW->ZGW_QTD3UM:= ZZS->ZZS_QTD3UM//Novo
+             ZGW->ZGW_3UM   := ZZS->ZZS_3UM   //Novo
+             ZGW->ZGW_VALOR := ZZS->ZZS_VALOR //Novo
+             ZGW->ZGW_TIPOV := ZZS->ZZS_TIPOV //Novo
+             ZGW->ZGW_DATAM := ZZS->ZZS_DATA  //Novo
+             ZGW->ZGW_COOR  := ZZS->ZZS_COOR
+             ZGW->ZGW_NMCOOR:= ZZS->ZZS_NMCOOR
+             ZGW->ZGW_ANOMES:= ZZS->ZZS_ANOMES
+             ZGW->ZGW_OPER  := If(_lAchou,"ALTERACAO/IMPORTACAO","INCLUSAO/IMPORTACAO")
+             ZGW->ZGW_USER  := _cUserName
+             ZGW->ZGW_DATA  := Date()
+             ZGW->ZGW_HORA  := Time()
+             ZGW->(MSUnLock())
 
-                    If SB1->B1_CONV == 0
-                        If SB1->B1_I_QQUEI == 'S' .and. SB1->B1_I_FATCO > 0
-                            _nfator := IF(SB1->B1_TIPCONV=="M", 1/SB1->B1_I_FATCO,SB1->B1_I_FATCO)
-                        Endif
-                    Else
-                        _nfator := IF(SB1->B1_TIPCONV=="M", 1/SB1->B1_CONV,SB1->B1_CONV)
-                    Endif
-                    _nQtde1um:=IF(_nfator>0,_aLista[_ni][nColVol]*_nfator,_aLista[_ni][nColVol])// Conversão da Segunda UM para a Primeira UM
+             AOMS063Ger("GERAR_VALORES_POR_DATA",ZZS->ZZS_ANOMES)
 
-                    _nQtde2um:=_aLista[_ni][nColVol]
+             nGravados++
+             lGravouDados:=.T.
+         Else
+             _nErros++
+             AAdd(_aErros,{.F.,_aLista[_nI][1],;
+                           _cCodVend,_cvend,;
+                           _cCodProd,_cprod,;
+                           _aLista[_nI][nColVol],;
+                           _cUnidade,0,;
+                           SB1->B1_UM,0,;
+                           SB1->B1_SEGUM,0,;
+                           SB1->B1_I_3UM,;
+                           _aLista[_nI][nColVal],;
+                           "Produto já existe na tabela de metas para esse Coor./vend.: "+FWxfilial("ZZS")+" "+AllTrim(MV_PAR01)+" "+_cCodProd+" "+_cCodVend})
+         EndIf
+     EndIf
+ Next _nI
 
-                     If SB1->B1_I_QQUEI == 'S' .AND. SB1->B1_SEGUM = 'PC' .AND. SB1->B1_I_3UM = 'CX'
-                        _nQtde3um:= _nQtde2um  / SB1->B1_I_QT3UM // Conversão da SEGUNDA UM para a Terceira UM
-                     Else
-                        _nQtde3um:= _nQtde1um  * SB1->B1_I_QT3UM // Conversão da PRIMEIRA UM para a Terceira UM
-                     Endif
-
-                //***************************************************
-                ElseIF _cUnidade == SB1->B1_I_3UM  // Conversão da Terceira UM para...
-
-                    _nQtde1um:= _aLista[_ni][nColVol]/ SB1->B1_I_QT3UM// Conversão #Normal* da Terceira UM para a Primeira UM
-
-                    _nQtde3um:= _aLista[_ni][nColVol]
-
-                    If SB1->B1_I_QQUEI == 'S' .AND. SB1->B1_SEGUM = 'PC' .AND. SB1->B1_I_3UM = 'CX'// Se Queijo*
-
-                       _nQtde2um:= _nQtde3um * SB1->B1_I_QT3UM// Conversão da Terceira UM para a Segunda UM
-
-                       If SB1->B1_CONV == 0
-                           If SB1->B1_I_QQUEI == 'S' .and. SB1->B1_I_FATCO > 0
-                               _nfator := IF(SB1->B1_TIPCONV=="M", 1/SB1->B1_I_FATCO,SB1->B1_I_FATCO)
-                           Endif
-                       Else
-                           _nfator := IF(SB1->B1_TIPCONV=="M", 1/SB1->B1_CONV,SB1->B1_CONV)
-                       Endif
-
-                       _nQtde1um:= _nQtde2um * nFator // Conversão da Segunda UM para a Primeira UM
-
-                    Else//Calculo #Normal* se ser queijo
-                       If SB1->B1_CONV = 0
-                           If SB1->B1_I_QQUEI == 'S' .and. SB1->B1_I_FATCO > 0
-                               nFator := IF(SB1->B1_TIPCONV=="D", 1/SB1->B1_I_FATCO,SB1->B1_I_FATCO)
-                           Endif
-                       Else
-                           nFator := IF(SB1->B1_TIPCONV=="D", 1/SB1->B1_CONV,SB1->B1_CONV)
-                       Endif
-
-                       _nQtde2um:= _nQtde1um * nFator// Conversão da Primeira UM para a Segunda UM
-
-                    EndIf
-
-                Endif
-
-                Aadd(_aErros,{.T.,_aLista[_ni][1],;
-                              _cCodVend,_cvend,;
-                              _cCodProd,_cprod,;
-                              _aLista[_ni][nColVol],;
-                              _cUnidade,;
-                              _nQtde1um,SB1->B1_UM,;
-                              _nQtde2um,SB1->B1_SEGUM,;
-                              _nQtde3um,SB1->B1_I_3UM,;
-                              _aLista[_ni][nColVal],;
-                              IF(_lAchou,"Alterado com sucesso","Incluido com sucesso")})
-
-                ZZS->(Reclock("ZZS",!_lAchou))//"ALTERACAO/IMPORTACAO","INCLUSAO/IMPORTACAO"
-                ZZS->ZZS_COD    := SB1->B1_COD
-                ZZS->ZZS_DESCR  := SB1->B1_DESC
-                ZZS->ZZS_DESCD  := SB1->B1_I_DESCD
-                ZZS->ZZS_UM     := SB1->B1_UM
-                ZZS->ZZS_2UM    := SB1->B1_SEGUM
-                ZZS->ZZS_3UM    := SB1->B1_I_3UM        //Novo
-                ZZS->ZZS_COOR   := SA3->A3_COD
-                ZZS->ZZS_NMCOOR := SA3->A3_NOME
-                ZZS->ZZS_ANOMES := MV_PAR01
-                ZZS->ZZS_QTD    := _nQtde1um
-                ZZS->ZZS_QTD2UM := _nQtde2um
-                ZZS->ZZS_QTD3UM := _nQtde3um            //Novo
-                ZZS->ZZS_VALOR  := _aLista[_ni][nColVal]//Novo
-                ZZS->ZZS_TIPOV  := SA3->A3_I_TIPV       //Novo
-                ZZS->(Msunlock())
-
-                ZGW->(RecLock("ZGW",.T.))//"ALTERACAO/IMPORTACAO","INCLUSAO/IMPORTACAO"
-                ZGW->ZGW_FILIAL:= xFilial("ZGW")
-                ZGW->ZGW_COD   := ZZS->ZZS_COD
-                ZGW->ZGW_DESCR := ZZS->ZZS_DESCR
-                ZGW->ZGW_DESCD := ZZS->ZZS_DESCD
-                ZGW->ZGW_UM    := ZZS->ZZS_UM
-                ZGW->ZGW_QTD   := ZZS->ZZS_QTD
-                ZGW->ZGW_QTD2UM:= ZZS->ZZS_QTD2UM
-                ZGW->ZGW_2UM   := ZZS->ZZS_2UM
-                ZGW->ZGW_QTD3UM:= ZZS->ZZS_QTD3UM//Novo
-                ZGW->ZGW_3UM   := ZZS->ZZS_3UM   //Novo
-                ZGW->ZGW_VALOR := ZZS->ZZS_VALOR //Novo
-                ZGW->ZGW_TIPOV := ZZS->ZZS_TIPOV //Novo
-                ZGW->ZGW_DATAM := ZZS->ZZS_DATA  //Novo
-                ZGW->ZGW_COOR  := ZZS->ZZS_COOR
-                ZGW->ZGW_NMCOOR:= ZZS->ZZS_NMCOOR
-                ZGW->ZGW_ANOMES:= ZZS->ZZS_ANOMES
-                ZGW->ZGW_OPER  := If(_lAchou,"ALTERACAO/IMPORTACAO","INCLUSAO/IMPORTACAO")
-                ZGW->ZGW_USER  := _cUserName
-                ZGW->ZGW_DATA  := DATE()
-                ZGW->ZGW_HORA  := TIME()
-                ZGW->(MsUnLock())
-
-                AOMS063Ger("GERAR_VALORES_POR_DATA",ZZS->ZZS_ANOMES)
-
-                nGravados++
-                lGravouDados:=.T.
-            Else
-                _nErros++
-                Aadd(_aErros,{.F.,_aLista[_ni][1],;
-                              _cCodVend,_cvend,;
-                              _cCodProd,_cprod,;
-                              _aLista[_ni][nColVol],;
-                              _cUnidade,0,;
-                              SB1->B1_UM,0,;
-                              SB1->B1_SEGUM,0,;
-                              SB1->B1_I_3UM,;
-                              _aLista[_ni][nColVal],;
-                              "Produto já existe na tabela de metas para esse Coor./vend.: "+xfilial("ZZS")+" "+AllTrim(MV_PAR01)+" "+_cCodProd+" "+_cCodVend})
-            Endif
-        Endif
-    Next _ni
-
-    cChama = "NÃO RECARREGAR"
-    If Len(_aErros) > 0
-        _aHead2 := {"","Mesano","Cod Vend","Vendedor","Cod Prod","Produto","Volume","Unidade","Qtde 1Um","1Um","Qtde 2Um","2Um","Qtde 3Um","3Um","Valor (R$)","Erros"}
-        U_ITListBox( 'Ajuste de meta de vendas' , _aHead2 , _aErros , .T. , 4, "Vendedor(es): Gravados "+AllTrim(Str(nGravados))+ " / Alterados "+AllTrim(Str(nAlterados))+" / Processados "+_cReg+ " / Erros: "+AllTrim(Str(_nErros)) )
+ cChama = "NÃO RECARREGAR"
+ If Len(_aErros) > 0
+     _aHead2 := {"","Mesano","Cod Vend","Vendedor","Cod Prod","Produto","Volume","Unidade","Qtde 1Um","1Um","Qtde 2Um","2Um","Qtde 3Um","3Um","Valor (R$)","Erros"}
+     U_ITListBox( 'Ajuste de meta de vendas' , _aHead2 , _aErros , .T. , 4, "Vendedor(es): Gravados "+AllTrim(Str(nGravados))+ " / Alterados "+AllTrim(Str(nAlterados))+" / Processados "+_cReg+ " / Erros: "+AllTrim(Str(_nErros)) )
+     cChama = "RECARREGA"
+     oDlgLIb:End()
+ Else
+     If lGravouDados
+        U_ITMsg("Gravacao Concluida Com Sucesso","Atenção","Vendedor(es): Incluidos "+AllTrim(Str(nGravados))+ " / Alterados "+AllTrim(Str(nAlterados))+" / Processados "+  _cReg ,2)
         cChama = "RECARREGA"
         oDlgLIb:End()
-    Else
-        IF lGravouDados
-           u_itmsg("Gravacao Concluida Com Sucesso","Atenção","Vendedor(es): Incluidos "+AllTrim(Str(nGravados))+ " / Alterados "+AllTrim(Str(nAlterados))+" / Processados "+  _cReg ,2)
-           cChama = "RECARREGA"
-           oDlgLIb:End()
-        ELSE
-           u_itmsg("Nenhum registro Gravado no mes "+AllTrim(MV_PAR01)+". Vendedor(es): Incluidos "+AllTrim(Str(nGravados))+ " / Alterados "+AllTrim(Str(nAlterados))+" / Processados "+  _cReg,"Atenção","Integre em um mês que não tenha metas de ninguem no mês.",2)
-        ENDIF
-    Endif
+     Else
+        U_ITMsg("Nenhum registro Gravado no mes "+AllTrim(MV_PAR01)+". Vendedor(es): Incluidos "+AllTrim(Str(nGravados))+ " / Alterados "+AllTrim(Str(nAlterados))+" / Processados "+  _cReg,"Atenção","Integre em um mês que não tenha metas de ninguem no mês.",2)
+     EndIf
+ EndIf
 
 Return
 
@@ -2467,13 +2319,13 @@ Programa--------: AOMS063R
 Autor-----------: Josué Danich Prestes
 Data da Criacao-: 18/09/2018
 Descrição-------: Relatório de log de metas de vendas
-Parametros------: _lLog: .T. - Log  / .F. - Relatório                  
+Parametros------: _lLog: .T. - Log  / .F. - Relatório
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-Static Function AOMS063R(_lLog)
+Static Function AOMS063R(_lLog As Logical)
  If Pergunte( 'AOMS063R' )
-    FwMsgRun(,{|oProc|AOMS063S(oProc,_lLog) } ,'Aguarde!','Lendo dados...' )
+    FWMsgRun(,{|oProc|AOMS063S(oProc,_lLog) } ,'Aguarde!','Lendo dados...' )
  EndIf
 Return
 
@@ -2483,32 +2335,31 @@ Programa--------: AOMS063S
 Autor-----------: Josué Danich Prestes
 Data da Criacao-: 18/09/2018
 Descrição-------: Execução de Relatório de log de metas de vendas
-Parametros------: oProc , _lLog: .T. - Log  / .F. - Relatório    
+Parametros------: oProc , _lLog: .T. - Log  / .F. - Relatório
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-Static Function AOMS063S(oProc,_lLog)
+Static Function AOMS063S(oProc As Object,_lLog As Logical)
 
  Local cRep    := "" As Char
  Local _cReg   := "" As Char
  Local _aHead  := {} As Array
  Local _alog   := {} As Array
- //Local _aColXML:= {} As Array
  Local _cAlias :=GetNextAlias() As Char
  Local _nCont  := 0 As Numeric
  Local A       := 0 As Numeric
 
- If _lLog 
+ If _lLog
     cRep:= " SELECT ZGW_COD,ZGW_DESCR,ZGW_QTD,ZGW_UM,ZGW_QTD2UM,ZGW_2UM,ZGW_COOR,ZGW_NMCOOR,ZGW_ANOMES,ZGW_OPER,ZGW_USER,ZGW_DATA,ZGW_HORA,"
     cRep+= "        ZGW_QTD3UM,ZGW_3UM,ZGW_VALOR,ZGW_DATAM"//Novos
     cRep+= " FROM " + retsqlname("ZGW")
     cRep+= " WHERE ZGW_ANOMES = '"+AllTrim(MV_PAR01)+"'
-    If !empty(AllTrim(MV_PAR03))
+    If !Empty(AllTrim(MV_PAR03))
         cRep+= " AND ZGW_COOR >= '"+ (MV_PAR02) + "' AND ZGW_COOR <= '" + (MV_PAR03) + "' "
-    Endif
-    If !empty(AllTrim(MV_PAR05))
+    EndIf
+    If !Empty(AllTrim(MV_PAR05))
         cRep+= " AND ZGW_COD >= '"+ (MV_PAR04) + "' AND ZGW_COD <= '" + (MV_PAR05) + "' ""
-    Endif
+    EndIf
     cRep+= " AND D_E_L_E_T_ = ' ' "
     cRep+= " ORDER BY ZGW_ANOMES,ZGW_NMCOOR,ZGW_DESCR,ZGW_DATAM,ZGW_DATA,ZGW_HORA"
     _cTit:='Log de registros de meta de vendas por Produto/Dia'
@@ -2517,53 +2368,53 @@ Static Function AOMS063S(oProc,_lLog)
     cRep+= "        ZZS_QTD3UM,ZZS_3UM,ZZS_VALOR,ZZS_DATA"//Novos
     cRep+= " FROM " + retsqlname("ZZS")
     cRep+= " WHERE ZZS_ANOMES = '"+AllTrim(MV_PAR01)+"'
-    If !empty(AllTrim(MV_PAR03))
+    If !Empty(AllTrim(MV_PAR03))
         cRep+= " AND ZZS_COOR >= '"+ (MV_PAR02) + "' AND ZZS_COOR <= '" + (MV_PAR03) + "' "
-    Endif
-    If !empty(AllTrim(MV_PAR05))
+    EndIf
+    If !Empty(AllTrim(MV_PAR05))
         cRep+= " AND ZZS_COD >= '"+ (MV_PAR04) + "' AND ZZS_COD <= '" + (MV_PAR05) + "' ""
-    Endif
+    EndIf
     cRep+= " AND D_E_L_E_T_ = ' ' "
     cRep+= " ORDER BY ZZS_ANOMES,ZZS_NMCOOR,ZZS_DESCR,ZZS_DATA"
     _cTit:='Relatorio de registros de meta de vendas por Produto/Dia'
- Endif
- 
+ EndIf
+
  MPSysOpenQuery( cRep , _cAlias)
 
  _nCont:=0
  _cReg:=0
- dbSelectArea(_cAlias)
+ DBSelectArea(_cAlias)
   COUNT TO _cReg
  _cReg:=AllTrim(Str(_cReg))
- (_cAlias)->(dbGoTop())
+ (_cAlias)->(DBGoTop())
 
- Do While (_cAlias)->(!EoF())
+ While (_cAlias)->(!Eof())
 
      _nCont++
      oProc:cCaption := ( "Lendo Metas: " + StrZero(_nCont,5) + " de " + _cReg)
      ProcessMessages()
 
-     If _lLog 
-       cTipoor:= POSICIONE("SA3",1,xFilial("SA3")+(_cAlias)->ZGW_COOR,"A3_I_TIPV")//V=VENDEDOR;C=COORDENADOR;G=GERENTE;S=SUPERVISOR;N=GERENCIA NACIONAL
-     ELSE
-       cTipoor:= POSICIONE("SA3",1,xFilial("SA3")+(_cAlias)->ZZS_COOR,"A3_I_TIPV")//V=VENDEDOR;C=COORDENADOR;G=GERENTE;S=SUPERVISOR;N=GERENCIA NACIONAL
-     ENDIF
-     IF cTipoor == "V"
+     If _lLog
+       cTipoor:= Posicione("SA3",1,FWxfilial("SA3")+(_cAlias)->ZGW_COOR,"A3_I_TIPV")//V=VENDEDOR;C=COORDENADOR;G=GERENTE;S=SUPERVISOR;N=GERENCIA NACIONAL
+     Else
+       cTipoor:= Posicione("SA3",1,FWxfilial("SA3")+(_cAlias)->ZZS_COOR,"A3_I_TIPV")//V=VENDEDOR;C=COORDENADOR;G=GERENTE;S=SUPERVISOR;N=GERENCIA NACIONAL
+     EndIf
+     If cTipoor == "V"
          cTipoor:= "Vendedor"
-     ELSEIF cTipoor == "C"
+     ElseIf cTipoor == "C"
          cTipoor:= "Coordenador"
-     ELSEIF cTipoor == "G"
+     ElseIf cTipoor == "G"
          cTipoor:= "Gerente"
-     ELSEIF cTipoor == "S"
+     ElseIf cTipoor == "S"
          cTipoor:= "Supervisor"
-     ELSEIF cTipoor == "N"
+     ElseIf cTipoor == "N"
          cTipoor:= "Gerencia Nacional"
-     ELSE
+     Else
          cTipoor:= "Tipo de Vendedor não encontrado"
-     ENDIF
+     EndIf
 
-     If _lLog 
-        Aadd(_alog,{STod((_cAlias)->ZGW_DATA) ,;//01
+     If _lLog
+        AAdd(_alog,{SToD((_cAlias)->ZGW_DATA) ,;//01
                          (_cAlias)->ZGW_HORA  ,;//02
                          (_cAlias)->ZGW_USER  ,;//03
                          (_cAlias)->ZGW_ANOMES,;//04
@@ -2572,7 +2423,7 @@ Static Function AOMS063S(oProc,_lLog)
                          (_cAlias)->ZGW_NMCOOR,;//07
                          (_cAlias)->ZGW_COD   ,;//08
                          (_cAlias)->ZGW_DESCR ,;//09
-                    STOD((_cAlias)->ZGW_DATAM),;//10
+                    SToD((_cAlias)->ZGW_DATAM),;//10
                          (_cAlias)->ZGW_QTD   ,;//11*
                          (_cAlias)->ZGW_UM    ,;//12
                          (_cAlias)->ZGW_QTD2UM,;//13*
@@ -2582,12 +2433,12 @@ Static Function AOMS063S(oProc,_lLog)
                          (_cAlias)->ZGW_VALOR ,;//17*
                          cTipoor              })//18
      Else
-        Aadd(_alog,{     (_cAlias)->ZZS_ANOMES,;//01
+        AAdd(_alog,{     (_cAlias)->ZZS_ANOMES,;//01
                          (_cAlias)->ZZS_COOR  ,;//02
                          (_cAlias)->ZZS_NMCOOR,;//03
                          (_cAlias)->ZZS_COD   ,;//04
                          (_cAlias)->ZZS_DESCR ,;//05
-                    STOD((_cAlias)->ZZS_DATA) ,;//06
+                    SToD((_cAlias)->ZZS_DATA) ,;//06
                          (_cAlias)->ZZS_QTD   ,;//07*
                          (_cAlias)->ZZS_UM    ,;//08
                          (_cAlias)->ZZS_QTD2UM,;//09*
@@ -2596,15 +2447,15 @@ Static Function AOMS063S(oProc,_lLog)
                          (_cAlias)->ZZS_3UM   ,;//12
                          (_cAlias)->ZZS_VALOR ,;//13*
                          cTipoor              })//14
-     Endif
-     (_cAlias)->(Dbskip())
+     EndIf
+     (_cAlias)->(DBSkip())
 
- Enddo
+ EndDo
 
  //_aColXML:=AClone(_alog)
 
  For A := 1 TO Len(_alog)
-     If _lLog 
+     If _lLog
         _alog[A,11]:= AllTrim(Trans(_alog[A,11],"@E 999,999,999.99"))//11*
         _alog[A,13]:= AllTrim(Trans(_alog[A,13],"@E 999,999,999.99"))//13*
         _alog[A,15]:= AllTrim(Trans(_alog[A,15],"@E 999,999,999.99"))//15*
@@ -2614,14 +2465,14 @@ Static Function AOMS063S(oProc,_lLog)
         _alog[A,09]:= AllTrim(Trans(_alog[A,09],"@E 999,999,999.99"))//09*
         _alog[A,11]:= AllTrim(Trans(_alog[A,11],"@E 999,999,999.99"))//11*
         _alog[A,13]:= AllTrim(Trans(_alog[A,13],"@E 999,999,999.99"))//13*
-    Endif
+    EndIf
  Next A
 
- (_cAlias)->(dbCloseArea())
+ (_cAlias)->(DBCloseArea())
 
  If Len(_alog) > 0
 
-    If _lLog 
+    If _lLog
        _aHead:={"Data Manut.",;//01
                 "Hora"       ,;//02
                 "Usuário"    ,;//03
@@ -2655,11 +2506,11 @@ Static Function AOMS063S(oProc,_lLog)
                 "3a Um"      ,;//12
                 "Valor (R$)" ,;//13
                 "Tipo"       } //14
-    Endif
+    EndIf
      U_ITListBox( _cTit , _aHead , _alog , .T. , 1,  )
  Else
-     u_itmsg("Não foram Localizados registros de log para os parâmetros indicados.","Atenção","Altere os filtros e tente novamente.",1)
- Endif
+     U_ITMsg("Não foram Localizados registros de log para os parâmetros indicados.","Atenção","Altere os filtros e tente novamente.",1)
+ EndIf
 
 Return
 
@@ -2669,30 +2520,29 @@ Programa--------: AOMS063M
 Autor-----------: Julio de Paula Paz
 Data da Criacao-: 04/02/2019
 Descrição-------: Gatilho para preenchimento dos campos de somente leitura do aCols para a tabela ZZS.
+                  Chamado do Valide do campo ZZS_COD
 Parametros------: Nenhum
-Retorno---------: Nenhum
+Retorno---------: .T.
 ===============================================================================================================================
 */
-User Function AOMS063M()
+User Function AOMS063M() As Logical
  Local _cCodProd := "" As char
- Local _nPosDesc := 0 As Numeric
- Local _nPosDesD := 0 As Numeric
- Local _nPosUM   := 0 As Numeric
- Local _nPos2UM  := 0 As Numeric
- Local _nPos3UM  := 0 As Numeric
- //If IsInCallStack("AOMS063IM")//INCLUSAO, MAS NA TROCA DE LINHA CARREGA DE NOVO
-     _cCodProd := M->ZZS_COD
-     _nPosDesc := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCR'} )
-     _nPosDesD := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCD'} )
-     _nPosUM   := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_UM'   } )
-     _nPos2UM  := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_2UM'  } )
-     _nPos3UM  := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_3UM'  } )
-     aCols[N,_nPosDesc] := Posicione("SB1",1,Xfilial("SB1")+_cCodProd,"B1_DESC")
-     aCols[N,_nPosDesD] := SB1->B1_I_DESCD
-     aCols[N,_nPosUM  ] := SB1->B1_UM
-     aCols[N,_nPos2UM ] := SB1->B1_SEGUM
-     aCols[N,_nPos3UM ] := SB1->B1_I_3UM
- //EndIf
+ Local _nPosDesc := 00 As Numeric
+ Local _nPosDesD := 00 As Numeric
+ Local _nPosUM   := 00 As Numeric
+ Local _nPos2UM  := 00 As Numeric
+ Local _nPos3UM  := 00 As Numeric
+ _cCodProd := M->ZZS_COD
+ _nPosDesc := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCR'} )
+ _nPosDesD := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_DESCD'} )
+ _nPosUM   := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_UM'   } )
+ _nPos2UM  := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_2UM'  } )
+ _nPos3UM  := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_3UM'  } )
+ aCols[N,_nPosDesc] := Posicione("SB1",1,FWxfilial("SB1")+_cCodProd,"B1_DESC")
+ aCols[N,_nPosDesD] := SB1->B1_I_DESCD
+ aCols[N,_nPosUM  ] := SB1->B1_UM
+ aCols[N,_nPos2UM ] := SB1->B1_SEGUM
+ aCols[N,_nPos3UM ] := SB1->B1_I_3UM
 Return .T.
 
 
@@ -2706,9 +2556,9 @@ Parametros------: _lXML: .T. gera XML senão Excel
 Retorno---------: .T.
 ===============================================================================================================================
 */
-Static Function AOMS063X(_lXML)
+Static Function AOMS063X(_lXML As Logical) As Logical
  Local _lComCab := .T. As Logical
- Local _cTitAux := "Metas de "+SUBSTR(cAnoMes,5,2)+"/"+SUBSTR(cAnoMes,1,4)+" do "+Lower(cTipoor)+" "+cCoord+" - "+cNmCoor As Char
+ Local _cTitAux := "Metas de "+SubStr(cAnoMes,5,2)+"/"+SubStr(cAnoMes,1,4)+" do "+Lower(cTipoor)+" "+cCoord+" - "+cNmCoor As Char
  Local _aCabExc := {} As Array
  Local _aLinhas := {} As Array
  Local _aLinAux := AClone(aCols) As Array
@@ -2718,36 +2568,36 @@ Static Function AOMS063X(_lXML)
  //    Alinhamento( 1-Left,2-Center,3-Right )
  //    Formatação( 1-General,2-Number,3-Monetário,4-DateTime )
  //                        Titulo das Colunas ,Alinhamento ,Formatação, Totaliza?
- AADD(_aCabExc,{"Cod. Produto"                ,2           ,1         ,.F.})
- AADD(_aCabExc,{"Descricao Produto"           ,1           ,1         ,.F.})
- AADD(_aCabExc,{"Descricao Completa"          ,1           ,1         ,.F.})
- AADD(_aCabExc,{"Quantidade 1a UM"            ,3           ,2         ,.F.})
- AADD(_aCabExc,{"1a UM"                       ,2           ,1         ,.F.})
- AADD(_aCabExc,{"Quantidade 2a UM"            ,3           ,2         ,.F.})
- AADD(_aCabExc,{"2a UM"                       ,2           ,1         ,.F.})
- AADD(_aCabExc,{"Quantidade 3a UM"            ,3           ,2         ,.F.})
- AADD(_aCabExc,{"3a UM"                       ,2           ,1         ,.F.})
- AADD(_aCabExc,{"Valor"                       ,3           ,3         ,.F.})
+ AAdd(_aCabExc,{"Cod. Produto"                ,2           ,1         ,.F.})
+ AAdd(_aCabExc,{"Descricao Produto"           ,1           ,1         ,.F.})
+ AAdd(_aCabExc,{"Descricao Completa"          ,1           ,1         ,.F.})
+ AAdd(_aCabExc,{"Quantidade 1a UM"            ,3           ,2         ,.F.})
+ AAdd(_aCabExc,{"1a UM"                       ,2           ,1         ,.F.})
+ AAdd(_aCabExc,{"Quantidade 2a UM"            ,3           ,2         ,.F.})
+ AAdd(_aCabExc,{"2a UM"                       ,2           ,1         ,.F.})
+ AAdd(_aCabExc,{"Quantidade 3a UM"            ,3           ,2         ,.F.})
+ AAdd(_aCabExc,{"3a UM"                       ,2           ,1         ,.F.})
+ AAdd(_aCabExc,{"Valor"                       ,3           ,3         ,.F.})
 
  _aLinhas:= {}
  For _nRep := 1 to Len(_aLinAux)
      aDel(_aLinAux[_nRep], Len(_aLinAux[_nRep]) )//Remove a ultima coluna do Del
      aSize(_aLinAux[_nRep],Len(_aLinAux[_nRep])-1)
-     Aadd(_aLinhas, _aLinAux[_nRep] )
+     AAdd(_aLinhas, _aLinAux[_nRep] )
  Next _nRep
 
- IF _lXML
+ If _lXML
     //ITGEREXCEL(_cNomeArq,_cDiretorio,_cTitulo,_cNomePlan,_aCabecalho,_aDetalhe,_lLeTabTemp,_cAliasTab,_aCampos,_lScheduller,_lCriaPastas,_aPergunte,_lEnviaEmail,_lXLSX,_lComCab
     //Exportação para Excel (.XML)
-    FWMSGRUN( ,{|_oProc| U_ITGEREXCEL(,,_cTitAux,,_aCabExc,_aLinhas,,,,,,,,.F.,_oProc,_lComCab),;
-                         U_ITMSG("Geração Concluida!  ["+DTOC(DATE())+"] ["+TIME()+"]") },;
+    FWMsgRun( ,{|_oProc| U_ITGEREXCEL(,,_cTitAux,,_aCabExc,_aLinhas,,,,,,,,.F.,_oProc,_lComCab),;
+                         U_ITMsg("Geração Concluida!  ["+DToC(DATE())+"] ["+TIME()+"]") },;
                          "H.I. : "+TIME()+" - Aguarde...","Gerando Excel (.XML)..."  )
  Else
     //Exportação para Excel (.XLSX)
-    FWMSGRUN( ,{|_oProc| U_ITGEREXCEL(,,_cTitAux,,_aCabExc,_aLinhas,,,,,,,,.T.,_oProc,_lComCab),;
-                         U_ITMSG("Geração Concluida!  ["+DTOC(DATE())+"] ["+TIME()+"]") },;
+    FWMsgRun( ,{|_oProc| U_ITGEREXCEL(,,_cTitAux,,_aCabExc,_aLinhas,,,,,,,,.T.,_oProc,_lComCab),;
+                         U_ITMsg("Geração Concluida!  ["+DToC(DATE())+"] ["+TIME()+"]") },;
                          "H.I. : "+TIME()+" - Aguarde...","Gerando Excel (.XLSX)..." )
- Endif
+ EndIf
 
 Return .T.
 
@@ -2773,8 +2623,8 @@ Static Function AOMS063MD()
  Local _aAnos    := {} As Array
  Local _aAnosGrv := {} As Array
  Local _dDataAtual:= dDataBase As Date
- Local _cAnoAtual:= LEFT(DTOS(_dDataAtual),4) As Char
- Local _cAno     := LEFT(DTOS(_dDataAtual),4) As Char
+ Local _cAnoAtual:= LEFT(DToS(_dDataAtual),4) As Char
+ Local _cAno     := LEFT(DToS(_dDataAtual),4) As Char
  Local _cAnoAux  := "" As Char
  Local _nAno     := 00 As Numeric
  Local _nOpca    := 00 As Numeric
@@ -2791,24 +2641,24 @@ Static Function AOMS063MD()
  Private aHeader := {} As Array
  Private aCols   := {} As Array
 
-for _nAno := (Year(_dDataAtual)-5) to (Year(_dDataAtual)+10)
-    IF ZPA->(MsSeek(xFilial("ZPA")+StrZero(_nAno,4)))
-       Aadd(_aAnos,StrZero(_nAno,4)+" (I)")
-       IF _cAno = StrZero(_nAno,4)
-          _cAno:= StrZero(_nAno,4)+" (I)"
-       Endif
-    ELSE
-       Aadd(_aAnos,StrZero(_nAno,4))
-    Endif
-next _nAno
+ For _nAno := (Year(_dDataAtual)-5) to (Year(_dDataAtual)+10)
+     If ZPA->(MSSeek(FWxfilial("ZPA")+StrZero(_nAno,4)))
+        AAdd(_aAnos,StrZero(_nAno,4)+" (I)")
+        If _cAno = StrZero(_nAno,4)
+           _cAno:= StrZero(_nAno,4)+" (I)"
+        EndIf
+     Else
+        AAdd(_aAnos,StrZero(_nAno,4))
+     EndIf
+ Next _nAno
 
-For _nAno := (Year(_dDataAtual)-15) to (Year(_dDataAtual)+15)
-    IF ZPA->(MsSeek(xFilial("ZPA")+StrZero(_nAno,4)))
-       Aadd(_aAnosGrv,StrZero(_nAno,4))
-    Endif
-Next _nAno
+ For _nAno := (Year(_dDataAtual)-15) to (Year(_dDataAtual)+15)
+     If ZPA->(MSSeek(FWxfilial("ZPA")+StrZero(_nAno,4)))
+        AAdd(_aAnosGrv,StrZero(_nAno,4))
+     EndIf
+ Next _nAno
 
- DO While .T.
+ While .T.
     nGDAction:=-1
     DEFINE MSDIALOG oDlgAno FROM 0,0 TO 200,300 PIXEL TITLE 'Escolha o ano e a manutenção'
 
@@ -2826,67 +2676,67 @@ Next _nAno
 
     ACTIVATE MSDIALOG oDlgAno CENTERED
 
-    IF nGDAction = -1
-       Return .f.
+    If nGDAction = -1
+       Return
     EndIf
     _cSalvaAno:=_cAno //Variavel auxiliar para o ano
     _cAno:=LEFT(_cAno,4)
 
-    IF nGDAction = 0 .and. !ZPA->(MsSeek(xFilial("ZPA")+_cAno)) //CRIA DE NÃO TIVER AINDA
+    If nGDAction = 0 .And. !ZPA->(MSSeek(FWxfilial("ZPA")+_cAno)) //CRIA DE NÃO TIVER AINDA
 
-       IF !U_ITMSG("Ano não cadastrodo.",'Atenção!',"Deseja cadastrar?",2,2,3,,"CONFIRMA","VOLTAR")
+       If !U_ITMsg("Ano não cadastrodo.",'Atenção!',"Deseja cadastrar?",2,2,3,,"CONFIRMA","VOLTAR")
           _cAno:=_cSalvaAno
-          LOOP
+          Loop
        EndIf
        nGDAction:= GD_UPDATE
 
-    ElseIF nGDAction = GD_DELETE
+    ElseIf nGDAction = GD_DELETE
 
-       IF ZPA->(MsSeek(xFilial("ZPA")+_cAno))
-          If _cAnoAtual <= _cAno .And. !ALLTRIM(GETENVSERVER()) == "HOMOLOGACAO_ALEXANDRO"
-             u_itmsg("Não é possível excluir o ano atual ou inferior: "+_cAno,"Atenção",,3)
+       If ZPA->(MSSeek(FWxfilial("ZPA")+_cAno))
+          If _cAnoAtual <= _cAno .And. !AllTrim(GETENVSERVER()) == "HOMOLOGACAO_ALEXANDRO"
+             U_ITMsg("Não é possível excluir o ano atual ou inferior: "+_cAno,"Atenção",,3)
              _cAno:=_cSalvaAno
-             LOOP
+             Loop
           EndIf
        Else
-          u_itmsg("Registros não encontrado para o ano "+_cAno,"Atenção",,3)
+          U_ITMsg("Registros não encontrado para o ano "+_cAno,"Atenção",,3)
           _cAno:=_cSalvaAno
           Loop
-       EndIF
-
-       IF !U_ITMSG("Confirma a exclusao do Ano de "+_cAno+' ?','Atenção!',,2,2,3,,"CONFIRMA","VOLTAR")
-          _cAno:=_cSalvaAno
-          LOOP
        EndIf
 
-       FwMsgRun( ,{|oProc| AOMS063Ger("EXCLUIR_META_ANUAL",_cAno) }, 'Aguarde!' , 'Excluindo as datas/metas...'  )
-       Return .T.
+       If !U_ITMsg("Confirma a exclusao do Ano de "+_cAno+' ?','Atenção!',,2,2,3,,"CONFIRMA","VOLTAR")
+          _cAno:=_cSalvaAno
+          Loop
+       EndIf
+
+       FWMsgRun( ,{|oProc| AOMS063Ger("EXCLUIR_META_ANUAL",_cAno) }, 'Aguarde!' , 'Excluindo As datas/metas...'  )
+       Return
     EndIf
 
-    EXIT
+    Exit
 
- Enddo
+ EndDo
 
- FwMsgRun( ,{|oProc| AOMS063Ger("LER_META_ANUAL",_cAno) }, 'Aguarde!' , 'Carregando as datas/metas...'  )
+ FWMsgRun( ,{|oProc| AOMS063Ger("LER_META_ANUAL",_cAno) }, 'Aguarde!' , 'Carregando As datas/metas...'  )
 
- _bTotais:={|| FwMsgRun( ,{|oProc| AOMS063Ger("SOMAR_PERCENTUAL",,,oMsMGet) }, 'Aguarde!' , 'Somando % por mes...'  )  }
+ _bTotais:={|| FWMsgRun( ,{|oProc| AOMS063Ger("SOMAR_PERCENTUAL",,,oMsMGet) }, 'Aguarde!' , 'Somando % por mes...'  )  }
 
  // pega tamanhos das telas
  _aSize := MsAdvSize()
  _aInfo := { _aSize[1] , _aSize[2] , _aSize[3] , _aSize[4] , 1 , 1 }
 
  aObjects := {}
- aAdd( aObjects, { 100 , 100 , .T. , .T. } )
- aAdd( aObjects, { 100 , 100 , .T. , .T. } )
- aAdd( aObjects, { 100 , 100 , .T. , .T. } )
+ AAdd( aObjects, { 100 , 100 , .T. , .T. } )
+ AAdd( aObjects, { 100 , 100 , .T. , .T. } )
+ AAdd( aObjects, { 100 , 100 , .T. , .T. } )
  aPosObj := MsObjSize( _aInfo , aObjects )
  _cAnoAux:= _cAno //Variavel auxiliar para o ano
- DO WHILE .T.
+ While .T.
 
     _nOpca:= 0
     DEFINE MSDIALOG oDlg2 TITLE _cTitulo+" do Ano "+_cAno OF oMainWnd PIXEL FROM _aSize[7],0 TO _aSize[6],_aSize[5]
 
-      IF nGDAction = GD_UPDATE
+      If nGDAction = GD_UPDATE
          @ 005,050 Button "GRAVAR" Size 55,13 Action ( _nOpca := 3 , oDlg2:End() ) Object oBotao1
          @ 005,110 Button "TOTAIS" Size 55,13 Action ( Eval(_bTotais)            ) Object oBotao2
          @ 005,170 Button "SAIR"   Size 55,13 Action ( _nOpca := 0 , oDlg2:End() ) Object oBotao3
@@ -2903,7 +2753,7 @@ Next _nAno
          @ 005,_nCol BTNBMP oBotao4 RESOURCE "AVANCAR2_OCEAN.BMP" SIZE _nLarg,_nAlt PIXEL OF oDlg2 ACTION ( _nOpca :=  2 , oDlg2:End() )
          _nCol+=100
          @ 005,_nCol BTNBMP oBotao5 RESOURCE "FINAL_OCEAN.BMP"    SIZE 030,030      PIXEL OF oDlg2 ACTION ( _nOpca :=  0 , oDlg2:End() )
-      endif
+      EndIf
 
       ///***********************  MSNEWGETDADOS() *************************
                               //[ nTop]          , [ nLeft]   , [ nBottom] , [ nRight ] , [ nStyle],cLinhaOk,cTudoOk,cIniCpos, [ aAlter], [ nFreeze], [ nMax], [ cFieldOk], [ cSuperDel], [ cDelOk], [ oWnd], [ aPartHeader], [ aParCols], [ uChange], [ cTela], [ aColsSize]
@@ -2912,45 +2762,45 @@ Next _nAno
 
     ACTIVATE MSDIALOG oDlg2
 
-    if _nOpca = 0 //Sair
+    If _nOpca = 0 //Sair
 
-       EXIT
-
-    Elseif _nOpca = 3 //GRAVAR
-
-       _cMeses:= ""
-       FwMsgRun( ,{|oProc| _cMeses:=AOMS063Ger("SOMAR_PERCENTUAL",,,oMsMGet) }, 'Aguarde!' , 'Somando % por mes...'  )
-       IF !Empty(_cMeses)
-          u_itmsg("O(s) mes(es) de "+_cMeses+" não esta com 100 % na somatoria.","Atenção","Acerte e grave novamente.",3)
-          Loop
-       EndIF
-       FwMsgRun( ,{|oProc| AOMS063Ger("GRAVAR_META_ANUAL",_cAno) }, 'Aguarde!' , 'Gravando as datas/metas...'  )
-       u_itmsg("Gravacao concluida com sucesso","Atenção",,2)
        Exit
 
-    Elseif _nOpca = -2 //PRIMEIRO
+    ElseIf _nOpca = 3 //GRAVAR
+
+       _cMeses:= ""
+       FWMsgRun( ,{|oProc| _cMeses:=AOMS063Ger("SOMAR_PERCENTUAL",,,oMsMGet) }, 'Aguarde!' , 'Somando % por mes...'  )
+       If !Empty(_cMeses)
+          U_ITMsg("O(s) mes(es) de "+_cMeses+" não esta com 100 % na somatoria.","Atenção","Acerte e grave novamente.",3)
+          Loop
+       EndIf
+       FWMsgRun( ,{|oProc| AOMS063Ger("GRAVAR_META_ANUAL",_cAno) }, 'Aguarde!' , 'Gravando As datas/metas...'  )
+       U_ITMsg("Gravacao concluida com sucesso","Atenção",,2)
+       Exit
+
+    ElseIf _nOpca = -2 //PRIMEIRO
 
        nPos:=1
 
-    Elseif _nOpca = -1//VOLTA UM
+    ElseIf _nOpca = -1//VOLTA UM
 
-       nPos:=ASCAN(_aAnosGrv,_cAno)
-       IF nPos > 1
+       nPos:=AScan(_aAnosGrv,_cAno)
+       If nPos > 1
           nPos--
        Else
           nPos:=1
-       EndIF
+       EndIf
 
-    Elseif _nOpca = 1//AVANCAO 1
+    ElseIf _nOpca = 1//AVANCAO 1
 
-       nPos:=ASCAN(_aAnosGrv,_cAno)
-       IF nPos < (Len(_aAnosGrv)-1)
+       nPos:=AScan(_aAnosGrv,_cAno)
+       If nPos < (Len(_aAnosGrv)-1)
           nPos++
        Else
           nPos:=Len(_aAnosGrv)
-       EndIF
+       EndIf
 
-    Elseif _nOpca = 2//ULTIMO
+    ElseIf _nOpca = 2//ULTIMO
 
        nPos:=Len(_aAnosGrv)
 
@@ -2958,14 +2808,14 @@ Next _nAno
 
     _cAno:=_aAnosGrv[nPos]
     _cAnoAux:=LEFT(_cAno,4) //Pega só o ano
-    IF ZPA->(MsSeek(xFilial("ZPA")+_cAnoAux))
-       FwMsgRun( ,{|oProc| AOMS063Ger("LER_META_ANUAL",_cAnoAux) }, 'Aguarde!' , 'Carregando as datas/metas...'  )
+    If ZPA->(MSSeek(FWxfilial("ZPA")+_cAnoAux))
+       FWMsgRun( ,{|oProc| AOMS063Ger("LER_META_ANUAL",_cAnoAux) }, 'Aguarde!' , 'Carregando As datas/metas...'  )
        _cAno:=_cAnoAux
-    Endif
+    EndIf
 
-ENDDO
+ EndDo
 
-Return .T.
+Return
 
 /*
 ===============================================================================================================================
@@ -2973,53 +2823,53 @@ Programa--------: AOMS063Ger
 Autor-----------: Alex Wallauer
 Data da Criacao-: 04/06/2025
 Descrição-------: Leitura e geracao da Manutenção do % diario
-Parametros------: _cAcao as char , _cAnoMes as char, _cCoord as char , oMsMGet as Object
-Retorno---------: Nenhum
+Parametros------: _cAcao As char , _cAnoMes As char, _cCoord As char , oMsMGet As Object
+Retorno---------: _cMeses //Retorna os meses que não tem 100% de somatoria na _cAcao = "SOMAR_PERCENTUAL"
 ===============================================================================================================================
 */
-Static Function AOMS063Ger(_cAcao as char,_cAnoMes as char ,_cCoord as char , oMsMGet as Object)
+Static Function AOMS063Ger(_cAcao As char,_cAnoMes As char ,_cCoord As char , oMsMGet As Object) As Char
  Local M         := 000 As Numeric
  Local A         := 000 As Numeric
  Local N         := 000 As Numeric
- Local nCol      := 001 as numeric
+ Local nCol      := 001 As Numeric
  Local nPosProd  := 000 As Numeric
  Local _nQtde1um := 000 As Numeric
  Local _nQtde2um := 000 As Numeric
  Local _nQtde3um := 000 As Numeric
  Local _nValorMe := 000 As Numeric
- Local cProd     := " " As Character
- Local _cChave   := " " As Character
- Local _cOperacao:= " " As Character
- Local _cData    := " " As Character
+ Local cProd     := " " As Char
+ Local _cChave   := " " As Char
+ Local _cOperacao:= " " As Char
+ Local _cData    := " " As Char
  Local _lAchou   := .F. As Logical
  Local xObj      := Nil As Object
  Local _aAreaZZS := ZZS->(FwGetArea()) //SALVA A AREA DE ZZS INDICE E RECNO
 
  //************************************//
- IF _cAcao = "GERAR_VALORES_POR_DATA"
+ If _cAcao = "GERAR_VALORES_POR_DATA"
  //************************************//
-    ZZA->(DbSetOrder(1))//ZPA_FILIAL+ZPA_SDATA
-    IF ZPA->(MsSeek(xFilial("ZPA")+_cAnoMes))
+    ZZA->(DBSetOrder(1))//ZPA_FILIAL+ZPA_SDATA
+    If ZPA->(MSSeek(FWxfilial("ZPA")+_cAnoMes))
 
        _cChave   := ZZS->ZZS_FILIAL+ZZS->ZZS_ANOMES+ZZS->ZZS_COOR+ZZS->ZZS_COD
        _nQtde1um := ZZS->ZZS_QTD
        _nQtde2um := ZZS->ZZS_QTD2UM
        _nQtde3um := ZZS->ZZS_QTD3UM
        _nValorMe := ZZS->ZZS_VALOR
-       _cOperacao:= ALLTRIM(ZGW->ZGW_OPER)+"_DT"
+       _cOperacao:= AllTrim(ZGW->ZGW_OPER)+"_DT"
 
-       SB1->(DbSetOrder(1))
-       SB1->(MsSeek(xfilial("SB1")+ZZS->ZZS_COD))
-       SA3->(DbSetOrder(1))
-       SA3->(MsSeek(xfilial("SA3")+ZZS->ZZS_COOR))
-       ZZS->(DbSetOrder(7))//ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD+ZZS_DATA
+       SB1->(DBSetOrder(1))
+       SB1->(MSSeek(FWxfilial("SB1")+ZZS->ZZS_COD))
+       SA3->(DBSetOrder(1))
+       SA3->(MSSeek(FWxfilial("SA3")+ZZS->ZZS_COOR))
+       ZZS->(DBSetOrder(7))//ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD+ZZS_DATA
 
-       DO While ZPA->(!EOF()) .AND. xFilial("ZPA")+_cAnoMes == ZPA->(ZPA_FILIAL+LEFT(ZPA_SDATA,6))//SÓ ANO + MES
+       While ZPA->(!Eof()) .And. FWxfilial("ZPA")+_cAnoMes == ZPA->(ZPA_FILIAL+LEFT(ZPA_SDATA,6))//SÓ ANO + MES
                              //esse campo de ZPA_SDATA é o ano+mes+dia caracter,ex:20250101
-          _lAchou:=ZZS->(MsSeek(_cChave+ZPA->ZPA_SDATA)) //ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD+ZZS_DATA
+          _lAchou:=ZZS->(MSSeek(_cChave+ZPA->ZPA_SDATA)) //ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD+ZZS_DATA
 
-          ZZS->(Reclock("ZZS",!_lAchou))
-          IF !_lAchou//Se não achou, inclui
+          ZZS->(RecLock("ZZS",!_lAchou))
+          If !_lAchou//Se não achou, inclui
              ZZS->ZZS_ANOMES := _cAnoMes
              ZZS->ZZS_COD    := SB1->B1_COD
              ZZS->ZZS_DESCR  := SB1->B1_DESC
@@ -3030,16 +2880,16 @@ Static Function AOMS063Ger(_cAcao as char,_cAnoMes as char ,_cCoord as char , oM
              ZZS->ZZS_COOR   := SA3->A3_COD
              ZZS->ZZS_NMCOOR := SA3->A3_NOME
              ZZS->ZZS_TIPOV  := SA3->A3_I_TIPV
-             ZZS->ZZS_DATA   := STOD(ZPA->ZPA_SDATA)
+             ZZS->ZZS_DATA   := SToD(ZPA->ZPA_SDATA)
           EndIf
           ZZS->ZZS_QTD    := ((_nQtde1um*ZPA->ZPA_PERCE)/100)
           ZZS->ZZS_QTD2UM := ((_nQtde2um*ZPA->ZPA_PERCE)/100)
           ZZS->ZZS_QTD3UM := ((_nQtde3um*ZPA->ZPA_PERCE)/100)
           ZZS->ZZS_VALOR  := ((_nValorMe*ZPA->ZPA_PERCE)/100)
-          ZZS->(Msunlock())
+          ZZS->(MSUnLock())
 
           ZGW->(RecLock("ZGW",.T.))//_cOperacao+"_DT"
-          ZGW->ZGW_FILIAL := xFilial("ZGW")
+          ZGW->ZGW_FILIAL := FWxfilial("ZGW")
           ZGW->ZGW_COD    := ZZS->ZZS_COD
           ZGW->ZGW_DESCR  := ZZS->ZZS_DESCR
           ZGW->ZGW_DESCD  := ZZS->ZZS_DESCD
@@ -3057,30 +2907,30 @@ Static Function AOMS063Ger(_cAcao as char,_cAnoMes as char ,_cCoord as char , oM
           ZGW->ZGW_ANOMES := ZZS->ZZS_ANOMES
           ZGW->ZGW_OPER   := _cOperacao
           ZGW->ZGW_USER   := _cUserName
-          ZGW->ZGW_DATA   := DATE()
-          ZGW->ZGW_HORA   := TIME()
-          ZGW->(MsUnLock())
+          ZGW->ZGW_DATA   := Date()
+          ZGW->ZGW_HORA   := Time()
+          ZGW->(MSUnLock())
 
-          ZPA->(DbSkip())
+          ZPA->(DBSkip())
        EndDo
        FwRestArea(_aAreaZZS)//VOLTA A AREA DE ZZS INDICE E RECNO
     EndIf
 
  //************************************************************************************//
- ElseIF _cAcao = "EXCLUIR_VALORES_POR_DATA"
+ ElseIf _cAcao = "EXCLUIR_VALORES_POR_DATA"
  //************************************************************************************//
-    ZZS->(DbSetOrder(7))//ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD+ZZS_DATA
+    ZZS->(DBSetOrder(7))//ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD+ZZS_DATA
     _cChave   := ZZS->ZZS_FILIAL+ZZS->ZZS_ANOMES+ZZS->ZZS_COOR+ZZS->ZZS_COD
-    _lAchou   := ZZS->(MsSeek(_cChave)) //ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD+ZZS_DATA
-    _cOperacao:= ALLTRIM(ZGW->ZGW_OPER)+"_DT"
+    _lAchou   := ZZS->(MSSeek(_cChave)) //ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD+ZZS_DATA
+    _cOperacao:= AllTrim(ZGW->ZGW_OPER)+"_DT"
 
-    DO While ZZS->(!EOF()) .AND. _cChave == ZZS->(ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD)
-       IF EMPTY(ZZS->ZZS_DATA)
-          ZZS->(Dbskip())
+    While ZZS->(!Eof()) .And. _cChave == ZZS->(ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD)
+       If Empty(ZZS->ZZS_DATA)
+          ZZS->(DBSkip())
           Loop
-       Endif
+       EndIf
        ZGW->(RecLock("ZGW",.T.))//_cOperacao+"_DT"
-       ZGW->ZGW_FILIAL := xFilial("ZGW")
+       ZGW->ZGW_FILIAL := FWxfilial("ZGW")
        ZGW->ZGW_COD    := ZZS->ZZS_COD
        ZGW->ZGW_DESCR  := ZZS->ZZS_DESCR
        ZGW->ZGW_DESCD  := ZZS->ZZS_DESCD
@@ -3098,37 +2948,37 @@ Static Function AOMS063Ger(_cAcao as char,_cAnoMes as char ,_cCoord as char , oM
        ZGW->ZGW_ANOMES := ZZS->ZZS_ANOMES
        ZGW->ZGW_OPER   := _cOperacao
        ZGW->ZGW_USER   := _cUserName
-       ZGW->ZGW_DATA   := DATE()
-       ZGW->ZGW_HORA   := TIME()
-       ZGW->(MsUnLock())
+       ZGW->ZGW_DATA   := Date()
+       ZGW->ZGW_HORA   := Time()
+       ZGW->(MSUnLock())
 
        ZZS->(RecLock("ZZS",.F.))
        ZZS->(DbDelete())
-       ZZS->(MsUnLock())
-       ZZS->(DbSkip())
+       ZZS->(MSUnLock())
+       ZZS->(DBSkip())
     EndDo
     FwRestArea(_aAreaZZS)//VOLTA A AREA DE ZZS INDICE E RECNO
 
  //************************************************************************************//
- ElseIF _cAcao = "GRAVAR_META_ANUAL"//não usa _cAnoMes
+ ElseIf _cAcao = "GRAVAR_META_ANUAL"//não usa _cAnoMes
  //************************************************************************************//
     For A := 1 TO 12
-       FOR M := 1 TO LEN(aCols)
-           IF EMPTY(aCols[M,nCol])//Não tem como o usuario por data em branco , server de controle de meses com mesmo de 31 dias
-              LOOP
+       For M := 1 TO Len(aCols)
+           If Empty(aCols[M,nCol])//Não tem como o usuario por data em branco , server de controle de meses com mesmo de 31 dias
+              Loop
            EndIf
-           _cSData:=DTOS(aCols[M,nCol])
+           _cSData:=DToS(aCols[M,nCol])
            _nPerc :=aCols[M,(nCol+1)]
-           IF ZPA->(MsSeek(xFilial("ZPA")+_cSData))
+           If ZPA->(MSSeek(FWxfilial("ZPA")+_cSData))
               ZPA->(RecLock("ZPA",.F.))
               ZPA->ZPA_PERCE:=_nPerc
-              ZPA->(MsUnLock())
-           ElseiF _nPerc > 0//Só inclui um reg se tiver percentual e data preenchidos
+              ZPA->(MSUnLock())
+           ElseIf _nPerc > 0//Só inclui um reg se tiver percentual e data preenchidos
               ZPA->(RecLock("ZPA",.T.))
               ZPA->ZPA_SDATA:=_cSData
               ZPA->ZPA_PERCE:=_nPerc
-              ZPA->(MsUnLock())
-           Endif
+              ZPA->(MSUnLock())
+           EndIf
         Next M
         nCol:=nCol+2
     Next A
@@ -3136,16 +2986,16 @@ Static Function AOMS063Ger(_cAcao as char,_cAnoMes as char ,_cCoord as char , oM
  //************************************************************************************//
  ElseIf _cAcao = "EXCLUIR_META_ANUAL"//_cAnoMes: Ler Ano 4 digitos
  //************************************************************************************//
-    IF ZPA->(MsSeek(xFilial("ZPA")+_cAnoMes))
-       DO While ZPA->(!EOF()) .AND. xFilial("ZPA")+_cAnoMes == ZPA->(ZPA_FILIAL+LEFT(ZPA_SDATA,4))
+    If ZPA->(MSSeek(FWxfilial("ZPA")+_cAnoMes))
+       While ZPA->(!Eof()) .And. FWxfilial("ZPA")+_cAnoMes == ZPA->(ZPA_FILIAL+LEFT(ZPA_SDATA,4))
           ZPA->(RecLock("ZPA",.F.))
           ZPA->(DbDelete())
-          ZPA->(DbSkip())
+          ZPA->(DBSkip())
        EndDo
-       u_itmsg("Registros excluiodos do ano "+_cAnoMes+" com SUCESSO.","Atenção",,2)
+       U_ITMsg("Registros excluiodos do ano "+_cAnoMes+" com SUCESSO.","Atenção",,2)
     Else
-       u_itmsg("Registros não encontrado para o ano "+_cAnoMes,"Atenção",,3)
-    EndIF
+       U_ITMsg("Registros não encontrado para o ano "+_cAnoMes,"Atenção",,3)
+    EndIf
 
  //************************************************************************************//
  ElseIf _cAcao = "LER_META_ANUAL"//_cAnoMes: Ler Ano 4 digitos
@@ -3153,89 +3003,89 @@ Static Function AOMS063Ger(_cAcao as char,_cAnoMes as char ,_cCoord as char , oM
 
     aHeader:={}
     /////aHeader,{X3_TITULO  ,   CAMPO   ,PICT,Tamanho,D,Validacao        ,USADO,X3_TIPO,ARQUIVO,X3_CONTEXT,X3_CBOX,X3_RELACAO,X3_WHEN,X3_VISUAL,X3_VLDUSER,X3_PICTVAR,X3_OBRIGAT
-    Aadd(aHeader,{"Janeiro"  ,"TRB_JAN_D","@D"     ,08,0,"               ","","D","","","","",".F."})
-    Aadd(aHeader,{"%"        ,"TRB_JAN_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
-    Aadd(aHeader,{"Fevereiro","TRB_FEV_D","@D"     ,08,0,"               ","","D","","","","",".F."})
-    Aadd(aHeader,{"%"        ,"TRB_FEV_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
-    Aadd(aHeader,{"Março"    ,"TRB_MAR_D","@D"     ,08,0,"               ","","D","","","","",".F."})
-    Aadd(aHeader,{"%"        ,"TRB_MAR_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
-    Aadd(aHeader,{"Abril"    ,"TRB_ABR_D","@D"     ,08,0,"               ","","D","","","","",".F."})
-    Aadd(aHeader,{"%"        ,"TRB_ABR_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
-    Aadd(aHeader,{"Maio"     ,"TRB_MAI_D","@D"     ,08,0,"               ","","D","","","","",".F."})
-    Aadd(aHeader,{"%"        ,"TRB_MAI_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
-    Aadd(aHeader,{"Junho"    ,"TRB_JUN_D","@D"     ,08,0,"               ","","D","","","","",".F."})
-    Aadd(aHeader,{"%"        ,"TRB_JUN_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
-    Aadd(aHeader,{"Julho"    ,"TRB_JUL_D","@D"     ,08,0,"               ","","D","","","","",".F."})
-    Aadd(aHeader,{"%"        ,"TRB_JUL_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
-    Aadd(aHeader,{"Agosto"   ,"TRB_AGO_D","@D"     ,08,0,"               ","","D","","","","",".F."})
-    Aadd(aHeader,{"%"        ,"TRB_AGO_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
-    Aadd(aHeader,{"Setembro" ,"TRB_SET_D","@D"     ,08,0,"               ","","D","","","","",".F."})
-    Aadd(aHeader,{"%"        ,"TRB_SET_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
-    Aadd(aHeader,{"Outubro"  ,"TRB_OUT_D","@D"     ,08,0,"               ","","D","","","","",".F."})
-    Aadd(aHeader,{"%"        ,"TRB_OUT_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
-    Aadd(aHeader,{"Novembro" ,"TRB_NOV_D","@D"     ,08,0,"               ","","D","","","","",".F."})
-    Aadd(aHeader,{"%"        ,"TRB_NOV_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
-    Aadd(aHeader,{"Dezembro" ,"TRB_DEZ_D","@D"     ,08,0,"               ","","D","","","","",".F."})
-    Aadd(aHeader,{"%"        ,"TRB_DEZ_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
+    AAdd(aHeader,{"Janeiro"  ,"TRB_JAN_D","@D"     ,08,0,"               ","","D","","","","",".F."})
+    AAdd(aHeader,{"%"        ,"TRB_JAN_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
+    AAdd(aHeader,{"Fevereiro","TRB_FEV_D","@D"     ,08,0,"               ","","D","","","","",".F."})
+    AAdd(aHeader,{"%"        ,"TRB_FEV_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
+    AAdd(aHeader,{"Março"    ,"TRB_MAR_D","@D"     ,08,0,"               ","","D","","","","",".F."})
+    AAdd(aHeader,{"%"        ,"TRB_MAR_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
+    AAdd(aHeader,{"Abril"    ,"TRB_ABR_D","@D"     ,08,0,"               ","","D","","","","",".F."})
+    AAdd(aHeader,{"%"        ,"TRB_ABR_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
+    AAdd(aHeader,{"Maio"     ,"TRB_MAI_D","@D"     ,08,0,"               ","","D","","","","",".F."})
+    AAdd(aHeader,{"%"        ,"TRB_MAI_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
+    AAdd(aHeader,{"Junho"    ,"TRB_JUN_D","@D"     ,08,0,"               ","","D","","","","",".F."})
+    AAdd(aHeader,{"%"        ,"TRB_JUN_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
+    AAdd(aHeader,{"Julho"    ,"TRB_JUL_D","@D"     ,08,0,"               ","","D","","","","",".F."})
+    AAdd(aHeader,{"%"        ,"TRB_JUL_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
+    AAdd(aHeader,{"Agosto"   ,"TRB_AGO_D","@D"     ,08,0,"               ","","D","","","","",".F."})
+    AAdd(aHeader,{"%"        ,"TRB_AGO_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
+    AAdd(aHeader,{"Setembro" ,"TRB_SET_D","@D"     ,08,0,"               ","","D","","","","",".F."})
+    AAdd(aHeader,{"%"        ,"TRB_SET_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
+    AAdd(aHeader,{"Outubro"  ,"TRB_OUT_D","@D"     ,08,0,"               ","","D","","","","",".F."})
+    AAdd(aHeader,{"%"        ,"TRB_OUT_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
+    AAdd(aHeader,{"Novembro" ,"TRB_NOV_D","@D"     ,08,0,"               ","","D","","","","",".F."})
+    AAdd(aHeader,{"%"        ,"TRB_NOV_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
+    AAdd(aHeader,{"Dezembro" ,"TRB_DEZ_D","@D"     ,08,0,"               ","","D","","","","",".F."})
+    AAdd(aHeader,{"%"        ,"TRB_DEZ_P","@E 99.9",04,1,'U_AOMS063V("%")',"","N","","","","",".T."})
 
-    IF !ZPA->(MsSeek(xFilial("ZPA")+_cAnoMes)) //CRIA SE NÃO TIVER AINDA - CARGA INICIAL DO ANO SELECIONADO
+    If !ZPA->(MSSeek(FWxfilial("ZPA")+_cAnoMes)) //CRIA SE NÃO TIVER AINDA - CARGA INICIAL DO ANO SELECIONADO
        For A := 1 TO 31
            _aLinhas:={}
            For M := 1 TO 12
-               _cData:=STRZERO(A,2)+"/"+STRZERO(M,2)+"/"+_cAnoMes
-               IF !EMPTY(CTOD(_cData))
-                  Aadd(_aLinhas,CTOD(_cData))
-                  IF A >= 1 .AND. A <= 15// Todos os Meses
-                     Aadd(_aLinhas,4)
-                  ElseIF A >= 16 .AND. STRZERO(M,2) $ "01,03,05,07,08,10,12" // meses com 31 dias
-                     Aadd(_aLinhas,2.5)
-                  ElseIF A >= 16 .AND. A <= 22 .AND. STRZERO(M,2) $ "04,06,09,11" // meses com 30 dias
-                     Aadd(_aLinhas,2.9)
-                  ElseIF A >= 23 .AND. A <= 29 .AND. STRZERO(M,2) $ "04,06,09,11" // meses com 30 dias
-                     Aadd(_aLinhas,2.5)
-                  ElseIF A = 30 .AND. STRZERO(M,2) $ "04,06,09,11" // meses com 30 dias
-                     Aadd(_aLinhas,2.2)
-                  ElseIF M = 2 // Fevereiro e Bisexto
-                     IF A >= 16 .AND. A <= 21
-                        Aadd(_aLinhas,3.3)
-                     ElseIF A >= 22 .AND. A <= 27
-                        Aadd(_aLinhas,2.9)
-                     ElseIF A = 28
-                        Aadd(_aLinhas,2.8)
-                     ElseIF A = 29
-                        Aadd(_aLinhas,0)
-                     Endif
-                  EndIF
+               _cData:=StrZero(A,2)+"/"+StrZero(M,2)+"/"+_cAnoMes
+               If !Empty(CTOD(_cData))
+                  AAdd(_aLinhas,CTOD(_cData))
+                  If A >= 1 .And. A <= 15// Todos os Meses
+                     AAdd(_aLinhas,4)
+                  ElseIf A >= 16 .And. StrZero(M,2) $ "01,03,05,07,08,10,12" // meses com 31 dias
+                     AAdd(_aLinhas,2.5)
+                  ElseIf A >= 16 .And. A <= 22 .And. StrZero(M,2) $ "04,06,09,11" // meses com 30 dias
+                     AAdd(_aLinhas,2.9)
+                  ElseIf A >= 23 .And. A <= 29 .And. StrZero(M,2) $ "04,06,09,11" // meses com 30 dias
+                     AAdd(_aLinhas,2.5)
+                  ElseIf A = 30 .And. StrZero(M,2) $ "04,06,09,11" // meses com 30 dias
+                     AAdd(_aLinhas,2.2)
+                  ElseIf M = 2 // Fevereiro e Bisexto
+                     If A >= 16 .And. A <= 21
+                        AAdd(_aLinhas,3.3)
+                     ElseIf A >= 22 .And. A <= 27
+                        AAdd(_aLinhas,2.9)
+                     ElseIf A = 28
+                        AAdd(_aLinhas,2.8)
+                     ElseIf A = 29
+                        AAdd(_aLinhas,0)
+                     EndIf
+                  EndIf
                Else
-                  Aadd(_aLinhas,CTOD(""))
-                  Aadd(_aLinhas,0)
-               EndIF
+                  AAdd(_aLinhas,CTOD(""))
+                  AAdd(_aLinhas,0)
+               EndIf
            Next M
-           Aadd(_aLinhas,.F.)
-           Aadd(aCols,_aLinhas)
+           AAdd(_aLinhas,.F.)
+           AAdd(aCols,_aLinhas)
        Next A
     Else//LER SE EXISTE *************************************************************************************//
        _aColAux:={}
-       DO While ZPA->(!EOF()) .AND. xFilial("ZPA")+_cAnoMes == ZPA->(ZPA_FILIAL+LEFT(ZPA_SDATA,4))
-          AADD(_aColAux,{ ZPA->ZPA_SDATA , ZPA->ZPA_PERCE })
-          ZPA->(DbSkip())
-       EndDO
+       While ZPA->(!Eof()) .And. FWxfilial("ZPA")+_cAnoMes == ZPA->(ZPA_FILIAL+LEFT(ZPA_SDATA,4))
+          AAdd(_aColAux,{ ZPA->ZPA_SDATA , ZPA->ZPA_PERCE })
+          ZPA->(DBSkip())
+       EndDo
        aCols:={}
        For A := 1 TO 31
            _aLinhas:={}
            For M := 1 TO 12
-               _cData:=_cAnoMes+STRZERO(M,2)+STRZERO(A,2)
-               _nPos:=ASCAN(_aColAux,{ |x| x[1] == _cData })
-               IF _nPos > 0
-                  Aadd(_aLinhas,STOD(_aColAux[_nPos,1]))
-                  Aadd(_aLinhas,_aColAux[_nPos,2])
+               _cData:=_cAnoMes+StrZero(M,2)+StrZero(A,2)
+               _nPos:=AScan(_aColAux,{ |x| x[1] == _cData })
+               If _nPos > 0
+                  AAdd(_aLinhas,SToD(_aColAux[_nPos,1]))
+                  AAdd(_aLinhas,_aColAux[_nPos,2])
                Else
-                  Aadd(_aLinhas,CTOD(""))
-                  Aadd(_aLinhas,0)
-               EndIF
+                  AAdd(_aLinhas,CTOD(""))
+                  AAdd(_aLinhas,0)
+               EndIf
            Next
-           Aadd(_aLinhas,.F.)
-           Aadd(aCols,_aLinhas)
+           AAdd(_aLinhas,.F.)
+           AAdd(aCols,_aLinhas)
        Next
 
     EndIf
@@ -3248,17 +3098,17 @@ Static Function AOMS063Ger(_cAcao as char,_cAnoMes as char ,_cCoord as char , oM
     _cMeses:=""
     nCol:=1
     For A := 1 TO 12
-        FOR M := 1 TO LEN(aCols)
-           IF EMPTY(aCols[M,nCol])//Não tem como o usuario por data em branco , server de controle de meses com mesmo de 31 dias
-              LOOP
+        For M := 1 TO Len(aCols)
+           If Empty(aCols[M,nCol])//Não tem como o usuario por data em branco , server de controle de meses com mesmo de 31 dias
+              Loop
            EndIf
            _cSData:=MesExtenso( Month( aCols[M,nCol]) )
            _nPerc :=aCols[M,(nCol+1)]
-           IF (nPos:=ASCAN(_aTotais,{ |D| D[2] = _cSData })) > 0
+           If (nPos:=AScan(_aTotais,{ |D| D[2] = _cSData })) > 0
               _aTotais[nPos,3] += _nPerc
               _aTotais[nPos,1] := (_aTotais[nPos,3] = 100)
            Else
-               Aadd(_aTotais,{ .F. ,_cSData , _nPerc })
+               AAdd(_aTotais,{ .F. ,_cSData , _nPerc })
            EndIf
         Next M
         nCol:=nCol+2
@@ -3267,20 +3117,20 @@ Static Function AOMS063Ger(_cAcao as char,_cAnoMes as char ,_cCoord as char , oM
     _aColXML:=aClone(_aTotais)
 
     For A := 1 TO Len(_aTotais)
-       IF !_aTotais[A,1] //Se o mes não tem 100% de somatoria
+       If !_aTotais[A,1] //Se o mes não tem 100% de somatoria
           _cMeses+="["+_aTotais[A,2]+"] "
        EndIf
        _aTotais[A,3]:= Trans(_aTotais[A,3],"@E 999.99")+" %"
     Next A
 
     _aCabTot:={}
-    Aadd(_aCabTot,"   "    )
-    Aadd(_aCabTot,"Mes"    )
-    Aadd(_aCabTot,"Total %")
+    AAdd(_aCabTot,"   "    )
+    AAdd(_aCabTot,"Mes"    )
+    AAdd(_aCabTot,"Total %")
     _cMsg:=NIL
-    IF !Empty(_cMeses)
+    If !Empty(_cMeses)
        _cMsg:="O(s) mes(es) de "+_cMeses+"não esta com 100 % na somatoria."
-    Endif
+    EndIf
     _cTitulo:="Conferencia do Total (100%) por mes das Metas Anuais"
     //ITListBox( _cTitAux , _aHeader , _aCols , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab , bDblClk , _aColXML , bCondMarca,_bLegenda,_lHasOk,_bHeadClk,_aSX1,_lComCab)
     U_ITListBox( _cTitulo , _aCabTot, _aTotais  , .F.    , 4      ,_cMsg     ,          ,         ,         ,     ,        ,          ,       ,         , _aColXML ,)
@@ -3290,32 +3140,32 @@ Static Function AOMS063Ger(_cAcao as char,_cAnoMes as char ,_cCoord as char , oM
  //************************************************************************************//
  ElseIf _cAcao = "LISTA_META_POR_DIA"//_cAnoMes: Ler AnoMes 6 digitos
  //************************************************************************************//
-    nPosProd  := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'   })
-    nPosQTD   := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD'   })
-    nPosUM    := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_UM'    })
-    nPosQTD2U := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD2UM'})
-    nPos2UM   := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_2UM'   })
-    nPosQTD3U := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD3UM'})
-    nPos3UM   := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_3UM'   })
-    nPosVALOR := Ascan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_VALOR' })
+    nPosProd  := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_COD'   })
+    nPosQTD   := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD'   })
+    nPosUM    := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_UM'    })
+    nPosQTD2U := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD2UM'})
+    nPos2UM   := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_2UM'   })
+    nPosQTD3U := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_QTD3UM'})
+    nPos3UM   := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_3UM'   })
+    nPosVALOR := AScan(aHeader,{ |x| AllTrim(x[2]) == 'ZZS_VALOR' })
     xObj      := CallMod2Obj()
     N         := xObj:oBrowse:nat
     cProd     := aCols[N,nPosProd]
-    _cChave   := xFilial("ZZS")+_cAnoMes+_cCoord+cProd
+    _cChave   := FWxfilial("ZZS")+_cAnoMes+_cCoord+cProd
 
-    ZZS->(DbSetOrder(7))  // ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD+ZZS_DATA
-    ZZS->(MsSeek(_cChave))// ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD
-    ZZA->(DbSetOrder(1))  // ZPA_FILIAL+ZPA_SDATA
+    ZZS->(DBSetOrder(7))  // ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD+ZZS_DATA
+    ZZS->(MSSeek(_cChave))// ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD
+    ZZA->(DBSetOrder(1))  // ZPA_FILIAL+ZPA_SDATA
     lAchou:=.F.
     _aProdDia:={}
     _aTotais:={0,0,0,0,0,0,0} //Acumula os totais de cada coluna
-    DO While ZZS->(!EOF()) .AND. _cChave == ZZS->(ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD)
-       IF Empty(ZZS->ZZS_DATA)
-          ZZS->(Dbskip())
+    While ZZS->(!Eof()) .And. _cChave == ZZS->(ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD)
+       If Empty(ZZS->ZZS_DATA)
+          ZZS->(DBSkip())
           Loop
-       Endif
-       ZPA->(MsSeek(xFilial("ZPA")+DTOS(ZZS->ZZS_DATA)))
-       Aadd(_aProdDia,{DTOC(ZZS->ZZS_DATA),;//01
+       EndIf
+       ZPA->(MSSeek(FWxfilial("ZPA")+DToS(ZZS->ZZS_DATA)))
+       AAdd(_aProdDia,{DToC(ZZS->ZZS_DATA),;//01
                        ZPA->ZPA_PERCE     ,;//02
                        ZZS->ZZS_QTD       ,;//03
                        ZZS->ZZS_UM        ,;//04
@@ -3331,17 +3181,17 @@ Static Function AOMS063Ger(_cAcao as char,_cAnoMes as char ,_cCoord as char , oM
        _aTotais[4] +=  ZZS->ZZS_VALOR
        _aTotais[5] +=  ZPA->ZPA_PERCE
        lAchou:=.T.
-       ZZS->(Dbskip())
-    Enddo
+       ZZS->(DBSkip())
+    EndDo
 
-    IF !lAchou
-       u_itmsg("Não existem datas para o produto "+AllTrim(cProd)+" no mes "+SUBSTR(_cAnoMes,5,2)+"/"+SUBSTR(_cAnoMes,1,4),"Atenção","A meta diaria do produto é gravada atuomaticamente na gravaçõo das metas mensais.",3)
-       Return .F. //*********************  RETORNO  ****************************//
+    If !lAchou
+       U_ITMsg("Não existem datas para o produto "+AllTrim(cProd)+" no mes "+SubStr(_cAnoMes,5,2)+"/"+SubStr(_cAnoMes,1,4),"Atenção","A meta diaria do produto é gravada atuomaticamente na gravaçõo das metas mensais.",3)
+       Return "" //*********************  RETORNO  ****************************//
     EndIf
 
-    ZZS->(MsSeek(_cChave+" ")) //ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD
+    ZZS->(MSSeek(_cChave+" ")) //ZZS_FILIAL+ZZS_ANOMES+ZZS_COOR+ZZS_COD
 
-    Aadd(_aProdDia,{"SOMAS:"    ,;//01
+    AAdd(_aProdDia,{"SOMAS:"    ,;//01
                     _aTotais[5] ,;//02
                     _aTotais[1] ,;//03
                     ZZS->ZZS_UM ,;//04
@@ -3351,7 +3201,7 @@ Static Function AOMS063Ger(_cAcao as char,_cAnoMes as char ,_cCoord as char , oM
                     ZZS->ZZS_3UM,;//08
                     _aTotais[4] })//09
 
-    Aadd(_aProdDia,{"TOTAIS:"         ,;//01
+    AAdd(_aProdDia,{"TOTAIS:"         ,;//01
                     100               ,;//02
                     aCols[N,nPosQTD  ],;//03
                     aCols[N,nPosUM   ],;//04
@@ -3361,7 +3211,7 @@ Static Function AOMS063Ger(_cAcao as char,_cAnoMes as char ,_cCoord as char , oM
                     aCols[N,nPos3UM  ],;//08
                     aCols[N,nPosVALOR]})//09
 
-    Aadd(_aProdDia,{"Diferença:"                      ,;//01
+    AAdd(_aProdDia,{"Diferença:"                      ,;//01
                     (100               -_aTotais[5] ) ,;//02
                     (aCols[N,nPosQTD  ]-_aTotais[1] ) ,;//03
                     (aCols[N,nPosUM   ]             ) ,;//04
@@ -3382,22 +3232,119 @@ Static Function AOMS063Ger(_cAcao as char,_cAnoMes as char ,_cCoord as char , oM
     Next A
 
     _aCabDT:={}
-    Aadd(_aCabDT,"Data"    )
-    Aadd(_aCabDT,"%"       )
-    Aadd(_aCabDT,"Qtde 1Um")
-    Aadd(_aCabDT,"1a Um"   )
-    Aadd(_aCabDT,"Qtde 2Um")
-    Aadd(_aCabDT,"2a Um"   )
-    Aadd(_aCabDT,"Qtde 3Um")
-    Aadd(_aCabDT,"3a Um"   )
-    Aadd(_aCabDT,"Valor"   )
+    AAdd(_aCabDT,"Data"    )
+    AAdd(_aCabDT,"%"       )
+    AAdd(_aCabDT,"Qtde 1Um")
+    AAdd(_aCabDT,"1a Um"   )
+    AAdd(_aCabDT,"Qtde 2Um")
+    AAdd(_aCabDT,"2a Um"   )
+    AAdd(_aCabDT,"Qtde 3Um")
+    AAdd(_aCabDT,"3a Um"   )
+    AAdd(_aCabDT,"Valor"   )
 
-    _cTitulo:="Valores por Dia do Produto "+cProd+" no mes "+SUBSTR(_cAnoMes,5,2)+"/"+SUBSTR(_cAnoMes,1,4)
+    _cTitulo:="Valores por Dia do Produto "+cProd+" no mes "+SubStr(_cAnoMes,5,2)+"/"+SubStr(_cAnoMes,1,4)
     //ITListBox( _cTitAux , _aHeader , _aCols , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab , bDblClk , _aColXML , bCondMarca,_bLegenda,_lHasOk,_bHeadClk,_aSX1,_lComCab)
     U_ITListBox( _cTitulo , _aCabDT , _aProdDia , .F.    , 1      ,          ,          ,         ,         ,     ,        ,          ,       ,         , _aColXML ,)
 
     FwRestArea(_aAreaZZS)//VOLTA A AREA DE ZZS INDICE E RECNO
 
- ENDIF
+ EndIf
 
-Return .T.
+Return ""
+
+/*
+===============================================================================================================================
+Programa--------: AOMS063Conv
+Autor-----------: Alex Wallauer
+Data da Criacao-: 04/06/2025
+Descrição-------: Conversão do volume importado o do % diario
+Parametros------: _nVolume,_cUnidade,_cUMDest,_nQtde1um,_nQtde2um,_nQtde3um
+Retorno---------: _nVolume
+===============================================================================================================================
+*/
+Static Function AOMS063Conv(_nVolume As Numeric,_cUnidade As Char,_cUMDest As Char,_nQtde1um As Numeric,_nQtde2um As Numeric,_nQtde3um As Numeric)
+ Local _nFator := 0 As Numeric
+ 
+  //**************************************************
+ If _cUnidade == SB1->B1_UM        // CONVERSAO DA PRIMEIRA UM PARA 2UM e 3UM...
+
+     If SB1->B1_CONV == 0
+         If SB1->B1_I_QQUEI == 'S' .And. SB1->B1_I_FATCO > 0
+             _nFator := If(SB1->B1_TIPCONV=="D", 1/SB1->B1_I_FATCO,SB1->B1_I_FATCO)
+         EndIf
+     Else
+         _nFator := If(SB1->B1_TIPCONV=="D", 1/SB1->B1_CONV,SB1->B1_CONV)
+     EndIf
+     _nQtde1um:=_nVolume
+     _nQtde2um:=If(_nFator>0,_nVolume*_nFator,_nVolume)
+     If SB1->B1_I_QQUEI == 'S' .And. SB1->B1_SEGUM = 'PC' .And. SB1->B1_I_3UM = 'CX'
+        _nQtde3um:=( _nQtde2um / SB1->B1_I_QT3UM)// Conversão da SEGUNDA UM para a Terceira UM
+     Else
+        _nQtde3um:=( _nQtde1um / SB1->B1_I_QT3UM )// Conversão da PRIMEIRA UM para a Terceira UM
+     EndIf
+
+  //**************************************************
+ ElseIf _cUnidade == SB1->B1_SEGUM // CONVERSAO DA SEGUNDA  UM PARA 1IM e 3UM...
+
+     If SB1->B1_CONV == 0
+         If SB1->B1_I_QQUEI == 'S' .And. SB1->B1_I_FATCO > 0
+             _nFator := If(SB1->B1_TIPCONV=="M", 1/SB1->B1_I_FATCO,SB1->B1_I_FATCO)
+         EndIf
+     Else
+         _nFator := If(SB1->B1_TIPCONV=="M", 1/SB1->B1_CONV,SB1->B1_CONV)
+     EndIf
+     _nQtde1um:=If(_nFator>0,_nVolume*_nFator,_nVolume)// Conversão da Segunda UM para a Primeira UM
+
+     _nQtde2um:=_nVolume
+
+      If SB1->B1_I_QQUEI == 'S' .And. SB1->B1_SEGUM = 'PC' .And. SB1->B1_I_3UM = 'CX'
+         _nQtde3um:= _nQtde2um  / SB1->B1_I_QT3UM // Conversão da SEGUNDA UM para a Terceira UM
+      Else
+         _nQtde3um:= _nQtde1um  / SB1->B1_I_QT3UM // Conversão da PRIMEIRA UM para a Terceira UM
+      EndIf
+
+  //***************************************************
+ ElseIf _cUnidade == SB1->B1_I_3UM // CONVERSAO DA TERCEIRA UM PARA 1UM e 2UM...
+
+     _nQtde1um:= _nVolume * SB1->B1_I_QT3UM// Conversão #Normal* da Terceira UM para a Primeira UM
+
+     _nQtde3um:= _nVolume
+
+     If SB1->B1_I_QQUEI == 'S' .And. SB1->B1_SEGUM = 'PC' .And. SB1->B1_I_3UM = 'CX'// Se Queijo*
+
+        _nQtde2um:= _nQtde3um * SB1->B1_I_QT3UM// Conversão da Terceira UM para a Segunda UM
+
+        If SB1->B1_CONV == 0
+            If SB1->B1_I_QQUEI == 'S' .And. SB1->B1_I_FATCO > 0
+                _nFator := If(SB1->B1_TIPCONV=="M", 1/SB1->B1_I_FATCO,SB1->B1_I_FATCO)
+            EndIf
+        Else
+            _nFator := If(SB1->B1_TIPCONV=="M", 1/SB1->B1_CONV,SB1->B1_CONV)
+        EndIf
+
+        _nQtde1um:= _nQtde2um * _nFator // Conversão da Segunda UM para a Primeira UM
+
+     Else//Calculo #Normal* se ser queijo
+        If SB1->B1_CONV = 0
+            If SB1->B1_I_QQUEI == 'S' .And. SB1->B1_I_FATCO > 0
+                _nFator := If(SB1->B1_TIPCONV=="D", 1/SB1->B1_I_FATCO,SB1->B1_I_FATCO)
+            EndIf
+        Else
+            _nFator := If(SB1->B1_TIPCONV=="D", 1/SB1->B1_CONV,SB1->B1_CONV)
+        EndIf
+
+        _nQtde2um:= _nQtde1um * _nFator// Conversão da Primeira UM para a Segunda UM
+
+     EndIf
+
+ EndIf
+ If !Empty(_cUMDest)
+    If _cUMDest == SB1->B1_UM
+       _nVolume:=_nQtde1um
+    ElseIf _cUMDest == SB1->B1_SEGUM
+       _nVolume:=_nQtde2um
+    ElseIf _cUMDest == SB1->B1_I_3UM
+       _nVolume:=_nQtde3um
+    EndIf
+ EndIf
+Return _nVolume

@@ -2,55 +2,45 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |     Data   |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 02/08/2017 | Chamado 20782. Ajustes para versão 12. 
--------------------------------------------------------------------------------------------------------------------------------                            
-Josué Prestes | 10/06/2019 | Chamado 29593. Revisão para loboguara.    
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 17/10/2019 | Chamado 28346. Removidos os Warning na compilação da release 12.1.25. 
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 06/06/2022 | Chamado 40380. Novo botão para buscar a matricula do usuario. 
+Lucas Borges  |17/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25. 
+Alex Wallauer |06/06/2022| Chamado 40380. Novo botão para buscar a matricula do usuario. 
+Lucas Borges  |02/10/2025| Chamado 51526. Modificada forma para recuperar a matrícula do usuário.
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes e Defines da Rotina.
-//====================================================================================================
-#Include "rwmake.ch"
-#Include "protheus.CH"
+
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: ACFG003
 Autor-------------: Fabiano Dias
 Data da Criacao---: 01/08/2011
-===============================================================================================================================
 Descrição---------: Rotina desenvolvida para realizar o cadastramento dos usuarios que terao acesso para efetuar a aprovacao
 					dos pedidos de venda do tipo bonificacao, neste cadastro constara o e-mail dos aprovadores para onde sera
 					enviado um e-mail para que ele possa efetuar a aprovacao via workflow ou em uma rotina manual.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function ACFG003()
+User Function ACFG003
 
 // VARIAVEIS DE VISUALIZACAO DA TELA
-Private aObjects    := {}
-Private aPosObj     := {}
-Private aSize       := MsAdvSize()
-Private aInfo       := { aSize[1] , aSize[2] , aSize[3] , aSize[4] , 3 , 3 }
-Private lMsErroAuto := .F. 
-Private _lCopia := .F.
+Private aObjects    := {} As Array
+Private aPosObj     := {} As Array
+Private aSize       := MsAdvSize() As Array
+Private aInfo       := { aSize[1] , aSize[2] , aSize[3] , aSize[4] , 3 , 3 } As Array
+Private lMsErroAuto := .F. As Logical
+Private _lCopia := .F. As Logical
 
 // pega tamanhos das telas
-AADD( aObjects , { 100 , 050 , .T. , .F. , .F. } )
-AADD( aObjects , { 100 , 100 , .T. , .T. , .F. } )
+aAdd( aObjects , { 100 , 050 , .T. , .F. , .F. } )
+aAdd( aObjects , { 100 , 100 , .T. , .T. , .F. } )
 aPosObj := MsObjSize( aInfo , aObjects )
 
 //Variaveis privadas usadas no modelo 3
-SetPrvt("AROTINA,CCADASTRO,CALIAS")
+SetPrvt("aRotina,CCADASTRO,CALIAS")
 SetPrvt("NOPCE,NOPCG,NUSADO")
 SetPrvt("CTITULO,CALIASENCHOICE,CLINOK,CTUDOK,CFIELDOK")
 SetPrvt("NREG,NOPC")
@@ -78,84 +68,71 @@ Return
 Programa----------: ACFG003CAD
 Autor-------------: Fabiano Dias
 Data da Criacao---: 01/08/2011
-===============================================================================================================================
 Descrição---------: Rotina de controle do cadastro e manutenção dos dados.   
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function ACFG003CAD( nOpc )
+User Function ACFG003CAD(nOpc As Numeric)
 
-Local aButtons  := {} 
-Local bCampo    := { |nCPO| Field(nCPO) }
-Local _nni		:= 0
-Private aTELA[0][0],aGETS[0]
-Private AHEADER := {}, ACOLS := {}
+Local aButtons  := {} As Array
+Local bCampo    := { |nCPO| Field(nCPO) } As CodeBlock
+Local _nni		:= 0 As Numeric
+Local nReg 		:= 0 As Numeric
+Private aTela 	:= {} As Array
+Private aGets 	:= {} As Array
+Private aHeader := {}, ACOLS := {} As Array
 
-nReg := 0
-aGets := {}
-aTela := {}
 SetPrvt("wVar")                   
 
 _lcopia := .F.
 
-if  nOpc == 3	  // Incluir
+If  nOpc == 3	  // Incluir
 	nOpcE := 3
 	nOpcG := 3 
-elseif nOpc == 4 	// Alterar
+ElseIf nOpc == 4 	// Alterar
 	nOpcE := 4
 	nOpcG := 4
-elseif nOpc == 2 	// Visualizar
+ElseIf nOpc == 2 	// Visualizar
 	nOpcE := 2
 	nOpcG := 2
-elseif nOpc == 6   // Copiar
+ElseIf nOpc == 6   // Copiar
 	nOpcE := 3
 	nOpcG := 3 
 	_lcopia := .T.
-else                // Excluir
+Else                // Excluir
 	nOpcE := 5
 	nOpcG := 5
-endif
+EndIf
 
-if nOpcE == 3 .OR. nOpcE == 4 
-   Aadd(aButtons, {"Atualiza Matricula" , {|| ACFG003Mat() } , "Atualiza Matricula"})
-ENDIF
+If nOpcE == 3 .Or. nOpcE == 4 
+   aAdd(aButtons, {"Atualiza Matricula" , {|| ACFG003Mat() } , "Atualiza Matricula"})
+EndIf
 
 //| Cria variaveis M->????? da Enchoice                          
 aCpoEnchoice  :={}
 _astruct := ZZL->(Dbstruct())
 
-
-For _nni := 1 to len(_astruct)
-	
-	AADD( aCpoEnchoice , alltrim(_astruct[_nni][1]) )
-	
-	wVar	:= "M->"+ alltrim(_astruct[_nni][1])
-	&wVar	:= CriaVar( alltrim(_astruct[_nni][1]) ) // executa x3_relacao
-
+For _nni := 1 To Len(_astruct)
+	aAdd( aCpoEnchoice , AllTrim(_astruct[_nni][1]) )
+	wVar	:= "M->"+ AllTrim(_astruct[_nni][1])
+	&wVar	:= CriaVar( AllTrim(_astruct[_nni][1]) ) // executa x3_relacao
 Next _nni
 
-If nOpc # 3  //se nao for inclusao 
-
-	DbSelectArea("ZZL")
-	
+If nOpc # 3  //se nao For inclusao 
+	DBSelectArea("ZZL")
 	For _nni := 1 TO FCount()
 		M->&(EVAL(bCampo,_nni)) := FieldGet(_nni)
 	Next _nni
-	
-Endif
+EndIf
 
-if nOpc == 6    //se for cópia
-
-  M->ZZL_USER := "                         "
-  M->ZZL_NOME := "                              "
-  M->ZZL_MATRIC := "        "
-  M->ZZL_EMAIL := "                                                            "
-  M->ZZL_CODUSU := "      "
-  
-endif 
+If nOpc == 6    //se For cópia
+	M->ZZL_USER := "                         "
+	M->ZZL_NOME := "                              "
+	M->ZZL_MATRIC := "        "
+	M->ZZL_EMAIL := "                                                            "
+	M->ZZL_CODUSU := "      "
+EndIf 
 
 //| Executa a Modelo 2                                           |
 cTitulo			:= OemToAnsi("Cadastro de Usuarios")
@@ -166,75 +143,59 @@ cFieldOk		:= ""
 nOpca := 0
 
 DEFINE MSDIALOG oDlg2 TITLE cTitulo From 9,0 to 35,170	of oMainWnd
-
 	oEnCh1:=MsMget():New(cAliasEnchoice,nReg,nOpcE,,,,aCpoEnchoice,{15,aPosObj[2,2],aPosObj[2,3],aPosObj[2,4]},,3,,,,,,.F.)
 	oDlg2:lMaximized:=.T.
-	
-ACTIVATE MSDIALOG oDlg2 ON INIT (EnchoiceBar(oDlg2,{|| If(obrigatorio(aGets,aTela),ACFG003GRA(),.f.),nOpca := 1},{||oDlg2:End()},,aButtons) , oEnch1:oBox:Align:=CONTROL_ALIGN_ALLCLIENT)
+ACTIVATE MSDIALOG oDlg2 ON INIT (EnchoiceBar(oDlg2,{|| If(obrigatorio(aGets,aTela),ACFG003GRA(),.F.),nOpca := 1},{||oDlg2:End()},,aButtons) , oEnch1:oBox:Align:=CONTROL_ALIGN_ALLCLIENT)
 
-Return()
+Return
 
 /* 
 ===============================================================================================================================
 Programa----------: ACFG003GRA 
 Autor-------------: Enilton
 Data da Criacao---: 13/12/2005
-===============================================================================================================================
 Descrição---------: Funcao de Gravacao     
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
-===============================================================================================================================*/
-Static Function ACFG003GRA()
+===============================================================================================================================
+*/
+Static Function ACFG003GRA() As Logical
 
-Local _lVldInc 		:= .T.
-Local x				:= 0
-Private lMsHelpAuto := .T.
-Private lMsErroAuto := .F.
+Local _lVldInc 		:= .T. As Logical
+Local x				:= 0 As Numeric
+Private lMsHelpAuto := .T. As Logical
+Private lMsErroAuto := .F. As Logical
 
 //Caso esteja realizando uma inclusao valida se o usuario ja nao possui cadastro
 If Inclui
-	
 	_lVldInc:= U_ACFG003VLD()	
-
 EndIf
 
-If nOpcG # 2 .And. _lVldInc // nao for consulta
-    
-
-	If Inclui .or. Altera .or. _lCopia
-	
-		RecLock( "ZZL" , If( Altera , .F. , .T. ) )
-		
+If nOpcG # 2 .And. _lVldInc // nao For consulta
+	If Inclui .Or. Altera .Or. _lCopia
+		ZZL->(RecLock( "ZZL" , If( Altera , .F. , .T. ) ))
 		ZZL->ZZL_FILIAL := xFilial("ZZL")
 		
-		for x:=1 to len(aCpoEnchoice)
-		
+		For x:=1 to Len(aCpoEnchoice)
 			wVar := "M->"  + aCpoEnchoice[x]
 			ax   :="ZZL->" + aCpoEnchoice[x]
-			
-			if (POSICIONE("SX3",2,aCpoEnchoice[x],"X3_CONTEXT")!="V")
+			If (Posicione("SX3",2,aCpoEnchoice[x],"X3_CONTEXT")!="V")
 				&ax := &wVar
-			endif
-			
-		next x
-		MsUnlock()
+			EndIf
+		Next x
+		ZZL->(MSUnLock())
 
-		if Inclui .or. Altera .or. _lCopia
+		If Inclui .Or. Altera .Or. _lCopia
 			ConfirmSx8()
-		Endif
-		
+		EndIf
 	Else  // exclusao
-
-			RecLock("ZZL",.F.)
-			dbdelete()
-			MsUnlock()
-			WriteSx2("ZZL")  
-		
-	Endif
+		ZZL->(RecLock("ZZL",.F.))
+		ZZL->(DBDelete())
+		ZZL->(MSUnLock())
+		WriteSx2("ZZL")  
+	EndIf
 	
-Endif
+EndIf
 
 If _lVldInc
 	oDlg2:End()
@@ -247,26 +208,19 @@ Return(.T.)
 Programa----------: ACFG003VLD
 Autor-------------: 
 Data da Criacao---: 
-===============================================================================================================================
 Descrição---------: Valida dados antes da inclusão do usuário
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function ACFG003VLD() 
+User Function ACFG003VLD() As Logical
 
 Local _lRet:= .T.
 
-dbSelectArea("ZZL") 
-ZZL->(dbSetOrder(3))
-If  ZZL->(dbSeek(xFilial("ZZL") + M->ZZL_CODUSU))
-
+ZZL->(DBSetOrder(3))
+If  ZZL->(DBSeek(xFilial("ZZL") + M->ZZL_CODUSU))
 	_lRet:= .F.                                                                                                 
-	
-	u_itmsg("O usuário: " + IIF(PSWSEEK(M->ZZL_CODUSU),PSWRET(1)[1,4]," ")   + " já está cadastrado!","Atenção",,1)
-
+	U_ITMsg("O usuário: " + IIf(PSWSEEK(M->ZZL_CODUSU),PSWRET(1)[1,4]," ")   + " já está cadastrado!","Atenção",,1)
 EndIf
 
 Return _lRet
@@ -276,24 +230,18 @@ Return _lRet
 Programa----------: ACFG003Mat 
 Autor-------------: Alex Wallauer
 Data da Criacao---: 06/06/2022
-===============================================================================================================================
 Descrição---------: Busca a matriula do usuario novamente 
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
-===============================================================================================================================*/
+===============================================================================================================================
+*/
 Static Function ACFG003Mat()
-LOCAL _aUser
-IF PSWSEEK(ALLTRIM(M->ZZL_CODUSU))
-   _aUser := PSWRET(1)[1]
-   M->ZZL_MATRIC := STRTRAN(SUBSTR(_aUser[22],3)," ","")
-   IF EMPTY(M->ZZL_MATRIC)
-      U_ITMSG("Usuário informado não tem a matricula informada no módulo configurador do sistema: "+M->ZZL_CODUSU,'Atenção!',"Verifique o código informado.",3) // ALERT
-   ELSE
-      U_ITMSG("Matricula atualizada com: "+M->ZZL_MATRIC,'Atenção!',,2) // ALERT
-   ENDIF
-ELSE
-   U_ITMSG("Usuário informado não tem informações no módulo configurador do sistema: "+M->ZZL_CODUSU,'Atenção!',"Verifique o código informado.",3) // ALERT
-ENDIF
-RETURN
+
+M->ZZL_MATRIC := FWSFAllUsers({ZZL->ZZL_CODUSU},{"USR_FILIAL"})[1][3]+FWSFAllUsers({ZZL->ZZL_CODUSU},{"USR_CODFUNC"})[1][3]
+If Empty(M->ZZL_MATRIC)
+	U_ITMsg("Usuário informado não tem a matricula informada no módulo configurador do sistema: "+M->ZZL_CODUSU,'Atenção!',"Verifique o código informado.",3) // ALERT
+Else
+	U_ITMsg("Matricula atualizada com: "+M->ZZL_MATRIC,'Atenção!',,2) // ALERT
+EndIf
+
+Return

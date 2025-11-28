@@ -2,18 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 24/01/2023 | Chamado 42685. Corrigida query
-Lucas Borges  | 13/06/2023 | Chamado 44114. Corrigida query para forçar o ZL1_PLACA nas ordens 4 e 5
-Lucas Borges  | 13/06/2023 | Chamado 49953. Corrigido filtro de placa
+Lucas Borges  |24/01/2023| Chamado 42685. Corrigida query
+Lucas Borges  |13/06/2023| Chamado 44114. Corrigida query para forçar o ZL1_PLACA nas ordens 4 e 5
+Lucas Borges  |13/06/2023| Chamado 49953. Corrigido filtro de placa
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -130,9 +127,9 @@ Local _cPlaca		:= ""
 If MV_PAR03 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLD")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
+	aAdd(_aSelFil,cFilAnt)
 EndIf
 
 //=====================================================
@@ -252,7 +249,7 @@ EndIf
 If MV_PAR09 == 1// 1-Analítico 2-Sintético
 	_cCampos += " RES.ZLD_TICKET, RES.ZLD_DTCOLE, RES.ZLD_VEICUL, ZL1.ZL1_CAPACI, RES.ZLD_MOTOR, ZL0.ZL0_NOME, ZL1.ZL1_NOME, ZL1.ZL1_PLACA, ZFF.ZFF_DESCRI, RES.ZLD_VFILHA, "
 	_cOrder	+= " , RES.ZLD_TICKET, RES.ZLD_VFILHA"
-// No analítico sempre exibir a placa. Se for ordem 4 ou 5, exibir a placa mesmo se for o sintético
+// No analítico sempre exibir a placa. Se For ordem 4 ou 5, exibir a placa mesmo se For o sintético
 ElseIf _nOrdem == 4 .Or. _nOrdem == 5
 	_cCampos += " ZL1.ZL1_PLACA, "
 EndIf
@@ -272,11 +269,11 @@ BeginSql alias _cAlias
 	SELECT RES.ZLD_FILIAL, ZL2.ZL2_COD, ZL2.ZL2_DESCRI, %exp:_cCampos% 
 		SA2.A2_COD || SA2.A2_LOJA TRANS, SA2.A2_COD, SA2.A2_LOJA, SA2.A2_NOME,
 		SUM(RES.VCOL_FILHA) VCOL_FILHA,
-		CASE WHEN SUM(DISTINCT RES.VCOL_SET) * SUM(DISTINCT RES.VREC_SET) = 0 THEN 0 ELSE SUM(RES.VCOL_FILHA) / SUM(DISTINCT RES.VCOL_SET) * SUM(DISTINCT RES.VREC_SET) END VREC_FILHA,
-		CASE WHEN SUM(DISTINCT RES.VCOL_SET) * SUM(DISTINCT RES.VREC_SET) = 0 THEN 0 ELSE (SUM(RES.VCOL_FILHA) / SUM(DISTINCT RES.VCOL_SET) * SUM(DISTINCT RES.VREC_SET)) - SUM(RES.VCOL_FILHA) END PRO_FILHA,
-		SUM(DISTINCT CASE WHEN RES.VCOL_FILHA = 0 THEN 0 ELSE RES.VCOL_SET END) VCOL_SET,
+		Case WHEN SUM(DISTINCT RES.VCOL_SET) * SUM(DISTINCT RES.VREC_SET) = 0 THEN 0 Else SUM(RES.VCOL_FILHA) / SUM(DISTINCT RES.VCOL_SET) * SUM(DISTINCT RES.VREC_SET) END VREC_FILHA,
+		Case WHEN SUM(DISTINCT RES.VCOL_SET) * SUM(DISTINCT RES.VREC_SET) = 0 THEN 0 Else (SUM(RES.VCOL_FILHA) / SUM(DISTINCT RES.VCOL_SET) * SUM(DISTINCT RES.VREC_SET)) - SUM(RES.VCOL_FILHA) END PRO_FILHA,
+		SUM(DISTINCT Case WHEN RES.VCOL_FILHA = 0 THEN 0 Else RES.VCOL_SET END) VCOL_SET,
 		SUM(DISTINCT RES.VREC_SET) VREC_SET,
-		SUM(DISTINCT RES.VREC_SET) - SUM(DISTINCT CASE WHEN RES.VCOL_FILHA = 0 THEN 0 ELSE RES.VCOL_SET END) PRO_SET,
+		SUM(DISTINCT RES.VREC_SET) - SUM(DISTINCT Case WHEN RES.VCOL_FILHA = 0 THEN 0 Else RES.VCOL_SET END) PRO_SET,
 		SUM(DISTINCT RES.VREC_TICK) VREC_TICK,
 		SUM(RES.KM) KM,
 		NVL(AVG(NULLIF(RES.VTABFR,0)),0) VTABFR,
@@ -284,11 +281,11 @@ BeginSql alias _cAlias
 		SUM(RES.CREDFR) CREDFR,
 		SUM(RES.VLRFRE) + SUM(RES.CREDFR) FRETE,
 		SUM(RES.TOTFRE_ZLF) TOTFRE_ZLF,
-		CASE WHEN SUM(RES.VCOL_FILHA) = 0 THEN 0 ELSE (SUM(RES.VLRFRE) + SUM(RES.CREDFR)) / SUM(RES.VCOL_FILHA) END CUS_LITRO,
-		CASE WHEN ZL1.ZL1_CAPACI = 0 THEN 0 
+		Case WHEN SUM(RES.VCOL_FILHA) = 0 THEN 0 Else (SUM(RES.VLRFRE) + SUM(RES.CREDFR)) / SUM(RES.VCOL_FILHA) END CUS_LITRO,
+		Case WHEN ZL1.ZL1_CAPACI = 0 THEN 0 
 			 WHEN SUM(RES.VCOL_FILHA) = 0 THEN SUM(RES.VREC_TICK) / ZL1.ZL1_CAPACI * 100
-		ELSE 
-		(CASE WHEN SUM(DISTINCT RES.VCOL_SET) * SUM(DISTINCT RES.VREC_SET) = 0 THEN 0 ELSE SUM(RES.VCOL_FILHA) / SUM(DISTINCT RES.VCOL_SET) * SUM(DISTINCT RES.VREC_SET) END) /*VREC_FILHA*/
+		Else 
+		(Case WHEN SUM(DISTINCT RES.VCOL_SET) * SUM(DISTINCT RES.VREC_SET) = 0 THEN 0 Else SUM(RES.VCOL_FILHA) / SUM(DISTINCT RES.VCOL_SET) * SUM(DISTINCT RES.VREC_SET) END) /*VREC_FILHA*/
 		/ ZL1.ZL1_CAPACI * 100 END TX_OCUP
 	FROM (SELECT ZLD.ZLD_FILIAL, ZLD.ZLD_TICKET, ZLD.ZLD_DTCOLE, ZLD.ZLD_VEICUL, ZLD.ZLD_MOTOR, ZLD.ZLD_SETOR, ZLD.ZLD_LINROT,
 				ZLD.ZLD_FRETIS, ZLD.ZLD_LJFRET, ZLE.ZLE_COD, ZLE.ZLE_DTINI, ZLE.ZLE_DTFIM, ZLD.ZLD_VFILHA, 
@@ -456,11 +453,11 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->ZLD_FILIAL
@@ -469,7 +466,7 @@ While !oReport:Cancel() .And. (_cAlias)->(!EOF())
 	If _nOrdem == 4
 		_cPlaca	:= (_cAlias)->ZL1_PLACA
 	EndIf
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()

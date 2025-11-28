@@ -2,32 +2,24 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-Analista         - Programador       - Inicio     - Envio      - Chamado - Motivo da Alteração
----------------------------------------------------------------------------------------------------------------------------------------------------------
-Antonio Ramos    -  Igor Melgaço     - 10/04/2025 - 10/04/2025 - 47833   - Ajustes para correção de vencto.
-Antonio Ramos    -  Igor Melgaço     - 11/04/2025 - 14/04/2025 - 47833   - Ajustes para correção de vencto e adição e mail do solicitante.
-Antonio Ramos    -  Igor Melgaço     - 16/05/2025 - 30/05/2025 - 50527   - Ajustes para mudança de regra de vencto.
-Antonio Ramos    -  Igor Melgaço     - 23/07/2025 - 23/07/2025 - 51085   - Ajustes para reversão das alterações posteriores ao chamado 50527.
-Lucas Borges     -  Lucas Borges     - 23/07/2025 - 24/07/2025 - 51340   - Ajustar função para validação de ambiente de teste
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+Igor Melgaço  |23/07/2025| Chamado 51085. Ajustes para reversão das alterações posteriores ao chamado 50527.
+Lucas Borges  |24/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
+Igor Melgaço  |26/08/2025| Chamado 47930. Ajustes para inclusão das alterações posteriores ao chamado 50527.
 ===============================================================================================================================
 */
 
-#INCLUDE "FWMBROWSE.CH"
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "TOPCONN.CH"
-#INCLUDE "RWMAKE.CH"
+#Include "FWMVCDEF.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: AFIN037
 Autor-------------: Igor Melgaço
 Data da Criacao---: 31/03/2025
-===============================================================================================================================
 Descrição---------: Aprovação de Prorogações de Vencimento. Chamado: 47833 
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------:  
 ===============================================================================================================================
 */ 
@@ -37,7 +29,7 @@ Local _cAprov := SuperGetMV("IT_AFIN037",.F., "002355") As Char
 
 Default _lFiltra := .F.
 
-If !Empty(_cAprov) .AND. RetCodUsr() $ _cAprov
+If !Empty(_cAprov) .And. RetCodUsr() $ _cAprov
    _oBrowse := FWMBrowse():New()
    _oBrowse:SetAlias("ZM4")
    _oBrowse:SetMenuDef( 'AFIN037' )
@@ -53,24 +45,21 @@ If !Empty(_cAprov) .AND. RetCodUsr() $ _cAprov
 
    _oBrowse:Activate()
 Else
-	  U_ITmsg("Usuário sem permissão para aprovação de prorrogação de títulos!"					,;
+	  U_ITMsg("Usuário sem permissão para aprovação de prorrogação de títulos!"					,;
 				"Atenção!"																						,;
 				"Comunique o administrador do sistema.",1)
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MenuDef
 Autor-------------: Igor Melgaço
 Data da Criacao---: 24/07/2024
-===============================================================================================================================
 Descrição---------: Rotina de definição automática do menu via MVC
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: aRotina - Definições do menu principal da Rotina.
 ===============================================================================================================================
 */
@@ -88,17 +77,14 @@ Return( _aRotina )
 Programa----------: ModelDef
 Autor-------------: Igor Melgaço
 Data da Criacao---: 24/07/2024
-===============================================================================================================================
 Descrição---------: Rotina de definição do Modelo de Dados do MVC
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: _oModel - Objeto do modelo de dados do MVC 
 ===============================================================================================================================
 */ 
 Static Function ModelDef() As Array
 Local _oStruZM4 := FWFormStruct(1,"ZM4") As Object
-Local _oStruSE1 := FWFormStruct(1,'SE1',{|x| Alltrim(x) $ "|E1_FILIAL|E1_NUM|E1_PREFIXO|E1_PARCELA|E1_TIPO|E1_CLIENTE|E1_LOJA|E1_NOMCLI|E1_VENCTO|E1_VENCREA|E1_EMISSAO|E1_SALDO"}) As Object
+Local _oStruSE1 := FWFormStruct(1,'SE1',{|x| AllTrim(x) $ "|E1_FILIAL|E1_NUM|E1_PREFIXO|E1_PARCELA|E1_TIPO|E1_CLIENTE|E1_LOJA|E1_NOMCLI|E1_VENCTO|E1_VENCREA|E1_EMISSAO|E1_SALDO"}) As Object
 Local _oModel As Object
 Local _aSE1Rel := {} As Array
 Local _bCommit := {|_oModel| U_AFIN037O(_oModel)} As Block
@@ -144,7 +130,7 @@ _oModel:GetModel('SE1DETAIL'):SetOnlyView(.T.)
 _oModel:SetPrimaryKey( {'ZM4_FILIAL','ZM4_DOC','ZM4_SERIE','ZM4_CODIGO' } )
 _oModel:SetDescription("Aprovações de Prorrogação de Vencto")
 _oModel:SetVldActivate({|_oModel|   U_AFIN037B(_oModel)  })
-_oModel:SetActivate({|_oModel| FWMSGRUN( ,{||  U_AFIN037A(_oModel) } , "Carregando as grids de cadastro, Aguarde...",  ) })
+_oModel:SetActivate({|_oModel| FWMsgRun( ,{||  U_AFIN037A(_oModel) } , "Carregando as grids de cadastro, Aguarde...",  ) })
 
 Return _oModel
 
@@ -153,17 +139,14 @@ Return _oModel
 Programa----------: ViewDef
 Autor-------------: Igor Melgaço
 Data da Criacao---: 24/07/2024
-===============================================================================================================================
 Descrição---------: Rotina de definição da View do MVC
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: _oView - Objeto de exibição do MVC  
 ===============================================================================================================================
 */ 
 Static Function ViewDef() As Array
 Local _oStruZM4 := FWFormStruct(2,"ZM4") As Object
-Local _oStruSE1 := FWFormStruct(2,'SE1',{|x| Alltrim(x) $ "|E1_FILIAL|E1_NUM|E1_PREFIXO|E1_PARCELA|E1_TIPO|E1_CLIENTE|E1_LOJA|E1_NOMCLI|E1_VENCTO|E1_VENCREA|E1_EMISSAO|E1_SALDO"}) As Object
+Local _oStruSE1 := FWFormStruct(2,'SE1',{|x| AllTrim(x) $ "|E1_FILIAL|E1_NUM|E1_PREFIXO|E1_PARCELA|E1_TIPO|E1_CLIENTE|E1_LOJA|E1_NOMCLI|E1_VENCTO|E1_VENCREA|E1_EMISSAO|E1_SALDO"}) As Object
 
 Local _oModel := FWLoadModel("AFIN037") As Object
 Local _oView := Nil As Object
@@ -215,11 +198,6 @@ _oView:EnableTitleView('VIEW_SE1','Titulos do Documento')
 _oView:SetViewProperty("VIEW_SE1", "GRIDSEEK", {.F.})
 _oView:SetViewProperty("VIEW_SE1", "GRIDFILTER", {.F.}) 
 
-//_oView:AddUserButton( 'Excluir Título da Guia Compensações', 'CLIPS', {|_oView| AFIN037X(_oView)} )
-//_oView:AddUserButton( 'Excluir Títulos das Compensações', 'CLIPS', {|_oView| U_AFIN033(ZM4->ZM4_FILIAL+"CVI"+ZM4->ZM4_NUM)} )
-
-//_oModel:GetValue('ZM4_FILIAL') + _oModel:GetValue('ZM4_PREFIX') + _oModel:GetValue('ZM4_NUM') 
-//Tratativa padrão para fechar a tela
 _oView:SetCloseOnOk({||.T.})
 
 Return _oView
@@ -230,11 +208,8 @@ Return _oView
 Programa----------: AFIN037O
 Autor-------------: Igor Melgaço
 Data da Criacao---: 24/07/2024
-===============================================================================================================================
 Descrição---------: Complementar a gravação de dados.
-===============================================================================================================================
 Parametros--------: _oModel = Modelo de dados.
-===============================================================================================================================
 Retorno-----------: _lRet = .T. 
 ===============================================================================================================================
 */
@@ -259,6 +234,8 @@ Local _lRejeitado := .F. As Logical
 Local _aButtons := {} As Array
 Local _dVencAtu := CTOD("") As Date
 Local _dProrog :=  CTOD("") As Date
+Local _aBoletos := {} As Array
+Local cFilePrint := "" As Char
 
 Begin Transaction 
 
@@ -267,7 +244,9 @@ Begin Transaction
    _cFilial := xFilial("SE1")
    _cDoc    := _oModelMaster:GetValue("ZM4_DOC")
    _cSerie  := _oModelMaster:GetValue("ZM4_SERIE")
-   _cTipo   := _oModelMaster:GetValue("ZM4_TIPO")
+                           
+   _cTipo   := SUPERGETMV('IT_TIPTITF',.F.,"NF/ICM") // _oModelMaster:GetValue("ZM4_TIPO") // Tipo do Título Financeiro. Ex: NF, ICM.
+   
    _cCodigo := _oModelMaster:GetValue("ZM4_CODIGO")
    _nDias   := _oModelMaster:GetValue("ZM4_DPRORR")
 
@@ -279,37 +258,52 @@ Begin Transaction
 
    If _nOperation == MODEL_OPERATION_UPDATE
       If _lRejeitar
-         DbSelectArea("SE1")
-         DBSetOrder(1)
-         If DBSeek(_cFilial + _cSerie + _cDoc)
+         //DBSelectArea("SE1")
+         SE1->(DBSetOrder(1))
+         If SE1->(MsSeek(_cFilial + _cSerie + _cDoc))
             _cCliente := SE1->E1_CLIENTE
             _cLoja    := SE1->E1_LOJA
             _cVend1   := SE1->E1_VEND1
          Else
-            DbSelectArea("SF2")
-            DBSetOrder(1)
-            DBSeek(_cFilial + _cDoc )
-            _cCliente := SF2->F2_CLIENTE
-            _cLoja    := SF2->F2_LOJA
-            _cVend1   := SF2->F2_VEND1
+            //DBSelectArea("SF2")
+            SF2->(DBSetOrder(1))
+            If SF2->(MsSeek(_cFilial + _cDoc ))
+               _cCliente := SF2->F2_CLIENTE
+               _cLoja    := SF2->F2_LOJA
+               _cVend1   := SF2->F2_VEND1
+            EndIf 
          EndIf
          _cMotivo := _oModelMaster:GetValue("ZM4_MOTREJ")
          
-         DbSelectArea("ZM4")
-         RecLock("ZM4",.F.)
-            ZM4->ZM4_APROV  := RetCodUsr()
-            ZM4->ZM4_DTAPRO := Date()
-            ZM4->ZM4_STATUS := "R"
-            ZM4->ZM4_MOTREJ := _cMotivo
-         ZM4->(MsUnLock())
+         //DBSelectArea("ZM4")
+         ZM4->(RecLock("ZM4",.F.))
+         ZM4->ZM4_APROV  := RetCodUsr()
+         ZM4->ZM4_DTAPRO := Date()
+         ZM4->ZM4_STATUS := "R"
+         ZM4->ZM4_MOTREJ := _cMotivo
+         ZM4->(MSUnLock())
 
          _lRet := .T.
       Else
+         _aBoletos := {}
          _cMotivo := ""
-         DbSelectArea("SE1")
-         DBSetOrder(1)
-         If DBSeek(_cFilial + _cSerie + _cDoc)
-            Do While _cFilial + _cSerie + _cDoc + _cTipo == SE1->(E1_FILIAL + E1_PREFIXO + E1_NUM + E1_TIPO) .AND. SE1->(!EOF())
+         //DBSelectArea("SE1")
+         SE1->(DBSetOrder(31)) // E1_FILIAL+E1_NUM+E1_SERIE+E1_CLIENTE+E1_LOJA
+         If SE1->(MsSeek(_cFilial + _cDoc))
+            While ! SE1->(Eof()) .And. _cFilial + _cDoc == SE1->(E1_FILIAL + E1_NUM )  //_cFilial + _cSerie + _cDoc + _cTipo == SE1->(E1_FILIAL + E1_PREFIXO + E1_NUM + E1_TIPO) .And. SE1->(!Eof())
+
+               cFilePrint := ""
+
+               If ! AllTrim(SE1->E1_TIPO) $ _cTipo // NF OU ICM.
+                  SE1->(DBSkip())   
+                  Loop
+               EndIf 
+
+               If AllTrim(SE1->E1_TIPO) == 'NF' .And. _cSerie <> SE1->E1_PREFIXO // Não dá para inserir esta condição no While. Para tipo = ICM, E1_PREFIXO = DCT.
+                  SE1->(DBSkip())   
+                  Loop
+               EndIf 
+
                _nTit++
                If SE1->E1_SALDO > 0
 
@@ -332,6 +326,7 @@ Begin Transaction
                   aAdd(aVetSE1, {"E1_VEND3"  , SE1->E1_VEND3            , Nil})
                   aAdd(aVetSE1, {"E1_VEND4"  , SE1->E1_VEND4            , Nil})
                   aAdd(aVetSE1, {"E1_VEND5"  , SE1->E1_VEND5            , Nil})
+                  
                   lMsErroAuto := .F.
                   
                   MSExecAuto({|x,y| FINA040(x,y)}, aVetSE1, 4) // Alteração
@@ -340,7 +335,7 @@ Begin Transaction
                   If lMsErroAuto
                      _lLog := .F.
                      _cLog := " Falha na Prorrogação do Titulo! " 
-      					_cLog := " MSExecAuto:  "+ALLTRIM(MostraErro(Upper(GetSrvProfString("STARTPATH","")),"AFIN037.LOG"))+" "
+      					_cLog := " MSExecAuto:  "+AllTrim(MostraErro(Upper(GetSrvProfString("STARTPATH","")),"AFIN037.LOG"))+" "
                      //Help(NIL, NIL, "HELP", NIL, _cErro, 1, 0, NIL, NIL, NIL, NIL, NIL, {})
 
                      //MostraErro()
@@ -355,9 +350,10 @@ Begin Transaction
 
                      _cSeq := U_AFIN034GNU()
 
-                     DbSelectArea("ZAC")
-                     DbSetOrder(1)
-                     RecLock("ZAC",.T.)
+                     //DBSelectArea("ZAC")
+                     ZAC->(DBSetOrder(1))
+
+                     ZAC->(RecLock("ZAC",.T.))
                      
                      ZAC->ZAC_FILIAL := SE1->E1_FILIAL
                      ZAC->ZAC_PREFIX := SE1->E1_PREFIXO 
@@ -366,9 +362,9 @@ Begin Transaction
                      ZAC->ZAC_SEQ    := _cSeq
                      ZAC->ZAC_DATA   := Date()
                      ZAC->ZAC_HORA   := Time()
-                     ZAC->ZAC_DESC   := ("Prorrogação de Vecto "+ iif(!Empty(Alltrim(SE1->E1_PARCELA)),"da Parcela "+Alltrim(SE1->E1_PARCELA),"")+" para "+DTOC(_dProrog)+" - Oriundo Ocorrência de Frete. Solicitante: " + Alltrim(UsrFullName(ZM4->ZM4_SOLICI)))
+                     ZAC->ZAC_DESC   := ("Prorrogação de Vecto "+ IIf(!Empty(AllTrim(SE1->E1_PARCELA)),"da Parcela "+AllTrim(SE1->E1_PARCELA),"")+" para "+DToC(_dProrog)+" - Oriundo Ocorrência de Frete. Solicitante: " + AllTrim(UsrFullName(ZM4->ZM4_SOLICI)))
                      
-                     ZAC->(MsUnLock())
+                     ZAC->(MSUnLock())
 
                      _cCodOcorr := ""
 
@@ -380,11 +376,11 @@ Begin Transaction
                         _cDescOcorr := "ALTERACAO DE OUTROS DADOS"
                      EndIf
 
-                     If !Empty(Alltrim(_cCodOcorr))
+                     If !Empty(AllTrim(_cCodOcorr))
                         _dNovoVencto := SE1->E1_VENCTO
 
                         //ADICAO DA INCLUSÃO DA INSTRUCAO BANCARIA
-                        FI2->(Reclock("FI2",.T.))
+                        FI2->(RecLock("FI2",.T.))
 
                         FI2->FI2_FILIAL := SE1->E1_FILIAL
                         FI2->FI2_OCORR  := _cCodOcorr
@@ -399,15 +395,16 @@ Begin Transaction
                         FI2->FI2_NUMBOR := SE1->E1_NUMBOR
                         FI2->FI2_CARTEI := "1"
                         FI2->FI2_DTOCOR := dDataBase
-                        FI2->FI2_VALANT := DTOC(_dVencAtu)
-                        FI2->FI2_VALNOV := DTOC(_dNovoVencto)
+                        FI2->FI2_VALANT := DToC(_dVencAtu)
+                        FI2->FI2_VALNOV := DToC(_dNovoVencto)
                         FI2->FI2_CAMPO  := "E1_VENCTO"
                         FI2->FI2_TIPCPO := "D"
 
-                        FI2->(MsUnlock())
+                        FI2->(MSUnLock())
 
                      EndIf
-                  
+
+                     cFilePrint := U_RFIN002P() // Gera o boleto para o cliente.
                   EndIf
                Else
                   _nSemSaldo++
@@ -415,38 +412,40 @@ Begin Transaction
                   _cLog := "Falha na Prorrogação do Titulo. Título sem saldo para prorrogação. " 
                EndIf
                
-               AADD(_aLog,{_lLog,SE1->E1_FILIAL,SE1->E1_NUM,SE1->E1_PREFIXO,SE1->E1_TIPO,SE1->E1_PARCELA,SE1->E1_SALDO,_dVencAtu,SE1->E1_I_DTPRO,_cLog })
+               aAdd(_aBoletos,cFilePrint)
+
+               aAdd(_aLog,{_lLog,SE1->E1_FILIAL,SE1->E1_NUM,SE1->E1_PREFIXO,SE1->E1_TIPO,SE1->E1_PARCELA,SE1->E1_SALDO,_dVencAtu,SE1->E1_I_DTPRO,_cLog})
 
                _cCliente := SE1->E1_CLIENTE
                _cLoja    := SE1->E1_LOJA
                _cVend1   := SE1->E1_VEND1
 
-               SE1->(DbSkip())
+               SE1->(DBSkip())
             EndDo
 
             If _nProrrogados > 0
                _lRet := .T.
 
-               DbSelectArea("ZM4")
-               RecLock("ZM4",.F.)
-                  ZM4->ZM4_APROV  := RetCodUsr()
-                  ZM4->ZM4_DTAPRO := Date()
-                  ZM4->ZM4_STATUS := "A"
-               ZM4->(MsUnLock())
-            ElseIf _nTit = _nSemSaldo .AND. _nTit > 0
+               //DBSelectArea("ZM4")
+               ZM4->(RecLock("ZM4",.F.))
+               ZM4->ZM4_APROV  := RetCodUsr()
+               ZM4->ZM4_DTAPRO := Date()
+               ZM4->ZM4_STATUS := "A"
+               ZM4->(MSUnLock())
+            ElseIf _nTit = _nSemSaldo .And. _nTit > 0
                _lRejeitado := .T.
                _lRet := .T.
                _cLog := "Não há titulos com saldo para prorrogação."
 
-               DbSelectArea("ZM4")
-               RecLock("ZM4",.F.)
-                  ZM4->ZM4_APROV  := RetCodUsr()
-                  ZM4->ZM4_DTAPRO := Date()
-                  ZM4->ZM4_STATUS := "R"
-                  ZM4->ZM4_MOTREJ := _cLog
-               ZM4->(MsUnLock())
+               //DBSelectArea("ZM4")
+               ZM4->(RecLock("ZM4",.F.))
+               ZM4->ZM4_APROV  := RetCodUsr()
+               ZM4->ZM4_DTAPRO := Date()
+               ZM4->ZM4_STATUS := "R"
+               ZM4->ZM4_MOTREJ := _cLog
+               ZM4->(MSUnLock())
 
-               //U_ITMSG(_cLog,"Atenção",,3 , , , .T.)
+               //U_ITMsg(_cLog,"Atenção",,3 , , , .T.)
             Else
                _lRet := .F.
 
@@ -458,36 +457,36 @@ Begin Transaction
             _lRejeitado := .T.
             _lRet := .T.
             _cLog := "Não Encontrado titulos deste documento para prorrogação."
-            AADD(_aLog,{.F.,_cFilial,_cDoc,_cSerie,_cTipo,"",0,CTOD(""),CTOD(""),_cLog })
+            aAdd(_aLog,{.F.,_cFilial,_cDoc,_cSerie,_cTipo,"",0,CTOD(""),CTOD(""),_cLog })
 
-            //U_ITMSG(_cLog,"Atenção",,3 , , , .T.)
+            //U_ITMsg(_cLog,"Atenção",,3 , , , .T.)
 
-            DbSelectArea("ZM4")
-            RecLock("ZM4",.F.)
-               ZM4->ZM4_APROV  := RetCodUsr()
-               ZM4->ZM4_DTAPRO := Date()
-               ZM4->ZM4_STATUS := "R"
-               ZM4->ZM4_MOTREJ := _cLog
-            ZM4->(MsUnLock())
+            //DBSelectArea("ZM4")
+            ZM4->(RecLock("ZM4",.F.))
+            ZM4->ZM4_APROV  := RetCodUsr()
+            ZM4->ZM4_DTAPRO := Date()
+            ZM4->ZM4_STATUS := "R"
+            ZM4->ZM4_MOTREJ := _cLog
+            ZM4->(MSUnLock())
 
          EndIf
 
          _aCab := {"","Filial","Numero Titulo ","Prefixo","Tipo","Parcela","Saldo","Venc. Real","Dt de Prorrogação","Log"}
-         //AADD(_aLog,{_lLog,SE1->E1_FILIAL,SE1->E1_NUM,SE1->E1_PREFIXO,SE1->E1_TIPO,SE1->E1_PARCELA,SE1->E1_SALDO,SE1->E1_VENCREA,SE1->E1_VENCREA + _nDias,_cLog })
+         //aAdd(_aLog,{_lLog,SE1->E1_FILIAL,SE1->E1_NUM,SE1->E1_PREFIXO,SE1->E1_TIPO,SE1->E1_PARCELA,SE1->E1_SALDO,SE1->E1_VENCREA,SE1->E1_VENCREA + _nDias,_cLog })
 
    		_cTitAux := "Log de processamento de prorogações"
    		_cMsgTop := "Titulos processados"
          
          _aButtons := {}
-         AADD(_aButtons,{"Visualizar Log",{|| AVISO("Log",oLbxAux:aArray[oLbxAux:nAt][10],{"Fechar"},3)  },"Visualizar Log", "Visualizar Log" }) 
+         aAdd(_aButtons,{"Visualizar Log",{|| AVISO("Log",oLbxAux:aArray[oLbxAux:nAt][10],{"Fechar"},3)  },"Visualizar Log", "Visualizar Log" }) 
 
          If Len(_aLog) > 1
       		//ITListBox( _cTitAux , _aHeader , _aCols , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab , bDblClk     , _aColXML , bCondMarca,_bLegenda                      ,_lHasOk,_bHeadClk,_aSX1)
       		U_ITListBox( _cTitAux , _aCab    , _aLog  , .F.      , 2      , _cMsgTop ,          ,         ,         ,     ,        ,_aButtons,       ,             ,          ,           , {|C,L|U_AFIN037L(C,L)}        , .F.   ,         ,     )
          Else
             If !(_nProrrogados > 0)
-               //U_ITMSG("Aprovação não efeuada!","Atenção",_cLog,3 , , , .T.)
-               U_ITMSG(_cLog,'Atenção!',,1)
+               //U_ITMsg("Aprovação não efeuada!","Atenção",_cLog,3 , , , .T.)
+               U_ITMsg(_cLog,'Atenção!',,1)
             Else
          		//ITListBox( _cTitAux , _aHeader , _aCols , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab , bDblClk     , _aColXML , bCondMarca,_bLegenda                      ,_lHasOk,_bHeadClk,_aSX1)
          		U_ITListBox( _cTitAux , _aCab    , _aLog  , .F.      , 2      , _cMsgTop ,          ,         ,         ,     ,        ,_aButtons,       ,             ,          ,           , {|C,L|U_AFIN037L(C,L)}        , .F.   ,         ,     )
@@ -505,13 +504,13 @@ Begin Transaction
          cGerente := Posicione("SA3",1,xFilial("SA3") +_cVend1,"A3_GEREN")
          cEmail += ";" + Posicione("SA3",1,xFilial("SA3") +cGerente,"A3_EMAIL")
          
-         If !Empty(Alltrim(ZM4->ZM4_SOLICI))
+         If !Empty(AllTrim(ZM4->ZM4_SOLICI))
             cEmail += ";" + UsrRetMail(ZM4->ZM4_SOLICI) 
          EndIf
 
-         U_AFIN037F(_cDoc,POSICIONE("SA1",1,XFILIAL("SA1")+_cCliente+_cLoja,"A1_NOME"),cNomeVend,cEmail,_aLog,_lRejeitar,_cMotivo)
+         U_AFIN037F(_cDoc,Posicione("SA1",1,xFilial("SA1")+_cCliente+_cLoja,"A1_NOME"),cNomeVend,cEmail,_aLog,_lRejeitar,_cMotivo,_aBoletos)
       Else
-       	//U_ITMSG("Aprovação não efeuada!","Atenção",,3 , , , .T.)	      
+       	//U_ITMsg("Aprovação não efeuada!","Atenção",,3 , , , .T.)	      
          Help(NIL, 1, "HELP", NIL, "Aprovação não efeuada!", 1, 0, NIL, NIL, NIL, NIL, NIL, {})
       EndIf
       
@@ -521,18 +520,13 @@ End Transaction
 
 Return _lRet
 
-
-
 /*
 ===============================================================================================================================
 Programa----------: AFIN037A
 Autor-------------: Igor Melgaço
 Data da Criacao---: 24/07/2024
-===============================================================================================================================
 Descrição---------: Carrega variaveis
-===============================================================================================================================
 Parametros--------: _oModel = Modelo de dados.
-===============================================================================================================================
 Retorno-----------: _lRet = .T. 
 ===============================================================================================================================
 */
@@ -546,23 +540,18 @@ Local _lRejeitar := !(FWIsInCallStack("U_AFIN037R")) As Logical
       _oModelMaster:LoadValue("ZM4_DTAPRO",Date())
       _oModelMaster:LoadValue("ZM4_APROV" ,RetCodUsr())
       _oModelMaster:LoadValue("ZM4_NAPROV",UsrFullName(RetCodUsr()))
-      _oModelMaster:LoadValue("ZM4_STATUS",Iif(_lRejeitar,"R","A"))
+      _oModelMaster:LoadValue("ZM4_STATUS",IIf(_lRejeitar,"R","A"))
    EndIf
 
 Return _lRet 
-
-
 
 /*
 ===============================================================================================================================
 Programa----------: AFIN037B
 Autor-------------: Igor Melgaço
 Data da Criacao---: 22/07/2024
-===============================================================================================================================
 Descrição---------: Validação de Abertura do cadastro.
-===============================================================================================================================
 Parametros--------: _oModel = Modelo de dados.
-===============================================================================================================================
 Retorno-----------: _lRet = .T. 
 ===============================================================================================================================
 */
@@ -573,12 +562,12 @@ Local _lRet := .T. As Logical
    If _nOperation == MODEL_OPERATION_UPDATE
       If ZM4->ZM4_STATUS == "A"
          _lRet := .F.
-       	U_ITMSG("Registro já aprovado! ",;
+       	U_ITMsg("Registro já aprovado! ",;
           "Atenção",;
           "Selecione um registro que ainda não foi aprovado.",3 , , , .T.)	
       ElseIf ZM4->ZM4_STATUS == "R" 
          _lRet := .F.
-       	U_ITMSG("Registro já rejeitado! ",;
+       	U_ITMsg("Registro já rejeitado! ",;
           "Atenção",;
           "Selecione um registro que ainda não foi aprovado ou rejeitado.",3 , , , .T.)	
       EndIf
@@ -592,24 +581,21 @@ Return _lRet
 Programa----------: AFIN037
 Autor-------------: Igor Melgaço
 Data da Criacao---: 26/07/2024
-===============================================================================================================================
 Descrição---------: Monta Legenda
-===============================================================================================================================
 Parametros--------: _aCol,_nLinha
-===============================================================================================================================
 Retorno-----------: cRet
 ===============================================================================================================================
 */
-USER Function AFIN037L(_aCol As Array, _nLinha As Numeric) As Char
+User Function AFIN037L(_aCol As Array, _nLinha As Numeric) As Char
    Local oVerm := LoadBitmap( , "BR_VERMELHO") As Object // VERMELHO TEM QUE GERA REPOSICAO .F. CRITICO
    Local oVerd := LoadBitmap( , "BR_VERDE"   ) As Object // VERDE ESTOQUE TUDO OK .T.
-	IF _aCol[_nLinha,1]
-		RETURN oVerd
-	ELSE
-		RETURN oVerm
-	ENDIF
+	If _aCol[_nLinha,1]
+		Return oVerd
+	Else
+		Return oVerm
+	EndIf
 
-RETURN oVerm
+Return oVerm
 
 
 /*
@@ -617,15 +603,12 @@ RETURN oVerm
 Programa----------: MOMS068F
 Autor-------------: Igor Melgaco
 Data da Criacao---: 06/03/2024
-===============================================================================================================================
 Descrição---------: WorkFlow para notificação do Vendedor
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AFIN037F(cTit As Char, cDescCli As Char, cDescVend As Char, cEmail As Char, _aLog As Array, _lRejeitado As Logical, _cMotivo As Char) As Logical
+User Function AFIN037F(cTit As Char, cDescCli As Char, cDescVend As Char, cEmail As Char, _aLog As Array, _lRejeitado As Logical, _cMotivo As Char, _aBoletos As Array) As Logical
 Local cHtml      := "" As Char
 Local cTo        := "" As Char
 Local cGetCco    := "" As Char
@@ -646,9 +629,9 @@ Default _cMotivo := ""
       cHtml += '<br><br>'
       cHtml += '<br><br>'
       If _lRejeitado
-         cHtml += '&nbsp;&nbsp;&nbsp;Prorrogação por ocorrencia de frete do Titulo N. '+cTit+' / Cliente: '+Alltrim(cDescCli)+' rejeitada. '
+         cHtml += '&nbsp;&nbsp;&nbsp;Prorrogação por ocorrencia de frete do Titulo N. '+cTit+' / Cliente: '+AllTrim(cDescCli)+' rejeitada. '
       Else
-         cHtml += '&nbsp;&nbsp;&nbsp;Titulo N. '+cTit+' / Cliente: '+Alltrim(cDescCli)+' prorrogado por ocorrencia de frete.'
+         cHtml += '&nbsp;&nbsp;&nbsp;Titulo N. '+cTit+' / Cliente: '+AllTrim(cDescCli)+' prorrogado por ocorrencia de frete.'
       EndIf
       cHtml += '<br><br>'
       cHtml += '<br><br>'
@@ -661,7 +644,7 @@ Default _cMotivo := ""
       Else
          For i := 1 to Len(_aLog)
             If _aLog[i,1]
-               cHtml += '&nbsp;&nbsp;&nbsp;Titulo '+_aLog[i,3]+Iif(Empty(Alltrim(_aLog[i,6])),'',' / Parcela: '+_aLog[i,6])+' / Saldo: '+Transform(_aLog[i,7],"@E 9,999,999,999.99") + " / Vencto Anterior: " + DTOC(_aLog[i,8]) + " / Vencto Atual: " + DTOC(_aLog[i,9])
+               cHtml += '&nbsp;&nbsp;&nbsp;Titulo '+_aLog[i,3]+IIf(Empty(AllTrim(_aLog[i,6])),'',' / Parcela: '+_aLog[i,6])+' / Saldo: '+Transform(_aLog[i,7],"@E 9,999,999,999.99") + " / Vencto Anterior: " + DToC(_aLog[i,8]) + " / Vencto Atual: " + DToC(_aLog[i,9])
                cHtml += '<br><br>'
                _nTotal += _aLog[i,7]
             EndIf
@@ -713,8 +696,8 @@ Default _cMotivo := ""
       cHtml +=             '<span style="font-size:12.0pt;font-family:'+"'"+'Times New Roman'+"'"+','+"'"+'serif'+"'"+';mso-fareast-language:PT-BR"></span></p>
       cHtml +=             '<p class=MsoNormal style="mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;text-align:justify">'
       cHtml +=             '<span style="font-size:7.5pt;font-family:'+"'"+'Times New Roman'+"'"+','+"'"+'serif'+"'"+';color:#1D2668;mso-fareast-language:PT-BR">
-      cHtml +=                 'Esta mensagem é destinada exclusivamente para fins profissionais, para a(s) pessoa(s) a quem for dirigida, podendo conter informação confidencial e legalmente privilegiada. '
-      cHtml +=                 'Ao recebê-la, se você não for destinatário desta mensagem, fica automaticamente notificado de abster-se a divulgar, copiar, distribuir, examinar ou, de qualquer forma, utilizar '
+      cHtml +=                 'Esta mensagem é destinada exclusivamente para fins profissionais, para a(s) pessoa(s) a quem For dirigida, podendo conter informação confidencial e legalmente privilegiada. '
+      cHtml +=                 'Ao recebê-la, se você não For destinatário desta mensagem, fica automaticamente notificado de abster-se a divulgar, copiar, distribuir, examinar ou, de qualquer forma, utilizar '
       cHtml +=                 'sua informação, por configurar ato ilegal. Caso você tenha recebido esta mensagem indevidamente, solicitamos que nos retorne este e-mail, promovendo, concomitantemente sua '
       cHtml +=                 'eliminação de sua base de dados, registros ou qualquer outro sistema de controle. Fica desprovida de eficácia e validade a mensagem que contiver vínculos obrigacionais, expedida '
       cHtml +=                 'por quem não detenha poderes de representação, bem como não esteja legalmente habilitado para utilizar o referido endereço eletrônico, configurando falta grave conforme nossa '
@@ -726,42 +709,46 @@ Default _cMotivo := ""
       cHtml +=     '</tr>
       cHtml += '</table>'
 
-      cTo    := cEmail 
-      cGetCco := "" //cEmailVend
-
-      cFrom := SuperGetMV("IT_FIN037M",.F.,'sistema@italac.com.br') 
+      cFrom   := SuperGetMV("ITAFIN37EM",.F.,'cobranca@italac.com.br') 
+      cTo     := cEmail
       cGetCco := cFrom + "; prorrogacao@italac.com.br "
 
-      cFilePrint := U_RFIN002P() //  "" 
-      cFilePrint := ""
+      If !(AllTrim(GETENVSERVER()) == "PRODUCAO")
+         cTo    := "antonio.ramos@italac.com.br;neves.antonio.ramos@gmail.com" 
+         cGetCco := "igor.melgaco@italac.com.br" 					
+      EndIf
       
       If _lRejeitado
-         _cAssunto := "Prorogação de titulo rejeitada Doc.: "+ cTit + " Cliente: " + Alltrim(cDescCli) 
+         _cAssunto := "Prorogação de titulo rejeitada Doc.: "+ cTit + " Cliente: " + AllTrim(cDescCli) 
       Else
-         _cAssunto := "Titulo Prorogado por ocorrencia de frete " + Alltrim(cDescCli) + " Valor " + Alltrim(Transform(_nTotal,"@E 9,999,999,999.99"))  
+         _cAssunto := "Titulo Prorogado por ocorrencia de frete " + AllTrim(cDescCli) + " Valor " + AllTrim(Transform(_nTotal,"@E 9,999,999,999.99"))  
       EndIf
 
+      For i := 1 to Len(_aBoletos)
+         cFilePrint += IIf(Empty(AllTrim(cFilePrint)),"",";") + _aBoletos[i]
+      Next
+      
       U_ITENVMAIL( cFrom , cTo ,  ,cGetCco  , _cAssunto , cHtml , cFilePrint , _aConfig[01] , _aConfig[02] , _aConfig[03] , _aConfig[04] , _aConfig[05] , _aConfig[06] , _aConfig[07] , @_cLog )
       
       lRet :=  ("Sucesso" $ _cLog)
       
-      U_ItMsg(Iif(lRet,"Email enviado com sucesso para "+cTo+"!","Falha no Envio do email: "+_cLog),"Atenção",,Iif(lRet,2,1))
+      U_ItMsg(IIf(lRet,"Email enviado com sucesso para "+cTo+"!","Falha no Envio do email: "+_cLog),"Atenção",,IIf(lRet,2,1))
    
+      For i := 1 to Len(_aBoletos)
+         If ! Empty(_aBoletos[i]) .And. File(_aBoletos[i]) 
+            fErase(_aBoletos[i])
+         EndIf
+      Next
+      
 Return
-
-
-
 
 /*
 ===============================================================================================================================
 Programa----------: AFIN037R
 Autor-------------: Igor Melgaco
 Data da Criacao---: 06/03/2024
-===============================================================================================================================
 Descrição---------: WorkFlow para notificação do Vendedor
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -776,11 +763,8 @@ Return
 Programa----------: AFIN037V
 Autor-------------: Igor Melgaco
 Data da Criacao---: 30/07/2024
-===============================================================================================================================
 Descrição---------: Abertura da Rotina com a lista de aprovações pendente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */

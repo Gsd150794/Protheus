@@ -2,37 +2,30 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 03/11/2017 | Realização de ajustes nas rotinas de devolução de EPIs para que permitam a impressão dos recibos de 
-              |            | entrega de EPI. Chamados 22140/22154/19329.                   
---------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 10/04/2018 | Realização de ajustes nas rotinas de entrega e devolução de EPI, para impressão correta dos 
-              |            | comprovantes. Chamado 23960.
---------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 02/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Julio Paz     |03/11/2017| Chamados 22140/22154/19329. Realização de ajustes nas rotinas de devolução de EPIs para que permitam 
+              |          | a impressão dos recibos de entrega de EPI. 
+Julio Paz     |10/04/2018| Chamado 23960. Realização de ajustes nas rotinas de entrega e devolução de EPI, para impressão 
+              |          | correta dos comprovantes.
+Lucas Borges  |02/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: AMDT003
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 08/06/2016
-===============================================================================================================================
 Descrição---------: Devoluções de EPI's
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AMDT003()
+User Function AMDT003
+
 Local _cAlias		:= "TNF"
 Local _aCores 		:=	{	{'TNF_I_TPDV == "T"'	, 'BR_BRANCO'	},;
 							{'TNF_I_TPDV == "R"'	, 'BR_AMARELO'	} }
@@ -46,17 +39,13 @@ mBrowse( 6, 1,22,75,_cAlias,_aFixe,,,,,_aCores,,,,,,,,_cFiltro)
 
 Return
 
-
 /*
 ===============================================================================================================================
 Programa----------: MenuDef
 Autor-------------: Darcio Ribeiro Sporl
 Data da Criacao---: 25/04/2016
-===============================================================================================================================
 Descrição---------: Rotina responsavel pela criação das opções de menu
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -75,15 +64,13 @@ Return (aRotina)
 Programa----------: AMD003LEG
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 08/06/2016
-===============================================================================================================================
 Descrição---------: Função utilizada para montar a legenda
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AMD003LEG()
+
 aLegenda :=	{	{"BR_BRANCO"	, "Epi para Troca"		},;
 				{"BR_AMARELO"	, "Epi para Reúso"		} }
 
@@ -95,17 +82,14 @@ Return
 Programa----------: AMD003C
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 08/06/2016
-===============================================================================================================================
 Descrição---------: Função para marcar devolução dos EPI's
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AMD003C()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cMatric	:= SRA->RA_MAT
 Local _nPosEpi	:= aScan(aHeader,{|x| AllTrim(x[2]) == "TNF_CODEPI"}	)
 Local _nPosFor	:= aScan(aHeader,{|x| AllTrim(x[2]) == "TNF_FORNEC"}	)
@@ -138,16 +122,16 @@ Begin Sequence
 	     
 	     DEFINE MSDIALOG _oDlgQ TITLE "Devolução de EPIs" From 0,0 To 200,587 OF oMainWnd PIXEL // 440,587
 
-	        @ 0.5+_nLin,1 SAY OemToAnsi("Qtd Entregue") Of _oDlgQ  
+	        @ 0.5+_nLin,1 Say OemToAnsi("Qtd Entregue") Of _oDlgQ  
 	        @ 0.5+_nLin,8.2  MSGET _nQtdEntr SIZE 20,10 Of _oDlgQ WHEN .F.   
 	
-	        @ 1.7+_nLin ,1 SAY OemToAnsi("Qtd Devolvida") Of _oDlgQ
+	        @ 1.7+_nLin ,1 Say OemToAnsi("Qtd Devolvida") Of _oDlgQ
 	        @ 1.7+_nLin ,8.2  MSGET _nQtdDevolv SIZE 20,10 Of _oDlgQ WHEN .F.
 	
-	        @ 2.9+_nLin ,1 SAY OemToAnsi("Saldo") Of _oDlgQ
+	        @ 2.9+_nLin ,1 Say OemToAnsi("Saldo") Of _oDlgQ
 	        @ 2.9+_nLin ,8.2  MSGET _nSaldo SIZE 50,10 Of _oDlgQ WHEN .F.
 	                                
-	        @ 4.1+_nLin ,1 SAY OemToAnsi("Qtd a Devolver") Of _oPnlSup
+	        @ 4.1+_nLin ,1 Say OemToAnsi("Qtd a Devolver") Of _oPnlSup
 	        @ 4.1+_nLin ,8.2  MSGET _nQtdADev SIZE 45,10 PICTURE "@E 999.99" VALID U_AMD003V(_nSaldo,_nQtdADev) Of _oDlgQ 
 
          ACTIVATE MSDIALOG _oDlgQ CENTERED ON INIT EnchoiceBar(_oDlgQ,{||_nOpcTNF:=1,_oDlgQ:End()},{||_nOpcTNF := 0,_oDlgQ:End()}) VALID U_AMD003V(_nSaldo,_nQtdADev)
@@ -161,23 +145,23 @@ Begin Sequence
          U_MDT6954G(.T.)
          
 	  	 If Aviso("AMDT00304 - Reposicao do Estoque", "O EPI Será?", { "TROCA", "REÚSO" }, 1) = 1
-			dbSelectArea("TNF")
-			dbSetOrder(1)
-			If dbSeek(xFilial("TNF") + aCols[n][_nPosFor] + aCols[n][_nPosLoj] + aCols[n][_nPosEpi] + aCols[n][_nPosCap] + _cMatric + DtoS(aCols[n][_nPosDte]) + aCols[n][_nPosHre])
+			DBSelectArea("TNF")
+			DBSetOrder(1)
+			If DBSeek(xFilial("TNF") + aCols[n][_nPosFor] + aCols[n][_nPosLoj] + aCols[n][_nPosEpi] + aCols[n][_nPosCap] + _cMatric + DToS(aCols[n][_nPosDte]) + aCols[n][_nPosHre])
 				RecLock("TNF",.F.)
 				TNF->TNF_I_TPDV := "T"
 				TNF->TNF_I_QTDD := _nQtdADev
-				TNF->(MsUnLock())
+				TNF->(MSUnLock())
 			    MsgInfo("O processo de devolução de EPI foi conluído com sucesso.","AMDT00305 - Devolução de EPI")
 			 EndIf
 		  Else
-			 dbSelectArea("TNF")
-			 dbSetOrder(1)
-			 If dbSeek(xFilial("TNF") + aCols[n][_nPosFor] + aCols[n][_nPosLoj] + aCols[n][_nPosEpi] + aCols[n][_nPosCap] + _cMatric + DtoS(aCols[n][_nPosDte]) + aCols[n][_nPosHre])
+			 DBSelectArea("TNF")
+			 DBSetOrder(1)
+			 If DBSeek(xFilial("TNF") + aCols[n][_nPosFor] + aCols[n][_nPosLoj] + aCols[n][_nPosEpi] + aCols[n][_nPosCap] + _cMatric + DToS(aCols[n][_nPosDte]) + aCols[n][_nPosHre])
 	            RecLock("TNF",.F.)
 				TNF->TNF_I_TPDV := "R"
 				TNF->TNF_I_QTDD := _nQtdADev
-				TNF->(MsUnLock())
+				TNF->(MSUnLock())
 				MsgInfo("O processo de devolução de EPI foi conluído com sucesso.","AMDT00306 - Devolução de EPI")
 			 EndIf
 		  EndIf
@@ -188,27 +172,23 @@ Begin Sequence
    EndIf
 End Sequence
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
-
 
 /*
 ===============================================================================================================================
 Programa----------: AMD003D
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 08/06/2016
-===============================================================================================================================
 Descrição---------: Função efetivar a Devolução dos Epi's
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AMD003D()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local cMatricEn	:= TNF->TNF_MAT
 Local cNomeFuEn	:= NGSeek("SRA",cMatricEn,1,"RA_NOME")
 Local cFornecEn	:= TNF->TNF_FORNEC
@@ -239,7 +219,7 @@ Private aHeadTLW	:= {} //Cabeçalho da TLW
 Private aHeader		:= {}
 Private aCols		:= {}
 
-Private lSigaMdtPS	:= If( SuperGetMv("MV_MDTPS",.F.,"N") == "S", .t. , .f. )
+Private lSigaMdtPS	:= If( SuperGetMv("MV_MDTPS",.F.,"N") == "S", .T. , .F. )
 Private aDevEpi		:= {}
 Private oPnlSup
 Private oDlg
@@ -253,7 +233,7 @@ ElseIf TNF->TNF_I_TPDV == "R"
 	aAdd(aCols,{Date(),Time(),0,"05","2","S",.F.})
 EndIf
 
-_nLocTipoDV := aSCAN(aHeader, {|x| AllTrim(Upper(X[2])) == "TLW_TIPODV" })
+_nLocTipoDV := aScan(aHeader, {|x| AllTrim(Upper(X[2])) == "TLW_TIPODV" })
 For _nI := 1 To Len(aCols)
     aCols[_nI][_nLocTipoDV] := "1" // SIM
 Next
@@ -264,42 +244,42 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From 0,0 To 440,587 OF oMainWnd PIXEL
 	oPnlSup := TPanel():New(0,0,,oDlg,,,,,,0,90,.F.,.F.) // 70
 	oPnlSup:Align := CONTROL_ALIGN_TOP
 
-	@ 0.5 ,.8 SAY OemToAnsi("Matricula") Of oPnlSup
+	@ 0.5 ,.8 Say OemToAnsi("Matricula") Of oPnlSup
 	@ 0.5 ,5  MSGET cMatricEn SIZE 20,10 Of oPnlSup WHEN .F.
-	@ 0.5 ,9  SAY OemToAnsi("Nome") Of oPnlSup
+	@ 0.5 ,9  Say OemToAnsi("Nome") Of oPnlSup
 	@ 0.5 ,12 MSGET cNomeFuEn SIZE 196,10 Of oPnlSup WHEN .F.
 	
-	@ 1.7 ,.8 SAY OemToAnsi("Fornecedor") Of oPnlSup
+	@ 1.7 ,.8 Say OemToAnsi("Fornecedor") Of oPnlSup
 	@ 1.7 ,5  MSGET cFornecEn SIZE 20,10 Of oPnlSup WHEN .F.
-	@ 1.7 ,9  SAY OemToAnsi("Loja") Of oPnlSup
+	@ 1.7 ,9  Say OemToAnsi("Loja") Of oPnlSup
 	@ 1.7 ,12 MSGET cLojaSvEn SIZE 15,10 Of oPnlSup WHEN .F.
-	@ 1.7 ,17 SAY OemToAnsi("Nome Fornecedor") Of oPnlSup
+	@ 1.7 ,17 Say OemToAnsi("Nome Fornecedor") Of oPnlSup
 	@ 1.7 ,24 MSGET Eval({|| Posicione("SA2",1,xFilial("SA2")+cFornecEn+cLojaSvEn,"A2_NOME")}) SIZE 100,10 Of oPnlSup WHEN .F.
 	
-	@ 2.9 ,.8 SAY OemToAnsi("Epi") Of oPnlSup
+	@ 2.9 ,.8 Say OemToAnsi("Epi") Of oPnlSup
 	@ 2.9 ,5  MSGET cEpiSvoEn SIZE 50,10 Of oPnlSup WHEN .F.
-	@ 2.9 ,12 SAY OemToAnsi("Descricao") Of oPnlSup
+	@ 2.9 ,12 Say OemToAnsi("Descricao") Of oPnlSup
 	@ 2.9 ,17 MSGET cDesSb1En SIZE 65,10 Of oPnlSup WHEN .F.
 
-	@ 2.9 ,26 SAY OemToAnsi("Num. C.A.") Of oPnlSup
+	@ 2.9 ,26 Say OemToAnsi("Num. C.A.") Of oPnlSup
 	@ 2.9 ,30 MSGET cNumCapEn SIZE 40,10 Of oPnlSup WHEN .F.
 	                                
-	@ 4.1 ,.8 SAY OemToAnsi("Data Entrega") Of oPnlSup
+	@ 4.1 ,.8 Say OemToAnsi("Data Entrega") Of oPnlSup
 	@ 4.1 ,5  MSGET dDataSvEn SIZE 45,10 Of oPnlSup WHEN .F. HASBUTTON
 	
-	@ 4.1 ,12 SAY OemToAnsi("Hora Entrega") Of oPnlSup
+	@ 4.1 ,12 Say OemToAnsi("Hora Entrega") Of oPnlSup
 	@ 4.1 ,17 MSGET cHoraSvEn SIZE 18,10 Of oPnlSup WHEN .F.
 	
-	@ 4.1 ,24 SAY OemToAnsi("Qtde. Entregue") Of oPnlSup
+	@ 4.1 ,24 Say OemToAnsi("Qtde. Entregue") Of oPnlSup
 	@ 4.1 ,29 MSGET nQtdadeEn Picture "@E 999.99" SIZE 25,10 Of oPnlSup WHEN .F. HASBUTTON
 	
-	@ 5.3 ,.8 SAY OemToAnsi("Qtd Devolvida") Of oPnlSup
+	@ 5.3 ,.8 Say OemToAnsi("Qtd Devolvida") Of oPnlSup
 	@ 5.3 ,5  MSGET _nIQtdDev SIZE 45,10 Of oPnlSup WHEN .F. 
 	
-	@ 5.3 ,12 SAY OemToAnsi("Saldo") Of oPnlSup
+	@ 5.3 ,12 Say OemToAnsi("Saldo") Of oPnlSup
 	@ 5.3 ,17 MSGET _nQtdSaldo SIZE 18,10 Of oPnlSup WHEN .F.
 	
-	dbSelectArea("TLW")
+	DBSelectArea("TLW")
 	oGet1 := MsNewGetDados():New( 090, 005, 205, 292, GD_UPDATE, "AllwaysTrue", "AllwaysTrue", "",aAlter,, 999, "AllwaysTrue", "", "AllwaysTrue", oDlg, aHeader, aCols)  // 070, 005, 205, 292
 	oGet1:oBrowse:Align := CONTROL_ALIGN_ALLCLIENT
 	
@@ -312,9 +292,9 @@ If nOpcTLW == 1
 	_nPosQt	:= aScan(oGet1:aHeader,{|x| AllTrim(x[2]) == "TLW_QTDEVO"}	)
 	_nPosAr	:= aScan(oGet1:aHeader,{|x| AllTrim(x[2]) == "TLW_LOCAL"}	)
 
-	dbSelectArea("NNR")
-	dbSetOrder(1)
-	If dbSeek(xFilial("NNR") + oGet1:aCols[oGet1:nAt][_nPosAr])
+	DBSelectArea("NNR")
+	DBSetOrder(1)
+	If DBSeek(xFilial("NNR") + oGet1:aCols[oGet1:nAt][_nPosAr])
 
 		If TNF->TNF_I_TPDV == "T" .Or. TNF->TNF_I_TPDV == "R"
 	
@@ -331,16 +311,16 @@ If nOpcTLW == 1
 			TNF->TNF_QTDEVO	:= TNF->TNF_QTDEVO + oGet1:aCols[oGet1:nAt][_nPosQt]
 			TNF->TNF_I_QTDD := 0 // Este campo deve ser zerado toda vez que as tabela TNF e TLW forem atualizadas.
 			TNF->TNF_I_IMPR := "1"  // 1=Sim, deve ser impresso o recibo.
-			TNF->(MsUnLock())
+			TNF->(MSUnLock())
 		
-			dbSelectArea("TLW")
-			dbSetOrder(1)
-			If dbSeek(xFilial("TLW") + cFornecEn + cLojaSvEn + cEpiSvoEn + cNumCapEn + cMatricEn + ;
-					DtoS(dDataSvEn) + cHoraSvEn ) // + DtoS(oGet1:aCols[oGet1:nAt][_nPosDt]) + oGet1:aCols[oGet1:nAt][_nPosHr] )
+			DBSelectArea("TLW")
+			DBSetOrder(1)
+			If DBSeek(xFilial("TLW") + cFornecEn + cLojaSvEn + cEpiSvoEn + cNumCapEn + cMatricEn + ;
+					DToS(dDataSvEn) + cHoraSvEn ) // + DToS(oGet1:aCols[oGet1:nAt][_nPosDt]) + oGet1:aCols[oGet1:nAt][_nPosHr] )
 				RecLock("TLW",.F.)
 			Else
 				RecLock("TLW",.T.)
-			Endif
+			EndIf
 		
 			TLW->TLW_FILIAL := xFilial("TLW")
 			TLW->TLW_FORNEC := cFornecEn
@@ -355,7 +335,7 @@ If nOpcTLW == 1
 			TLW->TLW_DTDEVO	:= oGet1:aCols[oGet1:nAt][_nPosDt]
 			TLW->TLW_HRDEVO	:= oGet1:aCols[oGet1:nAt][_nPosHr]
 			TLW->TLW_TIPODV := "1" // Epi Devolvido  
-			TLW->(MSUNLOCK())
+			TLW->(MSUnLock())
 						
 			_cTmpLote	:= TNF->TNF_LOTECT
 			_cTmpSubL	:= TNF->TNF_LOTESB
@@ -365,11 +345,11 @@ If nOpcTLW == 1
 								nil, TNF->TNF_NUMSEQ , _cTmpLote , _cTmpSubL , _cTmpLocz , _cTmpNSer )
 			RecLock("TLW",.F.)
 			TLW->TLW_NUMSEQ := _cNUMSEQ
-			TLW->(MSUNLOCK())
+			TLW->(MSUnLock())
 
 			RecLock("SD3", .F.)
 			SD3->D3_I_OBS := "RETORNO DE EPI DE REUSO SESMT."
-			SD3->(MSUNLOCK())
+			SD3->(MSUnLock())
 			MsgInfo("O processo de devolução de EPI foi conluído com sucesso.", "AMDT00308 - Devolução de EPI")
 
 		Else
@@ -384,7 +364,7 @@ Else
 	MsgStop("O processo de devolução de EPI foi cancelado pelo usuário.", "AMDT00311 - Devolução de EPI")
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 Return
 
 /*
@@ -392,16 +372,14 @@ Return
 Programa----------: AMDTTOK
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 13/06/2016
-===============================================================================================================================
 Descrição---------: Função de validação da quantidade devolvida
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */                 //   1       2           3          4          5         6          7         8          9          10
 User Function AMDTTOK(oGet1, nQtdadeEn, cMatricEn, cFornecEn, cLojaSvEn, cEpiSvoEn, cNumCapEn, dDataSvEn, cHoraSvEn,_nIQtdDev)
-Local _aArea	:= GetArea()
+
+Local _aArea	:= FWGetArea()
 Local _lRet		:= .T.
 Local _nPosQtd	:= aScan(oGet1:aHeader,{|x| AllTrim(x[2]) == "TLW_QTDEVO"	})
 
@@ -417,7 +395,7 @@ EndIf
 
 DBSelectArea("TNF")
 TNF->(DBSetOrder(1))
-If TNF->(DBSeek(xFilial("TNF") + cFornecEn + cLojaSvEn + cEpiSvoEn + cNumCapEn + cMatricEn + DtoS(dDataSvEn) + cHoraSvEn))
+If TNF->(DBSeek(xFilial("TNF") + cFornecEn + cLojaSvEn + cEpiSvoEn + cNumCapEn + cMatricEn + DToS(dDataSvEn) + cHoraSvEn))
 	If oGet1:aCols[oGet1:nAt][_nPosQtd] > (TNF->TNF_QTDENT - TNF->TNF_QTDEVO)
 		MsgStop('A quantidade a devolver deve ser menor ou igual ao saldo. Saldo: ' + AllTrim(Transform(TNF->TNF_QTDENT - TNF->TNF_QTDEVO,"@E 9,999,999.99")),"AMDT00314")
 		_lRet := .F.
@@ -430,7 +408,7 @@ If oGet1:aCols[oGet1:nAt][_nPosQtd] > _nIQtdDev
 	_lRet := .F.
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 Return(_lRet)
 
 /*
@@ -438,27 +416,26 @@ Return(_lRet)
 Programa----------: AMD003E
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 16/06/2016
-===============================================================================================================================
 Descrição---------: Função para excluir a EPI do Monitor
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AMD003E()
-Local _aArea	:= GetArea()
+
+Local _aArea	:= FWGetArea()
 
 If MsgYesNo("Deseja realmente confirmar a Devolução deste EPI?","AMDT00316")
 	RecLock("TNF",.F.)
 		TNF->TNF_I_TPDV := " "
-	TNF->(MsUnLock())
+	TNF->(MSUnLock())
 	MsgInfo("O processo de exclução de EPI foi conluído com sucesso.","AMDT00317")
 Else
 	MsgAlert("Processo de exclusão canelado pelo usuário.","AMDT00318")
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
+
 Return
 
 /*
@@ -466,18 +443,15 @@ Return
 Programa----------: AMD003F
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 19/09/2016
-===============================================================================================================================
 Descrição---------: Função para validar o descarte do EPI
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: _lRet - .T. continua com o descarte, .F. caso contrário
 ===============================================================================================================================
 */
 User Function AMD003F()
-Local _aArea	:= GetArea()
-Local _lRet		:= .F.
 
+Local _aArea	:= FWGetArea()
+Local _lRet		:= .F.
 Local _nPosForn
 Local _nPosLoja
 Local _nPosCodEPI
@@ -491,29 +465,29 @@ If FUNNAME() == 'MDTA695'
 		//============================================================================
 		// TLW_FILIAL+TLW_FORNEC+TLW_LOJA+TLW_CODEPI+TLW_NUMCAP+TLW_MAT 
 		//============================================================================
-		_nPosForn   := aSCAN(aHeadPrin, {|x| AllTrim(Upper(X[2])) == "TNF_FORNEC" })
-        _nPosLoja   := aSCAN(aHeadPrin, {|x| AllTrim(Upper(X[2])) == "TNF_LOJA" })
-        _nPosCodEPI := aSCAN(aHeadPrin, {|x| AllTrim(Upper(X[2])) == "TNF_CODEPI" })
-        _nPosNumCap := aSCAN(aHeadPrin, {|x| AllTrim(Upper(X[2])) == "TNF_NUMCAP" })
+		_nPosForn   := aScan(aHeadPrin, {|x| AllTrim(Upper(X[2])) == "TNF_FORNEC" })
+        _nPosLoja   := aScan(aHeadPrin, {|x| AllTrim(Upper(X[2])) == "TNF_LOJA" })
+        _nPosCodEPI := aScan(aHeadPrin, {|x| AllTrim(Upper(X[2])) == "TNF_CODEPI" })
+        _nPosNumCap := aScan(aHeadPrin, {|x| AllTrim(Upper(X[2])) == "TNF_NUMCAP" })
 		
-		TNF->(DbSetOrder(1)) // TNF_FILIAL+TNF_FORNEC+TNF_LOJA+TNF_CODEPI+TNF_NUMCAP+TNF_MAT+DTOS(TNF_DTENTR)+TNF_HRENTR
-		If TNF->(DbSeek(xFilial("TNF")+aOldTNF[nSalTNF][_nPosForn]+aOldTNF[nSalTNF][_nPosLoja]+aOldTNF[nSalTNF][_nPosCodEPI]+aOldTNF[nSalTNF][_nPosNumCap]+M->RA_MAT))
-		    Aadd(ADevEPI,TNF->(Recno()))
+		TNF->(DBSetOrder(1)) // TNF_FILIAL+TNF_FORNEC+TNF_LOJA+TNF_CODEPI+TNF_NUMCAP+TNF_MAT+DToS(TNF_DTENTR)+TNF_HRENTR
+		If TNF->(DBSeek(xFilial("TNF")+aOldTNF[nSalTNF][_nPosForn]+aOldTNF[nSalTNF][_nPosLoja]+aOldTNF[nSalTNF][_nPosCodEPI]+aOldTNF[nSalTNF][_nPosNumCap]+M->RA_MAT))
+		    aAdd(ADevEPI,TNF->(Recno()))
 		EndIf
 		
 		RestOrd(_aOrd)
-        TNF->(DbGoTo(_nRegAtu))
+        TNF->(DBGoTo(_nRegAtu))
 	EndIf
 Else
 	_lRet := .T.
 EndIf
 If IsInCallStack("U_AMD003D")
-   aCols[n][5] := '1' // Ficou definido (Analista André Carvalho) que o campo TLW_TIPODV (Repor Estoque) sempre será Sim='1', quando for a rotina AMD003D.
+   aCols[n][5] := '1' // Ficou definido (Analista André Carvalho) que o campo TLW_TIPODV (Repor Estoque) sempre será Sim='1', quando For a rotina AMD003D.
 Else
    aCols[n][5] := '2' // Ficou definido (Analista André Carvalho) que o campo TLW_TIPODV (Repor Estoque) sempre será Não='2'.
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return(_lRet)
 
@@ -523,12 +497,9 @@ Return(_lRet)
 Programa----------: AMD003V
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 25/10/2017
-===============================================================================================================================
 Descrição---------: Valida a digitação da quantidade de devolução de EPI.
-===============================================================================================================================
 Parametros--------: _nSaldo = Saldo disponível para devolução.
                     _nQtdADev = Quantidade a ser devolvida.
-===============================================================================================================================
 Retorno-----------: _lRet - .T. = Validação correta. /  .F. = foram encontrados problemas na validação.
 ===============================================================================================================================
 */

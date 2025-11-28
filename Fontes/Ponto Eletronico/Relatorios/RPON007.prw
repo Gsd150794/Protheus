@@ -2,23 +2,14 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 16/06/2019 | Chamado 29715 - Ajustar fonte de impressão para exibir corretamente os dados do documento. 
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 17/09/2019 | Chamado 28346 - Retirada chamada da função itputx1.  
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 02/10/2019 | Chamado 28346 - Removidos os Warning na compilação da release 12.1.25. 
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 30/08/2021 | Chamado 37601 - Trazer o conteúdo do campo RA_NSOCIAL, quando preenchido no lugar do RA_NOME. 
--------------------------------------------------------------------------------------------------------------------------------
-Igor Melgaço  | 20/06/2023 | Chamado 44223 - Ajustes para inclusão de opções no campo Z10_TIPO.
+Lucas Borges  |02/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25. 
+Alex Wallauer |30/08/2021| Chamado 37601. Trazer o conteúdo do campo RA_NSOCIAL, quando preenchido no lugar do RA_NOME. 
+Igor Melgaço  |20/06/2023| Chamado 44223. Ajustes para inclusão de opções no campo Z10_TIPO.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
 #Include "Totvs.Ch"
 
 /*
@@ -26,11 +17,8 @@ Igor Melgaço  | 20/06/2023 | Chamado 44223 - Ajustes para inclusão de opções no 
 Programa----------: RPON007
 Autor-------------: Xavier
 Data da Criacao---: 20/05/2015
-===============================================================================================================================
 Descrição---------: Emissão do modelo de ocorrencias de horarios no ponto
-===============================================================================================================================
 Parametros--------: cTpModelo = Tipo do modelo para emitir (Comunicado ou Advertencia)
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -53,13 +41,13 @@ If !(_lauto)
 
 	_lroda := Pergunte( _cPerg )
 	
-Endif
+EndIf
 
 If _lroda
 
 	Processa( {|| _aDados := RPON007SEL(_lauto) } , "Aguarde!" , "Selecionando registros das recepções..." )
 	
-	IF Empty(_aDados)
+	If Empty(_aDados)
 	
 		MessageBox( "Não foram encontrados registros para exibir! Verifique os parâmetros e tente novamente." , "Atenção" , 48 )
 		
@@ -67,7 +55,7 @@ If _lroda
 	
 		Processa( {|| RPON007PRT( _aDados ) } , 'Aguarde!' , 'Imprimindo registros...' )
 		
-	EndIF
+	EndIf
 
 Else
 	
@@ -75,18 +63,15 @@ Else
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: RPON007SEL
 Autor-----------: Josué Danich Pretses
 Data da Criacao-: 18/08/2015
-===============================================================================================================================
 Descrição-------: Função para consulta e preparação dos dados do relatório
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: _aRet - Dados do relatório
 ===============================================================================================================================
 */
@@ -102,11 +87,11 @@ Default _lauto 		:= .T.
 
 //faz automatico com Z10 posicionado
 If _lauto
-   Private MV_PAR01 	:= alltrim(Z10->Z10_FILIAL)
+   Private MV_PAR01 	:= AllTrim(Z10->Z10_FILIAL)
    Private MV_PAR02 	:= Z10->Z10_DATA
    Private MV_PAR03 	:= Z10->Z10_DATA
-   Private MV_PAR04 	:= ALLTRIM(Z10->Z10_MATRIC)
-   Private MV_PAR05 	:= ALLTRIM(Z10->Z10_MATRIC)
+   Private MV_PAR04 	:= AllTrim(Z10->Z10_MATRIC)
+   Private MV_PAR05 	:= AllTrim(Z10->Z10_MATRIC)
    Private MV_PAR07 	:= 3 
    Private MV_PAR06 	:= 3
    Private MV_PAR08 	:= 3
@@ -117,34 +102,34 @@ If _lauto
 EndIf
 
 Begin Sequence
-   _cquery :=	" SELECT Z10_FILIAL, "
-   _cquery +=	" Z10_DATA,   "
-   _cquery +=	" Z10_MATRIC, "
-   _cquery +=	" Z10_TIPO,   "
-   _cquery +=	" Z10_MOTIVO, "
-   _cquery +=	" Z10_IMPRES, "
-   _cquery +=	" Z10_HORAIN, "
-   _cquery +=	" Z10_HORAFI, "
-   _cquery +=	" Z10_TEMPOD, "
-   _cquery +=	" R_E_C_N_O_, "
-   _cquery +=	" Z10_ORIGEM FROM "+ retsqlname("Z10") 
-   _cquery +=	" WHERE Z10_DATA BETWEEN '" + DTOS(MV_PAR02) + "' AND '" + DTOS(MV_PAR03) + "'"
-   _cquery += IIf( !Empty( MV_PAR01 ) , " AND Z10_FILIAL IN "+ FormatIn( Alltrim( MV_PAR01 ) , ';' )	, "" )
-   _cquery += " AND Z10_MATRIC BETWEEN '" + MV_PAR04 + "' AND '" +  MV_PAR05 + "'"
-   _cquery += " AND D_E_L_E_T_ <> '*'"
+   _cQuery :=	" SELECT Z10_FILIAL, "
+   _cQuery +=	" Z10_DATA,   "
+   _cQuery +=	" Z10_MATRIC, "
+   _cQuery +=	" Z10_TIPO,   "
+   _cQuery +=	" Z10_MOTIVO, "
+   _cQuery +=	" Z10_IMPRES, "
+   _cQuery +=	" Z10_HORAIN, "
+   _cQuery +=	" Z10_HORAFI, "
+   _cQuery +=	" Z10_TEMPOD, "
+   _cQuery +=	" R_E_C_N_O_, "
+   _cQuery +=	" Z10_ORIGEM FROM "+ retsqlname("Z10") 
+   _cQuery +=	" WHERE Z10_DATA BETWEEN '" + DToS(MV_PAR02) + "' AND '" + DToS(MV_PAR03) + "'"
+   _cQuery += IIf( !Empty( MV_PAR01 ) , " AND Z10_FILIAL IN "+ FormatIn( AllTrim( MV_PAR01 ) , ';' )	, "" )
+   _cQuery += " AND Z10_MATRIC BETWEEN '" + MV_PAR04 + "' AND '" +  MV_PAR05 + "'"
+   _cQuery += " AND D_E_L_E_T_ <> '*'"
 
    //Filtra advertência e notificação
    If MV_PAR06 == 1
-	  _cquery += " AND Z10_TIPO = 'N'
-   Elseif MV_PAR06 == 2
-	  _cquery += " AND Z10_TIPO = 'A'
+	  _cQuery += " AND Z10_TIPO = 'N'
+   ElseIf MV_PAR06 == 2
+	  _cQuery += " AND Z10_TIPO = 'A'
    EndIf
 
    //Filtra impressos
    If MV_PAR08 == 1
-	  _cquery += " AND Z10_IMPRES = 'S'
+	  _cQuery += " AND Z10_IMPRES = 'S'
    ElseIf MV_PAR08 == 2
-	  _cquery += " AND Z10_IMPRES = 'N'
+	  _cQuery += " AND Z10_IMPRES = 'N'
    EndIf
  
    If Select(_cAlias) > 0
@@ -158,22 +143,22 @@ Begin Sequence
    (_cAlias)->( DBEval( {|| _nTotReg++ } ) )
    (_cAlias)->( DBGoTop() )
 
-   SRA->( dbSetOrder( 1 ) )
+   SRA->( DBSetOrder( 1 ) )
    ProcRegua(_nTotReg)
-   Do While (_cAlias)->( !Eof() )
+   While (_cAlias)->( !Eof() )
 	
 	  _nRegAtu++
 	  IncProc( "Lendo registros: ["+ StrZero( _nRegAtu , 6 ) +"] de ["+ StrZero( _nTotReg , 6 ) +"]" )
 
-	       If Posicione("SRA",1,(_cAlias)->Z10_FILIAL + (_cAlias)->Z10_MATRIC, "RA_CC") >= alltrim(MV_PAR09) .AND.;
-		        Posicione("SRA",1,(_cAlias)->Z10_FILIAL + (_cAlias)->Z10_MATRIC, "RA_CC") <= alltrim(MV_PAR10) .AND.;
-		        Posicione("SRA",1,(_cAlias)->Z10_FILIAL + (_cAlias)->Z10_MATRIC, "RA_I_SETOR") >= alltrim(MV_PAR11) .AND.;
-		        Posicione("SRA",1,(_cAlias)->Z10_FILIAL + (_cAlias)->Z10_MATRIC, "RA_I_SETOR") <= alltrim(MV_PAR12)
+	       If Posicione("SRA",1,(_cAlias)->Z10_FILIAL + (_cAlias)->Z10_MATRIC, "RA_CC") >= AllTrim(MV_PAR09) .AND.;
+		        Posicione("SRA",1,(_cAlias)->Z10_FILIAL + (_cAlias)->Z10_MATRIC, "RA_CC") <= AllTrim(MV_PAR10) .AND.;
+		        Posicione("SRA",1,(_cAlias)->Z10_FILIAL + (_cAlias)->Z10_MATRIC, "RA_I_SETOR") >= AllTrim(MV_PAR11) .AND.;
+		        Posicione("SRA",1,(_cAlias)->Z10_FILIAL + (_cAlias)->Z10_MATRIC, "RA_I_SETOR") <= AllTrim(MV_PAR12)
 
 				_cNomeFunc := SRA->RA_NOMECMP
-		        IF !EMPTY(SRA->RA_NSOCIAL)
+		        If !Empty(SRA->RA_NSOCIAL)
 		           _cNomeFunc:=SRA->RA_NSOCIAL
-		        ENDIF
+		        EndIf
 
         
 		        aAdd( _aRet ,{(_cAlias)->Z10_FILIAL																                           ,; //01 - Filial
@@ -196,12 +181,12 @@ Begin Sequence
    (_cAlias)->( DBCloseArea() )
 
    //organiza matriz
-   IF MV_PAR07 == 1
-	  _aRet := ASort(_aRet, , , {|x,y | y[2]+y[3]+y[4] > x[2]+x[3]+x[4]})
-   ELSEIF MV_PAR07 == 2
-      _aRet := ASort(_aRet, , , {|x,y | y[4]+y[2] > x[4]+x[2]})
-   ELSEIF MV_PAR07 == 3
-	  _aRet := ASort(_aRet, , , {|x,y | y[2]+y[4] > x[2]+x[4]})
+   If MV_PAR07 == 1
+	  _aRet := aSort(_aRet, , , {|x,y | y[2]+y[3]+y[4] > x[2]+x[3]+x[4]})
+   ElseIf MV_PAR07 == 2
+      _aRet := aSort(_aRet, , , {|x,y | y[4]+y[2] > x[4]+x[2]})
+   ElseIf MV_PAR07 == 3
+	  _aRet := aSort(_aRet, , , {|x,y | y[2]+y[4] > x[2]+x[4]})
    EndIf
 
 End Sequence
@@ -213,11 +198,8 @@ Return( _aRet )
 Programa--------: RPON007PRT
 Autor-----------: Josué Danich Prestes
 Data da Criacao-: 03/08/2015
-===============================================================================================================================
 Descrição-------: Função para controlar e imprimir os dados do relatório
-===============================================================================================================================
 Parametros------: _aDados  - Dados do relatório
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -254,14 +236,14 @@ For _nI := 1 To Len( _aDados )
 	//====================================================================================================
 	// Imprime ocorrências
 	//====================================================================================================
-	IF _nI == 1 
+	If _nI == 1 
 
 		//cabeçalho para primeira folha
 		
 		_nulin  := _nLinha
 		_nLinha := 5000
 		
-		_nLinha := RPON007VPG( _oPrint , _nLinha , .F., _adados, _ni,_nulin)
+		_nLinha := RPON007VPG( _oPrint , _nLinha , .F., _aDados, _nI,_nulin)
 	
 	    _oPrint:Say(  _nLinha + 0020 , _ncolini + _aColCab[01]		, 'Data'	  , _oFont04B )
 		_oPrint:Say(  _nLinha + 0020 , _ncolini + _aColCab[02]		, 'Hora Inic.', _oFont04B )
@@ -276,13 +258,13 @@ For _nI := 1 To Len( _aDados )
 		_culmat 	:=	_aDados[_nI][03]
 		
 		
-	Elseif _culdata != _aDados[_nI][02] .or. _culmat !=  _aDados[_nI][03]
+	ElseIf _culdata != _aDados[_nI][02] .Or. _culmat !=  _aDados[_nI][03]
 		
 		//cabeçalho quando mudar data e/ou matricula
 		_nulin  := _nLinha
 		_nLinha := 5000
 		
-		_nLinha := RPON007VPG( _oPrint , _nLinha , .T., _adados, _ni,_nulin)
+		_nLinha := RPON007VPG( _oPrint , _nLinha , .T., _aDados, _nI,_nulin)
 	
 		_oPrint:Say(  _nLinha + 0020 , _ncolini + _aColCab[01]	    , 'Data'	  , _oFont04B )  
 		_oPrint:Say(  _nLinha + 0020 , _ncolini + _aColCab[02]		, 'Hora Inic.', _oFont04B )
@@ -296,7 +278,7 @@ For _nI := 1 To Len( _aDados )
 		_culdata 	:= _aDados[_nI][02]
 		_culmat 	:=	_aDados[_nI][03]
 	 
-	Endif	
+	EndIf	
 
 	_oPrint:Line( _nLinha        , _ncolini              		 	, _nLinha        , _ncolfim		      )
 	_oPrint:Line( _nLinha + 0075 , _ncolini             			, _nLinha + 0075 , _ncolfim	          )
@@ -310,12 +292,12 @@ For _nI := 1 To Len( _aDados )
 	
 	_ctipo := U_APON001Y(_aDados[_nI][07]+"A")
 		
-	_oPrint:Say( _nLinha + 10 , _ncolini + _aColItn[01] , dtoc(stod(_aDados[_nI][02]))	          , _oFont05			) // _oFont03
+	_oPrint:Say( _nLinha + 10 , _ncolini + _aColItn[01] , DToC(SToD(_aDados[_nI][02]))	          , _oFont05			) // _oFont03
 	_oPrint:Say( _nLinha + 10 , _ncolini + _aColItn[02] , _aDados[_nI][10]	                      , _oFont05			)
 	_oPrint:Say( _nLinha + 10 , _ncolini + _aColItn[03] , _aDados[_nI][11]	                      , _oFont05			)
 	_oPrint:Say( _nLinha + 10 , _ncolini + _aColItn[04] , _aDados[_nI][12]	                      , _oFont05			)
 	_oPrint:Say( _nLinha + 10 , _ncolini + _aColItn[05] , _ctipo	                              , _oFont05			)
-	_oPrint:Say( _nLinha + 10 , _ncolini + _aColItn[06] , substr(alltrim(_aDados[_nI][06]),1,50)  , _oFont05			)
+	_oPrint:Say( _nLinha + 10 , _ncolini + _aColItn[06] , SubStr(AllTrim(_aDados[_nI][06]),1,50)  , _oFont05			)
 	
 	_nLinha += 075
 	
@@ -324,8 +306,8 @@ Next _nI
 
 //Finaliza folha
 _nulin  := _nLinha
-_nlinha := 5000
-_nLinha := RPON007VPG( _oPrint , _nLinha , .T., _adados, _ni-1,_nulin, .F.)
+_nLinha := 5000
+_nLinha := RPON007VPG( _oPrint , _nLinha , .T., _aDados, _nI-1,_nulin, .F.)
 
 
 //=============================================================================
@@ -334,34 +316,31 @@ _nLinha := RPON007VPG( _oPrint , _nLinha , .T., _adados, _ni-1,_nulin, .F.)
 _oPrint:Preview()
 
 //marca registros como impressos
-dbSelectArea("Z10")
+DBSelectArea("Z10")
 
-for _ni := 1 to len(_adados)
+For _nI := 1 to Len(_aDados)
 
-	Z10->(Dbgoto(_adados[_ni][09]))
+	Z10->(DBGoTo(_aDados[_nI][09]))
 	RecLock("Z10", .F.)
 	Z10->Z10_IMPRES := "S"
-	Msunlock()
+	MSUnLock()
 	
 Next
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: RPON007VPG
 Autor-----------: Josué Danich Prestes
 Data da Criacao-: 03/08/2014
-===============================================================================================================================
 Descrição-------: Validação do posicionamento da página atual para quebras
-===============================================================================================================================
 Parametros------: oPrint	- Objeto de Impressão do Relatório
 ----------------: nLinha	- Variável de controle do posicionamento
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
  */
-Static Function RPON007VPG( _oPrint , _nLinha , _lFinPag, _adados, _ni,_nulin, _lnovpag)
+Static Function RPON007VPG( _oPrint , _nLinha , _lFinPag, _aDados, _nI,_nulin, _lnovpag)
 
 Local _nLimPag		:= 3350
 
@@ -374,36 +353,23 @@ If _nLinha > _nLimPag
 	//====================================================================================================
 	// Verifica se encerra a página atual
 	//====================================================================================================
-	IF _lFinPag
-	
-		
+	If _lFinPag
 		//faz texto do final da página
-		
-		_nlinha := _nulin + 90
-		
-	
+		_nLinha := _nulin + 90
 		_oPrint:Say( _nLinha, _ncolini, "Esclarecemos, ainda que a repetição de procedimentos como este poderá ser considerado como" , _oFont03			) 
 		_nLinha += 75
 
 		//Muda frase se é advertência ou notificação
 		_ctipo := ""
-		If _adados[_ni][5] == 'A'
-
+		If _aDados[_nI][5] == 'A'
 			_ctipo := "ato faltoso, passível de nova advertência e suspensão."
-
-		Elseif _adados[_ni][5] == 'O'
-
+		ElseIf _aDados[_nI][5] == 'O'
 			_ctipo := "ato faltoso, passível de nova ocorrência e notificação."
-
-		Elseif _adados[_ni][5] == 'S'
-
+		ElseIf _aDados[_nI][5] == 'S'
 			_ctipo := "ato faltoso, passível de demissão por justa causa."
-
 		Else
-
 			_ctipo := "ato faltoso, passível de advertência e suspensão."
-	
-		Endif
+		EndIf
 		
 		_oPrint:Say( _nLinha, _ncolini, _ctipo  , _oFont03			) 
 		_nLinha += 75
@@ -418,15 +384,15 @@ If _nLinha > _nLimPag
 		_nLinha += 30       
 		
 		If _lnovpag
-			_oPrint:Say( _nLinha, _ncolini,_adados[_ni-1][4] )
+			_oPrint:Say( _nLinha, _ncolini,_aDados[_nI-1][4] )
 		Else
-			_oPrint:Say( _nLinha, _ncolini,_adados[_ni][4] )
-		Endif
+			_oPrint:Say( _nLinha, _ncolini,_aDados[_nI][4] )
+		EndIf
 
 		_nLinha += 300       
 		_oPrint:Line( _nLinha        , _ncolini               , _nLinha        , 1500              )
 		_nLinha += 30       
-		_oPrint:Say( _nLinha, _ncolini, ALLTRIM(SM0->M0_NOMECOM))
+		_oPrint:Say( _nLinha, _ncolini, AllTrim(SM0->M0_NOMECOM))
       
 		_nLinha += 150  
 		_oPrint:Say( _nLinha, _ncolini, "Testemunha: (caso o colaborador advertido negue-se a assinar o documento. Serve para" , _oFont04			) 
@@ -442,15 +408,10 @@ If _nLinha > _nLimPag
 		_oPrint:Say( _nLinha + 030, 1200, "Nome:")
 		_oPrint:Say( _nLinha + 105, 1200, "CPF:")     
 	
-		
 		_oPrint:EndPage()
+	EndIf
 
-	EndIF
-	
-	
-	if _lnovpag
-	
-	   
+	If _lnovpag
 		//====================================================================================================
 		// Inicializa a nova página e o posicionamento
 		//====================================================================================================
@@ -464,7 +425,7 @@ If _nLinha > _nLimPag
 			_oPrint:SayBitmap( 050 , 1020 , "LGRL01.BMP" , 410 , 170 )
 		EndIf
 		
-		If _adados[_ni][5] == 'A'
+		If _aDados[_nI][5] == 'A'
 		
 			_oPrint:Say( 290 , _ncolini + 970 , "Advertência   " 								, _oFont02 )
 			
@@ -476,16 +437,16 @@ If _nLinha > _nLimPag
 			_nLinha := 405
 			
 		
-    	   _oPrint:Say(  _nLinha , _ncolini, ALLTRIM(SM0->M0_CIDCOB) + ", " + STRZERO(DAY(DATE()),2) + " de " + ALLTRIM(MESEXTENSO(Date())) + " de " + STRZERO(YEAR(DDATABASE),4) + "." 	, _oFont03			)
+    	   _oPrint:Say(  _nLinha , _ncolini, AllTrim(SM0->M0_CIDCOB) + ", " + StrZero(DAY(DATE()),2) + " de " + AllTrim(MESEXTENSO(Date())) + " de " + StrZero(YEAR(DDATABASE),4) + "." 	, _oFont03			)
 			_nLinha += 150
-			_oPrint:Say(  _nLinha , _ncolini, "Ao Sr.(a): " + alltrim(_adados[_ni][4]) + ", Filial/Matrícula: " + _adados[_ni][1] + "/" + _adados[_ni][3] , _oFont03			)
+			_oPrint:Say(  _nLinha , _ncolini, "Ao Sr.(a): " + AllTrim(_aDados[_nI][4]) + ", Filial/Matrícula: " + _aDados[_nI][1] + "/" + _aDados[_nI][3] , _oFont03			)
 			_nLinha += 90
 			_oPrint:Say(  _nLinha , _ncolini, "Esta carta tem a finalidade de advertir-lhe, em razão da(s) Notificação(ões) recebida(s) referente a(s)", _oFont03			)
 			_nLinha += 90
 			_oPrint:Say(  _nLinha,  _ncolini, "seguinte(s) ocorrência(s) e irregularidade(s) abaixo discriminada(s):", _oFont03			)
 			_nLinha += 90
    	 
-		ElseIf _adados[_ni][5] == 'O' 
+		ElseIf _aDados[_nI][5] == 'O' 
 		
 			_oPrint:Say( 290 , _ncolini + 970 , "Ocorrência   " 								, _oFont02 )
 			
@@ -496,16 +457,16 @@ If _nLinha > _nLimPag
 			//====================================================================================================
 			_nLinha := 405
 		
-		    _oPrint:Say(  _nLinha , _ncolini, ALLTRIM(SM0->M0_CIDCOB) + ", " + STRZERO(DAY(DATE()),2) + " de " + ALLTRIM(MESEXTENSO(Date())) + " de " + STRZERO(YEAR(DDATABASE),4) + "." 	, _oFont03			)
+		    _oPrint:Say(  _nLinha , _ncolini, AllTrim(SM0->M0_CIDCOB) + ", " + StrZero(DAY(DATE()),2) + " de " + AllTrim(MESEXTENSO(Date())) + " de " + StrZero(YEAR(DDATABASE),4) + "." 	, _oFont03			)
 			_nLinha += 150
-			_oPrint:Say(  _nLinha , _ncolini, "Ao Sr.(a): " + alltrim(_adados[_ni][4]) + ", Filial/Matrícula: " + _adados[_ni][1] + "/" + _adados[_ni][3] , _oFont03			)
+			_oPrint:Say(  _nLinha , _ncolini, "Ao Sr.(a): " + AllTrim(_aDados[_nI][4]) + ", Filial/Matrícula: " + _aDados[_nI][1] + "/" + _aDados[_nI][3] , _oFont03			)
 			_nLinha += 75
 			_oPrint:Say(  _nLinha , _ncolini, "Esta carta tem a finalidade de notificar-lhe, em razão da(s) seguinte(s) ocorrência(s) e irregularidade(s) ", _oFont03			)
 			_nLinha += 75
 			_oPrint:Say(  _nLinha,  _ncolini, "abaixo discriminada(s):", _oFont03			)
 			_nLinha += 90
     
-		ElseIf _adados[_ni][5] == 'S' 
+		ElseIf _aDados[_nI][5] == 'S' 
 		
 			_oPrint:Say( 290 , _ncolini + 970 , "Suspenção   " 								, _oFont02 )
 			
@@ -516,9 +477,9 @@ If _nLinha > _nLimPag
 			//====================================================================================================
 			_nLinha := 405
 		
-		    _oPrint:Say(  _nLinha , _ncolini, ALLTRIM(SM0->M0_CIDCOB) + ", " + STRZERO(DAY(DATE()),2) + " de " + ALLTRIM(MESEXTENSO(Date())) + " de " + STRZERO(YEAR(DDATABASE),4) + "." 	, _oFont03			)
+		    _oPrint:Say(  _nLinha , _ncolini, AllTrim(SM0->M0_CIDCOB) + ", " + StrZero(DAY(DATE()),2) + " de " + AllTrim(MESEXTENSO(Date())) + " de " + StrZero(YEAR(DDATABASE),4) + "." 	, _oFont03			)
 			_nLinha += 150
-			_oPrint:Say(  _nLinha , _ncolini, "Ao Sr.(a): " + alltrim(_adados[_ni][4]) + ", Filial/Matrícula: " + _adados[_ni][1] + "/" + _adados[_ni][3] , _oFont03			)
+			_oPrint:Say(  _nLinha , _ncolini, "Ao Sr.(a): " + AllTrim(_aDados[_nI][4]) + ", Filial/Matrícula: " + _aDados[_nI][1] + "/" + _aDados[_nI][3] , _oFont03			)
 			_nLinha += 75
 			_oPrint:Say(  _nLinha , _ncolini, "Esta carta tem a finalidade de suspenção, em razão da(s) seguinte(s) ocorrencia(s) e irregularidade(s)", _oFont03			)
 			_nLinha += 75
@@ -536,9 +497,9 @@ If _nLinha > _nLimPag
 			//====================================================================================================
 			_nLinha := 405
 		
-		    _oPrint:Say(  _nLinha , _ncolini, ALLTRIM(SM0->M0_CIDCOB) + ", " + STRZERO(DAY(DATE()),2) + " de " + ALLTRIM(MESEXTENSO(Date())) + " de " + STRZERO(YEAR(DDATABASE),4) + "." 	, _oFont03			)
+		    _oPrint:Say(  _nLinha , _ncolini, AllTrim(SM0->M0_CIDCOB) + ", " + StrZero(DAY(DATE()),2) + " de " + AllTrim(MESEXTENSO(Date())) + " de " + StrZero(YEAR(DDATABASE),4) + "." 	, _oFont03			)
 			_nLinha += 150
-			_oPrint:Say(  _nLinha , _ncolini, "Ao Sr.(a): " + alltrim(_adados[_ni][4]) + ", Filial/Matrícula: " + _adados[_ni][1] + "/" + _adados[_ni][3] , _oFont03			)
+			_oPrint:Say(  _nLinha , _ncolini, "Ao Sr.(a): " + AllTrim(_aDados[_nI][4]) + ", Filial/Matrícula: " + _aDados[_nI][1] + "/" + _aDados[_nI][3] , _oFont03			)
 			_nLinha += 75
 			_oPrint:Say(  _nLinha , _ncolini, "Esta carta tem a finalidade de notificar-lhe, em razão da(s) seguinte(s) ocorrência(s) e irregularidade(s) ", _oFont03			)
 			_nLinha += 75
@@ -548,8 +509,8 @@ If _nLinha > _nLimPag
 		
 		EndIf
 	
-	Endif
+	EndIf
 		
 EndIf
 
-Return _nlinha
+Return _nLinha

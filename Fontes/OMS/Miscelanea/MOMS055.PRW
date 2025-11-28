@@ -37,12 +37,12 @@ Begin Sequence
    //===========================================================================
    SET DATE FORMAT TO "DD/MM/YYYY"
 
-   //fwmsgrun( ,{|oproc| MOMS055I(oproc) } , "Processando..." , "Iniciando o processamento..." )
+   //FWMsgRun( ,{|oproc| MOMS055I(oproc) } , "Processando..." , "Iniciando o processamento..." )
    Processa( {|| MOMS055I() } , 'Aguarde!' , "Iniciando o processamento..." )
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -109,29 +109,29 @@ Begin Sequence
    Next _nI
 
    If !ParamBox( _aParAux , "Importação de clientes Broker" , @_aParRet )
-	  U_ItMsg( "Operação cancelada pelo usuário!" , "Atenção!",,1 )
+	  U_ITMsg( "Operação cancelada pelo usuário!" , "Atenção!",,1 )
 	  Break 
    EndIf
 
    IncProc("Abrindo arquivo...")
    
-   //Se for arquivo excel vai converte primeiro para csv para poder trabalhar
-   If ! Upper(Right(alltrim(MV_PAR01),3)) == "CSV" // .And. ! Upper(Right(AllTrim(MV_PAR01),4)) == "XLSX" 
-      U_ItMsg( "O Arquivo informado não está no formato CSV." , "Atenção!",,1 ) // U_ItMsg( "O Arquivo informado não é uma planilha em Excel." , "Atenção!",,1 )
+   //Se For arquivo excel vai converte primeiro para csv para poder trabalhar
+   If ! Upper(Right(AllTrim(MV_PAR01),3)) == "CSV" // .And. ! Upper(Right(AllTrim(MV_PAR01),4)) == "XLSX" 
+      U_ITMsg( "O Arquivo informado não está no formato CSV." , "Atenção!",,1 ) // U_ITMsg( "O Arquivo informado não é uma planilha em Excel." , "Atenção!",,1 )
 	  Break 
    EndIf 
  
    _aDados := U_MOMS055L(AllTrim(MV_PAR01))
 
    If Empty(_aDados) .Or. Len(_aDados)  == 0
-      U_ItMsg( "Não ha dados para importação dos clientes Broker." , "Atenção!",,1 ) 
+      U_ITMsg( "Não ha dados para importação dos clientes Broker." , "Atenção!",,1 ) 
 	  Break
    EndIf 
  
    ProcRegua(Len(_aDados))
       
-   SA1->(DbSetOrder(3))
-   ZA5->(DbSetOrder(1)) // ZA5_FILIAL+ZA5_CEP
+   SA1->(DBSetOrder(3))
+   ZA5->(DBSetOrder(1)) // ZA5_FILIAL+ZA5_CEP
 
    For _nI := 1 To Len(_aDados)
 
@@ -210,7 +210,7 @@ Begin Sequence
             //SA1->(RecLock("SA1", .F.))  
             //SA1->A1_VEND    := '002186'
             //SA1->A1_I_VEND2 := '002185'
-            //SA1->(MsUnLock())          
+            //SA1->(MSUnLock())          
  
        EndIf 
 
@@ -220,7 +220,7 @@ Begin Sequence
 
       If Empty(_cNomeReduz) // A1_NREDUZ
          //_cMsgPreVl += "Nome fantasia não preenchido. "
-         _cNomeReduz := (SUBSTR( _cRazao, 1, 20))
+         _cNomeReduz := (SubStr( _cRazao, 1, 20))
       EndIf 
 
       If Empty(_cEstado) // A1_EST
@@ -237,10 +237,10 @@ Begin Sequence
          If ! ZA5->(MsSeek(xFilial("ZA5")+U_ItKey(_cCep,"ZA5_CEP"))) 
             _cMsgPreVl += "O CEP informado não existe no cadastro de CEP Italac. "
          Else 
-            If !Empty(Alltrim(ZA5->ZA5_BAIRRO))
-               _cBairro:=Alltrim(ZA5->ZA5_BAIRRO)
+            If !Empty(AllTrim(ZA5->ZA5_BAIRRO))
+               _cBairro:=AllTrim(ZA5->ZA5_BAIRRO)
             End
-         Endif
+         EndIf
 
       EndIf
 
@@ -264,7 +264,7 @@ Begin Sequence
          _cMsgPreVl += "Seguimento Clientes não preenchido. "
       EndIf 
       
-      If Alltrim(_Simples) == "S"// A1_SIMPNAC
+      If AllTrim(_Simples) == "S"// A1_SIMPNAC
          _Simples := '1'
       Else 
          _Simples := '2'
@@ -274,7 +274,7 @@ Begin Sequence
          _cMsgPreVl += "Condição de pagamento não preenchida. "
       EndIf 
 
-      //Limite de Crédito importado Padrão R$ 100,00 
+      //Limite de Crédito importado PadRão R$ 100,00 
       _nLimiteCr := 100
       //If _nLimiteCr == 0
       //   _cMsgPreVl += "Limite de Crédito não informado. " 
@@ -305,7 +305,7 @@ Begin Sequence
       //=============================================
       // Monta o aDados
 	   //=============================================
-      Aadd(_aDadosCli,{_cCnpj,;       // CNPJ   		                        // 1
+      aAdd(_aDadosCli,{_cCnpj,;       // CNPJ   		                        // 1
                         _cRazao,;      // Razão Social                        // 2 
                         _cNomeReduz,;  // Nome Fantasia                       // 3  
                         _cEstado,;     // Estado                              // 4
@@ -379,53 +379,53 @@ Begin Sequence
             _cTipoPess := "F"
          EndIf 
 
-          Aadd(_aDadosSA1,{"A1_CGC"         , U_ITKEY(_aDadosCli[_nI, 1],"A1_CGC")     , Nil}) // CNPJ/CGC 	
-		    Aadd(_aDadosSA1,{"A1_NOME"        , U_AOMS014S(U_ITKEY(_aDadosCli[_nI, 2],"A1_NOME"))    , Nil}) // Razão Social
-          Aadd(_aDadosSA1,{"A1_NREDUZ"      , U_AOMS014S(U_ITKEY(_aDadosCli[_nI, 3],"A1_NREDUZ"))  , Nil}) // Nome Fantasia 	
-          Aadd(_aDadosSA1,{"A1_EST"         , U_AOMS014S(U_ITKEY(_aDadosCli[_nI, 4],"A1_EST"))     , Nil}) // Estado 	
-          Aadd(_aDadosSA1,{"A1_COD_MUN"     , U_ITKEY(_aDadosCli[_nI, 5],"A1_COD_MUN") , Nil}) // Código do Município 	
-          Aadd(_aDadosSA1,{"A1_CEP"         , U_ITKEY(_aDadosCli[_nI, 6],"A1_CEP")     , Nil}) // CEP 	
-          Aadd(_aDadosSA1,{"A1_END"         , U_AOMS014S(U_ITKEY(_aDadosCli[_nI, 7],"A1_END"))     , Nil}) // Endereço 	
-          Aadd(_aDadosSA1,{"A1_COMPLEM"     , U_AOMS014S(U_ITKEY(_aDadosCli[_nI, 8],"A1_COMPLEM")) , Nil}) // Complemento de Endereço 	
-          Aadd(_aDadosSA1,{"A1_BAIRRO"      , U_AOMS014S(U_ITKEY(_aDadosCli[_nI, 9],"A1_BAIRRO"))  , Nil}) // Bairro 	
-          Aadd(_aDadosSA1,{"A1_DDD"         , U_ITKEY(_aDadosCli[_nI, 10],"A1_DDD")    , Nil}) // DDD 	
-          Aadd(_aDadosSA1,{"A1_TEL"         , U_ITKEY(_aDadosCli[_nI, 11],"A1_TEL")    , Nil}) // Telefone 	
-          Aadd(_aDadosSA1,{"A1_INSCR"       , U_ITKEY(_aDadosCli[_nI, 12],"A1_INSCR")  , Nil}) // Inscrição Estadual 	
-          Aadd(_aDadosSA1,{"A1_EMAIL"       , U_ITKEY(_aDadosCli[_nI, 13],"A1_EMAIL")  , Nil}) // E-mail 	
-          Aadd(_aDadosSA1,{"A1_COND"        , U_ITKEY(_aDadosCli[_nI, 14],"A1_COND")   , Nil}) // Condição de Pagamento 	
-          Aadd(_aDadosSA1,{"A1_LC"          , _aDadosCli[_nI, 15]                      , Nil}) // Limite de Crédito. 	
-          Aadd(_aDadosSA1,{"A1_I_EMAI"      ,(Alltrim(_aDadosCli[_nI, 16]),"A1_I_EMAI") , Nil}) // E-mail Contato 	
-          Aadd(_aDadosSA1,{"A1_CONTATO"     , U_AOMS014S(U_ITKEY(_aDadosCli[_nI, 17],"A1_CONTATO")), Nil}) // Contato 	
-          Aadd(_aDadosSA1,{"A1_I_CARGC"     , U_AOMS014S(U_ITKEY(_aDadosCli[_nI, 18],"A1_I_CARGC")), Nil}) // Cargo Contato 	
-          Aadd(_aDadosSA1,{"A1_I_DTCAD"	  , dDatabase								         , Nil}) // 
-          Aadd(_aDadosSA1,{"A1_NATUREZ"     , "111001"  							            , Nil}) 
-          Aadd(_aDadosSA1,{"A1_CODPAIS"	  , "01058"				  				            , Nil})
-          Aadd(_aDadosSA1,{"A1_MSBLQL"	     , "2"									            , Nil})
-          Aadd(_aDadosSA1,{"A1_PAIS"	     , "105"								            , Nil})
-          Aadd(_aDadosSA1,{"A1_PESSOA"	     , _cTipoPess                   				, Nil})	
-          Aadd(_aDadosSA1,{"A1_RISCO"	     , "C"												   , Nil})	
-          Aadd(_aDadosSA1,{"A1_I_IBOLE"	  , "S"								               , Nil}) 
-          Aadd(_aDadosSA1,{"A1_TIPO"	     , "R"								               , Nil}) 
-          Aadd(_aDadosSA1,{"A1_GRPVEN"	     , "999999"						               , Nil})
-          Aadd(_aDadosSA1,{"A1_VEND"	     , "002191"						               , Nil})          
-          Aadd(_aDadosSA1,{"A1_I_VEND2"	  , "002190"						               , Nil})   
-          Aadd(_aDadosSA1,{"A1_CARGO3"	     , "MOMS055"						               , Nil})   
-          Aadd(_aDadosSA1,{"A1_ESTC"        , U_AOMS014S(U_ITKEY(_aDadosCli[_nI, 4],"A1_ESTC"))    , Nil}) // Estado de Cobrança 	
-          Aadd(_aDadosSA1,{"A1_I_CMUNC"     , U_ITKEY(_aDadosCli[_nI, 5],"A1_I_CMUNC") , Nil}) // Código do Município 	
-          Aadd(_aDadosSA1,{"A1_CEPC"        , U_ITKEY(_aDadosCli[_nI, 6],"A1_CEP")     , Nil}) // CEP de Cobrança 	
-          Aadd(_aDadosSA1,{"A1_BAIRROC"     , U_AOMS014S(U_ITKEY(_aDadosCli[_nI, 9],"A1_BAIRRO"))  , Nil}) // Bairro de Cobrança 		
-          Aadd(_aDadosSA1,{"A1_I_GRCLI"     , U_ITKEY(_aDadosCli[_nI, 22],"A1_I_GRCLI"), Nil})  // Grupo de Clientes/Rede 
-          Aadd(_aDadosSA1,{"A1_SIMPNAC"     , U_ITKEY(_aDadosCli[_nI, 23],"A1_SIMPNAC"), Nil})  // Simples Nacional
+          aAdd(_aDadosSA1,{"A1_CGC"         , U_ITKEY(_aDadosCli[_nI, 1],"A1_CGC")     , Nil}) // CNPJ/CGC 	
+		    aAdd(_aDadosSA1,{"A1_NOME"        , U_AOMS014S(U_ITKEY(_aDadosCli[_nI, 2],"A1_NOME"))    , Nil}) // Razão Social
+          aAdd(_aDadosSA1,{"A1_NREDUZ"      , U_AOMS014S(U_ITKEY(_aDadosCli[_nI, 3],"A1_NREDUZ"))  , Nil}) // Nome Fantasia 	
+          aAdd(_aDadosSA1,{"A1_EST"         , U_AOMS014S(U_ITKEY(_aDadosCli[_nI, 4],"A1_EST"))     , Nil}) // Estado 	
+          aAdd(_aDadosSA1,{"A1_COD_MUN"     , U_ITKEY(_aDadosCli[_nI, 5],"A1_COD_MUN") , Nil}) // Código do Município 	
+          aAdd(_aDadosSA1,{"A1_CEP"         , U_ITKEY(_aDadosCli[_nI, 6],"A1_CEP")     , Nil}) // CEP 	
+          aAdd(_aDadosSA1,{"A1_END"         , U_AOMS014S(U_ITKEY(_aDadosCli[_nI, 7],"A1_END"))     , Nil}) // Endereço 	
+          aAdd(_aDadosSA1,{"A1_COMPLEM"     , U_AOMS014S(U_ITKEY(_aDadosCli[_nI, 8],"A1_COMPLEM")) , Nil}) // Complemento de Endereço 	
+          aAdd(_aDadosSA1,{"A1_BAIRRO"      , U_AOMS014S(U_ITKEY(_aDadosCli[_nI, 9],"A1_BAIRRO"))  , Nil}) // Bairro 	
+          aAdd(_aDadosSA1,{"A1_DDD"         , U_ITKEY(_aDadosCli[_nI, 10],"A1_DDD")    , Nil}) // DDD 	
+          aAdd(_aDadosSA1,{"A1_TEL"         , U_ITKEY(_aDadosCli[_nI, 11],"A1_TEL")    , Nil}) // Telefone 	
+          aAdd(_aDadosSA1,{"A1_INSCR"       , U_ITKEY(_aDadosCli[_nI, 12],"A1_INSCR")  , Nil}) // Inscrição Estadual 	
+          aAdd(_aDadosSA1,{"A1_EMAIL"       , U_ITKEY(_aDadosCli[_nI, 13],"A1_EMAIL")  , Nil}) // E-mail 	
+          aAdd(_aDadosSA1,{"A1_COND"        , U_ITKEY(_aDadosCli[_nI, 14],"A1_COND")   , Nil}) // Condição de Pagamento 	
+          aAdd(_aDadosSA1,{"A1_LC"          , _aDadosCli[_nI, 15]                      , Nil}) // Limite de Crédito. 	
+          aAdd(_aDadosSA1,{"A1_I_EMAI"      ,(AllTrim(_aDadosCli[_nI, 16]),"A1_I_EMAI") , Nil}) // E-mail Contato 	
+          aAdd(_aDadosSA1,{"A1_CONTATO"     , U_AOMS014S(U_ITKEY(_aDadosCli[_nI, 17],"A1_CONTATO")), Nil}) // Contato 	
+          aAdd(_aDadosSA1,{"A1_I_CARGC"     , U_AOMS014S(U_ITKEY(_aDadosCli[_nI, 18],"A1_I_CARGC")), Nil}) // Cargo Contato 	
+          aAdd(_aDadosSA1,{"A1_I_DTCAD"	  , dDatabase								         , Nil}) // 
+          aAdd(_aDadosSA1,{"A1_NATUREZ"     , "111001"  							            , Nil}) 
+          aAdd(_aDadosSA1,{"A1_CODPAIS"	  , "01058"				  				            , Nil})
+          aAdd(_aDadosSA1,{"A1_MSBLQL"	     , "2"									            , Nil})
+          aAdd(_aDadosSA1,{"A1_PAIS"	     , "105"								            , Nil})
+          aAdd(_aDadosSA1,{"A1_PESSOA"	     , _cTipoPess                   				, Nil})	
+          aAdd(_aDadosSA1,{"A1_RISCO"	     , "C"												   , Nil})	
+          aAdd(_aDadosSA1,{"A1_I_IBOLE"	  , "S"								               , Nil}) 
+          aAdd(_aDadosSA1,{"A1_TIPO"	     , "R"								               , Nil}) 
+          aAdd(_aDadosSA1,{"A1_GRPVEN"	     , "999999"						               , Nil})
+          aAdd(_aDadosSA1,{"A1_VEND"	     , "002191"						               , Nil})          
+          aAdd(_aDadosSA1,{"A1_I_VEND2"	  , "002190"						               , Nil})   
+          aAdd(_aDadosSA1,{"A1_CARGO3"	     , "MOMS055"						               , Nil})   
+          aAdd(_aDadosSA1,{"A1_ESTC"        , U_AOMS014S(U_ITKEY(_aDadosCli[_nI, 4],"A1_ESTC"))    , Nil}) // Estado de Cobrança 	
+          aAdd(_aDadosSA1,{"A1_I_CMUNC"     , U_ITKEY(_aDadosCli[_nI, 5],"A1_I_CMUNC") , Nil}) // Código do Município 	
+          aAdd(_aDadosSA1,{"A1_CEPC"        , U_ITKEY(_aDadosCli[_nI, 6],"A1_CEP")     , Nil}) // CEP de Cobrança 	
+          aAdd(_aDadosSA1,{"A1_BAIRROC"     , U_AOMS014S(U_ITKEY(_aDadosCli[_nI, 9],"A1_BAIRRO"))  , Nil}) // Bairro de Cobrança 		
+          aAdd(_aDadosSA1,{"A1_I_GRCLI"     , U_ITKEY(_aDadosCli[_nI, 22],"A1_I_GRCLI"), Nil})  // Grupo de Clientes/Rede 
+          aAdd(_aDadosSA1,{"A1_SIMPNAC"     , U_ITKEY(_aDadosCli[_nI, 23],"A1_SIMPNAC"), Nil})  // Simples Nacional
  
-          If Alltrim(_aDadosCli[_nI, 23]) == "1" .And. Alltrim(_aDadosCli[_nI, 4]) == "PR"
-               Aadd(_aDadosSA1,{"A1_GRPTRIB"     , "023", Nil})  // Simples Nacional
-          ENDIF
+          If AllTrim(_aDadosCli[_nI, 23]) == "1" .And. AllTrim(_aDadosCli[_nI, 4]) == "PR"
+               aAdd(_aDadosSA1,{"A1_GRPTRIB"     , "023", Nil})  // Simples Nacional
+          EndIf
   
           _cCodigo := U_MOMS055D(U_ITKEY(_aDadosCli[_nI, 1],"A1_CGC"))
           _cLoja  :=  U_MOMS055E(U_ITKEY(_aDadosCli[_nI, 1],"A1_CGC"))
    
-          Aadd(_aDadosSA1,{"A1_COD"	     , _cCodigo					               , Nil}) 
-          Aadd(_aDadosSA1,{"A1_LOJA"	  , _cLoja					               , Nil})           
+          aAdd(_aDadosSA1,{"A1_COD"	     , _cCodigo					               , Nil}) 
+          aAdd(_aDadosSA1,{"A1_LOJA"	  , _cLoja					               , Nil})           
 
           lMsErroAuto := .F. 
  
@@ -440,7 +440,7 @@ Begin Sequence
              _cDirErros := _cDirErros + "\"
           EndIf
           
-		  _cNomeArq := "Cliente_" + Alltrim(_aDadosCli[_nI,1 ]) + ".TXT"
+		  _cNomeArq := "Cliente_" + AllTrim(_aDadosCli[_nI,1 ]) + ".TXT"
 
 		  If lMsErroAuto
 		     //_cErro := (MostraErro(_cDirErros + _cNomeArq))
@@ -452,7 +452,7 @@ Begin Sequence
 			  // Grava as REFERENCIAS COMERCIAIS E BANCÁRIAS.
 			  //=======================================================================
 			  //                 Contato                          Referencia Comercial
-			  If !Empty(ALLTRIM(_aDadosCli[_nI, 17])) .Or.!EMPTY(ALLTRIM(_aDadosCli[_nI, 19]))
+			  If !Empty(AllTrim(_aDadosCli[_nI, 17])) .Or.!Empty(AllTrim(_aDadosCli[_nI, 19]))
 		
 		        DBSelectArea("SAO")
 		        SAO->( RecLock( "SAO" , .T. ) )
@@ -464,8 +464,8 @@ Begin Sequence
 			     SAO->AO_DATA	:= dDataBase
 			     SAO->AO_TELEFON	:= _aDadosCli[_nI,20] // SZX->ZX_RC1TEL // Telefone Referência Comercial
 			     SAO->AO_CONTATO	:= _aDadosCli[_nI,21] // SZX->ZX_RC1CONT // Nome Contato Referencia Comercial
-		        SAO->( MsUnlock() )
-			  EndIF
+		        SAO->( MSUnLock() )
+			  EndIf
 
 		  EndIf  
 	  Next   
@@ -476,7 +476,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -503,7 +503,7 @@ Begin Sequence
    // Se houver erro de abertura abandona processamento
    If _nStatusArq = -1  
       Break
-   Endif
+   EndIf
    
    // Posiciona na primeria linha
    FT_FGoTop()
@@ -516,7 +516,7 @@ Begin Sequence
 	      Exit 
 	   EndIf 
       
-	   Aadd(_aLinhas, _cLine)
+	   aAdd(_aLinhas, _cLine)
    
       FT_FSKIP()
    End
@@ -557,7 +557,7 @@ Local _nPosPonto	:= 0
 
 Private _aEmail		:= {}
 
-_aEmail := StrTokarr(_cEmail,";")  
+_aEmail := StrTokArr(_cEmail,";")  
 
 //================================================================================
 // Caso o e-mail esteja em branco não valida e retorna .T. - Chamado 7767
@@ -667,14 +667,14 @@ For _nI := 1 To Len( _aEmail )
 	
 Next _nI
 
-If "ITALAC@ITALAC.COM.BR" $ _cEmail .and. _lRet
+If "ITALAC@ITALAC.COM.BR" $ _cEmail .And. _lRet
 
-	_lret := .F.
+	_lRet := .F.
 	
-Endif	
+EndIf	
 
 //If !_lRet .And. !IsInCallStack('MSEXECAUTO')
-//	u_itmsg( 'O e-Mail informado não é válido para o cadastro!' , 'Atenção!',,1 )
+//	U_ITMsg( 'O e-Mail informado não é válido para o cadastro!' , 'Atenção!',,1 )
 //EndIf
 
 Return( _lRet )
@@ -697,10 +697,10 @@ Retorno-----------: _cRetorno	- Retorna o novo código do Cliente para a inclusão
 
 User Function MOMS055D(_pcCGC)
 
-	Local _aArea    := GetArea()
+	Local _aArea    := FWGetArea()
 	Local _cAlias	:= GetNextAlias()
 	Local _cQuery   := ""
-	local _cRetorno := ""
+	Local _cRetorno := ""
 	Local _cCodigo  := ""
 	Local _pcTipo	 := "J"
 
@@ -718,20 +718,20 @@ User Function MOMS055D(_pcCGC)
 //===============================================================================================
 // Verifica pelo CPF ou CNPJ de acordo com o tipo de cadastro
 //===============================================================================================
-	IF Alltrim(_pcTipo) == "J"
-		_cQuery += " AND	SUBSTR( SA1.A1_CGC , 1 , 8 ) = '" + SubStr( _pcCGC , 1 , 8 ) + "' "
+	If AllTrim(_pcTipo) == "J"
+		_cQuery += " AND	SubStr( SA1.A1_CGC , 1 , 8 ) = '" + SubStr( _pcCGC , 1 , 8 ) + "' "
 		_cQuery += " AND	SA1.A1_PESSOA = 'J' "
 	Else
-		_cQuery += " AND	SA1.A1_CGC  = '" + Alltrim( _pcCGC ) + "' "
-	EndIF
+		_cQuery += " AND	SA1.A1_CGC  = '" + AllTrim( _pcCGC ) + "' "
+	EndIf
 
 	DBUseArea( .T. , "TOPCONN" , TCGENQRY(,, _cQuery ) , _cAlias , .F. , .F. )
 
 	DBSelectArea(_cAlias)
-	(_cAlias)->( DBGotop() )
-	IF (_cAlias)->( !Eof() )
+	(_cAlias)->( DBGoTop() )
+	If (_cAlias)->( !Eof() )
 		_cCodigo := (_cAlias)->CODIGO
-	EndIF
+	EndIf
 
 	(_cAlias)->( DBCloseArea() )
 
@@ -743,7 +743,7 @@ User Function MOMS055D(_pcCGC)
 		DBSelectArea("SA1")
 		SA1->( DBSetOrder(1) )
 		SA1->( DBGoBottom( ) )
-		IF SA1->( !Eof() )
+		If SA1->( !Eof() )
 
 			_cCodigo := Soma1( SA1->A1_COD , TamSX3("A1_COD")[01] )
 
@@ -758,13 +758,13 @@ User Function MOMS055D(_pcCGC)
 
 			_cCodigo := StrZero( 1 , TamSX3("A1_COD")[01] )
 
-		EndIF
+		EndIf
 
 	EndIf
 
 	_cRetorno := _cCodigo
 
-	RestArea( _aArea )
+	FWRestArea( _aArea )
 
 Return( _cRetorno )
 
@@ -786,11 +786,11 @@ Retorno-----------: _cRetorno	- Retorna o novo código do Cliente para a inclusão
 
 User Function MOMS055E(_cCNPJ)
 
-	Local _aArea		:= GetArea()
+	Local _aArea		:= FWGetArea()
 	Local _cCod			:= ""
 	Local _cRetorno		:= ""
 
-	If Len( Alltrim( _cCNPJ ) ) > 11
+	If Len( AllTrim( _cCNPJ ) ) > 11
 
 		_cRetorno := SubStr( _cCNPJ , 9 , 4 )
 
@@ -799,11 +799,11 @@ User Function MOMS055E(_cCNPJ)
 		//====================================================================================================
 		_cCod := Posicione( "SA1" , 3 , xFilial("SA1") + _cCNPJ , "A1_COD" )
 
-		IF !Empty(_cCod)
+		If !Empty(_cCod)
 
 			_cRetorno := MOMS055F( _cCod , 1 )
 
-		EndIF
+		EndIf
 
 	Else
 
@@ -821,7 +821,7 @@ User Function MOMS055E(_cCNPJ)
 
 	EndIf
  
-	RestArea( _aArea )
+	FWRestArea( _aArea )
 
 Return( _cRetorno )
 
@@ -852,22 +852,22 @@ Static Function MOMS055F( _cAux , _nOpc )
 	cQuery += " WHERE "
 	cQuery += " 	SA1.D_E_L_E_T_	= ' ' "
 	If _nOpc == 1
-		cQuery += " AND	SA1.A1_COD      = '" + Alltrim( _cAux ) +"' "
+		cQuery += " AND	SA1.A1_COD      = '" + AllTrim( _cAux ) +"' "
 	Else
-		cQuery += " AND	SA1.A1_CGC      = '" + Alltrim( _cAux ) +"' "
-	EndIF
+		cQuery += " AND	SA1.A1_CGC      = '" + AllTrim( _cAux ) +"' "
+	EndIf
 
-	IF Select(cAlias) > 0
+	If Select(cAlias) > 0
 		(cAlias)->( DBCloseArea() )
-	EndIF
+	EndIf
 
 	DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, cQuery ) , cAlias , .T. , .F. )
 
 	DBSelectArea(cAlias)
-	(cAlias)->( DBGotop() )
-	IF (cAlias)->( !Eof() )
+	(cAlias)->( DBGoTop() )
+	If (cAlias)->( !Eof() )
 		_cRetorno := Soma1( (cAlias)->LOJA )
-	EndIF
+	EndIf
 
 	(cAlias)->( DBCloseArea() )
 

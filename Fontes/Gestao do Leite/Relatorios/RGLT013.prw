@@ -2,37 +2,25 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor            |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer     | 14/03/2017 | Incluída a coluna de vencimento. Chamado 19233
--------------------------------------------------------------------------------------------------------------------------------
-Lucas B. Ferreira | 13/06/2019 | Revisão de fontes. Help 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas B. Ferreira | 27/09/2019 | Revisão de fontes. Chamado 28346
+Alex Wallauer |14/03/2017| Chamado 19233. Incluída a coluna de vencimento.
+Lucas Borges  |13/06/2019| Chamado 28346. Revisão de fontes.
+Lucas Borges  |27/09/2019| Chamado 28346. Revisão de fontes.
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.Ch"
-#Include "Fileio.Ch"
 
-//====================================================================================================
-// Definicoes Gerais da Rotina.
-//====================================================================================================
+#Include "TOTVS.ch"
+
 #Define TITULO	"Recepção do Leite de Terceiros - Fatura de Frete"
-#Define CRLF	Chr(13)+Chr(10)
 
 /*
 ===============================================================================================================================
 Programa--------: RGLT013
 Autor-----------: Alexandre Villar
 Data da Criacao-: 13/07/2015
-===============================================================================================================================
 Descrição-------: Relatório dos registros de recebimentos de leite de terceiros - Detalhamento por Frete
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -42,8 +30,8 @@ Local _aCabec1		:= { 'Transportadora', 'Capac.' , 'Número' , 'Valor do' , 'Pedág
 Local _aCabec2		:= { ''              , ''       , '    CTE', '  Frete'  , ''        , ''     , 'Prest.' , 'Desconto' , ''         , ''      , 'Recep.'  , ''           , ''        , 'Transp.' , 'Frete' ,"Vencto"}
 
 Local _aColItnST    := { 0050            , 0600     , 0690      , 1000       , 1200      , 1400   , 1600     , 1800       , 1935       , 2020    , 2200      , 2400         , 2850      , 3120      , 3300 }
-Local _aColCab		:= ARRAY(LEN(_aCabec1))
-Local _aColItn	    := ARRAY(LEN(_aCabec2))
+Local _aColCab		:= ARRAY(Len(_aCabec1))
+Local _aColItn	    := ARRAY(Len(_aCabec2))
 Local _aDados		:= {}
 Local _cPerg		:= "RGLT013"
 Local _nOpca		:= 0
@@ -101,28 +89,25 @@ If _nOpca == 1
 
 	Processa( {|| _aDados := RGLT013SEL() } , "Aguarde!" , "Selecionando registros das recepções..." )
 	
-	IF Empty(_aDados)
+	If Empty(_aDados)
 		MessageBox( "Não foram encontrados registros para exibir! Verifique os parâmetros e tente novamente." , "RGLT01301" , 48 )
 	Else
 		Processa( {|| RGLT013PRT( _aCabec1 , _aCabec2 , _aColCab , _aColItn , _aDados , _aColItnST) } , 'Aguarde!' , 'Imprimindo registros...' )
-	EndIF
+	EndIf
 
 Else
 	MsgInfo( 'Operação cancelada pelo usuário!' , 'RGLT01302' )
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: RGLT013SEL
 Autor-----------: Alexandre Villar
 Data da Criacao-: 13/07/2015
-===============================================================================================================================
 Descrição-------: Função para consulta e preparação dos dados do relatório
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: _aRet - Dados do relatório
 ===============================================================================================================================
 */
@@ -135,10 +120,10 @@ Local _nTotReg		:= 0
 Local _nRegAtu		:= 0
 
 If MV_PAR03 < 4
-	_cFiltro += IIf( !Empty( MV_PAR03 ) , " AND ZLX.ZLX_TIPOLT = '"+ IIF( MV_PAR03 == 1 , 'F' , IIF( MV_PAR03 == 2 , 'T' , 'P' ) ) +"' ","")
+	_cFiltro += IIf( !Empty( MV_PAR03 ) , " AND ZLX.ZLX_TIPOLT = '"+ IIf( MV_PAR03 == 1 , 'F' , IIf( MV_PAR03 == 2 , 'T' , 'P' ) ) +"' ","")
 EndIf
 
-_cFiltro += IIf( !Empty( MV_PAR04 ) , " AND ZZX.ZZX_CODPRD IN "+ FormatIn( ALLTRIM(MV_PAR04) , ';' ),"")
+_cFiltro += IIf( !Empty( MV_PAR04 ) , " AND ZZX.ZZX_CODPRD IN "+ FormatIn( AllTrim(MV_PAR04) , ';' ),"")
 _cFiltro += IIf( !Empty( MV_PAR13 ) , " AND ZLX.ZLX_PLACA  IN "+ FormatIn( MV_PAR13 , ';' ),"")
 _cFiltro += IIf( !Empty( MV_PAR14 ) , " AND ZZV.ZZV_FXCAPA IN "+ FormatIn( MV_PAR14 , ';' ),"")
 _cFiltro += IIf( !Empty( MV_PAR19 ) , " AND ZLX.ZLX_STATUS IN "+ FormatIn( MV_PAR19 , ';' ),"")
@@ -146,8 +131,8 @@ _cFiltro += "%"
 
 BeginSql alias _cAlias
  SELECT ZZX.ZZX_CODPRD, A2T.A2_NREDUZ TRANSP, ZZV.ZZV_CAPACI, ZLX.ZLX_CTE, ZLX.ZLX_CTESER, ZLX.ZLX_VLRFRT, ZLX.ZLX_PEDAGI,
-        ZLX.ZLX_ICMSFR, ZLX.ZLX_TVLFRT, ZLX.ZLX_ADCFRT, SUBSTR(ZLX.ZLX_DTENTR, 7, 2) DIA, ZLX.ZLX_PLACA, ZLX.ZLX_CODIGO,
-        A2F.A2_NREDUZ FORNECE, ZLX.ZLX_NRONF, ZLX.ZLX_VOLREC, ROUND((ZLX.ZLX_VLRFRT + ZLX.ZLX_PEDAGI) / ZLX.ZLX_VOLREC, 4) CUSTO_FRETE,
+        ZLX.ZLX_ICMSFR, ZLX.ZLX_TVLFRT, ZLX.ZLX_ADCFRT, SubStr(ZLX.ZLX_DTENTR, 7, 2) DIA, ZLX.ZLX_PLACA, ZLX.ZLX_CODIGO,
+        A2F.A2_NREDUZ FORNECE, ZLX.ZLX_NRONF, ZLX.ZLX_VOLREC, Round((ZLX.ZLX_VLRFRT + ZLX.ZLX_PEDAGI) / ZLX.ZLX_VOLREC, 4) CUSTO_FRETE,
         NVL((SELECT MAX(SE2.E2_VENCREA)
               FROM %Table:SE2% SE2
              WHERE SE2.D_E_L_E_T_ = ' '
@@ -215,7 +200,7 @@ While (_cAlias)->( !Eof() )
 					AllTrim(	(_cAlias)->ZLX_NRONF )																	,; //13 - Volume NF
 			AllTrim( Transform(	(_cAlias)->ZLX_VOLREC									, '@E 999,999,999,999'      ) )	,; //14 - Volume Recebido
 			AllTrim( Transform(	(_cAlias)->CUSTO_FRETE									, '@E 999,999,999,999.9999' ) )	,; //15 - Procedencia
-			          IF(EMPTY( (_cAlias)->VENCTO ),"        ",DTOC(STOD((_cAlias)->VENCTO)))     	  					}) //16 - Data de VEnciemnto 
+			          If(Empty( (_cAlias)->VENCTO ),"        ",DToC(SToD((_cAlias)->VENCTO)))     	  					}) //16 - Data de VEnciemnto 
 
 	(_cAlias)->( DBSkip() )
 EndDo
@@ -229,15 +214,12 @@ Return( _aRet )
 Programa--------: RGLT013PRT
 Autor-----------: Alexandre Villar
 Data da Criacao-: 13/07/2015
-===============================================================================================================================
 Descrição-------: Função para controlar e imprimir os dados do relatório
-===============================================================================================================================
 Parametros------: _aCabec1 - Primeira linha dos dados de cabeçalho
 ----------------: _aCabec2 - Segunda linha dos dados de cabeçalho
 ----------------: _aColCab - Posicionamento dos dados de cabeçalho
 ----------------: _aColItn - Ajuste do posicionamento dos dados
 ----------------: _aDados  - Dados do relatório
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -294,15 +276,15 @@ _oPrint:SetPaperSize(9)
 //====================================================================================================
 ProcRegua(Len( _aDados ))
 _nRegAtu:=0
-_cTot:=ALLTRIM(Str( Len( _aDados ) ))
+_cTot:=AllTrim(Str( Len( _aDados ) ))
 For _nI := 1 To Len( _aDados )
 	
 	//====================================================================================================
 	// Inicializa a primeira página do relatório
 	//====================================================================================================
 	_nRegAtu++
-	IncProc( "Lendo registros: ["+ ALLTRIM(Str( _nRegAtu )) +"] de ["+_cTot+"]" )
-	IF _nI == 1
+	IncProc( "Lendo registros: ["+ AllTrim(Str( _nRegAtu )) +"] de ["+_cTot+"]" )
+	If _nI == 1
 
 		_nLinha		:= 50000
 		
@@ -330,7 +312,7 @@ For _nI := 1 To Len( _aDados )
 		If _nTotCol > 0
 		
 			For _nX := 1 To _nTotCol
-				_oPrint:Say( IIF( Empty( _aCabec2[_nX] ) , _nLinha + 07 , _nLinha ) , _aColCab[_nX] , _aCabec1[_nX] , _oFont02 )
+				_oPrint:Say( IIf( Empty( _aCabec2[_nX] ) , _nLinha + 07 , _nLinha ) , _aColCab[_nX] , _aCabec1[_nX] , _oFont02 )
 			Next _nX
 			
 			_nLinha += 030
@@ -353,7 +335,7 @@ For _nI := 1 To Len( _aDados )
 	//=============================================================================
 	//| Encerra Lote do Setor atual                                               |
 	//=============================================================================	
-	ElseIF _nLinha > 2100
+	ElseIf _nLinha > 2100
 		
 		_nLinha := 50000
 		//=============================================================================
@@ -366,7 +348,7 @@ For _nI := 1 To Len( _aDados )
 			_nLinha += 035
 			_oPrint:Line( _nLinha , 0 , _nLinha , 5000 ) ; _nLinha += 10
 			
-			_oPrint:Say( _nLinha , _aColCab[01] , 'Sub-Total ('+ cValToChar(_nConTot) + IIF( _nConTot == 1 , ' viagem' , ' viagens' ) +')'	, _oFont03 )
+			_oPrint:Say( _nLinha , _aColCab[01] , 'Sub-Total ('+ cValToChar(_nConTot) + IIf( _nConTot == 1 , ' viagem' , ' viagens' ) +')'	, _oFont03 )
 			_oPrint:Say( _nLinha , _aColItn[04] , Transform( _nTotFrt				, '@E 999,999,999.99' )									, _oFont03 ,,,, 1 )
 			_oPrint:Say( _nLinha , _aColItn[05] , Transform( _nTotPed				, '@E 999,999,999.99' )									, _oFont03 ,,,, 1 )
 			_oPrint:Say( _nLinha , _aColItn[06] , Transform( _nTotICM				, '@E 999,999,999.99' )									, _oFont03 ,,,, 1 )
@@ -386,7 +368,7 @@ For _nI := 1 To Len( _aDados )
 			
 			_nLinha += 100
 			
-			_oPrint:Say( _nLinha , _aColCab[01] , 'Total Geral ('+ cValToChar(_aTotGer[01]) + IIF( _aTotGer[01] == 1 , ' viagem' , ' viagens' ) +')'	, _oFont03 )
+			_oPrint:Say( _nLinha , _aColCab[01] , 'Total Geral ('+ cValToChar(_aTotGer[01]) + IIf( _aTotGer[01] == 1 , ' viagem' , ' viagens' ) +')'	, _oFont03 )
 			_oPrint:Say( _nLinha , _aColItn[04] , Transform( _aTotGer[02]					, '@E 999,999,999.99' )										, _oFont03 ,,,, 1 )
 			_oPrint:Say( _nLinha , _aColItn[05] , Transform( _aTotGer[03]					, '@E 999,999,999.99' )										, _oFont03 ,,,, 1 )
 			_oPrint:Say( _nLinha , _aColItn[06] , Transform( _aTotGer[04]					, '@E 999,999,999.99' )										, _oFont03 ,,,, 1 )
@@ -435,7 +417,7 @@ For _nI := 1 To Len( _aDados )
 			_nLinha += 035
 			_oPrint:Line( _nLinha , 0 , _nLinha , 5000 ) ; _nLinha += 10
 			
-			_oPrint:Say( _nLinha , _aColCab[01] , 'Sub-Total ('+ cValToChar(_nConTot) + IIF( _nConTot == 1 , ' viagem' , ' viagens' ) +')'	, _oFont03 )
+			_oPrint:Say( _nLinha , _aColCab[01] , 'Sub-Total ('+ cValToChar(_nConTot) + IIf( _nConTot == 1 , ' viagem' , ' viagens' ) +')'	, _oFont03 )
 			_oPrint:Say( _nLinha , _aColItn[04] , Transform( _nTotFrt				, '@E 999,999,999.99' )									, _oFont03 ,,,, 1 )
 			_oPrint:Say( _nLinha , _aColItn[05] , Transform( _nTotPed				, '@E 999,999,999.99' )									, _oFont03 ,,,, 1 )
 			_oPrint:Say( _nLinha , _aColItn[06] , Transform( _nTotICM				, '@E 999,999,999.99' )									, _oFont03 ,,,, 1 )
@@ -472,7 +454,7 @@ For _nI := 1 To Len( _aDados )
 		If _nTotCol > 0
 			
 			For _nX := 1 To _nTotCol
-				_oPrint:Say( IIF( Empty( _aCabec2[_nX] ) , _nLinha + 07 , _nLinha ) , _aColCab[_nX] , _aCabec1[_nX] , _oFont02 )
+				_oPrint:Say( IIf( Empty( _aCabec2[_nX] ) , _nLinha + 07 , _nLinha ) , _aColCab[_nX] , _aCabec1[_nX] , _oFont02 )
 			Next _nX
 			
 			_nLinha += 030
@@ -497,7 +479,7 @@ For _nI := 1 To Len( _aDados )
 		_nLinha += 035
 		_oPrint:Line( _nLinha , 0 , _nLinha , 5000 ) ; _nLinha += 10
 		
-		_oPrint:Say( _nLinha , _aColCab[01] , 'Sub-Total ('+ cValToChar(_nConTot) + IIF( _nConTot == 1 , ' viagem' , ' viagens' ) +')'	, _oFont03 )
+		_oPrint:Say( _nLinha , _aColCab[01] , 'Sub-Total ('+ cValToChar(_nConTot) + IIf( _nConTot == 1 , ' viagem' , ' viagens' ) +')'	, _oFont03 )
 		_oPrint:Say( _nLinha , _aColItn[04] , Transform( _nTotFrt				, '@E 999,999,999.99' )									, _oFont03 ,,,, 1 )
 		_oPrint:Say( _nLinha , _aColItn[05] , Transform( _nTotPed				, '@E 999,999,999.99' )									, _oFont03 ,,,, 1 )
 		_oPrint:Say( _nLinha , _aColItn[06] , Transform( _nTotICM				, '@E 999,999,999.99' )									, _oFont03 ,,,, 1 )
@@ -519,7 +501,7 @@ For _nI := 1 To Len( _aDados )
 		
 		RGLT013VPG( @_oPrint , @_nLinha , .T. )
 		
-		_oPrint:Say( _nLinha , _aColCab[01] , 'Total Geral ('+ cValToChar(_aTotGer[01]) + IIF( _aTotGer[01] == 1 , ' viagem' , ' viagens' ) +')'	, _oFont03 )
+		_oPrint:Say( _nLinha , _aColCab[01] , 'Total Geral ('+ cValToChar(_aTotGer[01]) + IIf( _aTotGer[01] == 1 , ' viagem' , ' viagens' ) +')'	, _oFont03 )
 		_oPrint:Say( _nLinha , _aColItn[04] , Transform( _aTotGer[02]					, '@E 999,999,999.99' )										, _oFont03 ,,,, 1 )
 		_oPrint:Say( _nLinha , _aColItn[05] , Transform( _aTotGer[03]					, '@E 999,999,999.99' )										, _oFont03 ,,,, 1 )
 		_oPrint:Say( _nLinha , _aColItn[06] , Transform( _aTotGer[04]					, '@E 999,999,999.99' )										, _oFont03 ,,,, 1 )
@@ -568,7 +550,7 @@ For _nI := 1 To Len( _aDados )
 		If _nTotCol > 0
 		
 			For _nX := 1 To _nTotCol
-				_oPrint:Say( IIF( Empty( _aCabec2[_nX] ) , _nLinha + 07 , _nLinha ) , _aColCab[_nX] , _aCabec1[_nX] , _oFont02 )
+				_oPrint:Say( IIf( Empty( _aCabec2[_nX] ) , _nLinha + 07 , _nLinha ) , _aColCab[_nX] , _aCabec1[_nX] , _oFont02 )
 			Next _nX
 			
 			_nLinha += 030
@@ -593,7 +575,7 @@ For _nI := 1 To Len( _aDados )
 		_nLinha += 035
 		_oPrint:Line( _nLinha , 0 , _nLinha , 5000 ) ; _nLinha += 10
 		
-		_oPrint:Say( _nLinha , _aColCab[01] , 'Sub-Total ('+ cValToChar(_nConTot) + IIF( _nConTot == 1 , ' viagem' , ' viagens' ) +')'	, _oFont03 )
+		_oPrint:Say( _nLinha , _aColCab[01] , 'Sub-Total ('+ cValToChar(_nConTot) + IIf( _nConTot == 1 , ' viagem' , ' viagens' ) +')'	, _oFont03 )
 		_oPrint:Say( _nLinha , _aColItn[04] , Transform( _nTotFrt				, '@E 999,999,999.99' )									, _oFont03 ,,,, 1 )
 		_oPrint:Say( _nLinha , _aColItn[05] , Transform( _nTotPed				, '@E 999,999,999.99' )									, _oFont03 ,,,, 1 )
 		_oPrint:Say( _nLinha , _aColItn[06] , Transform( _nTotICM				, '@E 999,999,999.99' )									, _oFont03 ,,,, 1 )
@@ -633,7 +615,7 @@ For _nI := 1 To Len( _aDados )
 		If _nTotCol > 0
 		
 			For _nX := 1 To _nTotCol
-				_oPrint:Say( IIF( Empty( _aCabec2[_nX] ) , _nLinha + 07 , _nLinha ) , _aColCab[_nX] , _aCabec1[_nX] , _oFont02 )
+				_oPrint:Say( IIf( Empty( _aCabec2[_nX] ) , _nLinha + 07 , _nLinha ) , _aColCab[_nX] , _aCabec1[_nX] , _oFont02 )
 			Next _nX
 			
 			_nLinha += 030
@@ -657,12 +639,12 @@ For _nI := 1 To Len( _aDados )
 	
 		_nLinha += 030
 		
-	EndIF
+	EndIf
 	
 	RGLT013VPG( @_oPrint , @_nLinha , .T. )
 	//IMPREASAO DO CORPO DO RELATORIO
 	For _nX := 1 To _nTotCol
-		_oPrint:Say( _nLinha , _aColItn[_nX] , _aDados[_nI][_nX+1] , _oFont03 ,,,, IIF( StrZero(_nX,2) $ '02;04;05;06;07;08;14;15' , 1 , 0 ) )
+		_oPrint:Say( _nLinha , _aColItn[_nX] , _aDados[_nI][_nX+1] , _oFont03 ,,,, IIf( StrZero(_nX,2) $ '02;04;05;06;07;08;14;15' , 1 , 0 ) )
 	Next _nX
 	//IMPREASAO DO CORPO DO RELATORIO
 	_nConTot++
@@ -684,7 +666,7 @@ Next _nI
 _nLinha += 035
 _oPrint:Line( _nLinha , 0 , _nLinha , 5000 ) ; _nLinha += 10
 
-_oPrint:Say( _nLinha , _aColCab[01] , 'Sub-Total ('+ cValToChar(_nConTot) + IIF( _nConTot == 1 , ' viagem' , ' viagens' ) +')'	, _oFont03 )
+_oPrint:Say( _nLinha , _aColCab[01] , 'Sub-Total ('+ cValToChar(_nConTot) + IIf( _nConTot == 1 , ' viagem' , ' viagens' ) +')'	, _oFont03 )
 _oPrint:Say( _nLinha , _aColItn[04] , Transform( _nTotFrt				, '@E 999,999,999.99' )									, _oFont03 ,,,, 1 )
 _oPrint:Say( _nLinha , _aColItn[05] , Transform( _nTotPed				, '@E 999,999,999.99' )									, _oFont03 ,,,, 1 )
 _oPrint:Say( _nLinha , _aColItn[06] , Transform( _nTotICM				, '@E 999,999,999.99' )									, _oFont03 ,,,, 1 )
@@ -710,7 +692,7 @@ _nLinha += 100
 
 RGLT013VPG( @_oPrint , @_nLinha , .T. )
 
-_oPrint:Say( _nLinha , _aColCab[01] , 'Total Geral ('+ cValToChar(_aTotGer[01]) + IIF( _aTotGer[01] == 1 , ' viagem' , ' viagens' ) +')'	, _oFont03 )
+_oPrint:Say( _nLinha , _aColCab[01] , 'Total Geral ('+ cValToChar(_aTotGer[01]) + IIf( _aTotGer[01] == 1 , ' viagem' , ' viagens' ) +')'	, _oFont03 )
 _oPrint:Say( _nLinha , _aColItn[04] , Transform( _aTotGer[02]				 		, '@E 999,999,999.99' )									, _oFont03 ,,,, 1 )
 _oPrint:Say( _nLinha , _aColItn[05] , Transform( _aTotGer[03]				 		, '@E 999,999,999.99' )									, _oFont03 ,,,, 1 )
 _oPrint:Say( _nLinha , _aColItn[06] , Transform( _aTotGer[04]				 		, '@E 999,999,999.99' )									, _oFont03 ,,,, 1 )
@@ -828,7 +810,7 @@ For _nI := 1 To Len(_aFretes)
 			RGLT013VPG( @_oPrint , @_nLinha , .T. )
 			_oPrint:Say(_nLinha, _aColItn[01],"SUB-TOTAL 2o PERCURSO -->", _oFont02)
 
-			_oPrint:Say(_nLInha, _aColItn[04]-300	, Transform(_nTtfVol, '@E 999,999,999,999'		)+" Lt"		, _oFont02)
+			_oPrint:Say(_nLinha, _aColItn[04]-300	, Transform(_nTtfVol, '@E 999,999,999,999'		)+" Lt"		, _oFont02)
 			_oPrint:Say(_nLinha, _aColItn[05]-200	, Transform(_nTtfVal, '@E 999,999,999,999.99'	)	, _oFont02)
 			_oPrint:Say(_nLinha, _aColItn[06]-80	, Transform(_nTtfPed, '@E 999,999,999,999.99'	)	, _oFont02)
 			_oPrint:Say(_nLinha, _aColItn[07]+20	, Transform(_nTtfIcm, '@E 999,999,999,999.99'	)	, _oFont02)
@@ -865,7 +847,7 @@ For _nI := 1 To Len(_aFretes)
 		_oPrint:Say(_nLinha, _aColItn[01]		, "Código"			, _oFont02)
 		_oPrint:Say(_nLinha, _aColItn[02]-430	, "Loja"			, _oFont02)
 		_oPrint:Say(_nLinha, _aColItn[03]-400	, "Transportadora"	, _oFont02)
-		_oPrint:Say(_nLInha, _aColItn[04]-315	, "Volume 2o Perc."	, _oFont02)
+		_oPrint:Say(_nLinha, _aColItn[04]-315	, "Volume 2o Perc."	, _oFont02)
 		_oPrint:Say(_nLinha, _aColItn[05]-140	, "Valor (R$)"		, _oFont02)
 		_oPrint:Say(_nLinha, _aColItn[06]+002	, "Pedágio"			, _oFont02)
 		_oPrint:Say(_nLinha, _aColItn[07]+130	, "ICMS"			, _oFont02)
@@ -895,7 +877,7 @@ For _nI := 1 To Len(_aFretes)
 	_oPrint:Say(_nLinha, _aColItn[01]		, _aFretes[_nI][02]	, _oFont03)
 	_oPrint:Say(_nLinha, _aColItn[02]-430	, _aFretes[_nI][03]	, _oFont03)
 	_oPrint:Say(_nLinha, _aColItn[03]-400	, _aFretes[_nI][04]	, _oFont03)
-	_oPrint:Say(_nLInha, _aColItn[04]-300	, Transform(_aFretes[_nI][06], '@E 999,999,999,999'		)+" Lt"		, _oFont03)
+	_oPrint:Say(_nLinha, _aColItn[04]-300	, Transform(_aFretes[_nI][06], '@E 999,999,999,999'		)+" Lt"		, _oFont03)
 	_oPrint:Say(_nLinha, _aColItn[05]-200	, Transform(_aFretes[_nI][09], '@E 999,999,999,999.99'	)	, _oFont03)
 	_oPrint:Say(_nLinha, _aColItn[06]-80	, Transform(_aFretes[_nI][07], '@E 999,999,999,999.99'	)	, _oFont03)
 	_oPrint:Say(_nLinha, _aColItn[07]+20	, Transform(_aFretes[_nI][08], '@E 999,999,999,999.99'	)	, _oFont03)
@@ -929,7 +911,7 @@ Next _nI
 _nLinha += 020
 _oPrint:Say(_nLinha, _aColItn[01],"SUB-TOTAL 2o PERCURSO -->", _oFont02)
 
-_oPrint:Say(_nLInha, _aColItn[04]-300	, Transform(_nTtfVol, '@E 999,999,999,999'		)+" Lt"		, _oFont02)
+_oPrint:Say(_nLinha, _aColItn[04]-300	, Transform(_nTtfVol, '@E 999,999,999,999'		)+" Lt"		, _oFont02)
 _oPrint:Say(_nLinha, _aColItn[05]-200	, Transform(_nTtfVal, '@E 999,999,999,999.99'	)	, _oFont02)
 _oPrint:Say(_nLinha, _aColItn[06]-80	, Transform(_nTtfPed, '@E 999,999,999,999.99'	)	, _oFont02)
 _oPrint:Say(_nLinha, _aColItn[07]+20	, Transform(_nTtfIcm, '@E 999,999,999,999.99'	)	, _oFont02)
@@ -947,7 +929,7 @@ RGLT013VPG( @_oPrint , @_nLinha , .T. )
 
 _nLinha += 050
 _oPrint:Say(_nLinha, _aColItn[01],"TOTAL GERAL -->", _oFont02)
-_oPrint:Say(_nLInha, _aColItn[04]-300	, Transform(_nTtgVol, '@E 999,999,999,999'		)+" Lt"		, _oFont02)
+_oPrint:Say(_nLinha, _aColItn[04]-300	, Transform(_nTtgVol, '@E 999,999,999,999'		)+" Lt"		, _oFont02)
 _oPrint:Say(_nLinha, _aColItn[05]-200	, Transform(_nTtgVal, '@E 999,999,999,999.99'	)	, _oFont02)
 _oPrint:Say(_nLinha, _aColItn[06]-80	, Transform(_nTtgPed, '@E 999,999,999,999.99'	)	, _oFont02)
 _oPrint:Say(_nLinha, _aColItn[07]+20	, Transform(_nTtgIcm, '@E 999,999,999,999.99'	)	, _oFont02)
@@ -985,12 +967,9 @@ Return
 Programa--------: RGLT013VPG
 Autor-----------: Alexandre Villar
 Data da Criacao-: 29/04/2014
-===============================================================================================================================
 Descrição-------: Validação do pocicionamento da página atual para quebras
-===============================================================================================================================
 Parametros------: oPrint	- Objeto de Impressão do Relatório
 ----------------: nLinha	- Variável de controle do posicionamento
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -1029,9 +1008,9 @@ If _nLinha > _nLimPag
 	_oPrint:Line( 050 , 0400 , 240 , 0400 )
 	_oPrint:Line( 050 , 3350 , 240 , 3350 )
 	
-	_oPrint:Say( 060 , 420 , TITULO +" ( "+ DtoC(Date()) +" - "+ Time() +")" , _oFont01 )
-	_oPrint:Say( 120 , 420 , "Período de Recepção: "+ DTOC( MV_PAR01 ) +" - "+ DTOC( MV_PAR02 ) +" | Filial: "+ cFilAnt , _oFont02 )
-	_oPrint:Say( 150 , 420 ,	"Considera: "+ IIF(MV_PAR03==1,'Leite de Filiais',IIF(MV_PAR03==3,'Leite de Plataformas',IIF(MV_PAR03==2,'Leite de Terceiros','Todas as Procedências'))) , _oFont02 )
+	_oPrint:Say( 060 , 420 , TITULO +" ( "+ DToC(Date()) +" - "+ Time() +")" , _oFont01 )
+	_oPrint:Say( 120 , 420 , "Período de Recepção: "+ DToC( MV_PAR01 ) +" - "+ DToC( MV_PAR02 ) +" | Filial: "+ cFilAnt , _oFont02 )
+	_oPrint:Say( 150 , 420 ,	"Considera: "+ IIf(MV_PAR03==1,'Leite de Filiais',IIf(MV_PAR03==3,'Leite de Plataformas',IIf(MV_PAR03==2,'Leite de Terceiros','Todas as Procedências'))) , _oFont02 )
 	
 	//====================================================================================================
 	// Adiciona cabecalho de conteúdo
@@ -1047,17 +1026,14 @@ Return
 Programa--------: RGLT013FRT
 Autor-----------: Darcio Ribeiro Spörl
 Data da Criacao-: 05/09/2016
-===============================================================================================================================
 Descrição-------: Rotina para gerar as informações da Síntese do Frete
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: _aRet - Array com as informações dos fretes por produto
 ===============================================================================================================================
 */
 Static Function RGLT013FRT()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _aRet		:= {}
 Local _cFiltro	:= "%"
 Local _cProd	:= ""
@@ -1067,7 +1043,7 @@ Local _nItem	:= 0
 Local _cAlias	:= GetNextAlias()
 
 If MV_PAR03 < 4
-_cFiltro += IIf( !Empty( MV_PAR03 ) , " AND ZLX.ZLX_TIPOLT = '"+ IIF( MV_PAR03 == 1 , 'F' , IIF( MV_PAR03 == 2 , 'T' , 'P' ) ) +"' ","")
+_cFiltro += IIf( !Empty( MV_PAR03 ) , " AND ZLX.ZLX_TIPOLT = '"+ IIf( MV_PAR03 == 1 , 'F' , IIf( MV_PAR03 == 2 , 'T' , 'P' ) ) +"' ","")
 EndIf
 
 _cFiltro += IIf( !Empty( MV_PAR04 ) , " AND ZZX.ZZX_CODPRD IN "+ FormatIn( MV_PAR04 , ';' ),"")
@@ -1126,7 +1102,7 @@ While (_cAlias)->( !Eof() )
 						(_cAlias)->ZLX_ICMSFR																	,; //[08] - ICMS do Frete
 						(_cAlias)->ZLX_VLRFRT																	,; //[09] - Valor do Frete
 						(_cAlias)->ZLX_TVLFRT																	,; //[10] - Total do Frete
-						ROUND( ( (_cAlias)->ZLX_VLRFRT + (_cAlias)->ZLX_PEDAGI ) / (_cAlias)->ZLX_VOLREC , 4 )  }) //[11] - Custo LT
+						Round( ( (_cAlias)->ZLX_VLRFRT + (_cAlias)->ZLX_PEDAGI ) / (_cAlias)->ZLX_VOLREC , 4 )  }) //[11] - Custo LT
 
 		_cProd := (_cAlias)->ZZX_CODPRD
 		_cTran := (_cAlias)->A2_COD
@@ -1137,7 +1113,7 @@ While (_cAlias)->( !Eof() )
 		_aRet[_nItem][08] += (_cAlias)->ZLX_ICMSFR
 		_aRet[_nItem][09] += (_cAlias)->ZLX_VLRFRT
 		_aRet[_nItem][10] += (_cAlias)->ZLX_TVLFRT
-		_aRet[_nItem][11] += ROUND( ( (_cAlias)->ZLX_VLRFRT + (_cAlias)->ZLX_PEDAGI ) / (_cAlias)->ZLX_VOLREC , 4 )
+		_aRet[_nItem][11] += Round( ( (_cAlias)->ZLX_VLRFRT + (_cAlias)->ZLX_PEDAGI ) / (_cAlias)->ZLX_VOLREC , 4 )
 	EndIf
 								
 	(_cAlias)->( DBSkip() )
@@ -1145,5 +1121,5 @@ EndDo
 
 (_cAlias)->( DBCloseArea() )
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 Return(_aRet)

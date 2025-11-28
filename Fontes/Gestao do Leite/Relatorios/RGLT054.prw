@@ -2,31 +2,25 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 27/08/2019 | Revisão do fonte. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 16/08/2022 | Corrigida query para não considerar pre-notas. Chamado 41037
+Lucas Borges  |27/08/2019| Chamado 28346. Revisão do fonte.
+Lucas Borges  |16/08/2022| Chamado 41037. Corrigida query para não considerar pre-notas.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "REPORT.CH"
+#Include "TOTVS.ch"
+#Include "REPORT.CH"
+
 /*
 ===============================================================================================================================
 Programa----------: RGLT054
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 12/03/2012
-===============================================================================================================================
 Descrição---------: Relatório das notas fiscais de produtores (NFP) lançadas no Documento de Entrada. Essas notas são necessárias
 					para o fechamento das filiais situadas no RS, onde é validado na transmissão do XML da NF-e, se existe uma
 					nota de produtor associada à nota que está sendo emitida.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -58,7 +52,7 @@ oReport:DisableOrientation()//Desabilita a escolha do tipo de orientacao da pagi
 //===========================================
 
 //Seção dados da Linha
-DEFINE SECTION oSecCabec OF oReport TITLE "Linha/Rota" TABLES "ZL3"
+DEFINE Section oSecCabec OF oReport TITLE "Linha/Rota" TABLES "ZL3"
 
 DEFINE CELL NAME "ZL3_COD"  	OF oSecCabec ALIAS "ZL3" TITLE "Linha\Rota"
 DEFINE CELL NAME "ZL3_DESCRI" OF oSecCabec ALIAS "ZL3" TITLE "Descirção"
@@ -73,7 +67,7 @@ oSecCabec:Disable()
 //Seção detalhes - Dados da NFP
 //===========================================
 
-DEFINE SECTION oSecDetalh OF oSecCabec TITLE oTitulo TABLES "SF1","SA2"
+DEFINE Section oSecDetalh OF oSecCabec TITLE oTitulo TABLES "SF1","SA2"
 
 DEFINE CELL NAME "A2_COD" OF oSecDetalh ALIAS "SA2" TITLE "Código"
 DEFINE CELL NAME "A2_LOJA"  OF oSecDetalh ALIAS "SA2" TITLE "Loja"
@@ -101,11 +95,8 @@ Return
 Programa----------: PrintReport
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 21/03/2012
-===============================================================================================================================
 Descrição---------: Função estática que faz os filtros do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -130,7 +121,7 @@ If MV_PAR05 == 1 //NFPs Lançadas
 	BEGIN REPORT QUERY oSecCabec
 		BeginSql alias "QRY1"   	   	
 			SELECT ZL3.ZL3_COD, ZL3.ZL3_DESCRI, SA2.A2_COD, SA2.A2_LOJA, SA2.A2_NOME, SF1.F1_DOC, SF1.F1_SERIE, SF1.F1_EMISSAO, SF1.F1_DTDIGIT
-			  FROM %table:ZLF% ZLF, %table:SA2% SA2, %table:ZL3% ZL3, %table:SF1% SF1
+			  FROM %Table:ZLF% ZLF, %Table:SA2% SA2, %Table:ZL3% ZL3, %Table:SF1% SF1
 			 WHERE ZLF.D_E_L_E_T_ = ' '
 			   AND SA2.D_E_L_E_T_ = ' '
 			   AND ZL3.D_E_L_E_T_ = ' '
@@ -221,7 +212,7 @@ ElseIf MV_PAR05 == 3 //NFPs Divergentes
 	BEGIN REPORT QUERY oSecCabec
 		BeginSql alias "QRY1"
 			SELECT ZL3.ZL3_COD, ZL3.ZL3_DESCRI, SA2.A2_COD, SA2.A2_LOJA, SA2.A2_NOME, SF1.F1_DOC, SF1.F1_SERIE, SF1.F1_EMISSAO, SF1.F1_DTDIGIT
-			  FROM %table:SF1% SF1, %table:SA2% SA2, %table:ZL3% ZL3
+			  FROM %Table:SF1% SF1, %Table:SA2% SA2, %Table:ZL3% ZL3
 			 WHERE SF1.D_E_L_E_T_ = ' '
 			   AND SA2.D_E_L_E_T_ = ' '
 			   AND ZL3.D_E_L_E_T_ = ' '

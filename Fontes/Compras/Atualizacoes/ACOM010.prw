@@ -10,8 +10,7 @@ Lucas Borges  |09/05/2025| Chamado 50617. Corrigir chamada estática no nome das 
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
-
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -27,9 +26,9 @@ User Function ACOM010()
 Local cPerg		:= "ACOM010"
 
 If Pergunte(cPerg,.T.)
-	FwMsgRun( ,{|| ACOM010RU() }, , "Aguarde, processando informações...")
+	FWMsgRun( ,{|| ACOM010RU() }, , "Aguarde, processando informações...")
 Else
-	u_itmsg(  'Operação cancelada pelo usuário!' ,'Atenção!' ,,1 )
+	U_ITMsg(  'Operação cancelada pelo usuário!' ,'Atenção!' ,,1 )
 EndIf
 
 Return
@@ -62,8 +61,6 @@ Local aCampos	:= {}
 Local aFiliais  := {}
 Local _nX		:= 0
 
-
-
 aAdd(aCampos, "ÍNDICE")
 aAdd(aCampos, "COMPRADOR")
 
@@ -76,7 +73,7 @@ cQrySY1 += "FROM "+ RetSqlName("SC1") +" SC1, "+ RetSqlName("SY1") +" SY1 "
 cQrySY1 += "WHERE SC1.D_E_L_E_T_ = ' ' "
 cQrySY1 += "  AND C1_CODCOMP <> ' ' "
 cQrySY1 += "  AND C1_RESIDUO <> 'S' "
-cQrySY1 += "  AND C1_EMISSAO BETWEEN '" + DtoS(MV_PAR03) + "' AND '" + DtoS(MV_PAR04) + "' " 
+cQrySY1 += "  AND C1_EMISSAO BETWEEN '" + DToS(MV_PAR03) + "' AND '" + DToS(MV_PAR04) + "' " 
 cQrySY1 += "  AND Y1_FILIAL = '"+ xFilial("SY1") +"' "
 cQrySY1 += "  AND Y1_COD = C1_CODCOMP "
 cQrySY1 += "  AND Y1_MSBLQL <> '1' "
@@ -95,7 +92,7 @@ cQryFil += "FROM "+ RetSqlName("SC1") +" SC1, "+ RetSqlName("SY1") +" SY1 "
 cQryFil += "WHERE SC1.D_E_L_E_T_ = ' ' "
 cQryFil += "  AND C1_CODCOMP <> ' ' "
 cQryFil += "  AND C1_RESIDUO <> 'S' "
-cQryFil += "  AND C1_EMISSAO BETWEEN '" + DtoS(MV_PAR03) + "' AND '" + DtoS(MV_PAR04) + "' "
+cQryFil += "  AND C1_EMISSAO BETWEEN '" + DToS(MV_PAR03) + "' AND '" + DToS(MV_PAR04) + "' "
 cQryFil += "  AND Y1_FILIAL = '"+ xFilial("SY1") +"' "
 cQryFil += "  AND Y1_COD = C1_CODCOMP "
 cQryFil += "  AND Y1_GRUPCOM BETWEEN '"+ MV_PAR01 +"' AND '"+ MV_PAR02 +"' "
@@ -108,18 +105,18 @@ MPSysOpenQuery(cQryFil,"TRBFIL")
 //==========================================================================================
 // Montagem do Array com os Campos do Cabeçalho da Planilha e Array Filiais com movto de SC
 //==========================================================================================
-TRBFIL->(dbGoTop())      
+TRBFIL->(DBGoTop())      
 While !TRBFIL->(Eof())
 	
  	aAdd(aCampos, AllTrim(TRBFIL->C1_FILIAL) + " - " + AllTrim(Posicione('SM0',1,cEmpAnt+TRBFIL->C1_FILIAL,'M0_FILIAL') ))	
 	aAdd(aFiliais, AllTrim(TRBFIL->C1_FILIAL))
 		
-    TRBFIL->(dbSkip())
+    TRBFIL->(DBSkip())
 End          
 
 aAdd(aCampos, "TOTAL")
                                			
-TRBSY1->(dbGoTop())
+TRBSY1->(DBGoTop())
 	
 While !TRBSY1->(Eof())
 	nItem++
@@ -137,7 +134,7 @@ While !TRBSY1->(Eof())
         EndIf
         
 		cQrySC1 += "WHERE C1_FILIAL = '" + aFiliais[nX] + "' "
-		cQrySC1 += "  AND C1_EMISSAO BETWEEN '" + DtoS(MV_PAR03) + "' AND '" + DtoS(MV_PAR04) + "' "
+		cQrySC1 += "  AND C1_EMISSAO BETWEEN '" + DToS(MV_PAR03) + "' AND '" + DToS(MV_PAR04) + "' "
 		cQrySC1 += "  AND C1_CODCOMP = '" + TRBSY1->Y1_COD + "' "    
 		
 		If MV_PAR05 == 1 //Com Cotacao
@@ -151,9 +148,9 @@ While !TRBSY1->(Eof())
 			cQrySC1 += "  AND C1_QUJE = 0 "
 		EndIf
 		If MV_PAR07 == 1 //Dt de Retorno Atrasada
-			cQrySC1 += "  AND C1_I_DTRET < '" + DtoS(Date()) + "'"
+			cQrySC1 += "  AND C1_I_DTRET < '" + DToS(Date()) + "'"
 		ElseIf MV_PAR07 == 2
-			cQrySC1 += "  AND C1_I_DTRET >= '" + DtoS(Date()) + "'"
+			cQrySC1 += "  AND C1_I_DTRET >= '" + DToS(Date()) + "'"
 		EndIf
 		
 		cQrySC1 += "  AND C1_RESIDUO <>  'S' "
@@ -167,11 +164,11 @@ While !TRBSY1->(Eof())
 		cQrySC1 := ChangeQuery(cQrySC1)
 		MPSysOpenQuery(cQrySC1,"TRBSC1")
 
-		TRBSC1->(dbGoTop())
+		TRBSC1->(DBGoTop())
 			
 		While !TRBSC1->(Eof())
 			nQuant += TRBSC1->TOTAL
-			TRBSC1->(dbSkip())
+			TRBSC1->(DBSkip())
 		End
 		
 		aAdd( aDados , nQuant )
@@ -179,7 +176,7 @@ While !TRBSY1->(Eof())
 		nQtdTot += nQuant
 		nQuant	:= 0
 
-		TRBSC1->(dbCloseArea())
+		TRBSC1->(DBCloseArea())
 
 	Next nX
 
@@ -190,11 +187,11 @@ While !TRBSY1->(Eof())
 	aAdd( aDadTot , aDados )
 	aDados := {}
 	
-TRBSY1->(dbSkip())
+TRBSY1->(DBSkip())
 End
 
-TRBSY1->(dbCloseArea())
-TRBFIL->(dbCloseArea())
+TRBSY1->(DBCloseArea())
+TRBFIL->(DBCloseArea())
 
 
 If !Empty( aDadTot )
@@ -249,10 +246,10 @@ Else
 	cMapaPor := " - Por Qtd de Itens de SC" 
 EndIf
 
-If len(aDadTot) > 0
+If Len(aDadTot) > 0
 	U_ITListBox( "Quantidade de SC's por Comprador x Filiais "+cRetorno + cMapaPor , aCampos , aDadTot , .T. , 1 )
 Else
-	u_itmsg("Não foram localizados dados com os filtros selecionados!","Atenção",,1)
+	U_ITMsg("Não foram localizados dados com os filtros selecionados!","Atenção",,1)
 EndIf
 
 Return

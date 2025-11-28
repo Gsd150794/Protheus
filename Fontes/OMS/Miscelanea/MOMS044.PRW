@@ -7,8 +7,8 @@
                  |            |
 =============================================================================================================================== 
 */
-#Include 'Protheus.ch'  
-#INCLUDE "TBICONN.CH"   
+#Include "TOTVS.ch"  
+#Include "TBICONN.CH"   
 
 /*
 ===============================================================================================================================
@@ -38,7 +38,7 @@ Begin Sequence
    //              A=Aguardando a Aprovacao                                                                   
    //=================================================================
   
-   SZW->(DbGoTo(_nRecno))
+   SZW->(DBGoTo(_nRecno))
    
    _aRetCriter := U_MOMS044C()
 
@@ -71,7 +71,7 @@ Begin Sequence
       SZW->ZW_HORAAPR := Time()
       SZW->ZW_OBSIMP  := "LIBERADO AUTOMATICAMENTE"
       SZW->ZW_STATUS  := "L" 
-      SZW->(MsUnLock())
+      SZW->(MSUnLock())
    End Transaction
 
    _cRet := "SUCESSO:TRUE; Estatus do pedido de vendas atualizado para 'L=Liberado'. "
@@ -143,7 +143,7 @@ Local _cFilAtual := "01"
 Local _cLibCoord 
 
 Begin Sequence
-   U_ItConOut("[MOMS044S] Alteração Status Pedido Vendas Portal Scheduller: "+DTOC(DATE())+" - "+TIME())
+   U_ItConOut("[MOMS044S] Alteração Status Pedido Vendas Portal Scheduller: "+DToC(DATE())+" - "+TIME())
    
    //=====================================================================
    // Limpa o ambiente, liberando a licença e fechando as conexões
@@ -153,7 +153,7 @@ Begin Sequence
    //===========================================================================================
    // Preparando o ambiente com a filial da carga recebida
    //===========================================================================================
-   U_ItConOut("[MOMS044S] Preparando Ambiente - Alteração Status Pedido Vendas Portal Scheduller: "+DTOC(DATE())+" - "+TIME())
+   U_ItConOut("[MOMS044S] Preparando Ambiente - Alteração Status Pedido Vendas Portal Scheduller: "+DToC(DATE())+" - "+TIME())
    PREPARE ENVIRONMENT EMPRESA '01' FILIAL '01'; 
            TABLES "SC9","SA1","SC5","SC6","ZP1","SZW","SB1";
            MODULO 'OMS'
@@ -167,7 +167,7 @@ Begin Sequence
    _cQry := " SELECT DISTINCT SZW.R_E_C_N_O_ NRRECNO, SZW.ZW_FILIAL , SZW.ZW_IDPED "
    _cQry += " FROM " + RetSqlName('SZW') + " SZW, " + RetSqlName('SA3') + " SA3 "
    _cQry += " WHERE "+ RetSqlDel('SZW') + " AND " + RetSqlDel('SA3') 
-   _cQry += " AND ZW_VEND1 = A3_COD AND A3_SUPER IN " + FormatIn(ALLTRIM(_cLibCoord),";")
+   _cQry += " AND ZW_VEND1 = A3_COD AND A3_SUPER IN " + FormatIn(AllTrim(_cLibCoord),";")
    _cQry += " AND ZW_STATUS = 'A' "
    _cQry += " ORDER BY SZW.ZW_FILIAL, SZW.ZW_IDPED "
 
@@ -175,16 +175,16 @@ Begin Sequence
 	  TRBSZW->( DBCloseArea(  ) )
    EndIf
    
-   U_ItConOut("[MOMS044S] Rodando Query - Alteração Status Pedido Vendas Portal Scheduller: "+DTOC(DATE())+" - "+TIME())
+   U_ItConOut("[MOMS044S] Rodando Query - Alteração Status Pedido Vendas Portal Scheduller: "+DToC(DATE())+" - "+TIME())
    DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQry) , "TRBSZW" , .T. , .F. )
 
-   Do While !(TRBSZW->(Eof()))    
+   While !(TRBSZW->(Eof()))    
             
-      U_ItConOut("[MOMS044S] Alterando Status - Alteração Status Pedido Vendas Portal: " + StrZero(TRBSZW->NRRECNO,10) + " - " + DTOC(DATE())+" - "+TIME()) 
+      U_ItConOut("[MOMS044S] Alterando Status - Alteração Status Pedido Vendas Portal: " + StrZero(TRBSZW->NRRECNO,10) + " - " + DToC(DATE())+" - "+TIME()) 
       _cRetorno := U_MOMS044(TRBSZW->NRRECNO)  
-      U_ItConOut("[MOMS044S] Retorno Alteração Status Pedido Vendas Portal Scheduller: " + _cRetorno+" - "+DTOC(DATE())+" - "+TIME()) 
+      U_ItConOut("[MOMS044S] Retorno Alteração Status Pedido Vendas Portal Scheduller: " + _cRetorno+" - "+DToC(DATE())+" - "+TIME()) 
 
-      TRBSZW->(DbSkip())
+      TRBSZW->(DBSkip())
    EndDo 
 
 End Sequence    
@@ -193,4 +193,4 @@ If Select("TRBSZW") <> 0
    TRBSZW->( DBCloseArea(  ) )
 EndIf
 
-Return Nil
+Return

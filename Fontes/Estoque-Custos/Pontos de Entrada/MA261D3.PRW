@@ -11,12 +11,7 @@ Lucas Borges  |13/10/2024| Chamado 48465. Retirada da função de conout
 ==============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "TOPCONN.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -44,34 +39,34 @@ Local _cDestino  := SD3->D3_I_DESTI
 //==============================================================
 // Posiciona no proximo SD3 para encontrar o armazem destino. 
 //==============================================================
-DbSelectArea("SD3")
-dbSetOrder(4)//D3_FILIAL+D3_NUMSEQ+D3_CHAVE+D3_COD
+DBSelectArea("SD3")
+DBSetOrder(4)//D3_FILIAL+D3_NUMSEQ+D3_CHAVE+D3_COD
 
-If SD3->(dbSeek(cSeekSD3))
+If SD3->(DBSeek(cSeekSD3))
 
 	//==============================================================
 	// Grava o Nro do Documento no SD3 de Saida - 999.            
 	//==============================================================
 	RecLock("SD3",.F.)
-	If ALLTRIM(FUNNAME()) == "AEST011"
+	If AllTrim(FUNNAME()) == "AEST011"
 
 		SD3->D3_I_DOC := _cD3IDOC
 
-	Endif
-    IF !EMPTY(_cObs) .AND. EMPTY(SD3->D3_I_OBS)
+	EndIf
+    If !Empty(_cObs) .And. Empty(SD3->D3_I_OBS)
 	   SD3->D3_I_OBS:=_cObs
-    ENDIF
-	IF !EMPTY(_cSetor) .AND. EMPTY(SD3->D3_I_SETOR)
+    EndIf
+	If !Empty(_cSetor) .And. Empty(SD3->D3_I_SETOR)
 	   SD3->D3_I_SETOR:=_cSetor
-    ENDIF
+    EndIf
 
-	IF !EMPTY(_cTpTRS) .AND. EMPTY(SD3->D3_I_TPTRS)
+	If !Empty(_cTpTRS) .And. Empty(SD3->D3_I_TPTRS)
 	   SD3->D3_I_TPTRS:=_cTpTRS
-    ENDIF
+    EndIf
 
-	IF !EMPTY(_cDescTM) .AND. EMPTY(SD3->D3_I_DSCTM)
+	If !Empty(_cDescTM) .And. Empty(SD3->D3_I_DSCTM)
 	   SD3->D3_I_DSCTM:=_cDescTM
-    ENDIF
+    EndIf
 
 	If ! Empty(_cMotTrRef)  .And. Empty(SD3->D3_I_MOTTR)
        SD3->D3_I_MOTTR := _cMotTrRef
@@ -85,9 +80,9 @@ If SD3->(dbSeek(cSeekSD3))
        SD3->D3_I_DESTI := _cDestino
 	EndIf 
 
-	SD3->D3_I_DTAP := DATE()
-	SD3->D3_I_HRAP := TIME()
-	MsUnLock()
+	SD3->D3_I_DTAP := Date()
+	SD3->D3_I_HRAP := Time()
+	MSUnLock()
 
     _cTpTRS   := SD3->D3_I_TPTRS
     _cDescTM  := SD3->D3_I_DSCTM
@@ -101,32 +96,32 @@ If SD3->(dbSeek(cSeekSD3))
 	
 EndIf
 	
-SD3->(dbSetOrder(nIndSD3))
-SD3->(dbGoTo(nRecSD3))
+SD3->(DBSetOrder(nIndSD3))
+SD3->(DBGoTo(nRecSD3))
 
 //==============================================================
 // Grava o Nro do Documento no SD3 de Entrada - 499.          
 //==============================================================
 SD3->(RecLock("SD3",.F.))
 
-If ALLTRIM(FUNNAME()) == "AEST011"
+If AllTrim(FUNNAME()) == "AEST011"
 	SD3->D3_I_DOC := _cD3IDOC
-Endif
+EndIf
 
-SD3->D3_I_DTAP := DATE()
-SD3->D3_I_HRAP := TIME()
-IF !EMPTY(_cObs) .AND. EMPTY(SD3->D3_I_OBS)
+SD3->D3_I_DTAP := Date()
+SD3->D3_I_HRAP := Time()
+If !Empty(_cObs) .And. Empty(SD3->D3_I_OBS)
    SD3->D3_I_OBS:=_cObs
-ENDIF
-IF !EMPTY(_cSetor) .AND. EMPTY(SD3->D3_I_SETOR)
+EndIf
+If !Empty(_cSetor) .And. Empty(SD3->D3_I_SETOR)
    SD3->D3_I_SETOR:=_cSetor
-ENDIF
-IF !EMPTY(_cTpTRS) .AND. EMPTY(SD3->D3_I_TPTRS)
+EndIf
+If !Empty(_cTpTRS) .And. Empty(SD3->D3_I_TPTRS)
    SD3->D3_I_TPTRS:=_cTpTRS
-ENDIF
-IF !EMPTY(_cDescTM) .AND. EMPTY(SD3->D3_I_DSCTM)
+EndIf
+If !Empty(_cDescTM) .And. Empty(SD3->D3_I_DSCTM)
    SD3->D3_I_DSCTM:=_cDescTM
-ENDIF
+EndIf
 
 If ! Empty(_cMotTrRef)  .And. Empty(SD3->D3_I_MOTTR)
    SD3->D3_I_MOTTR := _cMotTrRef
@@ -140,66 +135,66 @@ EndIf
 
 SD3->D3_I_ORIGE	:= FUNNAME()
 
-SD3->(MsUnLock())
+SD3->(MSUnLock())
 	
 
 If isincallstack("U_AGLT003G")
 
     cSeekSD3:= SD3->D3_FILIAL+SD3->D3_NUMSEQ+"E0"
-	Reclock("SD3",.F.)
+	RecLock("SD3",.F.)
 	SD3->D3_CHAVEF1 := "AGLT003" + _eccod+cSetor
-	SD3->(Msunlock())
-	SD3->(dbSetOrder(4))//D3_FILIAL+D3_NUMSEQ+D3_CHAVE+D3_COD
-	If SD3->(dbSeek(cSeekSD3))
+	SD3->(MSUnLock())
+	SD3->(DBSetOrder(4))//D3_FILIAL+D3_NUMSEQ+D3_CHAVE+D3_COD
+	If SD3->(DBSeek(cSeekSD3))
 	
-		Reclock("SD3",.F.)
+		RecLock("SD3",.F.)
 		SD3->D3_CHAVEF1 := "AGLT003" + _eccod+cSetor
-		SD3->(Msunlock())
+		SD3->(MSUnLock())
 		
-	Endif
+	EndIf
 	
-	SD3->(dbSetOrder(nIndSD3))
-	SD3->(dbGoTo(nRecSD3))
+	SD3->(DBSetOrder(nIndSD3))
+	SD3->(DBGoTo(nRecSD3))
 	
-Endif			
+EndIf			
 
-If isincallstack("MT103TRANC") .OR. isincallstack("MT103TRANS")
+If isincallstack("MT103TRANC") .Or. isincallstack("MT103TRANS")
 
-	Reclock("SD3",.F.)
+	RecLock("SD3",.F.)
 	SD3->D3_CHAVEF1 := SF1->F1_DOC+SF1->F1_SERIE+SF1->F1_FORNECE+SF1->F1_LOJA+SF1->F1_TIPO 
-	SD3->(Msunlock())
-	SD3->(dbSetOrder(4))//D3_FILIAL+D3_NUMSEQ+D3_CHAVE+D3_COD
-	If SD3->(dbSeek(cSeekSD3))
+	SD3->(MSUnLock())
+	SD3->(DBSetOrder(4))//D3_FILIAL+D3_NUMSEQ+D3_CHAVE+D3_COD
+	If SD3->(DBSeek(cSeekSD3))
 	
-		Reclock("SD3",.F.)
+		RecLock("SD3",.F.)
 		SD3->D3_CHAVEF1 := SF1->F1_DOC+SF1->F1_SERIE+SF1->F1_FORNECE+SF1->F1_LOJA+SF1->F1_TIPO 
-		SD3->(Msunlock())
+		SD3->(MSUnLock())
 		
-	Endif
+	EndIf
 	
-	SD3->(dbSetOrder(nIndSD3))
-	SD3->(dbGoTo(nRecSD3))
+	SD3->(DBSetOrder(nIndSD3))
+	SD3->(DBGoTo(nRecSD3))
 
-Endif
+EndIf
 
-If isincallstack("MCOM4Trans") .OR. isincallstack("MCOM4DesTrans")
+If isincallstack("MCOM4Trans") .Or. isincallstack("MCOM4DesTrans")
     cSeekSD3:= SD3->D3_FILIAL+SD3->D3_NUMSEQ+"E0"
-	Reclock("SD3",.F.)
+	RecLock("SD3",.F.)
 	SD3->D3_CHAVEF1 := "MCOM004" + _cChavePC + SF1->F1_DOC+SF1->F1_SERIE
-	SD3->(Msunlock())
-	SD3->(dbSetOrder(4))//D3_FILIAL+D3_NUMSEQ+D3_CHAVE+D3_COD
+	SD3->(MSUnLock())
+	SD3->(DBSetOrder(4))//D3_FILIAL+D3_NUMSEQ+D3_CHAVE+D3_COD
 	
-	If SD3->(dbSeek(cSeekSD3))
+	If SD3->(DBSeek(cSeekSD3))
 	
-		Reclock("SD3",.F.)
+		RecLock("SD3",.F.)
 		SD3->D3_CHAVEF1 := "MCOM004" + _cChavePC + SF1->F1_DOC+SF1->F1_SERIE
-		SD3->(Msunlock())
+		SD3->(MSUnLock())
 		
-	Endif
+	EndIf
 	
-	SD3->(dbSetOrder(nIndSD3))
-	SD3->(dbGoTo(nRecSD3))
+	SD3->(DBSetOrder(nIndSD3))
+	SD3->(DBGoTo(nRecSD3))
 	
-Endif			
+EndIf			
 
 Return

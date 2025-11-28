@@ -12,7 +12,7 @@ Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1
 // Definicoes de Includes da Rotina.
 //====================================================================================================
 
-#Include "PROTHEUS.CH"  
+#Include "TOTVS.ch"  
 #Include "RWMAKE.CH"             
 
 /*
@@ -36,79 +36,79 @@ Local _nposori := SC5->(Recno())
 //Valida bloqueio logístico
 If SC5->C5_I_BLOG == "S"
 
-	ZZL->(Dbsetorder(3))
-	If !(ZZL->(Dbseek(xFilial("ZZL") + RetCodUsr()))) .OR. ZZL->ZZL_PVLOG != "S"	
+	ZZL->(DBSetOrder(3))
+	If !(ZZL->(DBSeek(xFilial("ZZL") + RetCodUsr()))) .Or. ZZL->ZZL_PVLOG != "S"	
 
 		U_MT_ITMSG("Pedido em Planejamento Logístico, operação não permitida, Por favor entrar em contato com área de Logística","Atenção",,1)
 		Return
 
-	Endif
+	EndIf
 
-Endif
+EndIf
 
 //Valida se pedido pode ser alterado
-SC9->( DbSetOrder(1) )
-IF SC9->( DBSeek( SC5->C5_FILIAL + SC5->C5_NUM ) ) 
-      DO While SC9->( !EOF() ) .AND. SC9->( C9_FILIAL + C9_PEDIDO ) == SC5->C5_FILIAL + SC5->C5_NUM
-          IF !EMPTY(SC9->C9_NFISCAL)
-              U_MT_ITMSG("Pedido selecionado "+ALLTRIM(SC5->C5_NUM)+" já tem Nota: "+SC9->C9_NFISCAL,"Atenção!","Estorne a Nota "+ALLTRIM(SC9->C9_NFISCAL)+" ou selecione outro pedido",1)
+SC9->( DBSetOrder(1) )
+If SC9->( DBSeek( SC5->C5_FILIAL + SC5->C5_NUM ) ) 
+      While SC9->( !Eof() ) .And. SC9->( C9_FILIAL + C9_PEDIDO ) == SC5->C5_FILIAL + SC5->C5_NUM
+          If !Empty(SC9->C9_NFISCAL)
+              U_MT_ITMSG("Pedido selecionado "+AllTrim(SC5->C5_NUM)+" já tem Nota: "+SC9->C9_NFISCAL,"Atenção!","Estorne a Nota "+AllTrim(SC9->C9_NFISCAL)+" ou selecione outro pedido",1)
               Return
-          ENDIF 
-          IF !EMPTY(SC9->C9_CARGA)
-              U_MT_ITMSG("Pedido selecionado "+ALLTRIM(SC5->C5_NUM)+" já esta na carga: "+SC9->C9_CARGA,"Atenção!","Estorne a carga "+ALLTRIM(SC9->C9_CARGA)+" ou selecione outro pedido",1)
+          EndIf 
+          If !Empty(SC9->C9_CARGA)
+              U_MT_ITMSG("Pedido selecionado "+AllTrim(SC5->C5_NUM)+" já esta na carga: "+SC9->C9_CARGA,"Atenção!","Estorne a carga "+AllTrim(SC9->C9_CARGA)+" ou selecione outro pedido",1)
               Return
-          ENDIF 
-           SC9->(DBSKIP())
-	   ENDDO
-ENDIF
+          EndIf 
+           SC9->(DBSkip())
+	   EndDo
+EndIf
 
 //Se o pedido já tiver pedido vinculado verifica se o pedido vinculado pode ser alterado
 _nposori := SC5->(Recno())
 _cpedido := SC5->C5_NUM
 
-SC5->(Dbsetorder(1))
-If SC5->(Dbseek(SC5->C5_FILIAL+SC5->C5_I_PEVIN))
+SC5->(DBSetOrder(1))
+If SC5->(DBSeek(SC5->C5_FILIAL+SC5->C5_I_PEVIN))
 
 	//Valida bloqueio logístico
 	If SC5->C5_I_BLOG == "S"
 
-		ZZL->(Dbsetorder(3))
-		If !(ZZL->(Dbseek(xFilial("ZZL") + RetCodUsr()))) .OR. ZZL->ZZL_PVLOG != "S"	
+		ZZL->(DBSetOrder(3))
+		If !(ZZL->(DBSeek(xFilial("ZZL") + RetCodUsr()))) .Or. ZZL->ZZL_PVLOG != "S"	
 
-	        U_MT_ITMSG("Pedido selecionado "+ALLTRIM(_cpedido)+" possui pedido vinculado, " + SC5->C5_NUM + " e em Planejamento Logístico. Por favor entrar em contato com área de Logística. ",;
+	        U_MT_ITMSG("Pedido selecionado "+AllTrim(_cpedido)+" possui pedido vinculado, " + SC5->C5_NUM + " e em Planejamento Logístico. Por favor entrar em contato com área de Logística. ",;
               													"Atenção!","Retire o Planejamento Logístico ou selecione outro pedido",1)
    			Return
 
-		Endif
+		EndIf
 
-	Endif
+	EndIf
 
-	SC9->( DbSetOrder(1) )
-	IF SC9->( DBSeek( SC5->C5_FILIAL + SC5->C5_NUM ) ) 
-      DO While SC9->( !EOF() ) .AND. SC9->( C9_FILIAL + C9_PEDIDO ) == SC5->C5_FILIAL + SC5->C5_NUM
-          IF !EMPTY(SC9->C9_NFISCAL)
-              U_MT_ITMSG("Pedido selecionado "+ALLTRIM(_cpedido)+" possui pedido vinculado, " + SC5->C5_NUM + " já tem Nota: "+SC9->C9_NFISCAL,;
-              													"Atenção!","Estorne a Nota "+ALLTRIM(SC9->C9_NFISCAL)+" ou selecione outro pedido",1)
+	SC9->( DBSetOrder(1) )
+	If SC9->( DBSeek( SC5->C5_FILIAL + SC5->C5_NUM ) ) 
+      While SC9->( !Eof() ) .And. SC9->( C9_FILIAL + C9_PEDIDO ) == SC5->C5_FILIAL + SC5->C5_NUM
+          If !Empty(SC9->C9_NFISCAL)
+              U_MT_ITMSG("Pedido selecionado "+AllTrim(_cpedido)+" possui pedido vinculado, " + SC5->C5_NUM + " já tem Nota: "+SC9->C9_NFISCAL,;
+              													"Atenção!","Estorne a Nota "+AllTrim(SC9->C9_NFISCAL)+" ou selecione outro pedido",1)
               Return
-          ENDIF 
-          IF !EMPTY(SC9->C9_CARGA)
-              U_MT_ITMSG("Pedido selecionado "+ALLTRIM(_cpedido)+" possui pedido vinculado, " + SC5->C5_NUM + " já esta na carga: "+SC9->C9_CARGA,;
-              "Atenção!","Estorne a carga "+ALLTRIM(SC9->C9_CARGA)+" ou selecione outro pedido",1)
+          EndIf 
+          If !Empty(SC9->C9_CARGA)
+              U_MT_ITMSG("Pedido selecionado "+AllTrim(_cpedido)+" possui pedido vinculado, " + SC5->C5_NUM + " já esta na carga: "+SC9->C9_CARGA,;
+              "Atenção!","Estorne a carga "+AllTrim(SC9->C9_CARGA)+" ou selecione outro pedido",1)
               Return
-          ENDIF 
-           SC9->(DBSKIP())
-	   ENDDO
-	ENDIF
+          EndIf 
+           SC9->(DBSkip())
+	   EndDo
+	EndIf
 
-Endif
+EndIf
 
-SC5->(Dbgoto(_nposori))
+SC5->(DBGoTo(_nposori))
 
 If SC5->C5_I_ENVRD != "V"
 
 	_cperg := "AOMS1102"
 	
-Endif
+EndIf
 
 Pergunte(_cperg,.F.)
 MV_PAR01 := SC5->C5_I_PEVIN
@@ -116,280 +116,280 @@ MV_PAR02 := 1
 
 If Pergunte(_cperg)
 
-	SC5->(Dbgoto(_nposori))
+	SC5->(DBGoTo(_nposori))
 	_cpedido := SC5->C5_NUM
 	
 	//valida para não escolher o próprio pedido
-	If alltrim(SC5->C5_NUM) == alltrim(MV_PAR01)
+	If AllTrim(SC5->C5_NUM) == AllTrim(MV_PAR01)
 	
-		U_ITMSG("Não é possível vincular um pedido a si mesmo","Atenção",,1)
+		U_ITMsg("Não é possível vincular um pedido a si mesmo","Atenção",,1)
 		Return
 		
-	Endif
+	EndIf
 
 	//Se o MV_PAR01 estiver em branco pergunta se quer remover vinculo do pedido de vendas
-	If EMPTY(MV_PAR01) .AND. EMPTY(SC5->C5_I_PEVIN)
+	If Empty(MV_PAR01) .And. Empty(SC5->C5_I_PEVIN)
 	
-		U_ITMSG("Pedido atual não tem vínculo registrado, obrigatório indicar um vínculo","Atenção","Preencha o campo de pedido à vincular",1)
+		U_ITMsg("Pedido atual não tem vínculo registrado, obrigatório indicar um vínculo","Atenção","Preencha o campo de pedido à vincular",1)
 		Return
 		
-	Elseif EMPTY(MV_PAR01)
+	ElseIf Empty(MV_PAR01)
 	
-		If !(U_ITMSG("Deseja limpar vínculo do pedido " +SC5->C5_NUM + " com o pedido "+ SC5->C5_I_PEVIN + "?","Atenção",,2,2,2))
+		If !(U_ITMsg("Deseja limpar vínculo do pedido " +SC5->C5_NUM + " com o pedido "+ SC5->C5_I_PEVIN + "?","Atenção",,2,2,2))
 		
-			u_itmsg("Processo cancelado","Atenção",,1)
+			U_ITMsg("Processo cancelado","Atenção",,1)
 			Return
 		
-		Endif
+		EndIf
 		
-	Endif
+	EndIf
 
 	//Valida se pedido selecionado pode ser vinculado
-     IF !EMPTY(MV_PAR01) .and. !SC5->(DBSEEK(xFilial()+MV_PAR01))
+     If !Empty(MV_PAR01) .And. !SC5->(DBSeek(xFilial()+MV_PAR01))
          U_MT_ITMSG("O Pedido vinculado "+MV_PAR01+" não existe.","PEDIDO VINCULADO",;
 		            "Selecione um Pedido cadastrado",1)
 
 		 Return
 		       
-     ELSEIF !EMPTY(MV_PAR01) .and. !EMPTY(SC5->C5_I_PEVIN) .AND. !(SC5->C5_I_PEVIN == _CPEDIDO)
+     ElseIf !Empty(MV_PAR01) .And. !Empty(SC5->C5_I_PEVIN) .And. !(SC5->C5_I_PEVIN == _CPEDIDO)
       
          U_MT_ITMSG("O Pedido selecionado " + MV_PAR01 + " já esta vinculado com outro Pedido: "+SC5->C5_I_PEVIN,"PEDIDO VINCULADO",;
 		            "Selecione outro um Pedido",1)
 
 		 Return
 
-	 ELSEIF SC5->C5_I_BLOG == "S"
+	 ElseIf SC5->C5_I_BLOG == "S"
 
-		ZZL->(Dbsetorder(3))
-		If !(ZZL->(Dbseek(xFilial("ZZL") + RetCodUsr()))) .OR. ZZL->ZZL_PVLOG != "S"	
+		ZZL->(DBSetOrder(3))
+		If !(ZZL->(DBSeek(xFilial("ZZL") + RetCodUsr()))) .Or. ZZL->ZZL_PVLOG != "S"	
 
-	        U_MT_ITMSG("Pedido selecionado "+ALLTRIM(SC5->C5_NUM)+" em Planejamento Logístico!",;
+	        U_MT_ITMSG("Pedido selecionado "+AllTrim(SC5->C5_NUM)+" em Planejamento Logístico!",;
               													"Atenção!","Retire do Planejamento Logístico ou selecione outro pedido",1)
    			Return
 
-		Endif
+		EndIf
 
-     ELSEif !EMPTY(MV_PAR01)   //ve se tem carga e nota
+     ElseIf !Empty(MV_PAR01)   //ve se tem carga e nota
       
-         SC9->( DbSetOrder(1) )
-         IF SC9->( DBSeek( SC5->C5_FILIAL + MV_PAR01 ) ) 
-	        DO While SC9->( !EOF() ) .AND. SC9->( C9_FILIAL + C9_PEDIDO ) == SC5->C5_FILIAL + MV_PAR01
-	           IF !EMPTY(SC9->C9_NFISCAL)
-                  U_MT_ITMSG("Pedido Vinculado "+ALLTRIM(MV_PAR01)+" já tem Nota: "+SC9->C9_NFISCAL,"Atenção!","Estorne a Nota "+ALLTRIM(SC9->C9_NFISCAL)+" ou selecione outro pedido",1)
+         SC9->( DBSetOrder(1) )
+         If SC9->( DBSeek( SC5->C5_FILIAL + MV_PAR01 ) ) 
+	        While SC9->( !Eof() ) .And. SC9->( C9_FILIAL + C9_PEDIDO ) == SC5->C5_FILIAL + MV_PAR01
+	           If !Empty(SC9->C9_NFISCAL)
+                  U_MT_ITMSG("Pedido Vinculado "+AllTrim(MV_PAR01)+" já tem Nota: "+SC9->C9_NFISCAL,"Atenção!","Estorne a Nota "+AllTrim(SC9->C9_NFISCAL)+" ou selecione outro pedido",1)
                   Return
-	           ENDIF 
-	           IF !EMPTY(SC9->C9_CARGA)
-                  U_MT_ITMSG("Pedido selecionado "+ALLTRIM(MV_PAR01)+" já esta na carga: "+SC9->C9_CARGA,"Atenção!","Estorne a carga "+ALLTRIM(SC9->C9_CARGA)+" ou selecione outro pedido",1)
+	           EndIf 
+	           If !Empty(SC9->C9_CARGA)
+                  U_MT_ITMSG("Pedido selecionado "+AllTrim(MV_PAR01)+" já esta na carga: "+SC9->C9_CARGA,"Atenção!","Estorne a carga "+AllTrim(SC9->C9_CARGA)+" ou selecione outro pedido",1)
                   Return
-	           ENDIF 
-	           SC9->(DBSKIP())
-	        ENDDO
-         ENDIF
+	           EndIf 
+	           SC9->(DBSkip())
+	        EndDo
+         EndIf
       
-     ENDIF
+     EndIf
 	
-	SC5->(Dbgoto(_nposori))
+	SC5->(DBGoTo(_nposori))
 	
 	BEGIN TRANSACTION
 
 	//Se possui um vinculo atual diferente do indicado no MV_PAR01 apaga vinculo do pedido vinculado
-	If !EMPTY(SC5->C5_I_PEVIN) .AND. ALLTRIM(MV_PAR01) !=  ALLTRIM(SC5->C5_I_PEVIN) .AND. SC5->(Dbseek(SC5->C5_FILIAL+SC5->C5_I_PEVIN))
+	If !Empty(SC5->C5_I_PEVIN) .And. AllTrim(MV_PAR01) !=  AllTrim(SC5->C5_I_PEVIN) .And. SC5->(DBSeek(SC5->C5_FILIAL+SC5->C5_I_PEVIN))
     
 		_aLogSC5 := U_ITIniLog( 'SC5')
     
-		Reclock("SC5",.F.)
+		RecLock("SC5",.F.)
 		SC5->C5_I_PEVIN := ""
-		If SC5->C5_I_ENVRD == "V" .AND. MV_PAR02 = 1 
+		If SC5->C5_I_ENVRD == "V" .And. MV_PAR02 = 1 
 			SC5->C5_I_ENVRD := "R"
-			SC5->C5_I_DTRET := DATE() - 1
-			SC5->C5_I_HRRET := TIME()
+			SC5->C5_I_DTRET := Date() - 1
+			SC5->C5_I_HRRET := Time()
 			_CMENS := " - Pedido vinculado anteriormente" + SC5->C5_NUM + " liberado para envio ao RDC."
-		Endif
-		SC5->(Msunlock())
+		EndIf
+		SC5->(MSUnLock())
 		
 		//Grava log de alteração de tabela
-         U_ITGrvLog( _aLogSC5 , "SC5" , 1 , SC5->( C5_FILIAL + C5_NUM ) ,"A" , _cCodUsr , date() , time() )    
+         U_ITGrvLog( _aLogSC5 , "SC5" , 1 , SC5->( C5_FILIAL + C5_NUM ) ,"A" , _cCodUsr , Date() , Time() )    
 		
 		
 		//Verifica se o pedido de vendas existe no RDC 
 		_cQry := "select pedido,pedid2 from rdcitl.TGA447 WHERE  "
-		_cQry += " pedido = '" + alltrim(SC5->C5_NUM) + "'"
+		_cQry += " pedido = '" + AllTrim(SC5->C5_NUM) + "'"
 
-		If select ("TRBPED") > 0
+		If Select ("TRBPED") > 0
 
-			dbselectarea("TRBPED")
-			TRBPED->(Dbclosearea())
+			DBSelectArea("TRBPED")
+			TRBPED->(DBCloseArea())
 	
-		Endif
+		EndIf
 
 		dbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQry ) , "TRBPED" , .T., .F. )
 
-		dbSelectArea("TRBPED")
+		DBSelectArea("TRBPED")
 
 		//se existe atualiza campo pedid2
 		If !TRBPED->(Eof())
 		
 			_cQry := " UPDATE rdcitl.TGA447 SET pedid2 = ''"
-			_cQry += " WHERE pedido = '" + alltrim(SC5->C5_NUM) + "'"
+			_cQry += " WHERE pedido = '" + AllTrim(SC5->C5_NUM) + "'"
 						
 			_nres := TCSqlExec(_cQry)
 		
-		Elseif MV_PAR02 = 1
+		ElseIf MV_PAR02 = 1
 		
 			//Se não existe marca o pedido para ser enviado ao RDC
-			Reclock("SC5",.F.)
+			RecLock("SC5",.F.)
 			SC5->C5_I_ENVRD := "R"
-			SC5->C5_I_DTRET := DATE() - 1
-			SC5->C5_I_HRRET := TIME()
-			SC5->(Msunlock())
+			SC5->C5_I_DTRET := Date() - 1
+			SC5->C5_I_HRRET := Time()
+			SC5->(MSUnLock())
 				
-		Endif
+		EndIf
 		
-		If select ("TRBPED") > 0
+		If Select ("TRBPED") > 0
 
-			dbselectarea("TRBPED")
-			TRBPED->(Dbclosearea())
+			DBSelectArea("TRBPED")
+			TRBPED->(DBCloseArea())
 	
-		Endif
+		EndIf
 		
-	Endif
+	EndIf
 
-	SC5->(Dbgoto(_nposori))
+	SC5->(DBGoTo(_nposori))
 	_CMENS := ""
 	
 	_aLogSC5 := U_ITIniLog( 'SC5')
 	
-	Reclock("SC5",.F.)
+	RecLock("SC5",.F.)
 	//Se libera para envio ao RDC marca como recuperado em data anterior para o schedule gerar muro e enviar
-	If SC5->C5_I_ENVRD == "V" .AND. MV_PAR02 = 1
+	If SC5->C5_I_ENVRD == "V" .And. MV_PAR02 = 1
 		SC5->C5_I_ENVRD := "R"
-    	SC5->C5_I_DTRET := DATE() - 1
-    	SC5->C5_I_HRRET := TIME()
+    	SC5->C5_I_DTRET := Date() - 1
+    	SC5->C5_I_HRRET := Time()
     	_CMENS := " - Pedido " + SC5->C5_NUM + " liberado para envio ao RDC."
-    Endif
+    EndIf
     
-    SC5->C5_I_PEVIN := ALLTRIM(MV_PAR01)
+    SC5->C5_I_PEVIN := AllTrim(MV_PAR01)
     
-    SC5->(Msunlock())
+    SC5->(MSUnLock())
     
     //Grava log de alteração de tabela
-     U_ITGrvLog( _aLogSC5 , "SC5" , 1 , SC5->( C5_FILIAL + C5_NUM ) ,"A" , _cCodUsr , date() , time() )    
+     U_ITGrvLog( _aLogSC5 , "SC5" , 1 , SC5->( C5_FILIAL + C5_NUM ) ,"A" , _cCodUsr , Date() , Time() )    
         
     //Verifica se o pedido de vendas existe no RDC 
 	_cQry := "select pedido,pedid2 from rdcitl.TGA447 WHERE  "
-	_cQry += " pedido = '" + alltrim(SC5->C5_NUM) + "'"
+	_cQry += " pedido = '" + AllTrim(SC5->C5_NUM) + "'"
 
-	If select ("TRBPED") > 0
+	If Select ("TRBPED") > 0
 
-		dbselectarea("TRBPED")
-		TRBPED->(Dbclosearea())
+		DBSelectArea("TRBPED")
+		TRBPED->(DBCloseArea())
 	
-	Endif
+	EndIf
 
 	dbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQry ) , "TRBPED" , .T., .F. )
 
-	dbSelectArea("TRBPED")
+	DBSelectArea("TRBPED")
 
 	//se existe atualiza campo pedid2
 	If !TRBPED->(Eof())
 		
-		_cQry := " UPDATE rdcitl.TGA447 SET pedid2 = '" + ALLTRIM(SC5->C5_I_PEVIN) + "'"
-		_cQry += " WHERE pedido = '" + alltrim(SC5->C5_NUM) + "'"
+		_cQry := " UPDATE rdcitl.TGA447 SET pedid2 = '" + AllTrim(SC5->C5_I_PEVIN) + "'"
+		_cQry += " WHERE pedido = '" + AllTrim(SC5->C5_NUM) + "'"
 						
 		_nres := TCSqlExec(_cQry)
 		
-	Elseif MV_PAR02 = 1
+	ElseIf MV_PAR02 = 1
 		
 		//Se não existe marca o pedido para ser enviado ao RDC
-		Reclock("SC5",.F.)
+		RecLock("SC5",.F.)
 		SC5->C5_I_ENVRD := "R"
-		SC5->C5_I_DTRET := DATE() - 1
-		SC5->C5_I_HRRET := TIME()
-		SC5->(Msunlock())
+		SC5->C5_I_DTRET := Date() - 1
+		SC5->C5_I_HRRET := Time()
+		SC5->(MSUnLock())
 				
-	Endif
+	EndIf
 		
-	If select ("TRBPED") > 0
+	If Select ("TRBPED") > 0
 
-		dbselectarea("TRBPED")
-		TRBPED->(Dbclosearea())
+		DBSelectArea("TRBPED")
+		TRBPED->(DBCloseArea())
 	
-	Endif
+	EndIf
     
     
     //Atualiza pedido vinculado
-    If !EMPTY(MV_PAR01) 
-    	SC5->(Dbseek(SC5->C5_FILIAL+SC5->C5_I_PEVIN))
+    If !Empty(MV_PAR01) 
+    	SC5->(DBSeek(SC5->C5_FILIAL+SC5->C5_I_PEVIN))
     	
     	_aLogSC5 := U_ITIniLog( 'SC5')
     	
-    	Reclock("SC5",.F.)
+    	RecLock("SC5",.F.)
     	SC5->C5_I_PEVIN := _cpedido
     	//Se libera para envio ao RDC marca como recuperado em data anterior para o schedule gerar muro e enviar
-    	If SC5->C5_I_ENVRD == "V" .AND. MV_PAR02 = 1
+    	If SC5->C5_I_ENVRD == "V" .And. MV_PAR02 = 1
     		SC5->C5_I_ENVRD := "R"
-    		SC5->C5_I_DTRET := DATE() - 1
-    		SC5->C5_I_HRRET := TIME()
+    		SC5->C5_I_DTRET := Date() - 1
+    		SC5->C5_I_HRRET := Time()
     		_CMENS := " - Pedido " + SC5->C5_NUM + " vinculado também liberado para envio ao RDC."
-    	Endif
-    	SC5->(Msunlock())
+    	EndIf
+    	SC5->(MSUnLock())
     	
     	//Grava log de alteração de tabela
-         U_ITGrvLog( _aLogSC5 , "SC5" , 1 , SC5->( C5_FILIAL + C5_NUM ) ,"A" , _cCodUsr , date() , time() )    
+         U_ITGrvLog( _aLogSC5 , "SC5" , 1 , SC5->( C5_FILIAL + C5_NUM ) ,"A" , _cCodUsr , Date() , Time() )    
            
     	//Verifica se o pedido de vendas existe no RDC 
 		_cQry := "select pedido,pedid2 from rdcitl.TGA447 WHERE  "
-		_cQry += " pedido = '" + alltrim(SC5->C5_NUM) + "'"
+		_cQry += " pedido = '" + AllTrim(SC5->C5_NUM) + "'"
 
-		If select ("TRBPED") > 0
+		If Select ("TRBPED") > 0
 
-			dbselectarea("TRBPED")
-			TRBPED->(Dbclosearea())
+			DBSelectArea("TRBPED")
+			TRBPED->(DBCloseArea())
 	
-		Endif
+		EndIf
 
 		dbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQry ) , "TRBPED" , .T., .F. )
 
-		dbSelectArea("TRBPED")
+		DBSelectArea("TRBPED")
 
 		//se existe atualiza campo pedid2
 		If !TRBPED->(Eof())
 		
-			_cQry := " UPDATE rdcitl.TGA447 SET pedid2 = '" + ALLTRIM(SC5->C5_I_PEVIN) + "'"
-			_cQry += " WHERE pedido = '" + alltrim(SC5->C5_NUM) + "'"
+			_cQry := " UPDATE rdcitl.TGA447 SET pedid2 = '" + AllTrim(SC5->C5_I_PEVIN) + "'"
+			_cQry += " WHERE pedido = '" + AllTrim(SC5->C5_NUM) + "'"
 						
 			_nres := TCSqlExec(_cQry)
 		
-		Elseif MV_PAR02 = 1
+		ElseIf MV_PAR02 = 1
 		
 			//Se não existe marca o pedido para ser enviado ao RDC
-			Reclock("SC5",.F.)
+			RecLock("SC5",.F.)
 			SC5->C5_I_ENVRD := "R"
-			SC5->C5_I_DTRET := DATE() - 1
-			SC5->C5_I_HRRET := TIME()
-			SC5->(Msunlock())
+			SC5->C5_I_DTRET := Date() - 1
+			SC5->C5_I_HRRET := Time()
+			SC5->(MSUnLock())
 				
-		Endif
+		EndIf
 		
-		If select ("TRBPED") > 0
+		If Select ("TRBPED") > 0
 
-			dbselectarea("TRBPED")
-			TRBPED->(Dbclosearea())
+			DBSelectArea("TRBPED")
+			TRBPED->(DBCloseArea())
 	
-		Endif
+		EndIf
     	    	
-    Endif
+    EndIf
     
     END TRANSACTION
     
-    SC5->(Dbgoto(_nposori))
+    SC5->(DBGoTo(_nposori))
 
-    u_itmsg("Vínculo do pedido " + SC5->C5_NUM + " atualizado com sucesso!","Atenção","Pedido vinculado: " + SC5->C5_I_PEVIN + _CMENS,3)
+    U_ITMsg("Vínculo do pedido " + SC5->C5_NUM + " atualizado com sucesso!","Atenção","Pedido vinculado: " + SC5->C5_I_PEVIN + _CMENS,3)
 
 Else
 
-	u_itmsg("Encerrado sem alterações","Atenção",,1)
+	U_ITMsg("Encerrado sem alterações","Atenção",,1)
 	
-Endif
+EndIf
 
 Return

@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 04/07/2019 |Relatório reescrito, aproveitando apenas a ideia base. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 10/07/2019 |Modificado para tratar registros duplicados que não deveriam ocorrer. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 25/07/2019 | Corrigida a barra de progresso. Help 28346
+Lucas Borges  |04/07/2019| Chamado 28346. Relatório reescrito, aproveitando apenas a ideia base.
+Lucas Borges  |10/07/2019| Chamado 28346. Modificado para tratar registros duplicados que não deveriam ocorrer.
+Lucas Borges  |25/07/2019| Chamado 28346. Corrigida a barra de progresso.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT018
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 23/01/2009
-===============================================================================================================================
 Descrição---------: Relatório de Divergência entre Estoque (SD3) e Recepção de Leite Próprio (ZLD)
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 04/07/2019
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -91,11 +80,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 04/07/2019
-===============================================================================================================================
 Descrição---------: Processa impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -113,10 +99,10 @@ Local _nCountRec	:= 0
 If MV_PAR04 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLD")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -168,11 +154,11 @@ oReport:SetMeter(0)
 BeginSql alias _cAlias
 SELECT A.*, ZL2.ZL2_COD, ZL2.ZL2_DESCRI
   FROM %Table:ZL2% ZL2,
-       (SELECT CASE WHEN L.ZLD_FILIAL IS NULL THEN E.D3_FILIAL ELSE L.ZLD_FILIAL END FILIAL,
-               CASE WHEN L.ZLD_DTCOLE IS NULL THEN E.D3_EMISSAO ELSE L.ZLD_DTCOLE END ZLD_DTCOLE,
-               CASE WHEN L.ZLD_TICKET IS NULL THEN E.D3_L_ORIG ELSE L.ZLD_TICKET END TICKET,
-               CASE WHEN L.ZLD_SETOR IS NULL THEN E.D3_L_SETOR ELSE L.ZLD_SETOR END SETOR,
-               CASE WHEN L.ZLD_SETOR IS NULL THEN 'Leite' WHEN E.D3_L_SETOR IS NULL THEN 'Estoque' ELSE ' ' END INEXISTENTE,
+       (SELECT Case WHEN L.ZLD_FILIAL IS NULL THEN E.D3_FILIAL Else L.ZLD_FILIAL END FILIAL,
+               Case WHEN L.ZLD_DTCOLE IS NULL THEN E.D3_EMISSAO Else L.ZLD_DTCOLE END ZLD_DTCOLE,
+               Case WHEN L.ZLD_TICKET IS NULL THEN E.D3_L_ORIG Else L.ZLD_TICKET END TICKET,
+               Case WHEN L.ZLD_SETOR IS NULL THEN E.D3_L_SETOR Else L.ZLD_SETOR END SETOR,
+               Case WHEN L.ZLD_SETOR IS NULL THEN 'Leite' WHEN E.D3_L_SETOR IS NULL THEN 'Estoque' Else ' ' END INEXISTENTE,
                L.ZLD_TOTBOM QTD_RECEP,
                E.D3_QUANT QTD_EST,
                ABS(NVL(L.ZLD_TOTBOM,0) - NVL(E.D3_QUANT,0)) DIFERENCA
@@ -216,18 +202,18 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->FILIAL
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

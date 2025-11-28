@@ -10,7 +10,8 @@ Lucas Borges  |27/05/2025| Chamado 50617. Revisões diversas visando padronizar o
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
+
 /*
 ===============================================================================================================================
 Programa----------: ACOM034
@@ -48,9 +49,9 @@ Local _cnome := "" As Character
 
 Begin Sequence
    If _cCampo == "ZFX_CCUSTO" 
-      ZFX->(DbSetOrder(1))
+      ZFX->(DBSetOrder(1))
       
-      If M->ZFX_TIPO == "P" .AND. ZFX->(DbSeek(xFilial("ZFX")+M->ZFX_PRODUT+M->ZFX_CCUSTO)) 
+      If M->ZFX_TIPO == "P" .And. ZFX->(DBSeek(xFilial("ZFX")+M->ZFX_PRODUT+M->ZFX_CCUSTO)) 
          FWAlertWarning("Produto x Centro de Custo já cadastrado para esta filial.","ACOM03401")
          _lRet := .F.    
          Break
@@ -58,12 +59,12 @@ Begin Sequence
    
    EndIf
 
-   SA1->(Dbsetorder(1))
-   If SA1->(Dbseek(xfilial("SA1")+M->ZFX_CLIENT+M->ZFX_LOJC))
+   SA1->(DBSetOrder(1))
+   If SA1->(DBSeek(xFilial("SA1")+M->ZFX_CLIENT+M->ZFX_LOJC))
       _cnome := SA1->A1_NOME
    EndIf
 
-   If !Empty(M->ZFX_CLIENT) .AND. !EMPTY(M->ZFX_LOJC)
+   If !Empty(M->ZFX_CLIENT) .And. !Empty(M->ZFX_LOJC)
 	  M->ZFX_NOMEC := _cnome
    EndIf
    
@@ -85,25 +86,25 @@ Retorno-----------: True ou False
 */  
 User Function ACOM034O
 
-Local _lret := .T. As Logical
+Local _lRet := .T. As Logical
 
 Begin Sequence
 
 If M->ZFX_TIPO == 'P' 
-	If EMPTY(M->ZFX_PRODUT)
+	If Empty(M->ZFX_PRODUT)
 		FWAlertWarning("Para regra tipo produto o campo produto é obrigatório!","ACOM03402")
- 		_lret := .F.
+ 		_lRet := .F.
  		Break
- 	Endif
+ 	EndIf
  	
- 	ZFX->(DbSetOrder(1))
-    If (inclui .or. M->ZFX_PRODUT != ZFX->ZFX_PRODUT) .AND. ZFX->(DbSeek(xFilial("ZFX")+M->ZFX_PRODUT)) 
+ 	ZFX->(DBSetOrder(1))
+    If (inclui .Or. M->ZFX_PRODUT != ZFX->ZFX_PRODUT) .And. ZFX->(DBSeek(xFilial("ZFX")+M->ZFX_PRODUT)) 
  		FWAlertInfo("Regra para esse produto já cadastrada nessa filial.","ACOM03403")
  		_lRet := .F.    
  		Break
  	EndIf
  
- 	If !(EMPTY(M->ZX_FORNEC) .AND. EMPTY(M->ZX_LOJA) .AND. EMPTY(M->ZX_CLIENT) .AND. EMPTY(M->ZX_LOJC) )
+ 	If !(Empty(M->ZX_FORNEC) .And. Empty(M->ZX_LOJA) .And. Empty(M->ZX_CLIENT) .And. Empty(M->ZX_LOJC) )
  		If FWAlertYesNo("Para registro do tipo produto os campos Fornecedor e Cliente devem estar vazios, apagar campos e confirmar gravação?","ACOM03404")
  			M->ZX_FORNEC := ""
  			M->ZX_LOJA := ""
@@ -112,26 +113,26 @@ If M->ZFX_TIPO == 'P'
  		Else
 			_lRet := .F.    
  			Break
- 		Endif
- 	Endif
-Endif
+ 		EndIf
+ 	EndIf
+EndIf
 
 If M->ZFX_TIPO == 'F' 
- 	If EMPTY(M->ZFX_FORNEC)
+ 	If Empty(M->ZFX_FORNEC)
  		FWAlertWarning("Para regra tipo fornecedor o campo fornecedor é obrigatório!","ACOM03405")
- 		_lret := .F.
+ 		_lRet := .F.
  		Break
- 	Endif
+ 	EndIf
  	
- 	ZFX->(DbSetOrder(3))
+ 	ZFX->(DBSetOrder(3))
       
- 	If  (inclui .or. M->ZFX_FORNEC+M->ZFX_LOJA != ZFX->ZFX_FORNEC+ZFX->ZFX_LOJA) .AND. ZFX->(DbSeek(xFilial("ZFX")+M->ZFX_FORNEC+M->ZFX_LOJA)) 
+ 	If  (inclui .Or. M->ZFX_FORNEC+M->ZFX_LOJA != ZFX->ZFX_FORNEC+ZFX->ZFX_LOJA) .And. ZFX->(DBSeek(xFilial("ZFX")+M->ZFX_FORNEC+M->ZFX_LOJA)) 
  		FWAlertInfo("Regra de para esse fornecedor já cadastrada nessa filial.","ACOM03406")
  		_lRet := .F.    
  		Break
- 	Endif
+ 	EndIf
  	
- 	If !(EMPTY(M->ZX_PRODUT) .AND. EMPTY(M->ZX_CLIENT) .AND. EMPTY(M->ZX_LOJC) )
+ 	If !(Empty(M->ZX_PRODUT) .And. Empty(M->ZX_CLIENT) .And. Empty(M->ZX_LOJC) )
  		If FWAlertYesNo("Para registro do tipo fornecedor os campos Produto e Cliente devem estar vazios, apagar campos e confirmar gravação?","ACOM03407")
  			M->ZX_PRODUT := ""
  			M->ZX_CLIENT := ""
@@ -139,25 +140,25 @@ If M->ZFX_TIPO == 'F'
  		Else
  			_lRet := .F.    
  			Break
- 		Endif
- 	Endif
-Endif
+ 		EndIf
+ 	EndIf
+EndIf
 
 If M->ZFX_TIPO == 'C' 
- 	If EMPTY(M->ZFX_CLIENT)
+ 	If Empty(M->ZFX_CLIENT)
  		FWAlertWarning("Para regra tipo cliente o campo cliente é obrigatório!","ACOM03408")
- 		_lret := .F.
+ 		_lRet := .F.
  		Break
- 	Endif
+ 	EndIf
  	
- 	ZFX->(DbSetOrder(4))
- 	If (inclui .or. M->ZFX_CLIENT+M->ZFX_LOJC != ZFX->ZFX_CLIENT+ZFX->ZFX_LOJC) .AND. ZFX->(DbSeek(xFilial("ZFX")+M->ZFX_CLIENT+M->ZFX_LOJC)) 
+ 	ZFX->(DBSetOrder(4))
+ 	If (inclui .Or. M->ZFX_CLIENT+M->ZFX_LOJC != ZFX->ZFX_CLIENT+ZFX->ZFX_LOJC) .And. ZFX->(DBSeek(xFilial("ZFX")+M->ZFX_CLIENT+M->ZFX_LOJC)) 
  		FWAlertInfo("Regra de para esse cliente já cadastrada nessa filial.","ACOM03409")
  		_lRet := .F.    
  		Break
  	EndIf
  	
- 	If !(EMPTY(M->ZX_PRODUT) .AND. EMPTY(M->ZX_CLIENT) .AND. EMPTY(M->ZX_LOJC) )
+ 	If !(Empty(M->ZX_PRODUT) .And. Empty(M->ZX_CLIENT) .And. Empty(M->ZX_LOJC) )
  		If FWAlertYesNo("Para registro do tipo cliente os campos Produto e Fornecedor devem estar vazios, apagar campos e confirmar gravação?","ACOM03410")
  			M->ZX_PRODUT := ""
  			M->ZX_FORNEC := ""
@@ -165,13 +166,13 @@ If M->ZFX_TIPO == 'C'
  		Else
  			_lRet := .F.    
  			Break
- 		Endif
- 	Endif
-Endif
+ 		EndIf
+ 	EndIf
+EndIf
 
 End Sequence
 
-Return _lret
+Return _lRet
 
 /*
 ===============================================================================================================================
@@ -185,22 +186,22 @@ Retorno-----------: _cCC - string com valor para o C6_CC
 */  
 User Function ACOM034G
 
-Local _cCC := Posicione('SB1',1,xfilial('SB1')+M->C6_PRODUTO, 'B1_CC') As Character//(só usa se não achar regra)
+Local _cCC := Posicione('SB1',1,xFilial('SB1')+M->C6_PRODUTO, 'B1_CC') As Character//(só usa se não achar regra)
 Local _cordem := SuperGetMV("IT_ORDCC",.F.,"C") As Character //Define ordem de prioridade de regra, C para cliente primeiro e P para produto primeiro
 Local _lachou := .F. As Logical
 
 //Atualiza com regra de produto 
-ZFX->(Dbsetorder(1))
+ZFX->(DBSetOrder(1))
 
-If ZFX->(Dbseek(xfilial("ZFX")+M->C6_PRODUTO))
+If ZFX->(DBSeek(xFilial("ZFX")+M->C6_PRODUTO))
 	_cCC := ZFX->ZFX_CCUSTO
 	_lachou := .F.
-Endif
+EndIf
 
-//Atualiza com regra de cliente se for prioridade ou se não achou regra de produto
-ZFX->(Dbsetorder(4))
-If (_cordem == "C" .or. !_lachou ) .and. ZFX->(Dbseek(xfilial("ZFX")+M->C5_CLIENTE+M->C5_LOJACLI))
+//Atualiza com regra de cliente se For prioridade ou se não achou regra de produto
+ZFX->(DBSetOrder(4))
+If (_cordem == "C" .Or. !_lachou ) .And. ZFX->(DBSeek(xFilial("ZFX")+M->C5_CLIENTE+M->C5_LOJACLI))
 	_cCC := ZFX->ZFX_CCUSTO
-Endif
+EndIf
 
 Return _cCC

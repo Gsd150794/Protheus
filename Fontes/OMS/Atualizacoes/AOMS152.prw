@@ -1,41 +1,35 @@
 /*
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-=================================================================================================================================================================================================
-Analista         - Programador       - Inicio     - Envio    - Chamado - Motivo da Alteração
--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Vanderlei Alves  - Julio Paz         - 14/03/25   - 10/06/25 - 50188   - Desenvolvimento de Rotina de Integração Webservice Protheus x TMS Multiembarcador Para Replicar Cargas Criadas no Protheus para o TMS Multiembarcador [OMS]
-Vanderlei Alves  - Julio Paz         - 14/03/25   - 10/06/25 - 45229   - Webservice de Integração Protheus x TMS Multiembarcador.
-Vanderlei Alves  - Julio Paz         - 12/06/25   - 13/06/25 - 45229   - Ajustes no novo webservice de integração Alteração na Situação Comercial do Pedido de Vendas.
-Lucas Borges     - Lucas Borges      - 01/08/25   - 01/08/25 - 51453   - Substituir função EncodeUtf8 por FWHttpEncode
-=================================================================================================================================================================================================
+===============================================================================================================================
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+Julio Paz     |13/06/2025| Chamado 45229. Ajustes no novo webservice de integração Alteração na Situação Comercial do Pedido de Vendas.
+Lucas Borges  |01/08/2025| Chamado 51453. Substituir função EncodeUtf8 por FWHttpEncode
+Lucas Borges  |18/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
+===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.Ch"
+#Include "TOTVS.ch"
 #Include "FWMVCDef.Ch"
 
-STATIC _lScheduler :=.F.
+Static _lScheduler :=.F.
 
 /*
 ===============================================================================================================================
-Programa----------: AOMS152A()
+Programa----------: AOMS152A
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 14/03/2025
-===============================================================================================================================
 Descrição---------: Rotina de integração de Cargas Via Webservice para o sistema TMS Multiembarcador.
-===============================================================================================================================
 Parametros--------: _lSchedule = .T. = modo agendado.
                                  .F. = modo manual/menu.
                     _cOpcao    = "P" = Carga posicionada.
                                = "S" = Selecionar Cargas.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS152A(_lSchedule,_cOpcao)
+
 Local _nTotRegs := 0
 Local _aParAux:= {}
 Local _aParRet:= {}
@@ -51,24 +45,11 @@ Begin Sequence
    If ValType(_lSchedule) == "U"
       _lSchedule := .F.
    EndIf 
-/*
-   _lWsTms := U_ITGETMV( 'IT_WEBSTMS' , .F. ) 
-
-   If ! _lWsTms
-      If ! _lSchedule
-         U_ItMsg("Esta rotina não está habilitada para rodar nesta filial.","Atenção",,1) 
-      EndIf 
-
-      Break 
-   EndIf 
-*/
-//   If _lWsTms
-      If ! _lSchedule
-         If ! U_ITMSG("Confirma o reenvio da(s) Carga(s) para o Sistema TMS ?","Atenção" , , ,2, 2)
-            Break 
-         EndIf
-      EndIf  
-//   EndIf 
+   If ! _lSchedule
+      If ! U_ITMsg("Confirma o reenvio da(s) Carga(s) para o Sistema TMS ?","Atenção" , , ,2, 2)
+         Break 
+      EndIf
+   EndIf
    _cDAK_Cod := ""
    
    If _cOpcao == "P"
@@ -77,12 +58,12 @@ Begin Sequence
       //================================================================================
       If _lSchedule
          AOMS152DAI()   // Grava os dados das tabelas ZFQ e ZFR para a carga posicionada.
-      Else 
+      Else
          Processa( {|| AOMS152DAI() } , 'Aguarde!' , 'Gravando Dados para Reenvio da Carga...' )
       EndIf 
       _cDAK_Cod := DAK->DAK_COD
 
-   Else 
+   Else
       //=================================================================================================
       // Grava os dados das tabelas ZFQ e ZFR para as cargas informadas pelo usuário na tela de filtro.
       //=================================================================================================
@@ -90,11 +71,11 @@ Begin Sequence
          Break 
       EndIf 
 
-      _bQryFiltr := {|| "SELECT DISTINCT DAK_COD, A1_NOME FROM "+ RETSQLNAME("DAK") + " DAK, "+ RETSQLNAME("DAI") + " DAI, "+RETSQLNAME("SA1") + " SA1 " +"WHERE DAK.D_E_L_E_T_ = ' '  AND DAI.D_E_L_E_T_ = ' ' AND SA1.D_E_L_E_T_ = ' ' AND DAK.DAK_FILIAL = '" + xFilial("DAK") + "' AND DAK_FILIAL = DAI_FILIAL AND DAK_COD = DAI_COD AND DAI_CLIENT = A1_COD AND DAI_LOJA = A1_LOJA AND DAK.DAK_DATA >= '"+ Dtos(_dDataFilt) +"' ORDER BY DAK_COD DESC "}     
+      _bQryFiltr := {|| "SELECT DISTINCT DAK_COD, A1_NOME FROM "+ RETSQLNAME("DAK") + " DAK, "+ RETSQLNAME("DAI") + " DAI, "+RETSQLNAME("SA1") + " SA1 " +"WHERE DAK.D_E_L_E_T_ = ' '  AND DAI.D_E_L_E_T_ = ' ' AND SA1.D_E_L_E_T_ = ' ' AND DAK.DAK_FILIAL = '" + xFilial("DAK") + "' AND DAK_FILIAL = DAI_FILIAL AND DAK_COD = DAI_COD AND DAI_CLIENT = A1_COD AND DAI_LOJA = A1_LOJA AND DAK.DAK_DATA >= '"+ DToS(_dDataFilt) +"' ORDER BY DAK_COD DESC "}     
       _aItalac_F3 := {}
-      Aadd(_aItalac_F3,{"MV_PAR01",_bQryFiltr,{|Tab| (Tab)->DAK_COD },{|Tab| (Tab)->A1_NOME }  ,/*_bCondSA1*/ ,"Cargas",,,,.F.        ,       , } )
+      aAdd(_aItalac_F3,{"MV_PAR01",_bQryFiltr,{|Tab| (Tab)->DAK_COD },{|Tab| (Tab)->A1_NOME }  ,/*_bCondSA1*/ ,"Cargas",,,,.F.        ,       , } )
      
-      Aadd( _aParAux , { 1 , "Cargas"       		, MV_PAR01, "@!"    , ""  , "F3ITLC"  , "" , 100 , .F. } )
+      aAdd( _aParAux , { 1 , "Cargas"       		, MV_PAR01, "@!"    , ""  , "F3ITLC"  , "" , 100 , .F. } )
      
       If !ParamBox( _aParAux , "Selecione o filtro" , @_aParRet,  , /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
          Break 
@@ -105,7 +86,7 @@ Begin Sequence
           //==========================================================
           // Posiciona a carga para a gravação das tabela ZFQ e ZFR.  
           //==========================================================
-          DAK->(DbSetOrder(1))
+          DAK->(DBSetOrder(1))
           If DAK->(MsSeek(xFilial("DAK")+U_ItKey(_cCarga,"DAK_COD")))
              Processa( {|| AOMS152DAI() } , 'Aguarde!' , 'Gravando Dados para Reenvio da Carga...' )
              _cDAK_Cod += If(!Empty(_cDAK_Cod),";","") + DAK->DAK_COD
@@ -115,7 +96,7 @@ Begin Sequence
 
    _cQry2 := " SELECT ZFQ.R_E_C_N_O_ ZFQ_RECNO,ZFQ_FILIAL, ZFQ_NCARGA, ZFQ_SEQENT " 
    _cQry2 += " FROM "+ RETSQLNAME("ZFQ") + " ZFQ "
-   _cQry2 += " WHERE ZFQ.D_E_L_E_T_ <> '*' "
+   _cQry2 += " WHERE ZFQ.D_E_L_E_T_ = ' ' "
    _cQry2 += " AND ZFQ_SITUAC = 'C' "  
    _cQry2 += " AND ZFQ_NCARGA IN " + FormatIn(_cDAK_Cod,";")
 
@@ -127,11 +108,11 @@ Begin Sequence
 
    MPSysOpenQuery( _cQry2 , "QRYZFQ") 
 
-   DbSelectArea("QRYZFQ")
+   DBSelectArea("QRYZFQ")
 
    Count To _nTotRegs 
 
-   QRYZFQ->(DbGotop())
+   QRYZFQ->(DBGoTop())
    
    If ! _lSchedule
       ProcRegua(_nTotRegs)
@@ -142,28 +123,26 @@ Begin Sequence
    //====================================================================
    If _lSchedule
       U_AOMS152B()
-   Else 
+   Else
       Processa( {|| U_AOMS152B() } , 'Aguarde!' , 'Reenviando a Carga para o Sistema TMS...' )
    EndIf 
 
 End Sequence 
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS152B
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 06/10/2023
-===============================================================================================================================
 Descrição---------: Rotina de transmissão de dados webservice da carga para o sistema TMS da Multi-Embarcador / Multsoftware.
-===============================================================================================================================
 Parametros--------: oproc = Objeto de mensagens
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS152B(oproc)
+
 Local _cDirXML := ""
 Local _cLink   := ""
 Local _cCabXML := ""
@@ -214,28 +193,28 @@ Begin Sequence
    //================================================================================
    // Retorna Codigo Empresa WebService TMS-MULTI EMBARCADOR.
    //================================================================================                    
-   _cEmpWebService := U_ITGETMV( 'IT_EMPTMSM' , "000006")
+   _cEmpWebService := SuperGetMV('IT_EMPTMSM',.F.,"000005")
 
    //================================================================================
    // Lê o diretório dos arquivos XML modelos e o link de envio dos dados.
    //================================================================================
    If !_lScheduler
-   	If Valtype(oproc) = "O"
+   	If ValType(oproc) = "O"
    		oproc:cCaption := ("2/12 - Identificando diretório dos XML...")
    		ProcessMessages()
     	EndIf 
    EndIf 
 
-   ZFM->(DbSetOrder(1))
-   If ZFM->(DbSeek(xFilial("ZFM")+_cEmpWebService))
+   ZFM->(DBSetOrder(1))
+   If ZFM->(DBSeek(xFilial("ZFM")+_cEmpWebService))
       _cDirXML := ZFM->ZFM_LOCXML 
       _cLink   := AllTrim(ZFM->ZFM_LINK01)
    Else
-      IF _lScheduler
+      If _lScheduler
          u_itconout( "[AOMS140] - Empresa WebService para envio dos dados não localizada.")
-      ELSE
-         u_itmsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
-      ENDIF
+      Else
+         U_ITMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
+      EndIf
       Break   
    EndIf                        
    
@@ -243,12 +222,12 @@ Begin Sequence
       If _lScheduler
          U_Itconout("[AOMS140] - Diretório dos arquivos XML modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".")
       Else
-         U_Itmsg("Diretório dos arquivos XML modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)
+         U_ITMsg("Diretório dos arquivos XML modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)
       EndIf
       Break                                     
    EndIf
       
-   _cDirXML := Alltrim(_cDirXML)
+   _cDirXML := AllTrim(_cDirXML)
    If Right(_cDirXML,1) <> "\"
       _cDirXML := _cDirXML + "\"
    EndIf
@@ -257,7 +236,7 @@ Begin Sequence
    // Lê os arquivos modelo XML e os transforma em String.
    //================================================================================
    If !_lScheduler
-  		If valtype(oproc) = "O"
+  		If ValType(oproc) = "O"
   			oproc:cCaption := ("3/12 - Lendo arquivo XML Modelo de Cabeçalho...")
   			ProcessMessages()
    	EndIf 
@@ -268,13 +247,13 @@ Begin Sequence
       If _lScheduler
          U_Itconout("[AOMS140] - Erro na leitura do arquivo XML modelo do cabeçalhode envio Pedido de Vendas.")
       Else
-         U_Itmsg("Erro na leitura do arquivo XML modelo do cabeçalho de envio Pedido de Vendas. ","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo XML modelo do cabeçalho de envio Pedido de Vendas. ","Atenção",,1)
       EndIf
       Break
    EndIf
 
    If !_lScheduler
-  		If Valtype(oproc) = "O"
+  		If ValType(oproc) = "O"
   			oproc:cCaption := ("4/12 - Lendo arquivo XML Modelo de Detalhe A_1...")
   			ProcessMessages()
   		EndIf 
@@ -283,12 +262,12 @@ Begin Sequence
    //_cDetA_1_XML := U_AOMS140X(_cDirXML+"det_a_1_pedido_troca_nf_tms.TXT") // "Det_A_1_Pedido_TMS.TXT")
    _cDetA_1_XML := U_AOMS140X(_cDirXML+"det_a_1_pedido_reenvio_troca_nf_tms.txt") 
    If Empty(_cDetA_1_XML)
-      U_Itmsg("Erro na leitura do arquivo XML modelo do detalhe A_1 de envio Pedido de Vendas.","Atenção",,1)
+      U_ITMsg("Erro na leitura do arquivo XML modelo do detalhe A_1 de envio Pedido de Vendas.","Atenção",,1)
       Break
    EndIf            
 
    If !_lScheduler
-  		If Valtype(oproc) = "O"
+  		If ValType(oproc) = "O"
   			oproc:cCaption := ("5/12 - Lendo arquivo XML Modelo de Detalhe A_2...")
   			ProcessMessages()
   		EndIf 
@@ -296,12 +275,12 @@ Begin Sequence
 
    _cDetA_2_XML := U_AOMS140X(_cDirXML+"Det_A_2_EXPEDIDOR_Pedido_TMS.TXT")
    If Empty(_cDetA_2_XML)
-      U_Itmsg("Erro na leitura do arquivo XML modelo do detalhe A_2_Expedidor de envio Pedido de Vendas.","Atenção",,1)
+      U_ITMsg("Erro na leitura do arquivo XML modelo do detalhe A_2_Expedidor de envio Pedido de Vendas.","Atenção",,1)
       Break
    EndIf            
 
    If !_lScheduler
-  		If Valtype(oproc) = "O"
+  		If ValType(oproc) = "O"
   			oproc:cCaption := ("6/12 - Lendo arquivo XML Modelo de Detalhe A_3...")
   			ProcessMessages()
   		EndIf 
@@ -309,12 +288,12 @@ Begin Sequence
 
    _cDetA_3_XML := U_AOMS140X(_cDirXML+"det_a_3_pedido_troca_nf_tms.TXT")
    If Empty(_cDetA_3_XML)
-      U_Itmsg("Erro na leitura do arquivo XML modelo do detalhe A_3 de envio Pedido de Vendas.","Atenção",,1)
+      U_ITMsg("Erro na leitura do arquivo XML modelo do detalhe A_3 de envio Pedido de Vendas.","Atenção",,1)
       Break
    EndIf            
 
    If !_lScheduler
-   	If Valtype(oproc) = "O"
+   	If ValType(oproc) = "O"
    		oproc:cCaption := ("7/12 - Lendo arquivo XML Modelo de Item de Pedido...")
    		ProcessMessages()
    	EndIf 
@@ -325,26 +304,25 @@ Begin Sequence
       If _lScheduler
          U_Itconout("[AOMS140] - Erro na leitura do arquivo XML modelo dos itens de envio Pedido de Vendas.")
       Else
-         U_itmsg("Erro na leitura do arquivo XML modelo dos itens de envio Pedido de Vendas.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo XML modelo dos itens de envio Pedido de Vendas.","Atenção",,1)
       EndIf 
       Break
    EndIf 
 
    If ! _lScheduler
-  		If valtype(oproc) = "O"
+  		If ValType(oproc) = "O"
   			oproc:cCaption := ("8/12 - Lendo arquivo XML Modelo de Detalhe B...")
    		ProcessMessages()
     	EndIf 
    EndIf     
        
-   //_cDetC_XML := U_AOMS140X(_cDirXML+"det_c_pedido_troca_nf_tms.TXT")
    _cDetC_XML := U_AOMS140X(_cDirXML+"det_c_pedido_reenvio_troca_nf_tms.txt")
    
    If Empty(_cDetC_XML)
       If _lScheduler
          U_Itconout("[AOMS140] - Erro na leitura do arquivo XML modelo do detalhe C de envio Pedido de Vendas..")
       Else
-         U_Itmsg("Erro na leitura do arquivo XML modelo do detalhe C de envio Pedido de Vendas.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo XML modelo do detalhe C de envio Pedido de Vendas.","Atenção",,1)
       EndIf 
       Break
    EndIf            
@@ -355,7 +333,7 @@ Begin Sequence
       If _lScheduler
          U_Itconout("[AOMS140] - Erro na leitura do arquivo XML modelo do detalhe C 2 de envio Pedido de Vendas..")
       Else
-         U_Itmsg("Erro na leitura do arquivo XML modelo do detalhe C 2 de envio Pedido de Vendas.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo XML modelo do detalhe C 2 de envio Pedido de Vendas.","Atenção",,1)
       EndIf 
       Break
    EndIf       
@@ -366,7 +344,7 @@ Begin Sequence
       If _lScheduler
          U_Itconout("[AOMS140] - Erro na leitura do arquivo XML modelo do detalhe C 3 de envio Pedido de Vendas..")
       Else
-         U_Itmsg("Erro na leitura do arquivo XML modelo do detalhe C 3 de envio Pedido de Vendas.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo XML modelo do detalhe C 3 de envio Pedido de Vendas.","Atenção",,1)
       EndIf 
       Break
    EndIf   
@@ -377,13 +355,13 @@ Begin Sequence
       If _lScheduler
          U_Itconout("[AOMS140] - Erro na leitura do arquivo XML modelo do detalhe C 4 de envio Pedido de Vendas..")
       Else
-         U_Itmsg("Erro na leitura do arquivo XML modelo do detalhe C 4 de envio Pedido de Vendas.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo XML modelo do detalhe C 4 de envio Pedido de Vendas.","Atenção",,1)
       EndIf 
       Break
    EndIf   
    
    If !_lScheduler
-  		If Valtype(oproc) = "O"
+  		If ValType(oproc) = "O"
    		oproc:cCaption := ("9/12 - Lendo arquivo XML Modelo de Rodapé...")
    		ProcessMessages()
    	EndIf 
@@ -394,19 +372,19 @@ Begin Sequence
       If _lScheduler
          u_itconout("[AOMS140] - Erro na leitura do arquivo XML modelo do rodapé de envio Pedido de Vendas.")
       Else
-         u_itmsg("Erro na leitura do arquivo XML modelo do rodapé de envio Pedido de Vendas.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo XML modelo do rodapé de envio Pedido de Vendas.","Atenção",,1)
       EndIf 
       Break
    EndIf
 
-   SC5->(DbSetOrder(1)) // C5_FILIAL+C5_NUM
-   SB1->(DbSetOrder(1)) // B1_FILIAL+B1_COD
+   SC5->(DBSetOrder(1)) // C5_FILIAL+C5_NUM
+   SB1->(DBSetOrder(1)) // B1_FILIAL+B1_COD
 
    //================================================================================
    // Concatena os Pedidos de Vendas selecionados e monta array de XML com os dados.
    //================================================================================                       
    If !_lScheduler
-  		If Valtype(oproc) = "O"
+  		If ValType(oproc) = "O"
   			oproc:cCaption := ("10/12 - Montando dados de envio...")
   			ProcessMessages()
    	EndIf
@@ -422,15 +400,15 @@ Begin Sequence
    
    _aresult := {}
    
-   ZFR->(DbSetOrder(5))
-   SC9->(DbSetOrder(1))      
-   SA3->(DbSetOrder(1))
-   SA2->(DbSetOrder(3))
-   SA1->(DbSetOrder(3))
-   SC6->(DbSetOrder(1)) // C6_FILIAL+C6_NUM+C6_ITEM+C6_PRODUTO
-   ZG9->(DbSetOrder(1)) // ZG9_FILIAL+ZG9_CODFIL+ZG9_ARMAZE   
+   ZFR->(DBSetOrder(5))
+   SC9->(DBSetOrder(1))      
+   SA3->(DBSetOrder(1))
+   SA2->(DBSetOrder(3))
+   SA1->(DBSetOrder(3))
+   SC6->(DBSetOrder(1)) // C6_FILIAL+C6_NUM+C6_ITEM+C6_PRODUTO
+   ZG9->(DBSetOrder(1)) // ZG9_FILIAL+ZG9_CODFIL+ZG9_ARMAZE   
                      
-   If Valtype(oproc) = "O" 
+   If ValType(oproc) = "O" 
 		oproc:cCaption := ("11/12 - Enviando dados para MULTI-EMBARCADOR...")
 		ProcessMessages()
    EndIf  
@@ -439,54 +417,52 @@ Begin Sequence
    // Monta array dos estados
    //================================================================================
    _aUF := {}
-   aadd(_aUF,{"RO","11"})
-   aadd(_aUF,{"AC","12"})
-   aadd(_aUF,{"AM","13"})
-   aadd(_aUF,{"RR","14"})
-   aadd(_aUF,{"PA","15"})
-   aadd(_aUF,{"AP","16"})
-   aadd(_aUF,{"TO","17"})
-   aadd(_aUF,{"MA","21"})
-   aadd(_aUF,{"PI","22"})
-   aadd(_aUF,{"CE","23"})
-   aadd(_aUF,{"RN","24"})
-   aadd(_aUF,{"PB","25"})
-   aadd(_aUF,{"PE","26"})
-   aadd(_aUF,{"AL","27"})	
-   aadd(_aUF,{"MG","31"})
-   aadd(_aUF,{"ES","32"})
-   aadd(_aUF,{"RJ","33"})
-   aadd(_aUF,{"SP","35"})
-   aadd(_aUF,{"PR","41"})
-   aadd(_aUF,{"SC","42"})
-   aadd(_aUF,{"RS","43"})
-   aadd(_aUF,{"MS","50"})
-   aadd(_aUF,{"MT","51"})
-   aadd(_aUF,{"GO","52"})
-   aadd(_aUF,{"DF","53"})
-   aadd(_aUF,{"SE","28"})
-   aadd(_aUF,{"BA","29"})
-   aadd(_aUF,{"EX","99"})
+   aAdd(_aUF,{"RO","11"})
+   aAdd(_aUF,{"AC","12"})
+   aAdd(_aUF,{"AM","13"})
+   aAdd(_aUF,{"RR","14"})
+   aAdd(_aUF,{"PA","15"})
+   aAdd(_aUF,{"AP","16"})
+   aAdd(_aUF,{"TO","17"})
+   aAdd(_aUF,{"MA","21"})
+   aAdd(_aUF,{"PI","22"})
+   aAdd(_aUF,{"CE","23"})
+   aAdd(_aUF,{"RN","24"})
+   aAdd(_aUF,{"PB","25"})
+   aAdd(_aUF,{"PE","26"})
+   aAdd(_aUF,{"AL","27"})	
+   aAdd(_aUF,{"MG","31"})
+   aAdd(_aUF,{"ES","32"})
+   aAdd(_aUF,{"RJ","33"})
+   aAdd(_aUF,{"SP","35"})
+   aAdd(_aUF,{"PR","41"})
+   aAdd(_aUF,{"SC","42"})
+   aAdd(_aUF,{"RS","43"})
+   aAdd(_aUF,{"MS","50"})
+   aAdd(_aUF,{"MT","51"})
+   aAdd(_aUF,{"GO","52"})
+   aAdd(_aUF,{"DF","53"})
+   aAdd(_aUF,{"SE","28"})
+   aAdd(_aUF,{"BA","29"})
+   aAdd(_aUF,{"EX","99"})
 
    //=====================================================================
    // Obtem o token de acesso ao sistema multi embarcador.
    //=====================================================================
-   _cToken := U_ITGETMV( 'IT_TOKMUTE' , "a78e0523d3794843855e8d95c2bff8d4")
+   _cToken := SuperGetMV('IT_TOKMUTE',.F.,"a78e0523d3794843855e8d95c2bff8d4")
    
-   //_aPedFat := {}
-   //_aRatFat := {}
    _aPVCargas := {}
 
-   ZFQ->(DbSetOrder(3)) // ZFQ_FILIAL+ZFQ_PEDIDO+ZFQ_SITUAC+DTOS(ZFQ_DATA)  
+   ZFQ->(DBSetOrder(3)) // ZFQ_FILIAL+ZFQ_PEDIDO+ZFQ_SITUAC+DToS(ZFQ_DATA)  
 
-   QRYZFQ->(DbGoTop())                                                                   
-   Do While ! QRYZFQ->(Eof())
+   QRYZFQ->(DBGoTop())                                                                   
+   While ! QRYZFQ->(Eof())
 
-      ZFQ->(DbGoto(QRYZFQ->ZFQ_RECNO))
-      DAK->(DbSetOrder(1)) //DAK->(DbSetOrder(1)) // DAK->(DbSetOrder(7))
+      ZFQ->(DBGoTo(QRYZFQ->ZFQ_RECNO))
+      DAK->(DBSetOrder(1)) //DAK->(DBSetOrder(1)) // DAK->(DBSetOrder(7))
       
       If ! DAK->(MsSeek(ZFQ->ZFQ_FILIAL+ZFQ->ZFQ_NCARGA)) // ZFQ->ZFQ_FILIAL+ZFQ->ZFQ_CARTMS
-         QRYZFQ->(DbSkip())
+         QRYZFQ->(DBSkip())
          Loop 
       EndIf 
 
@@ -498,34 +474,34 @@ Begin Sequence
          	
          U_Itconout( '[AOMS140] -  - Enviando pedido ' + ZFQ->ZFQ_PEDIDO + ' para multi-embarcador ...' )
          	
-         If Valtype(oproc) = "O"
+         If ValType(oproc) = "O"
          	oproc:cCaption := ("12/12 - Enviando dados para MULTI-EMBARCADOR - Pedido " + ZFQ->ZFQ_PEDIDO + "..." )
          	ProcessMessages()
    		EndIf          	
          	
-         If !(SC5->(DbSeek(ZFQ->ZFQ_FILIAL+U_ItKey(ZFQ->ZFQ_PEDIDO,"C5_NUM")))) //Se não achar o pedido de vendas marca como enviado e não transmite
+         If !(SC5->(DBSeek(ZFQ->ZFQ_FILIAL+U_ItKey(ZFQ->ZFQ_PEDIDO,"C5_NUM")))) //Se não achar o pedido de vendas marca como enviado e não transmite
             ZFQ->(RecLock("ZFQ",.F.))
             ZFQ->ZFQ_SITUAC  := "P"
             ZFQ->ZFQ_DATAAL  := Date()
             ZFQ->ZFQ_RETORN  := "Eliminado por exclusão do pedido no SC5"
-            ZFQ->ZFQ_DATAP   := DATE()
-            ZFQ->ZFQ_HORAP   := TIME()
-            ZFQ->(MsUnlock())
+            ZFQ->ZFQ_DATAP   := Date()
+            ZFQ->ZFQ_HORAP   := Time()
+            ZFQ->(MSUnLock())
             U_Itconout( '[AOMS140] -  - Pedido ' + ZFQ->ZFQ_PEDIDO + ' eliminado da muro por exclusão ...' )
-         Else  
+         Else
             //-----------------------------------------------------------------------------------------
             // Realiza a integração dos pedidos de vendas (Envio de XML) via WebService.
             //-----------------------------------------------------------------------------------------
             _cSitEnv := "C"
-            ZFR->(DbSetOrder(5))  // Alguma rotina está alterando a situação da ZFQ, de "T" para "N".
-            If ! ZFR->(DbSeek(ZFQ->ZFQ_FILIAL+ZFQ->ZFQ_PEDIDO+_cSitEnv)) 
+            ZFR->(DBSetOrder(5))  // Alguma rotina está alterando a situação da ZFQ, de "T" para "N".
+            If ! ZFR->(DBSeek(ZFQ->ZFQ_FILIAL+ZFQ->ZFQ_PEDIDO+_cSitEnv)) 
                _cSitEnv := "N"
-               ZFR->(DbSeek(ZFQ->ZFQ_FILIAL+ZFQ->ZFQ_PEDIDO+_cSitEnv)) 
+               ZFR->(DBSeek(ZFQ->ZFQ_FILIAL+ZFQ->ZFQ_PEDIDO+_cSitEnv)) 
             EndIf 
 
             _aRecnoItem := {}
             _cDadosItens := ""
-            Do While ! ZFR->(Eof()) .And. ZFR->(ZFR_FILIAL+ZFR_NUMPED+ZFR_SITUAC) = ZFQ->(ZFQ_FILIAL+ZFQ_PEDIDO)+_cSitEnv  
+            While ! ZFR->(Eof()) .And. ZFR->(ZFR_FILIAL+ZFR_NUMPED+ZFR_SITUAC) = ZFQ->(ZFQ_FILIAL+ZFQ_PEDIDO)+_cSitEnv  
                //============================================================
                // Faz a atualização dos itens para pedidos de vendas antigos
                //============================================================
@@ -542,13 +518,13 @@ Begin Sequence
                      ZFR->ZFR_SEGUNI   := SC6->C6_SEGUM
                      ZFR->ZFR_QTDSGU   := SC6->C6_UNSVEN
                   EndIf 
-                  ZFR->(MsUnLock()) 
-               EndIF
+                  ZFR->(MSUnLock()) 
+               EndIf
                      
                _cDadosItens += &(_cItemXML)
-               Aadd(_aRecnoItem,ZFR->(Recno()))
+               aAdd(_aRecnoItem,ZFR->(Recno()))
               
-               ZFR->(DbSkip())
+               ZFR->(DBSkip())
             EndDo
 
             If ! Empty(_cDadosItens) 
@@ -561,24 +537,24 @@ Begin Sequence
                      _cXML := &(_cCabXML) + &(_cDetA_1_XML) + &(_cDetA_2_XML) + &(_cDetA_3_XML) + _cDadosItens + &(_cDetC_XML) + &(_cDetC3_XML) + _cRodXML  // Monta o XML de envio.
                   ElseIf ZFQ->ZFQ_TIPVEI == "5" // Rodo-Trem
                      _cXML := &(_cCabXML) + &(_cDetA_1_XML) + &(_cDetA_2_XML) + &(_cDetA_3_XML) + _cDadosItens + &(_cDetC_XML) + &(_cDetC4_XML) + _cRodXML  // Monta o XML de envio.
-                  Else // Caminhão e Utilitário
+                  Else// Caminhão e Utilitário
                      _cXML := &(_cCabXML) + &(_cDetA_1_XML) + &(_cDetA_2_XML) + &(_cDetA_3_XML) + _cDadosItens + &(_cDetC_XML) + _cRodXML  // Monta o XML de envio.
                   EndIf
 
-               Else  // Não possui Expedidor Preenchido. Não Inclui a Tag Expedidor
+               Else// Não possui Expedidor Preenchido. Não Inclui a Tag Expedidor
                   If ZFQ->ZFQ_TIPVEI == "1" // Carreta
                      _cXML := &(_cCabXML) + &(_cDetA_1_XML) + &(_cDetA_3_XML) + _cDadosItens + &(_cDetC_XML)+ &(_cDetC2_XML) + _cRodXML  // Monta o XML de envio.
                   ElseIf ZFQ->ZFQ_TIPVEI == "3" // Bi-Trem
                      _cXML := &(_cCabXML) + &(_cDetA_1_XML) + &(_cDetA_3_XML) + _cDadosItens + &(_cDetC_XML)+ &(_cDetC3_XML) + _cRodXML  // Monta o XML de envio.
                   ElseIf ZFQ->ZFQ_TIPVEI == "5" // Rodo-Trem
                      _cXML := &(_cCabXML) + &(_cDetA_1_XML) + &(_cDetA_3_XML) + _cDadosItens + &(_cDetC_XML)+ &(_cDetC4_XML) + _cRodXML  // Monta o XML de envio.
-                  Else // Caminhão e Utilitário
+                  Else// Caminhão e Utilitário
                      _cXML := &(_cCabXML) + &(_cDetA_1_XML) + &(_cDetA_3_XML) + _cDadosItens + &(_cDetC_XML) + _cRodXML  // Monta o XML de envio.  
                   EndIf 
                EndIf 
  		    
  		         // Limpa & da string
- 		         _cXML := strtran(_cXML,"&"," ")
+ 		         _cXML := StrTran(_cXML,"&"," ")
 
 		         // Envia para o servidor
                _cOk := oWsdl:SendSoapMsg(_cXML) // Este comando pega o XML e envia para o servidor da MULTI-EMBARCADOR.  
@@ -649,16 +625,16 @@ Begin Sequence
 
                //=====================================================================================
                // Para não rodar a rotina de fechamento de carga, grava Array _aPVCargas 
-               // se algum pedido da carga não for integrado com sucesso. 
+               // se algum pedido da carga não For integrado com sucesso. 
                //=====================================================================================
-               _nI := AsCan(_aPVCargas,{|x| x[1] == DAK->DAK_COD})
+               _nI := aScan(_aPVCargas,{|x| x[1] == DAK->DAK_COD})
                If _nI == 0
                   If _cCodMsg <> "200" 
-                     Aadd(_aPVCargas,{DAK->DAK_COD, .F., DAK->(Recno())})
-                  Else 
-                     Aadd(_aPVCargas,{DAK->DAK_COD, .T., DAK->(Recno())})
+                     aAdd(_aPVCargas,{DAK->DAK_COD, .F., DAK->(Recno())})
+                  Else
+                     aAdd(_aPVCargas,{DAK->DAK_COD, .T., DAK->(Recno())})
                   EndIf 
-               Else 
+               Else
                   If _cCodMsg <> "200" 
                      _aPVCargas[_nI,2] := .F.
                   EndIf  
@@ -676,24 +652,24 @@ Begin Sequence
                ZFQ->ZFQ_XMLRET  := _cResult
                ZFQ->ZFQ_RASTMS  := _cProtIntP // _cCodRast // Nr Protocolo Pedido
 
-               ZFQ->ZFQ_DATAP   := DATE()
-               ZFQ->ZFQ_HORAP   := TIME()
-               ZFQ->(MsUnlock())
+               ZFQ->ZFQ_DATAP   := Date()
+               ZFQ->ZFQ_HORAP   := Time()
+               ZFQ->(MSUnLock())
            
                For _nI := 1 To Len(_aRecnoItem)
-                   ZFR->(DbGoTo(_aRecnoItem[_nI]))
+                   ZFR->(DBGoTo(_aRecnoItem[_nI]))
                
                    ZFR->(RecLock("ZFR",.F.))
-                   ZFR->ZFR_SITUAC  := _cSituacao // iif(_cok, "P", "N")
+                   ZFR->ZFR_SITUAC  := _cSituacao // IIf(_cok, "P", "N")
                    ZFR->ZFR_DATAAL  := Date()
-                   ZFR->ZFR_RETORN  := _cResposta // AllTrim(strtran(_cResult,Chr(10)," ")) // grava o resultado da integração na tabela ZFQ,dizendo que deu certo ou não.
-                   ZFR->(MsUnlock()) 
+                   ZFR->ZFR_RETORN  := _cResposta // AllTrim(StrTran(_cResult,Chr(10)," ")) // grava o resultado da integração na tabela ZFQ,dizendo que deu certo ou não.
+                   ZFR->(MSUnLock()) 
                Next       
                
                If ! Empty(_cProtIntC) // Protocolo de Integração da Carga. 
                   DAK->(RecLock("DAK",.F.))
                   DAK->DAK_I_PTMS := AllTrim(_cProtIntC) //
-                  DAK->(MsUnLock())
+                  DAK->(MSUnLock())
                EndIf 
 
                //=======================================================
@@ -702,10 +678,10 @@ Begin Sequence
                If ! Empty(_cProtIntP) // Protocolo de Integração do Pedido.
                   SC5->(RecLock("SC5",.F.))
                   SC5->C5_I_CDTMS := AllTrim(_cProtIntP) 
-                  SC5->(MsUnLock())
+                  SC5->(MSUnLock())
                EndIf 
                
-               Aadd(_aresult,{ZFQ->ZFQ_PEDIDO,DAK->DAK_COD,ZFQ->ZFQ_CNPJEM,"[Retorno Reenvio da Carga] : " + AllTrim(ZFQ->ZFQ_RETORN)}) // adicona em um array para fazer um item list, exibir os resultados.
+               aAdd(_aresult,{ZFQ->ZFQ_PEDIDO,DAK->DAK_COD,ZFQ->ZFQ_CNPJEM,"[Retorno Reenvio da Carga] : " + AllTrim(ZFQ->ZFQ_RETORN)}) // adicona em um array para fazer um item list, exibir os resultados.
                Sleep(100) //Espera para não travar a comunicação com o webservice da MULTI-EMBARCADOR
             EndIf
 
@@ -713,7 +689,7 @@ Begin Sequence
          
       End Transaction
 
-      QRYZFQ->(DbSkip())
+      QRYZFQ->(DBSkip())
    EndDo 
    
    //===========================================================================
@@ -721,43 +697,25 @@ Begin Sequence
    //===========================================================================
    For _nI := 1 To Len(_aPVCargas)
        If _aPVCargas[_nI,2] // Carga e pedidos de vendas integrados com sucesso.
-          DAK->(DbGoto(_aPVCargas[_nI,3]))         
+          DAK->(DBGoTo(_aPVCargas[_nI,3]))         
           _aRet := U_AOMS140F()  // Chama a rotina de integração Webservice de finalização da carga.
           If _aRet[1]  // Solicitação de Fechamento de Carga realizado com sucesso. 
-             Aadd(_aresult,{"Carga: >>>",DAK->DAK_COD,"","[Retorno Fechamento da Carga após reenvio] : Sucesso - " + _aRet[2] + "-" + _aRet[3]}) // adicona em um array para fazer um item list, exibir os resultados.
-/*
-             //==============================================================================
-             // Após Fechar a Carga, Roda a Rotina de solicitação de emissão de nota fiscal
-             //______________________________________________________________________________
-             // _aRet :=  {1=True/False, // sucesso na integração / falha na integração
-             //            2=Codigo da Mensagem de Retorno,
-             //            3=Código e Mensagem de Retorno, 
-             //            4=Xml de Retorno, 
-             //            5=Xml de Envio}
-             //==============================================================================
-             _aRet := U_AOMS140P() // Chama a rotina de integração Webservice de solicitação de emissão de nota fiscal.
-
-             If _aRet[1]  // Solicitação de Fechamento de Carga realizado com sucesso.
-                Aadd(_aresult,{"Carga: >>>",DAK->DAK_COD,"","[Retorno Mudança Reeenvio Solicitação de emissão de nota fiscal] : Sucesso - " + _aRet[2] + "-" + _aRet[3]}) // adicona em um array para fazer um item list, exibir os resultados.
-             Else 
-                Aadd(_aresult,{"Carga: >>>",DAK->DAK_COD,"","[Retorno Mudança Reeenvio Solicitação de emissão de nota fiscal] : Erro - "    + _aRet[2] + "-" + _aRet[3]}) // adicona em um array para fazer um item list, exibir os resultados.
-             EndIf 
-*/
-          Else // Mensagem de erro no Reenvio.
-             Aadd(_aresult,{"Carga: >>>",ZFQ->ZFQ_NCARGA,"","[Retorno Fechamento da Carga após Reenvio] : Erro - " + _aRet[2] + "-" + _aRet[3]})    // adicona em um array para fazer um item list, exibir os resultados.
+             aAdd(_aresult,{"Carga: >>>",DAK->DAK_COD,"","[Retorno Fechamento da Carga após reenvio] : Sucesso - " + _aRet[2] + "-" + _aRet[3]}) // adicona em um array para fazer um item list, exibir os resultados.
+          Else// Mensagem de erro no Reenvio.
+             aAdd(_aresult,{"Carga: >>>",ZFQ->ZFQ_NCARGA,"","[Retorno Fechamento da Carga após Reenvio] : Erro - " + _aRet[2] + "-" + _aRet[3]})    // adicona em um array para fazer um item list, exibir os resultados.
           EndIf 
        EndIf 
    Next  
 
    _aCabecalho := {}
-   Aadd(_aCabecalho,"PEDIDO" ) 
-   Aadd(_aCabecalho,"CARGA" ) 
-   Aadd(_aCabecalho,"CNPJ") 
-   Aadd(_aCabecalho,"RETORNO") 
+   aAdd(_aCabecalho,"PEDIDO" ) 
+   aAdd(_aCabecalho,"CARGA" ) 
+   aAdd(_aCabecalho,"CNPJ") 
+   aAdd(_aCabecalho,"RETORNO") 
              
    _cTitulo := "Resultados da integração"
       
-   If len(_aresult) > 0 .AND. !_lScheduler
+   If Len(_aresult) > 0 .And. !_lScheduler
       U_ITListBox( _cTitulo , _aCabecalho , _aresult  ) // Exibe uma tela de resultado.
       _aresult := {}
   	EndIf
@@ -766,59 +724,57 @@ End Sequence
 
 RestOrd(_aOrd)
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS152DAI()
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 17/03/2025
-===============================================================================================================================
 Descrição---------: Grava as tabelas ZFQ e ZFR de acordo com os pedidos de vendas da carga.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 Static Function AOMS152DAI()
+
 Local _nSequenPV := 0
 Local _aEspecie := {}
 
 Begin Sequence 
-   Aadd(_aEspecie,{"CA   ","10"}) // Conh.Aereo
-   Aadd(_aEspecie,{"CTA  ","09"}) // Conh.Transp.Aquaviario
-   Aadd(_aEspecie,{"CTF  ","11"}) // Conh.Transp.Ferroviario
-   Aadd(_aEspecie,{"CTR  ","08"}) // Conh.Transp.Rodoviario
-   Aadd(_aEspecie,{"NFST ","07"}) // NF Servico de Transporte
-   Aadd(_aEspecie,{"CTM  ","26"}) // Conh.Transp.Multimodal
-   Aadd(_aEspecie,{"CTE  ","57"}) // Conhecimento de Transporte Eletronico
-   Aadd(_aEspecie,{"CTEOS","67"}) // Conhecimento de Transporte Eletrônico para Outros Serviços - CT-e OS
-   Aadd(_aEspecie,{"NFPS ","  "}) // NF Prestacao de Servico
-   Aadd(_aEspecie,{"NFS  ","  "}) // NF Servico
-   Aadd(_aEspecie,{"RPS  ","  "}) // Recibo Provisorio de Servicos - Nota Fiscal Eletronica de Sao Paulo
-   Aadd(_aEspecie,{"NFSC ","21"}) // NF Servico de Comunicacao
-   Aadd(_aEspecie,{"NTST ","22"}) // NF Servico de Telecomunicacoes
-   Aadd(_aEspecie,{"NFCF ","02"}) // NF de venda a Consumidor Final
-   Aadd(_aEspecie,{"CF   ","02"}) // Cupom Fiscal gerado pelo SIGALOJA
-   Aadd(_aEspecie,{"ECF  ","02"}) // Cupom Fiscal gerado pelo SIGALOJA
-   Aadd(_aEspecie,{"RMD  ","18"}) // Resumo Movimento Diario
-   Aadd(_aEspecie,{"NFCEE","06"}) // Conta de Energia Eletrica
-   Aadd(_aEspecie,{"NFFA ","29"}) // Nota fiscal de fornecimento de agua
-   Aadd(_aEspecie,{"NFCFG","28"}) // Nota fiscal/conta de fornecimento de gas
-   Aadd(_aEspecie,{"NFE  ","01"}) // NF Entrada
-   Aadd(_aEspecie,{"NFA  ","1B"}) // Nota Fiscal Avulsa
-   Aadd(_aEspecie,{"NFP  ","04"}) // NF de Produtor
-   Aadd(_aEspecie,{"SPED ","55"}) // Nota fiscal eletronica do SEFAZ.
-   Aadd(_aEspecie,{"NFCE ","65"}) // Nota fiscal Eletronica ao Consumidor Final
-   Aadd(_aEspecie,{"SATCE","59"}) // CUPOM FISCAL ELETRÔNICO – SAT
+   aAdd(_aEspecie,{"CA   ","10"}) // Conh.Aereo
+   aAdd(_aEspecie,{"CTA  ","09"}) // Conh.Transp.Aquaviario
+   aAdd(_aEspecie,{"CTF  ","11"}) // Conh.Transp.Ferroviario
+   aAdd(_aEspecie,{"CTR  ","08"}) // Conh.Transp.Rodoviario
+   aAdd(_aEspecie,{"NFST ","07"}) // NF Servico de Transporte
+   aAdd(_aEspecie,{"CTM  ","26"}) // Conh.Transp.Multimodal
+   aAdd(_aEspecie,{"CTE  ","57"}) // Conhecimento de Transporte Eletronico
+   aAdd(_aEspecie,{"CTEOS","67"}) // Conhecimento de Transporte Eletrônico para Outros Serviços - CT-e OS
+   aAdd(_aEspecie,{"NFPS ","  "}) // NF Prestacao de Servico
+   aAdd(_aEspecie,{"NFS  ","  "}) // NF Servico
+   aAdd(_aEspecie,{"RPS  ","  "}) // Recibo Provisorio de Servicos - Nota Fiscal Eletronica de Sao Paulo
+   aAdd(_aEspecie,{"NFSC ","21"}) // NF Servico de Comunicacao
+   aAdd(_aEspecie,{"NTST ","22"}) // NF Servico de Telecomunicacoes
+   aAdd(_aEspecie,{"NFCF ","02"}) // NF de venda a Consumidor Final
+   aAdd(_aEspecie,{"CF   ","02"}) // Cupom Fiscal gerado pelo SIGALOJA
+   aAdd(_aEspecie,{"ECF  ","02"}) // Cupom Fiscal gerado pelo SIGALOJA
+   aAdd(_aEspecie,{"RMD  ","18"}) // Resumo Movimento Diario
+   aAdd(_aEspecie,{"NFCEE","06"}) // Conta de Energia Eletrica
+   aAdd(_aEspecie,{"NFFA ","29"}) // Nota fiscal de fornecimento de agua
+   aAdd(_aEspecie,{"NFCFG","28"}) // Nota fiscal/conta de fornecimento de gas
+   aAdd(_aEspecie,{"NFE  ","01"}) // NF Entrada
+   aAdd(_aEspecie,{"NFA  ","1B"}) // Nota Fiscal Avulsa
+   aAdd(_aEspecie,{"NFP  ","04"}) // NF de Produtor
+   aAdd(_aEspecie,{"SPED ","55"}) // Nota fiscal eletronica do SEFAZ.
+   aAdd(_aEspecie,{"NFCE ","65"}) // Nota fiscal Eletronica ao Consumidor Final
+   aAdd(_aEspecie,{"SATCE","59"}) // CUPOM FISCAL ELETRÔNICO – SAT
 
    DAI->(MsSeek(DAK->DAK_FILIAL+DAK->DAK_COD))
-   Do While ! DAI->(Eof()) .And. DAI->DAI_FILIAL+DAI->DAI_COD == DAK->DAK_FILIAL+DAK->DAK_COD
+   While ! DAI->(Eof()) .And. DAI->DAI_FILIAL+DAI->DAI_COD == DAK->DAK_FILIAL+DAK->DAK_COD
       SC5->(MsSeek(DAI->DAI_FILIAL+DAI->DAI_PEDIDO))
 
       If SC5->C5_I_PEDPA == "S"
-         DAI->(DbSkip())
+         DAI->(DBSkip())
          Loop 
       EndIf 
 
@@ -831,7 +787,7 @@ Begin Sequence
       //====================================================
       If _lSchedule
          U_AOMS084P("C",,"SCHEDULLER","ESP") 
-      Else 
+      Else
          U_AOMS084P("C",,"BROWSER","ESP")
       EndIf 
 
@@ -845,7 +801,6 @@ Begin Sequence
       ZFQ->ZFQ_CNPJTP := Posicione('SA2',1,xFilial('SA2')+DA4->DA4_FORNEC+DA4->DA4_LOJA,'A2_CGC')
       
       ZFQ->ZFQ_VALFRE := DAK->DAK_I_FRET // N	16	2	Valor do Frete	Valor do Frete
-      //ZFQ->ZFQ_NCARGA := DAK->DAK_I_CARG // DAK->DAK_COD     // Numero da Carga.
       
       If DA3->DA3_I_TPVC == "2" .Or. DA3->DA3_I_TPVC == "4"  // 2=CAMINHAO / 4=UTILITARIO
          ZFQ->ZFQ_PLACA	 := DA3->DA3_PLACA  // Placa Veiculo	Placa Principal do Veiculo
@@ -870,7 +825,7 @@ Begin Sequence
       ZFQ->ZFQ_CHVNFE := SF2->F2_CHVNFE   	//	Chave NFE	Chave da Nota Fiscal
       ZFQ->ZFQ_EMISNF := SF2->F2_EMISSAO	   //	Data Emi.NFE	Data de Emissão da Nota Fiscal
       
-      _nI := AsCan(_aEspecie,{|x| x[1] == U_ItKey(SF2->F2_ESPECIE,"F2_ESPECIE")})
+      _nI := aScan(_aEspecie,{|x| x[1] == U_ItKey(SF2->F2_ESPECIE,"F2_ESPECIE")})
 
       If _nI > 0
          ZFQ->ZFQ_MODNFE := _aEspecie[_nI,2]	//C	5	0	Modelo NFE	Modelo de Nota Fiscal
@@ -902,7 +857,7 @@ Begin Sequence
 
       ZFQ->ZFQ_SEQENT := StrZero(_nSequenPV,6)
 
-      ZFQ->(MsUnLock())
+      ZFQ->(MSUnLock())
 
       _nSequenPV += 1
 
@@ -910,48 +865,44 @@ Begin Sequence
       // Há alguama rotina que altera ZFR->ZFR_SITUAC := "T" para "N".
       // Este trecho força a atualização para "T".
       //=================================================================
-      ZFR->(DbSetOrder(5)) // ZFR_FILIAL+ZFR_NUMPED+ZFR_SITUAC  
+      ZFR->(DBSetOrder(5)) // ZFR_FILIAL+ZFR_NUMPED+ZFR_SITUAC  
       ZFR->(MsSeek(ZFQ->ZFQ_FILIAL+ZFQ->ZFQ_PEDIDO+"N"))
-      Do While ! ZFR->(Eof()) .And. ZFR->ZFR_FILIAL+ZFR->ZFR_NUMPED+ZFR->ZFR_SITUAC == ZFQ->ZFQ_FILIAL+ZFQ->ZFQ_PEDIDO+"N"
+      While ! ZFR->(Eof()) .And. ZFR->ZFR_FILIAL+ZFR->ZFR_NUMPED+ZFR->ZFR_SITUAC == ZFQ->ZFQ_FILIAL+ZFQ->ZFQ_PEDIDO+"N"
          ZFR->(RecLock("ZFR",.F.))
          ZFR->ZFR_SITUAC := "C"
-         ZFR->(MsUnlock())
+         ZFR->(MSUnLock())
 
-         ZFR->(DbSkip())
+         ZFR->(DBSkip())
       EndDo  
 
-      DAI->(DbSkip())
+      DAI->(DBSkip())
    EndDo 
    
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS152F() // AOMS144F
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 28/03/2025
-===============================================================================================================================
 Descrição---------: Rotina de transmissão dos XMLs das notas fiscais Italac x TMS Multiembarcador.
                     Rotina adaptada para transmitir os XMLs para Cargas Posicionadas.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
-Static Function AOMS152F() // AOMS144F()
+Static Function AOMS152F
+
 Local _cQry          := ""
 Local _cAliasTMP     := "TRBAOMS152F" // AOMS144F"
 Local _cAlias        := "ZFK"
-//----------------------------------------------//
 Local _cTimeIni      := Time()
 Local _nI            := 0
 Local _nRegAtu       := 0
 Local _nTotRegs      := 0
 Local _nEnviados     := 0
-//----------------------------------------------//
 Local _aDados        := {}
 Local _aSizes        := {}
 Local _aCabec        := {}
@@ -959,31 +910,26 @@ Local _aAlias        := {}
 Local _aCampos       := {}
 Local _aLinha        := {}
 Local _aPosCpo       := {}
-//----------------------------------------------//
 Local _cToken        := ""
 Local _cLink         := ""
 Local _cXML          := ""
-Local _cCodEmpWS     := U_ITGETMV( 'IT_EMPTMSM' , "000005")
-//----------------------------------------------//
+Local _cCodEmpWS     := SuperGetMV('IT_EMPTMSM',.F.,"000005")
 Local _aLog          := {}
 Local _aCabecLog        := {"Processado","Filial","Pedido","Chave NFe","Retorno", "Recno ZFK"}
 Local _cTextoFim     := ""
-//----------------------------------------------//
 Local _lOk           := .F.
 Local _cResult       := ""
-//----------------------------------------------//
-Local _cFilHabilit      := U_ITGETMV( 'IT_FILINTWS' , '' ) 
+Local _cFilHabilit      := SuperGetMV('IT_FILINTW',.F.,'')
 Local _cProtocolo    := ""
 Local _nPosi         := 0
 Local _nPosf         := 0
 Local _cXML_Nfe      := ""
-
 Local _nRecnoZFK     := 0
 Local oWsdl
 
 Begin Sequence 
    
-   If !_lScheduler .AND. ! U_ItMsg("Confirma envio de arquivos XML das NFe >> Italac <---> TMS Multi-Embarcador?","Inicio de processamento",,4,2,2) 
+   If !_lScheduler .And. ! U_ITMsg("Confirma envio de arquivos XML das NFe >> Italac <---> TMS Multi-Embarcador?","Inicio de processamento",,4,2,2) 
       Break
    EndIf
 
@@ -999,10 +945,10 @@ Begin Sequence
    //===================================================================================================
    _cQry := " SELECT ZFK.*, ZFK.R_E_C_N_O_ R_E_C_N_O_ "
    _cQry += " FROM "+RetSqlName("ZFK")+" ZFK "
-   _cQry += " WHERE ZFK.D_E_L_E_T_ <> '*' "
+   _cQry += " WHERE ZFK.D_E_L_E_T_ = ' ' "
    _cQry += "   AND ZFK_TIPOI = '2' "
    _cQry += "   AND (ZFK_SITUAC = 'N' OR  ZFK_SITUAC = 'R') "
-   _cQry += "   AND ZFK_FILIAL IN "+FormatIn(ALLTRIM(_cFilHabilit),";")
+   _cQry += "   AND ZFK_FILIAL IN "+FormatIn(AllTrim(_cFilHabilit),";")
 
    _cQry := ChangeQuery(_cQry)          
 
@@ -1010,39 +956,38 @@ Begin Sequence
       (_cAliasTMP)->( DBCloseArea() )
    EndIf
 
-   //DbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQry ) , _cAliasTMP , .T., .F. )                            
    MPSysOpenQuery( _cQry , _cAliasTMP)
    
    DBSelectArea(_cAliasTMP)                                                                                  
-   COUNT TO _nTotRegs
+   COUNT To _nTotRegs
 
-   IF !_lScheduler
+   If !_lScheduler
       ProcRegua(_nTotRegs)
    EndIf
 
-   _cTotal := ALLTRIM(STR(_nTotRegs))
+   _cTotal := AllTrim(Str(_nTotRegs))
 
    If _nTotRegs > 0
 
       DBSelectArea(_cAliasTMP)                       
-      (_cAliasTMP)->(DbGoTop())
+      (_cAliasTMP)->(DBGoTop())
 
-      Do While !(_cAliasTMP)->(Eof()) 
+      While !(_cAliasTMP)->(Eof()) 
 
          _nRegAtu++
 
          If !_lScheduler 
-            IncProc("Lendo dados de Carga - Registro : " + Alltrim(Str(_nRegAtu)) + " de " + Alltrim(Str(_nTotRegs)))  
+            IncProc("Lendo dados de Carga - Registro : " + AllTrim(Str(_nRegAtu)) + " de " + AllTrim(Str(_nTotRegs)))  
          EndIf
 
          _aLinha := {}
          For _nI := 1 To Len(_aCampos)
-            Aadd(_aLinha, &(_aCampos[_nI]))
+            aAdd(_aLinha, &(_aCampos[_nI]))
          Next
 
-         Aadd(_aDados,_aLinha)
+         aAdd(_aDados,_aLinha)
 
-         (_cAliasTMP)->(Dbskip())
+         (_cAliasTMP)->(DBSkip())
          
       EndDo
       
@@ -1059,7 +1004,7 @@ Begin Sequence
                      //ITListBox( _cTitAux , _aHeader    , _aCols    , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab , bDblClk , _aColXML , bCondMarca,_bLegenda ,_lHasOk,_bHeadClk,_aSX1)
             _lReturn := U_ITListBox( _cTitulo , _aCabec     , _aDados   , .T.      , 2      , _cMsgTop ,          , _aSizes ,         ,     ,        ,          ,       ,         ,          ,           ,          ,       ,         ,     )
          Else
-            U_ItMsg(">> Carregamento concluído << "+Chr(10)+;
+            U_ITMsg(">> Carregamento concluído << "+Chr(10)+;
             "Hora Inicial: "+_cTimeIni+" / Hora Final: "+TIME()+Chr(10)+"Sem dados para integração",;
             "Atenção!!!",,3)
             Break
@@ -1071,38 +1016,38 @@ Begin Sequence
          //=====================================================================
          // Obtem o token de acesso ao sistema multi embarcador.
          //=====================================================================
-         _cToken := U_ITGETMV( 'IT_TOKMUTE' , "a78e0523d3794843855e8d95c2bff8d4")
+         _cToken := SuperGetMV('IT_TOKMUTE',.F.,"a78e0523d3794843855e8d95c2bff8d4")
 
-         IF !_lScheduler 
+         If !_lScheduler 
             ProcRegua(Len(_aDados))
          EndIf
 
-         _cTotal := ALLTRIM(STR(Len(_aDados)))
+         _cTotal := AllTrim(Str(Len(_aDados)))
 
          For _nI := 1 To Len(_aDados)
             
             If _lScheduler   
-               U_ItConout("[AOMS152F] Registros Lidos: "+ALLTRIM(STR(_nI))+" de "+_cTotal)  
+               U_ItConout("[AOMS152F] Registros Lidos: "+AllTrim(Str(_nI))+" de "+_cTotal)  
             Else
-               IncProc("Registros Lidos: "+ALLTRIM(STR(_nI))+" de "+_cTotal)   
+               IncProc("Registros Lidos: "+AllTrim(Str(_nI))+" de "+_cTotal)   
             EndIf
 
-            If _aDados[_nI][1] .OR. _lScheduler
+            If _aDados[_nI][1] .Or. _lScheduler
 
                Begin Sequence
 
                   _nRecnoZFK := _aDados[_nI][aScan(_aPosCpo,{|x|x="R_E_C_N_O_"})]
 
-                  ZFK->(DbGoTo(_nRecnoZFK))   
+                  ZFK->(DBGoTo(_nRecnoZFK))   
 
-                  ZFM->(DbSetOrder(1))
-                  If ZFM->(DbSeek(ZFK->ZFK_FILIAL+_cCodEmpWS))
+                  ZFM->(DBSetOrder(1))
+                  If ZFM->(DBSeek(ZFK->ZFK_FILIAL+_cCodEmpWS))
                      //_cDirXML := ZFM->ZFM_LOCXML 
                      _cLink   := AllTrim(ZFM->ZFM_LINK02)
-                  Else    
+                  Else
                      _cMsg := "Empresa WebService para envio dos dados não localizada. Tabela ZFM."     
                      If !_lScheduler
-                        u_itmsg(_cMsg,"Atenção",,1)
+                        U_ITMsg(_cMsg,"Atenção",,1)
                      Else
                         U_ITCONOUT("[AOMS152F] "+_cMsg)
                      EndIf
@@ -1113,7 +1058,7 @@ Begin Sequence
                   If Empty(_cLink)
                      _cMsg := "O Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+"."
                      If !_lScheduler
-                        U_ItMsg(_cMsg,"Atenção",,1)
+                        U_ITMsg(_cMsg,"Atenção",,1)
                      Else
                         U_ItConout("[AOMS152F] "+_cMsg)
                      EndIf
@@ -1121,9 +1066,9 @@ Begin Sequence
                      Break                                     
                   EndIf
 
-                  DbSelectArea("SF2")
-                  DbSetOrder(21)
-                  If DbSeek(ZFK->ZFK_CHVNFE)
+                  DBSelectArea("SF2")
+                  DBSetOrder(21)
+                  If DBSeek(ZFK->ZFK_CHVNFE)
 
                      If ! _lScheduler
                         IncProc("Integrando a Chave NFe: "+ZFK->ZFK_CHVNFE)                    
@@ -1166,8 +1111,8 @@ Begin Sequence
                         If _nPosi == 0
                            _cProtocolo := ""
                         Else
-                           _cProtocolo := substr(_cresult,_nposi+Len("<a:Objeto>"),_nposf-_nposi-Len("<a:Objeto>"))
-                        Endif
+                           _cProtocolo := SubStr(_cresult,_nposi+Len("<a:Objeto>"),_nposf-_nposi-Len("<a:Objeto>"))
+                        EndIf
                         
                         _cResult := "Integração Processada"
                      Else
@@ -1181,27 +1126,27 @@ Begin Sequence
                            SF2->F2_I_DTENV := Date()
                            SF2->F2_I_HRENV := Time()
                            SF2->F2_I_PRTMS := _cProtocolo      //Protocolo TMS
-                        SF2->(MsUnLock())
+                        SF2->(MSUnLock())
                         _nEnviados++
                      EndIf 
 
                      ZFK->(RecLock("ZFK",.F.))
                         ZFK->ZFK_DATA   := Date()  
                         ZFK->ZFK_HORA   := Time()
-                        ZFK->ZFK_SITUAC := Iif(_lOk,"P","R")
+                        ZFK->ZFK_SITUAC := IIf(_lOk,"P","R")
                         ZFK->ZFK_CODEMP := _cCodEmpWS
                         ZFK->ZFK_RETORN := _cResult
                         ZFK->ZFK_PRTMS  := _cProtocolo
                         If _lOk
                            ZFK->ZFK_XML    := _cXML
                         EndIf
-                     ZFK->(MsUnLock())
+                     ZFK->(MSUnLock())
 
                      _cMsg := _cResult
 
                   Else
                      _lOk  := .F.
-                     _cMsg := "Não encontrado a Nota da Chave "+ ZFK->ZFK_CHVNFE +" gravada na ZFK referente ao Recno "+Alltrim(Str(_nRecnoZFK))
+                     _cMsg := "Não encontrado a Nota da Chave "+ ZFK->ZFK_CHVNFE +" gravada na ZFK referente ao Recno "+AllTrim(Str(_nRecnoZFK))
                      If _lScheduler   
                         U_ItConout("[AOMS152F] "+_cMsg)  
                      Else
@@ -1211,23 +1156,23 @@ Begin Sequence
                      
                End Sequence
 
-               AADD(_aLog,{_lOk, ZFK->ZFK_FILIAL,ZFK->ZFK_PEDIDO,ZFK->ZFK_CHVNFE,_cMsg,ZFK->(Recno())})
+               aAdd(_aLog,{_lOk, ZFK->ZFK_FILIAL,ZFK->ZFK_PEDIDO,ZFK->ZFK_CHVNFE,_cMsg,ZFK->(Recno())})
                Sleep(100) //Espera para não travar a comunicação com o webservice da TMS
 
-            Endif
+            EndIf
                
             FreeObj(oWsdl)
 
          Next
 
-      Endif
+      EndIf
 
-      _cTextoFim := "Arquivos XML NFe enviados pelo método EnviarArquivoXMLNFe: "+STR(_nEnviados)+Chr(10)
+      _cTextoFim := "Arquivos XML NFe enviados pelo método EnviarArquivoXMLNFe: "+Str(_nEnviados)+Chr(10)
 
       If _lScheduler
          U_ItConout("[AOMS152F] >> Processamento concluído << Italac <---> TMS Multi-Embarcador "+_cTextoFim)
       Else
-         U_ItMsg(">> Processamento concluído << "+Chr(10)+;
+         U_ITMsg(">> Processamento concluído << "+Chr(10)+;
                "Hora Inicial: "+_cTimeIni+" / Hora Final: "+TIME()+Chr(10)+_cTextoFim+Chr(10),;
                "Fim de processamento",,2)
          
@@ -1244,8 +1189,7 @@ Begin Sequence
       If _lScheduler
          ConOut("[AOMS152F] - Não foram encontrados dados para integração." )
       Else
-         //U_ITMSG("Não foram encontrados dados para integração.","Atenção",,3)
-         U_ItMsg(">> Processamento concluído << "+Chr(10)+;
+         U_ITMsg(">> Processamento concluído << "+Chr(10)+;
          "Hora Inicial: "+_cTimeIni+" / Hora Final: "+TIME()+Chr(10)+"Sem dados para integração",;
          "Atenção",,3)
       EndIf
@@ -1257,24 +1201,21 @@ If Select(_cAliasTMP) > 0
    (_cAliasTMP)->( DBCloseArea() )
 EndIf
 
-Return Nil
-
+Return
 
 /*
 ===================================================================================================================================
 Programa----------: AOMS152G() // AOMS144G
 Autor-------------: Julio de Paula Paz 
 Data da Criacao---: 28/03/2025
-===================================================================================================================================
 Descrição---------: Rotina Rotina de Reenvio de XML das Notas Fiscais, para cargas posicionadas, Italac <---> TMS Multi-Embarcador.
                     Replica da função AOMS144G, adaptada para enviar XMLs das Notas Fiscais para cargas posicionadas.
-===================================================================================================================================
 Parametros--------: Nenhum
-===================================================================================================================================
 Retorno-----------: Nenhum
 ===================================================================================================================================
 */  
-Static Function AOMS152G() // AOMS144G()
+Static Function AOMS152G()
+
 Local _cQry        := ""
 Local _cTimeIni    := Time()
 Local _cAlias      := "SF2"
@@ -1293,9 +1234,7 @@ Local _lOk         := .T.
 Local _cMsg        := ""
 Local _aLog        := {}
 Local _aCabecLog   := {"Processado","Filial","Pedido","Chave NFe","Retorno", "Recno SF2"}
-
-Local _dDataIntTMS := U_ItGetMv("IT_DTINTRDC",Ctod("25/10/2016"))
-
+Local _dDataIntTMS := SuperGetMV("IT_DTINTRD",.F.,CToD("25/10/2016"))
 Local _cXmlNfe     := ""
 Local _cProtNfe    := ""
 Local _cXmlEnv     := ""
@@ -1304,18 +1243,16 @@ Local _cPart2Xml   := ""
 Local _nI          := 0
 Local _nIni        := 0
 Local _nFim        := 0
-Local _cFilHabilit := U_ITGETMV( 'IT_FILINTWS' , '' ) // Filiais habilitadas na integracao Webservice Italac x TMS Multi-Embarcador
-
+Local _cFilHabilit := SuperGetMV('IT_FILINTW',.F.,'') // Filiais habilitadas na integracao Webservice Italac x TMS Multi-Embarcador
 Local _cTextoFim   := ""
 Local _nEnviados   := 0
-
 Local _nRecnoSF2   := 0
 Local _nRecno54    := 0
 Local _nRecno50    := 0
 
 Begin Sequence 
    
-   If !_lScheduler .AND. ! U_ItMsg("Confirma a carga de registros para Enviar Arquivos XML NFe >> Italac <---> TMS Multi-Embarcador?","Inicio de processamento",,4,2,2) 
+   If !_lScheduler .And. ! U_ITMsg("Confirma a carga de registros para Enviar Arquivos XML NFe >> Italac <---> TMS Multi-Embarcador?","Inicio de processamento",,4,2,2) 
       Break
    EndIf
 
@@ -1326,27 +1263,27 @@ Begin Sequence
    _aSizes  := _aAlias[3]
    _aCampos := _aAlias[4]
 
-   Aadd(_aCabec,"Recno SF2")
-   Aadd(_aPosCpo,"NRECSF2")
-   Aadd(_aSizes,10)
-   Aadd(_aCampos,"NRECSF2")
+   aAdd(_aCabec,"Recno SF2")
+   aAdd(_aPosCpo,"NRECSF2")
+   aAdd(_aSizes,10)
+   aAdd(_aCampos,"NRECSF2")
 
-   Aadd(_aCabec,"Recno 50")
-   Aadd(_aPosCpo,"NREC50")
-   Aadd(_aSizes,10)
-   Aadd(_aCampos,"NREC50")
+   aAdd(_aCabec,"Recno 50")
+   aAdd(_aPosCpo,"NREC50")
+   aAdd(_aSizes,10)
+   aAdd(_aCampos,"NREC50")
 
-   Aadd(_aCabec,"Recno 54")
-   Aadd(_aPosCpo,"NREC54")
-   Aadd(_aSizes,10)
-   Aadd(_aCampos,"NREC54")
+   aAdd(_aCabec,"Recno 54")
+   aAdd(_aPosCpo,"NREC54")
+   aAdd(_aSizes,10)
+   aAdd(_aCampos,"NREC54")
 
-   Aadd(_aCabec,"Recno DAK")
-   Aadd(_aPosCpo,"NRECDAK")
-   Aadd(_aSizes,10)
-   Aadd(_aCampos,"NRECDAK")
+   aAdd(_aCabec,"Recno DAK")
+   aAdd(_aPosCpo,"NRECDAK")
+   aAdd(_aSizes,10)
+   aAdd(_aCampos,"NRECDAK")
 
-   IF !_lScheduler
+   If !_lScheduler
       ProcRegua(0)
       IncProc("Lendo dados da SPED50/SF2...")
    EndIf
@@ -1356,24 +1293,22 @@ Begin Sequence
    //===================================================================================================
    _cQry := " SELECT SF2.* ,SPED50.R_E_C_N_O_ NREC50, SF2.R_E_C_N_O_ NRECSF2, SPED54.R_E_C_N_O_ NREC54, DAK.R_E_C_N_O_ NRECDAK "
    _cQry += " FROM "+RetSqlName("SF2")+" SF2, SPED050 SPED50, SPED054 SPED54, "+RetSqlName("DAK")+" DAK "
-   _cQry += " WHERE SF2.D_E_L_E_T_ <> '*' "
-   _cQry += "   AND SPED50.D_E_L_E_T_ <> '*' "
-   _cQry += "   AND SPED54.D_E_L_E_T_ <> '*' "
-   _cQry += "   AND DAK.D_E_L_E_T_ <> '*' "
-   //_cQry += "   AND F2_I_SITUA = ' ' "
-   _cQry += "   AND DOC_CHV = F2_CHVNFE "
+   _cQry += " WHERE SF2.D_E_L_E_T_ = ' ' "
+   _cQry += "   AND SPED50.D_E_L_E_T_ = ' ' "
+   _cQry += "   AND SPED54.D_E_L_E_T_ = ' ' "
+   _cQry += "   AND DAK.D_E_L_E_T_ = ' ' "
+      _cQry += "   AND DOC_CHV = F2_CHVNFE "
    _cQry += "   AND NFE_CHV = F2_CHVNFE "
    _cQry += "   AND F2_ESPECIE = 'SPED' "
-   _cQry += "   AND F2_EMISSAO >= '" + DTos(_dDataIntTMS) + "' "
+   _cQry += "   AND F2_EMISSAO >= '" + DToS(_dDataIntTMS) + "' "
    _cQry += "   AND F2_CHVNFE <> ' ' "
    _cQry += "   AND SPED50.STATUS = '6' "
    _cQry += "   AND SPED54.CSTAT_SEFR = '100' "     
    _cQry += "   AND DAK_FILIAL = F2_FILIAL "
    _cQry += "   AND DAK_COD = F2_CARGA "
    _cQry += "   AND F2_CARGA = '" + DAK->DAK_COD + "' "
-   //_cQry += "   AND DAK_I_RECR <> ' ' " 
-   _cQry += "   AND F2_FILIAL IN "+FormatIn(ALLTRIM(_cFilHabilit),";")
-   _cQry += "   AND NOT EXISTS ( SELECT 'X' FROM "+RetSqlName("ZFK")+ " ZFK WHERE ZFK.D_E_L_E_T_ <> '*' AND ZFK.ZFK_TIPOI = '2' AND ZFK.ZFK_CHVNFE = SF2.F2_CHVNFE)"
+   _cQry += "   AND F2_FILIAL IN "+FormatIn(AllTrim(_cFilHabilit),";")
+   _cQry += "   AND NOT EXISTS ( SELECT 'X' FROM "+RetSqlName("ZFK")+ " ZFK WHERE ZFK.D_E_L_E_T_ = ' ' AND ZFK.ZFK_TIPOI = '2' AND ZFK.ZFK_CHVNFE = SF2.F2_CHVNFE)"
    
    _cQry := ChangeQuery(_cQry)         
 
@@ -1381,38 +1316,37 @@ Begin Sequence
       (_cAliasTMP)->( DBCloseArea() )
    EndIf
 
-   //DbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQry ) , _cAliasTMP , .T., .F. )   
    MPSysOpenQuery( _cQry , _cAliasTMP)                         
    
    DBSelectArea(_cAliasTMP)                                                                               
-   COUNT TO _nTotRegs
+   COUNT To _nTotRegs
 
-   IF !_lScheduler 
+   If !_lScheduler 
       ProcRegua(_nTotRegs)
    EndIf
 
-   _cTotal := ALLTRIM(STR(_nTotRegs))
+   _cTotal := AllTrim(Str(_nTotRegs))
                           
       DBSelectArea(_cAliasTMP)
       (_cAliasTMP)->(DBGoTop())
    
    If _nTotRegs > 0
-      Do While !(_cAliasTMP)->(Eof()) 
+      While !(_cAliasTMP)->(Eof()) 
 
          _nRegAtu++
 
          If !_lScheduler 
-            IncProc("Lendo dados de Carga - Registro : " + Alltrim(Str(_nRegAtu)) + " de " + Alltrim(Str(_nTotRegs)))  
+            IncProc("Lendo dados de Carga - Registro : " + AllTrim(Str(_nRegAtu)) + " de " + AllTrim(Str(_nTotRegs)))  
          EndIf
 
          _aLinha := {}
          For _nI := 1 To Len(_aCampos)
-            Aadd(_aLinha, &(_aCampos[_nI]))
+            aAdd(_aLinha, &(_aCampos[_nI]))
          Next
 
-         Aadd(_aDados,_aLinha)
+         aAdd(_aDados,_aLinha)
 
-         (_cAliasTMP)->(Dbskip())
+         (_cAliasTMP)->(DBSkip())
          
       EndDo
 
@@ -1429,7 +1363,7 @@ Begin Sequence
                      //ITListBox( _cTitAux , _aHeader    , _aCols    , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab , bDblClk , _aColXML , bCondMarca,_bLegenda ,_lHasOk,_bHeadClk,_aSX1)
             _lReturn := U_ITListBox( _cTitulo , _aCabec     , _aDados   , .T.      , 2      , _cMsgTop ,          , _aSizes ,         ,     ,        ,          ,       ,         ,          ,           ,          ,       ,         ,     )
          Else
-            U_ItMsg(">> Carregamento concluído << "+Chr(10)+;
+            U_ITMsg(">> Carregamento concluído << "+Chr(10)+;
             "Hora Inicial: "+_cTimeIni+" / Hora Final: "+TIME()+Chr(10)+"Sem dados para integração",;
             "Atenção!!!",,3)
             Break
@@ -1454,17 +1388,17 @@ Begin Sequence
          
          USE SPED054 ALIAS SPED054 SHARED NEW VIA "TOPCONN" 
          
-         SC5->(DbSetOrder(1)) // C5_FILIAL+C5_NUM                                                                                                                                                
+         SC5->(DBSetOrder(1)) // C5_FILIAL+C5_NUM                                                                                                                                                
 
          For _nI := 1 To Len(_aDados)
 
             If _lScheduler   
-               U_ItConout("[AOMS152G] Registros Lidos: "+ALLTRIM(STR(_nI))+" de "+_cTotal)  
+               U_ItConout("[AOMS152G] Registros Lidos: "+AllTrim(Str(_nI))+" de "+_cTotal)  
             Else
-               IncProc("Registros Lidos: "+ALLTRIM(STR(_nI))+" de "+_cTotal)   
+               IncProc("Registros Lidos: "+AllTrim(Str(_nI))+" de "+_cTotal)   
             EndIf
 
-            If _aDados[_nI][1] .OR. _lScheduler
+            If _aDados[_nI][1] .Or. _lScheduler
 
                _nRecnoSF2 := _aDados[_nI][aScan(_aPosCpo,{|x|x="NRECSF2"})]
                _nRecno54  := _aDados[_nI][aScan(_aPosCpo,{|x|x="NREC54"})]
@@ -1474,8 +1408,8 @@ Begin Sequence
                _cMsg := ""
                _lOk  := .T.
 
-               SF2->(DbGoTo(_nRecnoSF2)) //Com a SF2 devidamente posicionada
-               DAK->(DbGoTo(_nRecnoDAK))
+               SF2->(DBGoTo(_nRecnoSF2)) //Com a SF2 devidamente posicionada
+               DAK->(DBGoTo(_nRecnoDAK))
 
                AOMS152VN(@_lOk,@_cMsg)
 
@@ -1487,12 +1421,12 @@ Begin Sequence
                      U_ItConout("[AOMS152G] Gravando Tabela Muro ZFK o arquivo XML: " +SPED050->DOC_CHV)
                   EndIf
 
-                  SPED054->(DbGoTo(_nRecno54))
-                  SPED050->(DbGoTo(_nRecno50))
+                  SPED054->(DBGoTo(_nRecno54))
+                  SPED050->(DBGoTo(_nRecno50))
 
                   _lSC5_PEDPA   := .F.
 
-                  If !Empty(Alltrim(SF2->F2_I_PEDID ))
+                  If !Empty(AllTrim(SF2->F2_I_PEDID ))
                      DBSelectArea("SC5")
                      SC5->( DBSetOrder(1) )
                      If SC5->( DBSeek( SF2->F2_FILIAL + SF2->F2_I_PEDID ) )
@@ -1535,8 +1469,8 @@ Begin Sequence
                      ZFK->ZFK_HORA   := Time()
                      ZFK->ZFK_TIPOI  := "2"
                      ZFK->ZFK_CHVNFE := SF2->F2_CHVNFE
-                     ZFK->ZFK_PEDPAL := Iif(_lSC5_PEDPA ,"S","N") 
-                     ZFK->ZFK_NRPPAL := Iif(_lSC5_PEDPA ,SF2->F2_I_PEDID ,"")    
+                     ZFK->ZFK_PEDPAL := IIf(_lSC5_PEDPA ,"S","N") 
+                     ZFK->ZFK_NRPPAL := IIf(_lSC5_PEDPA ,SF2->F2_I_PEDID ,"")    
                      ZFK->ZFK_CGC    := Posicione("SA1",1,xFilial("SA1")+SF2->(F2_CLIENTE+F2_LOJA),"A1_CGC") 
                      ZFK->ZFK_PEDIDO := SC5->C5_NUM
                      ZFK->ZFK_COD	 := SF2->F2_CLIENTE    // Código Cliente    // SA2->A2_COD  - Fornecedor    // O correto é: A1_COD
@@ -1545,32 +1479,23 @@ Begin Sequence
                      ZFK->ZFK_USUARI := __cUserId
                      ZFK->ZFK_SITUAC := "N" 
                      ZFK->ZFK_XML    := _cXML_Nfe
-                  ZFK->(MsUnLock())
+                  ZFK->(MSUnLock())
 
                   _cMsg := "Carregado para Integração"
-/*
-               Else
-               
-                  SF2->(RecLock("SF2",.F.))
-                     SF2->F2_I_SITUA := 'N'    
-                     SF2->F2_I_DTENV := Date()
-                     SF2->F2_I_HRENV := Time()
-                  SF2->(MsUnLock())
-*/                     
                EndIf
                
-               AADD(_aLog,{_lOk, SF2->F2_FILIAL,SC5->C5_NUM,SF2->F2_CHVNFE,_cMsg,SF2->(Recno())})
+               aAdd(_aLog,{_lOk, SF2->F2_FILIAL,SC5->C5_NUM,SF2->F2_CHVNFE,_cMsg,SF2->(Recno())})
 
             EndIf
 
          Next _nI
 
-         _cTextoFim := "Notas Fiscais carregadas para Enviar Arquivo XML NFe : "+STR(_nEnviados)+Chr(10)
+         _cTextoFim := "Notas Fiscais carregadas para Enviar Arquivo XML NFe : "+Str(_nEnviados)+Chr(10)
 
          U_ItConout("[AOMS152G] >> Carregamento concluído << Italac <---> TMS Multi-Embarcador "+_cTextoFim)
          
          If !_lScheduler
-            U_ItMsg(">> Carregamento concluído << "+Chr(10)+;
+            U_ITMsg(">> Carregamento concluído << "+Chr(10)+;
                   "Hora Inicial: "+_cTimeIni+" / Hora Final: "+TIME()+Chr(10)+_cTextoFim+Chr(10),;
                   "Fim de Carregamento",,2)
             
@@ -1587,8 +1512,7 @@ Begin Sequence
       If _lScheduler
          ConOut("[AOMS152G] - Não foram encontrados dados para integração." )
       Else
-         //U_ITMSG("Não foram encontrados dados para integração.","Atenção",,3)
-         U_ItMsg(">> Processamento concluído << "+Chr(10)+;
+         U_ITMsg(">> Processamento concluído << "+Chr(10)+;
          "Hora Inicial: "+_cTimeIni+" / Hora Final: "+TIME()+Chr(10)+"Sem dados para integração",;
          "Atenção",,3)
       EndIf
@@ -1596,9 +1520,6 @@ Begin Sequence
 
 End Sequence
 
- //================================================================================
-// Fecha as tabelas temporárias
-//================================================================================                    
 If Select(_cAliasTMP) > 0
    (_cAliasTMP)->( DBCloseArea() )
 EndIf
@@ -1611,34 +1532,30 @@ If Select("SPED054") > 0
    SPED054->( DBCloseArea() )
 EndIf  
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Função------------: AOMS152I() // AOMS144I
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 31/03/2025
-===============================================================================================================================
 Descrição---------: Faz a transmissão das notas fiscais Protheus x TMS Multiembarcador.
                     Replica da função AOMS144I adaptada para transmitir as notas fiscais para cargas posicionadas.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
-User Function AOMS152I() // AOMS144I()
+User Function AOMS152I
+
 Local _cQry             := ""
 Local _aOrd             := SaveOrd({"SX3","ZFK"})
 Local _cAlias           := "ZFK"
 Local _cAliasTMP        := "TRBZFK"
-//----------------------------------------------//
 Local _cTimeIni         := Time()
 Local _nI               := 0
 Local _nRegAtu          := 0
 Local _nTotRegs         := 0
 Local _nEnviados        := 0
-//----------------------------------------------//
 Local _aDados           := {}
 Local _aSizes           := {}
 Local _aCabec           := {}
@@ -1646,32 +1563,26 @@ Local _aAlias           := {}
 Local _aCampos          := {}
 Local _aLinha           := {}
 Local _aPosCpo          := {}
-//----------------------------------------------//
 Local _cToken           := ""
 Local _cLink            := ""
 Local _cXML             := ""
-Local _cCodEmpWS   := U_ITGETMV( 'IT_EMPTMSM' , "000005")
-//----------------------------------------------//
+Local _cCodEmpWS   := SuperGetMV('IT_EMPTMSM',.F.,"000005")
 Local _aLog          := {}
 Local _aCabecLog        := {"Processado","Filial","Chave NFe","Pedido","CNPJ","Retorno", "Recno ZFK"}
 Local _cTextoFim     := ""
-//----------------------------------------------//
 Local _lOk              := .F.
 Local _cResult          := ""
-//----------------------------------------------//
-Local _cFilHabilit      := U_ITGETMV( 'IT_FILINTWS' , '' ) 
+Local _cFilHabilit      := SuperGetMV('IT_FILINTW',.F.,'')
 Local _cResposta        := ""
 Local cReplace          := ""
 Local cErros            := ""
 Local cAvisos           := ""
-
 Local _nRecnoZFK        := 0
 Local oWSDL
-//Local _aCargaLibSNFe     := {}
 
 Begin Sequence
 
-   If !_lScheduler .AND. ! U_ItMsg("Confirma integração de Notas Fiscais >> Italac <---> TMS Multi-Embarcador?","Inicio de processamento",,4,2,2) 
+   If !_lScheduler .And. ! U_ITMsg("Confirma integração de Notas Fiscais >> Italac <---> TMS Multi-Embarcador?","Inicio de processamento",,4,2,2) 
       Break
    EndIf
 
@@ -1687,50 +1598,49 @@ Begin Sequence
    //===================================================================================================
    _cQry := " SELECT ZFK.*,  ZFK.R_E_C_N_O_ R_E_C_N_O_ "
    _cQry += " FROM "+RetSqlName("ZFK")+" ZFK "
-   _cQry += " WHERE ZFK.D_E_L_E_T_ <> '*' "
+   _cQry += " WHERE ZFK.D_E_L_E_T_ = ' ' "
    _cQry += "   AND ZFK_TIPOI = '4' "
    _cQry += "   AND (ZFK_SITUAC = 'N' OR  ZFK_SITUAC = 'R') "
-   _cQry += "   AND ZFK_FILIAL IN "+FormatIn(ALLTRIM(_cFilHabilit),";")
+   _cQry += "   AND ZFK_FILIAL IN "+FormatIn(AllTrim(_cFilHabilit),";")
 
    _cQry := ChangeQuery(_cQry)          
 
    If Select(_cAliasTMP) > 0
-      (_cAliasTMP)->( DbCloseArea() )
+      (_cAliasTMP)->( DBCloseArea() )
    EndIf
 
-   //DbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQry ) , _cAliasTMP , .T., .F. )  
    MPSysOpenQuery( _cQry , _cAliasTMP)                         
 
    DBSelectArea(_cAliasTMP)
-   Count to _nTotRegs
+   Count To _nTotRegs
 
-   IF !_lScheduler 
+   If !_lScheduler 
       ProcRegua(_nTotRegs)
    EndIf
    
-   _cTotal := ALLTRIM(STR(_nTotRegs))
+   _cTotal := AllTrim(Str(_nTotRegs))
 
    If _nTotRegs > 0
 
       DBSelectArea(_cAliasTMP)
       (_cAliasTMP)->(DBGoTop())
 
-      Do While (_cAliasTMP)->(!EOF())
+      While (_cAliasTMP)->(!Eof())
 
          _nRegAtu++
 
          If !_lScheduler 
-            IncProc("Lendo dados de Carga - Registro : " + Alltrim(Str(_nRegAtu)) + " de " + Alltrim(Str(_nTotRegs)))  
+            IncProc("Lendo dados de Carga - Registro : " + AllTrim(Str(_nRegAtu)) + " de " + AllTrim(Str(_nTotRegs)))  
          EndIf
 
          _aLinha := {}
          For _nI := 1 To Len(_aCampos)
-            Aadd(_aLinha, &(_aCampos[_nI]))
+            aAdd(_aLinha, &(_aCampos[_nI]))
          Next
 
-         Aadd(_aDados,_aLinha)
+         aAdd(_aDados,_aLinha)
 
-         (_cAliasTMP)->(Dbskip())
+         (_cAliasTMP)->(DBSkip())
 
       EndDo
 
@@ -1747,7 +1657,7 @@ Begin Sequence
                         //ITListBox( _cTitAux , _aHeader    , _aCols    , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab , bDblClk , _aColXML , bCondMarca,_bLegenda ,_lHasOk,_bHeadClk,_aSX1)
             _lReturn := U_ITListBox( _cTitulo , _aCabec     , _aDados   , .T.      , 2      , _cMsgTop ,          , _aSizes ,         ,     ,        ,          ,       ,         ,          ,           ,          ,       ,         ,     )
          Else
-            U_ItMsg(">> Processamento concluído << "+Chr(10)+;
+            U_ITMsg(">> Processamento concluído << "+Chr(10)+;
             "Hora Inicial: "+_cTimeIni+" / Hora Final: "+TIME()+Chr(10)+"Sem dados para integração",;
             "Atenção!!!",,3)
             Break
@@ -1759,38 +1669,34 @@ Begin Sequence
          //=====================================================================
          // Obtem o token de acesso ao sistema multi embarcador.
          //=====================================================================
-         _cToken := U_ITGETMV( 'IT_TOKMUTE' , "a78e0523d3794843855e8d95c2bff8d4")
+         _cToken := SuperGetMV('IT_TOKMUTE',.F.,"a78e0523d3794843855e8d95c2bff8d4")
 
-         IF !_lScheduler 
+         If !_lScheduler 
             ProcRegua(Len(_aDados))
          EndIf
 
-         _cTotal := ALLTRIM(STR(Len(_aDados)))
+         _cTotal := AllTrim(Str(Len(_aDados)))
 
          For _nI := 1 To Len(_aDados)
 
             If _lScheduler   
-               U_ItConout("[AOMS152I] Registros Lidos: "+ALLTRIM(STR(_nI))+" de "+_cTotal)  
+               U_ItConout("[AOMS152I] Registros Lidos: "+AllTrim(Str(_nI))+" de "+_cTotal)  
             Else
-               IncProc("Registros Lidos: "+ALLTRIM(STR(_nI))+" de "+_cTotal)   
+               IncProc("Registros Lidos: "+AllTrim(Str(_nI))+" de "+_cTotal)   
             EndIf
 
-            If _aDados[_nI][1] .OR. _lScheduler
+            If _aDados[_nI][1] .Or. _lScheduler
 
                Begin Sequence
                
                   _nRecnoZFK := _aDados[_nI][aScan(_aPosCpo,{|x|x="R_E_C_N_O_"})]
 
-                  ZFK->(DbGoto(_nRecnoZFK))
+                  ZFK->(DBGoTo(_nRecnoZFK))
                   
-                  //_cCodEmpWS := ZFK->ZFK_CODEMP   
-
-                  ZFM->(DbSetOrder(1))
-                  If ZFM->(DbSeek(ZFK->ZFK_FILIAL+_cCodEmpWS))
-                     //_cDirXML := ZFM->ZFM_LOCXML 
+                  ZFM->(DBSetOrder(1))
+                  If ZFM->(DBSeek(ZFK->ZFK_FILIAL+_cCodEmpWS))
                      _cLink   := AllTrim(ZFM->ZFM_LINK02)
-                     //_cLink := "https://italac.multihomo.com.br/SGT.WebService/NFe.svc?wsdl"
-                  Else  
+                  Else
                      _cMsg := "Empresa WebService para envio dos dados não localizada."          
                      If ! _lScheduler
                         MsgInfo(_cMsg,"Atenção")
@@ -1804,7 +1710,7 @@ Begin Sequence
                   If Empty(_cLink)
                      _cMsg := "O Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+"."
                      If !_lScheduler
-                        U_ItMsg(_cMsg,"Atenção",,1)
+                        U_ITMsg(_cMsg,"Atenção",,1)
                      Else
                         U_ItConout("[AOMS152I] "+_cMsg)
                      EndIf
@@ -1814,7 +1720,7 @@ Begin Sequence
 
                   DBSelectArea("DAK")
                   DBSetOrder(1)
-                  If DbSeek(ZFK->ZFK_FILIAL+ZFK->ZFK_CARGA)
+                  If DBSeek(ZFK->ZFK_FILIAL+ZFK->ZFK_CARGA)
 
                      If ! _lScheduler
                         IncProc("Integrando Carga: "+DAK->DAK_COD)                    
@@ -1822,15 +1728,14 @@ Begin Sequence
                         u_itconout("[AOMS152I] Integrando Carga: "+DAK->DAK_COD) 
                      EndIf  
 
-                     //_cProtIntC := Alltrim(DAK->DAK_I_RECR)  //'446' 
-                     _cProtIntC := Alltrim(DAK->DAK_I_PTMS)    //'446' 
+                     _cProtIntC := AllTrim(DAK->DAK_I_PTMS)    //'446' 
 
                      If ZFK->ZFK_PEDPAL  == "S"             //  Grava dados informando que é um pedido de pallet.
                         _cProtIntP := Posicione("SC5",1,DAK->DAK_FILIAL+ZFK->ZFK_NRPPAL,"C5_I_CDTMS")  
                      Else
-                        _cProtIntP := Alltrim(ZFK->ZFK_PRTPED)    // '2335'
+                        _cProtIntP := AllTrim(ZFK->ZFK_PRTPED)    // '2335'
                      EndIf 
-                     _cTokenNF  := Alltrim(ZFK->ZFK_PRTMS)     //'74998224-5997-4343-9621-7cf0c2cd4b61'
+                     _cTokenNF  := AllTrim(ZFK->ZFK_PRTMS)     //'74998224-5997-4343-9621-7cf0c2cd4b61'
 
                      _cXml := '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tem="http://tempuri.org/" xmlns:dom="http://schemas.datacontract.org/2004/07/Dominio.ObjetosDeValor.WebService.Carga" xmlns:dom1="http://schemas.datacontract.org/2004/07/Dominio.ObjetosDeValor.Embarcador.Pessoas" xmlns:dom2="http://schemas.datacontract.org/2004/07/Dominio.ObjetosDeValor.Embarcador.Localidade" xmlns:dom3="http://schemas.datacontract.org/2004/07/Dominio.ObjetosDeValor" xmlns:dom4="http://schemas.datacontract.org/2004/07/Dominio.ObjetosDeValor.Embarcador.Carga" xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays" xmlns:dom5="http://schemas.datacontract.org/2004/07/Dominio.ObjetosDeValor.WebService" xmlns:dom6="http://schemas.datacontract.org/2004/07/Dominio.ObjetosDeValor.Embarcador.NFe">'
                      _cXml += '  <soapenv:Header>'
@@ -1866,23 +1771,13 @@ Begin Sequence
                         _cResult := oWsdl:GetParsedResponse() // Pega o resultado de envio já no formato em string.  
                         oResult := XmlParser(oWsdl:GetSoapResponse(), cReplace, @cErros, @cAvisos)
 
-                        /*
-                        _nPosi := AT("<a:Objeto>", _cResult)             
-                        _nPosf := AT("</a:Objeto>", _cResult)	
-                        
-                        If _nPosi == 0
-                           _cProtocolo := ""
-                        Else
-                           _cProtocolo := substr(_cresult,_nposi+Len("<a:Objeto>"),_nposf-_nposi-Len("<a:Objeto>"))
-                        Endif 
-                        */
                         If oResult:_S_ENVELOPE:_S_BODY:_INTEGRARNOTASFISCAISRESPONSE:_INTEGRARNOTASFISCAISRESULT:_A_STATUS:TEXT == "false"
                            _lOk := .F.
                         Else
                            _cResult := "Integração Processada"
                         EndIf
 
-                     Else 
+                     Else
 
                         _cResult := oWsdl:cError 
                         _cProtocolo := ""
@@ -1894,87 +1789,32 @@ Begin Sequence
                      
                      //grava resultado // sempre como processado
                      ZFK->(RecLock("ZFK",.F.))
-                        ZFK->ZFK_SITUAC  := Iif(_lOk, "P", "N")
-                        ZFK->ZFK_USUARI  := __CUSERID
+                        ZFK->ZFK_SITUAC  := IIf(_lOk, "P", "N")
+                        ZFK->ZFK_USUARI  := __cUserId
                         ZFK->ZFK_DATAAL  := Date()
-                        ZFK->ZFK_RETORN  := _cResposta // AllTrim(strtran(_cResult,Chr(10)," ")) // grava o resultado da integração na tabela ZFK,dizendo que deu certo ou não.
+                        ZFK->ZFK_RETORN  := _cResposta // AllTrim(StrTran(_cResult,Chr(10)," ")) // grava o resultado da integração na tabela ZFK,dizendo que deu certo ou não.
                         ZFK->ZFK_XML     := _cXML
-                     ZFK->(MsUnlock()) 
-
-                     If _lOk
-                        /*
-                        DBSelectArea("DAI")
-                        DAI->( DBSetOrder(1) ) //DAI_FILIAL+DAI_COD+DAI_SEQCAR+DAI_SEQUEN+DAI_PEDIDO
-                       
-                        If DAI->( DBSeek( DAK->(DAK_FILIAL+DAK_COD) ) )
-                           Do While DAI->(!Eof()) .And. DAI->DAI_COD == DAK->DAK_COD .And. DAI->DAI_FILIAL == DAK->DAK_FILIAL
-                              DBSelectArea("SF2")
-                              SF2->( DBSetOrder(1) )
-                              If SF2->( DBSeek( DAI->DAI_FILIAL + DAI->DAI_NFISCA + DAI->DAI_SERIE ) )
-                                 RecLock("SF2",.F.)
-                                    SF2->F2_I_SITUA := "V"
-                                    //SF2->F2_I_PRTMS := _cProtocolo
-                                 SF2->(MSUNLOCK())
-                              EndIf
-                              
-                              DAI->(DbSkip())
-                           EndDo
-                        EndIf
-                        
-                        If aScan(_aCargaLibSNFe,{|x|x = DAK->(Recno())}) = 0
-                           AADD(_aCargaLibSNFe,DAK->(Recno()))
-                        EndIf   
-                        */
-                     EndIf
-                        
+                     ZFK->(MSUnLock()) 
                   Else
                      _cResposta := "Não encontrada a carga '"+ZFK->ZFK_CARGA+"' para efetuar a integração"
                      _lOk := .F.
                   EndIf   
                End Sequence
 
-               Aadd(_aLog,{_lOk,ZFK->ZFK_FILIAL,ZFK->ZFK_CHVNFE,ZFK->ZFK_PEDIDO,ZFK->ZFK_CGC,_cResposta,ZFK->(Recno())}) // adicona em um array para fazer um item list, exibir os resultados.
+               aAdd(_aLog,{_lOk,ZFK->ZFK_FILIAL,ZFK->ZFK_CHVNFE,ZFK->ZFK_PEDIDO,ZFK->ZFK_CGC,_cResposta,ZFK->(Recno())}) // adicona em um array para fazer um item list, exibir os resultados.
                Sleep(100) //Espera para não travar a comunicação com o webservice da TMS
 
             EndIf
-
             FreeObj(oWsdl)
-         
          Next
-
-         //Inicia a Geração de Registros do Tipo de Integração (ZFK_TIPOI) = 5 
-         /*If Len(_aCargaLibSNFe) > 0
-            For _nI := 1 to Len(_aCargaLibSNFe)
-               DAK->(DbGoTo(_aCargaLibSNFe[_nI]))
-               If AOMS144U()
-                  RecLock("ZFK",.T.)
-                     ZFK->ZFK_FILIAL  := DAK->DAK_FILIAL    //	Filial do Sistema
-                     ZFK->ZFK_CARGA   := DAK->DAK_COD
-                     ZFK->ZFK_CARTMS  := DAK->DAK_I_RECR
-                     ZFK->ZFK_HORA    := Time()             // Hora de inclusão do registro na tabela de muro.
-                     ZFK->ZFK_DATA    := Date()	            //	Data de Emissão
-                     ZFK->ZFK_USUARI  := __CUSERID	         //	Codigo do Usuário
-                     ZFK->ZFK_DATAAL  := Date()	            //	Data de Alteração
-                     ZFK->ZFK_SITUAC  := "N"                //	Situação do Registro
-                     ZFK->ZFK_TIPOI   := "5"
-                     ZFK->ZFK_CODEMP  := _cCodEmpWS         //	Codigo Empresa WebServer 
-                     
-                  ZFK->(MSUNLOCK())     
-               EndIf
-            Next
-
-            AOMS144K()
-            
-         EndIf*/
-
       EndIf
 
-      _cTextoFim := "Notas Fiscais integradas pelo metodo IntegrarNotasFiscais : "+STR(_nEnviados)+Chr(10)
+      _cTextoFim := "Notas Fiscais integradas pelo metodo IntegrarNotasFiscais : "+Str(_nEnviados)+Chr(10)
       
       U_ItConout("[AOMS152F] >> Processamento concluído << Italac <---> TMS Multi-Embarcador "+_cTextoFim)
       
       If !_lScheduler
-         U_ItMsg(">> Processamento concluído << "+Chr(10)+;
+         U_ITMsg(">> Processamento concluído << "+Chr(10)+;
                "Hora Inicial: "+_cTimeIni+" / Hora Final: "+TIME()+Chr(10)+_cTextoFim+Chr(10),;
                "Fim de processamento",,2)
          
@@ -1990,8 +1830,7 @@ Begin Sequence
       If _lScheduler
          ConOut("[AOMS152I] - Não foram encontrados dados para integração." )
       Else
-         //U_ITMSG("Não foram encontrados dados para integração.","Atenção",,3, , , .T.)
-         U_ItMsg(">> Processamento concluído << "+Chr(10)+;
+         U_ITMsg(">> Processamento concluído << "+Chr(10)+;
          "Hora Inicial: "+_cTimeIni+" / Hora Final: "+TIME()+Chr(10)+"Sem dados para integração",;
          "Atenção",,3)
       EndIf
@@ -2001,27 +1840,25 @@ End Sequence
 
 If Select(_cAliasTMP) > 0
    (_cAliasTMP)->( DBCloseArea() )
-Endif
+EndIf
 
 RestOrd(_aOrd)
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS152P() // AOMS144G
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 31/03/2025
-===============================================================================================================================
 Descrição---------: Rotina de integração de dados das notas fiscais Protheus x TMS Multiembarcador.
                     Replica da função AOMS144G adaptada para enviar os dados das cargas posicionadas.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AOMS152P() // AOMS144G()
+User Function AOMS152P
+
 Local _cQuery      := ""
 Local _cTimeIni    := Time()
 Local _cAlias      := "DAK"
@@ -2040,23 +1877,18 @@ Local _lOk         := .T.
 Local _cMsg        := ""
 Local _aLog        := {}
 Local _aCabecLog   := {"Processado","Filial","Pedido","Chave NFe","Retorno", "Recno SF2"}
-
 Local _cTextoFim   := ""
 Local _nEnviados   := 0
-
-Local _dDataIntTMS := U_ItGetMv("IT_DTINTTMS",Ctod("01/01/2024"))
-
+Local _dDataIntTMS := SuperGetMV("IT_DTINTMS",.F.,Ctod("01/01/2024"))
 Local _nI          := 0
 Local _cTitulo     := ""
 Local _cMsgTop     := ""
-Local _cCodEmpWS   := U_ITGETMV( 'IT_EMPTMSM' , "000005")
+Local _cCodEmpWS   := SuperGetMV('IT_EMPTMSM',.F.,"000005")
 Local _lSC5_PEDPA  := .F.
-//Local _cFilHabilit := U_ITGETMV( 'IT_FILINTWS' , '' ) 
-//Local _cPedProdu
 
 Begin Sequence
 
-   If !_lScheduler .AND. ! U_ItMsg("Confirma carga de registros para integração de Notas Fiscais >> Italac <---> TMS Multi-Embarcador?","Inicio de processamento",,4,2,2) 
+   If !_lScheduler .And. ! U_ITMsg("Confirma carga de registros para integração de Notas Fiscais >> Italac <---> TMS Multi-Embarcador?","Inicio de processamento",,4,2,2) 
       Break
    EndIf
 
@@ -2070,7 +1902,7 @@ Begin Sequence
    _cQuery := "SELECT * "
    _cQuery += "FROM "+RetSqlName("DAK")+" DAK "
    _cQuery += " WHERE DAK_FILIAL ='" +DAK->DAK_FILIAL + "' "  
-   _cQuery += " AND DAK_DATA >= '" + DTos(_dDataIntTMS) + "' "
+   _cQuery += " AND DAK_DATA >= '" + DToS(_dDataIntTMS) + "' "
    _cQuery += " AND DAK.D_E_L_E_T_ = ' ' "
    _cQuery += " AND DAK.DAK_COD = '" + DAK->DAK_COD + "' " 
    _cQuery += " AND NVL ( "
@@ -2103,42 +1935,41 @@ Begin Sequence
    _cQuery := ChangeQuery(_cQuery)
 
    If Select(_cAliasTMP) > 0
-      dbSelectArea(_cAliasTMP)
-      dbCloseArea()
+      DBSelectArea(_cAliasTMP)
+      DBCloseArea()
    EndIf
 
-   //dbUseArea(.T.,"TOPCONN",TCGENQRY(,,_cQuery),_cAliasTMP,.F.,.T.)
    MPSysOpenQuery( _cQuery , _cAliasTMP)                         
 
    DBSelectArea(_cAliasTMP)
-   Count to _nTotRegs
+   Count To _nTotRegs
 
-   IF !_lScheduler 
+   If !_lScheduler 
       ProcRegua(_nTotRegs)
    EndIf
 
-   _cTotal := ALLTRIM(STR(_nTotRegs))
+   _cTotal := AllTrim(Str(_nTotRegs))
 
    If _nTotRegs > 0
 
       DBSelectArea(_cAliasTMP)
       (_cAliasTMP)->(DBGoTop())
-      Do While (_cAliasTMP)->(!EOF())
+      While (_cAliasTMP)->(!Eof())
          
          _nRegAtu++
 
          If !_lScheduler 
-            IncProc("Lendo dados de Carga - Registro : " + Alltrim(Str(_nRegAtu)) + " de " + Alltrim(Str(_nTotRegs)))  
+            IncProc("Lendo dados de Carga - Registro : " + AllTrim(Str(_nRegAtu)) + " de " + AllTrim(Str(_nTotRegs)))  
          EndIf
 
          _aLinha := {}
          For _nI := 1 To Len(_aCampos)
-            Aadd(_aLinha, &(_aCampos[_nI]))
+            aAdd(_aLinha, &(_aCampos[_nI]))
          Next
 
-         Aadd(_aDados,_aLinha)
+         aAdd(_aDados,_aLinha)
 
-         (_cAliasTMP)->(Dbskip())
+         (_cAliasTMP)->(DBSkip())
 
       EndDo
 
@@ -2161,12 +1992,12 @@ Begin Sequence
          For _nI := 1 To Len(_aDados) 
 
             If _lScheduler   
-               U_ItConout("[AOMS152P] Registros Lidos: "+ALLTRIM(STR(_nI))+" de "+_cTotal)  
+               U_ItConout("[AOMS152P] Registros Lidos: "+AllTrim(Str(_nI))+" de "+_cTotal)  
             Else
-               IncProc("Registros Lidos: "+ALLTRIM(STR(_nI))+" de "+_cTotal)   
+               IncProc("Registros Lidos: "+AllTrim(Str(_nI))+" de "+_cTotal)   
             EndIf
 
-            If _aDados[_nI][1] .OR. _lScheduler
+            If _aDados[_nI][1] .Or. _lScheduler
                
                _cFilial := _aDados[_nI][aScan(_aPosCpo,{|x|x="DAK_FILIAL"})]
                _cCarga := _aDados[_nI][aScan(_aPosCpo,{|x|x="DAK_COD"})]
@@ -2174,7 +2005,7 @@ Begin Sequence
                DBSelectArea("DAI")
                DAI->( DBSetOrder(1) ) //DAI_FILIAL+DAI_COD+DAI_SEQCAR+DAI_SEQUEN+DAI_PEDIDO
                If DAI->( DBSeek( _cFilial + _cCarga ) )
-                  Do While DAI->(!Eof()) .And. DAI->DAI_COD == _cCarga .And. DAI->DAI_FILIAL == _cFilial
+                  While DAI->(!Eof()) .And. DAI->DAI_COD == _cCarga .And. DAI->DAI_FILIAL == _cFilial
 
                      DBSelectArea("SF2")
                      SF2->( DBSetOrder(1) )
@@ -2190,7 +2021,7 @@ Begin Sequence
 
                         _lSC5_PEDPA := .F.
       
-                        If !Empty(Alltrim(SF2->F2_I_PEDID ))
+                        If !Empty(AllTrim(SF2->F2_I_PEDID ))
                            DBSelectArea("SC5")
                            SC5->( DBSetOrder(1) )
                            If SC5->( DBSeek( SF2->F2_FILIAL + SF2->F2_I_PEDID ) )
@@ -2214,7 +2045,6 @@ Begin Sequence
                               ZFK->ZFK_FILIAL  := _aDados[_nI][aScan(_aPosCpo,{|x|x="DAK_FILIAL"})]     //	Filial do Sistema
                               ZFK->ZFK_CARGA   := _aDados[_nI][aScan(_aPosCpo,{|x|x="DAK_COD"})]
                               ZFK->ZFK_DATA    := _aDados[_nI][aScan(_aPosCpo,{|x|x="DAK_DATA"})]
-                              //ZFK->ZFK_CARTMS  := _aDados[_nI][aScan(_aPosCpo,{|x|x="DAK_I_RECR"})]
                               ZFK->ZFK_CARTMS  := _aDados[_nI][aScan(_aPosCpo,{|x|x="DAK_I_PTMS"})]
                               ZFK->ZFK_PRTPED  := _cSC5_I_CDTMS
                               ZFK->ZFK_HORA    := Time()             // Hora de inclusão do registro na tabela de muro.
@@ -2226,7 +2056,7 @@ Begin Sequence
                               ZFK->ZFK_LOJA    := SF2->F2_LOJA       // Loja Cliente      // SA2->A2_LOJA - Fornecedor    //              A1_LOJA
                               ZFK->ZFK_NOME    := Posicione("SA1",1,xFilial("SA1")+SF2->(F2_CLIENTE+F2_LOJA),"A1_NOME")   // Nome Cliente      // SA2->A2_NOME - Fornecedor   //              A1_NOME
                               ZFK->ZFK_PRTMS   := SF2->F2_I_PRTMS
-                              ZFK->ZFK_USUARI  := __CUSERID	         //	Codigo do Usuário
+                              ZFK->ZFK_USUARI  := __cUserId	         //	Codigo do Usuário
                               ZFK->ZFK_DATAAL  := Date()	            //	Data de Alteração
                               ZFK->ZFK_SITUAC  := "N"                //	Situação do Registro
                               
@@ -2239,12 +2069,7 @@ Begin Sequence
 
                               ZFK->ZFK_TIPOI   := "4"
                               ZFK->ZFK_CODEMP  := _cCodEmpWS         //	Codigo Empresa WebServer 
-                           ZFK->(MSUNLOCK())
-/*
-                           RecLock("SF2",.F.)
-                              SF2->F2_I_SITUA := "I"
-                           SF2->(MSUNLOCK())
-*/
+                           ZFK->(MSUnLock())
                         End Transaction
 
                         _cMsg := "Carregado para Integração"
@@ -2254,7 +2079,7 @@ Begin Sequence
                         _cMsg := "Nota Fiscal não encontrada! Filial " + DAI->DAI_FILIAL + " Nota " + DAI->DAI_NFISCA + " Serie " + DAI->DAI_SERIE 
                      EndIf
 
-                     AADD(_aLog,{_lOk, SF2->F2_FILIAL,SF2->F2_I_PEDID,SF2->F2_CHVNFE,_cMsg,SF2->(Recno())})
+                     aAdd(_aLog,{_lOk, SF2->F2_FILIAL,SF2->F2_I_PEDID,SF2->F2_CHVNFE,_cMsg,SF2->(Recno())})
 
                      DAI->(DBSkip())
                   EndDo
@@ -2262,19 +2087,19 @@ Begin Sequence
                   _lOk := .F.
                   _cMsg := "Carga não encontrada! Filial " + _cFilial + " Carga " + _cCarga
                   
-                  AADD(_aLog,{_lOk, SF2->F2_FILIAL,SF2->F2_I_PEDID,SF2->F2_CHVNFE,_cMsg,SF2->(Recno())})
+                  aAdd(_aLog,{_lOk, SF2->F2_FILIAL,SF2->F2_I_PEDID,SF2->F2_CHVNFE,_cMsg,SF2->(Recno())})
                EndIf
                
             EndIf
          
          Next
 
-         _cTextoFim := "Registros carregados para Integração de Notas Fiscais: "+STR(_nEnviados)+Chr(10)
+         _cTextoFim := "Registros carregados para Integração de Notas Fiscais: "+Str(_nEnviados)+Chr(10)
 
          U_ItConout("[AOMS152P] >> Carregamento concluído << Italac <---> TMS Multi-Embarcador "+_cTextoFim)
          
          If !_lScheduler
-            U_ItMsg(">> Carregamento concluído << "+Chr(10)+;
+            U_ITMsg(">> Carregamento concluído << "+Chr(10)+;
                   "Hora Inicial: "+_cTimeIni+" / Hora Final: "+TIME()+Chr(10)+_cTextoFim+Chr(10),;
                   "Fim de Carregamento",,2)
             
@@ -2292,8 +2117,7 @@ Begin Sequence
       If _lScheduler
          ConOut("[AOMS152] - Não foram encontrados dados para integração." )
       Else
-         //U_ITMSG("Não foram encontrados dados para integração.","Atenção",,3)
-         U_ItMsg(">> Processamento concluído << "+Chr(10)+;
+         U_ITMsg(">> Processamento concluído << "+Chr(10)+;
          "Hora Inicial: "+_cTimeIni+" / Hora Final: "+TIME()+Chr(10)+"Sem dados para integração",;
          "Atenção",,3)
       EndIf
@@ -2312,21 +2136,18 @@ Return _lReturn
 Programa----------: AOMS152E / AOMS144E
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 28/03/2025
-===============================================================================================================================
 Descrição---------: Rotina de Envio dos XMLs das notas fiscais para o sistema TMS Mulit-Embarcador.
                     Replica da função AOMS144E, adaptada para enviar os XMLs para Carga Posicionada. 
-===============================================================================================================================
 Parametros--------: _lScheduler = .T. = Rotina chamada via agendamento/Scheduller.
                                   .F. = Rotina chamada via menu.
                     _lCargaPos  = .T. = Carga Posicionada.
                                   .F. = Carga ou Cargas informadas pelo usuário.               
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
-User Function AOMS152E(_lScheduler, _lCargaPos) // AOMS144E()
+User Function AOMS152E(_lScheduler, _lCargaPos)
+
 Local _nI
-//Local _lWsTms
 Local _aParAux:= {}
 Local _aParRet:= {}
 Local _bQryFiltr
@@ -2353,19 +2174,12 @@ Begin Sequence
       //================================================================================
       // Prepara ambiente abrindo tabelas e incializando variaveis.
       //================================================================================   
-      //PREPARE ENVIRONMENT EMPRESA '01' FILIAL "01"; 
-      //        TABLES "CKO","ZG0","SA7","SB1","SB2","SB5","SB8","SBJ","SB9","SBE","SBF","SC0","SD5","SBK","SD7","SDC","SF4","SGA","SM2","SDA","SDB","SBM","ADA","SA2","DAK","DAI","DA4","ZFU","ZFV","SC9","SA1","SC5","SC6","ZP1";
-      //        MODULO 'OMS'
       RpcSetEnv("01", "01",,,,, {"CKO","ZG0","SA7","SB1","SB2","SB5","SB8","SBJ","SB9","SBE","SBF","SC0","SD5","SBK","SD7","SDC","SF4","SGA","SM2","SDA","SDB","SBM","ADA","SA2","DAK","DAI","DA4","ZFU","ZFV","SC9","SA1","SC5","SC6","ZP1"})
 
       cFilAnt := "01"  
-     
-      //_lWsTms := U_ITGETMV( 'IT_WEBSTMS' , .F. ) 
-
-      //If _lWsTms // AOMS144VA()  // retorna se a integração com o TMS está hbilitada para a Filial.
-         AOMS152G() // AOMS152G() // AOMS144G() // Lê os dados das notas fiscais para envio para o TMS
-         AOMS152F() // AOMS144F() // Faz o envio dos XML das notas fiscais para o TMS
-      //EndIf
+   
+      AOMS152G() // AOMS152G() // AOMS144G() // Lê os dados das notas fiscais para envio para o TMS
+      AOMS152F() // AOMS144F() // Faz o envio dos XML das notas fiscais para o TMS
       
       //============================================================
       //Limpa o ambiente, liberando a licença e fechando as conexoes
@@ -2373,18 +2187,14 @@ Begin Sequence
       RpcClearEnv() 
 
    Else
-      //_lWsTms := U_ITGETMV( 'IT_WEBSTMS' , .F. ) 
-
-      //If _lWsTms // AOMS144VA()
-
          If _lCargaPos
             Processa( {|| AOMS152G(),AOMS152F()},"Hora Ini: "+Time()+", Aguarde...") // Processa( {|| AOMS152G() // AOMS144G(),AOMS152F() // AOMS144F()},"Hora Ini: "+Time()+", Aguarde...")
-         Else 
-            _bQryFiltr := {|| "SELECT DISTINCT DAK_COD, A1_NOME FROM "+ RETSQLNAME("DAK") + " DAK, "+ RETSQLNAME("DAI") + " DAI, "+RETSQLNAME("SA1") + " SA1 " +"WHERE DAK.D_E_L_E_T_ = ' '  AND DAI.D_E_L_E_T_ = ' ' AND SA1.D_E_L_E_T_ = ' ' AND DAK.DAK_FILIAL = '" + xFilial("DAK") + "' AND DAK_FILIAL = DAI_FILIAL AND DAK_COD = DAI_COD AND DAI_CLIENT = A1_COD AND DAI_LOJA = A1_LOJA AND DAK.DAK_DATA >= '"+ Dtos(_dDataFilt) +"' ORDER BY DAK_COD DESC "}     
+         Else
+            _bQryFiltr := {|| "SELECT DISTINCT DAK_COD, A1_NOME FROM "+ RETSQLNAME("DAK") + " DAK, "+ RETSQLNAME("DAI") + " DAI, "+RETSQLNAME("SA1") + " SA1 " +"WHERE DAK.D_E_L_E_T_ = ' '  AND DAI.D_E_L_E_T_ = ' ' AND SA1.D_E_L_E_T_ = ' ' AND DAK.DAK_FILIAL = '" + xFilial("DAK") + "' AND DAK_FILIAL = DAI_FILIAL AND DAK_COD = DAI_COD AND DAI_CLIENT = A1_COD AND DAI_LOJA = A1_LOJA AND DAK.DAK_DATA >= '"+ DToS(_dDataFilt) +"' ORDER BY DAK_COD DESC "}     
             _aItalac_F3 := {}
-            Aadd(_aItalac_F3,{"MV_PAR01",_bQryFiltr,{|Tab| (Tab)->DAK_COD },{|Tab| (Tab)->A1_NOME }  ,/*_bCondSA1*/ ,"Cargas",,,,.F.        ,       , } )
+            aAdd(_aItalac_F3,{"MV_PAR01",_bQryFiltr,{|Tab| (Tab)->DAK_COD },{|Tab| (Tab)->A1_NOME }  ,/*_bCondSA1*/ ,"Cargas",,,,.F.        ,       , } )
      
-            Aadd( _aParAux , { 1 , "Cargas"       		, MV_PAR01, "@!"    , ""  , "F3ITLC"  , "" , 100 , .F. } )
+            aAdd( _aParAux , { 1 , "Cargas"       		, MV_PAR01, "@!"    , ""  , "F3ITLC"  , "" , 100 , .F. } )
      
             If !ParamBox( _aParAux , "Selecione o filtro" , @_aParRet,  , /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
                Break 
@@ -2396,7 +2206,7 @@ Begin Sequence
                 //==========================================================
                 // Posiciona a carga para a gravação das tabela ZFQ e ZFR.  
                 //==========================================================
-                DAK->(DbSetOrder(1))
+                DAK->(DBSetOrder(1))
                 If DAK->(MsSeek(xFilial("DAK")+U_ItKey(_cCarga,"DAK_COD")))
                    Processa( {|| AOMS152G(),AOMS152F()},"Hora Ini: "+Time()+", Aguarde...") // Processa( {|| AOMS152G() // AOMS144G(),AOMS152F() // AOMS144F()},"Hora Ini: "+Time()+", Aguarde...")
                 EndIf 
@@ -2407,26 +2217,24 @@ Begin Sequence
 
 End Sequece 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
 Programa--------: AOMS152C // AOMS144C
 Autor-----------: Julio de Paula Paz
 Data da Criacao-: 28/03/2025
-===============================================================================================================================
 Descrição-------: Rotina de Integração das Notas Fiscais Italac x TMS Multiembarcador.
                   Replica da função AOMS144C, adaptada para enviar as notas fiscais para cargas posicionadas. 
-===============================================================================================================================
 Parametros------: _lScheduler = .T. = Rotina chamada via agendamento/Scheduller.
                                 .F. = Rotina chamada via menu.
                   _lCargaPos  = .T. = Carga Posicionada.
                                 .F. = Carga ou Cargas informadas pelo usuário.               
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-User Function AOMS152C(_lScheduler, _lCargaPos) // AOMS144C()
+User Function AOMS152C(_lScheduler, _lCargaPos)
+
 Local _nI
 Local _lWsTms
 Local _aParAux:= {}
@@ -2456,12 +2264,8 @@ Begin Sequence
 
       cFilAnt := "01"   
       
-      //_lWsTms := U_ITGETMV( 'IT_WEBSTMS' , .F. ) 
-
-      //If _lWsTms // AOMS144VA()
-         U_AOMS152P() // AOMS144G() // Lê as cargas para envio das notas fiscais.
-         U_AOMS152I() // AOMS144I() // Envia as notas fiscais com base nas cargas lidas.
-      //EndIf
+      U_AOMS152P() // AOMS144G() // Lê as cargas para envio das notas fiscais.
+      U_AOMS152I() // AOMS144I() // Envia as notas fiscais com base nas cargas lidas.
 
       //============================================================
       //Limpa o ambiente, liberando a licença e fechando as conexoes
@@ -2470,56 +2274,51 @@ Begin Sequence
 
 	Else
       
-      _lWsTms := U_ITGETMV( 'IT_WEBSTMS' , .F. ) 
+      _lWsTms := SuperGetMV('IT_WEBSTMS',.F.,.F.)
  
-      //If _lWsTms
-      
-         If _lCargaPos
-            Processa( {|| U_AOMS152P() ,U_AOMS152I() } , 'Aguarde!' , 'Processando Cargas...' ) // AOMS144G(),U_AOMS152I() // AOMS144I() } , 'Aguarde!' , 'Processando Cargas...' )
-         Else 
-            _bQryFiltr := {|| "SELECT DISTINCT DAK_COD, A1_NOME FROM "+ RETSQLNAME("DAK") + " DAK, "+ RETSQLNAME("DAI") + " DAI, "+RETSQLNAME("SA1") + " SA1 " +"WHERE DAK.D_E_L_E_T_ = ' '  AND DAI.D_E_L_E_T_ = ' ' AND SA1.D_E_L_E_T_ = ' ' AND DAK.DAK_FILIAL = '" + xFilial("DAK") + "' AND DAK_FILIAL = DAI_FILIAL AND DAK_COD = DAI_COD AND DAI_CLIENT = A1_COD AND DAI_LOJA = A1_LOJA AND DAK.DAK_DATA >= '"+ Dtos(_dDataFilt) +"' ORDER BY DAK_COD DESC "}     
-            _aItalac_F3 := {}
-            Aadd(_aItalac_F3,{"MV_PAR01",_bQryFiltr,{|Tab| (Tab)->DAK_COD },{|Tab| (Tab)->A1_NOME }  ,/*_bCondSA1*/ ,"Cargas",,,,.F.        ,       , } )
-     
-            Aadd( _aParAux , { 1 , "Cargas"       		, MV_PAR01, "@!"    , ""  , "F3ITLC"  , "" , 100 , .F. } )
-     
-            If !ParamBox( _aParAux , "Selecione o filtro" , @_aParRet,  , /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
-               Break 
-            EndIf 
-            
-            _aCargas := StrTokArr2( MV_PAR01, ";", .T. )
-            For _nI := 1 To Len(_aCargas)
-                _cCarga := _aCargas[_nI]
-                //==========================================================
-                // Posiciona a carga para a gravação das tabela ZFQ e ZFR.  
-                //==========================================================
-                DAK->(DbSetOrder(1))
-                If DAK->(MsSeek(xFilial("DAK")+U_ItKey(_cCarga,"DAK_COD")))
-                   Processa( {|| U_AOMS152P() ,U_AOMS152I() } , 'Aguarde!' , 'Processando Cargas...' ) // AOMS144G(),U_AOMS152I() // AOMS144I() } , 'Aguarde!' , 'Processando Cargas...' )
-                EndIf 
-            Next 
-         EndIf    
-      //EndIf     
+      If _lCargaPos
+         Processa( {|| U_AOMS152P() ,U_AOMS152I() } , 'Aguarde!' , 'Processando Cargas...' ) // AOMS144G(),U_AOMS152I() // AOMS144I() } , 'Aguarde!' , 'Processando Cargas...' )
+      Else
+         _bQryFiltr := {|| "SELECT DISTINCT DAK_COD, A1_NOME FROM "+ RETSQLNAME("DAK") + " DAK, "+ RETSQLNAME("DAI") + " DAI, "+RETSQLNAME("SA1") + " SA1 " +"WHERE DAK.D_E_L_E_T_ = ' '  AND DAI.D_E_L_E_T_ = ' ' AND SA1.D_E_L_E_T_ = ' ' AND DAK.DAK_FILIAL = '" + xFilial("DAK") + "' AND DAK_FILIAL = DAI_FILIAL AND DAK_COD = DAI_COD AND DAI_CLIENT = A1_COD AND DAI_LOJA = A1_LOJA AND DAK.DAK_DATA >= '"+ DToS(_dDataFilt) +"' ORDER BY DAK_COD DESC "}     
+         _aItalac_F3 := {}
+         aAdd(_aItalac_F3,{"MV_PAR01",_bQryFiltr,{|Tab| (Tab)->DAK_COD },{|Tab| (Tab)->A1_NOME }  ,/*_bCondSA1*/ ,"Cargas",,,,.F.        ,       , } )
+   
+         aAdd( _aParAux , { 1 , "Cargas"       		, MV_PAR01, "@!"    , ""  , "F3ITLC"  , "" , 100 , .F. } )
+   
+         If !ParamBox( _aParAux , "Selecione o filtro" , @_aParRet,  , /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
+            Break 
+         EndIf 
+         
+         _aCargas := StrTokArr2( MV_PAR01, ";", .T. )
+         For _nI := 1 To Len(_aCargas)
+               _cCarga := _aCargas[_nI]
+               //==========================================================
+               // Posiciona a carga para a gravação das tabela ZFQ e ZFR.  
+               //==========================================================
+               DAK->(DBSetOrder(1))
+               If DAK->(MsSeek(xFilial("DAK")+U_ItKey(_cCarga,"DAK_COD")))
+                  Processa( {|| U_AOMS152P() ,U_AOMS152I() } , 'Aguarde!' , 'Processando Cargas...' ) // AOMS144G(),U_AOMS152I() // AOMS144I() } , 'Aguarde!' , 'Processando Cargas...' )
+               EndIf 
+         Next 
+      EndIf    
 	EndIf
 
 End Sequence 
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS152MA
 Autor-------------: Igor Melgaço
 Data da Criacao---: 15/02/2024
-===============================================================================================================================
 Descrição---------: Valida dados da SF2, SC5 e DAK
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AOMS152MA(_cAlias,_cAliasTmp,_lMark,_lFilial,_lRecno)
+
 Local _aCabec := {}
 Local _aPosCpo := {}
 Local _aSizes := {}
@@ -2535,10 +2334,10 @@ Private aCols := {}
 Private aHeader := {}
 
 If _lMark
-   Aadd(_aCabec,"")
-   Aadd(_aPosCpo,"MARK")
-   Aadd(_aSizes,10)
-   Aadd(_aCampos,'.F.')
+   aAdd(_aCabec,"")
+   aAdd(_aPosCpo,"MARK")
+   aAdd(_aSizes,10)
+   aAdd(_aCampos,'.F.')
 EndIf
 
 If _lFilial
@@ -2548,10 +2347,10 @@ If _lFilial
       _cAliasCMP := Subs(_cAlias,2,2)
    EndIf
 
-   Aadd(_aCabec,"Filial")
-   Aadd(_aPosCpo,_cAliasCMP+"_FILIAL")
-   Aadd(_aSizes,10)
-   Aadd(_aCampos,_cAliasCMP+"_FILIAL")
+   aAdd(_aCabec,"Filial")
+   aAdd(_aPosCpo,_cAliasCMP+"_FILIAL")
+   aAdd(_aSizes,10)
+   aAdd(_aCampos,_cAliasCMP+"_FILIAL")
 EndIf
 
 aHeader := {}
@@ -2559,29 +2358,29 @@ FillGetDados(1,_cAlias,1,,,{||.T.},,,,,,.T.)
 
 For _nI := 1 To Len(aHeader)
 
-   If X3USO(GetSx3Cache(aHeader[_nI,2],"X3_USADO")) .AND. cNivel >= GetSx3Cache(aHeader[_nI,2],"X3_NIVEL") .AND. !(GetSx3Cache(aHeader[_nI,2],"X3_TIPO") = "M") .AND. GetSx3Cache(aHeader[_nI,2],"X3_BROWSE") == "S"
+   If X3USO(GetSx3Cache(aHeader[_nI,2],"X3_USADO")) .And. cNivel >= GetSx3Cache(aHeader[_nI,2],"X3_NIVEL") .And. !(GetSx3Cache(aHeader[_nI,2],"X3_TIPO") = "M") .And. GetSx3Cache(aHeader[_nI,2],"X3_BROWSE") == "S"
 
       If AllTrim(GetSx3Cache(aHeader[_nI,2],"X3_CONTEXT"))  == "V"
-         Aadd(_aCampos,StrTran(AllTrim(GetSx3Cache(aHeader[_nI,2],"X3_INIBRW")),"DAK->",_cAliasTmp+"->"))
+         aAdd(_aCampos,StrTran(AllTrim(GetSx3Cache(aHeader[_nI,2],"X3_INIBRW")),"DAK->",_cAliasTmp+"->"))
       Else
          If AllTrim(GetSx3Cache(aHeader[_nI,2],"X3_TIPO")) == "D"
-            Aadd(_aCampos,"STOD("+Alltrim(GetSx3Cache(aHeader[_nI,2],"X3_CAMPO"))+")")
+            aAdd(_aCampos,"SToD("+AllTrim(GetSx3Cache(aHeader[_nI,2],"X3_CAMPO"))+")")
          Else
-            Aadd(_aCampos,Alltrim(GetSx3Cache(aHeader[_nI,2],"X3_CAMPO")))
+            aAdd(_aCampos,AllTrim(GetSx3Cache(aHeader[_nI,2],"X3_CAMPO")))
          EndIf
       EndIf
       
-      Aadd(_aPosCpo,AllTrim(GetSx3Cache(aHeader[_nI,2],"X3_CAMPO")))
-      Aadd(_aCabec ,AllTrim(GetSx3Cache(aHeader[_nI,2],"X3_TITULO")))
-      Aadd(_aSizes ,GetSx3Cache(aHeader[_nI,2],"X3_TAMANHO")* 3)
+      aAdd(_aPosCpo,AllTrim(GetSx3Cache(aHeader[_nI,2],"X3_CAMPO")))
+      aAdd(_aCabec ,AllTrim(GetSx3Cache(aHeader[_nI,2],"X3_TITULO")))
+      aAdd(_aSizes ,GetSx3Cache(aHeader[_nI,2],"X3_TAMANHO")* 3)
    EndIf
 Next
 
 If _lRecno
-   Aadd(_aCabec,"Recno")
-   Aadd(_aPosCpo,"R_E_C_N_O_")
-   Aadd(_aSizes,10)
-   Aadd(_aCampos,"R_E_C_N_O_")
+   aAdd(_aCabec,"Recno")
+   aAdd(_aPosCpo,"R_E_C_N_O_")
+   aAdd(_aSizes,10)
+   aAdd(_aCampos,"R_E_C_N_O_")
 EndIf
 
 Return {_aCabec,_aPosCpo,_aSizes,_aCampos,}
@@ -2591,25 +2390,23 @@ Return {_aCabec,_aPosCpo,_aSizes,_aCampos,}
 Programa----------: AOMS152VN // AOMS144VN
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 31/03/2025
-===============================================================================================================================
 Descrição---------: Valida dados da SF2, SC5 e DAK antes da Integração.
                     Esta função é réplica da função AOMS144VN adaptada para rotina de reenvio de cargas para o TMS.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function AOMS152VN(_lOk,_cMsg) // AOMS144VN(_lOk,_cMsg)
-Local _cFilHabilit   := U_ITGETMV( 'IT_FILINTWS' , '' ) // Filiais habilitadas na integracao Webservice Italac x TMS Multi-Embarcador
+Static Function AOMS152VN(_lOk,_cMsg)
+
+Local _cFilHabilit   := SuperGetMV('IT_FILINTW',.F.,'') // Filiais habilitadas na integracao Webservice Italac x TMS Multi-Embarcador
 Local _cListaFiliais := ""
 
 _cListaFiliais := AllTrim(_cFilHabilit)                             
 _cListaFiliais := StrTran(_cListaFiliais,";","','")    
 
 //Com a SF2 devidamente posicionada
-DAK->(dbseek(SF2->F2_FILIAL+SF2->F2_CARGA))
-SC5->(DbSeek(SF2->F2_FILIAL+SF2->F2_I_PEDID))
+DAK->(DBSeek(SF2->F2_FILIAL+SF2->F2_CARGA))
+SC5->(DBSeek(SF2->F2_FILIAL+SF2->F2_I_PEDID))
 
 Begin Sequence
 
@@ -2630,25 +2427,25 @@ Begin Sequence
       EndIf
    EndIf
    
-   If Alltrim(SC5->C5_TIPO) <> "N" // Diferente de um pedido normal.
+   If AllTrim(SC5->C5_TIPO) <> "N" // Diferente de um pedido normal.
       _lOk := .F.
       _cMsg := "O pedido de venda "+SC5->C5_NUM+ " possui tipo (C5_TIPO) diferente de normal "
       Break
    EndIf
    
-   If SC5->C5_I_TRCNF != "S" .AND. EMPTY(DAK->DAK_I_CARG)  //Se não é troca nota e carga não foi montada pelo RDC 
+   If SC5->C5_I_TRCNF != "S" .And. Empty(DAK->DAK_I_CARG)  //Se não é troca nota e carga não foi montada pelo RDC 
       _lOk := .F.
       _cMsg := "Se não é troca nota e carga não foi montada pelo TMS "
       Break
    EndIf
    
-   If SC5->C5_I_TRCNF == "S" .AND. SC5->C5_NUM == SC5->C5_I_PDPR .AND. EMPTY(DAK->DAK_I_CARG)  //Se é troca nota, pedido de carregamento e carga não foi montada pelo RDC 
+   If SC5->C5_I_TRCNF == "S" .And. SC5->C5_NUM == SC5->C5_I_PDPR .And. Empty(DAK->DAK_I_CARG)  //Se é troca nota, pedido de carregamento e carga não foi montada pelo RDC 
       _lOk := .F.
       _cMsg := "Se é troca nota, pedido de carregamento e carga não foi montada pelo TMS"
       Break
    EndIf
    
-   If SC5->C5_I_TRCNF == "S" .AND. SC5->C5_NUM == SC5->C5_I_PDFT   //Se é troca nota, pedido de faturamento
+   If SC5->C5_I_TRCNF == "S" .And. SC5->C5_NUM == SC5->C5_I_PDFT   //Se é troca nota, pedido de faturamento
 
       _nSC5 := SC5->(Recno())
       _nSF2 := SF2->(Recno())
@@ -2656,54 +2453,51 @@ Begin Sequence
       
       _lOk := .F.
       
-      If SC5->(dbseek(SC5->C5_I_FLFNC+SC5->C5_I_PDPR))
+      If SC5->(DBSeek(SC5->C5_I_FLFNC+SC5->C5_I_PDPR))
       
-         If SF2->(dbseek(SC5->C5_FILIAL+SC5->C5_NOTA))
+         If SF2->(DBSeek(SC5->C5_FILIAL+SC5->C5_NOTA))
          
-            If DAK->(dbseek(SF2->F2_FILIAL+SF2->F2_CARGA))
+            If DAK->(DBSeek(SF2->F2_FILIAL+SF2->F2_CARGA))
             
                If !Empty(DAK->DAK_I_CARG) //Se achou a carga de carregamento e foi gerada pelo rdc deixa enviar o xml
                
                   _lOk := .T.
                   
-               Endif
+               EndIf
                
-            Endif
+            EndIf
             
-         Endif
+         EndIf
          
-         SC5->(Dbgoto(_nSC5))
-         SF2->(Dbgoto(_nSF2))
-         DAK->(Dbgoto(_nDAK))
+         SC5->(DBGoTo(_nSC5))
+         SF2->(DBGoTo(_nSF2))
+         DAK->(DBGoTo(_nDAK))
 
          If !_lOk
             Break
-         Endif
-      Endif
-   Endif
+         EndIf
+      EndIf
+   EndIf
 
 End Sequence
 
-Return Nil 
+Return 
 
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 /*
 ===============================================================================================================================
 Programa----------: AOMS152R()
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 09/05/2025
-===============================================================================================================================
 Descrição---------: Rotina de integração de Solicitação de Emissão de nota fiscais.
-===============================================================================================================================
 Parametros--------: _lSchedule = .T. = modo agendado.
                                  .F. = modo manual/menu.
                     _cOpcao    = "P" = Carga posicionada.
                                = "S" = Selecionar Cargas.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS152R(_lSchedule,_cOpcao)
+
 Local _nTotRegs := 0
 Local _aParAux:= {}
 Local _aParRet:= {}
@@ -2721,7 +2515,7 @@ Begin Sequence
    EndIf 
 
    If ! _lSchedule
-      If ! U_ITMSG("Confirma o reenvio da(s) Carga(s) para o Sistema TMS ?","Atenção" , , ,2, 2)
+      If ! U_ITMsg("Confirma o reenvio da(s) Carga(s) para o Sistema TMS ?","Atenção" , , ,2, 2)
          Break 
       EndIf
    EndIf  
@@ -2734,12 +2528,12 @@ Begin Sequence
       //================================================================================
       If _lSchedule
          AOMS152DAI()   // Grava os dados das tabelas ZFQ e ZFR para a carga posicionada.
-      Else 
+      Else
          Processa( {|| AOMS152DAI() } , 'Aguarde!' , 'Gravando Dados para Reenvio da Carga...' )
       EndIf 
       _cDAK_Cod := DAK->DAK_COD
 
-   Else 
+   Else
       //=================================================================================================
       // Grava os dados das tabelas ZFQ e ZFR para as cargas informadas pelo usuário na tela de filtro.
       //=================================================================================================
@@ -2747,11 +2541,11 @@ Begin Sequence
          Break 
       EndIf 
 
-      _bQryFiltr := {|| "SELECT DISTINCT DAK_COD, A1_NOME FROM "+ RETSQLNAME("DAK") + " DAK, "+ RETSQLNAME("DAI") + " DAI, "+RETSQLNAME("SA1") + " SA1 " +"WHERE DAK.D_E_L_E_T_ = ' '  AND DAI.D_E_L_E_T_ = ' ' AND SA1.D_E_L_E_T_ = ' ' AND DAK.DAK_FILIAL = '" + xFilial("DAK") + "' AND DAK_FILIAL = DAI_FILIAL AND DAK_COD = DAI_COD AND DAI_CLIENT = A1_COD AND DAI_LOJA = A1_LOJA AND DAK.DAK_DATA >= '"+ Dtos(_dDataFilt) +"' ORDER BY DAK_COD DESC "}     
+      _bQryFiltr := {|| "SELECT DISTINCT DAK_COD, A1_NOME FROM "+ RETSQLNAME("DAK") + " DAK, "+ RETSQLNAME("DAI") + " DAI, "+RETSQLNAME("SA1") + " SA1 " +"WHERE DAK.D_E_L_E_T_ = ' '  AND DAI.D_E_L_E_T_ = ' ' AND SA1.D_E_L_E_T_ = ' ' AND DAK.DAK_FILIAL = '" + xFilial("DAK") + "' AND DAK_FILIAL = DAI_FILIAL AND DAK_COD = DAI_COD AND DAI_CLIENT = A1_COD AND DAI_LOJA = A1_LOJA AND DAK.DAK_DATA >= '"+ DToS(_dDataFilt) +"' ORDER BY DAK_COD DESC "}     
       _aItalac_F3 := {}
-      Aadd(_aItalac_F3,{"MV_PAR01",_bQryFiltr,{|Tab| (Tab)->DAK_COD },{|Tab| (Tab)->A1_NOME }  ,/*_bCondSA1*/ ,"Cargas",,,,.F.        ,       , } )
+      aAdd(_aItalac_F3,{"MV_PAR01",_bQryFiltr,{|Tab| (Tab)->DAK_COD },{|Tab| (Tab)->A1_NOME }  ,/*_bCondSA1*/ ,"Cargas",,,,.F.        ,       , } )
      
-      Aadd( _aParAux , { 1 , "Cargas"       		, MV_PAR01, "@!"    , ""  , "F3ITLC"  , "" , 100 , .F. } )
+      aAdd( _aParAux , { 1 , "Cargas"       		, MV_PAR01, "@!"    , ""  , "F3ITLC"  , "" , 100 , .F. } )
      
       If !ParamBox( _aParAux , "Selecione o filtro" , @_aParRet,  , /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
          Break 
@@ -2762,7 +2556,7 @@ Begin Sequence
           //==========================================================
           // Posiciona a carga para a gravação das tabela ZFQ e ZFR.  
           //==========================================================
-          DAK->(DbSetOrder(1))
+          DAK->(DBSetOrder(1))
           If DAK->(MsSeek(xFilial("DAK")+U_ItKey(_cCarga,"DAK_COD")))
              Processa( {|| AOMS152DAI() } , 'Aguarde!' , 'Gravando Dados para Reenvio da Carga...' )
              _cDAK_Cod += If(!Empty(_cDAK_Cod),";","") + DAK->DAK_COD
@@ -2772,7 +2566,7 @@ Begin Sequence
 
    _cQry2 := " SELECT ZFQ.R_E_C_N_O_ ZFQ_RECNO,ZFQ_FILIAL, ZFQ_NCARGA, ZFQ_SEQENT " 
    _cQry2 += " FROM "+ RETSQLNAME("ZFQ") + " ZFQ "
-   _cQry2 += " WHERE ZFQ.D_E_L_E_T_ <> '*' "
+   _cQry2 += " WHERE ZFQ.D_E_L_E_T_ = ' ' "
    _cQry2 += " AND ZFQ_SITUAC = 'C' "  
    _cQry2 += " AND ZFQ_NCARGA IN " + FormatIn(_cDAK_Cod,";")
 
@@ -2784,11 +2578,11 @@ Begin Sequence
 
    MPSysOpenQuery( _cQry2 , "QRYZFQ") 
 
-   DbSelectArea("QRYZFQ")
+   DBSelectArea("QRYZFQ")
 
    Count To _nTotRegs 
 
-   QRYZFQ->(DbGotop())
+   QRYZFQ->(DBGoTop())
    
    If ! _lSchedule
       ProcRegua(_nTotRegs)
@@ -2799,31 +2593,29 @@ Begin Sequence
    //====================================================================
    If _lSchedule
       U_AOMS152B()
-   Else 
+   Else
       Processa( {|| U_AOMS152B() } , 'Aguarde!' , 'Reenviando a Carga para o Sistema TMS...' )
    EndIf 
 
 End Sequence 
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS152H()
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 12/05/2025
-===============================================================================================================================
 Descrição---------: Rotina de integração de Solicitação de Emissão de Notas Fiscais para o sistema TMS Multiembarcador.
-===============================================================================================================================
 Parametros--------: _lSchedule = .T. = modo agendado.
                                  .F. = modo manual/menu.
                     _cOpcao    = "P" = Carga posicionada.
                                = "S" = Selecionar Cargas.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS152H(_lSchedule,_cOpcao)
+
 Local _aParAux:= {}
 Local _aParRet:= {}
 Local _bQryFiltr
@@ -2844,7 +2636,7 @@ Begin Sequence
    EndIf 
 
    If ! _lSchedule
-      If ! U_ITMSG("Confirma a Integração de Solicitação de Emissão de Notas Fiscais para o Sistema TMS ?","Atenção" , , ,2, 2)
+      If ! U_ITMsg("Confirma a Integração de Solicitação de Emissão de Notas Fiscais para o Sistema TMS ?","Atenção" , , ,2, 2)
          Break 
       EndIf
    EndIf  
@@ -2863,7 +2655,7 @@ Begin Sequence
       //===================================================================================
       If _lSchedule
          U_AOMS140P() // Chama a rotina de integração Webservice de solicitação de emissão de nota fiscal.
-      Else 
+      Else
          //==============================================================================
          // Após Fechar a Carga, Roda a Rotina de solicitação de emissão de nota fiscal
          //______________________________________________________________________________
@@ -2876,12 +2668,12 @@ Begin Sequence
          Processa( {|| _aRet := U_AOMS140P()} , 'Aguarde!' , 'Integrando Solicitação Emissão de Notas Fiscais TMS...' ) // Chama a rotina de integração Webservice de solicitação de emissão de nota fiscal.
 
          If _aRet[1]  // Solicitação de Fechamento de Carga realizado com sucesso.
-            Aadd(_aresult,{"Carga: >>>",DAK->DAK_COD,"","[Retorno Solicitação de emissão de nota fiscal] : Sucesso - " + _aRet[2] + "-" + _aRet[3]}) // adicona em um array para fazer um item list, exibir os resultados.
-         Else 
-            Aadd(_aresult,{"Carga: >>>",DAK->DAK_COD,"","[Retorno Solicitação de emissão de nota fiscal] : Erro - "    + _aRet[2] + "-" + _aRet[3]}) // adicona em um array para fazer um item list, exibir os resultados.
+            aAdd(_aresult,{"Carga: >>>",DAK->DAK_COD,"","[Retorno Solicitação de emissão de nota fiscal] : Sucesso - " + _aRet[2] + "-" + _aRet[3]}) // adicona em um array para fazer um item list, exibir os resultados.
+         Else
+            aAdd(_aresult,{"Carga: >>>",DAK->DAK_COD,"","[Retorno Solicitação de emissão de nota fiscal] : Erro - "    + _aRet[2] + "-" + _aRet[3]}) // adicona em um array para fazer um item list, exibir os resultados.
          EndIf 
       EndIf 
-   Else 
+   Else
       //=================================================================================================
       // Grava os dados das tabelas ZFQ e ZFR para as cargas informadas pelo usuário na tela de filtro.
       //=================================================================================================
@@ -2889,11 +2681,11 @@ Begin Sequence
          Break 
       EndIf 
 
-      _bQryFiltr := {|| "SELECT DISTINCT DAK_COD, A1_NOME FROM "+ RETSQLNAME("DAK") + " DAK, "+ RETSQLNAME("DAI") + " DAI, "+RETSQLNAME("SA1") + " SA1 " +"WHERE DAK.D_E_L_E_T_ = ' '  AND DAI.D_E_L_E_T_ = ' ' AND SA1.D_E_L_E_T_ = ' ' AND DAK.DAK_FILIAL = '" + xFilial("DAK") + "' AND DAK_FILIAL = DAI_FILIAL AND DAK_COD = DAI_COD AND DAI_CLIENT = A1_COD AND DAI_LOJA = A1_LOJA AND DAK.DAK_DATA >= '"+ Dtos(_dDataFilt) +"' ORDER BY DAK_COD DESC "}     
+      _bQryFiltr := {|| "SELECT DISTINCT DAK_COD, A1_NOME FROM "+ RETSQLNAME("DAK") + " DAK, "+ RETSQLNAME("DAI") + " DAI, "+RETSQLNAME("SA1") + " SA1 " +"WHERE DAK.D_E_L_E_T_ = ' '  AND DAI.D_E_L_E_T_ = ' ' AND SA1.D_E_L_E_T_ = ' ' AND DAK.DAK_FILIAL = '" + xFilial("DAK") + "' AND DAK_FILIAL = DAI_FILIAL AND DAK_COD = DAI_COD AND DAI_CLIENT = A1_COD AND DAI_LOJA = A1_LOJA AND DAK.DAK_DATA >= '"+ DToS(_dDataFilt) +"' ORDER BY DAK_COD DESC "}     
       _aItalac_F3 := {}
-      Aadd(_aItalac_F3,{"MV_PAR01",_bQryFiltr,{|Tab| (Tab)->DAK_COD },{|Tab| (Tab)->A1_NOME }  ,/*_bCondSA1*/ ,"Cargas",,,,.F.        ,       , } )
+      aAdd(_aItalac_F3,{"MV_PAR01",_bQryFiltr,{|Tab| (Tab)->DAK_COD },{|Tab| (Tab)->A1_NOME }  ,/*_bCondSA1*/ ,"Cargas",,,,.F.        ,       , } )
      
-      Aadd( _aParAux , { 1 , "Cargas"       		, MV_PAR01, "@!"    , ""  , "F3ITLC"  , "" , 100 , .F. } )
+      aAdd( _aParAux , { 1 , "Cargas"       		, MV_PAR01, "@!"    , ""  , "F3ITLC"  , "" , 100 , .F. } )
      
       If !ParamBox( _aParAux , "Selecione o filtro" , @_aParRet,  , /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
          Break 
@@ -2902,7 +2694,7 @@ Begin Sequence
       For _nI := 1 To Len(_aCargas)
           _cCarga := _aCargas[_nI]
 
-          DAK->(DbSetOrder(1))
+          DAK->(DBSetOrder(1))
           If DAK->(MsSeek(xFilial("DAK")+U_ItKey(_cCarga,"DAK_COD")))
              //==============================================================================
              // Após Fechar a Carga, Roda a Rotina de solicitação de emissão de nota fiscal
@@ -2916,53 +2708,50 @@ Begin Sequence
              Processa( {|| _aRet := U_AOMS140P()} , 'Aguarde!' , 'Integrando Solicitação Emissão de Notas Fiscais TMS...' ) // Chama a rotina de integração Webservice de solicitação de emissão de nota fiscal.
 
              If _aRet[1]  // Solicitação de Fechamento de Carga realizado com sucesso.
-                Aadd(_aresult,{"Carga: >>>",DAK->DAK_COD,"","[Retorno Solicitação de emissão de nota fiscal] : Sucesso - " + _aRet[2] + "-" + _aRet[3]}) // adicona em um array para fazer um item list, exibir os resultados.
-             Else 
-                Aadd(_aresult,{"Carga: >>>",DAK->DAK_COD,"","[Retorno Solicitação de emissão de nota fiscal] : Erro - "    + _aRet[2] + "-" + _aRet[3]}) // adicona em um array para fazer um item list, exibir os resultados.
+                aAdd(_aresult,{"Carga: >>>",DAK->DAK_COD,"","[Retorno Solicitação de emissão de nota fiscal] : Sucesso - " + _aRet[2] + "-" + _aRet[3]}) // adicona em um array para fazer um item list, exibir os resultados.
+             Else
+                aAdd(_aresult,{"Carga: >>>",DAK->DAK_COD,"","[Retorno Solicitação de emissão de nota fiscal] : Erro - "    + _aRet[2] + "-" + _aRet[3]}) // adicona em um array para fazer um item list, exibir os resultados.
              EndIf 
           EndIf 
       Next 
    EndIf 
 
    _aCabecalho := {}
-   Aadd(_aCabecalho,"PEDIDO" ) 
-   Aadd(_aCabecalho,"CARGA" ) 
-   Aadd(_aCabecalho,"CNPJ") 
-   Aadd(_aCabecalho,"RETORNO") 
+   aAdd(_aCabecalho,"PEDIDO" ) 
+   aAdd(_aCabecalho,"CARGA" ) 
+   aAdd(_aCabecalho,"CNPJ") 
+   aAdd(_aCabecalho,"RETORNO") 
              
    _cTitulo := "Resultados da integração"
       
-   If len(_aresult) > 0 .AND. !_lSchedule
+   If Len(_aresult) > 0 .And. !_lSchedule
       U_ITListBox( _cTitulo , _aCabecalho , _aresult  ) // Exibe uma tela de resultado.
       _aresult := {}
   	EndIf
 
 End Sequence 
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS152W()
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 30/05/2025
-===============================================================================================================================
 Descrição---------: Rotina de integração para Solicitar Cancelamento Da Carga para o sistema TMS Multiembarcador.
-===============================================================================================================================
 Parametros--------: Nenhum 
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS152W()
+
 Local _aParaux   := {}
 Local _aParRet   := {}
-//----------------------------
 Local oWsdl
 Local _cXML           := ""
 Local _cLink          := ""
-Local _cToken         := U_ITGETMV( 'IT_TOKMUTE' , "a78e0523d3794843855e8d95c2bff8d4")
-Local _cEmpWebService := U_ITGETMV( 'IT_EMPTMSM' , "000005")
+Local _cToken         := SuperGetMV('IT_TOKMUTE',.F.,"a78e0523d3794843855e8d95c2bff8d4")
+Local _cEmpWebService := SuperGetMV('IT_EMPTMSM',.F.,"000005")
 Local _lReturn        := .F.
 Local cReplace:= ""
 Local cErros:= ""
@@ -2971,36 +2760,36 @@ Local cAvisos := ""
 Begin Sequence 
 
    If ! _lSchedule
-      If ! U_ITMSG("Confirma a Integração de Solicitação de Cancelamento de Carga para o Sistema TMS ?","Atenção" , , ,2, 2)
+      If ! U_ITMsg("Confirma a Integração de Solicitação de Cancelamento de Carga para o Sistema TMS ?","Atenção" , , ,2, 2)
          Break 
       EndIf
    EndIf  
 
    MV_PAR01 := Space(20)
        
-   Aadd( _aParAux , { 1 , "Numero Protocolo Integração de Carga"   , MV_PAR01, "@!", ""	, ""	  , ""          ,050      , .T. } )
+   aAdd( _aParAux , { 1 , "Numero Protocolo Integração de Carga"   , MV_PAR01, "@!", ""	, ""	  , ""          ,050      , .T. } )
          
-   Aadd(_aParRet,"MV_PAR01")
+   aAdd(_aParRet,"MV_PAR01")
          
    If !ParamBox( _aParAux , "Integra uma Solicitação de Cancelamento de Cargas para o Sistema TMS" , @_aParRet )
-	   U_ItMsg( "Operação cancelada pelo usuário!" , "Atenção!",,1 )
+	   U_ITMsg( "Operação cancelada pelo usuário!" , "Atenção!",,1 )
 	   Break 
 	EndIf
 
    If Empty(MV_PAR01)
-      U_ItMsg( "Protocolo de integração de cargas não preenchido." , "Atenção!",,1 )
+      U_ITMsg( "Protocolo de integração de cargas não preenchido." , "Atenção!",,1 )
 	   Break 
    EndIf 
 
-   ZFM->(DbSetOrder(1))
-   If ZFM->(DbSeek(xFilial("ZFM")+_cEmpWebService))
+   ZFM->(DBSetOrder(1))
+   If ZFM->(DBSeek(xFilial("ZFM")+_cEmpWebService))
 		_cLink   := AllTrim(ZFM->ZFM_LINK01) //Cargas
-   Else            
+   Else   
       MsgInfo("Empresa WebService para envio dos dados não localizada.","Atenção")
    EndIf
 
    If Empty(_cLink)
-      U_ItMsg( "Link de integração de cargas não preenchido." , "Atenção!",,1 )
+      U_ITMsg( "Link de integração de cargas não preenchido." , "Atenção!",,1 )
 	   Break 
    EndIf 
       
@@ -3037,237 +2826,231 @@ Begin Sequence
 
 		If oResult:_S_ENVELOPE:_S_BODY:_SolicitarCancelamentoDaCargaRESPONSE:_SolicitarCancelamentoDaCargaRESULT:_A_STATUS:TEXT == "false"
 			_lReturn   := .F.
-			//_cMensagem := oResult:_S_ENVELOPE:_S_BODY:_SolicitarCancelamentoDaCargaRESPONSE:_SolicitarCancelamentoDaCargaRESULT:_A_MENSAGEM:TEXT
 		EndIf
-	Else 
+	Else
 		_lReturn := .F.
 		_cMensagem  := oWsdl:cError 
 	EndIf   
    
    If _lReturn
-      U_ItMsg( "Solicitação de Cancelamento de Carga realizada com sucesso para o Sistema TMS Multiembarcador: " + AllTrim(_cMensagem) , "Atenção!",,2 )
-   Else 
-      U_ItMsg( "Falha na Solicitação de Cancelamento de Carga para o Sistema TMS Multiembarcador: " + AllTrim(_cMensagem) , "Atenção!",,1 )
+      U_ITMsg( "Solicitação de Cancelamento de Carga realizada com sucesso para o Sistema TMS Multiembarcador: " + AllTrim(_cMensagem) , "Atenção!",,2 )
+   Else
+      U_ITMsg( "Falha na Solicitação de Cancelamento de Carga para o Sistema TMS Multiembarcador: " + AllTrim(_cMensagem) , "Atenção!",,1 )
    EndIf 
 
 End Sequence 
 
-U_ItMsg( "Termino da rotina de solicitação de cancelamento de cargas para o sistema TMS Multiembarcador." , "Atenção!",,2 )
+U_ITMsg( "Termino da rotina de solicitação de cancelamento de cargas para o sistema TMS Multiembarcador." , "Atenção!",,2 )
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS152Y()
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 12/06/2025
-===============================================================================================================================
 Descrição---------: Webservice de integração de situação de pedidos de vendas para o sistema TMS Multiembarcador.
-===============================================================================================================================
 Parametros--------: Nenhum 
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS152Y()
-    Local _cDirXML := ""
-    Local _cLink   := ""
-    Local _cCabXML := ""
-    Local _cRodXML := ""
-    Local _cEmpWebService := ""
-    Local _aOrd
-    Local _cXML
-    Local _cResult := ""
-    Local _cResposta, _cSituacao
-    Local _nRegSC5
-    Local _cSitPed := ""
-    //Local _lWsTms := U_ITGETMV( 'IT_WEBSTMS' , .F.) // Indica se rotina de integração WebService é TMS Multi-Embarcador ou RDC.
 
-    Default _lMarcaEnv:=.T.
-    Default _item := {"  ", SC5->C5_FILIAL,SC5->C5_NUM} //Se não mandar parâmetro analisa pedido posicionado
+Local _cDirXML := ""
+Local _cLink   := ""
+Local _cCabXML := ""
+Local _cRodXML := ""
+Local _cEmpWebService := ""
+Local _aOrd
+Local _cXML
+Local _cResult := ""
+Local _cResposta, _cSituacao
+Local _nRegSC5
+Local _cSitPed := ""
 
-    Begin Sequence
+Default _lMarcaEnv:=.T.
+Default _item := {"  ", SC5->C5_FILIAL,SC5->C5_NUM} //Se não mandar parâmetro analisa pedido posicionado
 
-        If Select("ZFM") == 0 // Se a tabela ZFM não estiver aberta, abre a tabela ZFM.
-            ChkFile("ZFM")
-        EndIf
+Begin Sequence
 
-        If Select("SC5") == 0 // Se a tabela SC5 não estiver aberta, abre a tabela SC5.
-            ChkFile("SC5")
-        EndIf
+   If Select("ZFM") == 0 // Se a tabela ZFM não estiver aberta, abre a tabela ZFM.
+      ChkFile("ZFM")
+   EndIf
 
-        _nRegSC5 := SC5->(Recno())
+   If Select("SC5") == 0 // Se a tabela SC5 não estiver aberta, abre a tabela SC5.
+      ChkFile("SC5")
+   EndIf
 
-        _aOrd := SaveOrd({"ZFM","SC5"}) // Salva no Array _aOrd a ordem dos índices das tabelas posicionadas e a posição atual do ponterio de registro.
+   _nRegSC5 := SC5->(Recno())
 
-        SC5->(Dbsetorder(1))
-        If !(SC5->(Dbseek(_item[2]+_item[3]))) //Se não achar o pedido de vendas sai da rotina de imediato
-            Break
-        Endif
+   _aOrd := SaveOrd({"ZFM","SC5"}) // Salva no Array _aOrd a ordem dos índices das tabelas posicionadas e a posição atual do ponterio de registro.
 
-        _cSitPed := U_STPEDIDO()
+   SC5->(DBSetOrder(1))
+   If !(SC5->(DBSeek(_item[2]+_item[3]))) //Se não achar o pedido de vendas sai da rotina de imediato
+      Break
+   EndIf
+
+   _cSitPed := U_STPEDIDO()
 //----------------------------------------------------------  // JPP TESTE
-        // Incluir chamada para o TMS Aqui. 
+   // Incluir chamada para o TMS Aqui. 
 
-        //================================================================================
-        // Se o Webservice de integração dom o TMS Multiembarcador estiver ativo
-        // para este local de embarque,  roda a rotina de integração Webservice
-        // de envio de situação de Pedidos de vendas para o sistema TMS Multiembarcador. 
-        //================================================================================
-        If ! U_IT_TMS(SC5->C5_I_LOCEM) 
+   //================================================================================
+   // Se o Webservice de integração dom o TMS Multiembarcador estiver ativo
+   // para este Local de embarque,  roda a rotina de integração Webservice
+   // de envio de situação de Pedidos de vendas para o sistema TMS Multiembarcador. 
+   //================================================================================
+   If ! U_IT_TMS(SC5->C5_I_LOCEM) 
 
-        EndIf  
-//----------------------------------------------------------
-        If SC5->C5_I_ENVRD = "S"
-           //========================================================================
-           // Se a filial atual estiver habilitada a utilizar o TMS MultiEmbarcador,
-           // Chama a rotina nova de Envio de Situação do Pedido de Vendas.
-           //========================================================================
-           If U_IT_TMS(SC5->C5_I_LOCEM)//_lWsTms 
-              U_AOMS140O() // Nova Rotina de Envio da Situação do Pedido de Vendas para o TMS MultiEmbarcador.    
-              Break 
-           EndIf 
+   EndIf  
 
-           //========================================================================
-           // Chama a rotina antiga, do RDC, de envio da Situação do Pedido de Vendas
-           //========================================================================
-              IF _lMarcaEnv
-                U_GRVCAPAC(SC5->C5_FILIAL,NIL,SC5->C5_NUM,"[ ENVSITPV - MARCAENV - "+ALLTRIM(FUNNAME())+" ] [ Sit.: "+_cSitPed+" ]")
-                Break
-            ENDIF
+   If SC5->C5_I_ENVRD = "S"
+      //========================================================================
+      // Se a filial atual estiver habilitada a utilizar o TMS MultiEmbarcador,
+      // Chama a rotina nova de Envio de Situação do Pedido de Vendas.
+      //========================================================================
+      If U_IT_TMS(SC5->C5_I_LOCEM)//_lWsTms 
+         U_AOMS140O() // Nova Rotina de Envio da Situação do Pedido de Vendas para o TMS MultiEmbarcador.    
+         Break 
+      EndIf 
 
-            //================================================================================
-            // Lê o diretório dos arquivos XML modelos e o link de envio dos dados.
-            //================================================================================
-            ZFM->(DbSetOrder(1))
-            If ZFM->(DbSeek(xFilial("ZFM")+_cEmpWebService))
-                _cDirXML := ZFM->ZFM_LOCXML
-                _cLink   := AllTrim(ZFM->ZFM_LINK01)
+      //========================================================================
+      // Chama a rotina antiga, do RDC, de envio da Situação do Pedido de Vendas
+      //========================================================================
+         If _lMarcaEnv
+            U_GRVCAPAC(SC5->C5_FILIAL,NIL,SC5->C5_NUM,"[ ENVSITPV - MARCAENV - "+AllTrim(FUNNAME())+" ] [ Sit.: "+_cSitPed+" ]")
+            Break
+      EndIf
+
+      //================================================================================
+      // Lê o diretório dos arquivos XML modelos e o link de envio dos dados.
+      //================================================================================
+      ZFM->(DBSetOrder(1))
+      If ZFM->(DBSeek(xFilial("ZFM")+_cEmpWebService))
+            _cDirXML := ZFM->ZFM_LOCXML
+            _cLink   := AllTrim(ZFM->ZFM_LINK01)
+      Else
+            Break
+      EndIf
+
+      If Empty(_cDirXML) .Or. Empty(_cLink)
+            Break
+      EndIf
+
+      _cDirXML := AllTrim(_cDirXML)
+      If Right(_cDirXML,1) <> "\"
+            _cDirXML := _cDirXML + "\"
+      EndIf
+
+      //================================================================================
+      // Lê os arquivos modelo XML e os transforma em String.
+      //================================================================================
+      _cCabXML := LEXMLS(_cDirXML+"Cab_BloqPedido.txt")
+      If Empty(_cCabXML)
+            Break
+      EndIf
+
+      oWsdl := tWSDLManager():New() // Cria o objeto da WSDL.
+      oWsdl:nTimeout := 30          // Timeout de 10 segundos
+      oWsdl:lSSLInsecure := .T. //   Acessa com certificado anônimo
+
+      oWsdl:ParseURL( _cLink) // Manda para dentro do Objeto qual é o link do WSDL de integração Webservice. Este link é o da RDC.
+      oWsdl:SetOperation("AlteraSituacaoPedido") // Define qual operação será realizada.
+
+      Begin Transaction
+            //-----------------------------------------------------------------------------------------
+            // Realiza a integração dos bloqueios e pedidos de vendas (Envio de XML) via WebService.
+            //-----------------------------------------------------------------------------------------
+
+            SC5->(DBSeek(_item[2]+_item[3])) //Posiciona pedido para montar xml
+
+            _cDetXML := LEXMLS(_cDirXML+"DET_BloqPedido.txt")
+
+            _cRodXML := LEXMLS(_cDirXML+"Rodape_BloqPedido.txt")
+
+            //Monta XML
+            _cXML := _cCabXML + &(_cDetXML) + _cRodXML  // Monta o XML de envio.
+
+            // Limpa & da string
+            _cXML := StrTran(_cXML,"&"," ")
+
+            // Envia para o servidor
+
+            _cOk := oWsdl:SendSoapMsg(_cXML) // Este comando pega o XML e envia para o servidor da RDC.
+
+            If _cOk
+               _cResult := oWsdl:GetParsedResponse() // Pega o resultado de envio já no formato em string.
             Else
-                Break
+               _cResult := oWsdl:cError
             EndIf
 
-            If Empty(_cDirXML) .Or. Empty(_cLink)
-                Break
+            _cResposta := AllTrim(StrTran(_cResult,Chr(10)," "))
+            _cResposta := Upper(_cResposta)
+
+            oWsdl:GetSoapResponse() //finaliza soap
+
+            // "Importado Com Sucesso"
+            _cSituacao := "P"
+
+            If ! _cOk
+               _cSituacao := "N"
+            ElseIf !("IMPORTADO COM SUCESSO" $ _cResposta)
+               _cSituacao := "N"
             EndIf
 
-            _cDirXML := Alltrim(_cDirXML)
-            If Right(_cDirXML,1) <> "\"
-                _cDirXML := _cDirXML + "\"
-            EndIf
+            // grava resultado // sempre como processado
+            ZGA->(RecLock("ZGA",.T.))
+            ZGA->ZGA_DTENT   := SC5->C5_I_DTENT
+            ZGA->ZGA_SITUAC  := _cSituacao
+            ZGA->ZGA_NUM     := SC5->C5_NUM
+            ZGA->ZGA_USUARI  := __cUserId
+            ZGA->ZGA_DATAAL  := Date()
+            ZGA->ZGA_HORASA  := Time()
+            ZGA->ZGA_STATUS  := _cSitPed
+            ZGA->ZGA_RETORN  := _cResposta // AllTrim(StrTran(_cResult,Chr(10)," ")) // grava o resultado da integração na tabela dizendo que deu certo ou não.
+            ZGA->ZGA_XML     := _cXML
+            ZGA->(MSUnLock())
 
-            //================================================================================
-            // Lê os arquivos modelo XML e os transforma em String.
-            //================================================================================
-            _cCabXML := LEXMLS(_cDirXML+"Cab_BloqPedido.txt")
-            If Empty(_cCabXML)
-                Break
-            EndIf
+      End Transaction
 
-            oWsdl := tWSDLManager():New() // Cria o objeto da WSDL.
-            oWsdl:nTimeout := 30          // Timeout de 10 segundos
-            oWsdl:lSSLInsecure := .T. //   Acessa com certificado anônimo
-
-            oWsdl:ParseURL( _cLink) // Manda para dentro do Objeto qual é o link do WSDL de integração Webservice. Este link é o da RDC.
-            oWsdl:SetOperation("AlteraSituacaoPedido") // Define qual operação será realizada.
-
-            Begin Transaction
-                //-----------------------------------------------------------------------------------------
-                // Realiza a integração dos bloqueios e pedidos de vendas (Envio de XML) via WebService.
-                //-----------------------------------------------------------------------------------------
-
-                SC5->(Dbseek(_item[2]+_item[3])) //Posiciona pedido para montar xml
-
-                _cDetXML := LEXMLS(_cDirXML+"DET_BloqPedido.txt")
-
-                _cRodXML := LEXMLS(_cDirXML+"Rodape_BloqPedido.txt")
-
-                //Monta XML
-                _cXML := _cCabXML + &(_cDetXML) + _cRodXML  // Monta o XML de envio.
-
-                // Limpa & da string
-                _cXML := strtran(_cXML,"&"," ")
-
-                // Envia para o servidor
-
-                _cOk := oWsdl:SendSoapMsg(_cXML) // Este comando pega o XML e envia para o servidor da RDC.
-
-                If _cOk
-                    _cResult := oWsdl:GetParsedResponse() // Pega o resultado de envio já no formato em string.
-                Else
-                    _cResult := oWsdl:cError
-                EndIf
-
-                _cResposta := AllTrim(StrTran(_cResult,Chr(10)," "))
-                _cResposta := Upper(_cResposta)
-
-                oWsdl:GetSoapResponse() //finaliza soap
-
-                // "Importado Com Sucesso"
-                _cSituacao := "P"
-
-                If ! _cOk
-                    _cSituacao := "N"
-                ElseIf !("IMPORTADO COM SUCESSO" $ _cResposta)
-                    _cSituacao := "N"
-                EndIf
-
-                // grava resultado // sempre como processado
-                ZGA->(RecLock("ZGA",.T.))
-                ZGA->ZGA_DTENT   := SC5->C5_I_DTENT
-                ZGA->ZGA_SITUAC  := _cSituacao
-                ZGA->ZGA_NUM     := SC5->C5_NUM
-                ZGA->ZGA_USUARI  := __CUSERID
-                ZGA->ZGA_DATAAL  := Date()
-                ZGA->ZGA_HORASA  := TIME()
-                ZGA->ZGA_STATUS  := _cSitPed
-                ZGA->ZGA_RETORN  := _cResposta // AllTrim(strtran(_cResult,Chr(10)," ")) // grava o resultado da integração na tabela dizendo que deu certo ou não.
-                ZGA->ZGA_XML     := _cXML
-                ZGA->(MsUnlock())
-
-            End Transaction
-
-            IF "AN EXCEPTION  OCCURRED AT 1:0 WSDLPARSER EXCEPTION" $ UPPER(ZGA->ZGA_RETORN) .OR.;
-                    "AN EXCEPTION  OCCURRED AT 0:0 WSDLPARSER EXCEPTION" $ UPPER(ZGA->ZGA_RETORN)
-                U_GRVCAPAC(SC5->C5_FILIAL,NIL,SC5->C5_NUM,"[ ENVSITPV - ERRO - "+ALLTRIM(FUNNAME())+" ]")
-            ENDIF
+      If "AN EXCEPTION  OCCURRED AT 1:0 WSDLPARSER EXCEPTION" $ Upper(ZGA->ZGA_RETORN) .OR.;
+               "AN EXCEPTION  OCCURRED AT 0:0 WSDLPARSER EXCEPTION" $ Upper(ZGA->ZGA_RETORN)
+            U_GRVCAPAC(SC5->C5_FILIAL,NIL,SC5->C5_NUM,"[ ENVSITPV - ERRO - "+AllTrim(FUNNAME())+" ]")
+      EndIf
 
 
-            IF TYPE("oWsdl") = "O"
-                oWsdl:=Nil
-                //Limpa o Objeto: Conforme orientado pelo Framework
-                DelClassIntf()//Exclui todas classes de interface da thread.
-            ENDIF
+      If Type("oWsdl") = "O"
+            oWsdl:=Nil
+            //Limpa o Objeto: Conforme orientado pelo Framework
+            DelClassIntf()//Exclui todas classes de interface da thread.
+      EndIf
 
-        ENDIF
+   EndIf
 
-        SC5->(RecLock("SC5",.F.))
-        SC5->C5_I_STATU := U_STPEDIDO() //Função de análise do pedido de vendas no xfunoms
-        SC5->(MsUnlock())
+   SC5->(RecLock("SC5",.F.))
+   SC5->C5_I_STATU := U_STPEDIDO() //Função de análise do pedido de vendas no xfunoms
+   SC5->(MSUnLock())
 
-    End Sequence
- 
-    RestOrd(_aOrd)
+End Sequence
 
-    SC5->(DbGoTo(_nRegSC5))
+RestOrd(_aOrd)
 
-Return Nil
+SC5->(DBGoTo(_nRegSC5))
+
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS152J()
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 12/06/2025
-===============================================================================================================================
 Descrição---------: Rotina que retorna o Status do Estoque do Pedido de Vendas.
                     Considera estar posicionado no pedido de vendas, tabela SC5.
-===============================================================================================================================
 Parametros--------: Nenhum 
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS152J()
+
 Local _aRet := {"01","Sem Reserva"}
 Local _lBloqEst  := .F.
 Local _lLiberado := .T.
@@ -3282,19 +3065,19 @@ Local _lLiberado := .T.
 
 Begin Sequence 
    
-   SC9->(DbSetorder(1))
-   SC6->(DbSetOrder(1))
-   SC6->(DbSeek(SC5->C5_FILIAL+SC5->C5_NUM))
+   SC9->(DBSetOrder(1))
+   SC6->(DBSetOrder(1))
+   SC6->(DBSeek(SC5->C5_FILIAL+SC5->C5_NUM))
    
-	Do While !(SC6->(Eof())) .And. SC6->(C6_FILIAL+C6_NUM) == SC5->C5_FILIAL+SC5->C5_NUM
+	While !(SC6->(Eof())) .And. SC6->(C6_FILIAL+C6_NUM) == SC5->C5_FILIAL+SC5->C5_NUM
 
-		If !(SC9->(DbSeek(SC6->C6_FILIAL+SC6->C6_NUM+SC6->C6_ITEM))) 
+		If !(SC9->(DBSeek(SC6->C6_FILIAL+SC6->C6_NUM+SC6->C6_ITEM))) 
          _lLiberado := .F.
       ElseIf !Empty(SC9->C9_BLEST)  // verifica estoque se não tem liberação válida ainda
          _lBloqEst  := .T.
       EndIf 
 
-		SC6->(Dbskip())
+		SC6->(DBSkip())
    EndDo
    
    If _lBloqEst

@@ -11,8 +11,8 @@
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#INCLUDE "Protheus.ch"
-#INCLUDE "RwMake.ch"
+#Include "TOTVS.ch"
+#Include "RwMake.ch"
 /*
 ===============================================================================================================================
 Programa----------: AOMS016()
@@ -28,7 +28,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================*/
 User Function AOMS016()
 
-Local aArea :=	GetArea()
+Local aArea :=	FWGetArea()
 Local nX := 0
 Local nN := N //Restaura o valor de n, que eh a variavel publica do protheus que indica a linha do aCols.
 
@@ -45,10 +45,10 @@ Next nX
 N := nN
 
 //Refresh para atualizacao do Rodape do Pedido de Venda.
-If type("oGetDad") = 'O' .AND. type("oGetDad:oWnd") = 'O'//Ajuste para o Tratamento da Operação Triangular
+If Type("oGetDad") = 'O' .And. Type("oGetDad:oWnd") = 'O'//Ajuste para o Tratamento da Operação Triangular
 	Ma410Rodap(oGetDad)
 	oGetDad:Refresh()       
 EndIf
 
-RestArea(aArea)
+FWRestArea(aArea)
 Return

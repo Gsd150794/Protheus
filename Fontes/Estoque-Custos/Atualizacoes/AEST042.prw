@@ -4,16 +4,15 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer |04/07/2022| Chamado 40565. Correções na Nova função para envio de WK Schedulado
-Julio Paz     |04/07/2022| Chamado 40619. Permitir usuário informar armazem para contagem fabrica.
 Lucas Borges  |10/10/2024| Chamado 48465. Retirada da função de conout
 Lucas Borges  |23/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
+Lucas Borges  |14/09/2025| Chamado 51799. Implementada função para validar ambiente de teste totvs.framework.environment.Type.get()
 ================================================================================================================================
 */
-#Include 'FWMVCDEF.CH'
-#Include 'PROTHEUS.CH'
 
-#define	MB_OK				0
+#Include 'FWMVCDEF.CH'
+#Include "TOTVS.ch"
+
 /*
 ===============================================================================================================================
 Programa----------: AEST042
@@ -25,8 +24,8 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AEST042()
+
 Local oBrowse		:= Nil
-//Local _cMensagem	:= ""
 
 oBrowse := FWMBrowse():New()
 
@@ -47,6 +46,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function ModelDef()
+
 Local oStruZE2	:= FWFormStruct(1,"ZE2")
 Local oModel	:= Nil
 
@@ -54,7 +54,7 @@ oModel := MPFormModel():New('AEST042M',,{|oModel| AEST042TOK(oModel)})
 
 oModel:AddFields('ZE2MASTER', , oStruZE2)
 
-oModel:SetPrimaryKey( {'ZE2_FILIAL','ZE2_PRODUT','DTOS(ZE2_DTCONT)'} )
+oModel:SetPrimaryKey( {'ZE2_FILIAL','ZE2_PRODUT','DToS(ZE2_DTCONT)'} )
 
 Return(oModel)
 
@@ -69,6 +69,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function ViewDef()
+
 Local oModel	:= FWLoadModel('AEST042')
 Local oStruZE2	:= FWFormStruct(2,'ZE2')
 Local oView		:= Nil
@@ -96,6 +97,7 @@ Retorno-----------: _aRotina - Array com as opções de menu
 ===============================================================================================================================
 */
 Static Function MenuDef()
+
 Local _aRotina := {}
 
 ADD OPTION _aRotina Title 'Visualizar'	 Action 'VIEWDEF.AEST042'	OPERATION 2 ACCESS 0
@@ -118,15 +120,15 @@ Retorno-----------: Lógico - .T. dados válidas, .F. dados inválidos
 ===============================================================================================================================
 */
 User Function AEST042VLD()
-Local _aArea	:= GetArea()
+
+Local _aArea	:= FWGetArea()
 Local _lRet		:= .T.
 Local _cCampo	:= ReadVar()
 Local _nContSema
 
-If 'ZE2_PALCPR' $ _cCampo .OR. 'ZE2_PALCEA' $ _cCampo .OR. 'ZE2_PALAVA' $ _cCampo .OR. 'ZE2_PALVAZ' $ _cCampo .OR. 'ZE2_PALSUJ' $ _cCampo
+If 'ZE2_PALCPR' $ _cCampo .Or. 'ZE2_PALCEA' $ _cCampo .Or. 'ZE2_PALAVA' $ _cCampo .Or. 'ZE2_PALVAZ' $ _cCampo .Or. 'ZE2_PALSUJ' $ _cCampo
 	//Faz a somatória dos Pallets
 	M->ZE2_PALTOT := M->ZE2_PALCPR + M->ZE2_PALCEA + M->ZE2_PALAVA + M->ZE2_PALVAZ + M->ZE2_PALSUJ
-
 EndIf
 
 If 'ZE2_PALVAZ' $ _cCampo
@@ -134,12 +136,12 @@ If 'ZE2_PALVAZ' $ _cCampo
 EndIf
 
 If 'ZE2_PRODUT' $ _cCampo
-	dbSelectArea("SB5")
-	dbSetOrder(1)
-	If dbSeek(xFilial("SB5") + M->ZE2_PRODUT)
-		dbSelectArea("SB1")
-		dbSetOrder(1)
-		If dbSeek(xFilial("SB1") + M->ZE2_PRODUT)
+	DBSelectArea("SB5")
+	DBSetOrder(1)
+	If DBSeek(xFilial("SB5") + M->ZE2_PRODUT)
+		DBSelectArea("SB1")
+		DBSetOrder(1)
+		If DBSeek(xFilial("SB1") + M->ZE2_PRODUT)
 			M->ZE2_DESCRI := AllTrim(SB1->B1_DESC)
 		Else
 			_aInfHlp := {}
@@ -164,22 +166,18 @@ If 'ZE2_PRODUT' $ _cCampo
 EndIf
 
 If "ZE2_LOCAL" $ _cCampo // Valida campo Armazém
-   NNR->(DbSetOrder(1))
+   NNR->(DBSetOrder(1))
    If !Empty(M->ZE2_LOCAL) .And. ! NNR->(MsSeek(xFilial("NNR")+M->ZE2_LOCAL))
 
       Help( ,, 'Atenção',, 'O armazém informado não foi localizado no cadastro de armazéns.' , 1, 0 )
       _lRet := .F.
-
    EndIf 
 EndIf
 
 If "ZE2_DTCONT" $ _cCampo // Valida campo Data da Contagem
-  
    If Empty(M->ZE2_DTCONT) 
- 
       Help( ,, 'Atenção',, 'O preenchimento da data da contagem é obrigatório.' , 1, 0 )
       _lRet := .F.
- 
    EndIf 
    
    _nContSema := Dow(M->ZE2_DTCONT)
@@ -190,12 +188,11 @@ If "ZE2_DTCONT" $ _cCampo // Valida campo Data da Contagem
 
       Help( ,, 'Atenção',, 'O preenchimento da data da contagem só é permitido para os dias da semana: Sexta-feira, Sábado e Domingo.' , 1, 0 )
       _lRet := .F.
-
    EndIf  
-
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
+
 Return(_lRet)
 
 /*
@@ -209,13 +206,12 @@ Retorno-----------: Lógico - .T. dados válidas, .F. dados inválidos
 ===============================================================================================================================
 */
 Static Function AEST042TOK(oModel)
-Local _aArea	:= GetArea()
+
+Local _aArea	:= FWGetArea()
 Local _nOpc 	:= oModel:GetOperation()
 Local _lRet		:= .T.
-//Local _cCampo	:= ReadVar()
 
-If (_nopc == 3 .or. _nopc == 4 ) .and. M->ZE2_PALDES > 0 .AND. M->ZE2_QTDPC == 0
-
+If (_nopc == 3 .Or. _nopc == 4 ) .And. M->ZE2_PALDES > 0 .And. M->ZE2_QTDPC == 0
 		_aInfHlp := {}
 		//                 |....:....|....:....|....:....|....:....|      |....:....|....:....|....:....|....:....|
 		aAdd( _aInfHlp , { "Foi informado pallet descarte "	, " sem quantidade de peças                  "	} )
@@ -224,13 +220,12 @@ If (_nopc == 3 .or. _nopc == 4 ) .and. M->ZE2_PALDES > 0 .AND. M->ZE2_QTDPC == 0
 		U_ITCADHLP( _aInfHlp , "AEST04299" )
 
 		_lRet := .F.
+EndIf
 
-Endif
-
-If _nOpc == 3 .AND. _lret	//Inclusão
-	dbSelectArea("ZE2")
-	dbSetOrder(3)
-	If dbSeek(xFilial("ZE2") + M->ZE2_PRODUT + DtoS(M->ZE2_DTCONT) + M->ZE2_LOCAL)
+If _nOpc == 3 .And. _lRet	//Inclusão
+	DBSelectArea("ZE2")
+	DBSetOrder(3)
+	If DBSeek(xFilial("ZE2") + M->ZE2_PRODUT + DToS(M->ZE2_DTCONT) + M->ZE2_LOCAL)
 		_aInfHlp := {}
 		//                 |....:....|....:....|....:....|....:....|      |....:....|....:....|....:....|....:....|
 		aAdd( _aInfHlp , { "O produto informado já possui apontamen-"	, "to para esta data e armazém.           "	} )
@@ -247,10 +242,11 @@ If _nOpc == 4 .And. _lRet
 	RecLock("ZE2",.F.)
 		ZE2->ZE2_QTDALT := ZE2->ZE2_QTDALT + 1
 		ZE2->ZE2_AUTEST := ZE2->ZE2_PALVAZ / ZE2->ZE2_MEDCON
-	MsUnLock()
+	MSUnLock()
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
+
 Return(_lRet)
 
 /*
@@ -264,7 +260,8 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AEST042K()
-Local _aArea	:= GetArea()
+
+Local _aArea	:= FWGetArea()
 Local _nMedCG	:= 0
 Local _nOpcx	:= 0
 Local _oDataL
@@ -291,14 +288,11 @@ Local _oSButCan
 Local _oSButOk
 Local _oDlg
 
-dbSelectArea("ZZL")
-dbSetOrder(3) //ZZL_FILIAL + ZZL_CODUSU
-If dbSeek(xFilial("ZZL") + __cUserId)
-
+DBSelectArea("ZZL")
+DBSetOrder(3) //ZZL_FILIAL + ZZL_CODUSU
+If DBSeek(xFilial("ZZL") + __cUserId)
 	If ZZL->ZZL_MEDCON == "S"
-       
 	   If ZE2->ZE2_DTCONT < Date() 
-
 			If ZZL->ZZL_ALTDTA == "N"
                _aInfHlp := {}
 			   //                 |....:....|....:....|....:....|....:....|      |....:....|....:....|....:....|....:....|
@@ -307,46 +301,45 @@ If dbSeek(xFilial("ZZL") + __cUserId)
 	
 			   U_ITCADHLP( _aInfHlp , "AEST04205" )
 				
-			   RestArea(_aArea)
+			   FWRestArea(_aArea)
 			   Return
 			EndIf
-			
 		EndIf
 
 		DEFINE MSDIALOG _oDlg TITLE "Média Consumo Diário" FROM 000, 000  TO 110, 700 COLORS 0, 16777215 PIXEL
 		
-			@ 005, 006 SAY _oProdL PROMPT "Produto:" SIZE 022, 007 OF _oDlg COLORS 0, 16777215 PIXEL
-		    @ 005, 030 SAY _oProdR PROMPT ZE2->ZE2_PRODUT SIZE 049, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
+			@ 005, 006 Say _oProdL PROMPT "Produto:" SIZE 022, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+		    @ 005, 030 Say _oProdR PROMPT ZE2->ZE2_PRODUT SIZE 049, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
 		
-		    @ 005, 094 SAY _oDescL PROMPT "Descrição:" SIZE 028, 007 OF _oDlg COLORS 0, 16777215 PIXEL
-		    @ 005, 122 SAY _oDescR PROMPT ZE2->ZE2_DESCRI SIZE 140, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
+		    @ 005, 094 Say _oDescL PROMPT "Descrição:" SIZE 028, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+		    @ 005, 122 Say _oDescR PROMPT ZE2->ZE2_DESCRI SIZE 140, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
 		
-		    @ 005, 266 SAY _oDataL PROMPT "Data Contagem:" SIZE 037, 007 OF _oDlg COLORS 0, 16777215 PIXEL
-		    @ 005, 306 SAY _oDataR PROMPT ZE2->ZE2_DTCONT SIZE 037, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
+		    @ 005, 266 Say _oDataL PROMPT "Data Contagem:" SIZE 037, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+		    @ 005, 306 Say _oDataR PROMPT ZE2->ZE2_DTCONT SIZE 037, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
 		
-		    @ 021, 006 SAY _oPallPL PROMPT "Pall.c/Prod:" SIZE 036, 007 OF _oDlg COLORS 0, 16777215 PIXEL
-		    @ 021, 042 SAY _oPallPR PROMPT AllTrim(Transform(ZE2->ZE2_PALCPR,PesqPict("ZE2","ZE2_PALCPR"))) SIZE 048, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
+		    @ 021, 006 Say _oPallPL PROMPT "Pall.c/Prod:" SIZE 036, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+		    @ 021, 042 Say _oPallPR PROMPT AllTrim(Transform(ZE2->ZE2_PALCPR,PesqPict("ZE2","ZE2_PALCPR"))) SIZE 048, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
 		
-		    @ 021, 094 SAY _oPLEAL PROMPT "Pal.Emb.Almx:" SIZE 036, 007 OF _oDlg COLORS 0, 16777215 PIXEL
-		    @ 021, 130 SAY _oPLEAR PROMPT AllTrim(Transform(ZE2->ZE2_PALCEA,PesqPict("ZE2","ZE2_PALCEA"))) SIZE 048, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
+		    @ 021, 094 Say _oPLEAL PROMPT "Pal.Emb.Almx:" SIZE 036, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+		    @ 021, 130 Say _oPLEAR PROMPT AllTrim(Transform(ZE2->ZE2_PALCEA,PesqPict("ZE2","ZE2_PALCEA"))) SIZE 048, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
 		
-		    @ 021, 182 SAY _oPalAvL PROMPT "Pallet Avari:" SIZE 031, 007 OF _oDlg COLORS 0, 16777215 PIXEL
-		    @ 021, 214 SAY _oPalAvR PROMPT AllTrim(Transform(ZE2->ZE2_PALAVA,PesqPict("ZE2","ZE2_PALAVA"))) SIZE 048, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
+		    @ 021, 182 Say _oPalAvL PROMPT "Pallet Avari:" SIZE 031, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+		    @ 021, 214 Say _oPalAvR PROMPT AllTrim(Transform(ZE2->ZE2_PALAVA,PesqPict("ZE2","ZE2_PALAVA"))) SIZE 048, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
 		
-		    @ 021, 266 SAY _oPalVaL PROMPT "Pallet Vazio:" SIZE 031, 007 OF _oDlg COLORS 0, 16777215 PIXEL
-		    @ 021, 298 SAY _oPalVaR PROMPT AllTrim(Transform(ZE2->ZE2_PALVAZ,PesqPict("ZE2","ZE2_PALVAZ"))) SIZE 048, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
+		    @ 021, 266 Say _oPalVaL PROMPT "Pallet Vazio:" SIZE 031, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+		    @ 021, 298 Say _oPalVaR PROMPT AllTrim(Transform(ZE2->ZE2_PALVAZ,PesqPict("ZE2","ZE2_PALVAZ"))) SIZE 048, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
 
-			@ 037, 006 SAY _oPalSuL PROMPT "Pallet Sujo:" SIZE 031, 007 OF _oDlg COLORS 0, 16777215 PIXEL
-		    @ 037, 038 SAY _oPalSuR PROMPT AllTrim(Transform(ZE2->ZE2_PALVAZ,PesqPict("ZE2","ZE2_PALVAZ"))) SIZE 048, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
+			@ 037, 006 Say _oPalSuL PROMPT "Pallet Sujo:" SIZE 031, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+		    @ 037, 038 Say _oPalSuR PROMPT AllTrim(Transform(ZE2->ZE2_PALVAZ,PesqPict("ZE2","ZE2_PALVAZ"))) SIZE 048, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
 		
-		    @ 037, 094 SAY _oPalToL PROMPT "Pallet Total:" SIZE 031, 007 OF _oDlg COLORS 0, 16777215 PIXEL
-		    @ 037, 130 SAY _oPalToR PROMPT AllTrim(Transform(ZE2->ZE2_PALTOT,PesqPict("ZE2","ZE2_PALTOT"))) SIZE 048, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
+		    @ 037, 094 Say _oPalToL PROMPT "Pallet Total:" SIZE 031, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+		    @ 037, 130 Say _oPalToR PROMPT AllTrim(Transform(ZE2->ZE2_PALTOT,PesqPict("ZE2","ZE2_PALTOT"))) SIZE 048, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
 		
-		    @ 037, 182 SAY _oMedCL PROMPT "Med.Cons.Dia:" SIZE 038, 007 OF _oDlg COLORS 33023, 16777215 PIXEL
+		    @ 037, 182 Say _oMedCL PROMPT "Med.Cons.Dia:" SIZE 038, 007 OF _oDlg COLORS 33023, 16777215 PIXEL
 		    @ 037, 220 MSGET _oMedCG VAR _nMedCG SIZE 060, 010 OF _oDlg PICTURE "@E 9,999,999,999.999" COLORS 0, 16777215 PIXEL
 		
-			DEFINE SBUTTON _oSButCan	FROM 037, 320 TYPE 02 OF _oDlg ENABLE ACTION (_oDlg:End())
-			DEFINE SBUTTON _oSButOk		FROM 037, 288 TYPE 01 OF _oDlg ENABLE ACTION (_nOpcx := 1, _oDlg:End())
+			DEFINE SBUTTON _oSButCan	FROM 037, 320 Type 02 OF _oDlg ENABLE ACTION (_oDlg:End())
+			DEFINE SBUTTON _oSButOk		FROM 037, 288 Type 01 OF _oDlg ENABLE ACTION (_nOpcx := 1, _oDlg:End())
 		
 		ACTIVATE MSDIALOG _oDlg CENTERED
 
@@ -354,10 +347,9 @@ If dbSeek(xFilial("ZZL") + __cUserId)
 			RecLock("ZE2",.F.)
 				ZE2->ZE2_MEDCON := _nMedCG
 				ZE2->ZE2_AUTEST := ZE2->ZE2_PALVAZ / _nMedCG
-			MsUnLock()
-			u_itmsg("Média de Consumo Diário foi gravado com sucesso!","Atenção",,1)
+			MSUnLock()
+			U_ITMsg("Média de Consumo Diário foi gravado com sucesso!","Atenção",,1)
 		EndIf
-
 	Else
 		_aInfHlp := {}
 		//                 |....:....|....:....|....:....|....:....|      |....:....|....:....|....:....|....:....|
@@ -375,7 +367,8 @@ Else
 	U_ITCADHLP( _aInfHlp , "AEST04203" )
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
+
 Return
 
 /*
@@ -389,58 +382,38 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AEST042Z()
-Local _aArea	:= GetArea()
-//Local _nOpcx	:= 0
+
+Local _aArea	:= FWGetArea()
 Local _oDataL
 Local _oDataR
 Local _oDescL
 Local _oDescR
-//Local _oMedCG
-//Local _oMedCL
-//Local _oPalAvL
-//Local _oPalAvR
-//Local _oPallPL
-//Local _oPallPR
-//Local _oPalToL
-//Local _oPalToR
-//Local _oPalVaL
-//Local _oPalVaR
-//Local _oPalSuL
-//Local _oPalSuR
-//Local _oPLEAL
-//Local _oPLEAR
 Local _oProdL
 Local _oProdR
 Local _oQtdAL
 Local _oQtdAR
-//Local _oSButCan
 Local _oSButOk
 Local _oDlg
 
-dbSelectArea("ZZL")
-dbSetOrder(3) //ZZL_FILIAL + ZZL_CODUSU
-If dbSeek(xFilial("ZZL") + __cUserId)
-
+DBSelectArea("ZZL")
+DBSetOrder(3) //ZZL_FILIAL + ZZL_CODUSU
+If DBSeek(xFilial("ZZL") + __cUserId)
 	If ZZL->ZZL_QTDALT == "S"
-
 		DEFINE MSDIALOG _oDlg TITLE "Visualização de Log" FROM 000, 000  TO 080, 490 COLORS 0, 16777215 PIXEL
+			@ 005, 006 Say _oProdL PROMPT "Produto:" SIZE 022, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+		    @ 005, 030 Say _oProdR PROMPT ZE2->ZE2_PRODUT SIZE 049, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
 		
-			@ 005, 006 SAY _oProdL PROMPT "Produto:" SIZE 022, 007 OF _oDlg COLORS 0, 16777215 PIXEL
-		    @ 005, 030 SAY _oProdR PROMPT ZE2->ZE2_PRODUT SIZE 049, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
+		    @ 005, 094 Say _oDescL PROMPT "Descrição:" SIZE 028, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+		    @ 005, 122 Say _oDescR PROMPT ZE2->ZE2_DESCRI SIZE 135, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
 		
-		    @ 005, 094 SAY _oDescL PROMPT "Descrição:" SIZE 028, 007 OF _oDlg COLORS 0, 16777215 PIXEL
-		    @ 005, 122 SAY _oDescR PROMPT ZE2->ZE2_DESCRI SIZE 135, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
-		
-		    @ 021, 006 SAY _oDataL PROMPT "Data Contagem:" SIZE 037, 007 OF _oDlg COLORS 0, 16777215 PIXEL
-		    @ 021, 046 SAY _oDataR PROMPT ZE2->ZE2_DTCONT SIZE 037, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
+		    @ 021, 006 Say _oDataL PROMPT "Data Contagem:" SIZE 037, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+		    @ 021, 046 Say _oDataR PROMPT ZE2->ZE2_DTCONT SIZE 037, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
 
-			@ 021, 094 SAY _oQtdAL PROMPT "Qtd.Alterações:" SIZE 038, 007 OF _oDlg COLORS 33023, 16777215 PIXEL
-		    @ 021, 140 SAY _oQtdAR PROMPT  AllTrim(Transform(ZE2->ZE2_QTDALT,PesqPict("ZE2","ZE2_QTDALT"))) SIZE 048, 007 OF _oDlg COLORS 33023, 16777215 PIXEL
+			@ 021, 094 Say _oQtdAL PROMPT "Qtd.Alterações:" SIZE 038, 007 OF _oDlg COLORS 33023, 16777215 PIXEL
+		    @ 021, 140 Say _oQtdAR PROMPT  AllTrim(Transform(ZE2->ZE2_QTDALT,PesqPict("ZE2","ZE2_QTDALT"))) SIZE 048, 007 OF _oDlg COLORS 33023, 16777215 PIXEL
 
-			DEFINE SBUTTON _oSButOk	FROM 021, 210 TYPE 01 OF _oDlg ENABLE ACTION (_oDlg:End())
-		
+			DEFINE SBUTTON _oSButOk	FROM 021, 210 Type 01 OF _oDlg ENABLE ACTION (_oDlg:End())
 		ACTIVATE MSDIALOG _oDlg CENTERED
-		
     Else
     	_aInfHlp := {}
 		//                 |....:....|....:....|....:....|....:....|      |....:....|....:....|....:....|....:....|
@@ -458,7 +431,8 @@ Else
 	U_ITCADHLP( _aInfHlp , "AEST04203" )
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
+
 Return
 
 /*
@@ -473,28 +447,27 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AEST042Y()
-Local _aArea := GetArea()
 
-dbSelectArea("ZZL")
-dbSetOrder(3) //ZZL_FILIAL + ZZL_CODUSU
-If dbSeek(xFilial("ZZL") + __cUserId)
-	
+Local _aArea := FWGetArea()
+
+DBSelectArea("ZZL")
+DBSetOrder(3) //ZZL_FILIAL + ZZL_CODUSU
+If DBSeek(xFilial("ZZL") + __cUserId)
 	If ZE2->ZE2_DTCONT < Date() 
-       If ZZL->ZZL_ALTDTA == "N"
-		  _aInfHlp := {}
-		  //                 |....:....|....:....|....:....|....:....|      |....:....|....:....|....:....|....:....|
-		  aAdd( _aInfHlp , { "Usuário logado não tem permissão para a-"	, "lterar registro com data anterior a atual"	} )
-		  aAdd( _aInfHlp , { "Favor solicitar acesso junto ao respon- "	, "sável."                                      } )
-	
-		  U_ITCADHLP( _aInfHlp , "AEST04204" )
+		If ZZL->ZZL_ALTDTA == "N"
+			_aInfHlp := {}
+			//                 |....:....|....:....|....:....|....:....|      |....:....|....:....|....:....|....:....|
+			aAdd( _aInfHlp , { "Usuário logado não tem permissão para a-"	, "lterar registro com data anterior a atual"	} )
+			aAdd( _aInfHlp , { "Favor solicitar acesso junto ao respon- "	, "sável."                                      } )
 
-		  RestArea(_aArea)
-		  Return
-	   EndIf
+			U_ITCADHLP( _aInfHlp , "AEST04204" )
+
+			FWRestArea(_aArea)
+			Return
+		EndIf
 	EndIf
 
 	FWExecView("Alterar","VIEWDEF.AEST042",4,/*oDlg*/,/*bCloseOnOk*/,/*bOk*/,/*nPercReducao*/)
-
 Else
 	_aInfHlp := {}
 	//                 |....:....|....:....|....:....|....:....|      |....:....|....:....|....:....|....:....|
@@ -504,7 +477,8 @@ Else
 	U_ITCADHLP( _aInfHlp , "AEST04203" )
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
+
 Return
 
 /*
@@ -518,15 +492,16 @@ Retorno-----------: Lógico - .T. dados válidas, .F. dados inválidos
 ===============================================================================================================================
 */
 User Function AEST042X7(_cProduto)
-Local _aArea	:= GetArea()
+
+Local _aArea	:= FWGetArea()
 Local _cRet		:= ""
 
-dbSelectArea("SB5")
-dbSetOrder(1)
-If dbSeek(xFilial("SB5") + M->ZE2_PRODUT)
-	dbSelectArea("SB1")
-	dbSetOrder(1)
-	If dbSeek(xFilial("SB1") + M->ZE2_PRODUT)
+DBSelectArea("SB5")
+DBSetOrder(1)
+If DBSeek(xFilial("SB5") + M->ZE2_PRODUT)
+	DBSelectArea("SB1")
+	DBSetOrder(1)
+	If DBSeek(xFilial("SB1") + M->ZE2_PRODUT)
 		_cRet := AllTrim(SB1->B1_DESC)
 	Else
 		_aInfHlp := {}
@@ -549,11 +524,9 @@ Else
 	_cRet := ""
 EndIf
 
+FWRestArea(_aArea)
 
-RestArea(_aArea)
 Return(_cRet)
-
-//******************************** SCHEDULE Chamado 39415 *********************************************************************************
 
 /*
 ===============================================================================================================================
@@ -565,100 +538,95 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AESTS42()///U_AESTS42
+User Function AESTS42()
+
 Local nI,M       := 0
 Local _aParRet   := {}
 Local _aParAux   := {}
 Local _bOK       := {|| .T. }
 Local _lRet      := .F.
-PRIVATE _lTela   := .T.
+Private _lTela   := .T.
 
 SET DATE FORMAT TO "DD/MM/YYYY"
 
 //Testa se esta sendo rodado do menu
 If Select('SX3') == 0
-	
-   	
    RPCSetType( 3 )					//Não consome licensa de uso
 	
    RpcSetEnv('01','01',,,,GetEnvServer(),{ "ZE2" })
    sleep( 1000 )					//Aguarda 5 segundos para que as jobs IPC subam.
 	
    _lTela := .F.
-   IF SuperGetMV("IT_AMBTEST",.F.,.T.)
-	  MV_PAR01 := DATE() 
+   If !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
+	  MV_PAR01 := Date() 
 	  MV_PAR02 := "sistema@italac.com.br"
 	  MV_PAR03 := "01;02;03;04;09;0A;10;20;23;30;40;90;91"
 	  MV_PAR04 := 2
-   ELSE
-	  MV_PAR01 := DATE() 
+   Else
+	  MV_PAR01 := Date() 
 	  MV_PAR02 := ""
 	  MV_PAR03 := ""
 	  MV_PAR04 := 1
-   ENDIF
-ELSE
-   
-	MV_PAR01 := DATE()
-	MV_PAR02 := SPACE(200)
-	MV_PAR03 := SPACE(50)
+   EndIf
+Else
+	MV_PAR01 := Date()
+	MV_PAR02 := Space(200)
+	MV_PAR03 := Space(50)
 	MV_PAR04 := 2
 
-   AADD( _aParAux , { 1 , "Data de Inclusao"	  , MV_PAR01, "@D"	, ""	, ""	, "" , 060 , .T. } )
-   AADD( _aParAux , { 1 , "E-mail Destino"	      , MV_PAR02, "@E"	, ""	, ""	, "" , 100 , .F. } )
-   AADD( _aParAux , { 1 , "Filiais"               , MV_PAR03, "!@"	, ""	, "LSTFIL","", 060 , .F. } )
-   AADD( _aParAux , { 3 , "Enmviar p/ User. WF"   , MV_PAR04, {"Sim","Nao"} , 40, "", .T., .T. , .T. } )
+   aAdd( _aParAux , { 1 , "Data de Inclusao"	  , MV_PAR01, "@D"	, ""	, ""	, "" , 060 , .T. } )
+   aAdd( _aParAux , { 1 , "E-mail Destino"	      , MV_PAR02, "@E"	, ""	, ""	, "" , 100 , .F. } )
+   aAdd( _aParAux , { 1 , "Filiais"               , MV_PAR03, "!@"	, ""	, "LSTFIL","", 060 , .F. } )
+   aAdd( _aParAux , { 3 , "Enmviar p/ User. WF"   , MV_PAR04, {"Sim","Nao"} , 40, "", .T., .T. , .T. } )
 
    For nI := 1 To Len( _aParAux )
 	    aAdd( _aParRet , _aParAux[nI][03] )
    Next nI
                          //aParametros, cTitle                                , @aRet    ,[bOk], [ aButtons ] [ lCentered ] [ nPosX ] [ nPosy ] [ oDlgWizard ] [ cLoad ] [ lCanSave ] [ lUserSave ] 
    If !ParamBox( _aParAux , "WK que monitora Pallet Chep" , @_aParRet, _bOK, /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
-	   RETURN .F.
+	   Return .F.
    EndIf
    
 EndIf
 
-_cTimeIni  := TIME()
+_cTimeIni  := Time()
 
 _aEmail:={}
 DBSelectArea('ZZL')
-IF ZZL->(FIELDPOS("ZZL_FLEVPA")) > 0 .AND. MV_PAR04 = 1
-    ZZL->( Dbsetfilter({ | | !EMPTY(ZZL->ZZL_FLEVPA) }, '!EMPTY(ZZL->ZZL_FLEVPA)') )
-    ZZL->( Dbgotop() )
-    DO WHILE .NOT. ZZL->( EOF() )
-    	AADD(_aEmail,{ALLTRIM( ZZL->ZZL_EMAIL ),ALLTRIM(  ZZL->ZZL_FLEVPA )})
-    	ZZL->( Dbskip() )
-    ENDDO
+If ZZL->(FIELDPOS("ZZL_FLEVPA")) > 0 .And. MV_PAR04 = 1
+    ZZL->( Dbsetfilter({ | | !Empty(ZZL->ZZL_FLEVPA) }, '!Empty(ZZL->ZZL_FLEVPA)') )
+    ZZL->( DBGoTop() )
+    While .NOT. ZZL->( Eof() )
+    	aAdd(_aEmail,{AllTrim( ZZL->ZZL_EMAIL ),AllTrim(  ZZL->ZZL_FLEVPA )})
+    	ZZL->( DBSkip() )
+    EndDo
     ZZL->(DBCLEARFILTER())
-ENDIF
+EndIf
 
-IF !EMPTY(MV_PAR02) .AND. !EMPTY(MV_PAR03)
-   AADD(_aEmail,{ALLTRIM( MV_PAR02 ),ALLTRIM(  MV_PAR03 )})
-ENDIF
+If !Empty(MV_PAR02) .And. !Empty(MV_PAR03)
+   aAdd(_aEmail,{AllTrim( MV_PAR02 ),AllTrim(  MV_PAR03 )})
+EndIf
 
 If _lTela
-   FOR M := 1 TO LEN(_aEmail)
-   	   FWMSGRUN( ,{|oProc|  _lRet := AESTS42EM(oProc,_aEmail[M,1],_aEmail[M,2] ) } , "Hora Inicial: "+_cTimeIni+" Lendo Cheps a partir de: "+DTOC(MV_PAR01))
-   NEXT
-
+   For M := 1 TO Len(_aEmail)
+   	   FWMsgRun( ,{|oProc|  _lRet := AESTS42EM(oProc,_aEmail[M,1],_aEmail[M,2] ) } , "Hora Inicial: "+_cTimeIni+" Lendo Cheps a partir de: "+DToC(MV_PAR01))
+   Next
 Else
 	//Atualização tabela SM2
    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "AEST042"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "AEST04201"/*cMsgId*/, "AEST04201 - INICIO DO PROCESSAMENTO - Hora Inicial: "+_cTimeIni/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 	
-   FOR M := 1 TO LEN(_aEmail)
+   For M := 1 TO Len(_aEmail)
    	   AESTS42EM(,_aEmail[M,1],_aEmail[M,2])
-   NEXT
+   Next
 
    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "AEST042"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "AEST04202"/*cMsgId*/, "AEST04202 - FIM DO PROCESSAMENTO - Hora Final: "+TIME()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 	
    RpcClearEnv() //Libera o Ambiente
-
 EndIf
 
 SET DATE FORMAT TO "DD/MM/YY"
 
 Return .T.
-
 
 /*
 ===============================================================================================================================
@@ -671,6 +639,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AESTS42EM(oProc,_cEmail,_cFilial)
+
 Local _aConfig	  := {}
 Local _cEmlLog	  := ""
 Local _cMsgEml	  := ""
@@ -679,7 +648,7 @@ Local _aCab      := {}
 Local _aSizes    := {}
 Local cGetCc	  := ""
 Local cGetPara	  := ""
-Local cGetAssun  := "Workflow de Pallet Chep incluidos no dia "+DTOC(MV_PAR01)
+Local cGetAssun  := "Workflow de Pallet Chep incluidos no dia "+DToC(MV_PAR01)
 Local _cTit      := "Monitoramento de inventario diario de Pallet Chep"
 Local _nCont     := 0
 Local _aDados    := {}
@@ -695,34 +664,31 @@ _aCab   := {"Filial","Dt.Contagem","Produto","Dt.inclusao","Qtde.Pallets_Avariad
 /*
 "Filial","Dt Contagem","Produto","Dt inclusao","Qtde Pallets Avariados","Qtde Pallets c/ Embal.","Qtde Pallets c/ prod.","Qtde Pallets Descarte","Qtde de Peças","Qtde Pallets Sujo","Qtde Pallets Vazios","Qtde Total Pallets","Media Consumo","Dias Autonomia"*/
 _aDados    := {}
-_aDados    := AESTS42QRY(oProc)// **************** PROCESSAMENTO **********************************
+_aDados    := AESTS42QRY(oProc)//PROCESSAMENTO
 _nTotal    := Len(_aDados)
 
 If _nTotal > 0
-	If _lTela// **************** TELA **********************************
-       _cMsgTop:="Par. 1: "+ALLTRIM(AllToChar(MV_PAR01))+" Par. 2: "+ALLTRIM(AllToChar(MV_PAR02))+" Par. 3: "+ALLTRIM(AllToChar(MV_PAR03))+" -  H.I.: "+_cTimeIni+" H.F.: "+TIME()+" - TODAS AS FILIAIS ESTAO LISTADAS AQUI"
-       If Len(_aDados) > 0 .AND. !U_ITListBox( cGetAssun  , _aCab   , _aDados    , .T. , 1 , _cMsgTop)
-	      RETURN .F.
-	   ENDIF	
-	ENDIF	
-ELSE
+	If _lTela//
+       _cMsgTop:="Par. 1: "+AllTrim(AllToChar(MV_PAR01))+" Par. 2: "+AllTrim(AllToChar(MV_PAR02))+" Par. 3: "+AllTrim(AllToChar(MV_PAR03))+" -  H.I.: "+_cTimeIni+" H.F.: "+TIME()+" - TODAS AS FILIAIS ESTAO LISTADAS AQUI"
+       If Len(_aDados) > 0 .And. !U_ITListBox( cGetAssun  , _aCab   , _aDados    , .T. , 1 , _cMsgTop)
+	      Return .F.
+	   EndIf	
+	EndIf	
+Else
    If _lTela
-      U_ITMSG("Não há dados para listar.","Envio do E-MAIL",,3)
-	  //RETURN .F.
-   ENDIF
+      U_ITMsg("Não há dados para listar.","Envio do E-MAIL",,3)
+   EndIf
 EndIf
 
 //Logo Italac
 _cMsgEml := '<html>'
 _cMsgEml += '<head><title>'+_cTit+'</title></head>'
 _cMsgEml += '<body>'
-_cMsgEml += '<style type="text/css"><!--'
+_cMsgEml += '<style Type="text/css"><!--'
 _cMsgEml += 'table.bordasimples { border-collapse: collapse; }'
 _cMsgEml += 'table.bordasimples tr td { border:1px solid #777777; }'
 _cMsgEml += 'td.titulos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #C6E2FF; }'
-//_cMsgEml += 'td.grupos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #E5E5E5; }'
 _cMsgEml += 'td.grupos	{ font-family:VERDANA; font-size:11px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #E5E5E5; }'
-//_cMsgEml += 'td.itens	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #FFFFFF; }'
 _cMsgEml += 'td.itens	{ font-family:VERDANA; font-size:10px; V-align:middle; margin-right: 13px; margin-left: 15px; background-color: #FFFFFF; }'
 _cMsgEml += '--></style>'
 _cMsgEml += '<center>'
@@ -734,28 +700,26 @@ _cMsgEml += '<table class="bordasimples" width="800">'
 _cMsgEml += '    <tr>'
 _cMsgEml += '	     <td class="titulos"><center>'+_cTit+'</center></td>'
 _cMsgEml += '	 </tr>'
-IF Len(_aDados) = 0
-   
+If Len(_aDados) = 0
    _aFilial:=StrTokArr(_cFilial,";")
    _cFiliais:=""
    
    For _nCont := 1 to Len(_aFilial)
 	   _cFiliais += "<br>"+_aFilial[_nCont]+ " - " + AllTrim(FWFilialName(cEmpAnt, _aFilial[_nCont], 1 ))
-   NEXT
+   Next
 
    _cMsgEml += '    <tr>'
-   _cMsgEml += '	     <td class="titulos"><left>Não houve laçamento de inventário no dia '+DTOC(DATE())+' de pallet Chep na(s) unidade(s): '+_cFiliais+'</center></td>'
+   _cMsgEml += '	     <td class="titulos"><left>Não houve laçamento de inventário no dia '+DToC(DATE())+' de pallet Chep na(s) unidade(s): '+_cFiliais+'</center></td>'
    _cMsgEml += '	 </tr>'
-ENDIF
+EndIf
 _cMsgEml += '</table>'
 _cMsgEml += '<br>'
 
-IF Len(_aDados) > 0
-
+If Len(_aDados) > 0
    _cMsgEml += '<br>'
    _cMsgEml += '<table class="bordasimples" width="3100">'
    _cMsgEml += '    <tr>'
-   _cMsgEml += '		<td align="left" colspan="'+ALLTRIM(STR(LEN(_aSizes)))+'" class="grupos"><b>'+cGetAssun+'</b></td>'
+   _cMsgEml += '		<td align="left" colspan="'+AllTrim(Str(Len(_aSizes)))+'" class="grupos"><b>'+cGetAssun+'</b></td>'
    _cMsgEml += '    </tr>'
    _cMsgEml += '    <tr>'
    _cMsgEml += '      <td class="itens" align="center" width="'+_aSizes[01]+'%"><b>'+_aCab[01]+'</b></td>'
@@ -778,22 +742,20 @@ IF Len(_aDados) > 0
    
    _cGetLista := ""
    _nTot:=nConta:=0
-   _nTot:=LEN(_aDados)
-   _cTot:=ALLTRIM(STR(_nTot))
-
-ENDIF
+   _nTot:=Len(_aDados)
+   _cTot:=AllTrim(Str(_nTot))
+EndIf
 
 For _nCont := 1 To Len(_aDados)
-
 	If oProc <> Nil
        nConta++
-	   oProc:cCaption := ('1/2-Montando e-mail: '+ALLTRIM(STR(nConta))+" de "+_cTot )
+	   oProc:cCaption := ('1/2-Montando e-mail: '+AllTrim(Str(nConta))+" de "+_cTot )
 	   ProcessMessages()
 	EndIf
 
-	IF !LEFT(_aDados[_nCont][01],2) $ _cFilial
-	   LOOP
-	ENDIF
+	If !LEFT(_aDados[_nCont][01],2) $ _cFilial
+	   Loop
+	EndIf
 
 	_cGetLista += '    <tr>'
 	_cGetLista += '      <td class="itens" align="left"   width="'+_aSizes[01]+'%">'+ _aDados[_nCont][01] +'</td>' 
@@ -813,7 +775,7 @@ For _nCont := 1 To Len(_aDados)
 	_cGetLista += '    </tr>'			
 Next
 
-_cMsgEml := STRTRAN(_cMsgEml,"#LISTA#",_cGetLista)
+_cMsgEml := StrTran(_cMsgEml,"#LISTA#",_cGetLista)
 
 _cMsgEml += '</center>'
 _cMsgEml += '<br>'
@@ -838,13 +800,13 @@ cGetPara:= _cEmail
 //ITEnvMail(cFrom       ,cEmailTo ,_cEmailCo,cEmailBcc,cAssunto ,cMensagem,cAttach,cAccount    ,cPassword   ,cServer     ,cPortCon    ,lRelauth     ,cUserAut     ,cPassAut     ,cLogErro)
 U_ITENVMAIL(_aConfig[01], cGetPara,   cGetCc,       "",cGetAssun, _cMsgEml,cAttach,_aConfig[01], _aConfig[02],_aConfig[03],_aConfig[04],_aConfig[05],_aConfig[06],_aConfig[07], @_cEmlLog )
 
-IF _lTela
+If _lTela
     bBloco:=NIL
 	_cBotao:=""
-    U_ITMSG(_cEmlLog+CHR(13)+CHR(10)+'Envio de E-mail P/ '+cGetPara,;
+    U_ITMsg(_cEmlLog+CHR(13)+CHR(10)+'Envio de E-mail P/ '+cGetPara,;
             'Resultdo do Envio de E-mail ',;
             _cBotao,3,,,,,,bBloco)
-ENDIF
+EndIf
 
 Return .T.
 
@@ -860,6 +822,7 @@ Retorno-----------: _cGetLista = Lista dos dados
 ===============================================================================================================================
 */  
 Static Function AESTS42QRY(oProc)
+
 Local _cAlias   := '' 
 Local _aDados   := {}
 
@@ -868,28 +831,28 @@ _cAlias := GetNextAlias()
 _cQuery:=" SELECT ZE2.R_E_C_N_O_ NRRECDS "
 _cQuery+="  FROM "+RETSQLNAME('ZE2') +" ZE2 "
 _cQuery+="   WHERE ZE2.D_E_L_E_T_  = ' ' "
-_cQuery+="     AND ZE2.ZE2_DTINCL = '"+DTOS(MV_PAR01)+"'"
+_cQuery+="     AND ZE2.ZE2_DTINCL = '"+DToS(MV_PAR01)+"'"
 
 MPSysOpenQuery( _cQuery,_cAlias )
 
-DbSelectArea(_cAlias)
+DBSelectArea(_cAlias)
 _nTot:=nConta:=0
 COUNT TO _nTot
-_cTot:=ALLTRIM(STR(_nTot))
+_cTot:=AllTrim(Str(_nTot))
 _aDados:={}
 
-SC7->(DbSetOrder(1))
+SC7->(DBSetOrder(1))
 (_cAlias)->(DBGoTop())
-If !(_cAlias)->(EOF())
-	Do While !(_cAlias)->(EOF())
+If !(_cAlias)->(Eof())
+	While !(_cAlias)->(Eof())
 
 	   If oProc <> Nil
           nConta++
-	      oProc:cCaption := ('Lendo ZZ2: '+ALLTRIM(STR(nConta))+" de "+_cTot )
+	      oProc:cCaption := ('Lendo ZZ2: '+AllTrim(Str(nConta))+" de "+_cTot )
 	      ProcessMessages()
 	   EndIf
 
-       ZE2->(DBGOTO((_cAlias)->NRRECDS)) 		
+       ZE2->(DBGoTo((_cAlias)->NRRECDS)) 		
 /*
 Filial (Nome da unidade); ZE2_FILIAL
 Data da contagem (ZE2_DTCONT);
@@ -906,27 +869,23 @@ Qtde Total de Pallets (ZE2_PALTOT);
 Media de consumo (ZE2_MEDCON);
 Dias de autonomia (ZE2_AUTEST);
 */
-	  AADD(_aDados,{ZE2->ZE2_FILIAL + " - " + AllTrim(FWFilialName(cEmpAnt, ZE2->ZE2_FILIAL, 1 )),;//01
-					DTOC(ZE2->ZE2_DTCONT),;                         //02
-					ZE2->ZE2_PRODUT+" - "+ALLTRIM(ZE2->ZE2_DESCRI),;//03
-					DTOC((ZE2->ZE2_DTINCL)) ,;                      //04
+	  aAdd(_aDados,{ZE2->ZE2_FILIAL + " - " + AllTrim(FWFilialName(cEmpAnt, ZE2->ZE2_FILIAL, 1 )),;//01
+					DToC(ZE2->ZE2_DTCONT),;                         //02
+					ZE2->ZE2_PRODUT+" - "+AllTrim(ZE2->ZE2_DESCRI),;//03
+					DToC((ZE2->ZE2_DTINCL)) ,;                      //04
 					TRANSF(ZE2->ZE2_PALAVA,'@E 9,999,999,999')    ,;//05
 					TRANSF(ZE2->ZE2_PALCEA,'@E 9,999,999,999')    ,;//06
 					TRANSF(ZE2->ZE2_PALCPR,'@E 9,999,999,999')    ,;//07
 					TRANSF(ZE2->ZE2_PALDES,'@E 9,999,999,999')    ,;//08
-					TRANSF(IF(ZE2->ZE2_PALDES>0,ZE2->ZE2_QTDPC,0),'@E 9,999,999,999')    ,;//09
+					TRANSF(If(ZE2->ZE2_PALDES>0,ZE2->ZE2_QTDPC,0),'@E 9,999,999,999')    ,;//09
 					TRANSF(ZE2->ZE2_PALSUJ,'@E 9,999,999,999')    ,;//10
 					TRANSF(ZE2->ZE2_PALVAZ,'@E 9,999,999,999')    ,;//11
 					TRANSF(ZE2->ZE2_PALTOT,'@E 9,999,999,999')    ,;//12 
 					TRANSF(ZE2->ZE2_MEDCON,'@E 9,999,999,999')    ,;//13
 					TRANSF(ZE2->ZE2_AUTEST,'@E 9,999,999,999')    ,;//14
 					})
-
-
 	(_cAlias)->(DBSkip())
-
 	EndDo	
-
 EndIf
 
 (_cAlias)->( DBCloseArea() )
@@ -945,16 +904,12 @@ Retorno-----------: _lRet = .T. = libera campo para digitação.
 ===============================================================================================================================
 */  
 User Function AEST042W()
+
 Local _lRet := .F.
 
-Begin Sequence
-
-   _nDiaSeman := Dow(dDataBase) 
-   
-   If _nDiaSeman == 2 // Segunda-Feira
-      _lRet := .T.
-   EndIf 
-
-End Sequence 
+_nDiaSeman := Dow(dDataBase) 
+If _nDiaSeman == 2 // Segunda-Feira
+	_lRet := .T.
+EndIf
 
 Return _lRet 

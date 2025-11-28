@@ -2,41 +2,39 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor            |    Data    |                              Motivo                      										 
-------------------------------------------------------------------------------------------------------------------------------- 
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
 ===============================================================================================================================
 */
 
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa--------: F420CRP
 Autor-----------: Alex Wallauer
 Data da Criacao-: 06/06/2022 
-===============================================================================================================================
 Descrição-------: Ponto de entrada no final do progrma FINA420.PRX - Geracao do Arquivo SisPag, Chamado 40354
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-USER FUNCTION F420CRP()
+User Function F420CRP()
     
-IF (GetRemoteType() == 5) //Valida se o ambiente é SmartClientHtml
+If (GetRemoteType() == 5) //Valida se o ambiente é SmartClientHtml
 
-   IF File(ALLTRIM(MV_PAR04))
-      //U_ITMSG("Gerou o aquivo: "+ALLTRIM(MV_PAR04),'Atenção!',,2) // OK
-      IF CpyS2TW(ALLTRIM(MV_PAR04),.T. ) = 0 //Indica se, falso (.F.), o arquivo será apenas copiado ou se, verdadeiro (.T.), será copiado e enviado para o browser
-         // U_ITMSG("Conseguiu Copiar o aquivo: "+ALLTRIM(MV_PAR04),'Atenção!',,2) // OK
-      ELSE
-          U_ITMSG("Não conseguiu Copiar o aquivo: "+ALLTRIM(MV_PAR04),'Atenção!',,3) // OK 
-      ENDIF
+   If File(AllTrim(MV_PAR04))
+      //U_ITMsg("Gerou o aquivo: "+AllTrim(MV_PAR04),'Atenção!',,2) // OK
+      If CpyS2TW(AllTrim(MV_PAR04),.T. ) = 0 //Indica se, falso (.F.), o arquivo será apenas copiado ou se, verdadeiro (.T.), será copiado e enviado para o browser
+         // U_ITMsg("Conseguiu Copiar o aquivo: "+AllTrim(MV_PAR04),'Atenção!',,2) // OK
+      Else
+          U_ITMsg("Não conseguiu Copiar o aquivo: "+AllTrim(MV_PAR04),'Atenção!',,3) // OK 
+      EndIf
    
-   ELSE
-      U_ITMSG("Não gerou "+ALLTRIM(MV_PAR04),'Atenção!',,3) // OK
-   ENDIF
+   Else
+      U_ITMsg("Não gerou "+AllTrim(MV_PAR04),'Atenção!',,3) // OK
+   EndIf
 
-ENDIF
+EndIf
 
-RETURN .T.
+Return .T.

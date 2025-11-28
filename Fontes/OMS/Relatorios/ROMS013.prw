@@ -10,8 +10,8 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
 
-#include "report.ch"
-#include "protheus.ch"
+#Include "report.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -39,7 +39,7 @@ Private cNomAutAna:= ""
 
 cFilAnt:= "01"
 
-pergunte(cPerg,.F.)
+Pergunte(cPerg,.F.)
 
 DEFINE REPORT oReport NAME cPerg TITLE "Relação de Valores por Filial/Autonomo Sintetico/Analitico" PARAMETER cPerg ACTION {|oReport| ROMS013P(oReport)} 
 
@@ -54,13 +54,13 @@ oReport:SetTotalInLine(.F.)
 //=================================================
 //Secao Filial Sintetica
 //=================================================
-DEFINE SECTION oZZ2FIL_1 OF oReport TITLE "Dados" TABLES "ZZ2","SRA" ORDERS aOrd
+DEFINE Section oZZ2FIL_1 OF oReport TITLE "Dados" TABLES "ZZ2","SRA" ORDERS aOrd
 
 DEFINE CELL NAME "zz2_filial"	OF oZZ2FIL_1 ALIAS "ZZ2"  TITLE "Cod "
 DEFINE CELL NAME "NOMFIL"	    OF oZZ2FIL_1 ALIAS "" BLOCK{|| ROMS013GF(QRY1->zz2_filial)} TITLE "Filial" SIZE 20
 oZZ2FIL_1:Disable()
 
-DEFINE SECTION oZZ2_1 OF oZZ2FIL_1 TITLE "Dados" TABLES "ZZ2","SRA"
+DEFINE Section oZZ2_1 OF oZZ2FIL_1 TITLE "Dados" TABLES "ZZ2","SRA"
 
 DEFINE CELL NAME "ra_mat"	        OF oZZ2_1 ALIAS "SRA" TITLE "Matricula"      SIZE 14
 DEFINE CELL NAME "Nome_Autonomo"    OF oZZ2_1 ALIAS ""    TITLE "Nome"           SIZE 40 BLOCK{|| QRY1->A2_COD + '-'+ QRY1->RA_NOME}     
@@ -93,7 +93,7 @@ oZZ2_1:Cell("IRRF"):SetHeaderAlign("RIGHT")
 //=================================================
 //Secao Filial Analitica
 //=================================================
-DEFINE SECTION oZZ2_2 OF oZZ2FIL_1 TITLE "Dados" TABLES "SRA"
+DEFINE Section oZZ2_2 OF oZZ2FIL_1 TITLE "Dados" TABLES "SRA"
 
 DEFINE CELL NAME "ra_mat"	        OF oZZ2_2 ALIAS "SRA" TITLE "Matricula"     
 DEFINE CELL NAME "Nome_Autonomo"    OF oZZ2_2 ALIAS ""    TITLE "Nome"           SIZE 40 BLOCK{|| QRY1->A2_COD + ' - '+ QRY1->RA_NOME}
@@ -103,7 +103,7 @@ oZZ2_2:Disable()
 
 oZZ2_2:OnPrintLine({|| cNomeAuton := QRY1->A2_COD + ' - '+ QRY1->RA_NOME })
 
-DEFINE SECTION oZZ2_3 OF oZZ2_2    TITLE "Dados" TABLES "ZZ2"
+DEFINE Section oZZ2_3 OF oZZ2_2    TITLE "Dados" TABLES "ZZ2"
 
 DEFINE CELL NAME "zz2_data"	        OF oZZ2_3 ALIAS "ZZ2" TITLE "Data"           SIZE 12
 DEFINE CELL NAME "zz2_recibo"	    OF oZZ2_3 ALIAS "ZZ2" TITLE "Recibo"         SIZE 12    
@@ -138,7 +138,7 @@ oZZ2_3:Cell("zz2_recibo"):SetAlign("RIGHT")
 //=================================================
 //Autonomo - Sintetico
 //=================================================
-DEFINE SECTION oZZ2_4 OF oReport    TITLE "Dados" TABLES "ZZ2","SRA"
+DEFINE Section oZZ2_4 OF oReport    TITLE "Dados" TABLES "ZZ2","SRA"
 
 DEFINE CELL NAME "ra_mat"	        OF oZZ2_4 ALIAS "SRA" TITLE "Matricula"      SIZE 14
 DEFINE CELL NAME "Nome_Autonomo"    OF oZZ2_4 ALIAS ""    TITLE "Nome"           SIZE 38 BLOCK{|| QRY2->A2_COD + '-' + QRY2->RA_NOME}
@@ -166,7 +166,7 @@ oZZ2_4:Cell("IRRF"):SetHeaderAlign("RIGHT")
 //=================================================
 //Autonomo - Analitico   
 //================================================= 
-DEFINE SECTION oZZ2_5 OF oReport TITLE "Dados" TABLES "SRA"
+DEFINE Section oZZ2_5 OF oReport TITLE "Dados" TABLES "SRA"
 
 DEFINE CELL NAME "ra_mat"	        OF oZZ2_5 ALIAS "SRA" TITLE "Matricula" 
 DEFINE CELL NAME "Nome_Aut"         OF oZZ2_5 ALIAS ""    TITLE "Nome"           SIZE 40 BLOCK{|| QRY3->A2_COD + ' - ' + QRY3->RA_NOME}     
@@ -174,7 +174,7 @@ DEFINE CELL NAME "ra_pis"	        OF oZZ2_5 ALIAS "SRA" TITLE "PIS"            S
 DEFINE CELL NAME "ra_cic"    	    OF oZZ2_5 ALIAS "SRA" TITLE "CPF"            SIZE 16 PICTURE "@R 999.999.999-99"                                               
 oZZ2_5:Disable()                                                                             
 
-DEFINE SECTION oZZ2_6 OF oZZ2_5  TITLE "Dados" TABLES "ZZ2"
+DEFINE Section oZZ2_6 OF oZZ2_5  TITLE "Dados" TABLES "ZZ2"
                                                                                        
 DEFINE CELL NAME "filial"	        OF oZZ2_6 ALIAS ""    TITLE "Filial"         SIZE 30 BLOCK{|| QRY3->zz2_filial + '-' + ROMS013GF(QRY3->zz2_filial)}
 DEFINE CELL NAME "total"	        OF oZZ2_6 ALIAS "ZZ2" TITLE "Proventos"      SIZE 20 PICTURE "@E 9,999,999,999.99" 
@@ -222,7 +222,7 @@ Private nOrdem := oZZ2FIL_1:GetOrder() //Busca ordem selecionada pelo usuario
 
 cFilAnt:= cFilCorre
 
-oReport:SetTitle("Relação de Valores  " + aOrd[nOrdem] + if(mv_par05 == 1," Sintético ", " Analítico ") + " - Emissao de " + dtoc(mv_par01) + " até "  + dtoc(mv_par02))
+oReport:SetTitle("Relação de Valores  " + aOrd[nOrdem] + If(MV_PAR05 == 1," Sintético ", " Analítico ") + " - Emissao de " + DToC(MV_PAR01) + " até "  + DToC(MV_PAR02))
 
 //=================================================
 //Filtros
@@ -231,8 +231,8 @@ oReport:SetTitle("Relação de Valores  " + aOrd[nOrdem] + if(mv_par05 == 1," Sint
 //Da Emissao Ate Emissao
 //=================================================
 If !Empty(MV_PAR01) .And. !Empty(MV_PAR02)
-	_cFiltroDt += " AND zz3.zz3_data BETWEEN '" + dtos(MV_PAR01) + "' AND '" + dtos(MV_PAR02) + "'"
-	_cFilDtZZ2 += " AND zz2.zz2_data BETWEEN '" + dtos(MV_PAR01) + "' AND '" + dtos(MV_PAR02) + "'"
+	_cFiltroDt += " AND zz3.zz3_data BETWEEN '" + DToS(MV_PAR01) + "' AND '" + DToS(MV_PAR02) + "'"
+	_cFilDtZZ2 += " AND zz2.zz2_data BETWEEN '" + DToS(MV_PAR01) + "' AND '" + DToS(MV_PAR02) + "'"
 EndIf	
 
 //=================================================
@@ -262,12 +262,12 @@ _cFilDtZZ2 += "%"
 //=================================================               
 //Por Filial
 //=================================================
-if nOrdem == 1    
+If nOrdem == 1    
     
     //=================================================
     //Por Filial - Sintetico                           
     //=================================================                                
-	If mv_par05 == 1                                                     
+	If MV_PAR05 == 1                                                     
 	
 		oZZ2FIL_1:Enable()
 		oZZ2_1:Enable()                     
@@ -296,13 +296,13 @@ if nOrdem == 1
 					ra.ra_nome,ra.ra_pis,Trim(ra.ra_cic) cic,SUM(ZZ2.ZZ2_VRPEDA) PEDAGIO ,
 					sum(zz2.zz2_total) TOTAL,sum(zz2.zz2_inss) INSS, sum(zz2.zz2_sest) SEST,sum(zz2.zz2_irrf) IRRF,COUNT(ZZ2.zz2_recibo) QTDRECIBO
 				FROM 
-					%table:ZZ2% ZZ2    
-					JOIN %table:SRA% RA ON zz2.zz2_autono = RA.ra_mat 
+					%Table:ZZ2% ZZ2    
+					JOIN %Table:SRA% RA ON zz2.zz2_autono = RA.ra_mat 
 				WHERE 
 					ZZ2.%notDel%  
 					AND RA.%notDel%  
 					AND RA.ra_catfunc = 'A'
-					AND ((ZZ2.ZZ2_ORIGEM = '1' AND ZZ2.ZZ2_RECIBO  =  ( SELECT DISTINCT ZZ3.ZZ3_RECIBO  FROM %table:ZZ3%  ZZ3  WHERE ZZ3.D_E_L_E_T_ = ' '  AND ZZ2.ZZ2_FILIAL   = ZZ3.ZZ3_FILIAL  AND ZZ2.ZZ2_RECIBO   = ZZ3.ZZ3_RECIBO  %exp:_cFiltroDt%  ) ) OR ZZ2.ZZ2_ORIGEM <> '1' %exp:_cFilDtZZ2%)
+					AND ((ZZ2.ZZ2_ORIGEM = '1' AND ZZ2.ZZ2_RECIBO  =  ( SELECT DISTINCT ZZ3.ZZ3_RECIBO  FROM %Table:ZZ3%  ZZ3  WHERE ZZ3.D_E_L_E_T_ = ' '  AND ZZ2.ZZ2_FILIAL   = ZZ3.ZZ3_FILIAL  AND ZZ2.ZZ2_RECIBO   = ZZ3.ZZ3_RECIBO  %exp:_cFiltroDt%  ) ) OR ZZ2.ZZ2_ORIGEM <> '1' %exp:_cFilDtZZ2%)
 					AND RA.RA_FILIAL = '01'
 					%exp:_cFiltro%					
 			    GROUP BY
@@ -368,18 +368,18 @@ if nOrdem == 1
 						(SELECT MIN(A2.A2_COD) FROM SA2010 A2 WHERE A2.D_E_L_E_T_ = ' ' AND (RA.RA_MAT = A2.A2_I_AUTAV OR RA.RA_MAT = A2.A2_I_AUT)) as a2_cod,
 						ra.ra_nome,ra.ra_pis,ra.ra_cic,zz2.zz2_total,
 						zz2.zz2_inss INSS, zz2.zz2_sest SEST,zz2.zz2_irrf,zz2.zz2_recibo, ZZ2.ZZ2_VRPEDA PEDAGIO ,
-						CASE 
+						Case 
 						WHEN ZZ2.ZZ2_ORIGEM = '1' THEN ( SELECT DISTINCT zz3.zz3_data FROM ZZ3010 ZZ3 WHERE ZZ3.D_E_L_E_T_ = ' ' AND ZZ2.ZZ2_FILIAL = ZZ3.ZZ3_FILIAL AND ZZ2.ZZ2_RECIBO = ZZ3.ZZ3_RECIBO ) 
-						ELSE ZZ2.ZZ2_DATA
+						Else ZZ2.ZZ2_DATA
 						END zz2_data
 					FROM 
-						%table:ZZ2% ZZ2
-						JOIN %table:SRA% RA ON zz2.zz2_autono = RA.ra_mat 
+						%Table:ZZ2% ZZ2
+						JOIN %Table:SRA% RA ON zz2.zz2_autono = RA.ra_mat 
 					WHERE 
 						ZZ2.%notDel%  
 						AND RA.%notDel%  
 						AND RA.ra_catfunc = 'A'     
-						AND ((ZZ2.ZZ2_ORIGEM = '1' AND ZZ2.ZZ2_RECIBO  =  ( SELECT DISTINCT ZZ3.ZZ3_RECIBO  FROM %table:ZZ3%  ZZ3  WHERE ZZ3.D_E_L_E_T_ = ' '  AND ZZ2.ZZ2_FILIAL   = ZZ3.ZZ3_FILIAL  AND ZZ2.ZZ2_RECIBO   = ZZ3.ZZ3_RECIBO  %exp:_cFiltroDt%  ) ) OR ZZ2.ZZ2_ORIGEM <> '1' %exp:_cFilDtZZ2%)
+						AND ((ZZ2.ZZ2_ORIGEM = '1' AND ZZ2.ZZ2_RECIBO  =  ( SELECT DISTINCT ZZ3.ZZ3_RECIBO  FROM %Table:ZZ3%  ZZ3  WHERE ZZ3.D_E_L_E_T_ = ' '  AND ZZ2.ZZ2_FILIAL   = ZZ3.ZZ3_FILIAL  AND ZZ2.ZZ2_RECIBO   = ZZ3.ZZ3_RECIBO  %exp:_cFiltroDt%  ) ) OR ZZ2.ZZ2_ORIGEM <> '1' %exp:_cFilDtZZ2%)
 						AND RA.RA_FILIAL = '01'
 						%exp:_cFiltro%
 					ORDER BY 
@@ -405,7 +405,7 @@ Else
 	//=================================================
     //Autonomo - Sintetico                             
     //=================================================                              
-	If mv_par05 == 1   
+	If MV_PAR05 == 1   
 						
 		oZZ2_4:Enable()   
 						
@@ -429,13 +429,13 @@ Else
 								ra.ra_nome,ra.ra_pis,ra.ra_cic, sum(ZZ2.ZZ2_VRPEDA) PEDAGIO ,
 								sum(zz2.zz2_total) TOTAL,sum(zz2.zz2_inss) INSS, sum(zz2.zz2_sest) SEST,sum(zz2.zz2_irrf) IRRF
 							FROM 
-								%table:ZZ2% ZZ2
-								JOIN %table:SRA% RA ON zz2.zz2_autono = RA.ra_mat 
+								%Table:ZZ2% ZZ2
+								JOIN %Table:SRA% RA ON zz2.zz2_autono = RA.ra_mat 
 							WHERE 
 								ZZ2.%notDel%  
 								AND RA.%notDel%  
 								AND RA.ra_catfunc = 'A'
-								AND ((ZZ2.ZZ2_ORIGEM = '1' AND ZZ2.ZZ2_RECIBO  =  ( SELECT DISTINCT ZZ3.ZZ3_RECIBO  FROM %table:ZZ3%  ZZ3  WHERE ZZ3.D_E_L_E_T_ = ' '  AND ZZ2.ZZ2_FILIAL   = ZZ3.ZZ3_FILIAL  AND ZZ2.ZZ2_RECIBO   = ZZ3.ZZ3_RECIBO  %exp:_cFiltroDt%  ) ) OR ZZ2.ZZ2_ORIGEM <> '1' %exp:_cFilDtZZ2%)
+								AND ((ZZ2.ZZ2_ORIGEM = '1' AND ZZ2.ZZ2_RECIBO  =  ( SELECT DISTINCT ZZ3.ZZ3_RECIBO  FROM %Table:ZZ3%  ZZ3  WHERE ZZ3.D_E_L_E_T_ = ' '  AND ZZ2.ZZ2_FILIAL   = ZZ3.ZZ3_FILIAL  AND ZZ2.ZZ2_RECIBO   = ZZ3.ZZ3_RECIBO  %exp:_cFiltroDt%  ) ) OR ZZ2.ZZ2_ORIGEM <> '1' %exp:_cFilDtZZ2%)
 								AND RA.RA_FILIAL = '01'
 								%exp:_cFiltro%
 						    GROUP BY
@@ -481,13 +481,13 @@ Else
 								ra.ra_nome,ra.ra_pis,ra.ra_cic, SUM(ZZ2.ZZ2_VRPEDA) PEDAGIO ,
 								sum(zz2.zz2_total) TOTAL,sum(zz2.zz2_inss) INSS, SUM(zz2.zz2_sest) SEST,sum(zz2.zz2_irrf) IRRF
 							FROM 
-								%table:ZZ2% ZZ2
-								JOIN %table:SRA% RA ON zz2.zz2_autono = RA.ra_mat 
+								%Table:ZZ2% ZZ2
+								JOIN %Table:SRA% RA ON zz2.zz2_autono = RA.ra_mat 
 							WHERE 
 								ZZ2.%notDel%  
 								AND RA.%notDel%  
 								AND RA.ra_catfunc = 'A'
-								AND ((ZZ2.ZZ2_ORIGEM = '1' AND ZZ2.ZZ2_RECIBO  =  ( SELECT DISTINCT ZZ3.ZZ3_RECIBO  FROM %table:ZZ3%  ZZ3  WHERE ZZ3.D_E_L_E_T_ = ' '  AND ZZ2.ZZ2_FILIAL   = ZZ3.ZZ3_FILIAL  AND ZZ2.ZZ2_RECIBO   = ZZ3.ZZ3_RECIBO  %exp:_cFiltroDt%  ) ) OR ZZ2.ZZ2_ORIGEM <> '1' %exp:_cFilDtZZ2%)
+								AND ((ZZ2.ZZ2_ORIGEM = '1' AND ZZ2.ZZ2_RECIBO  =  ( SELECT DISTINCT ZZ3.ZZ3_RECIBO  FROM %Table:ZZ3%  ZZ3  WHERE ZZ3.D_E_L_E_T_ = ' '  AND ZZ2.ZZ2_FILIAL   = ZZ3.ZZ3_FILIAL  AND ZZ2.ZZ2_RECIBO   = ZZ3.ZZ3_RECIBO  %exp:_cFiltroDt%  ) ) OR ZZ2.ZZ2_ORIGEM <> '1' %exp:_cFilDtZZ2%)
 								AND RA.RA_FILIAL = '01'
 								%exp:_cFiltro%
 						    GROUP BY
@@ -518,21 +518,21 @@ Parametros------: _cCodFil : Codigo da Filial a ser retornado o nome
 Retorno---------: _cRet - Nome da filial
 ===============================================================================================================================
 */
-Static function ROMS013GF(_cCodFil)
+Static Function ROMS013GF(_cCodFil)
 
 Local _aAreaSM0 := SM0->(getArea())
 Local _cRet := " "
 
-SM0->(dbSelectArea("SM0"))
-SM0->(dbSetOrder(1))
-SM0->(dbSeek(cEmpAnt+ _cCodFil))
+SM0->(DBSelectArea("SM0"))
+SM0->(DBSetOrder(1))
+SM0->(DBSeek(cEmpAnt+ _cCodFil))
 _cRet := SM0->M0_FILIAL 
 
 //=================================================
 //Restaura integridade da SM0
 //=================================================
 
-SM0->(dbSetOrder(_aAreaSM0[2]))
-SM0->(dbGoTo(_aAreaSM0[3]))
+SM0->(DBSetOrder(_aAreaSM0[2]))
+SM0->(DBGoTo(_aAreaSM0[3]))
 
-return _cRet
+Return _cRet

@@ -14,8 +14,8 @@ Lucas Borges      | 15/10/2019 | Removidos os Warning na compilação da release 1
 // Definicoes de Includes da Rotina.
 //====================================================================================================
 #Include "Rwmake.ch"
-#include "Protheus.ch"
-#include "TopConn.ch"
+#Include "TOTVS.ch"
+#Include "TopConn.ch"
 
 /*
 ===============================================================================================================================
@@ -32,25 +32,25 @@ Retorno-----------: Nenhum
 */
 User Function AOMS010()
 
-local cProduto
-local qtdx  	:=	0
-local _cxp  	:= 	0
-local nqtv 		:= 	0
+Local cProduto
+Local qtdx  	:=	0
+Local _cxp  	:= 	0
+Local nqtv 		:= 	0
 Local aArea    	:= 	GetArea("SB1")
 
-nP			:=	aScan( aHeader, { |x| Alltrim(x[2])== "C6_PRODUTO" } )
+nP			:=	aScan( aHeader, { |x| AllTrim(x[2])== "C6_PRODUTO" } )
 cProduto 	:= 	acols[n,nP] // PRODUTO
-nQ			:= 	aScan( aHeader, { |x| Alltrim(x[2])== "C6_UNSVEN" } )
+nQ			:= 	aScan( aHeader, { |x| AllTrim(x[2])== "C6_UNSVEN" } )
 qtdx     	:= 	acols[n,nQ] // QUANT SEGUNDA UNIDADE 
 
-DbSelectArea("SB1")
-SB1->(DbSetOrder(1))
+DBSelectArea("SB1")
+SB1->(DBSetOrder(1))
 
-If SB1->(DbSeek(xFilial("SB1")+cProduto))
+If SB1->(DBSeek(xFilial("SB1")+cProduto))
 
 	_cxp	:=	SB1->B1_I_CXPAL
 
-Endif
+EndIf
 
 If _cxp <> 0
 
@@ -58,14 +58,14 @@ If _cxp <> 0
 
 		nqtv := int(qtdx /_cxp) + 1 		
 
-	else
+	Else
 
 		nqtv := int(qtdx /_cxp) 
 
-	endif
+	EndIf
 
-Endif
+EndIf
 	
-RestArea(aArea)
+FWRestArea(aArea)
 
-RETURN int(nqtv)
+Return int(nqtv)

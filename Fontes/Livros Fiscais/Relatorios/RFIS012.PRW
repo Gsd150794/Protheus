@@ -2,34 +2,29 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Analista         - Programador       - Inicio     - Envio      - Chamado  - Motivo da Alteração
-===============================================================================================================================
-Antonio Ramos     - Igor Melgaço      - 25/09/2024 -            - 48619    - Acompanhamento dos envios e retornos do evento REINF 4020.
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+Igor Melgaço  |25/09/2024| Chamado 48619. Acompanhamento dos envios e retornos do evento REINF 4020.
 =============================================================================================================================== 
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RFIS012
 Autor-------------: 
 Data da Criacao---: 
-===============================================================================================================================
 Descrição---------: 
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function RFIS012()
+
    Local _aParRet :={}
    Local _aParAux :={} , nI
-   Local _bOK     :={|| IF(MV_PAR02 >= MV_PAR01,.T.,(U_ITMSG("Periodo INVALIDO",'Atenção!',"Tente novamente com outro periodo",3),.F.) ) }
+   Local _bOK     :={|| If(MV_PAR02 >= MV_PAR01,.T.,(U_ITMsg("Periodo INVALIDO",'Atenção!',"Tente novamente com outro periodo",3),.F.) ) }
 
 	Private _aDados := {}
 
@@ -37,15 +32,15 @@ User Function RFIS012()
    MV_PAR02 := dDataBase
    MV_PAR03 := "1"
 
-   AADD( _aParAux , { 1 , "Data de"	           , MV_PAR01, "@D"	, ""	, ""		, "" , 050 , .F. } )
-   AADD( _aParAux , { 1 , "Data ate"	        , MV_PAR02, "@D"	, ""	, ""		, "" , 050 , .F. } )
-   AADD( _aParAux , { 2 , "Exibir apenas o ultimo recibo", MV_PAR03, {"1-Sim","2-Nao"}          , 060 ,".T.",.T.,".T."}) 
+   aAdd( _aParAux , { 1 , "Data de"	           , MV_PAR01, "@D"	, ""	, ""		, "" , 050 , .F. } )
+   aAdd( _aParAux , { 1 , "Data ate"	        , MV_PAR02, "@D"	, ""	, ""		, "" , 050 , .F. } )
+   aAdd( _aParAux , { 2 , "Exibir apenas o ultimo recibo", MV_PAR03, {"1-Sim","2-Nao"}          , 060 ,".T.",.T.,".T."}) 
 
    For nI := 1 To Len( _aParAux )
    	aAdd( _aParRet , _aParAux[nI][03] )
    Next nI
 
-   IF !ParamBox( _aParAux , "Intervalo de Datas" , @_aParRet, _bOK )
+   If !ParamBox( _aParAux , "Intervalo de Datas" , @_aParRet, _bOK )
       Return
    EndIf
 
@@ -56,13 +51,13 @@ User Function RFIS012()
 		// Criando Tabela Temporária.
 		//=============================================
 		_aStruct := {}
-		Aadd(_aStruct,{"WK_RECIBO" ,"C",30 ,0})  // Recibo Sped
-		Aadd(_aStruct,{"WK_DATA"   ,"D",8  ,0})  // Data Sped
-		Aadd(_aStruct,{"WK_HORA"   ,"C",8  ,0})  // Hora Sped
-		Aadd(_aStruct,{"WK_RECNO"  ,"N",10 ,0})  // Recno Sped500
+		aAdd(_aStruct,{"WK_RECIBO" ,"C",30 ,0})  // Recibo Sped
+		aAdd(_aStruct,{"WK_DATA"   ,"D",8  ,0})  // Data Sped
+		aAdd(_aStruct,{"WK_HORA"   ,"C",8  ,0})  // Hora Sped
+		aAdd(_aStruct,{"WK_RECNO"  ,"N",10 ,0})  // Recno Sped500
 
 		If Select("SPEDTRB") > 0
-			SPEDTRB->(DbCloseArea())
+			SPEDTRB->(DBCloseArea())
 		EndIf
 
 		//================================================================================
@@ -84,7 +79,7 @@ User Function RFIS012()
 		Processa( {|| RFIS012D()} , 'Lendo Dados do Relatório...' , 'Aguarde!' )
 
 		If Len(_aDados) == 0
-			U_ITMSG("Não existem dados para emissão do relatório.","Atenção",1)
+			U_ITMsg("Não existem dados para emissão do relatório.","Atenção",1)
 			Break
 		EndIf
 
@@ -118,21 +113,18 @@ User Function RFIS012()
 	End Sequence
 
 	If Select("SPEDTRB") > 0
-		SPEDTRB->(DbCloseArea())
+		SPEDTRB->(DBCloseArea())
 	EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: RFIS012D
 Autor-------------: 
 Data da Criacao---: 
-===============================================================================================================================
 Descrição---------: Gera os dados do relatório e grava em tabelas temporárias para emissão do relatorio em Excel.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T. OU .F.
 ===============================================================================================================================
 */  
@@ -146,14 +138,14 @@ Static Function RFIS012D()
 
 		_cQry := " SELECT SPED.RECIBO , SPED.DTPROC, SPED.HRPROC, SPED.DTENTRADA, SPED.R_E_C_N_O_ NRREC "
 		_cQry += " FROM SPED500 SPED"
-		_cQry += " WHERE  SPED.D_E_L_E_T_ <> '*' "
+		_cQry += " WHERE  SPED.D_E_L_E_T_ = ' ' "
 
 		If ! Empty(MV_PAR01)
-			_cQry +=  " AND DTENTRADA >= '"+Dtos(MV_PAR01)+"' "
+			_cQry +=  " AND DTENTRADA >= '"+DToS(MV_PAR01)+"' "
 		EndIf
 
 		If ! Empty(MV_PAR02)
-			_cQry +=  " AND DTENTRADA <= '"+Dtos(MV_PAR02)+"' "
+			_cQry +=  " AND DTENTRADA <= '"+DToS(MV_PAR02)+"' "
 		EndIf
 
 		_cQry+=  " AND CODEVENTO = 'R-4020' "
@@ -161,7 +153,7 @@ Static Function RFIS012D()
 		_cQry += " ORDER BY DTENTRADA "
 
 		If Select("QRYSPED") > 0
-			QRYSPED->(DbCloseArea())
+			QRYSPED->(DBCloseArea())
 		EndIf
 
 		_cQry := ChangeQuery(_cQry)
@@ -190,16 +182,16 @@ Static Function RFIS012D()
 		ProcRegua(_nTOTREGS)
 
 		If Subs(MV_PAR03,1,1) ==  "2" // Exibe recibos repetidos
-			QRYSPED->(DbGoTop())
+			QRYSPED->(DBGoTop())
 
 			_nI := 1
 
-			Do While ! QRYSPED->(Eof())
-				IncProc( "Favor Aguardar... Processando registro: " + AllTrim( Str(_nI,5) ) +"/"+Alltrim(Str(_nTOTREGS,5)))
+			While ! QRYSPED->(Eof())
+				IncProc( "Favor Aguardar... Processando registro: " + AllTrim( Str(_nI,5) ) +"/"+AllTrim(Str(_nTOTREGS,5)))
 
 				_nI += 1
 
-				SPED500->(DbGoto(QRYSPED->NRREC))
+				SPED500->(DBGoTo(QRYSPED->NRREC))
 
 				_cXmlEnvio := AllTrim(SPED500->XMLEVENTO)
 
@@ -211,18 +203,18 @@ Static Function RFIS012D()
 				_cXmlRetorno := Nil
 				DelClassIntf()  // Remove da memória da Thread todos os objetos.
 
-				QRYSPED->(DbSkip())
+				QRYSPED->(DBSkip())
 			EndDo
 
 		Else // Exibe apena o último recibo quando registrado mais de uma vez.
 
-			QRYSPED->(DbGoTop())
+			QRYSPED->(DBGoTop())
 
 			_nI := 1
 			_nReglidos := 0
 
-			Do While ! QRYSPED->(Eof())
-				IncProc( "Favor Aguardar... Processando registro: " + AllTrim( Str(_nI,5) ) +"/"+Alltrim(Str(_nTOTREGS,5)))
+			While ! QRYSPED->(Eof())
+				IncProc( "Favor Aguardar... Processando registro: " + AllTrim( Str(_nI,5) ) +"/"+AllTrim(Str(_nTOTREGS,5)))
 				_nI += 1
 				_nReglidos += 1
 
@@ -232,14 +224,14 @@ Static Function RFIS012D()
 				EndIf
 
 				If ! _lNovoReg
-					If DTos(SPEDTRB->WK_DATA) < QRYSPED->DTPROC .Or. (DTos(SPEDTRB->WK_DATA) == QRYSPED->DTPROC .And. SPEDTRB->WK_HORA < QRYSPED->HRPROC)
+					If DToS(SPEDTRB->WK_DATA) < QRYSPED->DTPROC .Or. (DToS(SPEDTRB->WK_DATA) == QRYSPED->DTPROC .And. SPEDTRB->WK_HORA < QRYSPED->HRPROC)
 						_lAtualiza := .T.
 					Else
 						_lAtualiza := .F.
 					EndIf
 
 					If ! _lAtualiza
-						QRYSPED->(DbSkip())
+						QRYSPED->(DBSkip())
 						Loop
 					EndIf
 				EndIf
@@ -251,26 +243,26 @@ Static Function RFIS012D()
 				EndIf
 
 				SPEDTRB->WK_RECIBO := QRYSPED->RECIBO       // Recibo Sped
-				SPEDTRB->WK_DATA   := StoD(QRYSPED->DTPROC) // Data Sped
+				SPEDTRB->WK_DATA   := SToD(QRYSPED->DTPROC) // Data Sped
 				SPEDTRB->WK_HORA   := QRYSPED->HRPROC       // Hora Sped
 				SPEDTRB->WK_RECNO  := QRYSPED->NRREC        // Recno Sped500
-				SPEDTRB->(MsUnLock())
+				SPEDTRB->(MSUnLock())
 
-				QRYSPED->(DbSkip())
+				QRYSPED->(DBSkip())
 			EndDo
 
 			ProcRegua(_nReglidos)
 
-			SPEDTRB->(DbGoTop())
+			SPEDTRB->(DBGoTop())
 
 			_nI := 1
 
-			Do While ! SPEDTRB->(Eof())
+			While ! SPEDTRB->(Eof())
 
-				IncProc( "Favor Aguardar... Processando XMLs (Sped): " + AllTrim( Str(_nI,10) ) + "/" + Alltrim(Str(_nReglidos,10)))
+				IncProc( "Favor Aguardar... Processando XMLs (Sped): " + AllTrim( Str(_nI,10) ) + "/" + AllTrim(Str(_nReglidos,10)))
 				_nI += 1
 
-				SPED500->(DbGoto(SPEDTRB->WK_RECNO))
+				SPED500->(DBGoTo(SPEDTRB->WK_RECNO))
 
 				_cXmlEnvio := AllTrim(SPED500->XMLEVENTO)
 
@@ -282,7 +274,7 @@ Static Function RFIS012D()
 				_cXmlRetorno := Nil
 				DelClassIntf()  // Remove da memória da Thread todos os objetos.
 
-				SPEDTRB->(DbSkip())
+				SPEDTRB->(DBSkip())
 			EndDo
 
 		EndIf
@@ -301,18 +293,15 @@ Static Function RFIS012D()
 		SPEDTRB->( DBCloseArea() )
 	EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: RFIS012R
 Autor-------------: 
 Data da Criacao---: 
-===============================================================================================================================
 Descrição---------: Faz a leitura dos XMLs passados por parâmetro e gera os dados do relatório.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
@@ -392,7 +381,7 @@ User Function RFIS012R(_cXmlEnvio,_cXmlRetorno)
       						_nValorCSL := _oXmlE:_REINF:_EVTRETPJ:_IDEESTAB:_IDEBENEF:_IDEPGTO:_INFOPGTO[2]:_RETENCOES:_VLRCSLL:TEXT
       					EndIf
 
-      				ElseIf ValType( XmlChildEx(_oXmlE:_REINF:_EVTRETPJ:_IDEESTAB:_IDEBENEF:_IDEPGTO,"_INFOPGTO")) == "O" .AND. ValType( XmlChildEx(_oXmlE:_REINF:_EVTRETPJ:_IDEESTAB:_IDEBENEF:_IDEPGTO:_INFOPGTO,"_RETENCOES")) == "O"
+      				ElseIf ValType( XmlChildEx(_oXmlE:_REINF:_EVTRETPJ:_IDEESTAB:_IDEBENEF:_IDEPGTO,"_INFOPGTO")) == "O" .And. ValType( XmlChildEx(_oXmlE:_REINF:_EVTRETPJ:_IDEESTAB:_IDEBENEF:_IDEPGTO:_INFOPGTO,"_RETENCOES")) == "O"
 
                      If AttIsMemberOf(_oXmlE:_REINF:_EVTRETPJ:_IDEESTAB:_IDEBENEF:_IDEPGTO:_INFOPGTO:_RETENCOES,"_VLRIR")
       						_nValorIR := _oXmlE:_REINF:_EVTRETPJ:_IDEESTAB:_IDEBENEF:_IDEPGTO:_INFOPGTO:_RETENCOES:_VLRIR:TEXT
@@ -433,20 +422,20 @@ User Function RFIS012R(_cXmlEnvio,_cXmlRetorno)
    						If _nTotLin > 0
    							For _nI := 1 To _nTotLin
 
-   								If Alltrim(_oXmlR:_REINF:_EVTRET:_INFOTOTAL:_IDEESTAB:_TOTAPURMEN[_nI]:_CRMEN:TEXT) $  "170806|804506" //IR
-   									_nIRRetorno := Alltrim(_oXmlR:_REINF:_EVTRET:_INFOTOTAL:_IDEESTAB:_TOTAPURMEN[_nI]:_TOTAPURTRIBMEN:_VLRCRMENINF:TEXT)
+   								If AllTrim(_oXmlR:_REINF:_EVTRET:_INFOTOTAL:_IDEESTAB:_TOTAPURMEN[_nI]:_CRMEN:TEXT) $  "170806|804506" //IR
+   									_nIRRetorno := AllTrim(_oXmlR:_REINF:_EVTRET:_INFOTOTAL:_IDEESTAB:_TOTAPURMEN[_nI]:_TOTAPURTRIBMEN:_VLRCRMENINF:TEXT)
    								EndIf
 
-   								If Alltrim(_oXmlR:_REINF:_EVTRET:_INFOTOTAL:_IDEESTAB:_TOTAPURMEN[_nI]:_CRMEN:TEXT)  == "597907"
-   									_nPISRetorno := Alltrim(_oXmlR:_REINF:_EVTRET:_INFOTOTAL:_IDEESTAB:_TOTAPURMEN[_nI]:_TOTAPURTRIBMEN:_VLRCRMENINF:TEXT)
+   								If AllTrim(_oXmlR:_REINF:_EVTRET:_INFOTOTAL:_IDEESTAB:_TOTAPURMEN[_nI]:_CRMEN:TEXT)  == "597907"
+   									_nPISRetorno := AllTrim(_oXmlR:_REINF:_EVTRET:_INFOTOTAL:_IDEESTAB:_TOTAPURMEN[_nI]:_TOTAPURTRIBMEN:_VLRCRMENINF:TEXT)
    								EndIf
 
-   								If Alltrim(_oXmlR:_REINF:_EVTRET:_INFOTOTAL:_IDEESTAB:_TOTAPURMEN[_nI]:_CRMEN:TEXT)  == "596007"
-   									_nCOFRetorno := Alltrim(_oXmlR:_REINF:_EVTRET:_INFOTOTAL:_IDEESTAB:_TOTAPURMEN[_nI]:_TOTAPURTRIBMEN:_VLRCRMENINF:TEXT)
+   								If AllTrim(_oXmlR:_REINF:_EVTRET:_INFOTOTAL:_IDEESTAB:_TOTAPURMEN[_nI]:_CRMEN:TEXT)  == "596007"
+   									_nCOFRetorno := AllTrim(_oXmlR:_REINF:_EVTRET:_INFOTOTAL:_IDEESTAB:_TOTAPURMEN[_nI]:_TOTAPURTRIBMEN:_VLRCRMENINF:TEXT)
    								EndIf
 
-   								If Alltrim(_oXmlR:_REINF:_EVTRET:_INFOTOTAL:_IDEESTAB:_TOTAPURMEN[_nI]:_CRMEN:TEXT)  == "598707" // CSLL
-   									_nCSLRetorno := Alltrim(_oXmlR:_REINF:_EVTRET:_INFOTOTAL:_IDEESTAB:_TOTAPURMEN[_nI]:_TOTAPURTRIBMEN:_VLRCRMENINF:TEXT)
+   								If AllTrim(_oXmlR:_REINF:_EVTRET:_INFOTOTAL:_IDEESTAB:_TOTAPURMEN[_nI]:_CRMEN:TEXT)  == "598707" // CSLL
+   									_nCSLRetorno := AllTrim(_oXmlR:_REINF:_EVTRET:_INFOTOTAL:_IDEESTAB:_TOTAPURMEN[_nI]:_TOTAPURTRIBMEN:_VLRCRMENINF:TEXT)
    								EndIf
 
    							Next
@@ -459,15 +448,15 @@ User Function RFIS012R(_cXmlEnvio,_cXmlRetorno)
 		EndIf
 
 		_cFilial        := U_RFIS012F(_cNrInscr)
-		_cFornecedor    := POSICIONE("SA2",3,xfilial("SA2")+_cCNPJ,"A2_NOME")
+		_cFornecedor    := Posicione("SA2",3,xFilial("SA2")+_cCNPJ,"A2_NOME")
 
 		_dDataTransmissao := SPED500->DTTRANS
-		_cStatus          := ALLTRIM(SPED500->STATUS)
+		_cStatus          := AllTrim(SPED500->STATUS)
 		_cDescStatus      := SPED500->DETSTATUS
 		_cRecibo          := SPED500->RECIBO
 
 
-		Aadd(_aDados,{_cFilial,;
+		aAdd(_aDados,{_cFilial,;
 			_cEvento,;
 			_cNrInscr,;
 			_cCNPJ,;
@@ -496,19 +485,15 @@ User Function RFIS012R(_cXmlEnvio,_cXmlRetorno)
 
 	End Sequence
 
-Return Nil
-
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: RFIS007F
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 27/08/2021
-===============================================================================================================================
 Descrição---------: Retorna a filial com base no cadastro de filiais Scheduller.
-===============================================================================================================================
 Parametros--------: _cCnpj = CNPJ da unidade
-===============================================================================================================================
 Retorno-----------: _cRet = Código da filia + Nome
 ===============================================================================================================================
 */  
@@ -520,11 +505,11 @@ User Function RFIS012F(_cCnp)
 
 		_cQry := " SELECT ZZM_CODIGO, ZZM_DESCRI "
 		_cQry += " FROM " + RetSqlName("ZZM") + " ZZM "
-		_cQry += " WHERE  ZZM.D_E_L_E_T_ <> '*' "
+		_cQry += " WHERE  ZZM.D_E_L_E_T_ = ' ' "
 		_cQry += " AND ZZM_CGC = '" + AllTrim(_cCnp) + "' "
 
 		If Select("QRYZZM") > 0
-			QRYZZM->(DbCloseArea())
+			QRYZZM->(DBCloseArea())
 		EndIf
 
 		_cQry := ChangeQuery(_cQry)

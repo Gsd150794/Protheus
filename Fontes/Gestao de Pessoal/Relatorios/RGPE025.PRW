@@ -1,28 +1,21 @@
 /*
-================================================================================================================================
+===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-================================================================================================================================
-     Autor      |    Data    |                                             Motivo                                           
---------------------------------------------------------------------------------------------------------------------------------
-================================================================================================================================
+===============================================================================================================================
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
-
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGPE025P
 Autor-------------: Igor Melgaço
 Data da Criacao---: 24/10/2024
-===============================================================================================================================
 Descrição---------: Planilha para Dia do Comerciário - Chamado 48928 
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
@@ -41,7 +34,7 @@ Local _cDir As Character
 Local oProc As Object
 Local _aParRet As Array
 Local _aParAux As Array
-LOcal _bOK As Block
+Local _bOK As Block
 
 _aDados    := {}
 _aCab      := {}
@@ -61,7 +54,7 @@ _nI        := 0
 
 MV_PAR01 := Space(2)
 
-AADD( _aParAux , { 1 , "Filial"             , MV_PAR01, "@!"  , ""  ,"SM0", "" , 060 , .T. } ) 
+aAdd( _aParAux , { 1 , "Filial"             , MV_PAR01, "@!"  , ""  ,"SM0", "" , 060 , .T. } ) 
 
 For _nI := 1 To Len( _aParAux )
 	aAdd( _aParRet , _aParAux[_nI][03] )
@@ -69,25 +62,25 @@ Next _nI
 
 If ParamBox( _aParAux , " Integração de Dados com o sistema Kairos DIMEP " , @_aParRet, _bOK )
    //Processa a Query
-   FWMSGRUN(,{|oProc|  _aDados := RGPE025D(oProc) },'Aguarde processamento...','Lendo dados...')
+   FWMsgRun(,{|oProc|  _aDados := RGPE025D(oProc) },'Aguarde processamento...','Lendo dados...')
 
    If Len(_aDados) > 0
 
-      AADD(_aCab," ")
-      AADD(_aCab,"Filial")
-      AADD(_aCab,"Matricula")
-      AADD(_aCab,"Nome")
-      AADD(_aCab,"Verba")
-      AADD(_aCab,"Valor")
+      aAdd(_aCab," ")
+      aAdd(_aCab,"Filial")
+      aAdd(_aCab,"Matricula")
+      aAdd(_aCab,"Nome")
+      aAdd(_aCab,"Verba")
+      aAdd(_aCab,"Valor")
 
          // Array com o cabeçalho das colunas do relatório. 
          // Alinhamento( 1-Left,2-Center,3-Right )
          // Formatação( 1-General,2-Number,3-Monetário,4-DateTime )
          //                     Titulo das Colunas ,Alinhamento ,Formatação, Totaliza? 
-      AADD(_aCabExc,{"Filial"                      ,1           ,1         ,.F.}) 
-      AADD(_aCabExc,{"Matricula"                   ,1           ,1         ,.F.}) 
-      AADD(_aCabExc,{"Verba"                       ,1           ,1         ,.F.}) 
-      AADD(_aCabExc,{"Valor"                       ,1           ,2         ,.F.}) 
+      aAdd(_aCabExc,{"Filial"                      ,1           ,1         ,.F.}) 
+      aAdd(_aCabExc,{"Matricula"                   ,1           ,1         ,.F.}) 
+      aAdd(_aCabExc,{"Verba"                       ,1           ,1         ,.F.}) 
+      aAdd(_aCabExc,{"Valor"                       ,1           ,2         ,.F.}) 
 
       _cTitulo := 'Lista de Funcionários'
 
@@ -101,7 +94,7 @@ If ParamBox( _aParAux , " Integração de Dados com o sistema Kairos DIMEP " , @_a
 
          For _nI := 1 To Len(_aDados)
             If _aDados[_nI,1]
-               AADD(_aDadosExc,{_aDados[_nI,2],_aDados[_nI,3],_aDados[_nI,5],_aDados[_nI,6]})
+               aAdd(_aDadosExc,{_aDados[_nI,2],_aDados[_nI,3],_aDados[_nI,5],_aDados[_nI,6]})
             EndIf
          Next
 
@@ -109,7 +102,7 @@ If ParamBox( _aParAux , " Integração de Dados com o sistema Kairos DIMEP " , @_a
          _cNomeArq  := "Comerciario_" +  _cDataHora + ".xlsx"//XLSX 
          _cDir := GetTempPath() 
 
-         FWMSGRUN( ,{|oProc| U_ITGEREXCEL(_cNomeArq,_cDir,_cTitulo,_cTitulo,_aCabExc,_aDadosExc,,,,.T.,,,.F.,.T.,oProc) },"H.I. : "+TIME()+" - Aguarde...","Gerando Excel (.XML)..."  )
+         FWMsgRun( ,{|oProc| U_ITGEREXCEL(_cNomeArq,_cDir,_cTitulo,_cTitulo,_aCabExc,_aDadosExc,,,,.T.,,,.F.,.T.,oProc) },"H.I. : "+TIME()+" - Aguarde...","Gerando Excel (.XML)..."  )
          
          //Tentando abrir o objeto
          nRet := ShellExecute("open", _cNomeArq, "", _cDir, 1)
@@ -117,14 +110,12 @@ If ParamBox( _aParAux , " Integração de Dados com o sistema Kairos DIMEP " , @_a
       EndIf
 
    Else
-   	U_ITMSG("Consulta não retornou dados",;
+   	U_ITMsg("Consulta não retornou dados",;
               "",;
               "Selecione outra filial.",2, , , .T.)
    EndIf
 
 EndIf
-
-
 
 Return _lRet
 
@@ -134,11 +125,8 @@ Return _lRet
 Programa----------: RGPE025D
 Autor-------------: Igor Melgaço
 Data da Criacao---: 24/10/2024
-===============================================================================================================================
 Descrição---------: Processamento da Query
-===============================================================================================================================
 Parametros--------: _oProc
-===============================================================================================================================
 Retorno-----------: _aDados
 ===============================================================================================================================
 */  
@@ -160,19 +148,19 @@ Static Function RGPE025D(oProc As Object) As Array
    _cQry += "   AND SRA.D_E_L_E_T_ = ' ' "
 
    If Select("QRY025") > 0
-      QRY025->(DbCloseArea())
+      QRY025->(DBCloseArea())
    EndIf
 
    _cQry := ChangeQuery(_cQry) 
 
    MPSysOpenQuery( _cQry,"QRY025" )
 
-   Do While QRY025->(!EOF())
+   While QRY025->(!Eof())
       _aLinha := {}
 
-      If (CTOD('31/10/2024') - STOD(QRY025->RA_ADMISSA) ) >= 90
+      If (CTOD('31/10/2024') - SToD(QRY025->RA_ADMISSA) ) >= 90
 
-         If CTOD('31/10/2024') - STOD(QRY025->RA_ADMISSA)  > 180
+         If CTOD('31/10/2024') - SToD(QRY025->RA_ADMISSA)  > 180
             _nValor := QRY025->RA_SALARIO / 30 * 2
          Else
             _nValor := QRY025->RA_SALARIO / 30
@@ -180,22 +168,22 @@ Static Function RGPE025D(oProc As Object) As Array
 
          _nValor := Round(NoRound(_nValor,3),2)
 
-         AADD(_aLinha,.T.)
-         AADD(_aLinha,QRY025->RA_FILIAL)
-         AADD(_aLinha,QRY025->RA_MAT)
-         AADD(_aLinha,QRY025->RA_NOME)
-         AADD(_aLinha,"200")
-         AADD(_aLinha,_nValor)
+         aAdd(_aLinha,.T.)
+         aAdd(_aLinha,QRY025->RA_FILIAL)
+         aAdd(_aLinha,QRY025->RA_MAT)
+         aAdd(_aLinha,QRY025->RA_NOME)
+         aAdd(_aLinha,"200")
+         aAdd(_aLinha,_nValor)
 
-         AADD(_aDados,_aLinha)
+         aAdd(_aDados,_aLinha)
 
       EndIf
 
-      QRY025->(DbSkip())
+      QRY025->(DBSkip())
    EndDo
 
    If Select("QRY025") > 0
-      QRY025->(DbCloseArea())
+      QRY025->(DBCloseArea())
    EndIf
 
 Return _aDados

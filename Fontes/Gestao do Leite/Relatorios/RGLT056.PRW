@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 29/08/2019 | Corrigido filtro do Mix. Chamado 30459
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 13/09/2023 | Implementado envio de e-mail para o transportador com valor a ser pago. Chamado 44985
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 09/11/2023 | Incluída a informação de pedágio para o transportador. Chamado 45518
+Lucas Borges  |29/08/2019| Chamado 30459. Corrigido filtro do Mix.
+Lucas Borges  |13/09/2023| Chamado 44985. Implementado envio de e-mail para o transportador com valor a ser pago.
+Lucas Borges  |09/11/2023| Chamado 45518. Incluída a informação de pedágio para o transportador.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT056
 Autor-------------: Erich Buttner
 Data da Criacao---: 08/03/2013
-===============================================================================================================================
 Descrição---------: Relatório com informações referente ao frete dos transportadores de leite para análise de custos
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 31/05/2019
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -99,11 +88,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 31/05/2019
-===============================================================================================================================
 Descrição---------: Processa impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -129,9 +115,9 @@ Local _cReplyTo		:= AllTrim(MV_PAR11)
 If MV_PAR03 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLD")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
+	aAdd(_aSelFil,cFilAnt)
 EndIf
 
 //=====================================================
@@ -227,9 +213,9 @@ oReport:SetMeter(0)
 BeginSql alias _cAlias
 	SELECT RES.ZLD_FILIAL, %exp:_cCampos% SA2.A2_COD || SA2.A2_LOJA TRANS,SA2.A2_COD, SA2.A2_LOJA, SA2.A2_NOME, SA2.A2_EMAIL, 
 	       RES.ZLE_DTINI, SUM(RES.TOTFRE) TOTFRE, SUM(RES.VOLUME) VOLUME, SUM(RES.KM) KM, SUM(RES.PEDAGIO) PEDAGIO,
-	       CASE WHEN SUM(KM) = 0 THEN 0 ELSE SUM(TOTFRE) / SUM(KM) END VLRKM,
-	       CASE WHEN SUM(KM) = 0 THEN 0 ELSE SUM(VOLUME) / SUM(KM) END DENSIDADE,
-	       CASE WHEN SUM(VOLUME) = 0 THEN 0 ELSE SUM(TOTFRE) / SUM(VOLUME) END VLRLTO
+	       Case WHEN SUM(KM) = 0 THEN 0 Else SUM(TOTFRE) / SUM(KM) END VLRKM,
+	       Case WHEN SUM(KM) = 0 THEN 0 Else SUM(VOLUME) / SUM(KM) END DENSIDADE,
+	       Case WHEN SUM(VOLUME) = 0 THEN 0 Else SUM(TOTFRE) / SUM(VOLUME) END VLRLTO
 	  FROM (SELECT ZLD.ZLD_FILIAL, ZLD.ZLD_SETOR, ZLD.ZLD_LINROT, ZLD.ZLD_FRETIS, ZLD.ZLD_LJFRET, ZLE.ZLE_COD, ZLE.ZLE_DTINI, ZLE.ZLE_DTFIM,
 	               (SELECT NVL(SUM(ZLF_TOTAL), 0) TOTAL
 	                  FROM %Table:ZLF% ZLF, %Table:ZL8% ZL8
@@ -306,11 +292,11 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	//O envio de e-mail só deve ser disparado no modo analítico pois é onde é segregrado por setor, visto que é emitido um CT-e por setor
 	If MV_PAR10 == 1 .And. (_cAlias)->TOTFRE > 0
 		If !Empty((_cAlias)->A2_EMAIL)
@@ -339,7 +325,7 @@ While !oReport:Cancel() .And. (_cAlias)->(!EOF())
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->ZLD_FILIAL
 	_cFretis := (_cAlias)->A2_COD +"-"+(_cAlias)->A2_LOJA
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()

@@ -35,7 +35,7 @@ Antonio Neves| 07/02/2024 | Chamado 46248. Adicionada as UFs AC - RO nos Estados
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -45,14 +45,14 @@ Data da Criacao-: 02/12/2015
 ===============================================================================================================================
 Descrição-------: Ponto de entrada para gravar os dados do cadastro do Cliente após a inclusão.
 ===============================================================================================================================
-Parametros------: PARAMIXB -> Numérico -> Tipo da operação do usuário. Conteúdo 3 significa que o usuário cancelou a inclusão.
+Parametros------: ParamIXB -> Numérico -> Tipo da operação do usuário. Conteúdo 3 significa que o usuário cancelou a inclusão.
 ===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
 User Function M030INC()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cConta	:= ''
 Local _cEnd		:= ''
 
@@ -106,7 +106,7 @@ If !Empty( _cConta ) .And. _cConta <> SA1->A1_CONTA
 	
 	RecLock( 'SA1' , .F. )
 	SA1->A1_CONTA := _cConta
-	SA1->( MsUnLock() )
+	SA1->( MSUnLock() )
 	
 EndIf     
                  
@@ -120,24 +120,24 @@ EndIf
 //================================================================================
 // Cria item contábil para o novo fornecedor
 //================================================================================
-CTD->(Dbsetorder(1))
+CTD->(DBSetOrder(1))
 
-If .not. CTD->(Dbseek(xfilial("CTD")+"SA1"+ ALLTRIM(SA1->A1_COD)))
+If .not. CTD->(DBSeek(xFilial("CTD")+"SA1"+ AllTrim(SA1->A1_COD)))
 
-  Reclock("CTD", .T.)
+  RecLock("CTD", .T.)
 
-  CTD->CTD_ITEM := "SA1" + ALLTRIM(SA1->A1_COD)
+  CTD->CTD_ITEM := "SA1" + AllTrim(SA1->A1_COD)
   CTD->CTD_DESC01 := SA1->A1_NOME
   CTD->CTD_BLOQ :=  "2"
-  CTD->CTD_DTEXIS := stod("19800101")
-  CTD->CTD_ITLP := "SA2" + ALLTRIM(SA1->A1_COD)
+  CTD->CTD_DTEXIS := SToD("19800101")
+  CTD->CTD_ITLP := "SA2" + AllTrim(SA1->A1_COD)
   CTD->CTD_CLOBRG := "2"
   CTD->CTD_ACCLVL := "1"
   CTD->CTD_CLASSE := "2"
 
-  Msunlock()
+  MSUnLock()
   
-Endif
+EndIf
 
 If _lMashup
 
@@ -153,8 +153,8 @@ If _lMashup
 	
 	If SA1->A1_PESSOA <> "F"
 		_nQtdDia	:= Val(SA1->A1_I_PEREX)
-		_nQtdiaT	:= Iif(Empty(M->A1_I_DTEXE),0,dDataBase - M->A1_I_DTEXE)
-		_lExec		:= Iif(_nQtdiaT > _nQtdDia, .T., .F.)
+		_nQtdiaT	:= IIf(Empty(M->A1_I_DTEXE),0,dDataBase - M->A1_I_DTEXE)
+		_lExec		:= IIf(_nQtdiaT > _nQtdDia, .T., .F.)
 		If !_lLibMas .Or. _lExec
 			If IsInCallStack("MA030Trans")
 				If !Empty(SA1->A1_I_END) .And. Empty(SA1->A1_I_NUM)
@@ -166,12 +166,12 @@ If _lMashup
 				RecLock("SA1", .F.)
 				SA1->A1_END		:= _cEnd
 				SA1->A1_I_DTEXE	:= Date()
-				SA1->(MsUnLock())
+				SA1->(MSUnLock())
 			EndIf
 		Else
 			RecLock("SA1", .F.)
 			SA1->A1_I_DTEXE := Date()
-			SA1->(MsUnLock())
+			SA1->(MSUnLock())
 		EndIf
 	EndIf
 EndIf
@@ -179,11 +179,11 @@ EndIf
 If Empty(SA1->A1_INSCR) .Or. AllTrim(SA1->A1_INSCR) == "ISENTO"
 	RecLock("SA1", .F.)
 	SA1->A1_CONTRIB := "2"
-	SA1->(MsUnLock())
+	SA1->(MSUnLock())
 Else
 	RecLock("SA1", .F.)
 	SA1->A1_CONTRIB := "1"
-	SA1->(MsUnLock())
+	SA1->(MSUnLock())
 EndIf*/
 
 U_CRMA980CON()//Funcao do P.E. CRMA980PE.PRW
@@ -195,10 +195,10 @@ U_CRMA980CON()//Funcao do P.E. CRMA980PE.PRW
 //=======================================================================
 _aBloqSA1 := U_MA30RETA()
 If ValType(_aBloqSA1) == "A" .And. Len(_aBloqSA1) > 0 .And. ValType(_aBloqSA1[1]) == "L" .And. _aBloqSA1[1] // Bloqueia SA1 por Desconto Contratual = True or False
-   SA1->(RECLOCK("SA1",.F.))
+   SA1->(RecLock("SA1",.F.))
    SA1->A1_MSBLQL  := "1" // Bloqueio por Cliente
    SA1->A1_I_BLQDC := "1"
-   SA1->(MsUnlock())
+   SA1->(MSUnLock())
    
    //==================================================================
    // Envia Workflow de bloqueio de clientes por desconto contratual.
@@ -211,57 +211,57 @@ EndIf
 SA1->(RecLock("SA1", .F.))
 
 _cA1_NOME := SA1->A1_NOME
-If !Empty(Alltrim(M->A1_NOME))
+If !Empty(AllTrim(M->A1_NOME))
 	_lRet := U_CRMA980VCP(@_cA1_NOME   ,"A1_NOME")
 	SA1->A1_NOME := _cA1_NOME
 EndIf
 
 _cA1_END := SA1->A1_END
-If _lRet .And. !Empty(Alltrim(_cA1_END))
+If _lRet .And. !Empty(AllTrim(_cA1_END))
 	_lRet := U_CRMA980VCP(@_cA1_END    ,"A1_END")
 	SA1->A1_END := _cA1_END
 EndIf
 
 _cA1_BAIRRO := SA1->A1_BAIRRO
-If _lRet .And. !Empty(Alltrim(_cA1_BAIRRO))
+If _lRet .And. !Empty(AllTrim(_cA1_BAIRRO))
 	_lRet := U_CRMA980VCP(@_cA1_BAIRRO ,"A1_BAIRRO")
 	SA1->A1_BAIRRO := _cA1_BAIRRO
 EndIf
 
 _cA1_ENDCOB := M->A1_ENDCOB
-If _lRet .And. !Empty(Alltrim(_cA1_ENDCOB))
+If _lRet .And. !Empty(AllTrim(_cA1_ENDCOB))
 	_lRet := U_CRMA980VCP(@_cA1_ENDCOB ,"A1_ENDCOB")
 	SA1->A1_ENDCOB := _cA1_ENDCOB
 EndIf
 
 _cA1_ENDREC := M->A1_ENDREC
-If _lRet .And. !Empty(Alltrim(_cA1_ENDREC))
+If _lRet .And. !Empty(AllTrim(_cA1_ENDREC))
 	_lRet := U_CRMA980VCP(@_cA1_ENDREC ,"A1_ENDREC")
 	SA1->A1_ENDREC := _cA1_ENDREC
 EndIf
 
 _cA1_ENDENT := M->A1_ENDENT
-If _lRet .And. !Empty(Alltrim(_cA1_ENDENT))
+If _lRet .And. !Empty(AllTrim(_cA1_ENDENT))
 	_lRet := U_CRMA980VCP(@_cA1_ENDENT,"A1_ENDENT")
 	SA1->A1_ENDENT := _cA1_ENDENT
 EndIf
 
 _cA1_BAIRROE := M->A1_BAIRROE
-If _lRet .And. !Empty(Alltrim(_cA1_BAIRROE))
+If _lRet .And. !Empty(AllTrim(_cA1_BAIRROE))
 	_lRet := U_CRMA980VCP(@_cA1_BAIRROE,"A1_BAIRROE")
 	SA1->A1_BAIRROE := _cA1_BAIRROE
 EndIf
 
-SA1->(MsUnLock())
+SA1->(MSUnLock())
 //=====================================================================
 // Para os clientes que não são dos estados "AM-RR-AP" gravar os campos
 // suframa com: A1_CALCSUF = "N" e A1_SUFRAMA = " ".
 //=====================================================================
 If ! (SA1->A1_EST $ "AM-RR-AP-AC-RO")
-   SA1->(RECLOCK("SA1",.F.))
+   SA1->(RecLock("SA1",.F.))
    SA1->A1_CALCSUF := "N"
    SA1->A1_SUFRAMA := " "
-   SA1->(MsUnlock())
+   SA1->(MSUnLock())
 EndIf
 
 //=====================================================================
@@ -269,10 +269,10 @@ EndIf
 // como consumidor final.
 //=====================================================================
 If SA1->A1_CLIFUN == "1"
-   SA1->(RECLOCK("SA1",.F.))
+   SA1->(RecLock("SA1",.F.))
    SA1->A1_TIPO    := "F"  //  Tipo = Consumidor Final
    SA1->A1_I_GRCLI := "39" //  Seguimento = Consumidor Final   
-   SA1->(MsUnlock())   
+   SA1->(MSUnLock())   
 EndIf 
 
 //=====================================================================
@@ -280,10 +280,10 @@ EndIf
 // grava o campo Grupo Tributário com "023", para obterem benefícios.
 //=====================================================================
 If SA1->A1_EST $ _cUfMVA .And. SA1->A1_SIMPNAC == "1" // 1=Sim;2=Não
-   SA1->(RECLOCK("SA1",.F.))
+   SA1->(RecLock("SA1",.F.))
    SA1->A1_GRPTRIB := _cTRIBMVA //"023" //  Motivo: estado reduz o MVA para 30% (exceção fiscal) e estamos iniciando operação de 4 Brokers que atenderão este grupo.
-   SA1->(MsUnlock())
+   SA1->(MSUnLock())
 EndIf 
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 Return

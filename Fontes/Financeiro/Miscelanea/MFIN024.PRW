@@ -4,21 +4,13 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Antonio Ramos |22/01/2024| Chamado: 46144 - Tratativa para incluir exceções de email para o cliente
+Antonio Ramos |22/01/2024| Chamado 46144. Tratativa para incluir exceções de email para o cliente
 Lucas Borges  |13/10/2024| Chamado 48465. Retirada da função de conout
 Lucas Borges  |23/07/2025| Chamado 51340. Trocado e-mail padrão para sistema@italac.com.br
 ===============================================================================================================================
 */ 
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-
-#INCLUDE "Protheus.ch"
-#INCLUDE "RwMake.ch"
-#Include "TopConn.ch" 
-
-#DEFINE _ENTER CHR(13)+CHR(10)
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -112,7 +104,7 @@ Begin Sequence
        _cQry += " FROM " + RetSqlName("SE1") + " SE1 "
        _cQry += " INNER JOIN " + RetSqlName("SA1") + " SA1 ON A1_COD = E1_CLIENTE AND A1_LOJA = E1_LOJA AND SE1.D_E_L_E_T_ =' ' AND A1_I_IBOLE='S' " 
        _cQry += " LEFT JOIN "  + RetSqlName("SA3") + " SA3 ON A1_VEND = A3_COD AND SA3.D_E_L_E_T_ = ' ' "
-       _cQry += " WHERE E1_VENCTO = '" + DTos(_dDtVenc) + "' "
+       _cQry += " WHERE E1_VENCTO = '" + DToS(_dDtVenc) + "' "
        _cQry += " AND E1_SALDO > 0 AND E1_TIPO='NF' " 
        _cQry += " AND E1_I_CART= ' ' AND E1_I_DTPRO = '  ' "
        _cQry += " UNION "
@@ -123,7 +115,7 @@ Begin Sequence
        _cQry += " FROM " + RetSqlName("SE1") + " SE1 "
        _cQry += " INNER JOIN " + RetSqlName("SA1") + " SA1 ON A1_COD = E1_CLIENTE AND A1_LOJA = E1_LOJA AND SE1.D_E_L_E_T_ =' ' AND A1_I_IBOLE='S' " 
        _cQry += " LEFT JOIN "  + RetSqlName("SA3") + " SA3 ON A1_VEND = A3_COD AND SA3.D_E_L_E_T_ = ' ' "
-       _cQry += " WHERE E1_I_DTPRO = '" + DTos(_dDtVenc) + "' "
+       _cQry += " WHERE E1_I_DTPRO = '" + DToS(_dDtVenc) + "' "
        _cQry += " AND E1_SALDO > 0 AND E1_TIPO='NF' " 
        _cQry += " AND E1_I_CART= ' ' AND E1_I_DTPRO <> '  ' "
        _cQry += " ORDER BY COD_CLI, LOJA_CLI, FILIAL "
@@ -140,7 +132,7 @@ Begin Sequence
 
        _aDadosTit := {}
 
-       Do While !TRBSE1->(Eof())
+       While !TRBSE1->(Eof())
 
          _cEmail := ""
 
@@ -157,23 +149,23 @@ Begin Sequence
 
             DBSelectArea("AC8")
             DBSetOrder(2)
-            If Dbseek(xFilial("AC8")+"SA1"+xFilial("SA1")+TRBSE1->COD_CLI+TRBSE1->LOJA_CLI)
-               Do While xFilial("AC8")+"SA1"+xFilial("SA1")+TRBSE1->COD_CLI+TRBSE1->LOJA_CLI == Rtrim(AC8->(AC8_FILIAL + "SA1" + AC8_FILENT + AC8_CODENT)) .AND. AC8->(!EOF())
+            If DBSeek(xFilial("AC8")+"SA1"+xFilial("SA1")+TRBSE1->COD_CLI+TRBSE1->LOJA_CLI)
+               While xFilial("AC8")+"SA1"+xFilial("SA1")+TRBSE1->COD_CLI+TRBSE1->LOJA_CLI == Rtrim(AC8->(AC8_FILIAL + "SA1" + AC8_FILENT + AC8_CODENT)) .And. AC8->(!Eof())
                   DBSelectArea("SU5")
                   DBSetOrder(1)
-                  If Dbseek(AC8->(AC8_FILIAL+AC8_CODCON))
-                     _cEmail += Iif(Empty(Alltrim(_cEmail)),"",";") + Alltrim(SU5->U5_EMAIL)
+                  If DBSeek(AC8->(AC8_FILIAL+AC8_CODCON))
+                     _cEmail += IIf(Empty(AllTrim(_cEmail)),"",";") + AllTrim(SU5->U5_EMAIL)
                   EndIf
-                  AC8->(DbSkip())
+                  AC8->(DBSkip())
                EndDo
             Else
-               _cEmail := ALLTRIM(TRBSE1->EMAIL_CLIENTE)
+               _cEmail := AllTrim(TRBSE1->EMAIL_CLIENTE)
             EndIf
 
 
             //FIM DA ADICAO
 
-          Aadd(_aDadosTit, {TRBSE1->COD_CLI,;         // 1-Codigo Cliente
+          aAdd(_aDadosTit, {TRBSE1->COD_CLI,;         // 1-Codigo Cliente
                             TRBSE1->LOJA_CLI,;        // 2-Loja Cliente
                             TRBSE1->NOME_CLIENTE,;    // 3-Nome Cliente
                             TRBSE1->FILIAL,;          // 4-Filial
@@ -191,7 +183,7 @@ Begin Sequence
                             TRBSE1->EMAIL_VEND,;      // 16-Email Vendedor
                             TRBSE1->PARCELA})         // 17-Parcela
 
-          TRBSE1->(dbSkip())
+          TRBSE1->(DBSkip())
        EndDo
 
        If Len(_aDadosTit) > 0
@@ -242,7 +234,7 @@ Local _cServer,_cPortCon,_lRelauth,_cUserAut,_cPassAut,_cItem15
 Local _aConfig	
 Local _cEmailBcc
 
-Local _aListEml := STRTOKARR( U_ITGETMV('IT_EXCEMLCB', ''),";")
+Local _aListEml := StrTokArr( U_ITGETMV('IT_EXCEMLCB', ''),";")
 Local _nItEml 
 
 Begin Sequence
@@ -255,7 +247,7 @@ Begin Sequence
    _cMsgEml := '<html>'
    _cMsgEml += '<head><title>Workflow de Cobrança - Italac</title></head>'
    _cMsgEml += '<body>'
-   _cMsgEml += '<style type="text/css"><!--'
+   _cMsgEml += '<style Type="text/css"><!--'
    _cMsgEml += 'table.bordasimples { border-collapse: collapse; }'
    _cMsgEml += 'table.bordasimples tr td { border:1px solid #777777; }'
    _cMsgEml += 'td.titulos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #C6E2FF; }'
@@ -335,8 +327,8 @@ Begin Sequence
        _cMsgEml += '<td align="center" valign="top" width="5%" height="23" class="itens">' +_cPrefixo  +'</td>'
        _cMsgEml += '<td align="center" valign="top" width="15%" height="23" class="itens">'+_cNrTitulo +'</td>'
        _cMsgEml += '<td align="center" valign="top" width="5%" height="23" class="itens">' +_cParcela  +'</td>'
-       _cMsgEml += '<td align="center" valign="top" width="5%" height="23" class="itens">' +Dtoc(Stod(_dDtEimiss))+'</td>'
-       _cMsgEml += '<td align="center" valign="top" width="5%" height="23" class="itens">' +Dtoc(Stod(_dDtVecOri))+'</td>'		
+       _cMsgEml += '<td align="center" valign="top" width="5%" height="23" class="itens">' +DToC(SToD(_dDtEimiss))+'</td>'
+       _cMsgEml += '<td align="center" valign="top" width="5%" height="23" class="itens">' +DToC(SToD(_dDtVecOri))+'</td>'		
        _cMsgEml += '<td align="right"  valign="top" width="15%" height="23" class="itens">'+Transform(_nValTitul,"@E 999,999,999,999.99")+'</td>'	// AllTrim(Str(_nValTitul,16,2))
        _cMsgEml += '<td align="right"  valign="top" width="15%" height="23" class="itens">'+Transform(_nValSaldo,"@E 999,999,999,999.99")+'</td>'	// AllTrim(Str(_nValSaldo,16,2))	
        _cMsgEml += '</tr>
@@ -394,17 +386,17 @@ Begin Sequence
    _cEmailCli := _aDadosEnv[1,15] // E-mail do Cliente
 
    _cItem2    := "" 
-   _cEmailVen := Alltrim(_aDadosEnv[1,16]) // E-mail do Vendedor
+   _cEmailVen := AllTrim(_aDadosEnv[1,16]) // E-mail do Vendedor
    _cEmailBcc := SuperGetMV("IT_MLFINWF",.F.,"sistema@italac.com.br")
-   _cItem5    := "WORKFLOW DE COBRANÇAS - ITALAC - GERADO EM: "+ Dtoc(Date()) + " - AS: " + Time()
+   _cItem5    := "WORKFLOW DE COBRANÇAS - ITALAC - GERADO EM: "+ DToC(Date()) + " - AS: " + Time()
    _cItem6    := AllTrim(_cMsgEml)
    _cItem7    := "" // AllTrim(_cAnexos)
    _cItem15   := "" //_cEmlLog
 
 
    For _nItEml := 1 To Len(_aListEml)
-      _cEmailVen := STRTRAN(lower(AllTrim(_cEmailVen)),Alltrim(_aListEml[_nItEml]),"")
-      _cEmailCli := STRTRAN(lower(AllTrim(_cEmailCli)),Alltrim(_aListEml[_nItEml]),"")
+      _cEmailVen := StrTran(lower(AllTrim(_cEmailVen)),AllTrim(_aListEml[_nItEml]),"")
+      _cEmailCli := StrTran(lower(AllTrim(_cEmailCli)),AllTrim(_aListEml[_nItEml]),"")
    Next _nItEml
 
    //ITEnvMail(cFrom ,cEmailTo,cEmailCo,cEmailBcc,cAssunto,cMensagem,cAttach,cAccount,cPassword,cServer,cPortCon,lRelauth,cUserAut,cPassAut,cLogErro,lExibeAmb)
@@ -414,4 +406,4 @@ Begin Sequence
 
 End Sequence
 
-Return Nil
+Return

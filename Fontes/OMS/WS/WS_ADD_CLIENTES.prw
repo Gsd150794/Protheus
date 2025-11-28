@@ -4,20 +4,21 @@
 ===============================================================================================================================
  Autor        |    Data    |                              Motivo                      										 
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 16/02/2020 | Chamado 33016. Gravacao do campo ZX_TIMEEMI com FWTimeStamp( 4, DATE(), TIME() )
+Alex Wallauer | 16/02/2020 | Chamado 33016. Gravacao do campo ZX_TIMEEMI com FWTimeStamp( 4, DATE(), Time() )
 Alex Wallauer | 30/03/2021 | Chamado 36221. Ajustes na leitura dos dados de contato e do SLC
 Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 ===============================================================================================================================
  Analista     - Programador  - Inicio   - Envio    - Chamado - Motivo da Alteração
-=====================================================================================================================================================================
+====================================================================================================================================================================================
 Jerry         - Julio Paz    - 07/04/25 - 10/04/25 - 44503   - Inclusão de nova tag Segmento do cliente e atualização do cadastro de clientes e portal de vandas.
-=====================================================================================================================================================================
+Antonio       - Julio Paz    - 29/10/25 - 30/10/25 - 52463   - Formatação da informação CNAE (ZX_I_END/A1_CNAE), em algumas integrações esta informação está vindo sem formatação.
+====================================================================================================================================================================================
 
 */                                        
 //====================================================================================================
 // Definicoes de Includes da Rotina
 //====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include 'apwebsrv.ch'
 #Include 'TbiConn.ch'
 
@@ -117,48 +118,48 @@ WSMETHOD AddCliente WSRECEIVE Empresa, Filial, Cnpj, Razaosocial, Nomefantasia, 
  Fisicajuridica, Cnae, Segmento, Cond, GrupoVenda, Transportadora, Numerodw, cchep, lc , tadcontato WSSEND AtualCliente WSSERVICE WANW002
 
 Local aVetor	:= {}
-Local cCnpj			:= Alltrim(UnMaskCNPJ(::CNPJ))
-Local cRazaosocial	:= Upper(Alltrim(::Razaosocial))
-Local cNomefantasia	:= Upper(Alltrim(::Nomefantasia))
-Local cInsestadual	:= Upper(Alltrim(::Insestadual))
-Local cInsmunicipal	:= Upper(Alltrim(::Insmunicipal))
-Local cInsrural		:= Upper(Alltrim(::Insrural))
+Local cCnpj			:= AllTrim(UnMaskCNPJ(::CNPJ))
+Local cRazaosocial	:= Upper(AllTrim(::Razaosocial))
+Local cNomefantasia	:= Upper(AllTrim(::Nomefantasia))
+Local cInsestadual	:= Upper(AllTrim(::Insestadual))
+Local cInsmunicipal	:= Upper(AllTrim(::Insmunicipal))
+Local cInsrural		:= Upper(AllTrim(::Insrural))
 Local dDatanasc		:= ::Datanasc
-Local cHomepage		:= Upper(Alltrim(::Homepage))
-Local cTipo			:= Upper(Alltrim(::Tipo))
-Local cDdd			:= Upper(Alltrim(::Ddd))
-Local cTelefone		:= Upper(Alltrim(::Telefone))
-Local cTelfax		:= Upper(Alltrim(::Telfax))
-Local cEmail		:= Upper(Alltrim(::Email))
-Local cCep			:= Upper(Alltrim(::Cep))
-Local cEndereco		:= Upper(Alltrim(::Endereco)) + ", " + Upper(Alltrim(::Numero))
-Local cBairro		:= Upper(Alltrim(::Bairro))
-Local cComplemento	:= Upper(Alltrim(::Complemento))
-Local cObservacao	:= Upper(Alltrim(::Observacao))
-Local cVendedor		:= Upper(Alltrim(::Vendedor))
+Local cHomepage		:= Upper(AllTrim(::Homepage))
+Local cTipo			:= Upper(AllTrim(::Tipo))
+Local cDdd			:= Upper(AllTrim(::Ddd))
+Local cTelefone		:= Upper(AllTrim(::Telefone))
+Local cTelfax		:= Upper(AllTrim(::Telfax))
+Local cEmail		:= Upper(AllTrim(::Email))
+Local cCep			:= Upper(AllTrim(::Cep))
+Local cEndereco		:= Upper(AllTrim(::Endereco)) + ", " + Upper(AllTrim(::Numero))
+Local cBairro		:= Upper(AllTrim(::Bairro))
+Local cComplemento	:= Upper(AllTrim(::Complemento))
+Local cObservacao	:= Upper(AllTrim(::Observacao))
+Local cVendedor		:= Upper(AllTrim(::Vendedor))
 Local dDatacadastro	:= ::Datacadastro
-Local cHoracadastro	:= Upper(Alltrim(::Horacadastro))
-Local cSuframa		:= Upper(Alltrim(::Suframa))
-Local cRgfisica		:= Upper(Alltrim(::Rgfisica))
-Local cEstado		:= Upper(Alltrim(::Estado))
-Local cCodmunicipio	:= Upper(Alltrim(::Codmunicipio))
-Local cFisicajuridica	:= Upper(Alltrim(::Fisicajuridica))
-Local cCnae			:= Upper(Alltrim(::Cnae))
-Local cSubSegmen	:= Upper(Alltrim(::Segmento)) 
-Local cSegmento		:= Substr(cSubSegmen,1,2)     
-Local cCond	     	:= Upper(Alltrim(::Cond))
-Local cGrupoVenda	:= Upper(Alltrim(::GrupoVenda))
-Local cTransportadora:= Upper(Alltrim(::Transportadora))
-Local cNumerodw		:= Alltrim(::Numerodw)
-Local cContato      := Upper(Alltrim(::TADCONTATO))
-Local cCCHEP        := Upper(Alltrim(::cchep))
+Local cHoracadastro	:= Upper(AllTrim(::Horacadastro))
+Local cSuframa		:= Upper(AllTrim(::Suframa))
+Local cRgfisica		:= Upper(AllTrim(::Rgfisica))
+Local cEstado		:= Upper(AllTrim(::Estado))
+Local cCodmunicipio	:= Upper(AllTrim(::Codmunicipio))
+Local cFisicajuridica	:= Upper(AllTrim(::Fisicajuridica))
+Local cCnae			:= Upper(AllTrim(::Cnae))
+Local cSubSegmen	:= Upper(AllTrim(::Segmento)) 
+Local cSegmento		:= SubStr(cSubSegmen,1,2)     
+Local cCond	     	:= Upper(AllTrim(::Cond))
+Local cGrupoVenda	:= Upper(AllTrim(::GrupoVenda))
+Local cTransportadora:= Upper(AllTrim(::Transportadora))
+Local cNumerodw		:= AllTrim(::Numerodw)
+Local cContato      := Upper(AllTrim(::TADCONTATO))
+Local cCCHEP        := Upper(AllTrim(::cchep))
 Local nLC           := ::lc
 Local _lProspct     := U_ITGETMV("IT_INTPROSP",.F.) 
 Local cCodigo	:= ""
 Local cLoja		:= ""
 Local aRecnoSM0	:= {}
-Local cEmprWan	:= Upper(Alltrim(::Empresa))
-Local cFilWan	:= Upper(Alltrim(::Filial))
+Local cEmprWan	:= Upper(AllTrim(::Empresa))
+Local cFilWan	:= Upper(AllTrim(::Filial))
 Local lEmpres	:= .F.
 Local nOpc		:= 0
 
@@ -179,7 +180,7 @@ Private aAutoErro		:= {}
 
 // tratamento para carregar a empresa diretamente no fonte
 aRecnoSM0	:=	{cEmprWan,cFilWan} //Posição 1 referente ao codigo da empresa, posição 2 referente a filial caso não seja informado no aParam
-If !empty(alltrim(aRecnoSM0[01])) .and. !empty(alltrim(aRecnoSM0[02]))
+If !Empty(AllTrim(aRecnoSM0[01])) .And. !Empty(AllTrim(aRecnoSM0[02]))
      Reset Environment
      RPCSetType(3)
      If FindFunction("WFPREPENV")
@@ -196,27 +197,27 @@ begintran()
 nTamCdCli := TamSX3("A1_COD")[1]
 // primeiro valido o CNPJ. Se ele não existir, incluo. Caso contrário não rejito, pois pode ter alteração de contatos.
 // Valido a existência do CNPJ
-dbSelectArea("SA1")
-dbSetOrder(3)
-If !dbSeek(xFilial("SA1") + cCNPJ)
+DBSelectArea("SA1")
+DBSetOrder(3)
+If !DBSeek(xFilial("SA1") + cCNPJ)
 	//Valido a Existência do ID do cliente na base
-	if FChkIdDW(cNumeroDw,"SA1")
+	If FChkIdDW(cNumeroDw,"SA1")
 		_cMsgErro	:= "Cliente DW [" + cNumeroDw + "] ja existe na base com outro CNPJ."
 		_cObs := "ERRO:" + _cMsgErro
 		SetSoapFault("Retorno",LEFT(_cObs,60))
 		U_ITConOut(_cObs)
 		::AtualCliente := "[FALSO] Erro ao realizar a atualizacao do Cliente " + _cObs
 		lRet := .F.
-	endif
+	EndIf
 
-	if _lProspct .AND. FChkIdDW(cNumeroDw,"SZX")
+	If _lProspct .And. FChkIdDW(cNumeroDw,"SZX")
 		_cMsgErro	:= "Cliente DW [" + cNumeroDw + "] ja existe na base com outro CNPJ."
 		_cObs := "ERRO:" + _cMsgErro
 		SetSoapFault("Retorno",LEFT(_cObs,60))
 		U_ITConOut(_cObs)
 		::AtualCliente := "[FALSO] Erro ao realizar a atualizacao do Cliente " + _cObs
 		lRet := .F.
-	endif
+	EndIf
 
 	// Valido o tipo do cliente
 	If !(cTipo $ "FLRSX")
@@ -239,69 +240,78 @@ If !dbSeek(xFilial("SA1") + cCNPJ)
 	EndIf
 
 
-	if lRet
+	If lRet
 		nOpc := 3 // Inclusao
 		// Tratamento de variaveis locais
-		cPessoa		:= Iif(Len(cCNPJ) < 14,"F","J")
+		cPessoa		:= IIf(Len(cCNPJ) < 14,"F","J")
 		cFisicajuridica	:= cPessoa
 		cRaizCNPJ	:= SubStr(cCNPJ,1,8)
 
-		if ::DataNasc == nil
-			dDataNasc := stod("        ")
-		else
+		If ::DataNasc == nil
+			dDataNasc := SToD("        ")
+		Else
 			dDataNasc := ::DataNasc
-		endif
+		EndIf
 
 		// Formatacao de codigo e loja.
 		// A partir daqui nao pode mais usar AllTrim em nenhuma das 2 variaveis
-		dbselectarea("SA1")
-		SA1->(dbSetOrder(1))
+		DBSelectArea("SA1")
+		SA1->(DBSetOrder(1))
 		While (.T.)
 			cCodigo := GETSXENUM("SA1","A1_COD")
-			If !SA1->(dbSeek(xFilial("SA1") + cCodigo))
+			If !SA1->(DBSeek(xFilial("SA1") + cCodigo))
 			    U_ITConOut("[WS_ADD_CLIENTE] Sera incluido esse codigo: "+cCodigo)
 				SA1->(rollbackSx8())
 				Exit
-			Endif
+			EndIf
 			U_ITConOut("[WS_ADD_CLIENTE] Ja existe esse codigo: "+cCodigo)
 			SA1->(ConfirmSX8())
-		Enddo
+		EndDo
 
 	  	//cCodigo := GetNumSA1()
-		IF _lProspct
-		   cLoja:= LEFT(RIGHT(ALLTRIM(cCnpj),6),4)
-		ELSE   
+		If _lProspct
+		   cLoja:= LEFT(RIGHT(AllTrim(cCnpj),6),4)
+		Else   
 		   cLoja:= "0001"
-        ENDIF
+        EndIf
 		// Campos fixos pelo padrão
 		cPaisBacen	:= "01058"
 		cPais		:= "105"
 
 		// regra 01 - se o nome reduzido estiver em branco, assumo o campo cRazão, que alimentará o A1_NOME
-		if empty(alltrim(cNomefantasia))
+		If Empty(AllTrim(cNomefantasia))
 			cNomefantasia := cRazaosocial
-		else
-			cNomefantasia := alltrim(cNomefantasia)
-		endif
+		Else
+			cNomefantasia := AllTrim(cNomefantasia)
+		EndIf
 
 		cCONTATO:=""
 		cCARGC  :=""
 		cEMAILC :=""
-		IF Type("tAdContato:zzItensDoContato") == "A"
+		If Type("tAdContato:zzItensDoContato") == "A"
 		   nItem:=1
 		   oSU5Tmp:=::tAdContato:zzItensDoContato
-		   IF LEN(oSU5Tmp) > 0 
-	          IF Type("oSU5Tmp[nItem]:CONTATONOME"	)  = 'C'
-	             cCONTATO:=ALLTRIM(UPPER(oSU5Tmp[nItem]:CONTATONOME))
-	          ENDIF    
-	          IF Type("oSU5Tmp[nItem]:CONTATOFUNCAO" ) = 'C'
-	             cCARGC  :=ALLTRIM(UPPER(oSU5Tmp[nItem]:CONTATOFUNCAO))
-	          ENDIF	  
-	          IF Type("oSU5Tmp[nItem]:CONTATOEMAIL") == "C"
-	             cEMAILC :=ALLTRIM(UPPER(oSU5Tmp[nItem]:CONTATOEMAIL))
-	          ENDIF	  
-            ENDIF
-		ENDIF
+		   If Len(oSU5Tmp) > 0 
+	          If Type("oSU5Tmp[nItem]:CONTATONOME"	)  = 'C'
+	             cCONTATO:=AllTrim(Upper(oSU5Tmp[nItem]:CONTATONOME))
+	          EndIf    
+	          If Type("oSU5Tmp[nItem]:CONTATOFUNCAO" ) = 'C'
+	             cCARGC  :=AllTrim(Upper(oSU5Tmp[nItem]:CONTATOFUNCAO))
+	          EndIf	  
+	          If Type("oSU5Tmp[nItem]:CONTATOEMAIL") == "C"
+	             cEMAILC :=AllTrim(Upper(oSU5Tmp[nItem]:CONTATOEMAIL))
+	          EndIf	  
+            EndIf
+		EndIf
+
+		// Formatando a variável cCnae, em algumas integrações esta informação está vindo sem formatação.
+		If ! Empty(cCnae) 
+           cCnae := StrTran( cCnae , "." , "" )
+		   cCnae := StrTran( cCnae , "/" , "" )
+		   cCnae := StrTran( cCnae , "-" , "" )
+           cCnae := SubStr(cCnae,1,4) + "-" + SubStr(cCnae,5,1) + "/" + SubStr(cCnae,6,2)
+        EndIf 
+
 		aAdd(aVetor,{"A1_COD"		,cCodigo		,Nil})
 		aAdd(aVetor,{"A1_LOJA"		,cLoja			,Nil})
 		aAdd(aVetor,{"A1_NOME"		,cRazaoSocial	,Nil})
@@ -341,48 +351,48 @@ If !dbSeek(xFilial("SA1") + cCNPJ)
 		aAdd(aVetor,{"A1_COND"	    ,cCond          ,Nil})
 		aAdd(aVetor,{"A1_GRPVEN"	,cGrupoVenda    ,Nil})				
 		aAdd(aVetor,{"A1_I_CCHEP"	,cCCHEP			,Nil})
-		aAdd(aVetor,{"A1_I_CHEP"	,IF(EMPTY(cCCHEP),"P","C"),Nil})
-		//ConOut("****[WS_ADD_CLIENTE] VALTYPE(nLC)    "+VALTYPE(nLC)) 
-		IF VALTYPE(nLC) = "N"
+		aAdd(aVetor,{"A1_I_CHEP"	,If(Empty(cCCHEP),"P","C"),Nil})
+		//ConOut("****[WS_ADD_CLIENTE] ValType(nLC)    "+ValType(nLC)) 
+		If ValType(nLC) = "N"
 		   aAdd(aVetor,{"A1_I_SLC"	,nLC   			,Nil})				
-		ELSE
+		Else
 		   aAdd(aVetor,{"A1_I_SLC"	,0   			,Nil})				
-		EndIF
+		EndIf
 		aAdd(aVetor,{"A1_CONTATO"   ,cCONTATO		,Nil})
 		aAdd(aVetor,{"A1_I_CARGC"   ,cCARGC		    ,Nil})
 		aAdd(aVetor,{"A1_I_EMAIL"   ,cEMAILC		,Nil})
-        IF SA1->(FieldPos("A1_I_ORIGD")) > 0
+        If SA1->(FieldPos("A1_I_ORIGD")) > 0
 		   aAdd(aVetor,{"A1_I_ORIGD","D"	   		,Nil})
-		ENDIF   
+		EndIf   
 
 	    SA3->( DBSetOrder(1) )
 	    If SA3->( DBSeek( xFilial('SA3') +cVendedor ) )
 		   aAdd(aVetor,{"A1_TABELA"	,SA3->A3_I_TABPR ,Nil})				
 		   aAdd(aVetor,{"A1_RISCO"	,SA3->A3_I_RISCO ,Nil})				
 		   aAdd(aVetor,{"A1_LC"	    ,SA3->A3_I_LC	 ,Nil})				
-		ENDIF		   
+		EndIf		   
 
-		IF _lProspct
+		If _lProspct
            GravaProspct(aVetor,cCCHEP)
-        ELSE
+        Else
            //MSExecAuto( {|x,y,z| mata030(x,y,z) } , aVetor ,, 3 )  
 		   MSExecAuto({|x,y| Mata030(x,y)},aVetor,nOpc) // nOpc = 3 - inclusão, 4 - Alteracao
-		ENDIF   
+		EndIf   
 
 		If lMsErroAuto
 			aAutoErro := GETAUTOGRLOG()
-			_cObs := "[WS_ADD_CLIENTE] "+alltrim(xDatAt() + "[ERRO] [WS_ADD_CLIENTE] " + XCONVERRLOG(aAutoErro))
+			_cObs := "[WS_ADD_CLIENTE] "+AllTrim(xDatAt() + "[ERRO] [WS_ADD_CLIENTE] " + XCONVERRLOG(aAutoErro))
 			SetSoapFault("Retorno",LEFT(_cObs,60))
 			U_ITConOut(_cObs)
 			::AtualCliente := "[FALSO] Erro ao realizar a atualizacao do Cliente " + _cObs
 			lRet := .F.
 		Else
 			// verifico se realmente o cliente foi adicionado no Protheus
-			IF _lProspct
-				::AtualCliente := ALLTRIM(STR(SZX->(RECNO())))//"[SUCESSO] Cliente Gravado no Prospct Nr. DW: " + cNumeroDw
-			ELSE
-				SA1->(dbSetOrder(RetOrder("SA1","A1_FILIAL+A1_CGC")))
-				If SA1->(dbSeek(xFilial("SA1")+PadR(cCNPJ,TamSX3("A1_CGC")[1])))
+			If _lProspct
+				::AtualCliente := AllTrim(Str(SZX->(RECNO())))//"[SUCESSO] Cliente Gravado no Prospct Nr. DW: " + cNumeroDw
+			Else
+				SA1->(DBSetOrder(RetOrder("SA1","A1_FILIAL+A1_CGC")))
+				If SA1->(DBSeek(xFilial("SA1")+PadR(cCNPJ,TamSX3("A1_CGC")[1])))
 					::AtualCliente := SA1->A1_COD+SA1->A1_LOJA//"[SUCESSO] - Cliente gravado com o código: " + SA1->A1_COD + " - Loja: " + SA1->A1_LOJA // SA1->A1_COD+SA1->A1_LOJA
 					U_ITConOut("[WS_ADD_CLIENTE] Cliente " + SA1->A1_COD +" - "+ SA1->A1_LOJA + " - " + IIf(nOpc == 4,"alterado","incluido") + " com sucesso!")
 					
@@ -394,17 +404,17 @@ If !dbSeek(xFilial("SA1") + cCNPJ)
 					U_ITConOut(_cObs)
 					::AtualCliente := "[FALSO] Erro ao realizar a atualizacao do Cliente " + _cObs
 					lRet := .F.
-				endif
+				EndIf
 			EndIf
-		ENDIF
+		EndIf
 	EndIf
-else
+Else
 	::AtualCliente := "[FALSO] Cliente ja cadastrado, codigo: " + SA1->A1_COD + " - " + SA1->A1_LOJA
 EndIf
 
 endtran()
 
-U_ITConOut("[WS_ADD_CLIENTE] Fim: " + Time() + " Data: " + DtoC(Date()))
+U_ITConOut("[WS_ADD_CLIENTE] Fim: " + Time() + " Data: " + DToC(Date()))
 U_ITConOut("[WS_ADD_CLIENTE] "+Repl("-",150))
 
 Return lRet
@@ -412,7 +422,7 @@ Return lRet
 //=========================================================================================================================
 // função que cria / altera os contatos
 
-static Function WSADDCONTATO(xCodigo,xLoja,oSU5Tmp,cCONTATO)
+Static Function WSADDCONTATO(xCodigo,xLoja,oSU5Tmp,cCONTATO)
 
 Local nItem		:= 0
 //Local xCodCont	:= ""
@@ -422,24 +432,24 @@ Local _aItCont	:= oSU5Tmp
 
 nItens := Len(_aItCont)
 
-U_ITConOut("[WS_ADD_CLIENTE] Lendo  " +ALLTRIM(STR(nItens))+ " contatos " )
+U_ITConOut("[WS_ADD_CLIENTE] Lendo  " +AllTrim(Str(nItens))+ " contatos " )
 
-for nItem := 1 to nItens
-	IF nItem == 1
-	   IF Type("oSU5Tmp[nItem]:CONTATONOME"	)  = 'C'
-	      cCONTATO:=ALLTRIM(UPPER(oSU5Tmp[nItem]:CONTATONOME))
-	   ENDIF
+For nItem := 1 to nItens
+	If nItem == 1
+	   If Type("oSU5Tmp[nItem]:CONTATONOME"	)  = 'C'
+	      cCONTATO:=AllTrim(Upper(oSU5Tmp[nItem]:CONTATONOME))
+	   EndIf
 
-	   IF Type("oSU5Tmp[nItem]:CONTATOFUNCAO" ) = 'C'
-	      cCARGC  :=ALLTRIM(UPPER(oSU5Tmp[nItem]:CONTATOFUNCAO))
-	   ENDIF	  
-	   IF Type("oSU5Tmp[nItem]:CONTATOEMAIL") == "C"
-	      cEMAILC :=ALLTRIM(UPPER(oSU5Tmp[nItem]:CONTATOEMAIL))
-	   ENDIF	  
-    ENDIF
-next nX
+	   If Type("oSU5Tmp[nItem]:CONTATOFUNCAO" ) = 'C'
+	      cCARGC  :=AllTrim(Upper(oSU5Tmp[nItem]:CONTATOFUNCAO))
+	   EndIf	  
+	   If Type("oSU5Tmp[nItem]:CONTATOEMAIL") == "C"
+	      cEMAILC :=AllTrim(Upper(oSU5Tmp[nItem]:CONTATOEMAIL))
+	   EndIf	  
+    EndIf
+Next nX
 
-return()  
+Return  
 
 //==========================================================================================================================
 // função que converte o log, deixando-o mais "apresentável"
@@ -447,13 +457,13 @@ return()
 Static Function xConverrLog(aAutoErro)
 
 Local cRet := ""
-Local _ni   := 1
+Local _nI   := 1
 
-FOR _ni := 1 to Len(aAutoErro)
-	cRet += CRLF + AllTrim(aAutoErro[_ni])
-NEXT _ni
+For _nI := 1 to Len(aAutoErro)
+	cRet += CRLF + AllTrim(aAutoErro[_nI])
+Next _nI
 
-RETURN cRet
+Return cRet
 
 //==========================================================================================================================
 //função que retorna a data atual em formato CARACTERE
@@ -462,7 +472,7 @@ Static Function xDatAt()
 
 Local cRet	:=	""
 
-//cRet :=	CRLF + "(" + DTOC(DATE()) + " " + TIME() + ")"
+//cRet :=	CRLF + "(" + DToC(DATE()) + " " + Time() + ")"
 
 Return(cRet)
 
@@ -474,18 +484,18 @@ Static Function UnMaskCNPJ( cCNPJ )
 
 Local cCNPJClear := cCNPJ
 
-BEGIN SEQUENCE
+Begin Sequence
 
-	IF Empty( cCNPJClear )
+	If Empty( cCNPJClear )
 		BREAK
-	EndIF
+	EndIf
 
 	cCNPJClear := StrTran( cCNPJClear , "." , "" )
 	cCNPJClear := StrTran( cCNPJClear , "/" , "" )
 	cCNPJClear := StrTran( cCNPJClear , "-" , "" )
 	cCNPJClear := AllTrim( cCNPJClear )
 
-END SEQUENCE
+End Sequence
 
 Return(cCNPJClear)
 
@@ -494,7 +504,7 @@ Return(cCNPJClear)
 
 Static Function FChkIdDW(cIdDW,cTabela)
 
-Local aArea		:=	GetArea()
+Local aArea		:=	FWGetArea()
 Local cAliasTrb	:=	GetNextAlias()
 Local aQuery	:=	{}
 Local lRet		:=	.F.
@@ -531,7 +541,7 @@ If cTabela == "SA1" .And. SA1->(FieldPos("A1_I_DW")) > 0
 		lRet := .T.
 	EndIf
 
-ELSEIf cTabela == "SZX" .And. SZX->(FieldPos("ZX_I_DW")) > 0
+ElseIf cTabela == "SZX" .And. SZX->(FieldPos("ZX_I_DW")) > 0
 
 	BeginSql Alias cAliasTrb
 
@@ -554,11 +564,11 @@ ELSEIf cTabela == "SZX" .And. SZX->(FieldPos("ZX_I_DW")) > 0
 EndIf
 
 If Select(cAliasTrb) > 0
-	dbSelectArea(cAliasTrb)
-	dbCloseArea()
+	DBSelectArea(cAliasTrb)
+	DBCloseArea()
 EndIf
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return(lRet)
 
@@ -574,9 +584,9 @@ Retorno---------:(.T.)
 */
 Static Function GravaProspct(aVetor,cCCHEP)
 
-LOCAL _aGrava:={},_nCpo,_nPos
-//LOCAL _cTeste:=""
-LOCAL _aCampos:={;
+Local _aGrava:={},_nCpo,_nPos
+//Local _cTeste:=""
+Local _aCampos:={;
 { "A1_NOME"	  ,"ZX_NOME"  },;
 { "A1_PESSOA" ,"ZX_PESSOA"},;
 { "A1_CGC"	  ,"ZX_CGC"   },;
@@ -611,41 +621,41 @@ LOCAL _aCampos:={;
 { "A1_LOJA"	  ,"ZX_LOJA"   },;
 { "A1_I_CCHEP","ZX_I_CCHEP"} }
 
-dbSelectArea("SZX")
-AADD(_aCampos,{ "A1_I_DW" ,"ZX_I_DW" } )
-AADD(_aCampos,{ "A1_I_SLC","ZX_I_SLC"} )
+DBSelectArea("SZX")
+aAdd(_aCampos,{ "A1_I_DW" ,"ZX_I_DW" } )
+aAdd(_aCampos,{ "A1_I_SLC","ZX_I_SLC"} )
 
 
-AADD(_aGrava,{"ZX_FILIAL" ,xFilial("SZX")})
-AADD(_aGrava,{"ZX_EMISSAO",DATE()        })
-AADD(_aGrava,{"ZX_CODEMP" ,'010'         })
-AADD(_aGrava,{"ZX_MSBLQL" ,'2'           })
-AADD(_aGrava,{"ZX_STATUS" ,'L'           })
-AADD(_aGrava,{"ZX_EVENTO" ,'0'           })
-AADD(_aGrava,{"ZX_TIMEEMI",FWTimeStamp( 4, DATE(), TIME() ) })
-AADD(_aGrava,{"ZX_CHEP"   ,IF(EMPTY(cCCHEP),"N","S")})
+aAdd(_aGrava,{"ZX_FILIAL" ,xFilial("SZX")})
+aAdd(_aGrava,{"ZX_EMISSAO",Date()        })
+aAdd(_aGrava,{"ZX_CODEMP" ,'010'         })
+aAdd(_aGrava,{"ZX_MSBLQL" ,'2'           })
+aAdd(_aGrava,{"ZX_STATUS" ,'L'           })
+aAdd(_aGrava,{"ZX_EVENTO" ,'0'           })
+aAdd(_aGrava,{"ZX_TIMEEMI",FWTimeStamp( 4, DATE(), Time() ) })
+aAdd(_aGrava,{"ZX_CHEP"   ,If(Empty(cCCHEP),"N","S")})
 
-IF SZX->(FieldPos("ZX_I_ORIGD")) > 0
-   AADD(_aGrava,{"ZX_I_ORIGD" ,'D'       })
-ENDIF 
+If SZX->(FieldPos("ZX_I_ORIGD")) > 0
+   aAdd(_aGrava,{"ZX_I_ORIGD" ,'D'       })
+EndIf 
                                 
-FOR _nCpo:= 1 TO LEN(_aCampos)
-   IF (_nPos:=ASCAN(aVetor, {|I| I[1] == _aCampos[_nCpo,1] } )) > 0
+For _nCpo:= 1 TO Len(_aCampos)
+   If (_nPos:=aScan(aVetor, {|I| I[1] == _aCampos[_nCpo,1] } )) > 0
                     //1-compo         2-conteudo
-      AADD(_aGrava,{_aCampos[_nCpo,2],aVetor[_nPos,2]}) 
-   ENDIF   
-NEXT
+      aAdd(_aGrava,{_aCampos[_nCpo,2],aVetor[_nPos,2]}) 
+   EndIf   
+Next
 
 BEGIN TRANSACTION
 
 SZX->(RecLock("SZX",.T.))
 For _nCpo := 1 To Len(_aGrava)
-    IF SZX->(FieldPos(_aGrava[_nCpo][1])) > 0
+    If SZX->(FieldPos(_aGrava[_nCpo][1])) > 0
 	   SZX->(FieldPut( FieldPos(_aGrava[_nCpo][1]) , _aGrava[_nCpo][2] ))
-	ENDIF   
+	EndIf   
 Next
-SZX->(MSUNLOCK())
+SZX->(MSUnLock())
 
 END TRANSACTION
 
-RETURN .T.
+Return .T.

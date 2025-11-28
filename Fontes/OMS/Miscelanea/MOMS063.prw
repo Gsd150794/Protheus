@@ -11,7 +11,7 @@
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include "PROTHEUS.CH"
+#Include "TOTVS.ch"
 #Include "TopConn.ch"
 
 /*
@@ -31,17 +31,17 @@ User Function MOMS063()
 
 Begin Sequence 
 
-   If ! U_ITMSG("Confirma os ajutes da Rede com base no cadastro de desconto contratual?","Atenção" , , ,2, 2)
+   If ! U_ITMsg("Confirma os ajutes da Rede com base no cadastro de desconto contratual?","Atenção" , , ,2, 2)
       Break 
    EndIf 
 
    Processa( {|| U_MOMS063P() }, "Aguarde...", "Ajuste Rede x Desconto Contratual...",.F.)
 
-   U_ITMSG("Processamento Finalizado...","Atenção", , 2)
+   U_ITMsg("Processamento Finalizado...","Atenção", , 2)
 
 End Sequence 
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -63,16 +63,16 @@ Local _nTotRegs
 
 Begin Sequence 
 
-   ACY->(DbGoTop())
+   ACY->(DBGoTop())
 
    _nTotRegs := ACY->(RecCount())
 
    ProcRegua(_nTotRegs)
 
-   ACY->(DbGoTop())
+   ACY->(DBGoTop())
    _nI := 1
 
-   Do While ! ACY->(Eof())
+   While ! ACY->(Eof())
       IncProc("Processando registros cadastro Grupo de Vendas: " + StrZero(_nI,8) +" / " + StrZero(_nTotRegs,8) )
       
       _cQry := " SELECT Count(*) AS TOTREGS "
@@ -81,7 +81,7 @@ Begin Sequence
       _cQry += " AND ZAZ_GRPVEN = '" + ACY->ACY_GRPVEN +"' "
 
       If Select("QRYZAZ") > 0
-         QRYZAZ->(DbCloseArea())
+         QRYZAZ->(DBCloseArea())
       EndIf
       
       DbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQry ) , "QRYZAZ" , .T., .F. )
@@ -92,9 +92,9 @@ Begin Sequence
       Else 
          ACY->ACY_I_DESC := "N" // N=Nao = possui desconto contratual
       EndIf 
-      ACY->(MsUnLock())
+      ACY->(MSUnLock())
 
-      ACY->(DbSkip())
+      ACY->(DBSkip())
       _nI += 1
 
    EndDo 
@@ -102,7 +102,7 @@ Begin Sequence
 End Sequence 
 
 If Select("QRYZAZ") > 0
-   QRYZAZ->(DbCloseArea())
+   QRYZAZ->(DBCloseArea())
 EndIf
 
-Return Nil
+Return

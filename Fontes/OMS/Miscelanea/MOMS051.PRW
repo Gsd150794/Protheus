@@ -12,8 +12,8 @@
 // Definicoes de Includes da Rotina.
 //====================================================================================================
 
-#INCLUDE 'PROTHEUS.CH'
-#INCLUDE 'TOTVS.CH'
+#Include "TOTVS.ch"
+#Include 'TOTVS.CH'
 
 /*
 ===============================================================================================================================
@@ -28,7 +28,7 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-USER FUNCTION MOMS051()
+User Function MOMS051()
     Local lSchedule := (Select("SX3") == 0)
     Local aTabelas  := {"SZX", "SA3"}
 
@@ -40,13 +40,13 @@ USER FUNCTION MOMS051()
         MOMS051P()
         U_ItConOut("MOMS051 - Processo de aprovacao de prospect finalizado")
         RPCClearEnv()
-    ELSE
+    Else
         U_ItConOut("MOMS051 - Iniciando schedule de aprovacao de prospect")
         MOMS051P()
         U_ItConOut("MOMS051 - Processo de aprovacao de prospect finalizado")
-    Endif
+    EndIf
 
-RETURN
+Return
 
 /*
 ===============================================================================================================================
@@ -61,7 +61,7 @@ Parametros--------: Nenhum
 Retorno-----------: _RECN
 ===============================================================================================================================
 */
-STATIC FUNCTION MOMS051C()
+Static Function MOMS051C()
     Local _RECN     := {}
     Local _cQuery    := ""
     Local _cAlias    := GetNextAlias()
@@ -82,16 +82,16 @@ STATIC FUNCTION MOMS051C()
 
     DBSelectArea(_cAlias)
 
-    WHILE (_cAlias)->(!EOF())
-        Aadd(_RECN, (_cAlias)->RECNO)
-        (_cAlias)->(DbSkip())
-    ENDDO
+    While (_cAlias)->(!Eof())
+        aAdd(_RECN, (_cAlias)->RECNO)
+        (_cAlias)->(DBSkip())
+    EndDo
 
-    (_cAlias)->(dBCloseArea())
+    (_cAlias)->(DBCloseArea())
 
     U_ItConOut("MOMS051C - Total de registro pendentes: " + cValToChar(Len(_RECN)))
 
-RETURN _RECN
+Return _RECN
 
 /*
 ===============================================================================================================================
@@ -106,23 +106,23 @@ Parametros--------: Nenhum
 Retorno-----------: _RECN
 ===============================================================================================================================
 */
-STATIC FUNCTION MOMS051P()
+Static Function MOMS051P()
     Local _nX       := 0
     Local _nCont    := 0
     Local _RECN     := MOMS051C()
 
-    DbSelectArea("SZX")
-    SZX->(DbSetOrder(1))
+    DBSelectArea("SZX")
+    SZX->(DBSetOrder(1))
 
-    FOR _nX := 1 TO Len(_RECN)
-        SZX->(DBGOTO(_RECN[_nX]))
+    For _nX := 1 TO Len(_RECN)
+        SZX->(DBGoTo(_RECN[_nX]))
         RecLock("SZX", .F.)
         SZX->ZX_STATUS := "L"
         _nCont++
-    NEXT
+    Next
 
-    SZX->(MsUnlock())
-    SZX->(DbCloseArea())
+    SZX->(MSUnLock())
+    SZX->(DBCloseArea())
     U_ItConOut("MOMS051C - Total de prospects efetivados: " + cValToChar(_nCont))
 
-RETURN
+Return

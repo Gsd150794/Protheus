@@ -9,7 +9,7 @@ Lucas Borges  |08/08/2025| Chamado 51702. Incluído tratamento para Item Contábil
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -79,7 +79,7 @@ If _oFile:Open()
 	EndIf
 
 	//Separa o Vetor em Nível conforme Token
-	AEval(_aAux, {|x| AAdd(_aDados, StrTokArr2(x, ";", .T.))})
+	AEval(_aAux, {|x| aAdd(_aDados, StrTokArr2(x, ";", .T.))})
 
 	_oFile:Close()
 	If Empty(_aDados)
@@ -130,7 +130,7 @@ If _oFile:Open()
 			If Upper(_aDados[_nI][8]) $ "DELETA"
 				aAdd(_aItens,{{'LINPOS'	,'CT2_LINHA',_aDados[_nI][13]},;//CT2->CT2_LINHA - Necessário para qualquer alteração
 							{'AUTDELETA','S'		, NIL			} })//Indica se é para deletar a linha
-			Else //Se não for deleção, adiciono indicativo para alteração
+			Else //Se não For deleção, adiciono indicativo para alteração
 				aAdd(_aItens,{{'CT2_DEBITO'	,IIf(Empty(_aDados[_nI][1]),_aDados[_nI][14],_aDados[_nI][1]), NIL},;//CT2->CT2_DEBITO
 							{'CT2_CREDIT'	,IIf(Empty(_aDados[_nI][2]),_aDados[_nI][15],_aDados[_nI][2]), NIL},;//CT2->CT2_CREDIT
 							{'CT2_CCD'		,IIf(Empty(_aDados[_nI][3]),_aDados[_nI][16],_aDados[_nI][3]), NIL},;//CT2->CT2_CCD
@@ -141,8 +141,8 @@ If _oFile:Open()
 			EndIf
 			_cChave := DToS(_aDados[_nI][9])+_aDados[_nI][10]+_aDados[_nI][11]+_aDados[_nI][12]
 
-			//Se a chave for mudar ou se for o último registro, gravo as alterações
-			If _nI == _nQtdReg .OR. _cChave <> DToS(_aDados[_nI+1][9])+_aDados[_nI+1][10]+_aDados[_nI+1][11]+_aDados[_nI+1][12]
+			//Se a chave For mudar ou se For o último registro, gravo as alterações
+			If _nI == _nQtdReg .Or. _cChave <> DToS(_aDados[_nI+1][9])+_aDados[_nI+1][10]+_aDados[_nI+1][11]+_aDados[_nI+1][12]
 				lMsErroAuto := .F.
 				lMsHelpAuto := .T.
 

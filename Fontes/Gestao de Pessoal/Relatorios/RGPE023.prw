@@ -10,12 +10,8 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
-#Include "report.ch"
-#INCLUDE 'TOPCONN.CH'
+#Include "TOTVS.ch"
+#Include 'TOPCONN.CH'
 
 /*
 ===============================================================================================================================
@@ -42,7 +38,7 @@ _cSelectX5 += " AND X5_TABELA = '41'"
 
 _aItalac_F3:={}//       1           2         3                      4                      5          6                      7         8          9         10         11        12
 //  (_aItalac_F3,{"CPOCAMPO",_cTabela   ,_nCpoChave            , _nCpoDesc               ,_bCondTab   , _cTitAux           , _nTamChv , _aDados  , _nMaxSel , _lFilAtual,_cMVRET,_bValida})
-AADD(_aItalac_F3,{"MV_PAR11",_cSelectX5,{|Tab|ALLTRIM((Tab)->X5_CHAVE)},{|Tab|(Tab)->X5_DESCRI}                  ,,"Tipo de Aumento",          ,          ,          ,.F.        ,       , } )
+aAdd(_aItalac_F3,{"MV_PAR11",_cSelectX5,{|Tab|AllTrim((Tab)->X5_CHAVE)},{|Tab|(Tab)->X5_DESCRI}                  ,,"Tipo de Aumento",          ,          ,          ,.F.        ,       , } )
 
 Begin Sequence 
 	
@@ -52,7 +48,7 @@ Begin Sequence
 
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -159,11 +155,11 @@ Begin Sequence
    EndIf 
 	
    If ! Empty(MV_PAR03) 
-	  _cWhere += " AND R7_DATA >= '"+ DtoS(MV_PAR03) +"' "
+	  _cWhere += " AND R7_DATA >= '"+ DToS(MV_PAR03) +"' "
    EndIf 
 
    If ! Empty(MV_PAR04)
-	   _cWhere += " AND R7_DATA <= '" + DtoS(MV_PAR04) + "' "
+	   _cWhere += " AND R7_DATA <= '" + DToS(MV_PAR04) + "' "
    EndIf 
 	
    If (Len(MV_PAR07) > 0)		
@@ -201,7 +197,7 @@ Begin Sequence
    _cQry += " ORDER BY " + _cOrderBy 
 
    If Select("TRBSR7") <> 0
-	   TRBSR7->(DbCloseArea())
+	   TRBSR7->(DBCloseArea())
    EndIf
 	
    TCQUERY _cQry NEW ALIAS "TRBSR7"	
@@ -209,17 +205,17 @@ Begin Sequence
    TCSetField('TRBSR7',"ULTIMADT","D",8,0)
    TCSetField('TRBSR7',"R3_DTCDISS","D",8,0)
       	
-   DbSelectArea("TRBSR7")
-   TRBSR7->(dbGoTop())
+   DBSelectArea("TRBSR7")
+   TRBSR7->(DBGoTop())
 
    Count to _nTotRegs	
 
-   IF _ntotRegs = 0
-      U_ITMSG("Não existe dados para emissão do relatório.",'Atenção!',"Altere os filtros do relatório e tente novamente",3) 
+   If _ntotRegs = 0
+      U_ITMsg("Não existe dados para emissão do relatório.",'Atenção!',"Altere os filtros do relatório e tente novamente",3) 
       BREAK
-   ENDIF
+   EndIf
 
-   _cTotGeral:=AllTrim(STR(_nTotRegs,10))
+   _cTotGeral:=AllTrim(Str(_nTotRegs,10))
 
    //====================================================================================================
    // Ativa a seção do relatório conforme a ordem de emissão do relatório.
@@ -233,7 +229,7 @@ Begin Sequence
    // Inicia/Lista todos os reajustes, conforme os filtros informados.
    //====================================================================================================		
    If MV_PAR10 <> 1
-      TRBSR7->(dbGoTop())
+      TRBSR7->(DBGoTop())
       _cFilImpr := ""
 
       //====================================================================================================
@@ -241,19 +237,19 @@ Begin Sequence
       //====================================================================================================		
       _aFunLidos := {} 
 
-      Do While !TRBSR7->(Eof())
+      While !TRBSR7->(Eof())
 		
          If _oReport:Cancel()
 		      Exit
          EndIf
 
          If MV_PAR10 == 1
-            _nI := Ascan(_aFunLidos,{|x| x[1] == TRBSR7->R7_FILIAL .And. x[2] == TRBSR7->R7_MAT}) 
+            _nI := aScan(_aFunLidos,{|x| x[1] == TRBSR7->R7_FILIAL .And. x[2] == TRBSR7->R7_MAT}) 
       
             If _nI == 0
-               Aadd(_aFunLidos,{TRBSR7->R7_FILIAL,TRBSR7->R7_MAT})
+               aAdd(_aFunLidos,{TRBSR7->R7_FILIAL,TRBSR7->R7_MAT})
             Else
-               TRBSR7->(DbSkip())
+               TRBSR7->(DBSkip())
                Loop
             EndIf 
 
@@ -265,7 +261,7 @@ Begin Sequence
          If _cFilImpr <> TRBSR7->R7_FILIAL
             _cFilImpr := TRBSR7->R7_FILIAL
 
-            _nI := Ascan(_aFilial,{|x| x[2] == TRBSR7->R7_FILIAL}) 
+            _nI := aScan(_aFilial,{|x| x[2] == TRBSR7->R7_FILIAL}) 
 	         If _nI > 0
                _cNomeFil :=  _aFilial[_nI,7]
 	         EndIf
@@ -276,7 +272,7 @@ Begin Sequence
 	                  
             _oSect1_A:Cell("R7_FILIAL"):SetValue(TRBSR7->R7_FILIAL)
 		      _oSect1_A:Cell("WK_NOMEFIL"):SetValue(_cNomeFil)
-		      _oSect1_A:Printline()
+		      _oSect1_A:PrintLine()
             //_oSect1_A:ThinLine()
          
             _oSect1_B:Init()
@@ -305,9 +301,9 @@ Begin Sequence
          _oSect1_B:Cell("R7_DESCCAR"):SetValue(TRBSR7->R7_DESCCAR)
          _oSect1_B:Cell("R3_DTCDISS"):SetValue(TRBSR7->R3_DTCDISS)
          _oSect1_B:Cell("RA_CBO"):SetValue(TRBSR7->RA_CBO)
-	      _oSect1_B:Printline()
+	      _oSect1_B:PrintLine()
       
-         TRBSR7->(dbSkip())
+         TRBSR7->(DBSkip())
       EndDo		
    
       //====================================================================================================
@@ -334,18 +330,18 @@ Begin Sequence
    //===============================================================================
    // Emite o relatório listando apenas os ultimos reajustes dos funcionários.
    //===============================================================================
-   TRBSR7->(dbGoTop())
+   TRBSR7->(DBGoTop())
    
    _aFunLidos := {} 
 
-   Do While !TRBSR7->(Eof())
+   While !TRBSR7->(Eof())
       
       _oReport:IncMeter()
 
-      _nI := Ascan(_aFunLidos,{|x| x[1] == TRBSR7->R7_FILIAL .And. x[2] == TRBSR7->R7_MAT}) 
+      _nI := aScan(_aFunLidos,{|x| x[1] == TRBSR7->R7_FILIAL .And. x[2] == TRBSR7->R7_MAT}) 
       
       If _nI == 0
-         Aadd(_aFunLidos,{TRBSR7->R7_FILIAL,;  // 1 = Filial
+         aAdd(_aFunLidos,{TRBSR7->R7_FILIAL,;  // 1 = Filial
          TRBSR7->R7_MAT,;                      // 2 = Matricula
          TRBSR7->RA_NOME,;		                 // 3 = Nome
          TRBSR7->ULTIMADT,;                    // 4 = Data Aumento
@@ -358,8 +354,8 @@ Begin Sequence
          TRBSR7->RA_CBO,;                      // 11 = CBO
          Tabela("41",TRBSR7->R7_TIPO,.F.) })   // 12 = Descrição Tipo de Aumento
       Else
-         If (DTos(_aFunLidos[_nI,4]) < Dtos(TRBSR7->ULTIMADT)) .Or. ;
-            (DTos(_aFunLidos[_nI,4]) == Dtos(TRBSR7->ULTIMADT) .And. _aFunLidos[_nI,7] < TRBSR7->R3_VALOR)
+         If (DToS(_aFunLidos[_nI,4]) < DToS(TRBSR7->ULTIMADT)) .Or. ;
+            (DToS(_aFunLidos[_nI,4]) == DToS(TRBSR7->ULTIMADT) .And. _aFunLidos[_nI,7] < TRBSR7->R3_VALOR)
 
             _aFunLidos[_nI,4]  := TRBSR7->ULTIMADT                    // 4 = Data Aumento
             _aFunLidos[_nI,5]  := TRBSR7->R7_TIPO                     // 5 = Tipo Aumento
@@ -375,7 +371,7 @@ Begin Sequence
 
       EndIf 
             
-      TRBSR7->(dbSkip())
+      TRBSR7->(DBSkip())
    EndDo		
 
    _nTotRegs := Len(_aFunLidos)
@@ -397,7 +393,7 @@ Begin Sequence
        If _cFilImpr <> _aFunLidos[_nX,1] // Filial
           _cFilImpr := _aFunLidos[_nX,1] // Filial
 
-          _nI := Ascan(_aFilial,{|x| x[2] == _cFilImpr }) 
+          _nI := aScan(_aFilial,{|x| x[2] == _cFilImpr }) 
 	       If _nI > 0
              _cNomeFil :=  _aFilial[_nI,7]
 	       EndIf
@@ -408,7 +404,7 @@ Begin Sequence
 	                  
           _oSect1_A:Cell("R7_FILIAL"):SetValue(_cFilImpr)
 		    _oSect1_A:Cell("WK_NOMEFIL"):SetValue(_cNomeFil)
-		    _oSect1_A:Printline()
+		    _oSect1_A:PrintLine()
           //_oSect1_A:ThinLine()
          
           _oSect1_B:Init()
@@ -436,7 +432,7 @@ Begin Sequence
        _oSect1_B:Cell("R7_DESCCAR"):SetValue(_aFunLidos[_nX,9])  // TRBSR7->R7_DESCCAR) - Descrição do Cargo
        _oSect1_B:Cell("R3_DTCDISS"):SetValue(_aFunLidos[_nX,10]) // TRBSR7->R3_DTCDISS) - Data Dissidio
        _oSect1_B:Cell("RA_CBO"):SetValue(_aFunLidos[_nX,11])     // TRBSR7->RA_CBO)     - CBO
-	    _oSect1_B:Printline()
+	    _oSect1_B:PrintLine()
 
    Next   
    
@@ -457,7 +453,7 @@ Begin Sequence
 End Sequence
 
 If Select("TRBSR7") <> 0
-   TRBSR7->(DbCloseArea())
+   TRBSR7->(DBCloseArea())
 EndIf
 
-Return Nil
+Return

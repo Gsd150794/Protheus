@@ -10,7 +10,7 @@ Lucas Borges  |26/06/2025| Chamado 50617. Revisões diversas visando padronizar o
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include 'FWEVENTVIEWCONSTS.CH'
 
 /*
@@ -56,7 +56,7 @@ Retorno-----------: Nenhum
 */
 Static Function MGLT010R(_oProces As Object)
 
-Local _cArqLog	:= "LOG_FECHAMENTO_LEITE_"+ DtoS( Date() ) +"_"+ StrTran( Time() , ":" , "" ) +"_"+ RetCodUsr() +".log" As Character
+Local _cArqLog	:= "LOG_FECHAMENTO_LEITE_"+ DToS( Date() ) +"_"+ StrTran( Time() , ":" , "" ) +"_"+ RetCodUsr() +".log" As Character
 Local _cPthLog	:= "\data\italac\MGLT010\" As Character
 Local _cDirTmp	:= GetTempPath() As Character
 Local _cHoraIni	:= '' As Character
@@ -98,7 +98,7 @@ _cParam += "Setor: " + AllTrim(MV_PAR02)
 _cParam += "Fornecedor: " + MV_PAR03 +"-"+MV_PAR04
 _cParam += "Loja: " + MV_PAR05 +"-"+MV_PAR06
 _cParam += "Linha: " + MV_PAR07 +"-"+MV_PAR08
-_cParam += "Usuario: " + UsrFullName(__cUserID)
+_cParam += "Usuario: " + UsrFullName(__cUserId)
 EventInsert(FW_EV_CHANEL_ENVIRONMENT, FW_EV_CATEGORY_MODULES, "Z01", FW_EV_LEVEL_INFO, "", "Início Cancelamento do Leite",_cParam , .T.) //CHAMADA DO EVENTO
 
 _oProces:SaveLog("Thread:"+_cThread+" Iniciando a rotina. Parâmetros: "+MV_PAR01+"-"+AllTrim(MV_PAR02)+"-"+MV_PAR03+"-"+MV_PAR04+"-"+MV_PAR05+"-"+MV_PAR06+"-"+MV_PAR07+"-"+MV_PAR08)
@@ -125,7 +125,7 @@ If !_oFile:Create()
 	Return
 Else
 	_oFile:Write('====================================================================================================' + CRLF )
-	_oFile:Write(' Log de Processamento - Cancelamento do Fechamento do Leite - Data: '+ DtoC( Date() )				  + CRLF )
+	_oFile:Write(' Log de Processamento - Cancelamento do Fechamento do Leite - Data: '+ DToC( Date() )				  + CRLF )
 	_oFile:Write(' [ Para abrir o LOG no Excel, exclua os comentários do início e fim e salve o arquivo como ".CSV" ] ' + CRLF )
 	_oFile:Write(' [ Se não existirem registros, todos foram processados com sucesso ou nenhum foi processado ] '       + CRLF )
 	_oFile:Write('====================================================================================================' + CRLF )
@@ -175,7 +175,7 @@ DBSelectArea("SD1")
 DBSelectArea("SE2")
 DBSelectArea("ZLE")
 ZLE->( DBSetOrder(1) )
-If _lOk .And. ZLE->( DBSeek( xFILIAL("ZLE") + _cCodMix) )
+If _lOk .And. ZLE->( DBSeek( xFilial("ZLE") + _cCodMix) )
 	
 	//================================================================================
 	// Chama funcao para criar tabela Temporaria
@@ -244,7 +244,7 @@ If _lOk .And. ZLE->( DBSeek( xFILIAL("ZLE") + _cCodMix) )
 		_oProces:IncRegua2('Processo [01] - Inicializando...')
 
 		SA2->( DBSetOrder(1) )
-		If SA2->( DBSeek( xFILIAL("SA2") + (_cAlias)->ZLF_A2COD + (_cAlias)->ZLF_A2LOJA ) )
+		If SA2->( DBSeek( xFilial("SA2") + (_cAlias)->ZLF_A2COD + (_cAlias)->ZLF_A2LOJA ) )
 			//Indica se o fechamento vai gerar a nota ou se o produtor irá emitir a NFe
 			_lSemNota := IIf(SA2->A2_L_NFPRO == "S", .T.,.F.)
 			_cSetor := (_cAlias)->ZLF_SETOR
@@ -274,7 +274,7 @@ If _lOk .And. ZLE->( DBSeek( xFILIAL("ZLE") + _cCodMix) )
 				//Os títulos manuais incluídos no fechamento já foram excluídos pela CancBxSE2
 			ElseIf _lOk
 				_cAliasSF1	:= GetNextAlias()
-				BeginSQL Alias _cAliasSF1
+				BeginSql Alias _cAliasSF1
 					SELECT R_E_C_N_O_
 					FROM %Table:SF1%
 					WHERE F1_FILIAL = %xFilial:SF1%
@@ -286,7 +286,7 @@ If _lOk .And. ZLE->( DBSeek( xFILIAL("ZLE") + _cCodMix) )
 					AND F1_EMISSAO = %exp:dDataBase%
 					AND F1_FORMUL = 'S'
 					AND D_E_L_E_T_ = ' '
-				EndSQL
+				EndSql
 				
 				SF1->(DBGoTo((_cAliasSF1)->R_E_C_N_O_))
 				Count To _nReg
@@ -304,7 +304,7 @@ If _lOk .And. ZLE->( DBSeek( xFILIAL("ZLE") + _cCodMix) )
 								{ "F1_LOJA"	  	, SF1->F1_LOJA		, NIL } ,;
 								{ "F1_TIPO"		, SF1->F1_TIPO		, NIL } }
 			
-					//Não seria necessário passar os itens, mas se isso não for feito, é necessirio ajustar o MT103EXC pois o aCols estará vazio. 
+					//Não seria necessário passar os itens, mas se isso não For feito, é necessirio ajustar o MT103EXC pois o aCols estará vazio. 
 					//Seu conteúdo estará no aColSD1.
 					SD1->(DBSetOrder(1))
 					SD1->(DBSeek(SF1->(F1_FILIAL+F1_DOC+F1_SERIE+F1_FORNECE+F1_LOJA), .T. ))
@@ -360,7 +360,7 @@ If _lOk .And. ZLE->( DBSeek( xFILIAL("ZLE") + _cCodMix) )
 				_cUpdate += " AND ZLD_RETILJ = '"+ SA2->A2_LOJA		+"' "
 				_cUpdate += " AND ZLD_SETOR = '"+ _cSetor			+"' "
 				_cUpdate += " AND ZLD_LINROT = '"+ _cLinha			+"' "
-				_cUpdate += " AND ZLD_DTCOLE BETWEEN '"+ DtoS(ZLE->ZLE_DTINI) +"' AND '"+ DtoS(ZLE->ZLE_DTFIM) +"' "
+				_cUpdate += " AND ZLD_DTCOLE BETWEEN '"+ DToS(ZLE->ZLE_DTINI) +"' AND '"+ DToS(ZLE->ZLE_DTFIM) +"' "
 				_cUpdate += " AND D_E_L_E_T_ = ' ' "
 
 				If TCSqlExec(_cUpdate) < 0
@@ -403,7 +403,7 @@ If _lOk .And. ZLE->( DBSeek( xFILIAL("ZLE") + _cCodMix) )
 			EndIf
 			END TRANSACTION
 		EndIf
-		MsUnLockAll()	
+		MSUnLockAll()	
 		_nCont++
 		_nTotPrd++
 		(_cAlias)->( DBSkip() )
@@ -434,7 +434,7 @@ If _lOk .And. ZLE->( DBSeek( xFILIAL("ZLE") + _cCodMix) )
 	If (_cAlias)->QTD > 0
 		ZLE->( RecLock( "ZLE" , .F. ) )
 		ZLE->ZLE_STATUS := 'P'
-		ZLE->( MsUnLock() )
+		ZLE->( MSUnLock() )
 	EndIf
 		
 	(_cAlias)->(DBCloseArea())
@@ -519,11 +519,11 @@ BeginSql alias _cAlias
                   AND FK2_L_LINR = ZLF_LINROT
                   AND E2_FORNECE = ZLF_A2COD
                   AND ZLF_A2LOJA = %exp:SA2->A2_LOJA% 
-                  AND E2_PREFIXO = SUBSTR(ZLF_L_SEEK,3,3)
-                  AND E2_NUM = SUBSTR(ZLF_L_SEEK,6,9)
-                  AND E2_PARCELA = SUBSTR(ZLF_L_SEEK,15,2)
-                  AND E2_TIPO = SUBSTR(ZLF_L_SEEK,17,3)
-                  AND E2_LOJA = SUBSTR(ZLF_L_SEEK,26,4)
+                  AND E2_PREFIXO = SubStr(ZLF_L_SEEK,3,3)
+                  AND E2_NUM = SubStr(ZLF_L_SEEK,6,9)
+                  AND E2_PARCELA = SubStr(ZLF_L_SEEK,15,2)
+                  AND E2_TIPO = SubStr(ZLF_L_SEEK,17,3)
+                  AND E2_LOJA = SubStr(ZLF_L_SEEK,26,4)
                   AND FK2_SEQ = ZLF_SEQBX
 				  AND D_E_L_E_T_ = ' ')))
 	AND FK2_MOTBX = %exp:_cMotBaixa%
@@ -571,7 +571,7 @@ While (_cAlias)->( !Eof() ) .And. _lRet
 	lMsHelpAuto	:= .T.
 	
 	If (_cAlias)->COD_ACAO == '01'
-		_oProces:IncRegua2( "Cancelamento Baixa - Tarefa "+ Alltrim( Str(_nCont) ) +" de "+ Alltrim( Str(_nTotReg) ) )
+		_oProces:IncRegua2( "Cancelamento Baixa - Tarefa "+ AllTrim( Str(_nCont) ) +" de "+ AllTrim( Str(_nTotReg) ) )
 		_nSeq := 0
 		
 		_aDados := {	{ "E2_PREFIXO"		, SE2->E2_PREFIXO							, Nil } ,;
@@ -594,7 +594,7 @@ While (_cAlias)->( !Eof() ) .And. _lRet
 		//================================================================================
 		aBaixaSE5 := Sel080Baixa("VL /BA /CP /",SE2->E2_PREFIXO,SE2->E2_NUM,SE2->E2_PARCELA,SE2->E2_TIPO,0,0,SE2->E2_FORNECE,SE2->E2_LOJA,.F.,.F.,.F.,0,.F.,.T.)
 		For _nX := 1 To Len(aBaixaSE5)
-			If Substr(aBaixaSE5[_nX],Len(aBaixaSE5[_nX])-1,2) == (_cAlias)->FK2_SEQ
+			If SubStr(aBaixaSE5[_nX],Len(aBaixaSE5[_nX])-1,2) == (_cAlias)->FK2_SEQ
 				_nSeq := _nX
 				Exit
 			EndIf
@@ -615,7 +615,7 @@ While (_cAlias)->( !Eof() ) .And. _lRet
 			SE2->E2_DATALIB := CToD("  /  /  ")
 			SE2->E2_USUALIB := " "
 			SE2->E2_STATLIB := "01"
-			SE2->( MsUnlock() )
+			SE2->( MSUnLock() )
 		EndIf
 		
 		//Atualizo o Status dos Convênios
@@ -637,7 +637,7 @@ While (_cAlias)->( !Eof() ) .And. _lRet
 		EndIf
     
 	ElseIf (_cAlias)->COD_ACAO == '02'
-		_oProces:IncRegua2( "Exclusao Titulo - Tarefa "+ Alltrim( Str(_nCont) ) +" de "+ Alltrim( Str(_nTotReg) ) )
+		_oProces:IncRegua2( "Exclusao Titulo - Tarefa "+ AllTrim( Str(_nCont) ) +" de "+ AllTrim( Str(_nTotReg) ) )
 		
 		_aDados := {	{ "E2_PREFIXO"	, SE2->E2_PREFIXO	, Nil } ,;
 						{ "E2_NUM"		, SE2->E2_NUM		, Nil } ,;

@@ -8,11 +8,11 @@ Vanderlei     - Igor Melgaço - 03/04/25 - 15/07/25 - 48781   - Monitor de Integr
 =====================================================================================================================================
 */
 
-#INCLUDE "FWMBROWSE.CH"
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "TOPCONN.CH"
-#INCLUDE "RWMAKE.CH"
+#Include "FWMBROWSE.CH"
+#Include "FWMVCDEF.CH"
+#Include "TOTVS.ch"
+#Include "TOPCONN.CH"
+#Include "RWMAKE.CH"
 
 /*
 ===============================================================================================================================
@@ -42,7 +42,7 @@ _oBrowse:AddLegend( "Z34_STATUS=='G'", "GREEN"  ,"Ingrado com Fatura Gerada")
 
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -230,15 +230,15 @@ Local _cErro As Character
 _nRecnoSE2 := 0
 _cErro := "Não encontrado o Titulo no Contas a Pagar."
 
-   DbSelectArea("SE2")
-   DbSetOrder(1)
+   DBSelectArea("SE2")
+   DBSetOrder(1)
    If DBSeek(Z32->Z32_FILIAL+Z32->Z32_PREFIX+Z32->Z32_NUM+Z32->Z32_PARCEL+Z32->Z32_TIPO+Z32->Z32_FORNEC+Z32->Z32_LOJA)
       cCadastro:= "Visualização do Titulo"
       _nRecnoSE2 := SE2->(Recno())
       DBSelectArea("SE2")
       AxVisual("SE2",_nRecnoSE2,2)
    Else
-      U_ITMSG(_cErro,"Atenção","",3 , , , .T.)
+      U_ITMsg(_cErro,"Atenção","",3 , , , .T.)
    EndIf
 
 Return 
@@ -293,17 +293,17 @@ Parametros--------: _aCol,_nLinha
 Retorno-----------: 
 ===============================================================================================================================
 */
-USER Function AOMS149L2(_aCol As Array,_nLinha As Numeric) As Object
+User Function AOMS149L2(_aCol As Array,_nLinha As Numeric) As Object
 	Local oVerm As Object
 	Local oVerd As Object
 
 	oVerm := LoadBitmap( , "BR_VERMELHO")// VERMELHO TEM QUE GERA REPOSICAO .F. CRITICO
 	oVerd := LoadBitmap( , "BR_VERDE"   )// VERDE ESTOQUE TUDO OK .T.
 
-	IF _aCol[_nLinha,1]
-		RETURN oVerd
-	ELSE
-		RETURN oVerm
-	ENDIF
+	If _aCol[_nLinha,1]
+		Return oVerd
+	Else
+		Return oVerm
+	EndIf
 
-RETURN oVerm
+Return oVerm

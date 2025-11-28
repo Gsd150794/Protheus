@@ -4,14 +4,14 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |01/07/2025| Chamado 50617. Revisões diversas visando padronizar os fontes
-Lucas Borges  |23/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
 Lucas Borges  |01/08/2025| Chamado 51453. Substituir função EncodeUtf8 por FWHttpEncode
+Lucas Borges  |19/08/2025| Chamado 51840. Ajustado para não enviar e-mail para o sistema quando For um Admin
+Lucas Borges  |14/09/2025| Chamado 51799. Implementada função para validar ambiente de teste totvs.framework.environment.Type.get()
 ===============================================================================================================================
 */
 
-#Include "Protheus.ch"
-#include "msgraphi.ch"
+#Include "TOTVS.ch"
+#Include "msgraphi.ch"
 #Include 'XMLXFUN.ch'
 #Include 'FileIO.ch'
 
@@ -55,7 +55,7 @@ If !Empty( _cCodigo )
 		_lRet := SA2->( DBSeek( xFilial("SA2") + _cCodigo ) )
 	ElseIf Upper( AllTrim( _cVar ) ) == "M->"+_cAlias+"_RETILJ"
 	    _cCodigo := PadL(AllTrim(_cCodigo),GetSX3Cache(_cAlias+"_RETILJ","X3_TAMANHO"),"0")
-		_cRetiro	:= aCols[n][ aScan( aHeader , {|x| alltrim(x[2]) == ""+_cAlias+"_RETIRO" } ) ]
+		_cRetiro	:= aCols[n][ aScan( aHeader , {|x| AllTrim(x[2]) == ""+_cAlias+"_RETIRO" } ) ]
 		_lRet		:= SA2->( DBSeek( xFilial("SA2") + _cRetiro + _cCodigo ) )
 	EndIf
 	
@@ -66,9 +66,9 @@ If !Empty( _cCodigo )
 EndIf
 
 If _lRet
-	aCols[n][ aScan( aHeader , {|x| alltrim(x[2]) == _cAlias+"_RETIRO" } ) ] := SA2->A2_COD
-	aCols[n][ aScan( aHeader , {|x| alltrim(x[2]) == _cAlias+"_RETILJ" } ) ] := SA2->A2_LOJA
-	aCols[n][ aScan( aHeader , {|x| alltrim(x[2]) == _cAlias+"_DCRRET" } ) ] := SA2->A2_NOME
+	aCols[n][ aScan( aHeader , {|x| AllTrim(x[2]) == _cAlias+"_RETIRO" } ) ] := SA2->A2_COD
+	aCols[n][ aScan( aHeader , {|x| AllTrim(x[2]) == _cAlias+"_RETILJ" } ) ] := SA2->A2_LOJA
+	aCols[n][ aScan( aHeader , {|x| AllTrim(x[2]) == _cAlias+"_DCRRET" } ) ] := SA2->A2_NOME
 EndIf
 
 FWRestArea(_aArea)
@@ -129,12 +129,12 @@ Local ex_linha  := "" As Character
 Local ex_aux    := "" As Character
 Local _nX		:= 0 As Numeric
 
-ex_string := alltrim(ex_string)
+ex_string := AllTrim(ex_string)
 
 For _nX:=1 To Len(ex_string)
 	
-	ex_letra := Substr(ex_string,_nX,1)
-	ex_aux   := Substr(ex_string,_nX,1)
+	ex_letra := SubStr(ex_string,_nX,1)
+	ex_aux   := SubStr(ex_string,_nX,1)
 	
 	ex_letra := StrTran(ex_letra,char(13),"")
 	ex_letra := StrTran(ex_letra,char(10),"")
@@ -142,15 +142,15 @@ For _nX:=1 To Len(ex_string)
 	ex_linha += ex_letra
 	
 	ex_pos++
-	If ((ex_pos > ex_largura) .or. (ex_aux == char(13))) .AND. (ex_letra == " ")
-		Aadd(ex_array,ex_linha)
+	If ((ex_pos > ex_largura) .Or. (ex_aux == char(13))) .And. (ex_letra == " ")
+		aAdd(ex_array,ex_linha)
 		ex_linha  := ""
 		ex_pos := 0
 	EndIf
 	
 Next _nX
 
-Aadd(ex_array,ex_linha)
+aAdd(ex_array,ex_linha)
 
 Return( ex_array )
 
@@ -191,7 +191,7 @@ If _nOpc == 2
 EndIf
 _cCampos += " SUM("+ _cAux +"_QTDBOM) TBOM %"
 _cTable += RetSqlName(_cAux) +" %"
-_cFiltro += " AND "+ _cAux +"_DTCOLE BETWEEN '"+ DTOS(_dDtIni) +"' AND '"+ DTOS(_dDtFim) +"' "
+_cFiltro += " AND "+ _cAux +"_DTCOLE BETWEEN '"+ DToS(_dDtIni) +"' AND '"+ DToS(_dDtFim) +"' "
 _cFiltro += " AND "+ _cAux +"_FILIAL     = '"+ _cFilAux +"' "
 _cFiltro += IIf( Empty( _cSetor  ) , '' , " AND "+ _cAux +"_SETOR  = '"+ _cSetor  +"' " )
 _cFiltro += IIf( Empty( _cLinRot ) , '' , " AND "+ _cAux +"_LINROT = '"+ _cLinRot +"' " )
@@ -252,15 +252,15 @@ Local _cQuery	:= '' As Character
 Local _cAlias	:= GetNextAlias() As Character
 Local _aViagens := {} As Array
 
-IF VALTYPE(_lPorVaigem) <> "L"
+If ValType(_lPorVaigem) <> "L"
    _lPorVaigem:=.F.
-ENDIF
+EndIf
 
-IF _lPorVaigem
+If _lPorVaigem
    _cQuery := ""
-ELSE
+Else
    _cQuery := " SELECT NVL( SUM( KM ) , 0 ) AS KM FROM( "
-ENDIF
+EndIf
 
 _cQuery += "  SELECT ZLD.ZLD_TICKET , ZLD.ZLD_KM AS KM "
 _cQuery += "       FROM "+ RetSqlName('ZLD') +" ZLD "
@@ -269,7 +269,7 @@ _cQuery += "           ZLD.D_E_L_E_T_ = ' '
 _cQuery += "       AND ZLD.ZLD_FILIAL = '"+ _cFilial +"' "
 _cQuery += "       AND ZLD.ZLD_SETOR  = '"+ _cSetor  +"' "
 _cQuery += "       AND ZLD.ZLD_LINROT = '"+ _cLinha  +"' "
-_cQuery += "       AND ZLD.ZLD_DTCOLE BETWEEN '"+ DtoS( _dDtIni ) +"' AND '"+ DtoS( _dDtFim ) +"' AND ZLD.ZLD_KM > 0 "
+_cQuery += "       AND ZLD.ZLD_DTCOLE BETWEEN '"+ DToS( _dDtIni ) +"' AND '"+ DToS( _dDtFim ) +"' AND ZLD.ZLD_KM > 0 "
 
 If !Empty(_cFretis)
    _cQuery += "    AND ZLD.ZLD_FRETIS = '"+ _cFretis +"' "
@@ -277,7 +277,7 @@ EndIf
 If !Empty(_cFretLj)
    _cQuery += "    AND ZLD.ZLD_LJFRET = '"+ _cFretLj +"' "
 EndIf
-If _cVeiculo <> NIL .AND. !Empty(_cVeiculo)
+If _cVeiculo <> NIL .And. !Empty(_cVeiculo)
    _cQuery += "    AND ZLD.ZLD_VEICUL = '"+ _cVeiculo +"' "
 EndIf
 
@@ -290,10 +290,10 @@ _cQuery := ChangeQuery(_cQuery)
 MPSysOpenQuery(_cQuery,_cAlias)
 
 (_cAlias)->( DBGoTop() )
-Do While (_cAlias)->( !EOF() )
+While (_cAlias)->( !Eof() )
    _nKmRet += (_cAlias)->KM
    If _lPorVaigem
-	  AADD(_aViagens,{(_cAlias)->ZLD_TICKET,(_cAlias)->KM})
+	  aAdd(_aViagens,{(_cAlias)->ZLD_TICKET,(_cAlias)->KM})
    EndIf
   (_cAlias)->(DBSkip())
 EndDo
@@ -401,7 +401,7 @@ Parametros--------: _cFilial - Filial a ser verificada
 Retorno-----------: _nVolume - Volume Total
 ===============================================================================================================================
 */
-User function VolFret(_cFilial As Character,_cSetor As Character,_cLinha As Character,_cFretis As Character,_cFretLj As Character,_dDtIni As Date,_dDtFim As Date,_cVeiculo As Character)
+User Function VolFret(_cFilial As Character,_cSetor As Character,_cLinha As Character,_cFretis As Character,_cFretLj As Character,_dDtIni As Date,_dDtFim As Date,_cVeiculo As Character)
 
 Local _aArea	:= FWGetArea() As Array
 Local _nVolume	:= 0 As Numeric
@@ -411,7 +411,7 @@ Local _cAlias	:= GetNextAlias() As Character
 If !Empty(_cLinha)
    _cFiltro += " AND ZLD.ZLD_LINROT = '"+ _cLinha  +"' "
 EndIf
-If Valtype(_cVeiculo) = "C" .And. !Empty(_cVeiculo)
+If ValType(_cVeiculo) = "C" .And. !Empty(_cVeiculo)
    _cFiltro += " AND ZLD.ZLD_VEICUL = '"+ _cVeiculo +"' "
 EndIf
 _cFiltro += "%"
@@ -447,7 +447,7 @@ Retorno-----------: _nValFRT
 */
 User Function VFrete(_cVeiculo As Character)
 
-Local _nVolFRT := U_VolFret( xfilial("ZL8") , ZL2->ZL2_COD , ZL3->ZL3_COD , SA2->A2_COD , SA2->A2_LOJA , ZLE->ZLE_DTINI , ZLE->ZLE_DTFIM , _cVeiculo ) As Numeric
+Local _nVolFRT := U_VolFret( xFilial("ZL8") , ZL2->ZL2_COD , ZL3->ZL3_COD , SA2->A2_COD , SA2->A2_LOJA , ZLE->ZLE_DTINI , ZLE->ZLE_DTFIM , _cVeiculo ) As Numeric
 
 Return(_nVolFRT)
 
@@ -468,7 +468,7 @@ Local _nVlrFxa	:= 0 As Numeric
 Local _nTotal	:= 0 As Numeric
 Local _nVolume	:= 0 As Numeric
 Local _cAlias	:= GetNextAlias() As Character
-Local _dDtIni	:= StoD('') As Date
+Local _dDtIni	:= SToD('') As Date
 Local _nValMin	:= 0 As Numeric
 Local _cRound	:= "% "+cValToChar(IIf(_cTipo=='E',4,2))+" %" As Character
 Local _cFiltro	:= "% " As Character
@@ -485,8 +485,8 @@ _dDtIni := FirstDay(MonthSub(ZLE->ZLE_DTFIM,(_nMeses-1)))
 //====================================================================================================
 If _cTipo = 'V'
 	BeginSql alias _cAlias
-		SELECT ROUND(SUM(EXCEDENTE), 2) TOTAL
-			FROM (SELECT (NVL(ROUND((SELECT SUM(ZAP_GORD) / COUNT(1)
+		SELECT Round(SUM(EXCEDENTE), 2) TOTAL
+			FROM (SELECT (NVL(Round((SELECT SUM(ZAP_GORD) / COUNT(1)
                             FROM %Table:ZAP% AP2
                            WHERE AP2.D_E_L_E_T_ = ' '
                              AND AP2.ZAP_FILIAL = ZLX.ZLX_FILIAL
@@ -515,7 +515,7 @@ If _cTipo = 'V'
            AND ZLD.ZLD_RETILJ = %exp:SA2->A2_LOJA%
            AND ZLA.ZLA_FILIAL = ZLX.ZLX_FILIAL
            AND ZLA.ZLA_SETOR = ZLX.ZLX_SETOR
-           AND COALESCE(ROUND((SELECT SUM(ZAP_GORD) / COUNT(1)
+           AND COALESCE(Round((SELECT SUM(ZAP_GORD) / COUNT(1)
                                 FROM %Table:ZAP% AP2
                                WHERE AP2.D_E_L_E_T_ = ' '
                                  AND AP2.ZAP_FILIAL = ZLX.ZLX_FILIAL
@@ -539,7 +539,7 @@ Else
 	// Consulta para obter a média do índice por tipo de faixa
 	//====================================================================================================
 	BeginSql alias _cAlias
-		SELECT ROUND(DECODE(ZL9_MEDIA,'G',POWER(EXP(SUM(LN(ZLB_VLRFX))), (1 / COUNT(ZLB_VLRFX))),
+		SELECT Round(DECODE(ZL9_MEDIA,'G',POWER(EXP(SUM(LN(ZLB_VLRFX))), (1 / COUNT(ZLB_VLRFX))),
 							AVG(ZLB_VLRFX)),%exp:_cRound%) AS TOTAL
 		FROM %Table:ZLB% ZLB, %Table:ZL9% ZL9
 		WHERE ZLB.D_E_L_E_T_ = ' '
@@ -651,7 +651,7 @@ If !Empty( _cTipPag )
 EndIf
 _cFitlro += "%"
 BeginSql alias _cAlias
-	SELECT NVL(ROUND(SUM(TOTAL),2),0) TOTAL
+	SELECT NVL(Round(SUM(TOTAL),2),0) TOTAL
 	  FROM (SELECT (ZLC.ZLC_QTD * ZLC.ZLC_VALOR) TOTAL
 	          FROM %Table:ZLC% ZLC
 	         WHERE ZLC.D_E_L_E_T_ = ' '
@@ -820,7 +820,7 @@ If SA2->A2_L_TPFRT == 'L' .And. SA2->A2_L_TXFRT <> 0
 	//====================================================================================================
 	// Calcula o Volume de Leite do Produtor vezes a porcentagem informada no cadastro
 	//====================================================================================================
-	_nVol := U_VolLeite( xfilial("ZLD") , ZLE->ZLE_DTINI , ZLE->ZLE_DTFIM , ZL2->ZL2_COD , ZL3->ZL3_COD , SA2->A2_COD , SA2->A2_LOJA )
+	_nVol := U_VolLeite( xFilial("ZLD") , ZLE->ZLE_DTINI , ZLE->ZLE_DTFIM , ZL2->ZL2_COD , ZL3->ZL3_COD , SA2->A2_COD , SA2->A2_LOJA )
 	If _nVol == 0
 		FWAlertWarning("Não foi gerada a Taxa de Desconto de Frete por não haver volume produzido pelo Produtor ["+ SA2->A2_COD +"] no MIX ["+ ZLE->ZLE_COD +"] na Linha ["+ ZL3->ZL3_COD +"].","GLTXFUN011")
 	Else	
@@ -828,11 +828,11 @@ If SA2->A2_L_TPFRT == 'L' .And. SA2->A2_L_TXFRT <> 0
 	EndIf
 EndIf
 
-If SA2->A2_L_TPFRT <> 'L' .AND. SA2->A2_L_TXFRT <> 0
+If SA2->A2_L_TPFRT <> 'L' .And. SA2->A2_L_TXFRT <> 0
 	//====================================================================================================
 	// Calcula o Total pago ao produtor vezes a porcentagem informada no cadastro
 	//====================================================================================================
-	_nVlr := U_GetTotCr( XFILIAL("ZLF") , ZL2->ZL2_COD , ZL3->ZL3_COD , SA2->A2_COD , SA2->A2_LOJA , ZLE->ZLE_COD )
+	_nVlr := U_GetTotCr( xFilial("ZLF") , ZL2->ZL2_COD , ZL3->ZL3_COD , SA2->A2_COD , SA2->A2_LOJA , ZLE->ZLE_COD )
 	If _nVlr == 0
 		FWAlertWarning("Não foi gerada a Taxa de Desconto de Frete por não haver valor de Crédito para o Produtor ["+ SA2->A2_COD +"] no MIX ["+ ZLE->ZLE_COD +"] na Linha ["+ ZL3->ZL3_COD +"].","GLTXFUN012")
 	Else
@@ -860,7 +860,7 @@ Local _cAlias	:= GetNextAlias() As Character
 Local _nValRet	:= 0 As Numeric
 
 //====================================================================================================
-// Somente gera valor a pagar para frete de latao se o Fretista for responsável pela linha
+// Somente gera valor a pagar para frete de latao se o Fretista For responsável pela linha
 //====================================================================================================
 If SA2->A2_COD == ZL3->ZL3_FRETIS
 	BeginSql alias _cAlias
@@ -984,7 +984,7 @@ Local _aArea	:= FWGetArea() As Array
 Local _cAlias	:= GetNextAlias() As Character
 Local _cMaxSeq  := SuperGetMV("LT_MAXFAIX",.F.,"0010") As Character//Armazenaa sequencia da  faixa  que um determinado produtor que seja dono do tanque podera alcancar.
 Local _nVolMed	:= 0 As Numeric
-Local _nNumDia	:= Val(SubStr(DTOS(ZLE->ZLE_DTFIM),7,2)) As Numeric
+Local _nNumDia	:= Val(SubStr(DToS(ZLE->ZLE_DTFIM),7,2)) As Numeric
 
 _nVolMed := _nVolLiq / _nNumDia
 
@@ -995,7 +995,7 @@ _nVolMed := _nVolLiq / _nNumDia
 If SA2->A2_L_CLASS == 'C'
 	BeginSql alias _cAlias
 	  SELECT ZLA_FXINI, ZLA_FXFIM
-		FROM %table:ZLA% ZLA
+		FROM %Table:ZLA% ZLA
 	  WHERE ZLA.D_E_L_E_T_ = ' '
 	  AND ZLA_FILIAL = %xFilial:ZLA%
 	  AND ZLA.ZLA_COD = %exp:_cCodFxa%
@@ -1089,7 +1089,7 @@ Autor-------------: Alexandre Villar
 Data da Criacao---: 11/07/2014
 Descrição---------: Verifica a Linha do Fornecedor quanto à entrega de leite e movimentações (ZL8). Usado no ZL8_CONDIC
 Parametros--------: Nenhum (ZLE,ZL3,SA2 devem estar posicionadas) 
-Retorno-----------: lret - .t. se a linha teve movimentações
+Retorno-----------: lret - .T. se a linha teve movimentações
 ===============================================================================================================================
 */
 User Function GL_MOVLT
@@ -1153,18 +1153,18 @@ Descrição---------: Rotina para validar o Volume de Leite movimentado no ano atu
 Parametros--------: _nvolim - volume do leite movimentado  (SA2 deve estar posicionado)
 					_dDtIni - Data inicial do MIX  (ZLE deve estar posicionado)
 					_dDtFim - Data final do MIX  (ZLE deve estar posicionado)
-Retorno-----------: lret - .t. se o volume é maior que o volume registrado na ZLD para o ano corrente
+Retorno-----------: lret - .T. se o volume é maior que o volume registrado na ZLD para o ano corrente
 ===============================================================================================================================
 */
 User Function GLTVAno(_nVolLim As Numeric,_dDtIni As Date,_dDtFim As Date)
 
 Local _lRet		:= .F. As Logical
 Local _cAlias	:= GetNextAlias() As Character
-_dDtIni	:= StoD( cValToChar( Year( _dDtIni ) ) + '0101' )
+_dDtIni	:= SToD( cValToChar( Year( _dDtIni ) ) + '0101' )
 
 BeginSql alias _cAlias
 	SELECT SUM(ZLD_QTDBOM) VOLUME
-	  FROM %table:ZLD% ZLD, %table:SA2% SA2
+	  FROM %Table:ZLD% ZLD, %Table:SA2% SA2
 	 WHERE ZLD.D_E_L_E_T_ = ' '
 	   AND SA2.D_E_L_E_T_ = ' '
 	   AND ZLD.ZLD_FILIAL = %xFilial:ZLD%
@@ -1350,8 +1350,8 @@ Programa----------: getNwTicket
 Autor-------------: Abrahao
 Data da Criacao---: 24/12/2008
 Descrição---------: Funcao usada para pegar numero maximo do Ticket
-arametros--------: lvalid - retornar sempre .T. para private cticket não vazia
-Retorno-----------: .t. par ticket válido
+arametros--------: lvalid - retornar sempre .T. para Private cticket não vazia
+Retorno-----------: .T. par ticket válido
 ===============================================================================================================================
 */
 User Function getNwTicket(lvalid As Logical)
@@ -1368,20 +1368,20 @@ EndIf
 
 DBSelectArea("ZL2")
 ZL2->( DBSetOrder(1) )
-If ZL2->( DBSeek( xfilial("ZL2") + cSetor ) ) .And. xfilial("ZL2") + cSetor == ZL2->ZL2_FILIAL + ZL2->ZL2_COD 
+If ZL2->( DBSeek( xFilial("ZL2") + cSetor ) ) .And. xFilial("ZL2") + cSetor == ZL2->ZL2_FILIAL + ZL2->ZL2_COD 
 	cRet := ZL2->ZL2_TICKET
 	
-	If Empty( alltrim(cRet) )
-		cRet := StrZero( 1 , LEN(ZL2->ZL2_TICKET) )
+	If Empty( AllTrim(cRet) )
+		cRet := StrZero( 1 , Len(ZL2->ZL2_TICKET) )
 	EndIf
 	
-	cRet:= STRZERO(VAL(cRet),Len(ZL2->ZL2_TICKET))
+	cRet:= StrZero(Val(cRet),Len(ZL2->ZL2_TICKET))
 
 	ZL2->( RecLock( "ZL2" , .F. ) )
-	ZL2->ZL2_TICKET := soma1(cRet)
-	ZL2->( MsUnLock() )
+	ZL2->ZL2_TICKET := Soma1(cRet)
+	ZL2->( MSUnLock() )
 	
-	cTicket	:= STRZERO(VAL(cRet),Len(ZLW->ZLW_TICKET))//cRet
+	cTicket	:= StrZero(Val(cRet),Len(ZLW->ZLW_TICKET))//cRet
 	lRet	:= .T.
 Else
 	FWAlertWarning("Setor nao encontrado! Selecione um Setor válido!","GLTXFUN015")
@@ -1421,7 +1421,7 @@ EndSql
 _cRet := Soma1((_cAlias)->ULTIMO)
 (_cAlias)->( DBCloseArea() )
 
-Do While !MayIUseCode( "ZLD_CODREC"+ xFilial("ZLD") + _cRet )  // verifica se esta na memoria, sendo usado
+While !MayIUseCode( "ZLD_CODREC"+ xFilial("ZLD") + _cRet )  // verifica se esta na memoria, sendo usado
    _cRet := Soma1(_cRet)							           // busca o proximo numero disponivel
 EndDo 
 
@@ -1455,7 +1455,7 @@ EndSql
 _cRet := Soma1((_cAlias)->ULTIMO)
 (_cAlias)->( DBCloseArea() )
 
-Do While !MayIUseCode( "ZLW_CODREC"+ xFilial("ZLW") + _cRet )  // verifica se esta na memoria, sendo usado
+While !MayIUseCode( "ZLW_CODREC"+ xFilial("ZLW") + _cRet )  // verifica se esta na memoria, sendo usado
    _cRet := Soma1(_cRet)						           // busca o proximo numero disponivel
 EndDo 
 
@@ -1520,7 +1520,7 @@ If !Empty( _cXmlRet )
 		_nPosAux 	:= At( '</FAULTSTRING>' , _cXmlRet )
 		_cXmlRet	:= SubStr(_cXmlRet , 1 , _nPosAux - 1 )
 		_cErro		:= _cXmlRet
-	ElseIf	Upper("Service Temporarily Unavailable") $ Upper( _cXmlRet ) .OR. Upper("No service was found") $ Upper( _cXmlRet ) 
+	ElseIf	Upper("Service Temporarily Unavailable") $ Upper( _cXmlRet ) .Or. Upper("No service was found") $ Upper( _cXmlRet ) 
 		_cErro := _cXmlRet
 	Else
 		Do	Case
@@ -1670,7 +1670,7 @@ ElseIf _cTipo == "LITRO_OLD"
 		FWLogMsg("ERROR"/*cSeverity*/, /*cTransactionId*/, "AGLT020"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "GLTXFUN008"/*cMsgId*/, "Filial: "+cFilant+"] - Erro ao atualizar o custo do frete. Acione a TI. Erro: "+AllTrim(TCSQLError())/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 	EndIf
 ElseIf _cTipo == "DIA"
-	_nValFret := U_GETDIAFRT(XFILIAL("ZL8"),ZL2->ZL2_COD,ZL3->ZL3_COD,SA2->A2_COD,SA2->A2_LOJA,ZLE->ZLE_DTINI,ZLE->ZLE_DTFIM)*ZL3->ZL3_VLRFRT
+	_nValFret := U_GETDIAFRT(xFilial("ZL8"),ZL2->ZL2_COD,ZL3->ZL3_COD,SA2->A2_COD,SA2->A2_LOJA,ZLE->ZLE_DTINI,ZLE->ZLE_DTFIM)*ZL3->ZL3_VLRFRT
 	_cUpdate:="UPDATE "+RetSqlName("ZLD")+" ZLD SET ZLD_VLRFRE = "
 	_cUpdate+=cValToChar(_nValFret)+"/ (SELECT COUNT(1) FROM (SELECT ZLD_TICKET FROM "+RetSqlName("ZLD")+" ZLD "+ _cFiltro + " GROUP BY ZLD_TICKET)) "
 	_cUpdate+=" , ZLD_VTABFR = "+cValToChar(_nValFret)+"/ (SELECT COUNT(1) FROM (SELECT ZLD_TICKET FROM "+RetSqlName("ZLD")+" ZLD " + _cFiltro + " GROUP BY ZLD_TICKET)) " + _cFiltro
@@ -1679,16 +1679,16 @@ ElseIf _cTipo == "DIA"
 		FWLogMsg("ERROR"/*cSeverity*/, /*cTransactionId*/, "AGLT020"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "GLTXFUN009"/*cMsgId*/, "Filial: "+cFilant+"] - Erro ao atualizar o custo do frete. Acione a TI. Erro: "+AllTrim(TCSQLError())/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 	EndIf
 Else
-	DbSelectArea("ZFF")
+	DBSelectArea("ZFF")
 	ZFF->( DBSetOrder(1) )
-	DbSelectArea("ZFG")
+	DBSelectArea("ZFG")
 	ZFG->( DBSetOrder(1) )
 	_cFiltro3 := "% "+IIf(_cTipo == "LITRO"," "," AND ZLD_KM > 0 ")+"%"
 
 	If _nKmRet > 0
 		BeginSql alias _cAlias
 			SELECT ZL1_COD VEICULO, ZL1_TABFRE
-			FROM %table:ZL1% ZL1
+			FROM %Table:ZL1% ZL1
 			WHERE ZL1.D_E_L_E_T_ = ' '
 			AND ZL1_FILIAL = %xFilial:ZL1%
 			AND ZL1_COD = %exp:_cVeiculo%
@@ -1696,7 +1696,7 @@ Else
 	Else
 		BeginSql alias _cAlias
 			SELECT ZLD_VEICUL VEICULO, ZL1_TABFRE
-			FROM %table:ZLD% ZLD, %table:ZL1% ZL1
+			FROM %Table:ZLD% ZLD, %Table:ZL1% ZL1
 			WHERE ZLD.D_E_L_E_T_ = ' '
 			AND ZL1.D_E_L_E_T_ = ' '
 			%exp:_cFiltro3%
@@ -1741,14 +1741,14 @@ Else
 				//ZL3 já esta posicionado
 				If ZL3->ZL3_PRCEXE == "1"//1=Tabela de Faixas
 					If _nKmRet == 0
-					_aViagens:=U_GETKM(XFILIAL("ZL8"),ZL2->ZL2_COD,ZL3->ZL3_COD,SA2->A2_COD,SA2->A2_LOJA,ZLE->ZLE_DTINI,ZLE->ZLE_DTFIM,(_cAlias)->VEICULO,.T.)//POR VIAGEM
+					_aViagens:=U_GETKM(xFilial("ZL8"),ZL2->ZL2_COD,ZL3->ZL3_COD,SA2->A2_COD,SA2->A2_LOJA,ZLE->ZLE_DTINI,ZLE->ZLE_DTFIM,(_cAlias)->VEICULO,.T.)//POR VIAGEM
 					Else
-					AADD(_aViagens,{"",_nKmRet})
+					aAdd(_aViagens,{"",_nKmRet})
 					EndIf
 					
 					For _nX := 1 To Len(_aViagens)
 						If ZFG->( DBSeek( ZFF->ZFF_FILIAL + ZFF->ZFF_CODIGO ) )
-							Do While ZFG->(!Eof()) .AND. ZFG->ZFG_FILIAL + ZFG->ZFG_CODIGO == ZFF->ZFF_FILIAL + ZFF->ZFF_CODIGO
+							While ZFG->(!Eof()) .And. ZFG->ZFG_FILIAL + ZFG->ZFG_CODIGO == ZFF->ZFF_FILIAL + ZFF->ZFF_CODIGO
 								If _aViagens[_nX,2] <=  ZFG->ZFG_KM_ATE
 									_nValFret+=(_aViagens[_nX,2]*ZFG->ZFG_KMPREC)
 									_nMultiplicador:=ZFG->ZFG_KMPREC//Variavel usada no programa RGLR023.PRW
@@ -1770,7 +1770,7 @@ Else
 					Next _nX
 				ElseIf ZL3->ZL3_PRCEXE == "2"//2=Exceção
 					If _nKmRet == 0
-						_nKmRet:=U_GETKM(XFILIAL("ZL8"),ZL2->ZL2_COD,ZL3->ZL3_COD,SA2->A2_COD,SA2->A2_LOJA,ZLE->ZLE_DTINI,ZLE->ZLE_DTFIM,(_cAlias)->VEICULO,.F.)//TORLA
+						_nKmRet:=U_GETKM(xFilial("ZL8"),ZL2->ZL2_COD,ZL3->ZL3_COD,SA2->A2_COD,SA2->A2_LOJA,ZLE->ZLE_DTINI,ZLE->ZLE_DTFIM,(_cAlias)->VEICULO,.F.)//TORLA
 					EndIf
 					If _nKmRet > 0
 						_nValFret+=(_nKmRet*ZFF->ZFF_PRCEXE)
@@ -1826,7 +1826,7 @@ _cFiltro += "%"
 If Posicione("ZLU",1,xFilial("ZLU")+RetCodUsr(),"ZLU_SETALL") <> 'S'
 	BeginSql alias _cAlias
 	SELECT LISTAGG(ZL2_COD, ';') WITHIN GROUP(ORDER BY ZL2_COD) COD
-	  FROM %table:ZL2% ZL2
+	  FROM %Table:ZL2% ZL2
 	 WHERE ZL2.D_E_L_E_T_ = ' '
 	   %exp:_cFiltro%
 	   AND EXISTS
@@ -1838,13 +1838,13 @@ If Posicione("ZLU",1,xFilial("ZLU")+RetCodUsr(),"ZLU_SETALL") <> 'S'
 Else //Se usuário tem acesso à todos os setores, já busco todos
 	BeginSql alias _cAlias
 		SELECT LISTAGG(ZL2_COD, ';') WITHIN GROUP (ORDER BY ZL2_COD ) COD
-		FROM %table:ZL2% ZL2
+		FROM %Table:ZL2% ZL2
 		WHERE D_E_L_E_T_ = ' '
 		%exp:_cFiltro%
 	EndSql
 EndIf
 _cSetores := AllTrim((_cAlias)->COD)
-(_cAlias)->(DbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return (_cSetores)
 /*
@@ -1869,7 +1869,7 @@ Default _aCodSet:= ""
 Default _lFil	:= .T.
 
 //Monta lista dos setores informados e dos setores previamente liberados
-_aCodSet := StrTokArr( IIf(Empty(_aCodSet),AllTrim(&( Readvar() )),AllTrim(_aCodSet)), ';' )
+_aCodSet := StrTokArr( IIf(Empty(_aCodSet),AllTrim(&( ReadVar() )),AllTrim(_aCodSet)), ';' )
 //Informo .F. para não filtrar a filial. O tratamento da filial será feito abaixo
 _aSetUsr := StrTokArr(U_LisSetor(.F.) , ';' )
 
@@ -1884,7 +1884,7 @@ For _nI := 1 To Len(_aCodSet)
 				FWAlertWarning("Não foram informados setores válidos para o processamento. O setor ["+ _aCodSet[_nI] +"] não está liberado para utilização do usuário atual!","GLTXFUN001")
 			EndIf
 			Return (.F.)
-		ElseIf _lFil .And. Substr(_aCodSet[_nI],1,FWSizeFilial()) <> cFilAnt
+		ElseIf _lFil .And. SubStr(_aCodSet[_nI],1,FWSizeFilial()) <> cFilAnt
 			//Verifico se a rotina que está fazendo a chamada é em MVC pois o padrão de mensagem é diferente
 			If _oModel <> Nil .And. _oModel:IsActive()
 				_oModel:SetErrorMessage('', '' , '' , '' , "GLTXFUN002", "Não foram informados setores válidos para o processamento. O setor ["+ _aCodSet[_nI] +"] não pertence a essa Filial!", "Verifique os dados informados.")
@@ -1930,7 +1930,7 @@ If _cTpProd == 'C'
 EndIf
 _cCampos += " SUM("+ _cAux +"_QTDBOM) TBOM %"
 _cTable += RetSqlName(_cAux) +" %"
-_cFiltro += " AND "+ _cAux +"_DTCOLE BETWEEN '"+ DTOS(_dDtIni) +"' AND '"+ DTOS(_dDtFim) +"' "
+_cFiltro += " AND "+ _cAux +"_DTCOLE BETWEEN '"+ DToS(_dDtIni) +"' AND '"+ DToS(_dDtFim) +"' "
 _cFiltro += " AND "+ _cAux +"_RETIRO = '"+ _cCodFor +"' "
 _cFiltro += " AND "+ _cAux +"_RETILJ = '"+ _cLojFor +"' %"
 
@@ -2047,7 +2047,7 @@ If !_lDefini
 		EndIf
 		BeginSql alias _cAlias
 			SELECT ZLF_RETIRO, ZLF_RETILJ, ZLF_SETOR, ZL8_SB1COD, ZL8_TES, ZL8_TESSEN, ZL8_TESIP1, ZL8_TESSE2, B1_PRINCMG, %exp:_cCampos%
-			FROM %table:ZLF% ZLF, %table:ZL8% ZL8, %table:SB1% SB1
+			FROM %Table:ZLF% ZLF, %Table:ZL8% ZL8, %Table:SB1% SB1
 			WHERE ZLF.D_E_L_E_T_ = ' '
 			AND ZL8.D_E_L_E_T_ = ' '
 			AND SB1.D_E_L_E_T_ = ' '
@@ -2060,7 +2060,7 @@ If !_lDefini
 			AND ZLF.ZLF_CODZLE = %exp:ZLE->ZLE_COD%
 			AND ZLF.ZLF_SETOR  = %exp:ZL2->ZL2_COD%
 			AND ZLF.ZLF_LINROT = %exp:ZL3->ZL3_COD%
-			AND SUBSTR(ZLF.ZLF_RETIRO,1,1) = 'P'
+			AND SubStr(ZLF.ZLF_RETIRO,1,1) = 'P'
 			AND ZLF.ZLF_ORIGEM <> 'F'
 			AND ZLF.ZLF_TP_MIX = 'L'
 			AND ZL8_DEBCRE = 'C'
@@ -2119,7 +2119,7 @@ Programa----------: DescLeit
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 20/05/2019
 Descrição---------: Retorna o volume de leite a ser descontado de acordo com a Crioscopia e Condenações
-Parametros--------: Tipo da Faixa a ser filtrada. Se nenhuma for informada, todas referente ao mesmo assunto serão listadas.
+Parametros--------: Tipo da Faixa a ser filtrada. Se nenhuma For informada, todas referente ao mesmo assunto serão listadas.
 					Valores são obtidos pelas tabelas posicionadas pelo MIX: SA2, ZLE, ZL2, ZL3, ZL8. Usado no ZL8_FORMUL
 					_lLoja -> .T. -> Indica se a busca deve filtrar a loja ou se vai englobar todas as lojas do produtor
 Retorno-----------: _nValor -> N ->Volume de leite a ser descontado
@@ -2146,14 +2146,14 @@ EndIf
 //consigo fazer os filtros usando a ZLD. O fechamento é por setor e linha, então preciso separar.
 BeginSql alias _cAlias
 	SELECT SUM(ZLB_VOLCRI) VOLCRI
-	FROM %table:ZLB% ZLB
+	FROM %Table:ZLB% ZLB
 	WHERE ZLB.D_E_L_E_T_ = ' ' 
 	%exp:_cFiltro%
 	AND ZLB.ZLB_FILIAL = %xFilial:ZLB%
 	AND ZLB.ZLB_RETIRO = %exp:SA2->A2_COD%
 	AND ZLB.ZLB_SETOR = %exp:ZL2->ZL2_COD% 
 	AND ZLB.ZLB_DATA BETWEEN %exp:ZLE->ZLE_DTINI% AND %exp:ZLE->ZLE_DTFIM%
-	AND EXISTS (SELECT 1 FROM %table:ZLD% ZLD
+	AND EXISTS (SELECT 1 FROM %Table:ZLD% ZLD
 			WHERE ZLD.D_E_L_E_T_ = ' '
 			AND ZLD.ZLD_FILIAL = ZLB.ZLB_FILIAL
 			AND ZLB.ZLB_RETIRO = ZLD.ZLD_RETIRO
@@ -2249,12 +2249,12 @@ _cFiltro += "%"
 If Posicione("ZLU",1,xFilial("ZLU")+RetCodUsr(),"ZLU_SETALL") <> 'S'
 	BeginSql alias _cAlias
 		SELECT LISTAGG(LINHA, ';') WITHIN GROUP(ORDER BY ZLV_SETOR) LINHA  FROM 
-		(SELECT ZLV_SETOR, CASE WHEN LISTAGG(ZLR_LINHA, ';') WITHIN GROUP(ORDER BY ZLR_LINHA) IS NULL THEN
+		(SELECT ZLV_SETOR, Case WHEN LISTAGG(ZLR_LINHA, ';') WITHIN GROUP(ORDER BY ZLR_LINHA) IS NULL THEN
 		(SELECT LISTAGG(ZL3_COD, ';') WITHIN GROUP(ORDER BY ZL3_COD)
 			FROM %Table:ZL3%
 			WHERE D_E_L_E_T_ = ' '
 		AND ZL3_SETOR = ZLV_SETOR)
-		ELSE
+		Else
 		LISTAGG(ZLR_LINHA, ';') WITHIN GROUP(ORDER BY ZLR_LINHA)
 		END LINHA
 		FROM %Table:ZL2% ZL2, %Table:ZLV% ZLV, %Table:ZLR% ZLR
@@ -2268,8 +2268,8 @@ If Posicione("ZLU",1,xFilial("ZLU")+RetCodUsr(),"ZLU_SETALL") <> 'S'
 		AND ZLV_CODUSU = %Exp:RetCodUsr()%
 		GROUP BY ZLV_SETOR)
 	EndSql
-	_cLinhas := IIF(Empty((_cAlias)->LINHA),"XXXXXX",(_cAlias)->LINHA)
-	(_cAlias)->(DbCloseArea())
+	_cLinhas := IIf(Empty((_cAlias)->LINHA),"XXXXXX",(_cAlias)->LINHA)
+	(_cAlias)->(DBCloseArea())
 EndIf
 //Retorna vazio quando o usuário tem acesso à todas as linhas. Quando não tem, mas não localizou nenhuma linha
 //permitida, retorna um código inexistente para que não exiba as informações idenvidamente
@@ -2292,11 +2292,11 @@ Local _cAlias	:= GetNextAlias() As Character
 Local _nValRet 	:= 0 As Numeric
 
 BeginSql alias _cAlias
-	SELECT NVL(SUM(CASE WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL ELSE ZLF_TOTAL * -1 END),0) TOTAL
+	SELECT NVL(SUM(Case WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL Else ZLF_TOTAL * -1 END),0) TOTAL
 	  FROM %Table:ZLF%
 	 WHERE D_E_L_E_T_ = ' '
 	   AND ZLF_EVENTO = %exp:_cEvento%
-	   AND SUBSTR(ZLF_A2COD, 1, 1) = 'G'
+	   AND SubStr(ZLF_A2COD, 1, 1) = 'G'
 	   AND ZLF_FILIAL = %exp:_cFilial%
 	   AND ZLF_CODZLE = %exp:_cCodMix%
 	   AND ZLF_SETOR = %exp:_cSetor%
@@ -2343,7 +2343,7 @@ For _nX:=1 to Len(_oSX1:aGrupo[1][2])
 			Case _oSX1:aGrupo[1][2][_nX]:CX1_TIPO == 'C'
 		 		_cVlrParam:= &(_oSX1:aGrupo[1][2][_nX]:CX1_VAR01)
 			Case _oSX1:aGrupo[1][2][_nX]:CX1_TIPO == 'D'
-				_cVlrParam:= DtoC(&(_oSX1:aGrupo[1][2][_nX]:CX1_VAR01))
+				_cVlrParam:= DToC(&(_oSX1:aGrupo[1][2][_nX]:CX1_VAR01))
 			Case _oSX1:aGrupo[1][2][_nX]:CX1_TIPO == 'N'
 				_cVlrParam:= AllTrim(Str(&(_oSX1:aGrupo[1][2][_nX]:CX1_VAR01)))
 		EndCase
@@ -2371,7 +2371,7 @@ Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 24/02/2022
 Descrição---------: Função para cálculo do Incentivo à Produção em MG de acordo com o configurador de tributos. Se a filial 
 					possui incetivo à produção, ajusto o cadastro do produtor quando ele tiver direito ao incentivo (soma da 
-					produção do ano todo para o mesmo CNPJ e IE for inferior ao valor do parâmetro)
+					produção do ano todo para o mesmo CNPJ e IE For inferior ao valor do parâmetro)
 Parametros--------: Tabelas posicionadas: SA2, ZLE
 					_nTipo -> N -> 1-Primeira parte do processo onde ajusto os cadastros 2-Restauro as informações ajustadas
 					_nVolIncP -> N -> Volume anual que indica quando deve ou não ser calculado o incentivo
@@ -2387,20 +2387,20 @@ User Function CalcInc(_nTipo As Numeric,_nVolIncP As Numeric,_lCalIncP As Logica
 If _nTipo == 1
 	DBSelectArea("F22")
 	F22->(DBSetOrder(1))
-	If Substr(SA2->A2_COD,1,1) == 'P' .And. SA2->A2_TIPO == 'F' .And. F22->(DBSeek(xFilial("F22")+SuperGetMV("LT_REGINCP",.F.,"")+"1"+SA2->(A2_COD+A2_LOJA)))
+	If SubStr(SA2->A2_COD,1,1) == 'P' .And. SA2->A2_TIPO == 'F' .And. F22->(DBSeek(xFilial("F22")+SuperGetMV("LT_REGINCP",.F.,"")+"1"+SA2->(A2_COD+A2_LOJA)))
 		_lCalIncP := .T.
 		DBSelectArea("F28")
 		F28->(DBSetOrder(1))
-		//Se a filial possui incetivo à produção, ajusto o cadastro do produtor quando ele tiver direito ao incentivo (soma da produção do ano todo para o mesmo CNPJ e IE for inferior ao valor do parâmetro)	
+		//Se a filial possui incetivo à produção, ajusto o cadastro do produtor quando ele tiver direito ao incentivo (soma da produção do ano todo para o mesmo CNPJ e IE For inferior ao valor do parâmetro)	
 		If !U_GLTVANO(_nVolIncP,ZLE->ZLE_DTINI,ZLE->ZLE_DTFIM)
 			SA2->(RecLock("SA2",.F.))
 			SA2->A2_INCLTMG := '2' //1-Sim,2-Não
-			SA2->(MsUnLock())
+			SA2->(MSUnLock())
 			//Apago o registro da regra no configurador de tributo para que não seja calculada nenhuma exceção fiscal
 			_nRecPrd := F22->(RECNO())
 			F22->(RecLock("F22",.F.))
 			F22->(DBDelete())
-			F22->(MsUnLock())
+			F22->(MSUnLock())
 		Else
 			If SA2->A2_INDCP == '2' //Se o cálculo é sobre a Folha, só devo calcular o Senar
 				//Apago a regra do 000001-INSS pois o configurador de tributos ignora o cadastro do fornecedor
@@ -2408,14 +2408,14 @@ If _nTipo == 1
 					_nRecINS := F28->(RECNO())
 					F28->(RecLock("F28",.F.))
 					F28->(DBDelete())
-					F28->(MsUnLock())
+					F28->(MSUnLock())
 				EndIf
 				//Apago a regra do 000002-Gilrat pois o configurador de tributos ignora o cadastro do fornecedor
 				If F28->(DBSeek(xFilial("F28")+SuperGetMV("LT_GILINCP",.F.,"")))
 					_nRecGil := F28->(RECNO())
 					F28->(RecLock("F28",.F.))
 					F28->(DBDelete())
-					F28->(MsUnLock())
+					F28->(MSUnLock())
 				EndIf
 			EndIf
 		EndIf
@@ -2427,13 +2427,13 @@ Else//Se a filial possui incetivo à produção e eu ajustei o campo para o cálculo
 	If SA2->A2_INCLTMG == '2'
 		SA2->(RecLock("SA2",.F.))
 		SA2->A2_INCLTMG := '1' //1-Sim,2-Não
-		SA2->(MsUnLock())
+		SA2->(MSUnLock())
 		If _nRecPrd > 0
 			Set Deleted Off //Exibe registros deletados
 			F22->(DBGoTo(_nRecPrd))
 			F22->(RecLock("F22",.F.))
 			F22->(DBRecall())//Recupero o registro deletado para não ser necessário incluir um novo toda vez
-			F22->(MsUnLock())
+			F22->(MSUnLock())
 			Set Deleted On //Restauro a não exibição de registros deletados
 		EndIf
 	EndIf
@@ -2444,13 +2444,13 @@ Else//Se a filial possui incetivo à produção e eu ajustei o campo para o cálculo
 			F28->(DBGoTo(_nRecINS))//Restauro o cálculo do INSS
 			F28->(RecLock("F28",.F.))
 			F28->(DBRecall())//Recupero o registro deletado para não ser necessário incluir um novo toda vez
-			F28->(MsUnLock())
+			F28->(MSUnLock())
 		EndIf
 		If _nRecGil > 0
 			F28->(DBGoTo(_nRecGil))//Restauro o cálcil do Gilrat
 			F28->(RecLock("F28",.F.))
 			F28->(DBRecall())//Recupero o registro deletado para não ser necessário incluir um novo toda vez
-			F28->(MsUnLock())
+			F28->(MSUnLock())
 		EndIf
 		Set Deleted On //Restauro a não exibição de registros deletados
 	EndIf
@@ -2509,24 +2509,24 @@ Default _aAttach 	:= {}
 
 //Por padrão os ambientes de teste sempre irão direcionar os e-mails para a conta de sistema e do usuário logado
 // ao invés dos destinatários enviados
-If SuperGetMV("IT_AMBTEST",.F.,.T.)
+If !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
 	_cAssunto := GetEnvServer()+' - ' + _cAssunto
 		
 	// Tabela com informações do ambiente
-	_cMsgAux := '<tr><td class="itens" width="160" style="white-space: nowrap;"><b>Ambiente:</b></td>'
+	_cMsgAux := '<tr><td class="itens" width="160" style="white-Space: nowrap;"><b>Ambiente:</b></td>'
 	_cMsgAux += '<td class="itens" align="left">[' + GetEnvServer() + ']</td></tr>'
 
-	// Tabela com destinatários originais, apenas se for redirecionado
-	_cMsgAux += '<tr><td class="itens" width="160" style="white-space: nowrap;"><b>TO original:</b></td>'
+	// Tabela com destinatários originais, apenas se For redirecionado
+	_cMsgAux += '<tr><td class="itens" width="160" style="white-Space: nowrap;"><b>TO original:</b></td>'
 	_cMsgAux += '<td class="itens" align="left">' + _cTO + '</td></tr>'
 
-	_cMsgAux += '<tr><td class="itens" width="160" style="white-space: nowrap;"><b>CC original:</b></td>'
+	_cMsgAux += '<tr><td class="itens" width="160" style="white-Space: nowrap;"><b>CC original:</b></td>'
 	_cMsgAux += '<td class="itens" align="left">' + _cCC + '</td></tr>'
 
-	_cMsgAux += '<tr><td class="itens" width="160" style="white-space: nowrap;"><b>BCC original:</b></td>'
+	_cMsgAux += '<tr><td class="itens" width="160" style="white-Space: nowrap;"><b>BCC original:</b></td>'
 	_cMsgAux += '<td class="itens" align="left">' + _cBCC + '</td></tr>'
 
-	_cMsgAux += '<tr><td class="itens" width="160" style="white-space: nowrap;"><b>ReplyTo original:</b></td>'
+	_cMsgAux += '<tr><td class="itens" width="160" style="white-Space: nowrap;"><b>ReplyTo original:</b></td>'
 	_cMsgAux += '<td class="itens" align="left">' + _cReplyTo + '</td></tr>'
 
 	_cMsgAux := '<table border="1" style="font-family: Arial; font-size: 12px; border-collapse: collapse;" width="100%">' + ;
@@ -2542,10 +2542,18 @@ If SuperGetMV("IT_AMBTEST",.F.,.T.)
 	EndIf
 
 	If SuperGetMv("IT_EMAILTR",.F.,.T.)
-		_cTO := 'sistema@italac.com.br'
-		_cCC := AllTrim(UsrRetMail(__cUserId))
-		_cBCC := ''
-		_cReplyTo := ''
+		//Se For schedule ou usuário comum, envia para todos. Se não For, apenas para quem estiver testando
+		If FWGetRunSchedule() .Or. !FwIsAdmin()
+			_cTO := 'sistema@italac.com.br'
+			_cCC := AllTrim(UsrRetMail(__cUserId))
+			_cBCC := ''
+			_cReplyTo := ''
+		Else
+			_cTO := AllTrim(UsrRetMail(__cUserId))
+			_cCC := ''
+			_cBCC := ''
+			_cReplyTo := ''
+		EndIf
 	EndIf
 EndIf
 
@@ -2560,8 +2568,8 @@ EndIf
 
 //Tratamento para caso a porta esteja apenas no parametro MV_RELSERV.
 If (_nPos := AT(':',_cSMTPServer)) > 0 
- 	_nSMTPPort 		:= Val(Substr(_cSMTPServer, _nPos + 1,Len(_cSMTPServer)))
- 	_cSMTPServer := Substr(_cSMTPServer, 0, _nPos - 1)  
+ 	_nSMTPPort 		:= Val(SubStr(_cSMTPServer, _nPos + 1,Len(_cSMTPServer)))
+ 	_cSMTPServer := SubStr(_cSMTPServer, 0, _nPos - 1)  
 EndIf
 
 If !Empty(_cTO) //Envio de e-mail só ocorre se existirem destinatários
@@ -2577,13 +2585,13 @@ If !Empty(_cTO) //Envio de e-mail só ocorre se existirem destinatários
 	//seta um tempo de time out com servidor de 1min
 	_nErro := _oMail:SetSmtpTimeOut( 60 )
   	If _nErro <> 0
-		_cErro := "Falha ao setar o time out. Código do erro: "+str(_nErro,6) +" / "+ _oMail:GetErrorString(_nErro)
+		_cErro := "Falha ao setar o time out. Código do erro: "+Str(_nErro,6) +" / "+ _oMail:GetErrorString(_nErro)
 		_lRet:= .F.
   	Else
 		//realiza a conexão SMTP
 		_nErro := _oMail:SmtpConnect()
 		If _nErro <> 0
-			_cErro := "Falha ao conectar. Código do erro: "+str(_nErro,6) +" / "+ _oMail:GetErrorString(_nErro)
+			_cErro := "Falha ao conectar. Código do erro: "+Str(_nErro,6) +" / "+ _oMail:GetErrorString(_nErro)
 			_lRet:= .F.
 		EndIf
 	EndIf
@@ -2591,14 +2599,14 @@ If !Empty(_cTO) //Envio de e-mail só ocorre se existirem destinatários
 		//Autenticando Usuario
 		_nErro := _oMail:SmtpAuth(_cSMTPUser ,_cSMTPPass)
 		If _nErro <> 0
-			_cErro := "Erro de Autenticacao. Código do erro: "+str(_nErro,6) +" / "+ _oMail:GetErrorString(_nErro)
+			_cErro := "Erro de Autenticacao. Código do erro: "+Str(_nErro,6) +" / "+ _oMail:GetErrorString(_nErro)
 			_lRet := .F.
 		EndIf
 	EndIf
 
 	If _nErro <> 0
 		// Recupera erro
-		_cErro := "Erro de Autenticacao "+str(_nErro,4)+' ('+_oMail:GetErrorString(_nErro)+')'
+		_cErro := "Erro de Autenticacao "+Str(_nErro,4)+' ('+_oMail:GetErrorString(_nErro)+')'
 		_lRet := .F.
 		_oMail:SMTPDisconnect()
 	EndIf

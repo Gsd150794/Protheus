@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 30/08/2019 | Correção da barra de progresso. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 27/09/2019 | Revisão de fontes. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 06/12/2019 | Inclusão do código do produto. Chamado 31392
+Lucas Borges  |30/08/2019| Chamado 28346. Correção da barra de progresso.
+Lucas Borges  |27/09/2019| Chamado 28346. Revisão de fontes.
+Lucas Borges  |06/12/2019| Chamado 31392. Inclusão do código do produto.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa--------: RGLT065
 Autor-----------: Alex Wallauer
 Data da Criacao-: 12/03/2018
-===============================================================================================================================
 Descrição-------: Resumo de Viagens 2º Percurso - Chamado 22209
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -45,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Alex Wallauer
 Data da Criacao---: 12/03/2018
-===============================================================================================================================
 Descrição---------: Processa a montagem do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -100,11 +89,8 @@ Return(oReport)
 Programa--------: RGLT002SEL
 Autor-----------: Alex Wallauer
 Data da Criacao-: 12/03/2018
-===============================================================================================================================
 Descrição-------: Função para consulta e preparação dos dados do relatório
-===============================================================================================================================
 Parametros------: oReport = Objeto do relatório.
-===============================================================================================================================
 Retorno---------: _aRet - Dados do relatório
 ===============================================================================================================================
 */
@@ -145,7 +131,7 @@ TRFunction():New(oReport:Section(1):Cell("CUSTOLITRO")/*oCell*/,/*cName*/,"ONPRI
 // Monta filtro de acordo com a tabela de origem
 //====================================================================================================
 If MV_PAR03 < 4
-	_cFiltro += " AND ZLX.ZLX_TIPOLT = '"+ IIF( MV_PAR03 == 1 , 'F' , IIF( MV_PAR03 == 2 , 'T' , 'P' ) ) +"' "
+	_cFiltro += " AND ZLX.ZLX_TIPOLT = '"+ IIf( MV_PAR03 == 1 , 'F' , IIf( MV_PAR03 == 2 , 'T' , 'P' ) ) +"' "
 EndIf
 If !Empty( MV_PAR04 )
 	_cFiltro += " AND ZZX.ZZX_CODPRD IN "+ FormatIn( AllTrim(MV_PAR04) , ';' )
@@ -215,7 +201,7 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 ZZT->( DBSetOrder(1) )
@@ -223,45 +209,45 @@ ZZU->( DBSetOrder(1) )
 nTam:=TamSX3('ZZU_CAPACI')[01] 
 _aSintese:={}
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
    oReport:IncMeter()   
    
-   oReport:Section(1):Cell("ZZV_CAPACI"):SetValue(VAL((_cAlias)->ZZV_CAPACI))
+   oReport:Section(1):Cell("ZZV_CAPACI"):SetValue(Val((_cAlias)->ZZV_CAPACI))
    oReport:Section(1):Cell("FORNECE"):SetValue(Posicione("SA2",1,xFilial("SA2")+(_cAlias)->ZLX_FORNEC + (_cAlias)->ZLX_LJFORN ,"A2_NREDUZ"))
    oReport:Section(1):Cell("TRANSP" ):SetValue(Posicione("SA2",1,xFilial("SA2")+(_cAlias)->ZLX_TRANSP + (_cAlias)->ZLX_LJTRAN ,"A2_NREDUZ"))
    oReport:Section(1):Cell("CUSTOLITRO"):SetValue( ( ((_cAlias)->TOTALFRETE-(_cAlias)->ZLX_ICMSFR) / (_cAlias)->ZLX_VOLREC ))
 
-   IF ZZT->( DBSeek( xFilial("ZZT") + (_cAlias)->ZLX_TRANSP + (_cAlias)->ZLX_LJTRAN + (_cAlias)->ZZV_FXCAPA ) )
+   If ZZT->( DBSeek( xFilial("ZZT") + (_cAlias)->ZLX_TRANSP + (_cAlias)->ZLX_LJTRAN + (_cAlias)->ZZV_FXCAPA ) )
 		
-	  IF ZZU->( DBSeek( xFilial("ZZU") + (_cAlias)->ZLX_TRANSP + (_cAlias)->ZLX_LJTRAN + PadR( (_cAlias)->ZZV_FXCAPA , nTam ) + (_cAlias)->ZLX_FORNEC + (_cAlias)->ZLX_LJFORN ) )
+	  If ZZU->( DBSeek( xFilial("ZZU") + (_cAlias)->ZLX_TRANSP + (_cAlias)->ZLX_LJTRAN + PadR( (_cAlias)->ZZV_FXCAPA , nTam ) + (_cAlias)->ZLX_FORNEC + (_cAlias)->ZLX_LJFORN ) )
 
          oReport:Section(1):Cell("KMPADRAO"  ):SetValue(ZZU->ZZU_KMFORN)
          oReport:Section(1):Cell("TARIFAKM"  ):SetValue(ZZU->ZZU_VLRKM)
          oReport:Section(1):Cell("TARIFAFIXA"):SetValue(ZZU->ZZU_VLRCOM)
 
-      ENDIF	
+      EndIf	
 
-   ENDIF	
+   EndIf	
 
    _cChave:=oReport:Section(1):Cell("FORNECE"):GetValue()+oReport:Section(1):Cell("TRANSP" ):GetValue()+(_cAlias)->ZZV_FXCAPA
-   IF (_nI:= ASCAN(_aSintese,{|S| S[1]+S[2]+S[3] == _cChave } )) = 0
+   If (_nI:= aScan(_aSintese,{|S| S[1]+S[2]+S[3] == _cChave } )) = 0
 
-      AADD(_aSintese,{oReport:Section(1):Cell("FORNECE"):GetValue(),;//PROCEDENCIA    1
+      aAdd(_aSintese,{oReport:Section(1):Cell("FORNECE"):GetValue(),;//PROCEDENCIA    1
                       oReport:Section(1):Cell("TRANSP" ):GetValue(),;//TRANSPORTADORA 2
                       (_cAlias)->ZZV_FXCAPA, ;//CAPCIDADE  3
                       1,;                     //QUANTIDADE 4
                       ((_cAlias)->TOTALFRETE-(_cAlias)->ZLX_ICMSFR), ;//para calcular Custo/Litro 5
                       (_cAlias)->ZLX_VOLREC  ;//para calcular Custo/Litro 6
                        })
-   ELSE
+   Else
 
       _aSintese[_nI,4]++
       _aSintese[_nI,5]+=( (_cAlias)->TOTALFRETE-(_cAlias)->ZLX_ICMSFR )
       _aSintese[_nI,6]+=(_cAlias)->ZLX_VOLREC
 
-   ENDIF
+   EndIf
 
-    oReport:Section(1):Printline()
+    oReport:Section(1):PrintLine()
       
    (_cAlias)->( DBSkip() )
    
@@ -294,10 +280,10 @@ _nConTrans:=0
 For _nI:=1 To Len(_aSintese)
 
 	oReport:IncMeter()
-	IF EMPTY(_cQbgTrans)
+	If Empty(_cQbgTrans)
 	   _cQbgTrans:=_aSintese[_nI,1]+_aSintese[_nI,2]
        _cQbgForn :=_aSintese[_nI,1]
-	ENDIF
+	EndIf
 
     Quebras(oReport,_nI,1)//Imprimi o total das quebras
 
@@ -309,12 +295,12 @@ For _nI:=1 To Len(_aSintese)
     _nCuFForn +=_aSintese[_nI,5]
     _nCuLForn +=_aSintese[_nI,6]
     
-    IF !(_cTitTotPr == _aSintese[_nI,1])
+    If !(_cTitTotPr == _aSintese[_nI,1])
 	   oReport:Section(2):Cell("FORNECE"):SetValue(_aSintese[_nI,1])
        _cTitTotPr:=_aSintese[_nI,1]
-	ELSE
+	Else
 	   oReport:Section(2):Cell("FORNECE"):SetValue("")
-	ENDIF
+	EndIf
     oReport:Section(2):Cell("TOTAIS"    ):SetValue("")
 	oReport:Section(2):Cell("TRANSP"    ):SetValue(_aSintese[_nI,2])
 	oReport:Section(2):Cell("ZZV_FXCAPA"):SetValue(_aSintese[_nI,3])
@@ -343,11 +329,8 @@ Return
 Programa--------: AjustaSX1
 Autor-----------: Alex Wallauer
 Data da Criacao-: 30/07/2018
-===============================================================================================================================
 Descrição-------: Rotina para ajustar o grupo de perguntas no SX1
-===============================================================================================================================
 Parametros------: oReport,_nI, L
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */

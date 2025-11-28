@@ -1,45 +1,38 @@
 /*
 ===============================================================================================================================
-                                    ATUALIZACOES SOFRIDAS DESDE A CONSTRUÇAO INICIAL
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                           |
-------------------:------------:----------------------------------------------------------------------------------------------:
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
 ===============================================================================================================================
 */
 
-#INCLUDE "rwmake.ch"  
-#INCLUDE "protheus.ch"
-#INCLUDE "topconn.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa--------: AFIS006
 Autor-----------: Josué Danich Prestes
 Data da Criacao-: 04/11/2016
-===============================================================================================================================
 Descrição-------: Cadastro de código de retenção - Chamado 14542
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-
-
 User Function AFIS006()
 
 Local cAlias		:= "ZFT"
 Private cCadastro	:= "Cadastro de codigo de retencao"
 Private aRotina		:= {}     
 
-AADD(aRotina,{"Pesquisar"	,"AxPesqui",0,1})
-AADD(aRotina,{"Visualizar"	,"AxVisual",0,2})
-AADD(aRotina,{"Incluir"		,"AxInclui",0,3})
-AADD(aRotina,{"Alterar"		,"AxAltera",0,4})
-AADD(aRotina,{"Excluir"		,"AXExclui",0,5})           
+aAdd(aRotina,{"Pesquisar"	,"AxPesqui",0,1})
+aAdd(aRotina,{"Visualizar"	,"AxVisual",0,2})
+aAdd(aRotina,{"Incluir"		,"AxInclui",0,3})
+aAdd(aRotina,{"Alterar"		,"AxAltera",0,4})
+aAdd(aRotina,{"Excluir"		,"AXExclui",0,5})           
 	
-dbSelectArea(cAlias)
-dbSetOrder(1)
+DBSelectArea(cAlias)
+DBSetOrder(1)
 mBrowse(6,1,22,75,cAlias)
 
-Return Nil
+Return

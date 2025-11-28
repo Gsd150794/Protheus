@@ -2,20 +2,17 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 26/09/2019 | Chamado 28346. Revisão de fontes.
-Lucas Borges  | 22/07/2022 | Chamado 40778. Tratamento para Extrato Seco Total (EST).
-Lucas Borges  | 24/03/2025 | Chamado 48203. Incluído campo ZZX_FLOGID no grupo correto.
+Lucas Borges  |26/09/2019| Chamado 28346. Revisão de fontes.
+Lucas Borges  |22/07/2022| Chamado 40778. Tratamento para Extrato Seco Total (EST).
+Lucas Borges  |24/03/2025| Chamado 48203. Incluído campo ZZX_FLOGID no grupo correto.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "FWMBROWSE.CH"
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "PROTHEUS.CH"
+#Include "FWMBROWSE.CH"
+#Include "FWMVCDEF.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -39,12 +36,12 @@ _oBrowse:SetMenuDef( 'AGLT029' )
 _oBrowse:SetDescription( 'Análise de Qualidade - Leite de Terceiros' )
 _oBrowse:DisableDetails()
 
-_oBrowse:AddLegend( ' Empty( Posicione("ZLX",7,xFILIAL("ZLX")+ZZX->ZZX_CODIGO,"ZLX_CODIGO") )' , 'GREEN'	, 'Análise Pendente'				)
-_oBrowse:AddLegend( '!Empty( Posicione("ZLX",7,xFILIAL("ZLX")+ZZX->ZZX_CODIGO,"ZLX_CODIGO") )' , 'RED'		, 'Análise Vinculada à Recepção'	)
+_oBrowse:AddLegend( ' Empty( Posicione("ZLX",7,xFilial("ZLX")+ZZX->ZZX_CODIGO,"ZLX_CODIGO") )' , 'GREEN'	, 'Análise Pendente'				)
+_oBrowse:AddLegend( '!Empty( Posicione("ZLX",7,xFilial("ZLX")+ZZX->ZZX_CODIGO,"ZLX_CODIGO") )' , 'RED'		, 'Análise Vinculada à Recepção'	)
 
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -76,22 +73,22 @@ Local _oStruZAP	:= FWFormStruct( 1 , 'ZAP' )
 Local _oModel	:= Nil
 Local _aGatAux	:= {}
 
-_aGatAux := FwStruTrigger( 'ZZX_FORNEC'	, 'ZZX_NOMFOR' , 'POSICIONE("SA2",1,xFilial("SA2")+M->(ZZX_FORNEC)+AllTrim(M->ZZX_LJFORN),"A2_NREDUZ")'	, .F. )
+_aGatAux := FwStruTrigger( 'ZZX_FORNEC'	, 'ZZX_NOMFOR' , 'Posicione("SA2",1,xFilial("SA2")+M->(ZZX_FORNEC)+AllTrim(M->ZZX_LJFORN),"A2_NREDUZ")'	, .F. )
 _oStruZZX:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZZX_LJFORN'	, 'ZZX_NOMFOR' , 'POSICIONE("SA2",1,xFilial("SA2")+M->(ZZX_FORNEC+ZZX_LJFORN),"A2_NREDUZ")'				, .F. )
+_aGatAux := FwStruTrigger( 'ZZX_LJFORN'	, 'ZZX_NOMFOR' , 'Posicione("SA2",1,xFilial("SA2")+M->(ZZX_FORNEC+ZZX_LJFORN),"A2_NREDUZ")'				, .F. )
 _oStruZZX:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZZX_FORNEC'	, 'ZZX_LJFORN' , 'POSICIONE("SA2",1,xFilial("SA2")+M->(ZZX_FORNEC)+AllTrim(M->ZZX_LJFORN),"A2_LOJA")'	, .F. )
+_aGatAux := FwStruTrigger( 'ZZX_FORNEC'	, 'ZZX_LJFORN' , 'Posicione("SA2",1,xFilial("SA2")+M->(ZZX_FORNEC)+AllTrim(M->ZZX_LJFORN),"A2_LOJA")'	, .F. )
 _oStruZZX:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZZX_LJTRAN'	, 'ZZX_NOMTRA' , 'POSICIONE("SA2",1,xFilial("SA2")+M->(ZZX_TRANSP+ZZX_LJTRAN),"A2_NREDUZ")'				, .F. )
+_aGatAux := FwStruTrigger( 'ZZX_LJTRAN'	, 'ZZX_NOMTRA' , 'Posicione("SA2",1,xFilial("SA2")+M->(ZZX_TRANSP+ZZX_LJTRAN),"A2_NREDUZ")'				, .F. )
 _oStruZZX:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZZX_CODPRD'	, 'ZZX_DESPRD' , 'POSICIONE("SX5",1,xFilial("SX5")+"Z7"+M->ZZX_CODPRD,"X5_DESCRI")'		   				, .F. )
+_aGatAux := FwStruTrigger( 'ZZX_CODPRD'	, 'ZZX_DESPRD' , 'Posicione("SX5",1,xFilial("SX5")+"Z7"+M->ZZX_CODPRD,"X5_DESCRI")'		   				, .F. )
 _oStruZZX:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZZX_CODPRD'	, 'ZZX_DENSID' , 'POSICIONE("ZA7",1,xFilial("ZA7")+M->ZZX_CODPRD,"ZA7_DENPAD")'	   		  				, .F. )
+_aGatAux := FwStruTrigger( 'ZZX_CODPRD'	, 'ZZX_DENSID' , 'Posicione("ZA7",1,xFilial("ZA7")+M->ZZX_CODPRD,"ZA7_DENPAD")'	   		  				, .F. )
 _oStruZZX:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 _oModel := MpFormModel():New( "AGLT029M" ,, {|_oModel| VALIDCOMIT(_oModel) } )
@@ -222,7 +219,7 @@ Retorno-----------: Nenhum
 Static Function VALIDCOMIT( _oModAux )
 
 Local _oModel	:= FWModelActive()
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cAlias	:= ''
 Local _lRet		:= .T.
 Local _nOper	:= _oModel:GetOperation()
@@ -281,7 +278,7 @@ If _nOper == MODEL_OPERATION_INSERT .Or. _nOper == MODEL_OPERATION_UPDATE
 	
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _lRet )
 
@@ -362,7 +359,7 @@ Retorno-----------: Nenhum
 */
 User Function AGLT029F( _nOpc )
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _lRet		:= .T.
 Local _oModel	:= FWModelActive()
 Local _cCodFor	:= ''
@@ -385,6 +382,6 @@ Else
 	_lRet := .F.
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _lRet )

@@ -4,23 +4,13 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer |08/02/2023| Chamado 42719 - Acrescentada a opcao NF no campo C7_I_URGEN : S(SIM), N(NAO) F(NF).
-Igor Melgaço  |04/09/2024| Chamado 48417 - Acrescentado o campo E4_DESCRI no relatorio analitico.
 Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
-==================================================================================================================================================================================================================
-Analista - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
-==================================================================================================================================================================================================================
-André    - Julio Paz     - 28/02/25 - 06/03/25 -  50030  - Inclusão de novas informações referentes a centro de custo no relatório.
-André    - Igor Melgaço  - 31/07/25 - 01/08/25 -  51630  - Ajustes para performance do relatório.
-==================================================================================================================================================================================================================
-
+Julio Paz     |06/03/2025| Chamado 50030. Inclusão de novas informações referentes a centro de custo no relatório.
+Igor Melgaço  |01/08/2025| Chamado 51630. Ajustes para performance do relatório.
+===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
-#INCLUDE 'TOPCONN.CH'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -42,7 +32,7 @@ Private aSelFil := {} As Array
 If !Pergunte(cPerg,.T.)
    Return
 Else
-   If mv_par01 == 3
+   If MV_PAR01 == 3
       aSelFil := AdmGetFil()
       If Len(aSelFil) < 1
          Return
@@ -183,7 +173,7 @@ Local cin := "" As Character
 Local nI := 0 As Numeric
 Local cFiltro := "" As Character
 
-cFiltro := "WHERE C7_EMISSAO BETWEEN '" + DtoS(MV_PAR05) + "' AND '" + DtoS(MV_PAR06) + "' "
+cFiltro := "WHERE C7_EMISSAO BETWEEN '" + DToS(MV_PAR05) + "' AND '" + DToS(MV_PAR06) + "' "
 
 If MV_PAR01 == 1
    cFiltro += " AND C7_FILIAL <> '  ' "
@@ -277,7 +267,7 @@ cFiltro += "  AND SC7.D_E_L_E_T_ = ' ' "
       cQry1 += "        (SELECT C1_SOLICIT FROM " + RetSqlName("SC1") + " SC1 WHERE C7_FILIAL = C1_FILIAL AND C7_NUM = C1_PEDIDO AND C7_ITEM = C1_ITEMPED AND SC1.D_E_L_E_T_ = ' ' ) NOMSC, "
       cQry1 += "        (SELECT MIN(C7_I_DTFAT) C7_I_DTFAT FROM " + RetSqlName("SC7") + " SC7A WHERE SC7A.C7_FILIAL = SC7.C7_FILIAL AND SC7A.C7_NUM = SC7.C7_NUM AND SC7A.D_E_L_E_T_ = ' ') C7_I_DTFAT, "
       cQry1 += "        (SELECT MIN(C7_DATPRF) C7_DATPRF FROM " + RetSqlName("SC7") + " SC7B WHERE SC7B.C7_FILIAL = SC7.C7_FILIAL AND SC7B.C7_NUM = SC7.C7_NUM AND SC7B.D_E_L_E_T_ = ' ') C7_DATPRF, "
-      cQry1 += "        (SELECT LISTAGG(D1_DOC || ' - ' || SUBSTR(D1_DTDIGIT,7,2) || '/' || SUBSTR(D1_DTDIGIT,5,2) || '/' || SUBSTR(D1_DTDIGIT,1,4) , ';') WITHIN GROUP(ORDER BY D1_DOC) COD FROM (SELECT D1_DOC,D1_DTDIGIT FROM " + RetSqlName("SD1") + " SD1 WHERE SD1.D_E_L_E_T_ = ' ' AND D1_FILIAL = C7_FILIAL     AND D1_PEDIDO = C7_NUM   AND D1_ITEMPC = C7_ITEM  AND D1_DOC <> ' ' AND rownum <= 20) SD1 ) CONSNOTA, "
+      cQry1 += "        (SELECT LISTAGG(D1_DOC || ' - ' || SubStr(D1_DTDIGIT,7,2) || '/' || SubStr(D1_DTDIGIT,5,2) || '/' || SubStr(D1_DTDIGIT,1,4) , ';') WITHIN GROUP(ORDER BY D1_DOC) COD FROM (SELECT D1_DOC,D1_DTDIGIT FROM " + RetSqlName("SD1") + " SD1 WHERE SD1.D_E_L_E_T_ = ' ' AND D1_FILIAL = C7_FILIAL     AND D1_PEDIDO = C7_NUM   AND D1_ITEMPC = C7_ITEM  AND D1_DOC <> ' ' AND rownum <= 20) SD1 ) CONSNOTA, "
       cQry1 += "        C7_I_APLIC, "
       cQry1 += "        C7_I_CDINV, "
       cQry1 += "        ZZI_DESINV, "
@@ -310,18 +300,18 @@ cFiltro += "  AND SC7.D_E_L_E_T_ = ' ' "
       //Se o alias estiver aberto, irei fechar, isso ajuda a evitar erros
       //=================================================================
       If Select("TRBPED") <> 0
-         DbSelectArea("TRBPED")
-         DbCloseArea()
+         DBSelectArea("TRBPED")
+         DBCloseArea()
       EndIf
 
       //=================
       //crio o novo alias
       //=================
       MPSysOpenQuery( cQry1,"TRBPED" )   
-      dbSelectArea("TRBPED")
+      DBSelectArea("TRBPED")
       _nTot := 0
       COUNT TO _nTot
-      TRBPED->(dbGoTop())
+      TRBPED->(DBGoTop())
          
       oReport:SetMeter(_nTot)
        
@@ -331,7 +321,7 @@ cFiltro += "  AND SC7.D_E_L_E_T_ = ' ' "
       //=================================
       //Irei percorrer todos os registros
       //=================================
-      Do While !TRBPED->(Eof())
+      While !TRBPED->(Eof())
       
          If oReport:Cancel()
             Exit
@@ -351,7 +341,7 @@ cFiltro += "  AND SC7.D_E_L_E_T_ = ' ' "
                oSection2:Finish()
             EndIf
 
-            //IncProc("Imprimindo Filial " + Alltrim(TRBPED->C7_FILIAL) + " - " + AllTrim(FWFilialName(cEmpAnt,TRBPED->C7_FILIAL)))
+            //IncProc("Imprimindo Filial " + AllTrim(TRBPED->C7_FILIAL) + " - " + AllTrim(FWFilialName(cEmpAnt,TRBPED->C7_FILIAL)))
 
             //========================
             //imprimo a primeira seção
@@ -361,11 +351,11 @@ cFiltro += "  AND SC7.D_E_L_E_T_ = ' ' "
             oSection1:Cell("C7_NUM"):SetValue(TRBPED->C7_NUM)
             
             oSection1:Cell("C7_NUMSC"):SetValue(TRBPED->C7_NUMSC)
-            oSection1:Cell("NOMSC"):SetValue(TRBPED->NOMSC /*POSICIONE("SC1",6,TRBPED->C7_FILIAL+TRBPED->C7_NUM,"C1_SOLICIT")*/)
+            oSection1:Cell("NOMSC"):SetValue(TRBPED->NOMSC /*Posicione("SC1",6,TRBPED->C7_FILIAL+TRBPED->C7_NUM,"C1_SOLICIT")*/)
                   
-            oSection1:Cell("C7_EMISSAO"):SetValue(StoD(TRBPED->C7_EMISSAO))
-            oSection1:Cell("C7_I_DTFAT"):SetValue(StoD(TRBPED->C7_I_DTFAT))
-            oSection1:Cell("C7_DATPRF"):SetValue(StoD(TRBPED->C7_DATPRF))
+            oSection1:Cell("C7_EMISSAO"):SetValue(SToD(TRBPED->C7_EMISSAO))
+            oSection1:Cell("C7_I_DTFAT"):SetValue(SToD(TRBPED->C7_I_DTFAT))
+            oSection1:Cell("C7_DATPRF"):SetValue(SToD(TRBPED->C7_DATPRF))
             oSection1:Cell("A2_NREDUZ"):SetValue(TRBPED->A2_NREDUZ)
             oSection1:Cell("Y1_NOME"):SetValue(TRBPED->Y1_NOME)
             oSection1:Cell("C7_I_APLIC"):SetValue(TRBPED->C7_I_APLIC)
@@ -376,7 +366,7 @@ cFiltro += "  AND SC7.D_E_L_E_T_ = ' ' "
             oSection1:Cell("E4_DESCRI"):SetValue(TRBPED->E4_DESCRI)
             oSection1:Cell("C7_CC"):SetValue(TRBPED->C7_CC) 
             
-            oSection1:Printline()
+            oSection1:PrintLine()
             //==========================
             //inicializo a segunda seção
             //==========================
@@ -385,7 +375,7 @@ cFiltro += "  AND SC7.D_E_L_E_T_ = ' ' "
 
          oSection2:Cell("C7_ITEM"):SetValue(TRBPED->C7_ITEM)
          oSection2:Cell("C7_PRODUTO"):SetValue(TRBPED->C7_PRODUTO)
-         oSection2:Cell("B1_DESC"):SetValue(Iif(AllTrim(TRBPED->B1_I_DESCD) $ AllTrim(TRBPED->B1_DESC), AllTrim(TRBPED->B1_DESC), AllTrim(TRBPED->B1_DESC) + " " + AllTrim(TRBPED->B1_I_DESCD)))
+         oSection2:Cell("B1_DESC"):SetValue(IIf(AllTrim(TRBPED->B1_I_DESCD) $ AllTrim(TRBPED->B1_DESC), AllTrim(TRBPED->B1_DESC), AllTrim(TRBPED->B1_DESC) + " " + AllTrim(TRBPED->B1_I_DESCD)))
          oSection2:Cell("C7_QUANT"):SetValue(TRBPED->C7_QUANT)
          oSection2:Cell("C7_QUJE"):SetValue(TRBPED->C7_QUJE)
          oSection2:Cell("C7_PRECO"):SetValue(TRBPED->C7_PRECO)
@@ -397,10 +387,10 @@ cFiltro += "  AND SC7.D_E_L_E_T_ = ' ' "
          oSection2:Cell("C7_CC"):SetValue(TRBPED->C7_CC) 
 
          oSection2:Cell("CONSNOTA"):SetValue(TRBPED->CONSNOTA)
-         oSection2:Printline()
+         oSection2:PrintLine()
 
          cPedAnt := TRBPED->C7_FILIAL + TRBPED->C7_NUM
-         TRBPED->(dbSkip())
+         TRBPED->(DBSkip())
       End
       oReport:ThinLine()
       oSection2:Finish()
@@ -437,7 +427,7 @@ cFiltro += "  AND SC7.D_E_L_E_T_ = ' ' "
       cQry1 += "        (SELECT LISTAGG(C1_SOLICIT, ';') WITHIN GROUP( ORDER BY C1_SOLICIT) COD   FROM    (SELECT C1_SOLICIT FROM " + RetSqlName("SC1") + "  SC1      WHERE  SC7.C7_FILIAL = C1_FILIAL  AND SC7.C7_NUM = C1_PEDIDO AND SC1.D_E_L_E_T_ = ' ' AND rownum <= 20 GROUP BY C1_SOLICIT) SC1) NOMSC, "
       cQry1 += "        (SELECT MIN(C7_I_DTFAT) C7_I_DTFAT FROM " + RetSqlName("SC7") + " SC7A WHERE SC7A.C7_FILIAL = SC7.C7_FILIAL AND SC7A.C7_NUM = SC7.C7_NUM AND SC7A.D_E_L_E_T_ = ' ') C7_I_DTFAT, "
       cQry1 += "        (SELECT MIN(C7_DATPRF) C7_DATPRF FROM " + RetSqlName("SC7") + " SC7B WHERE SC7B.C7_FILIAL = SC7.C7_FILIAL AND SC7B.C7_NUM = SC7.C7_NUM AND SC7B.D_E_L_E_T_ = ' ') C7_DATPRF, "
-      cQry1 += "        (SELECT LISTAGG(D1_DOC || ' - ' || SUBSTR(D1_DTDIGIT, 7, 2) || '/' || SUBSTR(D1_DTDIGIT, 5, 2) || '/' || SUBSTR(D1_DTDIGIT, 1, 4), ';') WITHIN GROUP( ORDER BY D1_DOC) COD   FROM    (SELECT D1_DOC,D1_DTDIGIT   FROM " + RetSqlName("SD1") + " SD1      WHERE SD1.D_E_L_E_T_ = ' '  AND D1_FILIAL = C7_FILIAL  AND D1_PEDIDO = C7_NUM    AND D1_DOC <> ' ' AND rownum <= 20 GROUP BY D1_DOC,D1_DTDIGIT) SD1) CONSNOTA, "
+      cQry1 += "        (SELECT LISTAGG(D1_DOC || ' - ' || SubStr(D1_DTDIGIT, 7, 2) || '/' || SubStr(D1_DTDIGIT, 5, 2) || '/' || SubStr(D1_DTDIGIT, 1, 4), ';') WITHIN GROUP( ORDER BY D1_DOC) COD   FROM    (SELECT D1_DOC,D1_DTDIGIT   FROM " + RetSqlName("SD1") + " SD1      WHERE SD1.D_E_L_E_T_ = ' '  AND D1_FILIAL = C7_FILIAL  AND D1_PEDIDO = C7_NUM    AND D1_DOC <> ' ' AND rownum <= 20 GROUP BY D1_DOC,D1_DTDIGIT) SD1) CONSNOTA, "
       cQry1 += "        C7_OBS "
       cQry1 += "FROM ("
 
@@ -502,18 +492,18 @@ cFiltro += "  AND SC7.D_E_L_E_T_ = ' ' "
       //Se o alias estiver aberto, irei fechar, isso ajuda a evitar erros
       //=================================================================
       If Select("TRBPED") <> 0
-         DbSelectArea("TRBPED")
-         DbCloseArea()
+         DBSelectArea("TRBPED")
+         DBCloseArea()
       EndIf
 
       //=================
       //crio o novo alias
       //=================
       MPSysOpenQuery( cQry1,"TRBPED" )
-      dbSelectArea("TRBPED")
+      DBSelectArea("TRBPED")
       _ntot:=0
       COUNT TO _ntot
-      TRBPED->(dbGoTop())
+      TRBPED->(DBGoTop())
          
       oReport:SetMeter(_ntot)
        
@@ -523,7 +513,7 @@ cFiltro += "  AND SC7.D_E_L_E_T_ = ' ' "
 
 
       //Irei percorrer todos os meus registros
-      Do While !TRBPED->(Eof())
+      While !TRBPED->(Eof())
       
          If oReport:Cancel()
             Exit
@@ -538,9 +528,9 @@ cFiltro += "  AND SC7.D_E_L_E_T_ = ' ' "
          oSection1:Cell("C7_FILIAL"):SetValue(TRBPED->C7_FILIAL)
          oSection1:Cell("NOMEFIL"):SetValue(AllTrim(TRBPED->M0_FILIAL))
          oSection1:Cell("C7_NUM"):SetValue(TRBPED->C7_NUM)
-         oSection1:Cell("C7_EMISSAO"):SetValue(StoD(TRBPED->C7_EMISSAO))
-         oSection1:Cell("C7_I_DTFAT"):SetValue(StoD(TRBPED->C7_I_DTFAT))
-         oSection1:Cell("C7_DATPRF"):SetValue(StoD(TRBPED->C7_DATPRF))
+         oSection1:Cell("C7_EMISSAO"):SetValue(SToD(TRBPED->C7_EMISSAO))
+         oSection1:Cell("C7_I_DTFAT"):SetValue(SToD(TRBPED->C7_I_DTFAT))
+         oSection1:Cell("C7_DATPRF"):SetValue(SToD(TRBPED->C7_DATPRF))
          oSection1:Cell("A2_NREDUZ"):SetValue(TRBPED->A2_NREDUZ)
          oSection1:Cell("Y1_NOME"):SetValue(TRBPED->Y1_NOME)
          oSection1:Cell("C7_I_APLIC"):SetValue(TRBPED->C7_I_APLIC)
@@ -554,9 +544,9 @@ cFiltro += "  AND SC7.D_E_L_E_T_ = ' ' "
          oSection1:Cell("CONSNOTA"):SetValue(TRBPED->CONSNOTA)
          oSection1:Cell("CONSMSG"):SetValue(TRBPED->C7_OBS )
          oSection1:Cell("C7_CC"):SetValue(TRBPED->C7_CC)
-         oSection1:Printline()
+         oSection1:PrintLine()
       
-         TRBPED->(dbSkip())
+         TRBPED->(DBSkip())
       EndDo
       oSection1:Finish()
       oSection1:Enable()

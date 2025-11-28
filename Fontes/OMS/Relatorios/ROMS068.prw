@@ -10,7 +10,7 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#Include "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -34,7 +34,7 @@ Begin Sequence
    EndIf 
 
    If (Empty(MV_PAR02) .Or. Empty(MV_PAR03)) .And. Empty(MV_PAR01)
-      U_itmsg("É preciso informar a data de emissão inicial e final ou o período de fechamento da comissão, antes de emitir este relatório.","Atenção",,1)
+      U_ITMsg("É preciso informar a data de emissão inicial e final ou o período de fechamento da comissão, antes de emitir este relatório.","Atenção",,1)
 	   Break 
    EndIf 
 
@@ -90,15 +90,15 @@ Begin Sequence
 
       U_ITListBox( 'Relatório de Comissão e Análise Gerencial' ,_aTitulo , _aDados , .T. , 1 )
    Else 
-      U_ItMsg("Não foram encontrados dados para emissão do relatório.","Atenção",,1)
+      U_ITMsg("Não foram encontrados dados para emissão do relatório.","Atenção",,1)
       Break
    EndIf 
 
 End Sequence
 
-U_ItMsg("Termino da emissão do relatório.","Atenção",,1)
+U_ITMsg("Termino da emissão do relatório.","Atenção",,1)
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -131,11 +131,11 @@ Begin Sequence
    _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
 
    If ! Empty(MV_PAR02)
-      _cQry += " AND ZBK_EMISSA >= '"+Dtos(MV_PAR02)+"' "
+      _cQry += " AND ZBK_EMISSA >= '"+DToS(MV_PAR02)+"' "
    EndIf 
 
    If ! Empty(MV_PAR03)
-      _cQry += " AND ZBK_EMISSA <= '" + Dtos(MV_PAR03) + "' "
+      _cQry += " AND ZBK_EMISSA <= '" + DToS(MV_PAR03) + "' "
    EndIf 
 
    If ! Empty(MV_PAR01)
@@ -163,16 +163,16 @@ Begin Sequence
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
    _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
-   //_cQry += " AND ZBK_EMISSA >= '"+Dtos(MV_PAR02)+"' AND ZBK_EMISSA <= '" + Dtos(MV_PAR03) + "' "
+   //_cQry += " AND ZBK_EMISSA >= '"+DToS(MV_PAR02)+"' AND ZBK_EMISSA <= '" + DToS(MV_PAR03) + "' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
 
 //---------------------------------------------------------
    If ! Empty(MV_PAR02)
-      _cQry += " AND ZBK_EMISSA >= '"+Dtos(MV_PAR02)+"' "
+      _cQry += " AND ZBK_EMISSA >= '"+DToS(MV_PAR02)+"' "
    EndIf 
 
    If ! Empty(MV_PAR03)
-      _cQry += " AND ZBK_EMISSA <= '" + Dtos(MV_PAR03) + "' "
+      _cQry += " AND ZBK_EMISSA <= '" + DToS(MV_PAR03) + "' "
    EndIf 
 
    If ! Empty(MV_PAR01)
@@ -286,11 +286,11 @@ Begin Sequence
 
 //---------------------------------------------------------
    If ! Empty(MV_PAR02)
-      _cQry += " AND ZBK_EMISSA >= '"+Dtos(MV_PAR02)+"' "
+      _cQry += " AND ZBK_EMISSA >= '"+DToS(MV_PAR02)+"' "
    EndIf 
 
    If ! Empty(MV_PAR03)
-      _cQry += " AND ZBK_EMISSA <= '" + Dtos(MV_PAR03) + "' "
+      _cQry += " AND ZBK_EMISSA <= '" + DToS(MV_PAR03) + "' "
    EndIf 
 
    If ! Empty(MV_PAR01)
@@ -348,16 +348,16 @@ Begin Sequence
    
    _aDados := {}
 
-   Do While ! TRBZBK->(Eof())   
+   While ! TRBZBK->(Eof())   
       
       IncProc("Gerando dados do Relatório: " + StrZero(_nI,6) + " de " + StrZero(_nTotRegs,6)+"." )
 
-      Aadd(_aDados, {Stod(TRBZBK->ZBK_DTFECH),;  // "Data de Fechamento"      // 1
+      aAdd(_aDados, {SToD(TRBZBK->ZBK_DTFECH),;  // "Data de Fechamento"      // 1
                      TRBZBK->ZBK_VERSAO,;        // "Versão"                  // 2
                      TRBZBK->ZBK_FILDOC,;        // "Filial"				      // 3
                	   TRBZBK->ZBK_TIPO,;          // "Tipo"					      // 4
-               	   Stod(TRBZBK->ZBK_EMISSA),;	 // "Dt. Emissão"	            // 5 
-               	   Stod(TRBZBK->ZBK_BAIXA),;   // "Dt. Baixa"		         // 6
+               	   SToD(TRBZBK->ZBK_EMISSA),;	 // "Dt. Emissão"	            // 5 
+               	   SToD(TRBZBK->ZBK_BAIXA),;   // "Dt. Baixa"		         // 6
                	   TRBZBK->ZBK_DOCTO,;	       // "Documento"		         // 7	
                	   TRBZBK->ZBK_SERIE,;	       // "Parcela"			         // 8	
                      TRBZBK->ZBK_GRPVEN,;	       // "Rede"                    // 9
@@ -398,9 +398,9 @@ Begin Sequence
                	   TRBZBK->ZBK_GRPDSC,;        // "Descrição Grupo Produto" // 44
                      TRBZBK->ZBK_BIMIX})	       // "Mix BI"                  // 45
 
-      TRBZBK->(DbSkip()) 
+      TRBZBK->(DBSkip()) 
    EndDo 
 
 End Sequence 
 
-Return Nil
+Return

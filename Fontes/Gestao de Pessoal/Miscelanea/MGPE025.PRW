@@ -1,36 +1,24 @@
-/*  
+/*
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |   Data     |                              Motivo                       										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 12/05/2023 | Chamado 41896. Alteracao da P8_DATA para o P8_DATAAPO em alguns lugares
-Alex Wallauer | 30/11/2023 | Chamado 45701. NÃO considerar a marcação na SP8 esteja como deletada manualmente (P8_TMPCREP = D)
-Alex Wallauer | 11/12/2023 | Chamado 45801. correção do nome do campo para P8_TPMCREP.
-============================================================================================================================================================
-Analista         - Programador     - Inicio     - Envio    - Chamado - Motivo da Alteração
-------------------------------------------------------------------------------------------------------------------------------------------------------------
-Andre Carvalho   - Igor Melgaço    - 10/06/25   - 20/06/25 - 50981   - Ajustes para processamento de registros já inclusos na SP5
-Andre Carvalho   - Igor Melgaço    - 23/06/25   - 24/06/25 - 50981   - Ajustes para validação do período selecionado de acordo com o MV_PONMES
-============================================================================================================================================================
+Alex Wallauer |11/12/2023| Chamado 45801. Correção do nome do campo para P8_TPMCREP.
+Igor Melgaço  |20/06/2025| Chamado 50981. Ajustes para processamento de registros já inclusos na SP5
+Igor Melgaço  |24/06/2025| Chamado 50981. Ajustes para validação do período selecionado de acordo com o MV_PONMES
+===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-
-#INCLUDE "rwmake.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa--------: MGPE025 // U_MGPE025
 Autor-----------: Igor Melgaço
 Data da Criacao-: 07/03/2023   
-===============================================================================================================================
 Descrição-------: Rotina de apontamento automático para o vale refeição contabilizar pelo registro de jornada. CHAMADO 41896 
-===============================================================================================================================
 Parametros------: NENHUM
-===============================================================================================================================
 Retorno---------: NENHUM
 ===============================================================================================================================
 */
@@ -44,16 +32,16 @@ Local _bOk := {|| U_MGPE025VP(_cPeriodo) } As Block
 MV_PAR01 := dDataBase
 MV_PAR02 := dDataBase
 
-AADD( _aParAux , { 1 , "Data de"	      , MV_PAR01, "@D"	, ""	, ""		, "" , 050 , .F. } )
-AADD( _aParAux , { 1 , "Data ate"         , MV_PAR02, "@D"	, ""	, ""		, "" , 050 , .F. } )
+aAdd( _aParAux , { 1 , "Data de"	      , MV_PAR01, "@D"	, ""	, ""		, "" , 050 , .F. } )
+aAdd( _aParAux , { 1 , "Data ate"         , MV_PAR02, "@D"	, ""	, ""		, "" , 050 , .F. } )
 
 For nI := 1 To Len( _aParAux )
     aAdd( _aParRet , _aParAux[nI][03] )
 Next 
 
-DO WHILE ParamBox( _aParAux , "SELECIONE OS FILTROS" , _aParRet , _bOk , , , , , , , .T. , .T. )
-	FWMSGRUN(,{|oProc|  MGPE025PROC(oProc) },'Aguarde o processamento...','Lendo dados...')
-ENDDO
+While ParamBox( _aParAux , "SELECIONE OS FILTROS" , _aParRet , _bOk , , , , , , , .T. , .T. )
+	FWMsgRun(,{|oProc|  MGPE025PROC(oProc) },'Aguarde o processamento...','Lendo dados...')
+EndDo
 
 Return
 
@@ -62,15 +50,12 @@ Return
 Programa--------: MGPE025PROC 
 Autor-----------: Igor Melgaço
 Data da Criacao-: 11/08/2022   
-===============================================================================================================================
 Descrição-------: Rotina de Processamento da Listagem. 
-===============================================================================================================================
 Parametros------: oProc = Objeto da regua de processamento
-===============================================================================================================================
 Retorno---------: NENHUM
 ===============================================================================================================================
 */
-STATIC Function MGPE025PROC(oProc As Object)
+Static Function MGPE025PROC(oProc As Object)
 Local _aDados := {} As Array
 Local _aCab := {} As Array
 Local i := 0 As Numeric
@@ -91,26 +76,26 @@ Local lExcluir := .F. As Logical
 _aDados := MGPE025QRY(oProc)
 
 If Len(_aDados) = 0 
-    U_ITMSG("Não há dados no periodo.","Envio do E-MAIL",,3)
+    U_ITMsg("Não há dados no periodo.","Envio do E-MAIL",,3)
 Else
 	_cTitulo := "Apontamento automático para o vale refeição contabilizar pelo registro de jornada."
 	
-	AADD(_aCab," ")
-	AADD(_aCab,"Filial")
-	AADD(_aCab,"Matricula")
-	AADD(_aCab,"Nome")
-	AADD(_aCab,"Data")
-	AADD(_aCab,"Centro de Custo")
-	AADD(_aCab,"Valor Ref")
-	AADD(_aCab,"Desc")
+	aAdd(_aCab," ")
+	aAdd(_aCab,"Filial")
+	aAdd(_aCab,"Matricula")
+	aAdd(_aCab,"Nome")
+	aAdd(_aCab,"Data")
+	aAdd(_aCab,"Centro de Custo")
+	aAdd(_aCab,"Valor Ref")
+	aAdd(_aCab,"Desc")
 
 	_nTotal := Len(_aDados)
 	For i := 1 to _nTotal
 		_aLinha := {}
 		For z := 1 to Len(_aCab)
-			AADD(_aLinha, _aDados[i,z]) 
+			aAdd(_aLinha, _aDados[i,z]) 
 		Next
-		AADD(_aColXML, _aLinha)
+		aAdd(_aColXML, _aLinha)
 		If !_aDados[i,1]
 			_lExistente := .T.
 		Else 
@@ -119,15 +104,13 @@ Else
 	Next
 
 	_aButtons := {}
-    AADD(_aButtons,{"LEGENDA",{||  U_MGPE025L() },"Legenda", "Legenda" }) 
+    aAdd(_aButtons,{"LEGENDA",{||  U_MGPE025L() },"Legenda", "Legenda" }) 
 
-	//					  //  , _aCols   ,_lMaxSiz,_nTipo,_cMsgTop, _lSelUnc ,_aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab , bDblClk , _aColXML , bCondMarca )
-	//If U_ITListBox(_cTitulo,_aCab,_aDados   , .T.    , 1    ,        ,          ,        ,         ,     ,        ,          ,       ,         ,          ,            )
 	_cMsgTop := ""
 	   //ITListBox( _cTitAux , _aHeader , _aCols     , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab , bDblClk , _aColXML , bCondMarca,_bLegenda   ,_lHasOk,_bHeadClk,_aSX1)
     If U_ITListBox( _cTitulo , _aCab     , _aColXML   , .T.      , 4      , _cMsgTop ,          ,         ,         ,     ,        , _aButtons,       ,         ,          ,           ,            , .T.   ,         ,     )
  
-		If _lExistente .and. _lNovo
+		If _lExistente .And. _lNovo
 			aBotoes    := {"Substituir os Existentes e Incluir os Novos","Somente Incluir os Novos","Cancelar"}
 			cSubTitulo := "Já existem registros de almoço existentes para este período selecionado!"
 			cMensagem  := "O que desja fazer com este conjunto de registros?"
@@ -144,7 +127,7 @@ Else
 				EndIf
 				lContinua := .T.
 			EndIf
-		ElseIf _lExistente .and. !_lNovo
+		ElseIf _lExistente .And. !_lNovo
 			aBotoes    := {"Substituir os Existentes","Cancelar"}
 			cSubTitulo := "Para todo este conjunto de registros já existem registros de almoço existentes para este período selecionado!"
 			cMensagem  := "O que desja fazer com este conjunto de registros?"
@@ -157,7 +140,7 @@ Else
 				lExcluir := .T.
 				lContinua := .T.
 			EndIf
-		ElseIf !_lExistente .and. _lNovo
+		ElseIf !_lExistente .And. _lNovo
 			lContinua := .T.
 			lExcluir := .F.
 		EndIf
@@ -165,13 +148,13 @@ Else
 		If lContinua
 			Begin Transaction
 				For i := 1 to _nTotal
-					If !Empty(Alltrim(_aDados[i,9]))	
+					If !Empty(AllTrim(_aDados[i,9]))	
 						If lExcluir
 							DBSelectArea("SP5")
 							SP5->(DBGoTo(_aDados[i,10]))
-							RECLOCK( "SP5", .F. )
+							RecLock( "SP5", .F. )
 							SP5->(DbDelete())
-							SP5->(MSUNLOCK())
+							SP5->(MSUnLock())
 							_lContinua := .T.
 						Else
 							_lContinua := .F.
@@ -182,14 +165,14 @@ Else
 
 					If _lContinua
 						DBSelectArea("SP5")
-						RECLOCK( "SP5", .T. )
+						RecLock( "SP5", .T. )
 						SP5->P5_FILIAL 	:= _aDados[i,2]
 						SP5->P5_MAT 	:= _aDados[i,3]
 						SP5->P5_DATA 	:= CTOD(_aDados[i,5])
 						SP5->P5_HORA 	:= 12
 						SP5->P5_CODREF 	:= "01"
 						SP5->P5_TIPOREF := "02" // Almoço
-						SP5->P5_SEQ		:= "03" //fDesc("SP1","02","P1_SEQ",TamSx3("P1_SEQ")[1],NIL,2)
+						SP5->P5_SEQ		:= "03" //fDesc("SP1","02","P1_SEQ",TamSX3("P1_SEQ")[1],NIL,2)
 						SP5->P5_SEQMARC := "01"
 						SP5->P5_GERAFOL := "S"
 						SP5->P5_PD 		:= "035"
@@ -201,17 +184,17 @@ Else
 						SP5->P5_FLAG 	:= "I"
 						SP5->P5_APONTA 	:= "N"
 						SP5->P5_DATAAPO := Date()
-						SP5->(MSUNLOCK())
+						SP5->(MSUnLock())
 					EndIf
 
 					_nAtual++
-					oProc:cCaption := ("Gravando registro "+Alltrim(cValToChar(_nAtual)) + " de " + Alltrim(cValToChar(_nTotal)) + " ...")
+					oProc:cCaption := ("Gravando registro "+AllTrim(cValToChar(_nAtual)) + " de " + AllTrim(cValToChar(_nTotal)) + " ...")
 					ProcessMessages()
 				Next
 			End Transaction
 
 			If _nAtual > 0
-				U_ITMSG("Processamento concluido. Foram processados "+Alltrim(Str(_nAtual))+" registros!","Apontamento automático para o vale refeição","",2)
+				U_ITMsg("Processamento concluido. Foram processados "+AllTrim(Str(_nAtual))+" registros!","Apontamento automático para o vale refeição","",2)
 			EndIf
 		EndIf
 	EndIf
@@ -225,15 +208,12 @@ Return
 Programa--------: MGPE025QRY 
 Autor-----------: Igor Melgaço
 Data da Criacao-: 06/03/2023
-===============================================================================================================================
 Descrição-------: Processamento da Query 
-===============================================================================================================================
 Parametros------: oProc = Objeto da regua de processamento
-===============================================================================================================================
 Retorno---------: _aDados = Dados de retorno do processamento da query
 ===============================================================================================================================
 */
-STATIC Function MGPE025QRY(oProc As Object) As Array
+Static Function MGPE025QRY(oProc As Object) As Array
 Local _cAliasQRY := '' As Character
 Local _cFiltro := '' As Character
 Local _aDados := {} As Array
@@ -248,7 +228,7 @@ _cAliasQRY := GetNextAlias()
 _cFiltro += "% "
 _cFiltro += " SRA.D_E_L_E_T_  = ' ' "
 _cFiltro += " AND P8_FILIAL  = '" + xFilial("SP8") + "' "
-_cFiltro += " AND QRY1.P8_DATAAPO BETWEEN '" + DTOS(MV_PAR01) + "' AND '"+ DTOS(MV_PAR02) + "'"
+_cFiltro += " AND QRY1.P8_DATAAPO BETWEEN '" + DToS(MV_PAR01) + "' AND '"+ DToS(MV_PAR02) + "'"
 _cFiltro += " %"
 
 BeginSql Alias _cAliasQRY
@@ -272,21 +252,21 @@ BeginSql Alias _cAliasQRY
 
 EndSql
 
-DbSelectArea(_cAliasQRY)
+DBSelectArea(_cAliasQRY)
 (_cAliasQRY)->(DBGoTop())
-If !(_cAliasQRY)->(EOF())
-	DbSelectArea(_cAliasQRY)
+If !(_cAliasQRY)->(Eof())
+	DBSelectArea(_cAliasQRY)
 	COUNT to nTotal
 	(_cAliasQRY)->(DBGoTop())
-	Do While !(_cAliasQRY)->(EOF())
+	While !(_cAliasQRY)->(Eof())
 		_nAtual++
 
 		oProc:cCaption := ("Lendo registro "+cValToChar(_nAtual) + " de " + cValToChar(nTotal) + "...")
 		ProcessMessages()
 
-		Dbselectarea("SPM")
-		SPM->(DBSETORDER( 2 ))
-		If SPM->(Dbseek(xFilial("SPM")+'ALMOCO'))
+		DBSelectArea("SPM")
+		SPM->(DBSetOrder( 2 ))
+		If SPM->(DBSeek(xFilial("SPM")+'ALMOCO'))
 			nValref := SPM->PM_VALREF 
 			nPerFun := SPM->PM_PERCFUN
 		Else
@@ -294,17 +274,17 @@ If !(_cAliasQRY)->(EOF())
 			nPerFun := 0
 		EndIf
 
-		If !Empty( Alltrim((_cAliasQRY)->P5_MAT) )
+		If !Empty( AllTrim((_cAliasQRY)->P5_MAT) )
 			_lReproc := .F.
 		Else
 			_lReproc := .T.
 		EndIf
 
-		AADD(_aDados,{  _lReproc,;
+		aAdd(_aDados,{  _lReproc,;
 						(_cAliasQRY)->P8_FILIAL,;
 						(_cAliasQRY)->P8_MAT,;
 						(_cAliasQRY)->RA_NOME,;
-						DTOC(StoD((_cAliasQRY)->P8_DATAAPO)),;
+						DToC(SToD((_cAliasQRY)->P8_DATAAPO)),;
 						(_cAliasQRY)->RA_CC,;
 						nValref,;
 						Round(nValref * (nPerFun / 100),2),;
@@ -316,20 +296,15 @@ If !(_cAliasQRY)->(EOF())
 	(_cAliasQRY)->( DBCloseArea() )
 EndIf
 
-RETURN _aDados
-
-
+Return _aDados
 
 /*
 ===============================================================================================================================
 Programa----------: MGPE025L
 Autor-------------: Igor Melgaço
 Data da Criacao---: 12/10/2023
-===============================================================================================================================
 Descrição---------: Monta Legenda
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: .T.
 ===============================================================================================================================
 */
@@ -347,11 +322,8 @@ Return .T.
 Programa----------: MGPE025VP
 Autor-------------: Igor Melgaço
 Data da Criacao---: 12/10/2023
-===============================================================================================================================
 Descrição---------: Valida o periodo digitado pelo usuario
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: lRet
 ===============================================================================================================================
 */
@@ -364,13 +336,13 @@ _cPeriodo := StrTran(_cPeriodo,"-","")
 _cPeriodo := StrTran(_cPeriodo,".","")
 _cPeriodo := StrTran(_cPeriodo,"|","")
 
-_dDataIni := STOD(Subs(_cPeriodo,1,8)) //Parametro contem data de Incio e Fim, entao pega a data de fim
+_dDataIni := SToD(Subs(_cPeriodo,1,8)) //Parametro contem data de Incio e Fim, entao pega a data de fim
 
-If Empty(MV_PAR01) .OR. Empty(MV_PAR02) 
-	U_ITMSG("O periodo digitado não é válido.","Apontamento automático para o vale refeição","Os campos 'Data de' e 'Data ate' precisam ser preenchidos.",3)
+If Empty(MV_PAR01) .Or. Empty(MV_PAR02) 
+	U_ITMsg("O periodo digitado não é válido.","Apontamento automático para o vale refeição","Os campos 'Data de' e 'Data ate' precisam ser preenchidos.",3)
 	lRet := .F.
-ElseIf !(MV_PAR01 >= _dDataIni .AND. MV_PAR02 >= _dDataIni)
-	U_ITMSG("O periodo digitado não está dentro do intervalo de datas permitido.","Apontamento automático para o vale refeição","Digite um periodo superior a "+DTOC(_dDataIni)+".",3)
+ElseIf !(MV_PAR01 >= _dDataIni .And. MV_PAR02 >= _dDataIni)
+	U_ITMsg("O periodo digitado não está dentro do intervalo de datas permitido.","Apontamento automático para o vale refeição","Digite um periodo superior a "+DToC(_dDataIni)+".",3)
 	lRet := .F.
 EndIf
 	

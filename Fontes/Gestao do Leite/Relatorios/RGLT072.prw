@@ -2,26 +2,20 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT072
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 30/03/2023
-===============================================================================================================================
 Descrição---------: Relatório Mov. de Nfes - Cooperativas do Mix - Chamado 43437
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -40,11 +34,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 30/03/2023
-===============================================================================================================================
 Descrição---------: Processa a montagem do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -89,11 +80,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 30/03/2023
-===============================================================================================================================
 Descrição---------: Processa a impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -109,10 +97,10 @@ Local _lPlanilha  := oReport:nDevice == 4
 If MV_PAR01 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"SF1")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -155,7 +143,7 @@ oReport:SetMsgPrint("Consultando registros no Banco de Dados")
 oReport:SetMeter(0)
 
 BeginSql alias _cAlias
-SELECT F1_FILIAL, F1_EMISSAO, F1_DTDIGIT, CASE WHEN ORDEM = '1' THEN 'RECEPCAO' WHEN ORDEM = '2' THEN 'NFE' ELSE 'MIX'END TIPO,
+SELECT F1_FILIAL, F1_EMISSAO, F1_DTDIGIT, Case WHEN ORDEM = '1' THEN 'RECEPCAO' WHEN ORDEM = '2' THEN 'NFE' Else 'MIX'END TIPO,
        F1_DOC, F1_SERIE, A2_COD, A2_NOME, A2_NREDUZ, D1_QUANT,  D1_VUNIT, D1_TOTAL, F1_L_MIX
   FROM (SELECT F1_FILIAL, '2' ORDEM, F1_EMISSAO, F1_DTDIGIT, F1_DOC, F1_SERIE, F1_FORNECE, F1_LOJA,
                SUM(D1_QUANT) D1_QUANT, SUM(D1_VUNIT) D1_VUNIT, SUM(D1_TOTAL) D1_TOTAL, F1_L_MIX
@@ -223,14 +211,14 @@ oReport:Section(1):Init()
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(0)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cAux := (_cAlias)->F1_L_MIX + " - " + (_cAlias)->A2_COD + " - " + (_cAlias)->A2_NOME
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

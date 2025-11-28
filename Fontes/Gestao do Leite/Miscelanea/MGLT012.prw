@@ -2,34 +2,24 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 14/09/2020 | Correção do ERROR.LOG do pergunte. Chamado 34141
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 25/03/2022 | Migração das informações financeiras para as tabelas FKs. Chamado 39465
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 12/04/2024 | Corrigida a exclusão das baixas. Chamado 46931
+Lucas Borges  |14/09/2020| Chamado 34141. Correção do ERROR.LOG do pergunte.
+Lucas Borges  |25/03/2022| Chamado 39465. Migração das informações financeiras para as tabelas FKs.
+Lucas Borges  |12/04/2024| Chamado 46931. Corrigida a exclusão das baixas.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
-#INCLUDE "TOPCONN.CH"
-
-#Define CRLF		CHR(13)+CHR(10)
+#Include "TOTVS.ch"
+#Include "TOPCONN.CH"
 
 /*
 ===============================================================================================================================
 Programa----------: MGLT012
 Autor-------------: Wodson Reis
 Data da Criacao---: 03/12/2008
-===============================================================================================================================
 Descrição---------: Rotina desenvolvida para possibilitar o CANCELAMENTO do Acerto do Frete junto aos Fretistas.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -58,11 +48,8 @@ Return
 Programa----------: MGLT012R
 Autor-------------: Wodson Reis
 Data da Criacao---: 03/12/2008
-===============================================================================================================================
 Descrição---------: Rotina que controla o processamento do cancelamento
-===============================================================================================================================
 Parametros--------: _oProces
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -111,7 +98,7 @@ BeginSql alias _cAlias
         AND ZLF_A2COD BETWEEN %exp:MV_PAR03% AND %exp:MV_PAR04%
         AND ZLF_A2LOJA BETWEEN %exp:MV_PAR05% AND %exp:MV_PAR06%
         AND ZLF_CODZLE = %exp:_cCodMix%
-        AND SUBSTR(ZLF_A2COD,1,1) = 'G'
+        AND SubStr(ZLF_A2COD,1,1) = 'G'
         AND ZLF_ACERTO = 'S'
         AND ZLF_TP_MIX = 'F'
         %exp:_cQuery%
@@ -121,7 +108,7 @@ BeginSql alias _cAlias
 EndSql
 
 Count To _nReg
-(_cAlias)->( DbGoTop() )
+(_cAlias)->( DBGoTop() )
 _oProces:SetRegua1( _nReg )
 
 If _nReg <= 0
@@ -134,12 +121,12 @@ EndIf
 Begin Transaction
 	While (_cAlias)->( !Eof() )
 		
-		DbSelectArea("SA2")
-		SA2->(DbSetOrder(1))
-		If SA2->(DbSeek(xFILIAL("SA2")+(_cAlias)->ZLF_A2COD+(_cAlias)->ZLF_A2LOJA))
+		DBSelectArea("SA2")
+		SA2->(DBSetOrder(1))
+		If SA2->(DBSeek(xFilial("SA2")+(_cAlias)->ZLF_A2COD+(_cAlias)->ZLF_A2LOJA))
 			_cCodSetor := (_cAlias)->ZLF_SETOR
 			
-			_oProces:IncRegua1( "Fretista "+Alltrim(Str(nCont))+" de "+Alltrim(Str(_nReg))+" -> "+SA2->A2_COD +"/"+SA2->A2_LOJA +" - "+ALLTRIM(SA2->A2_NOME) )
+			_oProces:IncRegua1( "Fretista "+AllTrim(Str(nCont))+" de "+AllTrim(Str(_nReg))+" -> "+SA2->A2_COD +"/"+SA2->A2_LOJA +" - "+AllTrim(SA2->A2_NOME) )
 			
 			If !_lDeuErro
 				MGLT012C(_oProces,_cThread,_cMotBaixa,_cCodMix,_cCodSetor,@_lDeuErro)
@@ -175,7 +162,7 @@ Begin Transaction
 				//================================================================================
 				If !_lDeuErro
 					_cQuery := " UPDATE "+ RetSqlName("SE2")
-					_cQuery += " SET E2_DATALIB = '"+dtos(dDataBase)+"', E2_USUALIB = '"+cUserName+"' ,"
+					_cQuery += " SET E2_DATALIB = '"+DToS(dDataBase)+"', E2_USUALIB = '"+cUserName+"' ,"
 					_cQuery += " 	E2_BAIXA = ' ', E2_MOVIMEN = ' ', E2_SDACRES = E2_ACRESC"
 					_cQuery += " WHERE D_E_L_E_T_ = ' ' "
 					_cQuery += " AND E2_PREFIXO = '"+_cPrefixo+"'"
@@ -231,7 +218,7 @@ Begin Transaction
 		(_cAlias)->( DBSkip() )
 	EndDo
 		
-	(_cAlias)->(DbCloseArea())
+	(_cAlias)->(DBCloseArea())
 
 	_oProces:SetRegua1(1)
 	_oProces:IncRegua1( "Fim do Acerto - Verificando Status..." )
@@ -251,7 +238,7 @@ Begin Transaction
 	If (_cAlias)->QTD > 0
 		ZLE->( RecLock( "ZLE" , .F. ) )
 		ZLE->ZLE_STATUS := 'P'
-		ZLE->( MsUnLock() )
+		ZLE->( MSUnLock() )
 	EndIf
 	
 	(_cAlias)->(DBCloseArea())
@@ -267,11 +254,8 @@ Return
 Programa----------: MGLT012C
 Autor-------------: Wodson Reis
 Data da Criacao---: 03/12/2008
-===============================================================================================================================
 Descrição---------: Cancela Baixa de titulo no contas a pagar via SigaAuto.
-===============================================================================================================================
 Parametros--------: _oProces,_cThread,_cMotBaixa,_cCodMix,_cCodSetor,_lDeuErro
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -283,7 +267,7 @@ Local _nCont		:= 1
 Local _nTotReg		:= 0
 Local nModAnt		:= nModulo
 Local cModAnt		:= cModulo
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local _aAutoSE2		:= {}
 Local _nX		:= 0
 Local _nSeq		:= 0
@@ -327,9 +311,9 @@ BeginSql alias _cAlias
 EndSql		
 
 Count To _nTotReg
-(_cAlias)->( DbGoTop() )
+(_cAlias)->( DBGoTop() )
 _oProces:SetRegua2(_nTotReg)
-DbSelectArea("SE2")
+DBSelectArea("SE2")
 	
 While (_cAlias)->( !Eof() ) .And. !_lDeuErro
 	//Manter SE2 posicionada pois as rotinas padrões possuem essa premissa
@@ -337,7 +321,7 @@ While (_cAlias)->( !Eof() ) .And. !_lDeuErro
 	lMsErroAuto	:= .F.
 	lMsHelpAuto	:= .T.
 
-	_oProces:IncRegua2( "Cancelamento Baixa - Tarefa "+ Alltrim( Str( _nCont ) ) +" de "+ Alltrim( Str( _nTotReg ) ) )
+	_oProces:IncRegua2( "Cancelamento Baixa - Tarefa "+ AllTrim( Str( _nCont ) ) +" de "+ AllTrim( Str( _nTotReg ) ) )
 	_nSeq := 0
 
 	_aAutoSE2 := {	{ "E2_PREFIXO"		, (_cAlias)->E2_PREFIXO						, Nil },;
@@ -364,7 +348,7 @@ While (_cAlias)->( !Eof() ) .And. !_lDeuErro
 	//================================================================================
 	aBaixaSE5 := Sel080Baixa("VL /BA /CP /",SE2->E2_PREFIXO,SE2->E2_NUM,SE2->E2_PARCELA,SE2->E2_TIPO,0,0,SE2->E2_FORNECE,SE2->E2_LOJA,.F.,.F.,.F.,0,.F.,.T.)
 	For _nX := 1 To Len(aBaixaSE5)
-		If Substr(aBaixaSE5[_nX],Len(aBaixaSE5[_nX])-1,2) == (_cAlias)->FK2_SEQ
+		If SubStr(aBaixaSE5[_nX],Len(aBaixaSE5[_nX])-1,2) == (_cAlias)->FK2_SEQ
 			_nSeq := _nX
 			Exit
 		EndIf
@@ -431,8 +415,8 @@ While (_cAlias)->( !Eof() ) .And. !_lDeuErro
 	(_cAlias)->( DBSkip() )
 EndDo
 
-(_cAlias)->( DbCloseArea() )
-RestArea(_aArea)
+(_cAlias)->( DBCloseArea() )
+FWRestArea(_aArea)
 
 Return
 
@@ -441,11 +425,8 @@ Return
 Programa----------: MGLT012E
 Autor-------------: Wodson Reis
 Data da Criacao---: 03/12/2008
-===============================================================================================================================
 Descrição---------: Exlcui titulo no contas a pagar via SigaAuto.
-===============================================================================================================================
 Parametros--------: Objeto de Processamento
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -456,7 +437,7 @@ Local _nCont		:= 1
 Local _nTotReg		:= 0
 Local nModAnt		:= nModulo
 Local cModAnt		:= cModulo
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local _aAutoSE2		:= {}
 
 Private lMsErroAuto	:= .F.
@@ -480,14 +461,14 @@ BeginSql alias _cAlias
 EndSql
 		
 Count To _nTotReg
-(_cAlias)->( DbGoTop() )
+(_cAlias)->( DBGoTop() )
 _oProces:SetRegua2(_nTotReg)
-DbSelectArea("SE2")
+DBSelectArea("SE2")
 
 While (_cAlias)->(!Eof()) .And. !_lDeuErro
-	_oProces:IncRegua2("Exclusao Titulo - Tarefa "+Alltrim(Str(_nCont))+" de "+Alltrim(Str(_nTotReg)))
-	SE2->(DbSetOrder(1))
-	If SE2->(DbSeek(xFilial("SE2")+(_cAlias)->(E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO)+SA2->(A2_COD+A2_LOJA)))
+	_oProces:IncRegua2("Exclusao Titulo - Tarefa "+AllTrim(Str(_nCont))+" de "+AllTrim(Str(_nTotReg)))
+	SE2->(DBSetOrder(1))
+	If SE2->(DBSeek(xFilial("SE2")+(_cAlias)->(E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO)+SA2->(A2_COD+A2_LOJA)))
 		
 		//================================================================================
 		//Array com os dados a serem passados para o SigaAuto.
@@ -515,7 +496,7 @@ While (_cAlias)->(!Eof()) .And. !_lDeuErro
 	Else
 		_lDeuErro := .T.
 		_oProces:SaveLog("Thread:"+_cThread+" MGLT01210 - Erro - Título não encontrado para exclusão - "+xFilial("SE2")+(_cAlias)->(E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO)+SA2->(A2_COD+A2_LOJA))
-		MsgStop("O titulo "+xFILIAL("SE2")+(_cAlias)->(E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO)+;
+		MsgStop("O titulo "+xFilial("SE2")+(_cAlias)->(E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO)+;
 				" não foi encontrado! Fretista: "+SA2->A2_COD+"/"+SA2->A2_LOJA+"-"+SA2->A2_NOME	,;
 				"Verifique no financeiro se este titulo existe, pois o mesmo não foi encontrado. Favor acionar o Suporte.","MGLT01210")
 	EndIf
@@ -526,7 +507,7 @@ While (_cAlias)->(!Eof()) .And. !_lDeuErro
 	If lMsErroAuto
 		_lDeuErro := .T.
 		_oProces:SaveLog("Thread:"+_cThread+" MGLT01211 - Erro - Execauto de exclusão Contas a Pagar - "+xFilial("SE2")+(_cAlias)->(E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO)+SA2->(A2_COD+A2_LOJA))
-		MsgStop("O titulo "+ xFILIAL("SE2") + SE2->(E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO )+;
+		MsgStop("O titulo "+ xFilial("SE2") + SE2->(E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO )+;
 						" não foi excluido! Fretista: "+ SA2->A2_COD +"/"+ SA2->A2_LOJA +" - "+ SA2->A2_NOME,;
 						"Verifique no financeiro se este titulo ja foi baixado ou o motivo pelo qual não pode ser excluído. Favor acionar o Suporte.","MGLT01211")
 		Mostraerro()
@@ -535,7 +516,7 @@ While (_cAlias)->(!Eof()) .And. !_lDeuErro
 	(_cAlias)->( DBSkip() )
 EndDo
 
-(_cAlias)->( DbCloseArea() )
-RestArea( _aArea )
+(_cAlias)->( DBCloseArea() )
+FWRestArea( _aArea )
 
 Return

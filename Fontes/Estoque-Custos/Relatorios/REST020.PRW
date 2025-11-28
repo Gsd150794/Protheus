@@ -6,15 +6,12 @@
 -------------------------------------------------------------------------------------------------------------------------------
 Alex Wallauer |17/04/2023| Chamado 43586. Inclusao da frase "ESTOQUE LIBERADO".
 Lucas Borges  |09/05/2025| Chamado 50617. Corrigir chamada estática no nome das tabelas do sistema
-===============================================================================================================================
-Analista       - Programador     - Inicio     - Envio    - Chamado - Motivo de Alteração
-===============================================================================================================================
-Lucas          - Alex Wallauer   - 02/05/2025 - 06/05/25 - 50525   - Ajuste para remoção de diretório local C:\SMARTCLIENT\.
+Alex Wallauer |06/05/2025| Chamado 50525. Ajuste para remoção de diretório Local C:\SMARTCLIENT\.
 ===============================================================================================================================
 */
 
-#INCLUDE "RWMAKE.CH"
-#INCLUDE "PROTHEUS.CH"
+#Include "RWMAKE.CH"
+#Include "TOTVS.ch"
 #INCLUDE "RPTDEF.CH"
 #INCLUDE "FWPrintSetup.ch"
 
@@ -37,12 +34,12 @@ Retorno-----------: Nenhum
 */
 User Function REST020
 
-LOCAL nI
-LOCAL _bOK:=NIL
-PRIVATE _aParAux:={}
-PRIVATE _aParRet:={}
-PRIVATE _aItensLote:= {}
-PRIVATE _cDifVal:=""
+Local nI
+Local _bOK:=NIL
+Private _aParAux:={}
+Private _aParRet:={}
+Private _aItensLote:= {}
+Private _cDifVal:=""
 
 _aItalac_F3:={}
 
@@ -50,100 +47,100 @@ _aItalac_F3:={}
 _BSelectSB8:={|| "SELECT DISTINCT B8_LOCAL, NNR_DESCRI  FROM "+RETSQLNAME("SB8")+" SB8, "+RETSQLNAME("NNR")+" NNR WHERE"+;
                  " B8_FILIAL = '"+cFilAnt+"' AND"+;
                  " B8_LOCAL = NNR_CODIGO AND"+;
-				 IF(!EMPTY(MV_PAR02)," B8_LOTECTL IN "+FormatIn(ALLTRIM(MV_PAR02),";")+" AND","")+;
-				 IF(!EMPTY(MV_PAR03)," B8_PRODUTO IN "+FormatIn(ALLTRIM(MV_PAR03),";")+" AND","")+;
+				 If(!Empty(MV_PAR02)," B8_LOTECTL IN "+FormatIn(AllTrim(MV_PAR02),";")+" AND","")+;
+				 If(!Empty(MV_PAR03)," B8_PRODUTO IN "+FormatIn(AllTrim(MV_PAR03),";")+" AND","")+;
 				 " SB8.D_E_L_E_T_ = ' ' AND NNR.D_E_L_E_T_ = ' ' ORDER BY B8_LOCAL " }
 
 //Italac_F3:={}         1           2         3                          4                       5            6             7         8             9         10         11        12
 //AD(_aItalac_F3,{"1CPO_CAMPO1",_cTabela,_nCpoChave               , _nCpoDesc               ,_bCondTab , _cTitAux      , _nTamChv , _aDados  , _nMaxSel , _lFilAtual,_cMVRET,_bValida})
-AADD(_aItalac_F3,{"MV_PAR01"   ,_BSelectSB8,{|Tab|(Tab)->B8_LOCAL},{|Tab| (Tab)->NNR_DESCRI},          ,"Locais"       ,          ,          ,        ,.F.        ,       , } )
+aAdd(_aItalac_F3,{"MV_PAR01"   ,_BSelectSB8,{|Tab|(Tab)->B8_LOCAL},{|Tab| (Tab)->NNR_DESCRI},          ,"Locais"       ,          ,          ,        ,.F.        ,       , } )
 
 _BSelectSB8:={|| "SELECT DISTINCT B8_LOTECTL, B8_DFABRIC, B8_DTVALID FROM "+RETSQLNAME("SB8")+" SB8 WHERE"+;
                  " B8_FILIAL = '"+cFilAnt+"' AND"+;
-                 " SUBSTR(B8_LOTECTL,1,1) <> '#' AND"+;
+                 " SubStr(B8_LOTECTL,1,1) <> '#' AND"+;
                  " B8_SALDO > 0 AND"+;
-				 IF(!EMPTY(MV_PAR01)," B8_LOCAL   IN "+FormatIn(ALLTRIM(MV_PAR01),";")+" AND","")+;
-				 IF(!EMPTY(MV_PAR03)," B8_PRODUTO IN "+FormatIn(ALLTRIM(MV_PAR03),";")+" AND","")+;
+				 If(!Empty(MV_PAR01)," B8_LOCAL   IN "+FormatIn(AllTrim(MV_PAR01),";")+" AND","")+;
+				 If(!Empty(MV_PAR03)," B8_PRODUTO IN "+FormatIn(AllTrim(MV_PAR03),";")+" AND","")+;
 				 " D_E_L_E_T_ = ' ' ORDER BY B8_LOTECTL " }
 
 //Italac_F3:={}         1           2         3                                   4                                                                                        5            6             7             8             9         10         11        12
 //AD(_aItalac_F3,{"1CPO_CAMPO1",_cTabela,_nCpoChave                         , _nCpoDesc                                                                              ,_bCondTab , _cTitAux, _nTamChv            , _aDados  , _nMaxSel , _lFilAtual,_cMVRET,_bValida})
-AADD(_aItalac_F3,{"MV_PAR02"   ,_BSelectSB8,{|Tab| (Tab)->B8_LOTECTL },{|Tab| "Dt Fab.: "+DTOC(STOD((Tab)->B8_DFABRIC))+", Dt Val.: "+DTOC(STOD((Tab)->B8_DTVALID)) },          ,"Lotes"  , LEN(SB8->B8_LOTECTL),          ,           ,.F.       ,       , } )
+aAdd(_aItalac_F3,{"MV_PAR02"   ,_BSelectSB8,{|Tab| (Tab)->B8_LOTECTL },{|Tab| "Dt Fab.: "+DToC(SToD((Tab)->B8_DFABRIC))+", Dt Val.: "+DToC(SToD((Tab)->B8_DTVALID)) },          ,"Lotes"  , Len(SB8->B8_LOTECTL),          ,           ,.F.       ,       , } )
 
 
 _bSelItemSB8:={|| "SELECT DISTINCT B8_PRODUTO, B1_DESC  FROM "+RETSQLNAME("SB8")+" SB8,"+RETSQLNAME("SB1")+" SB1 WHERE"+;
                  " B8_FILIAL = '"+cFilAnt+"' AND"+;
                  " B8_PRODUTO = B1_COD AND"+;
                  " B8_PRODUTO <> '   ' AND"+;
-				 IF(!EMPTY(MV_PAR01)," B8_LOCAL   IN "+FormatIn(ALLTRIM(MV_PAR01),";")+" AND","")+;
-				 IF(!EMPTY(MV_PAR02)," B8_LOTECTL IN "+FormatIn(ALLTRIM(MV_PAR02),";")+" AND","")+;
+				 If(!Empty(MV_PAR01)," B8_LOCAL   IN "+FormatIn(AllTrim(MV_PAR01),";")+" AND","")+;
+				 If(!Empty(MV_PAR02)," B8_LOTECTL IN "+FormatIn(AllTrim(MV_PAR02),";")+" AND","")+;
 				 " SB8.D_E_L_E_T_ = ' ' AND SB1.D_E_L_E_T_ = ' '  ORDER BY B8_PRODUTO " }
 
 //Italac_F3:={}         1           2         3                                   4                 5            6             7             8             9         10         11        12
 //AD(_aItalac_F3,{"1CPO_CAMPO1",_cTabela,_nCpoChave                         , _nCpoDesc       ,_bCondTab , _cTitAux, _nTamChv  , _aDados  , _nMaxSel , _lFilAtual,_cMVRET,_bValida})
-AADD(_aItalac_F3,{"MV_PAR03"   ,_bSelItemSB8,{|Tab|AllTrim((Tab)->B8_PRODUTO)},{|Tab|(Tab)->B1_DESC}   , ,"Produtos", 11       ,          ,        ,.F.        ,       , } )
+aAdd(_aItalac_F3,{"MV_PAR03"   ,_bSelItemSB8,{|Tab|AllTrim((Tab)->B8_PRODUTO)},{|Tab|(Tab)->B1_DESC}   , ,"Produtos", 11       ,          ,        ,.F.        ,       , } )
 
 aTitCol:={}
-AADD(aTitCol,"Local")          //01
-AADD(aTitCol,"Lote")           //02
-AADD(aTitCol,"Data Fabricacao")//03
-AADD(aTitCol,"Data Validade")  //04
-AADD(aTitCol,"Produto")        //05
-AADD(aTitCol,"Descricao")      //06
-nPosDes:=LEN(aTitCol)
-AADD(aTitCol,"Saldo")          //07
-AADD(aTitCol,"Qtde Etiquetas") //08
-AADD(aTitCol,"Registro")       //09
+aAdd(aTitCol,"Local")          //01
+aAdd(aTitCol,"Lote")           //02
+aAdd(aTitCol,"Data Fabricacao")//03
+aAdd(aTitCol,"Data Validade")  //04
+aAdd(aTitCol,"Produto")        //05
+aAdd(aTitCol,"Descricao")      //06
+nPosDes:=Len(aTitCol)
+aAdd(aTitCol,"Saldo")          //07
+aAdd(aTitCol,"Qtde Etiquetas") //08
+aAdd(aTitCol,"Registro")       //09
 
 
-_lNovo:=U_ITMSG( "IMPRESSAO: É Referente a lote Novo ou Existente ? ",'IMPRESSAO',,2,2,3,,"NOVO","EXISTENTE")
+_lNovo:=U_ITMsg( "IMPRESSAO: É Referente a lote Novo ou Existente ? ",'IMPRESSAO',,2,2,3,,"NOVO","EXISTENTE")
 
-DO WHILE .T.
+While .T.
 
-    IF !_lNovo
+    If !_lNovo
     
-       MV_PAR01:=SPACE(100)
-       MV_PAR02:=SPACE(350)
-       MV_PAR03:=SPACE(100)
+       MV_PAR01:=Space(100)
+       MV_PAR02:=Space(350)
+       MV_PAR03:=Space(100)
 	   _aParAux:={}
-       AADD( _aParAux , { 1 , "Local"    , MV_PAR01, "@!"  , ""  ,"F3ITLC", "" , 100 , .T. } ) 
-       AADD( _aParAux , { 1 , "Lotes"    , MV_PAR02, "@!"  , ""  ,"F3ITLC", "" , 100 , .T. } ) 
-       AADD( _aParAux , { 1 , "Produtos" , MV_PAR03, "@!"  , ""  ,"F3ITLC", "" , 100 , .T. } ) 
+       aAdd( _aParAux , { 1 , "Local"    , MV_PAR01, "@!"  , ""  ,"F3ITLC", "" , 100 , .T. } ) 
+       aAdd( _aParAux , { 1 , "Lotes"    , MV_PAR02, "@!"  , ""  ,"F3ITLC", "" , 100 , .T. } ) 
+       aAdd( _aParAux , { 1 , "Produtos" , MV_PAR03, "@!"  , ""  ,"F3ITLC", "" , 100 , .T. } ) 
 	   _aParRet:={}
        For nI := 1 To Len( _aParAux )
-           AADD( _aParRet , _aParAux[nI][03] )
+           aAdd( _aParRet , _aParAux[nI][03] )
        Next nI
     
                                                       //        aParametros,cTitle,aRet      ,bOk  ,aButtons,lCentered,nPosX,nPosY,oDlgWizard,cLoad,lCanSave,lUserSave
-    	IF !ParamBox( _aParAux , "GERACAO DE ETIQUETAS DE ITENS - LOTE Existente" , @_aParRet, _bOK,        ,         ,     ,     ,          ,     ,.F.     ,.F. )
-    		EXIT
+    	If !ParamBox( _aParAux , "GERACAO DE ETIQUETAS DE ITENS - LOTE Existente" , @_aParRet, _bOK,        ,         ,     ,     ,          ,     ,.F.     ,.F. )
+    		Exit
     	EndIf
     
-    ELSE // NOVO LOTE
+    Else // NOVO LOTE
     
-       MV_PAR01:=SPACE(11)
-       MV_PAR02:=DATE()
-       MV_PAR03:=SPACE(LEN(SA2->A2_COD))
-       MV_PAR04:=SPACE(LEN(SA2->A2_LOJA))
-       MV_PAR05:=SPACE(LEN(SB8->B8_PRODUTO))
+       MV_PAR01:=Space(11)
+       MV_PAR02:=Date()
+       MV_PAR03:=Space(Len(SA2->A2_COD))
+       MV_PAR04:=Space(Len(SA2->A2_LOJA))
+       MV_PAR05:=Space(Len(SB8->B8_PRODUTO))
        
 	   _aParAux:={}
-       AADD( _aParAux , { 1 , "Lote"          , MV_PAR01, "@!"  , ""  ,"   ", "" , 050 , .T. } ) 
-       AADD( _aParAux , { 1 , "Data Validade" , MV_PAR02, "@D"  , ""  ,"   ", "" , 050 , .T. } ) 
-       AADD( _aParAux , { 1 , "Fornecedor"    , MV_PAR03, "@!"  , ""  ,"SA2", "" , 050 , .T. } ) 
-       AADD( _aParAux , { 1 , "Loja"          , MV_PAR04, "@!"  , ""  ,"   ", "" , 050 , .T. } ) 
-       AADD( _aParAux , { 1 , "Produto"       , MV_PAR05, "@!"  , ""  ,"SB1", "" , 050 , .T. } ) 
+       aAdd( _aParAux , { 1 , "Lote"          , MV_PAR01, "@!"  , ""  ,"   ", "" , 050 , .T. } ) 
+       aAdd( _aParAux , { 1 , "Data Validade" , MV_PAR02, "@D"  , ""  ,"   ", "" , 050 , .T. } ) 
+       aAdd( _aParAux , { 1 , "Fornecedor"    , MV_PAR03, "@!"  , ""  ,"SA2", "" , 050 , .T. } ) 
+       aAdd( _aParAux , { 1 , "Loja"          , MV_PAR04, "@!"  , ""  ,"   ", "" , 050 , .T. } ) 
+       aAdd( _aParAux , { 1 , "Produto"       , MV_PAR05, "@!"  , ""  ,"SB1", "" , 050 , .T. } ) 
     
 	   _aParRet:={}
        For nI := 1 To Len( _aParAux )
-           AADD( _aParRet , _aParAux[nI][03] )
+           aAdd( _aParRet , _aParAux[nI][03] )
        Next nI
                                                       //        aParametros,cTitle,aRet      ,bOk  ,aButtons,lCentered,nPosX,nPosY,oDlgWizard,cLoad,lCanSave,lUserSave
-    	IF !ParamBox( _aParAux , "GERACAO DE ETIQUETAS DE ITENS - LOTE Novo"      , @_aParRet, _bOK,        ,         ,     ,     ,          ,     ,.F.     ,.F. )
-    		EXIT
+    	If !ParamBox( _aParAux , "GERACAO DE ETIQUETAS DE ITENS - LOTE Novo"      , @_aParRet, _bOK,        ,         ,     ,     ,          ,     ,.F.     ,.F. )
+    		Exit
     	EndIf
     
-    ENDIF
+    EndIf
 	
     U_ITLOGACS()
 
@@ -151,9 +148,9 @@ DO WHILE .T.
 	_aItensLote:={}
 	_aBrowseT:={}
 
-    FWMSGRUN( ,{|oproc| REST020Ler(oproc,_lNovo) } ,'Aguarde!','lendo itens/Lotes...'  )
+    FWMsgRun( ,{|oproc| REST020Ler(oproc,_lNovo) } ,'Aguarde!','lendo itens/Lotes...'  )
 
-    IF LEN(_aItensLote) > 0
+    If Len(_aItensLote) > 0
        
        aSize:=NIL
        cTit1:="Lista dos Lotes / itens para imprimir as etiquetas"
@@ -161,33 +158,33 @@ DO WHILE .T.
        bDblClk:={|| REST020GET(@oLbxAux)}
 
        _abuttons:={}
-      IF _lNovo
+      If _lNovo
 	     aAdd(_abuttons,{"",{|| REST020Ler(,.T.) },"","Incluir Etiquetas"} )
-	  ENDIF
+	  EndIf
 
-       DO WHILE .T.    
+       While .T.    
 
     //            ITListBox(_cTitAux , _aHeader , _aCols     , _lMaxSiz ,  nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab ,bDblClk , _aColXML , bCondMarca,_bLegenda)
           lRet:=U_ITLISTBOX(cTit1    , aTitCol  , _aItensLote, .T.      , 1      , cTit2    ,          , aSize   ,         ,     ,        , _abuttons,       ,bDblClk )//, _aColXML , bCondMarca,_bLegenda)
     
-          IF lRet
+          If lRet
 	         lSair:=.F.
              
 			 Processa( {||  lSair:=REST020B() }, "Aguarde...", "Gerando Etiquetas...",.F.)
 
-             IF !lSair
+             If !lSair
 		        Loop
-		     ENDIF
-          ENDIF
-	      EXIT
-	   ENDDO
-    ELSE
+		     EndIf
+          EndIf
+	      Exit
+	   EndDo
+    Else
        Loop
-    ENDIF
+    EndIf
    
-ENDDO
+EndDo
 
-RETURN 
+Return 
 /*
 ===============================================================================================================================
 Programa----------: REST020Ler
@@ -198,102 +195,102 @@ Parametros--------: oProc
 Retorno-----------: Nenhum
 ===============================================================================================================================*/  
 
-STATIC FUNCTION REST020Ler(oProc,_lNovo)
+Static Function REST020Ler(oProc,_lNovo)
 Local _cAlias := GetNextAlias()
 Local _nConta :=0
 Local _cQrySB8:= " SELECT R_E_C_N_O_  RECSB8 "
 SB1->(DBSetOrder(1))
 
-IF _lNovo
+If _lNovo
 
-   IF oProc = NIL
-	  IF !ParamBox( _aParAux , "GERACAO DE ETIQUETAS NOVAS" , @_aParRet,   ,, .T. , , , , , .T. , .T.)
-	  	 RETURN .F.
+   If oProc = NIL
+	  If !ParamBox( _aParAux , "GERACAO DE ETIQUETAS NOVAS" , @_aParRet,   ,, .T. , , , , , .T. , .T.)
+	  	 Return .F.
 	  EndIf
    EndIf
 
 
-   SB1->(DBSEEK(xFilial("SB1")+MV_PAR05))
+   SB1->(DBSeek(xFilial("SB1")+MV_PAR05))
    _aItem:={}
-   AADD(_aItem,"")      //01
-   AADD(_aItem,ALLTRIM(MV_PAR01)+ALLTRIM(MV_PAR03)+ALLTRIM(MV_PAR04))//02
-   AADD(_aItem,"")                   //03
-   AADD(_aItem,DTOC(MV_PAR02))       //04
-   AADD(_aItem,MV_PAR05)             //05
-   AADD(_aItem,SB1->B1_DESC)         //06
-   AADD(_aItem,0)                    //07
-   AADD(_aItem,1)                    //08
-   AADD(_aItem,0)                    //09   
-   AADD(_aItensLote,_aItem)
-   IF oProc = NIL
+   aAdd(_aItem,"")      //01
+   aAdd(_aItem,AllTrim(MV_PAR01)+AllTrim(MV_PAR03)+AllTrim(MV_PAR04))//02
+   aAdd(_aItem,"")                   //03
+   aAdd(_aItem,DToC(MV_PAR02))       //04
+   aAdd(_aItem,MV_PAR05)             //05
+   aAdd(_aItem,SB1->B1_DESC)         //06
+   aAdd(_aItem,0)                    //07
+   aAdd(_aItem,1)                    //08
+   aAdd(_aItem,0)                    //09   
+   aAdd(_aItensLote,_aItem)
+   If oProc = NIL
       oLbxAux:Refresh()
-      PROCESSMESSAGES()
-   ENDIF
+      ProcessMessages()
+   EndIf
 
-   RETURN .T./////////////////////////// SAIDA QUANDO É NOVO
-ENDIF
+   Return .T./////////////////////////// SAIDA QUANDO É NOVO
+EndIf
 
 _cQrySB8 += " FROM " + RetSqlName("SB8") + " SB8 "
 _cQrySB8 += " WHERE SB8.D_E_L_E_T_ = ' ' "
 _cQrySB8 += " AND B8_FILIAL = '"+cFilAnt+"' "
-_cQrySB8 += " AND SUBSTR(B8_LOTECTL,1,1) <> '#' "
+_cQrySB8 += " AND SubStr(B8_LOTECTL,1,1) <> '#' "
 _cQrySB8 += " AND B8_SALDO > 0 "
-IF !EMPTY(MV_PAR01)
-   _cQrySB8 += " AND B8_LOCAL IN "+FormatIn(ALLTRIM(MV_PAR01),";")
-ENDIF
-IF !EMPTY(MV_PAR02)
-   _cQrySB8 += " AND B8_LOTECTL IN "+FormatIn(ALLTRIM(MV_PAR02),";")
-ENDIF
-IF !EMPTY(MV_PAR03)
-   _cQrySB8 += " AND B8_PRODUTO IN "+FormatIn(ALLTRIM(MV_PAR03),";")
-ENDIF
+If !Empty(MV_PAR01)
+   _cQrySB8 += " AND B8_LOCAL IN "+FormatIn(AllTrim(MV_PAR01),";")
+EndIf
+If !Empty(MV_PAR02)
+   _cQrySB8 += " AND B8_LOTECTL IN "+FormatIn(AllTrim(MV_PAR02),";")
+EndIf
+If !Empty(MV_PAR03)
+   _cQrySB8 += " AND B8_PRODUTO IN "+FormatIn(AllTrim(MV_PAR03),";")
+EndIf
 _cQrySB8 += " ORDER BY B8_LOCAL, B8_LOTECTL, B8_PRODUTO"
 _cQrySB8 := ChangeQuery(_cQrySB8)
 
 MPSysOpenQuery(_cQrySB8,_cAlias)
 
-DbSelectArea(_cAlias)
+DBSelectArea(_cAlias)
 COUNT TO _nQtdReg
-(_cAlias)->(DBGOTOP())
-_cTotal:=ALLTRIM(STR(_nQtdReg))
+(_cAlias)->(DBGoTop())
+_cTotal:=AllTrim(Str(_nQtdReg))
 
-IF EMPTY( _nQtdReg )
-   U_ITMSG("Nao tem dados para consultar com os filtros selecionados","Atenção","Verifique / altere o filtros selecionados",3)
-   RETURN .F.
-ELSEIF _nQtdReg > 500 .AND. !U_ITMSG( "Serão processados "+_cTotal+" registros. Deseja Continuar?",'ATENCAO!',,3,2,2)
-   RETURN .F.
-ENDIF
+If Empty( _nQtdReg )
+   U_ITMsg("Nao tem dados para consultar com os filtros selecionados","Atenção","Verifique / altere o filtros selecionados",3)
+   Return .F.
+ElseIf _nQtdReg > 500 .And. !U_ITMsg( "Serão processados "+_cTotal+" registros. Deseja Continuar?",'ATENCAO!',,3,2,2)
+   Return .F.
+EndIf
 
 _aItensLote:= {}
 
-DO While ! (_cAlias)->(EOF())                           
+While ! (_cAlias)->(Eof())                           
   
-   SB8->(DBGOTO((_cAlias)->RECSB8))
+   SB8->(DBGoTo((_cAlias)->RECSB8))
 
    _nConta++
-   oProc:cCaption := "Lendo Item: "+SB8->B8_PRODUTO+" - "+ALLTRIM(STR(_nConta))+" / "+_cTotal
-   PROCESSMESSAGES()
+   oProc:cCaption := "Lendo Item: "+SB8->B8_PRODUTO+" - "+AllTrim(Str(_nConta))+" / "+_cTotal
+   ProcessMessages()
    
-   SB1->(DBSEEK(xFilial("SB1")+SB8->B8_PRODUTO))
+   SB1->(DBSeek(xFilial("SB1")+SB8->B8_PRODUTO))
       
     _aItem:={}
-	AADD(_aItem,SB8->B8_LOCAL  )      //01
-	AADD(_aItem,SB8->B8_LOTECTL)      //02
-	AADD(_aItem,DTOC(SB8->B8_DFABRIC))//03
-	AADD(_aItem,DTOC(SB8->B8_DTVALID))//04
-	AADD(_aItem,SB8->B8_PRODUTO)      //05
-	AADD(_aItem,SB1->B1_DESC   )      //06
-	AADD(_aItem,SB8->B8_SALDO  )      //07
-	AADD(_aItem,1  )                  //08
-	AADD(_aItem,SB8->(RECNO()) )      //09
+	aAdd(_aItem,SB8->B8_LOCAL  )      //01
+	aAdd(_aItem,SB8->B8_LOTECTL)      //02
+	aAdd(_aItem,DToC(SB8->B8_DFABRIC))//03
+	aAdd(_aItem,DToC(SB8->B8_DTVALID))//04
+	aAdd(_aItem,SB8->B8_PRODUTO)      //05
+	aAdd(_aItem,SB1->B1_DESC   )      //06
+	aAdd(_aItem,SB8->B8_SALDO  )      //07
+	aAdd(_aItem,1  )                  //08
+	aAdd(_aItem,SB8->(RECNO()) )      //09
 
-    AADD(_aItensLote,_aItem)
+    aAdd(_aItensLote,_aItem)
 
    
-    (_cAlias)->(DbSkip())
+    (_cAlias)->(DBSkip())
 EndDo   
 
-RETURN .T.
+Return .T.
 
 /*
 ===============================================================================================================================
@@ -306,13 +303,13 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 Static Function REST020B()
-LOCAL NF
+Local NF
 Local cLocal:=GetTempPath()
 
-lImpDataVal:=!U_ITMSG( "IMPRESSAO: É Embalagem Tetra ? ",'IMPRESSAO',,2,2,2)
+lImpDataVal:=!U_ITMsg( "IMPRESSAO: É Embalagem Tetra ? ",'IMPRESSAO',,2,2,2)
 
 cFileName:="REST020_"
-cFileName+=DToS( DATE() ) + "_"
+cFileName+=DToS( Date() ) + "_"
 cFileName+=StrTran(TIME(), ":" , "" )
 cFileName:=cFileName+".pdf"
        //FWMsPrinter():New(cFilePrintert,nDevice],lAdjustToLegacy], [ cPathInServer], [ lDisabeSetup ], [ lTReport], [ @oPrintSetup], [ cPrinter], [ lServer], [ lPDFAsPNG], [ lRaw], [ lViewPDF], [ nQtdCopy] )
@@ -320,40 +317,40 @@ oPrint:= FwMsPrinter():New(cFileName    , IMP_PDF, .T.            , cLocal      
 oPrint:SetPortrait()            // Fixa a Impressao em Retrato //oPrint:SetLandScape()
 oPrint:cPathPDF := cLocal	// Caso seja utilizada impressão em IMP_PDF
 oPrint:Setup()
-IF UPPER(oPrint:cPathPDF) == "C:\" .OR. EMPTY(oPrint:cPathPDF)
+If Upper(oPrint:cPathPDF) == "C:\" .Or. Empty(oPrint:cPathPDF)
    oPrint:cPathPDF := cLocal
-ENDIF
+EndIf
 
-IF oPrint:nModalResult = 2//APERTOU O CANCELA
-   RETURN .F.
-ENDIF
+If oPrint:nModalResult = 2//APERTOU O CANCELA
+   Return .F.
+EndIf
 
-FOR NF:= 1 to LEN(_aItensLote)
+For NF:= 1 to Len(_aItensLote)
 
-    _nAte:= _aItensLote[NF,  LEN(_aItensLote[NF])-1 ]
-	IF _nAte = 0
-	   LOOP
-	ENDIF
-	IF _lNovo
+    _nAte:= _aItensLote[NF,  Len(_aItensLote[NF])-1 ]
+	If _nAte = 0
+	   Loop
+	EndIf
+	If _lNovo
 	   _cLote     :=_aItensLote[NF,2] 
 	   _cDtVal    :=CTOD(_aItensLote[NF,4])
        _cProduto  :=_aItensLote[NF,5]
        _cDescricao:=_aItensLote[NF,6] 
-    ELSE
-	   SB8->(DBGOTO(_aItensLote[NF, LEN(_aItensLote[NF]) ]))
+    Else
+	   SB8->(DBGoTo(_aItensLote[NF, Len(_aItensLote[NF]) ]))
        _cProduto  := SB8->B8_PRODUTO
        _cDescricao:= Posicione('SB1',1,xFilial("SB1")+SB8->B8_PRODUTO,"B1_DESC")//_aItensLote[NF,  nPosDes ]
 	   _cLote     := SB8->B8_LOTECTL
 	   _cDtVal    := SB8->B8_DTVALID//SB8->B8_LOCAL
-    ENDIF
+    EndIf
 
     lSair:=REST020C(NF) 
 
-	IF lSair
-	   RETURN .F.
-	ENDIF
+	If lSair
+	   Return .F.
+	EndIf
 
-NEXT NF
+Next NF
 
 LjMsgRun( "Gerando a visualização..." , "Aguarde!" , {|| oPrint:Preview() } )//Visualiza antes de imprimir
 
@@ -385,14 +382,14 @@ oFont12n := TFont():New("Arial", , (10+nTamFonte+1), .T., .T., 5,,, .T., .F.,,,,
 oFont20  := TFont():New("Arial", , (20+nTamFonte  ), .T., .F., 5,,, .T., .F.,,,,,, oPrint)
 
 cerros := ""
-procregua(LEN(_aItensLote))
-SA1->(DbSetOrder(1))
+ProcRegua(Len(_aItensLote))
+SA1->(DBSetOrder(1))
 
-FOR ni := 1 TO  _nAte
+For ni := 1 TO  _nAte
 	
 	nlinha := nlinhaIni
 	
-	incproc("Imprimindo etiqueta: " + strzero(_nTotEtiq,5) + " de " + strzero(LEN(_aItensLote),5))
+	IncProc("Imprimindo etiqueta: " + StrZero(_nTotEtiq,5) + " de " + StrZero(Len(_aItensLote),5))
 
 	
 	oPrint:StartPage()              // Inicializa a Pagina de Impressao
@@ -419,16 +416,16 @@ FOR ni := 1 TO  _nAte
 	nLinha += 075
 
 //======================================= PRODUTO =========================================================
-    _cDescricao:=alltrim(_cDescricao)
+    _cDescricao:=AllTrim(_cDescricao)
     nColAux:=40
     nTam:=30
-	IF LEN(_CDESCRICAO) > nTam
+	If Len(_CDESCRICAO) > nTam
 	   oPrint:Say(nLinha+nLinhAux1, nColuna+nColAux,+MEMOLINE(_CDESCRICAO,nTam,1),oFont20)
 	   nLinha += 075
 	   oPrint:Say(nLinha+nLinhAux1, nColuna+nColAux,+MEMOLINE(_CDESCRICAO,nTam,2),oFont20)
-	ELSE
+	Else
 	   oPrint:Say(nLinha+nLinhAux1, nColuna+nColAux,_CDESCRICAO,oFont20)
-	ENDIF
+	EndIf
 	nLinha += 025
 
 	oPrint:Line(nlinha+nLinhAux1,ncoluna - 5,nlinha+nLinhAux1,ncoluna + ntamh, 0 , "-6")
@@ -440,7 +437,7 @@ FOR ni := 1 TO  _nAte
 	nAltBar  :=50//0.7
     nLagBar2 :=270
 	
-    ccodbar1:=ALLTRIM(_cProduto)
+    ccodbar1:=AllTrim(_cProduto)
                
     oPrint:Code128(nLinBar ,nColBar ,ccodbar1,nLagBar,nAltBar,.F./*lSay*/,,nLagBar2)//CODIGO DE BARRA DO PEDIDO DE COMPRA
 	nLinha += 210
@@ -458,7 +455,7 @@ FOR ni := 1 TO  _nAte
 	oPrint:Line(nlinha+nLinhAux1,ncoluna - 5,nlinha+nLinhAux1,ncoluna + ntamh, 0 , "-6")
 	nLinha +=030
 	
-	ccodbar2 := ALLTRIM(_cLote)
+	ccodbar2 := AllTrim(_cLote)
 	nLinBar  := nLinha +nLinhAux1
 	nLagBar  := 1//0.0166//01//
 	
@@ -470,17 +467,17 @@ FOR ni := 1 TO  _nAte
 	nLinha += 050
 
 //**************************************** DATA DE VALIDADE **************************************************//
-	IF lImpDataVal
+	If lImpDataVal
   	   oPrint:Line(nlinha+nLinhAux1   ,ncoluna - 5       , nlinha+nLinhAux1 ,ncoluna + ntamh, 0 , "-6")//FECHA A LINHA
   	   nLinha += 075
-       oPrint:Say(nLinha+nLinhAux1, nColuna+nColAux , "DATA DE VALIDADE: "+DTOC(_cDtVal) , oFont20)
+       oPrint:Say(nLinha+nLinhAux1, nColuna+nColAux , "DATA DE VALIDADE: "+DToC(_cDtVal) , oFont20)
    	   nLinha += 025
-    ENDIF
+    EndIf
 	
 	oPrint:Line(nlinha+nLinhAux1,ncoluna - 5,nlinha+nLinhAux1,ncoluna + ntamh, 0 , "-6")
 	nLinha +=030
 	
-	ccodbar2 := DTOS(_cDtVal)
+	ccodbar2 := DToS(_cDtVal)
 	nLinBar  := nLinha+nLinhAux1 
 	nLagBar  := 1//0.0166//01//
 	nLagBar2 := 100
@@ -501,7 +498,7 @@ FOR ni := 1 TO  _nAte
 
 	oPrint:EndPage()                // Finaliza a Pagina de Impressao
 
-NEXT ni
+Next ni
 Return .F. //NAO SAIR 
 
 /*
@@ -519,30 +516,30 @@ Local _nLinPos  := oLbxAux:nAt
 Local _bOK
 Local _nlin:=10
 Local _nPula:=20
-LOCAL _nColQtde:=LEN(_aItensLote[_nLinPos])-1
+Local _nColQtde:=Len(_aItensLote[_nLinPos])-1
 
 _nQtde :=_aItensLote[_nLinPos,_nColQtde]
 
-_bOK:={|| IF(_nQtde >= 0 ,.T.,(U_ITMSG("Quantidade INVALIDA",'Atenção!',"A quantidade deve ser maior que zero",3),.F.) ) }
+_bOK:={|| If(_nQtde >= 0 ,.T.,(U_ITMsg("Quantidade INVALIDA",'Atenção!',"A quantidade deve ser maior que zero",3),.F.) ) }
 
 lOK:=.F.	
 @ 00,00 To 145,280 Dialog oDlgDes Title "Quantidade de copias de Etiqueta"
     
-    @ _nlin,10 say "Quantidade:" Pixel of oDlgDes
+    @ _nlin,10 Say "Quantidade:" Pixel of oDlgDes
     @ _nlin,50 MsGet _nQtde Picture "@E 999,999"  Pixel Of oDlgDes
 
     _nlin += _nPula
-	@ _nlin,50 BMPBUTTON Type 1 ACTION (IF(EVAL(_bOK),(lOK:=.T.,Close(oDlgDes)),))
-	@ _nlin,82 BMPBUTTON TYPE 2 ACTION Close(oDlgDes)
+	@ _nlin,50 BMPBUTTON Type 1 ACTION (If(EVAL(_bOK),(lOK:=.T.,Close(oDlgDes)),))
+	@ _nlin,82 BMPBUTTON Type 2 ACTION Close(oDlgDes)
 
 Activate Dialog oDlgDes Center
 
-IF lOK
+If lOK
    _aItensLote[_nLinPos,_nColQtde]:=_nQtde
-ENDIF
+EndIf
 
 oLbxAux:Refresh()
-PROCESSMESSAGES()
+ProcessMessages()
 
 Return .T.
 
@@ -556,23 +553,23 @@ Parametros--------: nRecSB8
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-USER Function REST20Etiq(nRecSB8)//U_REST20Etiq( SB8->(RECNO()) )
-PRIVATE  _aItensLote:={}
+User Function REST20Etiq(nRecSB8)//U_REST20Etiq( SB8->(RECNO()) )
+Private  _aItensLote:={}
 
-SB8->(DBGOTO(nRecSB8))
+SB8->(DBGoTo(nRecSB8))
 
 _aItem:={}
-AADD(_aItem,SB8->B8_LOCAL  )      //01
-AADD(_aItem,SB8->B8_LOTECTL)      //02
-AADD(_aItem,DTOC(SB8->B8_DFABRIC))//03
-AADD(_aItem,DTOC(SB8->B8_DTVALID))//04
-AADD(_aItem,SB8->B8_PRODUTO)      //05
-AADD(_aItem,""             )      //06
-AADD(_aItem,SB8->B8_SALDO  )      //07
-AADD(_aItem,1  )                  //08
-AADD(_aItem,SB8->(RECNO()) )      //09
+aAdd(_aItem,SB8->B8_LOCAL  )      //01
+aAdd(_aItem,SB8->B8_LOTECTL)      //02
+aAdd(_aItem,DToC(SB8->B8_DFABRIC))//03
+aAdd(_aItem,DToC(SB8->B8_DTVALID))//04
+aAdd(_aItem,SB8->B8_PRODUTO)      //05
+aAdd(_aItem,""             )      //06
+aAdd(_aItem,SB8->B8_SALDO  )      //07
+aAdd(_aItem,1  )                  //08
+aAdd(_aItem,SB8->(RECNO()) )      //09
 
-AADD(_aItensLote,_aItem)
+aAdd(_aItensLote,_aItem)
 
 MV_PAR01:=SB8->B8_LOCAL 
 MV_PAR02:=SB8->B8_LOTECTL
@@ -580,4 +577,4 @@ MV_PAR03:=SB8->B8_PRODUTO
 
 Processa( {|| REST020B() }, "Aguarde...", "Gerando Etiqueta...",.F.)
 
-RETURN .T.
+Return .T.

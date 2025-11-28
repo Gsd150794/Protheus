@@ -39,7 +39,7 @@ aAdd( _aLogM003 , { Date() , Time() ,'Log' ,'Iniciando o processamento' } )
 //validar acessos do usuario
 If !U_ITVLDUSR(9)
 	
-	u_itmsg('O usuário '+UsrRetName( RetCodUsr() )+' não possui acesso para geração de clientes. ', 'Validação de acesso',;
+	U_ITMsg('O usuário '+UsrRetName( RetCodUsr() )+' não possui acesso para geração de clientes. ', 'Validação de acesso',;
 			'Informar ao suporte T.I. para realizar essa manutenção. ',1)	
 	Return .F.
 	
@@ -73,7 +73,7 @@ Local cAliasQry		:= GetNextAlias()
 Local aCpos			:= MOMS003Y()
 Local bIniChk		:= {|| .T. }
 Local nAtuReg		:= 0
-local cPerg         := "MOMS003"
+Local cPerg         := "MOMS003"
 Local cClasse, cEst1, cEst2
 Local aSeeks		:= {}
 
@@ -105,7 +105,7 @@ cQuery += " AND SA2.A2_FILIAL   = '"+ xFilial("SA2") +"' "
 cQuery += " AND SA2.A2_MSBLQL   <> '1' "
 cQuery += " AND SA2.A2_I_CLASS IN "+FormatIn(cClasse,";")
 cQuery += " AND SA2.A2_EST BETWEEN '"+cEst1+"' AND '"+cEst2+"' "
-cQuery += " AND SA2.A2_CGC NOT IN ( SELECT SA1.A1_CGC FROM "+ RetSqlName("SA1") +" SA1 WHERE SA1.D_E_L_E_T_ = ' ' AND SA1.A1_FILIAL = '"+XFilial("SA1")+"' ) "
+cQuery += " AND SA2.A2_CGC NOT IN ( SELECT SA1.A1_CGC FROM "+ RetSqlName("SA1") +" SA1 WHERE SA1.D_E_L_E_T_ = ' ' AND SA1.A1_FILIAL = '"+xFilial("SA1")+"' ) "
 cQuery += " ORDER BY SA2.A2_COD, SA2.A2_LOJA "
 
 If Select(cAliasQry) > 0
@@ -124,8 +124,8 @@ DBSelectArea(cAliasQry)
 If nTotReg <= 0
 	
 	(cAliasQry)->( DBCloseArea() )
-	U_ITMSG( "Não foram encontrados fornecedores para esse filtro!", "Atenção!",,1 )
-	Return()
+	U_ITMsg( "Não foram encontrados fornecedores para esse filtro!", "Atenção!",,1 )
+	Return
 	
 EndIf
 
@@ -181,9 +181,9 @@ aAdd( aFields , { "CPF/CNPJ"		, {|| (cAliasAux)->CGC }	  		, "C" , "@!" , 0 , Ta
 aAdd( aFields , { "Estado"			, {|| (cAliasAux)->EST }			, "C" , "@!" , 0 , TamSX3("A2_EST")[01]		, 0 } )
 aAdd( aFields , { "Classe"			, {|| (cAliasAux)->CLASSE }			, "C" , "@!" , 0 , TamSX3("A2_I_CLASS")[01]		, 0 } )
 
-Aadd( aSeeks, { "Nome"		, { { "Nome"		, "C" , TamSX3("A2_NOME")[01]	, 0 , "Nome"		, "@!"				} } } )
-Aadd( aSeeks, { "CPF/CNPJ"	, { { "CPF/CNPJ"	, "C" , TamSX3("A2_CGC")[01]	, 0 , "CPF/CNPJ"	, "99999999999999"	} } } )
-Aadd( aSeeks, { "Codigo"	, { { "Codigo"		, "C" , TamSX3("A2_COD")[01]	, 0 , "Codigo"		, "@!"				} } } )
+aAdd( aSeeks, { "Nome"		, { { "Nome"		, "C" , TamSX3("A2_NOME")[01]	, 0 , "Nome"		, "@!"				} } } )
+aAdd( aSeeks, { "CPF/CNPJ"	, { { "CPF/CNPJ"	, "C" , TamSX3("A2_CGC")[01]	, 0 , "CPF/CNPJ"	, "99999999999999"	} } } )
+aAdd( aSeeks, { "Codigo"	, { { "Codigo"		, "C" , TamSX3("A2_COD")[01]	, 0 , "Codigo"		, "@!"				} } } )
 
 oMarkBRW := FWMarkBrowse():New()		   	// Inicializa o Browse
 oMarkBRW:SetAlias( cAliasAux )			   	// Define Alias que será a Base do Browse
@@ -202,7 +202,7 @@ oMarkBRW:Activate()					// Ativacao da classe
 //fechar arquivo temporario
 (cAliasAux)->( DBCloseArea() )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -237,11 +237,11 @@ Static Function MOMS003M(oMarkBrw)
 If ( !oMarkBrw:IsMark() )
 	RecLock(oMarkBrw:Alias(),.F.)
 	(oMarkBrw:Alias())->MARCA  := oMarkBrw:Mark()
-	(oMarkBrw:Alias())->(MsUnLock())
+	(oMarkBrw:Alias())->(MSUnLock())
 Else
 	RecLock(oMarkBrw:Alias(),.F.)
 	(oMarkBrw:Alias())->MARCA  := ""
-	(oMarkBrw:Alias())->(MsUnLock())
+	(oMarkBrw:Alias())->(MSUnLock())
 EndIf
 
 Return( .T. )
@@ -264,7 +264,7 @@ DBSelectArea("SA2")
 SA2->( DBGoTo(nRegSA2) )
 AxVisual( "SA2" , nRegSA2 , 2 )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -281,13 +281,13 @@ Static Function MOMS003Y()
 Local aCpos := {}
 
 aAdd( aCpos , { "MARCA"			, "C" , 1						, 0 } )
-AAdd( aCpos , { "FORNECE"		, "C" , TamSX3("A2_COD")[01]	, 0 } )
-AAdd( aCpos , { "LOJA"			, "C" , TamSX3("A2_LOJA")[01]	, 0 } )
-AAdd( aCpos , { "NOME"			, "C" , TamSX3("A2_NOME")[01]	, 0 } )
-AAdd( aCpos , { "CGC"			, "C" , TamSX3("A2_CGC")[01]	, 0 } )
-AAdd( aCpos , { "EST"			, "C" , TamSX3("A2_EST")[01]	, 0 } )
-AAdd( aCpos , { "CLASSE"		, "C" , TamSX3("A2_I_CLASS")[01], 0 } )
-AAdd( aCpos , { "REGSA2"		, "N" , 10						, 0 } )
+aAdd( aCpos , { "FORNECE"		, "C" , TamSX3("A2_COD")[01]	, 0 } )
+aAdd( aCpos , { "LOJA"			, "C" , TamSX3("A2_LOJA")[01]	, 0 } )
+aAdd( aCpos , { "NOME"			, "C" , TamSX3("A2_NOME")[01]	, 0 } )
+aAdd( aCpos , { "CGC"			, "C" , TamSX3("A2_CGC")[01]	, 0 } )
+aAdd( aCpos , { "EST"			, "C" , TamSX3("A2_EST")[01]	, 0 } )
+aAdd( aCpos , { "CLASSE"		, "C" , TamSX3("A2_I_CLASS")[01], 0 } )
+aAdd( aCpos , { "REGSA2"		, "N" , 10						, 0 } )
 
 Return( aCpos )
 
@@ -319,9 +319,9 @@ oMarkBRW:GoTop()
 
 IndRegua(cAliasAux,CriaTrab(Nil,.F.),"MARCA",,"MARCA#' '","Filtrando registros...")
 
-(cAliasAux)->(DbGoTop())
+(cAliasAux)->(DBGoTop())
 
-While (cAliasAux)->(!EOF()) .And. (cAliasAux)->MARCA # ' '
+While (cAliasAux)->(!Eof()) .And. (cAliasAux)->MARCA # ' '
 	
 	IncProc( "Processando... ["+ StrZero(nRegMark++,10) +"] de ["+ StrZero(nTotReg,10) +"]" )
 	
@@ -335,19 +335,19 @@ While (cAliasAux)->(!EOF()) .And. (cAliasAux)->MARCA # ' '
 	
 	End Transaction
 	
-	(cAliasAux)->(DbSkip())
+	(cAliasAux)->(DBSkip())
 EndDo
 
 //===========================================================================
 //| Verifica o Status geral do processamento.                               |
 //===========================================================================
-U_ITMSG( StrZero(nRegMark,10)+" Registros Marcados / " + StrZero(nRegSel,10)+" Registros processados com sucesso! " , "Concluído!" ,,2)
+U_ITMsg( StrZero(nRegMark,10)+" Registros Marcados / " + StrZero(nRegSel,10)+" Registros processados com sucesso! " , "Concluído!" ,,2)
 
 CloseBrowse()
 
 MOMS003R(cCliente)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -371,14 +371,14 @@ Local cAlias:= GetNextAlias()
 Local lNew	:= .T.
 Local _cRisco 	:= ""
 Local _nLimite	:= 0
-Local _dLimite	:= stod("20010101")
+Local _dLimite	:= SToD("20010101")
 Local _lMVCSA1      := U_ItGetMv( "MV_MVCSA1" , .F. ) // Parammetro para habilitar execução do ExecAuto do novo CRMA980 
 
 
 Private lMsErroAuto := .F.
 
 //Posiciona no registro marcado do cadastro de fornecedor
-SA2->(DbGoto(nRegSA2))
+SA2->(DBGoTo(nRegSA2))
 
 //determinar o tipo do cliente
 If SA2->A2_TIPO = 'X' //OUTROS
@@ -404,25 +404,25 @@ EndIf
 //================================================================================ 	
 _cRisco 	:= 	U_ITGETMV( "IT_RISCOFOR" , "B" ) 
 _nLimite 	:=	U_ITGETMV( "IT_LIMFORN" , 300 )
-_dLimite 	:=	U_ITGETMV( "IT_VNCLIMFO" , stod("20491231") )
+_dLimite 	:=	U_ITGETMV( "IT_VNCLIMFO" , SToD("20491231") )
 
 
 //verifica se existe mais cadastros do cliente posicionado, para saber se havera limite de credito ou nao.
 cQry := " SELECT COUNT(*) AS CONTADOR "
 cQry += " FROM " + RetSqlName("SA1") + " "
-cQry += " WHERE SUBSTR(A1_CGC,1,8) = '" + SubStr(SA2->A2_CGC,1,8) + "' "
+cQry += " WHERE SubStr(A1_CGC,1,8) = '" + SubStr(SA2->A2_CGC,1,8) + "' "
 cQry += "   AND A1_LC > 0 "
 cQry += "   AND D_E_L_E_T_ = ' ' "
 
 DbUseArea( .T. , "TOPCONN" , TcGenQry(,, cQry ) , cAlias , .T., .F. )
 
 DBSelectArea(cAlias)
-(cAlias)->( DbGotop() )
+(cAlias)->( DBGoTop() )
 If (cAlias)->CONTADOR > 0
 	lNew := .F.
 EndIf
 DBSelectArea(cAlias)
-(cAlias)->( DbCloseArea() )
+(cAlias)->( DBCloseArea() )
 
 aAdd( aCli , { "A1_FILIAL"		, xFilial("SA1")						, Nil }) // FILIAL
 aAdd( aCli , { "A1_NOME"		, SA2->A2_NOME							, Nil }) // NOME
@@ -471,13 +471,13 @@ aAdd( aCli , { "A1_SIMPNAC"		, SA2->A2_SIMPNAC						, Nil }) // Situação na Rece
 aAdd( aCli , { "A1_CNAE"		, SA2->A2_CNAE							, Nil }) // Situação na Receita Federal
 
 
-If empty(SA2->A2_CONTRIB) .or. empty(SA2->A2_SIMPNAC) 
+If Empty(SA2->A2_CONTRIB) .Or. Empty(SA2->A2_SIMPNAC) 
 
 	_ctexto := "Campos obrigatórios, Contribuinte ICMS , Part Simples não preenchidos no fornecedor!"
 	aAdd( _aLogM003 , { Date() , Time() ,'Erro' ,_cTexto } )
 	lRet := .F.
 
-Endif
+EndIf
 
 If lRet
 
@@ -493,7 +493,7 @@ If lRet
 		If ( __lSx8 )
 			RollBackSx8()
 		EndIf
-		_cTexto := MostraErro("\system\", SA2->A2_CGC + DtoS(dDataBase) + ".log")
+		_cTexto := MostraErro("\system\", SA2->A2_CGC + DToS(dDataBase) + ".log")
 		//_cTexto := MOMS003P(_cTexto)
 		aAdd( _aLogM003 , { Date() , Time() ,'Erro' ,_cTexto } )
 		lRet := .F.
@@ -504,7 +504,7 @@ If lRet
 			EndDo
 		EndIf
 	EndIf
-Endif
+EndIf
 
 Return(lRet)
 
@@ -538,13 +538,13 @@ While (nErrLin <= nLinhas)
      nErrLin++
      cBuffer:=RTrim(MemoLine(cErroTemp,200,nErrLin))
      If "INVALIDO" $ Upper(cBuffer) .And. "A1_EMAIL" $ Upper(cBuffer)
-     	cRet += "\" + AllTrim(substr(cBuffer,1,at("A",cBuffer)-3)) + " - " + substr(cBuffer,at("=",cBuffer)+2,Len(cBuffer))
+     	cRet += "\" + AllTrim(SubStr(cBuffer,1,at("A",cBuffer)-3)) + " - " + SubStr(cBuffer,at("=",cBuffer)+2,Len(cBuffer))
      ElseIf "A1_CGC" $ Upper(cBuffer)
-     	cRet += "\" + AllTrim(substr(cBuffer,1,at("-",cBuffer)-1)) + " - " + substr(cBuffer,at("=",cBuffer)+2,Len(cBuffer))
+     	cRet += "\" + AllTrim(SubStr(cBuffer,1,at("-",cBuffer)-1)) + " - " + SubStr(cBuffer,at("=",cBuffer)+2,Len(cBuffer))
      ElseIf "A1_NOME" $ Upper(cBuffer)
-     	cRet += " \ " + AllTrim(substr(cBuffer,1,at("-",cBuffer)-1)) + " - " + substr(cBuffer,at("=",cBuffer)+2,Len(cBuffer))
+     	cRet += " \ " + AllTrim(SubStr(cBuffer,1,at("-",cBuffer)-1)) + " - " + SubStr(cBuffer,at("=",cBuffer)+2,Len(cBuffer))
      ElseIf "INVALIDO" $ Upper(cBuffer)
-     	cRet += "\" + AllTrim(substr(cBuffer,1,at("-",cBuffer)-1)) + " - " + substr(cBuffer,at("=",cBuffer)+2,Len(cBuffer))
+     	cRet += "\" + AllTrim(SubStr(cBuffer,1,at("-",cBuffer)-1)) + " - " + SubStr(cBuffer,at("=",cBuffer)+2,Len(cBuffer))
      EndIf
 End
 
@@ -572,15 +572,15 @@ cQuery += " ORDER BY SA1.A1_COD, SA1.A1_LOJA "
 
 dbUseArea( .T., "TOPCONN",TcGenQry(,,cQuery),"TMPOK",.F.,.F.)
 
-dbSelectArea("TMPOK")
-TMPOK->(dbGoTop())
+DBSelectArea("TMPOK")
+TMPOK->(DBGoTop())
 
 While !TMPOK->(Eof())
 	aAdd( _aLogM003 , { Date() , Time() ,'Log' ,'Cliente: ' + TMPOK->A1_COD + " Loja: " + TMPOK->A1_LOJA + " Nome: " + AllTrim(TMPOK->A1_NOME) + ", processado com sucesso." } )
-	TMPOK->(dbSkip())
+	TMPOK->(DBSkip())
 End
 
-dbSelectArea("TMPOK")
-TMPOK->(DbCloseArea())
+DBSelectArea("TMPOK")
+TMPOK->(DBCloseArea())
 
 Return

@@ -2,29 +2,21 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 18/09/2019 | Incluído MenuDef para padronização - Chamado 28346 
+Lucas Borges  |18/09/2019| Chamado 28346. Incluído MenuDef para padronização
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "Protheus.ch"
-
-/*=========*/
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: AGPE001
 Autor-------------: Frederico O. C. Jr
 Data da Criacao---: 10/12/2008
-===============================================================================================================================
 Descrição---------: Cadastro do Pagamentos e Descontos Customizados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -43,9 +35,7 @@ Return
 Programa----------: MenuDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 18/09/2019
-===============================================================================================================================
 Descrição---------: Utilizacao de Menu Funcional
-===============================================================================================================================
 Parametros--------: aRotina
 					1. Nome a aparecer no cabecalho
 					2. Nome da Rotina associada
@@ -58,7 +48,6 @@ Parametros--------: aRotina
 						5 - Remove o registro corrente do Banco de Dados
 					5. Nivel de acesso
 					6. Habilita Menu Funcional
-===============================================================================================================================
 Retorno-----------: Array com opcoes da rotina
 ===============================================================================================================================
 */
@@ -77,22 +66,19 @@ Return( aRotina )
 Programa----------: GerMnem
 Autor-------------: Frederico O. C. Jr
 Data da Criacao---: 11/12/2008
-===============================================================================================================================
 Descrição---------: Função chamada no mnemonico buscando dados do cadastro para avaliar a geracao da verba
-===============================================================================================================================
 Parametros--------: Codigo -> vide cadastro ZAJ
 					Tipo de Pagamento/Desconto -> Hora / Valor / Percentual / Dia
 					Info para geracao: 	1 -> buscar configuracao para calculo
 										2 -> buscar data para pagamento
 					Caso haja mais de um retorno para um mesmo tipo de pagto/desconto
 										-> Informar as possiveis respostas separadas por "/"
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function GerMnem(cCod, cTipo, nFlag, nPos )
 
-Local aArea	:= GetArea()
+Local aArea	:= FWGetArea()
 Local cCont	:= ""
 Local aAux	:= {}
 Local cTemp	:= ""
@@ -118,32 +104,27 @@ If ( nFlag == 1)
 			Else
 				cTemp += SubStr(cCont,_nX,1)
 				
-				If ( _nX == len(cCont) )
+				If ( _nX == Len(cCont) )
 					aAdd(aAux, cTemp)
 					cTemp := ""
 				EndIf
 			EndIf	
 		Next _nX
 			
-		If ( nPos <= len(aAux) )
+		If ( nPos <= Len(aAux) )
 			uRet := Val( aAux[nPos] )
 		EndIf
 	EndIf
 Else
-	If ( dbSeek(xFilial("ZAJ")+cCod) )
+	If ( DBSeek(xFilial("ZAJ")+cCod) )
 		If ( ZAJ->ZAJ_REPEAT == "S")
-			uRet := DtoS(dDataBase)
+			uRet := DToS(dDataBase)
 		Else
-			uRet := DtoS(ZAJ->ZAJ_REFERE)
+			uRet := DToS(ZAJ->ZAJ_REFERE)
 		EndIf
 	EndIf
 EndIf
 	
-RestArea(aArea)
+FWRestArea(aArea)
 	
-/*=========*/
-
-/*=========*/
-
-
 Return uRet

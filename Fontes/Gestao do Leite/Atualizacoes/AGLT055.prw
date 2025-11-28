@@ -2,18 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 09/10/2024 | Chamado 48465. Retirada manipulação do SX1
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
-===============================================================================================================================
- Analista     - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração                                               
-=============================================================================================================================== 
- Andre        - Alex Wallauer - 21/11/24 - 26/12/24 - 48915   - Ajustes para a integração WebService Italac x Evomilk
+Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Alex Wallauer |26/12/2024| Chamado 48915. Ajustes para a integração WebService Italac x Evomilk
 ===============================================================================================================================
 */
 
-#Include "Protheus.Ch"
+#Include "TOTVS.ch"
 #Include "FWMVCDef.Ch"
 
 #Define	TITULO	"Análise de Dados dos Produtores Rurais Recebidos do APP Cia do Leite"
@@ -49,15 +46,15 @@ Begin Sequence
 
    cFiltroZBH:=""
    cFiltroZBI:=""
-    IF MV_PAR04 <> 3
-       IF MV_PAR04 = 2 
+    If MV_PAR04 <> 3
+       If MV_PAR04 = 2 
           cFiltroZBH:=" AND ZBH_WEBINT = 'E' "
           cFiltroZBI:=" AND ZBI_WEBINT = 'E' "
-       ELSE
+       Else
           cFiltroZBH:=" AND ZBH_WEBINT <> 'E' "
           cFiltroZBI:=" AND ZBI_WEBINT <> 'E' "
-       ENDIF
-    ENDIF
+       EndIf
+    EndIf
 
    //===========================================================================
    //| Define formato de data para exibição nas telas da rotina                |
@@ -68,7 +65,7 @@ Begin Sequence
 
 End Sequence 
 	
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -125,11 +122,11 @@ Begin Sequence
    EndIf 
 
    If ! Empty(MV_PAR02)
-      _cQry += " AND ZBG_DATA >= '"+ Dtos(MV_PAR02) + "' "
+      _cQry += " AND ZBG_DATA >= '"+ DToS(MV_PAR02) + "' "
    EndIf 
 
    If ! Empty(MV_PAR03)
-      _cQry += " AND ZBG_DATA <= '"+ Dtos(MV_PAR03) + "' "
+      _cQry += " AND ZBG_DATA <= '"+ DToS(MV_PAR03) + "' "
    EndIf
 
    _cQry += " AND ZBG_FILIAL = ZZM_CODIGO "
@@ -149,7 +146,7 @@ Begin Sequence
    COUNT TO _nTotReg
 
    If Select(cAliasAux) > 0
-	  (cAliasAux)->(Dbclosearea())
+	  (cAliasAux)->(DBCloseArea())
    EndIf
 
    _otemp := FWTemporaryTable():New( cAliasAux, _aCpos )
@@ -164,7 +161,7 @@ Begin Sequence
    ProcRegua(_nTotReg)
 
    (_cAliasQry)->( DBGoTop() )
-   Do While (_cAliasQry)->( !Eof() )
+   While (_cAliasQry)->( !Eof() )
       _lHaDados := .T.
       (cAliasAux)->( DBAPPEND() )
       (cAliasAux)->ZBG_TIPREG := If((_cAliasQry)->ZBG_TIPREG=="N","NOVO PRODUTOR","ALTERAÇÃO DE PRODUTOR")     // Tipo de Registro	N=Novo Produtor;A=Alteração de Produtor
@@ -181,7 +178,7 @@ Begin Sequence
       (cAliasAux)->ZBG_CEP    := (_cAliasQry)->ZBG_CEP	     // CEP	
       (cAliasAux)->ZBG_FAZEN  := (_cAliasQry)->ZBG_FAZEN      // Fazenda do Produtor
       (cAliasAux)->ZBG_IDPROD := (_cAliasQry)->ZBG_IDPROD	  // Id.Produtor	
-      (cAliasAux)->ZBG_DATA   := Stod((_cAliasQry)->ZBG_DATA) // Data Integra	
+      (cAliasAux)->ZBG_DATA   := SToD((_cAliasQry)->ZBG_DATA) // Data Integra	
       (cAliasAux)->ZBG_HORA	:= (_cAliasQry)->ZBG_HORA       // Hora Intagra	
       (cAliasAux)->ZBG_STATUS := (_cAliasQry)->ZBG_STATUS	  // Status		P=Pendente Atualização;A=Atualizado;R=Rejeitado
       (cAliasAux)->WK_RECNO	:= (_cAliasQry)->REGZBG         // Recno da tabela ZBG
@@ -208,7 +205,7 @@ Begin Sequence
    //===================================================================================
    // Exibe Tela Principal de Atualização de Produtores.
    //=================================================================================== 
-   DbSelectArea("ZBG")
+   DBSelectArea("ZBG")
 
    aAdd( _aFields , { "Tipo de Registro"   , {|| (cAliasAux)->ZBG_TIPREG} , "C" , "@!"                   , 0 , 22 , 0 } )     // Tipo de Registro	N=Novo Produtor;A=Alteração de Produtor
    aAdd( _aFields , { "Filial"             , {|| (cAliasAux)->ZBG_FILIAL} , "C" , "@!"                   , 0 , 8  , 0 } )     // Filial
@@ -249,10 +246,10 @@ Begin Sequence
 End Sequence 
 
 If Select(cAliasAux) > 0
-   (cAliasAux)->(Dbclosearea())
+   (cAliasAux)->(DBCloseArea())
 EndIf
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -307,7 +304,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -337,7 +334,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -396,7 +393,7 @@ Local _aLegenda :=	{	{"BR_VERMELHO", "Pendente Atualização"},;
 
 BrwLegenda(TITULO,"Legenda",_aLegenda)
 
-return
+Return
 
 /*
 ===============================================================================================================================
@@ -429,31 +426,31 @@ Begin Sequence
       @ 004,003 ComboBox	_cComboBx1	Items _aComboBx1 Size 213,010 OF _oDlgP PIXEL
 	   @ 020,003 MsGet		_oGet1	Var _cGet1		Size 212,009 OF _oDlgP PIXEL COLOR CLR_BLACK Picture "@!"
 	
-	   DEFINE SBUTTON FROM 004,227 TYPE 1 ENABLE ACTION ( _nOpca := 1 , _oDlgP:End() ) OF _oDlgP
-	   DEFINE SBUTTON FROM 021,227 TYPE 2 ENABLE ACTION ( _nOpca := 0 , _oDlgP:End() ) OF _oDlgP
+	   DEFINE SBUTTON FROM 004,227 Type 1 ENABLE ACTION ( _nOpca := 1 , _oDlgP:End() ) OF _oDlgP
+	   DEFINE SBUTTON FROM 021,227 Type 2 ENABLE ACTION ( _nOpca := 0 , _oDlgP:End() ) OF _oDlgP
 
    ACTIVATE MSDIALOG _oDlgP CENTERED
 
    If _nOpca == 1
-      If ALLTRIM(_cComboBx1) == ALLTRIM(_aComboBx1[1])
-         (cAliasAux)->(DbSetOrder(1)) // Ordem por ID.PRODUTOR
+      If AllTrim(_cComboBx1) == AllTrim(_aComboBx1[1])
+         (cAliasAux)->(DBSetOrder(1)) // Ordem por ID.PRODUTOR
       Else
-         (cAliasAux)->(DbSetOrder(3)) // Ordem por NOME       
+         (cAliasAux)->(DBSetOrder(3)) // Ordem por NOME       
       EndIf 
    
       If ! (cAliasAux)->(MsSeek(RTrim(_cGet1)))
-         U_ITMSG("Registro não encontrado.","Atenção",,1)
-         (cAliasAux)->(DbSetOrder(1))
-         (cAliasAux)->(DbGoTo(_nRegAtu))
+         U_ITMsg("Registro não encontrado.","Atenção",,1)
+         (cAliasAux)->(DBSetOrder(1))
+         (cAliasAux)->(DBGoTo(_nRegAtu))
       Else 
-         (cAliasAux)->(DbSetOrder(1))
+         (cAliasAux)->(DBSetOrder(1))
          _oMarkBRW:Refresh()
       EndIf 
    EndIf
 
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -479,7 +476,7 @@ Begin Sequence
       Break
    EndIf 
 
-   If ! U_ITMSG("Confirma a atualização do cadastro de Produtores para os registros selecionados?","Atenção" , , ,2, 2)
+   If ! U_ITMsg("Confirma a atualização do cadastro de Produtores para os registros selecionados?","Atenção" , , ,2, 2)
       Break 
    EndIf 
    
@@ -487,7 +484,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -503,7 +500,7 @@ User Function AGLT055H(nRegZBG)
 Local _cCodFor, _cLojaFor 
 Local _lIncluir 
 Local _aDadosFor := {}
-Local _cNomeUser := UsrFullName(__cUserID)
+Local _cNomeUser := UsrFullName(__cUserId)
 
 Private lMSErroAuto
 
@@ -511,22 +508,22 @@ Begin Sequence
    
    ProcRegua(0)
 
-   (cAliasAux)->(DbGoTop())
-   Do While ! (cAliasAux)->(Eof())
+   (cAliasAux)->(DBGoTop())
+   While ! (cAliasAux)->(Eof())
       
       IncProc("Atualizando Cadastro Produtor...")
 
       If _oMarkBRW:IsMark()
          
-          ZBG->(DbGoTo((cAliasAux)->WK_RECNO))
+          ZBG->(DBGoTo((cAliasAux)->WK_RECNO))
 
          If (cAliasAux)->ZBG_STATUS == "R"
-            U_ITMSG("Não é permitido a atualização de Registros rejeitados. Produtor: " + AllTrim(ZBG->ZBG_NOME) + "." ,"Atenção",,1)
-            (cAliasAux)->(DbSkip())
+            U_ITMsg("Não é permitido a atualização de Registros rejeitados. Produtor: " + AllTrim(ZBG->ZBG_NOME) + "." ,"Atenção",,1)
+            (cAliasAux)->(DBSkip())
             Loop 
          ElseIf (cAliasAux)->ZBG_STATUS == "A"
-            U_ITMSG("Os dados do produtor: "  + AllTrim(ZBG->ZBG_NOME) + ", já foram atualizados.","Atenção",,1)
-            (cAliasAux)->(DbSkip())
+            U_ITMsg("Os dados do produtor: "  + AllTrim(ZBG->ZBG_NOME) + ", já foram atualizados.","Atenção",,1)
+            (cAliasAux)->(DBSkip())
             Loop 
          EndIf 
 
@@ -542,8 +539,8 @@ Begin Sequence
             // cCodigo   = Devera ser passado o conteudo do campo A2_COD.
             // cClass    = Devera ser passado o conteudo do campo A2_I_CLASS.
             If Empty(_cCodFor)
-               U_ITMSG("Não foi possivel gerar o código do fornecedor para o produtor: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
-               (cAliasAux)->(DbSkip())
+               U_ITMsg("Não foi possivel gerar o código do fornecedor para o produtor: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
+               (cAliasAux)->(DBSkip())
                Loop
             EndIf 
             _cLojaFor := U_ACOM006( ZBG->ZBG_CNPJ , _cCodFor , "P" )
@@ -576,7 +573,7 @@ Begin Sequence
                aAdd( _aDadosFor , {	"A2_COD_MUN"	, AllTrim(ZBG->ZBG_CODMUN) , nil } ) 
             EndIf 
             If ! Empty(ZBG->ZBG_MUN)
-               aAdd( _aDadosFor , {	"A2_MUN"	      , ALLTRIM(ZBG->ZBG_MUN)    , nil } )                                                           
+               aAdd( _aDadosFor , {	"A2_MUN"	      , AllTrim(ZBG->ZBG_MUN)    , nil } )                                                           
             EndIf 
             If ! Empty(ZBG->ZBG_CEP)
                aAdd( _aDadosFor , {	"A2_CEP"		   , AllTrim(ZBG->ZBG_CEP)	  , nil } )
@@ -604,11 +601,11 @@ Begin Sequence
             aAdd( _aDadosFor , {	"A2_COD"		   , ZBG->ZBG_COD		               , nil } )
             aAdd( _aDadosFor , {	"A2_LOJA"		, ZBG->ZBG_LOJA		              	, nil } )
             
-            SA2->(DbSetOrder(1))
+            SA2->(DBSetOrder(1))
             If ! SA2->(MsSeek(xFilial("SA2")+ZBG->ZBG_COD+ZBG->ZBG_LOJA))
                If Empty(_cCodFor)
-                  U_ITMSG("Não foi possivel Localizar o produtor: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
-                  (cAliasAux)->(DbSkip())
+                  U_ITMsg("Não foi possivel Localizar o produtor: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
+                  (cAliasAux)->(DBSkip())
                   Loop
                EndIf 
             EndIf 
@@ -634,7 +631,7 @@ Begin Sequence
          EndIf 
 
          If MV_PAR03 == 1 .And. ! Empty(ZBG->ZBG_MUN)  // MV_PAR06
-            aAdd( _aDadosFor , {	"A2_MUN"	      , ALLTRIM(ZBG->ZBG_MUN)    , nil } )                                                           
+            aAdd( _aDadosFor , {	"A2_MUN"	      , AllTrim(ZBG->ZBG_MUN)    , nil } )                                                           
          EndIf 
 
          If MV_PAR04 == 1 .And. ! Empty(ZBG->ZBG_CEP)  // MV_PAR07
@@ -742,11 +739,11 @@ Begin Sequence
             MSExecAuto( {|x,y| Mata020(x,y) } , _aDadosFor , 4 )   
          EndIf 
 
-         IF lMSErroAuto
+         If lMSErroAuto
             If _lIncluir
-               U_ITMSG("Não foi possivel incluir o produtor: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
+               U_ITMsg("Não foi possivel incluir o produtor: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
             Else 
-               U_ITMSG("Não foi possivel alterar o produtor: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
+               U_ITMsg("Não foi possivel alterar o produtor: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
             EndIf 
 
 	         Mostraerro()
@@ -757,7 +754,7 @@ Begin Sequence
             ZBG->ZBG_USRAPR := _cNomeUser	// Usuário Altualiz.Cad.Produtor
             ZBG->ZBG_DTAPR	 := Date()     // Atualiz.Cad. Produtor
             ZBG->ZBG_HRAPR	 := Time()     // Hora Atualiz.Cad.Produtor
-            ZBG->(MsUnLock())
+            ZBG->(MSUnLock())
             
             (cAliasAux)->ZBG_STATUS := "A"
 
@@ -765,18 +762,18 @@ Begin Sequence
 
       EndIf
 
-      (cAliasAux)->(DbSKip())
+      (cAliasAux)->(DBSkip())
    EndDo
    
-   (cAliasAux)->(DbGoTop())
+   (cAliasAux)->(DBGoTop())
 
    _oMarkBRW:Refresh()
 
-   U_ITMSG("Atualização de Produtores Finalizada...","Atenção",,2)
+   U_ITMsg("Atualização de Produtores Finalizada...","Atenção",,2)
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -790,7 +787,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AGLT055T()
-Local _cNomeUser := UsrFullName(__cUserID)
+Local _cNomeUser := UsrFullName(__cUserId)
 
 Begin Sequence 
 
@@ -798,11 +795,11 @@ Begin Sequence
    ZBG->ZBG_USRALT := _cNomeUser	// Usuário da Alteração
    ZBG->ZBG_DTALT	 := Date()   // Data da Alteração
    ZBG->ZBG_HRALT	 := Time()   // Hora da Alteração
-   ZBG->(MsUnlock())
+   ZBG->(MSUnLock())
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -831,18 +828,18 @@ Begin Sequence
    // Configurações iniciais
    //======================================================
    _aObjects := {} 
-   AAdd( _aObjects, { 315,  50, .T., .T. } )
-   AAdd( _aObjects, { 100, 100, .T., .T. } )
+   aAdd( _aObjects, { 315,  50, .T., .T. } )
+   aAdd( _aObjects, { 100, 100, .T., .T. } )
 
    _aInfo := { _aSizeAut[ 1 ], _aSizeAut[ 2 ], _aSizeAut[ 3 ], _aSizeAut[ 4 ], 3, 3 } 
 
    _aPosObj := MsObjSize( _aInfo, _aObjects, .T. ) 
 
-   AADD(aRotina,{"Pesquisar"	,"AxPesqui",0,1})
-	AADD(aRotina,{"Visualizar"	,"AxVisual",0,2})
-	AADD(aRotina,{"Incluir"		,"AxInclui",0,3})
-	AADD(aRotina,{"Alterar"		,"AxAltera",0,4})
-	AADD(aRotina,{"Excluir"		,"AxExclui",0,5})
+   aAdd(aRotina,{"Pesquisar"	,"AxPesqui",0,1})
+	aAdd(aRotina,{"Visualizar"	,"AxVisual",0,2})
+	aAdd(aRotina,{"Incluir"		,"AxInclui",0,3})
+	aAdd(aRotina,{"Alterar"		,"AxAltera",0,4})
+	aAdd(aRotina,{"Excluir"		,"AxExclui",0,5})
    Inclui := .F.
    Altera := .T.
 
@@ -859,7 +856,7 @@ Begin Sequence
    //======================================================
    // aAdd(aHeader,{trim(x3_titulo),x3_campo,x3_picture,x3_tamanho,x3_decimal,x3_valid,x3_usado,x3_tipo, x3_f3,x3_context,	x3_cbox,x3_relacao,x3_when,X3_TRIGGER,	X3_PICTVAR,.F.,.F.})
 
-   Aadd(aHeader,{"Filial"                              ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Filial"                              ,;   // 1  = X3_TITULO                   
                  "ZBH_FILIAL"                          ,;   // 2  = X3_CAMPO
                  ""                                    ,;   // 3  = X3_PICTURE                    
                  1                                     ,;   // 4  = X3_TAMANHO            
@@ -870,7 +867,7 @@ Begin Sequence
                                                      "",;   // 9  = X3_CONTEXT
                  ""})                                       // 10 = X3_CBOX
 
-   Aadd(aHeader,{"Descrição"                            ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Descrição"                            ,;   // 1  = X3_TITULO                   
                  "ZZM_DESCRI"                          ,;   // 2  = X3_CAMPO
                  getsx3cache("ZZM_DESCRI","X3_PICTURE"),;   // 3  = X3_PICTURE                    
                  30                                     ,;   // 4  = X3_TAMANHO            
@@ -881,7 +878,7 @@ Begin Sequence
                                                      "",;   // 9  = X3_CONTEXT
                  ""})                                       // 10 = X3_CBOX
 
-    Aadd(aHeader,{"Cod.Produtor"                       ,;   // 1  = X3_TITULO                   
+    aAdd(aHeader,{"Cod.Produtor"                       ,;   // 1  = X3_TITULO                   
                             "ZBH_CODPRO"               ,;   // 2  = X3_CAMPO
                                       ""               ,;   // 3  = X3_PICTURE                    
                                        12              ,;   // 4  = X3_TAMANHO            
@@ -892,7 +889,7 @@ Begin Sequence
                                       ""               ,;   // 9  = X3_CONTEXT
                                       ""})                  // 10 = X3_CBOX
 
-   Aadd(aHeader,{"Loj.Produtor"                       ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Loj.Produtor"                       ,;   // 1  = X3_TITULO                   
                             "ZBH_LOJPRO"               ,;   // 2  = X3_CAMPO
                                       ""               ,;   // 3  = X3_PICTURE                    
                                        12              ,;   // 4  = X3_TAMANHO            
@@ -903,7 +900,7 @@ Begin Sequence
                                       ""               ,;   // 9  = X3_CONTEXT
                                       ""})                  // 10 = X3_CBOX
    
-   Aadd(aHeader,{"Nome Produtor"                       ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Nome Produtor"                       ,;   // 1  = X3_TITULO                   
                             "ZBH_NOMPRO"               ,;   // 2  = X3_CAMPO
                                       ""               ,;   // 3  = X3_PICTURE                    
                                        60              ,;   // 4  = X3_TAMANHO            
@@ -914,7 +911,7 @@ Begin Sequence
                                       ""               ,;   // 9  = X3_CONTEXT
                                       ""})                  // 10 = X3_CBOX
 
-   Aadd(aHeader,{"Data Rejeic"                       ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Data Rejeic"                       ,;   // 1  = X3_TITULO                   
                             "ZBH_DTREJ"               ,;   // 2  = X3_CAMPO
                                       ""               ,;   // 3  = X3_PICTURE                    
                                        12              ,;   // 4  = X3_TAMANHO            
@@ -926,7 +923,7 @@ Begin Sequence
                                       ""})                  // 10 = X3_CBOX
 
 
-   Aadd(aHeader,{"Hora Rejeic"                       ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Hora Rejeic"                       ,;   // 1  = X3_TITULO                   
                             "ZBH_HRREJ"               ,;   // 2  = X3_CAMPO
                                       ""               ,;   // 3  = X3_PICTURE                    
                                        12              ,;   // 4  = X3_TAMANHO            
@@ -938,7 +935,7 @@ Begin Sequence
                                       ""})                  // 10 = X3_CBOX
 
 
-   Aadd(aHeader,{"Data Envio"                       ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Data Envio"                       ,;   // 1  = X3_TITULO                   
                             "ZBH_DTENV"               ,;   // 2  = X3_CAMPO
                                       ""               ,;   // 3  = X3_PICTURE                    
                                        12              ,;   // 4  = X3_TAMANHO            
@@ -949,7 +946,7 @@ Begin Sequence
                                       ""               ,;   // 9  = X3_CONTEXT
                                       ""})                  // 10 = X3_CBOX
 
-   Aadd(aHeader,{"Hora Envio"                       ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Hora Envio"                       ,;   // 1  = X3_TITULO                   
                             "ZBH_HRENV"               ,;   // 2  = X3_CAMPO
                                       ""               ,;   // 3  = X3_PICTURE                    
                                        12              ,;   // 4  = X3_TAMANHO            
@@ -960,7 +957,7 @@ Begin Sequence
                                       ""               ,;   // 9  = X3_CONTEXT
                                       ""})                  // 10 = X3_CBOX
 
-   Aadd(aHeader,{"Status Integra"                       ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Status Integra"                       ,;   // 1  = X3_TITULO                   
                             "ZBH_STATUS"               ,;   // 2  = X3_CAMPO
                                       ""               ,;   // 3  = X3_PICTURE                    
                                        20              ,;   // 4  = X3_TAMANHO            
@@ -971,8 +968,8 @@ Begin Sequence
                                       ""               ,;   // 9  = X3_CONTEXT
                     getsx3cache("ZZM_DESCRI","X3_CBOX")})                  // 10 = X3_CBOX                                      
      
-    (_cAliasTrb)->(DbGoTop())
-    Do While .T.
+    (_cAliasTrb)->(DBGoTop())
+    While .T.
 
        DEFINE MSDIALOG _oDlgPrd TITLE _cTitulo FROM _aSizeAut[7],00 To _aSizeAut[6], _aSizeAut[5] PIXEL // 00,00 TO 300,400
            @ _aPosObj[2,3]-30, 05  BUTTON _OButtonApr PROMPT "&Visualizar" SIZE 50, 012 OF _oDlgPrd ACTION (U_AGLT055J( (_cAliasTrb)->WK_RECNO , _cTipoDado) ) PIXEL
@@ -984,7 +981,7 @@ Begin Sequence
            _oGetDB:oBrowse:bAdd := {||.F.} // não inclui novos itens MsGetDb()
            _oGetDB:Enable( ) 
 
-           (_cAliasTrb)->(DbGoTop())
+           (_cAliasTrb)->(DBGoTop())
            _oGetDB:ForceRefresh()
 
        ACTIVATE MSDIALOG _oDlgPrd CENTERED
@@ -997,7 +994,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil    
+Return    
 
 /*
 ===============================================================================================================================
@@ -1018,28 +1015,28 @@ Begin Sequence
       Break 
    EndIf 
 
-   If U_ITMSG("Confirma a rejeição dos dados do Produtor posicionado?","Atenção" , , ,2, 2)
+   If U_ITMsg("Confirma a rejeição dos dados do Produtor posicionado?","Atenção" , , ,2, 2)
       
-      ZBG->(DbGoto((cAliasAux)->WK_RECNO))
+      ZBG->(DBGoTo((cAliasAux)->WK_RECNO))
       ZBG->(RecLock("ZBG",.F.))
       ZBG->ZBG_STATUS := "R"
-      ZBG->(MsUnlock())
+      ZBG->(MSUnLock())
 
       (cAliasAux)->ZBG_STATUS := "R"
     
       _oMarkBRW:Refresh()
       
-      U_ITMSG("Rejeição de Produtor concluida com sucesso.","Atenção",,2)
+      U_ITMsg("Rejeição de Produtor concluida com sucesso.","Atenção",,2)
    
    Else 
       
-      U_ITMSG("Rejeição de Produtor cancelada.","Atenção",,2)
+      U_ITMsg("Rejeição de Produtor cancelada.","Atenção",,2)
 
    EndIf 
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -1057,27 +1054,27 @@ Local _aStruct, _aStruct2
 Begin Sequence 
 
    If Select("TRBZBHA") > 0
-	   TRBZBHA->(Dbclosearea())
+	   TRBZBHA->(DBCloseArea())
    EndIf 
    
    If Select("TRBZBHR") > 0
-	   TRBZBHR->(Dbclosearea())
+	   TRBZBHR->(DBCloseArea())
    EndIf 
 
    If Select("TRBZBIA") > 0
-	   TRBZBIA->(Dbclosearea())
+	   TRBZBIA->(DBCloseArea())
    EndIf 
 
    If Select("TRBZBIR") > 0
-	   TRBZBIR->(Dbclosearea())
+	   TRBZBIR->(DBCloseArea())
    EndIf 
 
    If Select("QRYZBI") > 0
-	   QRYZBI->(Dbclosearea())
+	   QRYZBI->(DBCloseArea())
    EndIf 
 
    If Select("QRYZBH") > 0
-	   QRYZBH->(Dbclosearea())
+	   QRYZBH->(DBCloseArea())
    EndIf 
 
    _aStruct := {}
@@ -1138,7 +1135,7 @@ Begin Sequence
    aAdd( _aStruct2 , {"ZBI_STATUS","C", 1 , 0}) //	Status Integra
    aAdd( _aStruct2 , {"ZBI_MOTIVO","C",200, 0}) //	Motivo Rej
    aAdd( _aStruct2 , {"WK_RECNO"  ,"N", 10, 0}) //  Recno ZBH
-   Aadd( _aStruct2 , {"WK_L_ATIVO","C",10 ,0})  // situacao  // Ativo / Inativo
+   aAdd( _aStruct2 , {"WK_L_ATIVO","C",10 ,0})  // situacao  // Ativo / Inativo
    //===========================================================================
    // Cria a tabela de Work TRBZBIA.
    //===========================================================================
@@ -1198,16 +1195,16 @@ Begin Sequence
    EndIf 
 
    If ! Empty(MV_PAR02)
-      _cQryP += " AND ZBH_DTENV >= '"+ Dtos(MV_PAR02) + "' "
+      _cQryP += " AND ZBH_DTENV >= '"+ DToS(MV_PAR02) + "' "
    EndIf 
 
    If ! Empty(MV_PAR03)
-      _cQryP += " AND ZBH_DTENV <= '"+ Dtos(MV_PAR03) + "' "
+      _cQryP += " AND ZBH_DTENV <= '"+ DToS(MV_PAR03) + "' "
    EndIf 
 
-   IF TYPE("cFiltroZBH") = "C" .AND. !EMPTY(cFiltroZBH)
+   If Type("cFiltroZBH") = "C" .And. !Empty(cFiltroZBH)
       _cQryP += cFiltroZBH
-   ENDIF       
+   EndIf       
    
    _cQryP += " ORDER BY ZBH_DTENV, ZBH_CODPRO "
 
@@ -1231,7 +1228,7 @@ Begin Sequence
    ProcRegua(_nTotReg)
 
    QRYZBH->( DBGoTop() )
-   Do While QRYZBH->( !Eof() )
+   While QRYZBH->( !Eof() )
       
       IncProc( "Lendo dados dos Produtores aceitos..." )
 
@@ -1284,16 +1281,16 @@ Begin Sequence
    EndIf 
 
    If ! Empty(MV_PAR02)
-      _cQryP += " AND ZBH_DTENV >= '"+ Dtos(MV_PAR02) + "' "
+      _cQryP += " AND ZBH_DTENV >= '"+ DToS(MV_PAR02) + "' "
    EndIf 
 
    If ! Empty(MV_PAR03)
-      _cQryP += " AND ZBH_DTENV <= '"+ Dtos(MV_PAR03) + "' "
+      _cQryP += " AND ZBH_DTENV <= '"+ DToS(MV_PAR03) + "' "
    EndIf 
 
-   IF TYPE("cFiltroZBH") = "C" .AND. !EMPTY(cFiltroZBH)
+   If Type("cFiltroZBH") = "C" .And. !Empty(cFiltroZBH)
       _cQryP += cFiltroZBH
-   ENDIF       
+   EndIf       
    
    _cQryP += " ORDER BY ZBH_DTENV, ZBH_CODPRO "
 
@@ -1317,7 +1314,7 @@ Begin Sequence
    ProcRegua(_nTotReg)
 
    QRYZBH->( DBGoTop() )
-   Do While QRYZBH->( !Eof() )
+   While QRYZBH->( !Eof() )
       
       IncProc( "Lendo dados dos Produtores rejeitados..." )
 
@@ -1370,16 +1367,16 @@ Begin Sequence
    EndIf 
 
    If ! Empty(MV_PAR02)
-      _cQryc += " AND ZBI_DTENV >= '"+ Dtos(MV_PAR02) + "' "
+      _cQryc += " AND ZBI_DTENV >= '"+ DToS(MV_PAR02) + "' "
    EndIf 
 
    If ! Empty(MV_PAR03)
-      _cQryc += " AND ZBI_DTENV <= '"+ Dtos(MV_PAR03) + "' "
+      _cQryc += " AND ZBI_DTENV <= '"+ DToS(MV_PAR03) + "' "
    EndIf 
 
-   IF TYPE("cFiltroZBI") = "C" .AND. !EMPTY(cFiltroZBI)
+   If Type("cFiltroZBI") = "C" .And. !Empty(cFiltroZBI)
       _cQryc += cFiltroZBI
-   ENDIF       
+   EndIf       
    
    _cQryc += " ORDER BY ZBI_DTENV, ZBI_CODPRO "
 
@@ -1404,7 +1401,7 @@ Begin Sequence
    ProcRegua(_nTotReg)
 
    QRYZBI->( DBGoTop() )
-   Do While QRYZBI->( !Eof() )
+   While QRYZBI->( !Eof() )
          
       IncProc( "Lendo dados das Coletas de Leite Aceitas..." )
       
@@ -1460,16 +1457,16 @@ Begin Sequence
    EndIf 
 
    If ! Empty(MV_PAR02)
-      _cQryc += " AND ZBI_DTENV >= '"+ Dtos(MV_PAR02) + "' "
+      _cQryc += " AND ZBI_DTENV >= '"+ DToS(MV_PAR02) + "' "
    EndIf 
 
    If ! Empty(MV_PAR03)
-      _cQryc += " AND ZBI_DTENV <= '"+ Dtos(MV_PAR03) + "' "
+      _cQryc += " AND ZBI_DTENV <= '"+ DToS(MV_PAR03) + "' "
    EndIf 
 
-   IF TYPE("cFiltroZBI") = "C" .AND. !EMPTY(cFiltroZBI)
+   If Type("cFiltroZBI") = "C" .And. !Empty(cFiltroZBI)
       _cQryc += cFiltroZBI
-   ENDIF       
+   EndIf       
    
    _cQryc += " ORDER BY ZBI_DTENV, ZBI_CODPRO "
 
@@ -1494,20 +1491,20 @@ Begin Sequence
    ProcRegua(_nTotReg)
 
    QRYZBI->( DBGoTop() )
-   Do While QRYZBI->( !Eof() )
+   While QRYZBI->( !Eof() )
          
       IncProc( "Lendo dados das Coletas de Leite Rejeitadas..." )
       
       _cZBI_MOTIVO:=StrTran(QRYZBI->ZBI_MOTIVO,CHR(10),"")
-      IF (_cPosJ:=AT('"message_error": [',_cZBI_MOTIVO)) > 0
+      If (_cPosJ:=AT('"message_error": [',_cZBI_MOTIVO)) > 0
          _cZBI_MOTIVO:=SubStr(_cZBI_MOTIVO,AT('"message_error": [',_cZBI_MOTIVO)+17)
-         IF (_cPosJ:=AT(']',_cZBI_MOTIVO)) > 0
+         If (_cPosJ:=AT(']',_cZBI_MOTIVO)) > 0
             _cZBI_MOTIVO:=SubStr(_cZBI_MOTIVO,1,_cPosJ)
          EndIf
-      ENDIF
-      IF EMPTY(_cZBI_MOTIVO)
-         _cZBI_MOTIVO:=ALLTRIM(StrTran(QRYZBI->ZBI_MOTIVO,CHR(10)," "))
-      ENDIF
+      EndIf
+      If Empty(_cZBI_MOTIVO)
+         _cZBI_MOTIVO:=AllTrim(StrTran(QRYZBI->ZBI_MOTIVO,CHR(10)," "))
+      EndIf
       
       TRBZBIR->( DBAPPEND() )
       TRBZBIR->ZBI_FILIAL := QRYZBI->ZBI_FILIAL   //	Filial
@@ -1524,7 +1521,7 @@ Begin Sequence
       TRBZBIR->ZBI_STATUS := QRYZBI->ZBI_STATUS   //	Status Integra
       TRBZBIR->ZBI_MOTIVO := _cZBI_MOTIVO
       TRBZBIR->WK_RECNO   := QRYZBI->REGZBI       //  Recno ZBI
-      TRBZBIR->WK_L_ATIVO := IF(Posicione("SA2",1,xFilial("SA2")+TRBZBIR->ZBI_CODPRO+TRBZBIR->ZBI_LOJPRO,"A2_L_ATIVO")="N","Inativo","Ativo")
+      TRBZBIR->WK_L_ATIVO := If(Posicione("SA2",1,xFilial("SA2")+TRBZBIR->ZBI_CODPRO+TRBZBIR->ZBI_LOJPRO,"A2_L_ATIVO")="N","Inativo","Ativo")
   
       QRYZBI->( DBSkip() )
 		
@@ -1536,7 +1533,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -1575,7 +1572,7 @@ End Sequence
 
 cFilAnt := _cFilAtual
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -1620,35 +1617,35 @@ Local _cPesq
 
 Begin Sequence 
    
-   //(_cAliasTrb)->(DbSetOrder(xxx))
+   //(_cAliasTrb)->(DBSetOrder(xxx))
    
    DEFINE MSDIALOG _oDlgP TITLE "Pesquisar Produtor Integrado" FROM 178,181 TO 259,697 PIXEL
 
       @ 004,003 ComboBox	_cComboBx1	Items _aComboBx1 Size 213,010 OF _oDlgP PIXEL
 	   @ 020,003 MsGet		_oGet1	Var _cGet1		Size 212,009 OF _oDlgP PIXEL COLOR CLR_BLACK Picture "@!"
 	
-	   DEFINE SBUTTON FROM 004,227 TYPE 1 ENABLE ACTION ( _nOpca := 1 , _oDlgP:End() ) OF _oDlgP
-	   DEFINE SBUTTON FROM 021,227 TYPE 2 ENABLE ACTION ( _nOpca := 0 , _oDlgP:End() ) OF _oDlgP
+	   DEFINE SBUTTON FROM 004,227 Type 1 ENABLE ACTION ( _nOpca := 1 , _oDlgP:End() ) OF _oDlgP
+	   DEFINE SBUTTON FROM 021,227 Type 2 ENABLE ACTION ( _nOpca := 0 , _oDlgP:End() ) OF _oDlgP
 
    ACTIVATE MSDIALOG _oDlgP CENTERED
 
    If _nOpca == 1
       _cPesq := RTrim(_cGet1)
-      If ALLTRIM(_cComboBx1) == ALLTRIM(_aComboBx1[1]) // Data Envio
-         (_cAliasTrb)->(DbSetOrder(6)) 
-         _cPesq := Dtos(Ctod(_cPesq))
-      ElseIf ALLTRIM(_cComboBx1) == ALLTRIM(_aComboBx1[2]) // "Codigo Produtor" 
-         (_cAliasTrb)->(DbSetOrder(4))       
+      If AllTrim(_cComboBx1) == AllTrim(_aComboBx1[1]) // Data Envio
+         (_cAliasTrb)->(DBSetOrder(6)) 
+         _cPesq := DToS(Ctod(_cPesq))
+      ElseIf AllTrim(_cComboBx1) == AllTrim(_aComboBx1[2]) // "Codigo Produtor" 
+         (_cAliasTrb)->(DBSetOrder(4))       
       Else // "Nome Produtor"
-         (_cAliasTrb)->(DbSetOrder(5)) 
+         (_cAliasTrb)->(DBSetOrder(5)) 
       EndIf 
    
       If ! (_cAliasTrb)->(MsSeek(_cPesq))
-         U_ITMSG("Registro não encontrado.","Atenção",,1)
-         (_cAliasTrb)->(DbSetOrder(1))
-         (_cAliasTrb)->(DbGoTo(_nRegAtu))
+         U_ITMsg("Registro não encontrado.","Atenção",,1)
+         (_cAliasTrb)->(DBSetOrder(1))
+         (_cAliasTrb)->(DBGoTo(_nRegAtu))
       Else 
-         (_cAliasTrb)->(DbSetOrder(1))
+         (_cAliasTrb)->(DBSetOrder(1))
          //_oMarkBRW:Refresh()
          _oGetDB:ForceRefresh()
       EndIf 
@@ -1656,7 +1653,7 @@ Begin Sequence
 
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -1688,18 +1685,18 @@ Begin Sequence
    // Configurações iniciais
    //======================================================
    _aObjects := {} 
-   AAdd( _aObjects, { 315,  50, .T., .T. } )
-   AAdd( _aObjects, { 100, 100, .T., .T. } )
+   aAdd( _aObjects, { 315,  50, .T., .T. } )
+   aAdd( _aObjects, { 100, 100, .T., .T. } )
 
    _aInfo := { _aSizeAut[ 1 ], _aSizeAut[ 2 ], _aSizeAut[ 3 ], _aSizeAut[ 4 ], 3, 3 } 
 
    _aPosObj := MsObjSize( _aInfo, _aObjects, .T. ) 
 
-   AADD(aRotina,{"Pesquisar"	,"AxPesqui",0,1})
-	AADD(aRotina,{"Visualizar"	,"AxVisual",0,2})
-	AADD(aRotina,{"Incluir"		,"AxInclui",0,3})
-	AADD(aRotina,{"Alterar"		,"AxAltera",0,4})
-	AADD(aRotina,{"Excluir"		,"AxExclui",0,5})
+   aAdd(aRotina,{"Pesquisar"	,"AxPesqui",0,1})
+	aAdd(aRotina,{"Visualizar"	,"AxVisual",0,2})
+	aAdd(aRotina,{"Incluir"		,"AxInclui",0,3})
+	aAdd(aRotina,{"Alterar"		,"AxAltera",0,4})
+	aAdd(aRotina,{"Excluir"		,"AxExclui",0,5})
    Inclui := .F.
    Altera := .T.
 
@@ -1716,7 +1713,7 @@ Begin Sequence
    //======================================================
    // aAdd(aHeader,{trim(x3_titulo),x3_campo,x3_picture,x3_tamanho,x3_decimal,x3_valid,x3_usado,x3_tipo, x3_f3,x3_context,	x3_cbox,x3_relacao,x3_when,X3_TRIGGER,	X3_PICTVAR,.F.,.F.})
 
-   Aadd(aHeader,{"Filial"                              ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Filial"                              ,;   // 1  = X3_TITULO                   
                  "ZBI_FILIAL"                          ,;   // 2  = X3_CAMPO
                  ""                                    ,;   // 3  = X3_PICTURE                    
                  1                                     ,;   // 4  = X3_TAMANHO            
@@ -1727,7 +1724,7 @@ Begin Sequence
                                                      "",;   // 9  = X3_CONTEXT
                  ""})                                       // 10 = X3_CBOX
 
-   Aadd(aHeader,{"Descrição"                           ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Descrição"                           ,;   // 1  = X3_TITULO                   
                  "ZZM_DESCRI"                          ,;   // 2  = X3_CAMPO
                  getsx3cache("ZZM_DESCRI","X3_PICTURE"),;   // 3  = X3_PICTURE                    
                  30                                    ,;   // 4  = X3_TAMANHO            
@@ -1738,7 +1735,7 @@ Begin Sequence
                                                      "",;   // 9  = X3_CONTEXT
                  ""})                                       // 10 = X3_CBOX
 
-   Aadd(aHeader,{"Ticket"                              ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Ticket"                              ,;   // 1  = X3_TITULO                   
                  "ZBI_TICKET"                          ,;   // 2  = X3_CAMPO
                  getsx3cache("ZBI_TICKET","X3_PICTURE"),;   // 3  = X3_PICTURE                    
                  30                                    ,;   // 4  = X3_TAMANHO            
@@ -1749,7 +1746,7 @@ Begin Sequence
                                                      "",;   // 9  = X3_CONTEXT
                  ""})                                       // 10 = X3_CBOX
  
-    Aadd(aHeader,{"Data Coleta"                        ,;   // 1  = X3_TITULO                   
+    aAdd(aHeader,{"Data Coleta"                        ,;   // 1  = X3_TITULO                   
                  "ZBI_DTCOLE"                          ,;   // 2  = X3_CAMPO
                  getsx3cache("ZBI_DTCOLE","X3_PICTURE"),;   // 3  = X3_PICTURE                    
                  30                                    ,;   // 4  = X3_TAMANHO            
@@ -1761,7 +1758,7 @@ Begin Sequence
                  ""})                                       // 10 = X3_CBOX
 
 
-    Aadd(aHeader,{"Cod.Produtor"                       ,;   // 1  = X3_TITULO                   
+    aAdd(aHeader,{"Cod.Produtor"                       ,;   // 1  = X3_TITULO                   
                             "ZBI_CODPRO"               ,;   // 2  = X3_CAMPO
                                       ""               ,;   // 3  = X3_PICTURE                    
                                        12              ,;   // 4  = X3_TAMANHO            
@@ -1772,7 +1769,7 @@ Begin Sequence
                                       ""               ,;   // 9  = X3_CONTEXT
                                       ""})                  // 10 = X3_CBOX
 
-   Aadd(aHeader,{"Loj.Produtor"                       ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Loj.Produtor"                       ,;   // 1  = X3_TITULO                   
                             "ZBI_LOJPRO"               ,;   // 2  = X3_CAMPO
                                       ""               ,;   // 3  = X3_PICTURE                    
                                        12              ,;   // 4  = X3_TAMANHO            
@@ -1783,7 +1780,7 @@ Begin Sequence
                                       ""               ,;   // 9  = X3_CONTEXT
                                       ""})                  // 10 = X3_CBOX
    
-   Aadd(aHeader,{"Nome Produtor"                       ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Nome Produtor"                       ,;   // 1  = X3_TITULO                   
                             "ZBI_NOMPRO"               ,;   // 2  = X3_CAMPO
                                       ""               ,;   // 3  = X3_PICTURE                    
                                        60              ,;   // 4  = X3_TAMANHO            
@@ -1794,7 +1791,7 @@ Begin Sequence
                                       ""               ,;   // 9  = X3_CONTEXT
                                       ""})                  // 10 = X3_CBOX
 
-   Aadd(aHeader,{"Data Rejeic"                       ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Data Rejeic"                       ,;   // 1  = X3_TITULO                   
                             "ZBI_DTREJ"               ,;   // 2  = X3_CAMPO
                                       ""               ,;   // 3  = X3_PICTURE                    
                                        12              ,;   // 4  = X3_TAMANHO            
@@ -1806,7 +1803,7 @@ Begin Sequence
                                       ""})                  // 10 = X3_CBOX
 
 
-   Aadd(aHeader,{"Hora Rejeic"                       ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Hora Rejeic"                       ,;   // 1  = X3_TITULO                   
                             "ZBI_HRREJ"               ,;   // 2  = X3_CAMPO
                                       ""               ,;   // 3  = X3_PICTURE                    
                                        12              ,;   // 4  = X3_TAMANHO            
@@ -1818,7 +1815,7 @@ Begin Sequence
                                       ""})                  // 10 = X3_CBOX
 
 
-   Aadd(aHeader,{"Data Envio"                       ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Data Envio"                       ,;   // 1  = X3_TITULO                   
                             "ZBI_DTENV"               ,;   // 2  = X3_CAMPO
                                       ""               ,;   // 3  = X3_PICTURE                    
                                        12              ,;   // 4  = X3_TAMANHO            
@@ -1829,7 +1826,7 @@ Begin Sequence
                                       ""               ,;   // 9  = X3_CONTEXT
                                       ""})                  // 10 = X3_CBOX
 
-   Aadd(aHeader,{"Hora Envio"                       ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Hora Envio"                       ,;   // 1  = X3_TITULO                   
                             "ZBI_HRENV"               ,;   // 2  = X3_CAMPO
                                       ""               ,;   // 3  = X3_PICTURE                    
                                        12              ,;   // 4  = X3_TAMANHO            
@@ -1840,7 +1837,7 @@ Begin Sequence
                                       ""               ,;   // 9  = X3_CONTEXT
                                       ""})                  // 10 = X3_CBOX
 
-   Aadd(aHeader,{"Status Integra"                       ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Status Integra"                       ,;   // 1  = X3_TITULO                   
                             "ZBI_STATUS"               ,;   // 2  = X3_CAMPO
                                       ""               ,;   // 3  = X3_PICTURE                    
                                        20              ,;   // 4  = X3_TAMANHO            
@@ -1851,7 +1848,7 @@ Begin Sequence
                                       ""               ,;   // 9  = X3_CONTEXT
                     getsx3cache("ZZM_DESCRI","X3_CBOX")})                  // 10 = X3_CBOX                                      
 
-   Aadd(aHeader,{"Produtor Ativo?"                     ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Produtor Ativo?"                     ,;   // 1  = X3_TITULO                   
                             "WK_L_ATIVO"               ,;   // 2  = X3_CAMPO
                                       ""               ,;   // 3  = X3_PICTURE                    
                                        10              ,;   // 4  = X3_TAMANHO            
@@ -1862,7 +1859,7 @@ Begin Sequence
                                       ""               ,;   // 9  = X3_CONTEXT
                                       ""})                  // 10 = X3_CBOX
 
-   Aadd(aHeader,{"Motivo Rejeiçao"                       ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Motivo Rejeiçao"                       ,;   // 1  = X3_TITULO                   
                             "ZBI_MOTIVO"               ,;   // 2  = X3_CAMPO
                                       ""               ,;   // 3  = X3_PICTURE                    
                                        100             ,;   // 4  = X3_TAMANHO            
@@ -1875,19 +1872,19 @@ Begin Sequence
 
      _aCabecalho:={}
      _aCampos   :={}
-     FOR H := 1 TO LEN(aHeader)
+     For H := 1 TO Len(aHeader)
     	// Alinhamento: 1-Left   ,2-Center,3-Right
     	// Formatação.: 1-General,2-Number,3-Monetário,4-DateTime
          //                             ,Alinhamento,Formatação, Totaliza,cPicture
-         AADD(_aCabecalho,{ aHeader[H,1],1          ,1         ,.F.      }  )
-         AADD(_aCampos   ,aHeader[H,2] )
-     NEXT H
+         aAdd(_aCabecalho,{ aHeader[H,1],1          ,1         ,.F.      }  )
+         aAdd(_aCampos   ,aHeader[H,2] )
+     Next H
     //ITGEREXCEL(_cNomeArq,_cDiretorio,_cTitulo,_cNomePlan,_aCabecalho,_aDetalhe,_lLeTabTemp,_cAliasTab,_aCampos,_lScheduller,_lCriaPastas,_aPergunte,_lEnviaEmail,_lXLSX,oProc)
-    _bExcel:={|| U_ITGEREXCEL("AGLT005_"+DTOS(DATE())+"_"+STRTRAN(TIME(),":","")+".XLSX",,_cTitulo,"INTEGRA_COLETA",_aCabecalho,,.T.,_cAliasTrb,_aCampos,.F.,.F.,,.F.,.T.,) }
+    _bExcel:={|| U_ITGEREXCEL("AGLT005_"+DToS(DATE())+"_"+StrTran(TIME(),":","")+".XLSX",,_cTitulo,"INTEGRA_COLETA",_aCabecalho,,.T.,_cAliasTrb,_aCampos,.F.,.F.,,.F.,.T.,) }
     
-    (_cAliasTrb)->(DbGoTop())
+    (_cAliasTrb)->(DBGoTop())
     
-    Do While .T.
+    While .T.
 
        DEFINE MSDIALOG _oDlgPrd TITLE _cTitulo FROM _aSizeAut[7],00 To _aSizeAut[6], _aSizeAut[5] PIXEL // 00,00 TO 300,400
            @ _aPosObj[2,3]-30, 05  BUTTON _OButtonApr PROMPT "&Visualizar"	 SIZE 50, 012 OF _oDlgPrd ACTION (U_AGLT055K( (_cAliasTrb)->WK_RECNO , _cTipoDado) ) PIXEL
@@ -1899,7 +1896,7 @@ Begin Sequence
            _oGetDBI:oBrowse:bAdd := {||.F.} // não inclui novos itens MsGetDb()
            _oGetDBI:Enable( ) 
 
-           (_cAliasTrb)->(DbGoTop())
+           (_cAliasTrb)->(DBGoTop())
            _oGetDBI:ForceRefresh()
 
        ACTIVATE MSDIALOG _oDlgPrd CENTERED
@@ -1912,7 +1909,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil    
+Return    
 
 /*
 ===============================================================================================================================
@@ -1951,7 +1948,7 @@ End Sequence
 
 cFilAnt := _cFilAtual
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -1981,34 +1978,34 @@ Begin Sequence
       @ 004,003 ComboBox	_cComboBx1	Items _aComboBx1 Size 213,010 OF _oDlgP PIXEL
 	   @ 020,003 MsGet		_oGet1	Var _cGet1		Size 212,009 OF _oDlgP PIXEL COLOR CLR_BLACK Picture "@!"
 	
-	   DEFINE SBUTTON FROM 004,227 TYPE 1 ENABLE ACTION ( _nOpca := 1 , _oDlgP:End() ) OF _oDlgP
-	   DEFINE SBUTTON FROM 021,227 TYPE 2 ENABLE ACTION ( _nOpca := 0 , _oDlgP:End() ) OF _oDlgP
+	   DEFINE SBUTTON FROM 004,227 Type 1 ENABLE ACTION ( _nOpca := 1 , _oDlgP:End() ) OF _oDlgP
+	   DEFINE SBUTTON FROM 021,227 Type 2 ENABLE ACTION ( _nOpca := 0 , _oDlgP:End() ) OF _oDlgP
 
    ACTIVATE MSDIALOG _oDlgP CENTERED
 
    If _nOpca == 1
       _cPesq := RTrim(_cGet1)
-      If ALLTRIM(_cComboBx1) == ALLTRIM(_aComboBx1[1]) // Data Envio
-         (_cAliasTrb)->(DbSetOrder(7)) 
-         _cPesq := Dtos(Ctod(_cPesq))
-      ElseIf ALLTRIM(_cComboBx1) == ALLTRIM(_aComboBx1[2]) // "Codigo Produtor" 
-         (_cAliasTrb)->(DbSetOrder(5))       
-      ElseIf ALLTRIM(_cComboBx1) == ALLTRIM(_aComboBx1[3]) // "Nome Produtor"
-         (_cAliasTrb)->(DbSetOrder(6)) 
+      If AllTrim(_cComboBx1) == AllTrim(_aComboBx1[1]) // Data Envio
+         (_cAliasTrb)->(DBSetOrder(7)) 
+         _cPesq := DToS(Ctod(_cPesq))
+      ElseIf AllTrim(_cComboBx1) == AllTrim(_aComboBx1[2]) // "Codigo Produtor" 
+         (_cAliasTrb)->(DBSetOrder(5))       
+      ElseIf AllTrim(_cComboBx1) == AllTrim(_aComboBx1[3]) // "Nome Produtor"
+         (_cAliasTrb)->(DBSetOrder(6)) 
       Else // Ticket
-         (_cAliasTrb)->(DbSetOrder(8)) 
+         (_cAliasTrb)->(DBSetOrder(8)) 
       EndIf 
    
       If ! (_cAliasTrb)->(MsSeek(_cPesq))
-         U_ITMSG("Registro não encontrado.","Atenção",,1)
-         (_cAliasTrb)->(DbSetOrder(1))
-         (_cAliasTrb)->(DbGoTo(_nRegAtu))
+         U_ITMsg("Registro não encontrado.","Atenção",,1)
+         (_cAliasTrb)->(DBSetOrder(1))
+         (_cAliasTrb)->(DBGoTo(_nRegAtu))
       Else 
-         (_cAliasTrb)->(DbSetOrder(1))
+         (_cAliasTrb)->(DBSetOrder(1))
          _oGetDBI:ForceRefresh()
       EndIf 
    EndIf
 
 End Sequence
 
-Return Nil
+Return

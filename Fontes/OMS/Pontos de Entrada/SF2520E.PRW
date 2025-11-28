@@ -2,77 +2,48 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Jerry		  | 13/03/2018 | Ajustar o novo campo de Status do Pedido de Vendas (C5_I_STATU) quando Excluir Nota - Chamado 24091
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 02/07/2018 | Substituida exclusão dos complementos pela função ECompFis. Chamado 25362
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 31/07/2024 | Chamado 48058. Incluída função para excluir movimento interno referente ao desconto Tetra Pak.
+Lucas Borges  |02/07/2018| Chamado 25362. Substituida exclusão dos complementos pela função ECompFis.
+Lucas Borges  |31/07/2024| Chamado 48058. Incluída função para excluir movimento interno referente ao desconto Tetra Pak.
+Lucas Borges  |02/10/2025| Chamado 51526. Modificada forma para recuperar a matrícula do usuário.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa--------: SF2520E
 Autor-----------: Tiago Correa Castro
 Data da Criacao-: 08/02/2009
-===============================================================================================================================
 Descrição-------: Ponto de Entrada após a exclusão da Nota Fiscal de Saida.
-===============================================================================================================================
 Parametros------: cTabAux := Código da Tabela no SX5
 ----------------: nTamAux := Tamanho da Chave para o Retorno
-===============================================================================================================================
 Retorno---------: .T. - Compatibilidade com a utilização em F3
 ===============================================================================================================================
 */
-User Function SF2520E()
+User Function SF2520E
 
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
+Local _aAreaSF2		:= SF2->(FWGetArea())
+Local _aAreaSC9		:= SC9->(FWGetArea())
+Local _aAreaDAI		:= DAI->(FWGetArea())
+Local _aAreaSD2		:= SD2->(FWGetArea())
+Local _aAreaSC5		:= SC5->(FWGetArea())
+Local _aAreaSC6		:= SC6->(FWGetArea())
 Local aVetor		:= {}
 Local _cPedido		:=  SF2->F2_I_PEDID
 
 Private lMsErroAuto	:= .F.
 
 //================================================================================
-//| Salvando Integridade do Sistema.                                             |
-//================================================================================
-dbSelectArea("SF2")
-_nOrdSF2 := IndexOrd()
-_nRecSF2 := Recno()
-
-dbSelectArea("SC9")
-_nOrdSC9 := IndexOrd()
-_nRecSC9 := Recno()
-
-dbSelectArea("DAI")
-_nOrdDAI := IndexOrd()
-_nRecDAI := Recno()
-
-dbSelectArea("SD2")
-_nOrdSD2 := IndexOrd()
-_nRecSD2 := Recno()
-
-dbSelectArea("SC5")
-_nOrdSC5 := IndexOrd()
-_nRecSC5 := Recno()
-
-dbSelectArea("SC6")
-_nOrdSC6 := IndexOrd()
-_nRecSC6 := Recno()
-
-//================================================================================
 // Grava filial e matricula do usuario q esta fazendo a exclusao
 // na tabela SF2 campo F2_I_UEXCL(Caracter 8)
 //================================================================================
 RecLock("SF2",.F.)
-F2_I_UEXCL := U_UCFG001(1)
-SF2->(MsUnlock())
+F2_I_UEXCL := FWSFAllUsers({__cUserID},{"USR_FILIAL"})[1][3]+FWSFAllUsers({__cUserID},{"USR_CODFUNC"})[1][3]
+SF2->(MSUnLock())
 SF2->(dbCommit())
 
 //Exclui os complementos de notas fiscais de entrada e de saida com as informacoes necessarias ao Sped.
@@ -81,26 +52,26 @@ Processa( {|| U_ECompFis("S",SF2->F2_DOC,SF2->F2_SERIE,SF2->F2_CLIENTE,SF2->F2_L
 //================================================================================
 //| Exluindo titulo no financeiro ref. ao valor do frete                         |
 //================================================================================
-DbSelectArea("ZZ2")
-ZZ2->(DbSetORder(2)) // ZZ2_FILIAL+ZZ2_CARGA
-IF ZZ2->(DbSeek(xFilial("ZZ2")+SF2->F2_CARGA))
+DBSelectArea("ZZ2")
+ZZ2->(DBSetOrder(2)) // ZZ2_FILIAL+ZZ2_CARGA
+If ZZ2->(DBSeek(xFilial("ZZ2")+SF2->F2_CARGA))
 			
-	DbSelectArea("SE2")
+	DBSelectArea("SE2")
 	SE2->( DBOrderNickName("IT_RPA")) //E2_FILIAL+E2_PREFIXO+E2_TIPO+E2_NUM+E2_PARCELA+E2_FORNECE+E2_LOJA                                                                                               
 	SE2->( DBSeek( xFilial("SE2") + "AUT" + "RPA" + ZZ2->ZZ2_RECIBO ) )
 	
-	While SE2->(!EOF()) .and. SE2->E2_FILIAL == xFilial("SE2") .and. SE2->E2_PREFIXO == "AUT" .and. SE2->E2_NUM == ZZ2->ZZ2_RECIBO
+	While SE2->(!Eof()) .And. SE2->E2_FILIAL == xFilial("SE2") .And. SE2->E2_PREFIXO == "AUT" .And. SE2->E2_NUM == ZZ2->ZZ2_RECIBO
 
-		If SE2->E2_TIPO == "RPA" .and. SE2->E2_SALDO == SE2->E2_VALOR
+		If SE2->E2_TIPO == "RPA" .And. SE2->E2_SALDO == SE2->E2_VALOR
 			   
 			lMsErroAuto := .F. 
 			
-			DbSelectArea("SA2")
-			SA2->(DbSetOrder(1))
-			SA2->(DbSeek(xFilial("SA2")+SE2->E2_FORNECE+SE2->E2_LOJA))
+			DBSelectArea("SA2")
+			SA2->(DBSetOrder(1))
+			SA2->(DBSeek(xFilial("SA2")+SE2->E2_FORNECE+SE2->E2_LOJA))
 			
-			DbSelectArea("SE2")
-			SE2->(DbSetOrder(1)) //E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
+			DBSelectArea("SE2")
+			SE2->(DBSetOrder(1)) //E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
 			
 			aVetor :={	{"E2_PREFIXO"	,SE2->E2_PREFIXO			,Nil},;
 						{"E2_NUM"		,SE2->E2_NUM				,Nil},;
@@ -113,37 +84,37 @@ IF ZZ2->(DbSeek(xFilial("ZZ2")+SF2->F2_CARGA))
 			
 			If lMsErroAuto
 				Mostraerro()
-			Endif
+			EndIf
 			
-		Endif
+		EndIf
 		
-		DbSelectArea("SE2")
-		SE2->(DbSetOrder(1)) //E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
-		SE2->(DbSkip())
+		DBSelectArea("SE2")
+		SE2->(DBSetOrder(1)) //E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
+		SE2->(DBSkip())
 		
 	EndDo
 	
 	// Apaga os dados do arquivo ZZ3 quando a exclusao da NF por nota/carga(Deletando item da N.F.)
-	DbSelectArea("ZZ3")
-	ZZ3->(DbSetOrder(1)) //ZZ3_FILIAL+ZZ3_RECIBO+ZZ3_CARGA+ZZ3_DOC+ZZ3_SERIE
-	ZZ3->(DbSeek(xFilial("ZZ3")+ZZ2->ZZ2_RECIBO+SF2->F2_CARGA))
-	While ZZ3->(!EOF()) .and. ZZ3->ZZ3_FILIAL == xFilial("ZZ3") .And. ZZ3->ZZ3_RECIBO == ZZ2->ZZ2_RECIBO .And. ZZ3->ZZ3_CARGA == ZZ2->ZZ2_CARGA
+	DBSelectArea("ZZ3")
+	ZZ3->(DBSetOrder(1)) //ZZ3_FILIAL+ZZ3_RECIBO+ZZ3_CARGA+ZZ3_DOC+ZZ3_SERIE
+	ZZ3->(DBSeek(xFilial("ZZ3")+ZZ2->ZZ2_RECIBO+SF2->F2_CARGA))
+	While ZZ3->(!Eof()) .And. ZZ3->ZZ3_FILIAL == xFilial("ZZ3") .And. ZZ3->ZZ3_RECIBO == ZZ2->ZZ2_RECIBO .And. ZZ3->ZZ3_CARGA == ZZ2->ZZ2_CARGA
 		RecLock("ZZ3",.F.)
 		Delete
-		MsUnlock()
-		ZZ3->(DbSkip())
+		MSUnLock()
+		ZZ3->(DBSkip())
 	EndDo
 	
 	//Deleta ZZ2 caso a exclusao seja por carga(Cabecalho do recibo)
 	If Upper(AllTrim(FunName())) == "MATA521B"
 		If MV_PAR04 == 1 //Os Pedidos voltam a ficar em carteira desfazendo assim a Montagem da Carga
-			DbSelectArea("ZZ2")
-			RecLock("ZZ2",.f.)
+			DBSelectArea("ZZ2")
+			RecLock("ZZ2",.F.)
 			Delete
-			MsUnLock()
-		Endif
-	Endif
-Endif
+			MSUnLock()
+		EndIf
+	EndIf
+EndIf
 
 //================================================================================
 //| Verifica a exclusão de impostos calculados no RPA Avulso/Faturamento de Carga|
@@ -159,22 +130,22 @@ U_ExcNcc()	// 07/02/2013 - Talita - Chamada da função responsavel por excluir os
 
 lCart := MV_PAR04==1
 	
-DbselectArea("SC5")
-SC5->(DbsetOrder(1))//C5_FILIAL+C5_NUM
-If SC5->(dbSeek(xFilial("SC5") + _cPedido ))
+DBSelectArea("SC5")
+SC5->(DBSetOrder(1))//C5_FILIAL+C5_NUM
+If SC5->(DBSeek(xFilial("SC5") + _cPedido ))
           
 	SC5->(RecLock("SC5",.F.))
 	If SC5->C5_I_TRCNF = "N"
-		SC5->C5_I_STATU = IIF(lCart,"01","03")
+		SC5->C5_I_STATU = IIf(lCart,"01","03")
 	Else 
 		If SC5->C5_I_FLFNC <> SC5->C5_FILIAL //PEDIDO FATURAMENTO
-			SC5->C5_I_STATU = IIF(lCart,"14","15")			
+			SC5->C5_I_STATU = IIf(lCart,"14","15")			
 		Else                  
 			SC5->C5_I_STATU = "12"	//PEDIDO CARREGAMENTO
-			SC5->C5_I_STATU = IIF(lCart,"12","13")						
+			SC5->C5_I_STATU = IIf(lCart,"12","13")						
 		EndIf    
 	EndIf
-	SC5->( MsUnlock() )
+	SC5->( MSUnLock() )
  
 EndIf    
 
@@ -182,47 +153,23 @@ If SF2->F2_CLIENTE == 'F00004' .And. SF2->F2_TIPO == "D"
 	DescTetraS()
 EndIf
 
-//================================
-//Restaura Integridade do Sistema.
-//================================
-dbSelectArea("SD2")
-dbSetOrder(_nOrdSD2)
-dbGoto(_nRecSD2)
+FWRestArea(_aAreaSF2)
+FWRestArea(_aAreaSC9)
+FWRestArea(_aAreaDAI)
+FWRestArea(_aAreaSD2)
+FWRestArea(_aAreaSC5)
+FWRestArea(_aAreaSC6)
+FWRestArea(_aArea)
 
-dbSelectArea("SF2")
-dbSetOrder(_nOrdSF2)
-dbGoto(_nRecSF2)
-
-dbSelectArea("SC9")
-dbSetOrder(_nOrdSC9)
-dbGoto(_nRecSC9)
-
-dbSelectArea("DAI")
-dbSetOrder(_nOrdDAI)
-dbGoto(_nRecDAI)      
-
-dbSelectArea("SC5")
-dbSetOrder(_nOrdSC5)
-dbGoto(_nRecSC5)
-
-dbSelectArea("SC6")
-dbSetOrder(_nOrdSC6)
-dbGoto(_nRecSC6)
-
-RestArea(_aArea)
-
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: ExcIMP
 Autor-----------: Alexandre Villar
 Data da Criacao-: 15/12/2008
-===============================================================================================================================
-Descrição-------: Rotina que processa a eliminação do cálculo de impostos da ZZ2 no momento da exclusão.
-===============================================================================================================================
+Descrição-------: Rotina que Processa a eliminação do cálculo de impostos da ZZ2 no momento da exclusão.
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T. - Permite o estorno
 ------------------: .F. - Impede o estorno
 ===============================================================================================================================
@@ -232,13 +179,11 @@ User Function ExcIMP()
 DBSelectArea('ZZ2')
 ZZ2->( DBSetOrder(2) )
 If ZZ2->( DBSeek( SF2->( F2_FILIAL + F2_CARGA ) ) )
-
 	ZZ2->( RecLock( 'ZZ2' , .F. ) )
 		ZZ2->ZZ2_SEST	:= 0
 		ZZ2->ZZ2_INSS	:= 0
 		ZZ2->ZZ2_IRRF	:= 0
-	ZZ2->( MsUnLock() )
-
+	ZZ2->( MSUnLock() )
 EndIf
 
 Return
@@ -248,43 +193,36 @@ Return
 Programa--------: ExcNCC
 Autor-----------: Talita Teixeira
 Data da Criacao-: 07/02/2013
-===============================================================================================================================
 Descrição-------: Consulta para verificar se a nota possui titulos de ncc se sim excluir os mesmos.
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-User Function ExcNcc()   
+User Function ExcNcc
 
 Local cNumero	:= SF2->F2_DOC
 Local aExcNCC 	:= {}  
 
 Private lMsErroAuto := .F.
 
-	DbSelectArea ("SE1")
-    SE1->(DbSetOrder(1))
-    SE1->(DbSeek(xFilial("SE1")+"DCT"+cNumero))
+DBSelectArea ("SE1")
+SE1->(DBSetOrder(1))
+SE1->(DBSeek(xFilial("SE1")+"DCT"+cNumero))
 
-    While SE1->(!Eof()) .And. SE1->E1_NUM = cNumero
+While SE1->(!Eof()) .And. SE1->E1_NUM = cNumero
+	If SE1->E1_TIPO = "NCC"
+		aExcNCC := {	{ "E1_FILIAL"	, SE1->E1_FILIAL	, NIL },;
+						{ "E1_PREFIXO"	, "DCT" 			, NIL },;
+						{ "E1_NUM"		, cNumero			, NIL } }
 
-    	If SE1->E1_TIPO = "NCC"
-
-    	aExcNCC := {	{ "E1_FILIAL"	, SE1->E1_FILIAL	, NIL },;
-    					{ "E1_PREFIXO"	, "DCT" 			, NIL },;
-     					{ "E1_NUM"		, cNumero			, NIL } }
- 
 		MsExecAuto( {|x,y| FINA040(x,y) } , aExcNCC , 5 )  // 3 - Inclusao, 4 - Alteração, 5 - Exclusão
 
-			If lMsErroAuto
-   				 MostraErro()
-			Endif
-
-        EndIf
-
+		If lMsErroAuto
+				MostraErro()
+		EndIf
+	EndIf
 	SE1->( DBSkip() )
-	EndDo
+EndDo
 
 Return
 
@@ -293,22 +231,20 @@ Return
 Programa----------: DescTetraS
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 31/07/2024
-===============================================================================================================================
 Descrição---------: Gera movimento interno para retornar o valor do desconto TetraPak do produto
-===============================================================================================================================
 Parametros--------: nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function DescTetraS()
+Static Function DescTetraS
+
 Local _aSD3 := GetArea("SD3")
 
 Private lMsErroAuto := .F.
 
-SD3->(Dbsetorder(16)) //D3_FILIAL + D3_CHAVEF2
-If SD3->(Dbseek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE+SF2->F2_CLIENTE+SF2->F2_LOJA))
-	While !SD3->(EOF()) .And. SD3->D3_FILIAL+Substr(SD3->D3_CHAVEF2,1,22) == SF2->(F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA)
+SD3->(DBSetOrder(16)) //D3_FILIAL + D3_CHAVEF2
+If SD3->(DBSeek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE+SF2->F2_CLIENTE+SF2->F2_LOJA))
+	While !SD3->(Eof()) .And. SD3->D3_FILIAL+SubStr(SD3->D3_CHAVEF2,1,22) == SF2->(F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA)
 		If SD3->D3_ESTORNO # "S"
 			MsExecAuto({|x,y,z| MatA241(x,y,z)},{},Nil,6)
 			If lMsErroAuto
@@ -316,9 +252,9 @@ If SD3->(Dbseek(SF2->F2_FILIAL+SF2->F2_DOC+SF2->F2_SERIE+SF2->F2_CLIENTE+SF2->F2
 				Mostraerro()
 			EndIf
 		EndIf
-		SD3->(dbSkip())
+		SD3->(DBSkip())
 	EndDo
 EndIf
-Restarea(_aSD3)
+FWRestArea(_aSD3)
 
 Return

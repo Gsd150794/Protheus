@@ -2,20 +2,17 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 05/04/2022 | Ajuste para tratar evento temporário do Incentivo à Produção. Chamado 39679
-Lucas Borges  | 24/01/2023 | Corrigida chamada de SuperGetMV em laço. Chamado 42685
-Lucas Borges  | 11/02/2025 | Chamado 49877. Removido tratamento sobre a versão do Mix
+Lucas Borges  |05/04/2022| Chamado 39679. Ajuste para tratar evento temporário do Incentivo à Produção.
+Lucas Borges  |24/01/2023| Chamado 42685. Corrigida chamada de SuperGetMV em laço.
+Lucas Borges  |11/02/2025| Chamado 49877. Removido tratamento sobre a versão do Mix
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "RWMAKE.CH"
-#INCLUDE "Colors.ch"
+#Include "TOTVS.ch"
+#Include "RWMAKE.CH"
+#Include "Colors.ch"
 
 /*
 ===============================================================================================================================
@@ -36,7 +33,7 @@ Private cCadastro	:= "Complemento de Pagamento - Gera título financeiro"
 Private aRotina		:= MenuDef()
 Private _nContReg	:= 0
 Private _cAliasZL8:= GetNextAlias()
-Private _cPrefixo := PADR(SuperGetMv("IT_PREFADI",.F.,"GCO"),TamSX3("E2_PREFIXO")[1])
+Private _cPrefixo := PadR(SuperGetMv("IT_PREFADI",.F.,"GCO"),TamSX3("E2_PREFIXO")[1])
 
 _aCores := {{"ZZE_STATUS == '1'",'ENABLE'} ,; //INCLUIDO SEM NENHUM REGISTRO TER SIDO EFETIVADO
            {"ZZE_STATUS == '2'",'BR_AZUL'}}   //EFETIVADO POSSUI PELO MENOS UM REGISTRO EFETIVADO, OU SEJA, PASSOU PELA ROTINA DE EFETIVACAO
@@ -104,7 +101,7 @@ Private aRotina     := {}
 
 _cCondicao  := "ZZF_CODIGO == '" + ZZE->ZZE_CODIGO + "'"
 
-(_cAlias)->(dbSetOrder(1))
+(_cAlias)->(DBSetOrder(1))
 
 set filter to  &(_cCondicao)
 
@@ -148,28 +145,28 @@ Local _oSay11, _oSay12, _oSay13, _oSay2
 Local _oSay3, _oSay4, _oSay5
 Local _oSay6, _oSay7, _oSay8
 Local _oSay9, _oSetor, _oGNumero
-Local _cDescSet    := IIF(_nOperac == 1,"",Posicione("ZL2",1,xFilial("ZL2") + ZZE->ZZE_SETOR,"ZL2->ZL2_DESCRI"))
-Local lInclui      := IIF(_nOperac == 1,.T.,.F.)
+Local _cDescSet    := IIf(_nOperac == 1,"",Posicione("ZL2",1,xFilial("ZL2") + ZZE->ZZE_SETOR,"ZL2->ZL2_DESCRI"))
+Local lInclui      := IIf(_nOperac == 1,.T.,.F.)
 Local oFont12b
 Private oSDadMixOr, oSDadMixDe
 Private _sDtInic,_sDtFin,_sDtDesIni,_sDtDesFin
-Private cGSetor    := IIF(_nOperac == 1,Space(GetSX3Cache("ZZE_SETOR","X3_TAMANHO")),ZZE->ZZE_SETOR)
-Private cGProdIni  := IIF(_nOperac == 1,Space(GetSX3Cache("ZZE_PROINI","X3_TAMANHO")),ZZE->ZZE_PROINI)
-Private cGProdFin  := IIF(_nOperac == 1,Space(GetSX3Cache("ZZE_PROFIN","X3_TAMANHO")),ZZE->ZZE_PROFIN)
-Private cGMixOrig  := IIF(_nOperac == 1,Space(GetSX3Cache("ZZE_MIXORI","X3_TAMANHO")),ZZE->ZZE_MIXORI)
-Private cGMixDest  := IIF(_nOperac == 1,Space(GetSX3Cache("ZZE_MIXDES","X3_TAMANHO")),ZZE->ZZE_MIXDES)
-Private cGLjProdIn := IIF(_nOperac == 1,Space(GetSX3Cache("ZZE_LOJINI","X3_TAMANHO")),ZZE->ZZE_LOJINI)
-Private cGLjProdFi := IIF(_nOperac == 1,Space(GetSX3Cache("ZZE_LOJFIN","X3_TAMANHO")),ZZE->ZZE_LOJFIN)
-Private cGLinIni   := IIF(_nOperac == 1,Space(GetSX3Cache("ZZE_LININI","X3_TAMANHO")),ZZE->ZZE_LININI)
-Private cGLinFin   := IIF(_nOperac == 1,Space(GetSX3Cache("ZZE_LINFIN","X3_TAMANHO")),ZZE->ZZE_LINFIN)
-Private cGVlrRepor := IIF(_nOperac == 1,0,ZZE->ZZE_VALOR)
-Private cCbOperac  := IIF(_nOperac == 1,'Incluir',IIF(_nOperac == 2,'Alterar','Excluir'))
-Private cGNumero   := IIF(_nOperac == 1,GETSXENUM("ZZE","ZZE_CODIGO"),ZZE->ZZE_CODIGO)
-Private cGProdFora := IIF(_nOperac == 1,SPACE(1600),ZZE->ZZE_PROOUT)
-Private cGProdFor2 := IIF(_nOperac == 1,SPACE(1600),ZZE->ZZE_PROOU2)
-Private cGDtCred   := IIF(_nOperac == 1,date(),ZZE->ZZE_DTCRED)
-Private _cDadMixOr := IIF(_nOperac == 1,"",MGLT027H(ZZE->ZZE_MIXORI,1))
-Private _cDadMixDe := IIF(_nOperac == 1,"",MGLT027H(ZZE->ZZE_MIXDES,2))
+Private cGSetor    := IIf(_nOperac == 1,Space(GetSX3Cache("ZZE_SETOR","X3_TAMANHO")),ZZE->ZZE_SETOR)
+Private cGProdIni  := IIf(_nOperac == 1,Space(GetSX3Cache("ZZE_PROINI","X3_TAMANHO")),ZZE->ZZE_PROINI)
+Private cGProdFin  := IIf(_nOperac == 1,Space(GetSX3Cache("ZZE_PROFIN","X3_TAMANHO")),ZZE->ZZE_PROFIN)
+Private cGMixOrig  := IIf(_nOperac == 1,Space(GetSX3Cache("ZZE_MIXORI","X3_TAMANHO")),ZZE->ZZE_MIXORI)
+Private cGMixDest  := IIf(_nOperac == 1,Space(GetSX3Cache("ZZE_MIXDES","X3_TAMANHO")),ZZE->ZZE_MIXDES)
+Private cGLjProdIn := IIf(_nOperac == 1,Space(GetSX3Cache("ZZE_LOJINI","X3_TAMANHO")),ZZE->ZZE_LOJINI)
+Private cGLjProdFi := IIf(_nOperac == 1,Space(GetSX3Cache("ZZE_LOJFIN","X3_TAMANHO")),ZZE->ZZE_LOJFIN)
+Private cGLinIni   := IIf(_nOperac == 1,Space(GetSX3Cache("ZZE_LININI","X3_TAMANHO")),ZZE->ZZE_LININI)
+Private cGLinFin   := IIf(_nOperac == 1,Space(GetSX3Cache("ZZE_LINFIN","X3_TAMANHO")),ZZE->ZZE_LINFIN)
+Private cGVlrRepor := IIf(_nOperac == 1,0,ZZE->ZZE_VALOR)
+Private cCbOperac  := IIf(_nOperac == 1,'Incluir',IIf(_nOperac == 2,'Alterar','Excluir'))
+Private cGNumero   := IIf(_nOperac == 1,GETSXENUM("ZZE","ZZE_CODIGO"),ZZE->ZZE_CODIGO)
+Private cGProdFora := IIf(_nOperac == 1,Space(1600),ZZE->ZZE_PROOUT)
+Private cGProdFor2 := IIf(_nOperac == 1,Space(1600),ZZE->ZZE_PROOU2)
+Private cGDtCred   := IIf(_nOperac == 1,date(),ZZE->ZZE_DTCRED)
+Private _cDadMixOr := IIf(_nOperac == 1,"",MGLT027H(ZZE->ZZE_MIXORI,1))
+Private _cDadMixDe := IIf(_nOperac == 1,"",MGLT027H(ZZE->ZZE_MIXDES,2))
 
 Static oDlg
 
@@ -180,51 +177,51 @@ DEFINE MSDIALOG oDlg TITLE "COMPLEMENTO DE PAGAMENTO - GERA TÍTULO FINANCEIRO" F
 //Comanando para impedir o uso da tecla ESC para fechar a janela
 oDlg:LESCCLOSE := .F.
 
-@ 041, 014 SAY _oSay11 PROMPT "Numero:" SIZE 040, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
+@ 041, 014 Say _oSay11 PROMPT "Numero:" SIZE 040, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
 @ 041, 054 MSGET _oGNumero VAR cGNumero SIZE 040, 008 OF oDlg COLORS 0, 16777215 WHEN .F. PIXEL
 
-@ 055, 014 SAY _oSay10 PROMPT "Operação:" SIZE 025, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
+@ 055, 014 Say _oSay10 PROMPT "Operação:" SIZE 025, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
 @ 055, 054 MSCOMBOBOX _oCbOperac VAR cCbOperac ITEMS {"Incluir","Alterar","Excluir"} SIZE 040, 010 OF oDlg COLORS 0, 16777215 PIXEL  WHEN .F.
 
-@ 069, 014 SAY _oSay1 PROMPT "Mix de Origem:" SIZE 040, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
-@ 069, 054 MSGET _oGMixOrig VAR cGMixOrig SIZE 040, 008 OF oDlg VALID IIF(!Empty(cGMixOrig),MGLT027V(cGMixOrig,1),.T.) COLORS 0, 16777215 F3 "ZLE_01" WHEN lInclui PIXEL
-@ 069, 112 SAY oSDadMixOr PROMPT _cDadMixOr SIZE 175, 008 OF oDlg COLORS 0, 16777215 FONT oFont12b PIXEL
+@ 069, 014 Say _oSay1 PROMPT "Mix de Origem:" SIZE 040, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
+@ 069, 054 MSGET _oGMixOrig VAR cGMixOrig SIZE 040, 008 OF oDlg VALID IIf(!Empty(cGMixOrig),MGLT027V(cGMixOrig,1),.T.) COLORS 0, 16777215 F3 "ZLE_01" WHEN lInclui PIXEL
+@ 069, 112 Say oSDadMixOr PROMPT _cDadMixOr SIZE 175, 008 OF oDlg COLORS 0, 16777215 FONT oFont12b PIXEL
 
-@ 083, 014 SAY _oSay2 PROMPT "Mix de Destino:" SIZE 040, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
-@ 083, 054 MSGET _oGMixDest VAR cGMixDest SIZE 040, 008 OF oDlg VALID IIF(!Empty(cGMixDest),MGLT027V(cGMixDest,2),.T.) COLORS 0, 16777215 F3 "ZLE_01" WHEN lInclui PIXEL
-@ 083, 112 SAY oSDadMixDe PROMPT _cDadMixDe SIZE 175, 008 OF oDlg COLORS 0, 16777215 FONT oFont12b PIXEL
+@ 083, 014 Say _oSay2 PROMPT "Mix de Destino:" SIZE 040, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
+@ 083, 054 MSGET _oGMixDest VAR cGMixDest SIZE 040, 008 OF oDlg VALID IIf(!Empty(cGMixDest),MGLT027V(cGMixDest,2),.T.) COLORS 0, 16777215 F3 "ZLE_01" WHEN lInclui PIXEL
+@ 083, 112 Say oSDadMixDe PROMPT _cDadMixDe SIZE 175, 008 OF oDlg COLORS 0, 16777215 FONT oFont12b PIXEL
 
-@ 097, 014 SAY _oSetor PROMPT "Setor:" SIZE 025, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
-@ 097, 054 MSGET _oGSetor VAR cGSetor SIZE 040, 008 OF oDlg VALID IIF(!Empty(cGSetor),IIF(U_VSetor(.T.),Eval({|| _cDescSet:= Posicione("ZL2",1,xFilial("ZL2") + cGSetor,"ZL2->ZL2_DESCRI")},oSDescSet:Refresh()),.F.),.T.) COLORS 0, 16777215 F3 "ZL2_01" WHEN lInclui PIXEL
-@ 097, 112 SAY oSDescSet PROMPT _cDescSet SIZE 175, 008 OF oDlg COLORS 0, 16777215 FONT oFont12b PIXEL
+@ 097, 014 Say _oSetor PROMPT "Setor:" SIZE 025, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
+@ 097, 054 MSGET _oGSetor VAR cGSetor SIZE 040, 008 OF oDlg VALID IIf(!Empty(cGSetor),IIf(U_VSetor(.T.),Eval({|| _cDescSet:= Posicione("ZL2",1,xFilial("ZL2") + cGSetor,"ZL2->ZL2_DESCRI")},oSDescSet:Refresh()),.F.),.T.) COLORS 0, 16777215 F3 "ZL2_01" WHEN lInclui PIXEL
+@ 097, 112 Say oSDescSet PROMPT _cDescSet SIZE 175, 008 OF oDlg COLORS 0, 16777215 FONT oFont12b PIXEL
 
-@ 111, 014 SAY _oSay7 PROMPT "Linha Inicial:" SIZE 035, 008 OF oDlg COLORS 0, 16777215 PIXEL
-@ 111, 054 MSGET _oGLinIni VAR cGLinIni SIZE 040, 008 OF oDlg VALID IIF(!Empty(cGLinIni) .And. cGLinIni <> 'ZZZZZZ',ExistCpo("ZL3",cGLinIni),.T.) COLORS 0, 16777215 F3 "ZL3_01" WHEN lInclui PIXEL
-@ 111, 112 SAY _oSay8 PROMPT "Linha Final:" SIZE 029, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
-@ 111, 144 MSGET _oGLinFin VAR cGLinFin SIZE 040, 008 OF oDlg VALID IIF(!Empty(cGLinFin) .And. cGLinFin <> 'ZZZZZZ',ExistCpo("ZL3",cGLinFin),.T.) COLORS 0, 16777215 F3 "ZL3_01" WHEN lInclui PIXEL
+@ 111, 014 Say _oSay7 PROMPT "Linha Inicial:" SIZE 035, 008 OF oDlg COLORS 0, 16777215 PIXEL
+@ 111, 054 MSGET _oGLinIni VAR cGLinIni SIZE 040, 008 OF oDlg VALID IIf(!Empty(cGLinIni) .And. cGLinIni <> 'ZZZZZZ',ExistCpo("ZL3",cGLinIni),.T.) COLORS 0, 16777215 F3 "ZL3_01" WHEN lInclui PIXEL
+@ 111, 112 Say _oSay8 PROMPT "Linha Final:" SIZE 029, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
+@ 111, 144 MSGET _oGLinFin VAR cGLinFin SIZE 040, 008 OF oDlg VALID IIf(!Empty(cGLinFin) .And. cGLinFin <> 'ZZZZZZ',ExistCpo("ZL3",cGLinFin),.T.) COLORS 0, 16777215 F3 "ZL3_01" WHEN lInclui PIXEL
 
-@ 125, 014 SAY _oSay3 PROMPT "Produtor De:" SIZE 034, 008 OF oDlg COLORS 0, 16777215 PIXEL
-@ 125, 054 MSGET _oGProdIni VAR cGProdIni SIZE 040, 008 OF oDlg VALID IIF(!Empty(cGProdIni) .And. cGProdIni <> 'ZZZZZZ',ExistCpo("SA2",cGProdIni),.T.) COLORS 0, 16777215 F3 "SA2_L4" WHEN lInclui PIXEL
-@ 125, 112 SAY _oSay4 PROMPT "Loja De:" SIZE 025, 008 OF oDlg COLORS 0, 16777215 PIXEL
-@ 125, 144 MSGET _oGLjProdIn VAR cGLjProdIn SIZE 040, 008 OF oDlg VALID IIF(!Empty(cGProdIni) .And. cGProdIni <> 'ZZZZZZ' .And. !Empty(cGLjProdIn) .And. cGLjProdIn <> 'ZZZZ',ExistCpo("SA2",cGProdIni + cGLjProdIn),.T.) COLORS 0, 16777215 WHEN lInclui PIXEL
+@ 125, 014 Say _oSay3 PROMPT "Produtor De:" SIZE 034, 008 OF oDlg COLORS 0, 16777215 PIXEL
+@ 125, 054 MSGET _oGProdIni VAR cGProdIni SIZE 040, 008 OF oDlg VALID IIf(!Empty(cGProdIni) .And. cGProdIni <> 'ZZZZZZ',ExistCpo("SA2",cGProdIni),.T.) COLORS 0, 16777215 F3 "SA2_L4" WHEN lInclui PIXEL
+@ 125, 112 Say _oSay4 PROMPT "Loja De:" SIZE 025, 008 OF oDlg COLORS 0, 16777215 PIXEL
+@ 125, 144 MSGET _oGLjProdIn VAR cGLjProdIn SIZE 040, 008 OF oDlg VALID IIf(!Empty(cGProdIni) .And. cGProdIni <> 'ZZZZZZ' .And. !Empty(cGLjProdIn) .And. cGLjProdIn <> 'ZZZZ',ExistCpo("SA2",cGProdIni + cGLjProdIn),.T.) COLORS 0, 16777215 WHEN lInclui PIXEL
 
-@ 139, 014 SAY _oSay5 PROMPT "Produtor Ate:" SIZE 034, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
-@ 139, 054 MSGET _oGProdFin VAR cGProdFin SIZE 040, 008 OF oDlg VALID IIF(!Empty(cGProdFin) .And. cGProdFin <> 'ZZZZZZ',ExistCpo("SA2",cGProdFin),.T.) COLORS 0, 16777215 F3 "SA2_L4" WHEN lInclui PIXEL
-@ 139, 112 SAY _oSay6 PROMPT "Loja Ate:" SIZE 034, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
-@ 139, 144 MSGET _oGLjProdFi VAR cGLjProdFi SIZE 040, 008 OF oDlg VALID IIF(!Empty(cGProdFin) .And. cGProdFin <> 'ZZZZZZ' .And. !Empty(cGLjProdFi) .And. cGLjProdFi <> 'ZZZZ',ExistCpo("SA2",cGProdFin + cGLjProdFi),.T.) COLORS 0, 16777215 WHEN lInclui PIXEL
+@ 139, 014 Say _oSay5 PROMPT "Produtor Ate:" SIZE 034, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
+@ 139, 054 MSGET _oGProdFin VAR cGProdFin SIZE 040, 008 OF oDlg VALID IIf(!Empty(cGProdFin) .And. cGProdFin <> 'ZZZZZZ',ExistCpo("SA2",cGProdFin),.T.) COLORS 0, 16777215 F3 "SA2_L4" WHEN lInclui PIXEL
+@ 139, 112 Say _oSay6 PROMPT "Loja Ate:" SIZE 034, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
+@ 139, 144 MSGET _oGLjProdFi VAR cGLjProdFi SIZE 040, 008 OF oDlg VALID IIf(!Empty(cGProdFin) .And. cGProdFin <> 'ZZZZZZ' .And. !Empty(cGLjProdFi) .And. cGLjProdFi <> 'ZZZZ',ExistCpo("SA2",cGProdFin + cGLjProdFi),.T.) COLORS 0, 16777215 WHEN lInclui PIXEL
 
-@ 153, 014 SAY _oSay9 PROMPT "Valor a repor:" SIZE 036, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
-@ 153, 054 MSGET _oGVlrRepor VAR cGVlrRepor SIZE 040, 008 OF oDlg PICTURE "@E 99.9999" COLORS 0, 16777215 WHEN IIF(_nOperac == 1 .Or. _nOperac == 2,.T.,.F.) PIXEL
-@ 153, 112 SAY _oSay12 PROMPT "Data Crédito:" SIZE 036, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
-@ 153, 144 MSGET _oGDtCred VAR cGDtCred SIZE 040, 008 OF oDlg COLORS 0, 16777215 WHEN IIF(_nOperac == 1 .Or. _nOperac == 2,.T.,.F.) PIXEL
+@ 153, 014 Say _oSay9 PROMPT "Valor a repor:" SIZE 036, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
+@ 153, 054 MSGET _oGVlrRepor VAR cGVlrRepor SIZE 040, 008 OF oDlg PICTURE "@E 99.9999" COLORS 0, 16777215 WHEN IIf(_nOperac == 1 .Or. _nOperac == 2,.T.,.F.) PIXEL
+@ 153, 112 Say _oSay12 PROMPT "Data Crédito:" SIZE 036, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
+@ 153, 144 MSGET _oGDtCred VAR cGDtCred SIZE 040, 008 OF oDlg COLORS 0, 16777215 WHEN IIf(_nOperac == 1 .Or. _nOperac == 2,.T.,.F.) PIXEL
 
-@ 167, 014 SAY _oSay10 PROMPT "Produt.Fora 1:" SIZE 035, 008 OF oDlg COLORS 0, 16777215 PIXEL
+@ 167, 014 Say _oSay10 PROMPT "Produt.Fora 1:" SIZE 035, 008 OF oDlg COLORS 0, 16777215 PIXEL
 @ 167, 054 MSGET _oGProdFora VAR cGProdFora SIZE 231, 008 OF oDlg COLORS 0, 16777215 WHEN lInclui PIXEL
 
-@ 181, 014 SAY _oSay13 PROMPT "Produt.Fora 2:" SIZE 035, 008 OF oDlg COLORS 0, 16777215 PIXEL
+@ 181, 014 Say _oSay13 PROMPT "Produt.Fora 2:" SIZE 035, 008 OF oDlg COLORS 0, 16777215 PIXEL
 @ 181, 054 MSGET _oGProdFor2 VAR cGProdFor2 SIZE 231, 008 OF oDlg COLORS 0, 16777215 WHEN lInclui PIXEL
 
-ACTIVATE MSDIALOG oDlg CENTERED ON INIT EnchoiceBar(oDlg,{||nopc:=1,IIF(MGLT027U(),IIF(MGLT027G(),oDlg:End(),),)}, {||nopc:=2,oDlg:End(),RollBackSX8()},,)
+ACTIVATE MSDIALOG oDlg CENTERED ON INIT EnchoiceBar(oDlg,{||nopc:=1,IIf(MGLT027U(),IIf(MGLT027G(),oDlg:End(),),)}, {||nopc:=2,oDlg:End(),RollBackSX8()},,)
 
 Return
 
@@ -253,17 +250,17 @@ _nCountRec := _nContReg
 
 If _nCountRec > 0
 
-	(_cAliasZLE)->(dbGotop())
+	(_cAliasZLE)->(DBGoTop())
 
 	//Mix de Origem
 	If _cTpMix == 1
-		_cDadMixOr	:= DtoC(StoD((_cAliasZLE)->ZLE_DTINI)) + " = " + DtoC(StoD((_cAliasZLE)->ZLE_DTFIM))
+		_cDadMixOr	:= DToC(SToD((_cAliasZLE)->ZLE_DTINI)) + " = " + DToC(SToD((_cAliasZLE)->ZLE_DTFIM))
 		//Armazena a data inicial e final do mix de origem para ser utilizada em query futura
 		_sDtInic	:= (_cAliasZLE)->ZLE_DTINI
 		_sDtFin		:= (_cAliasZLE)->ZLE_DTFIM
 	//Mix de Destino
 	Else 
-		_cDadMixDe	:= DtoC(StoD((_cAliasZLE)->ZLE_DTINI)) + " = " + DtoC(StoD((_cAliasZLE)->ZLE_DTFIM))
+		_cDadMixDe	:= DToC(SToD((_cAliasZLE)->ZLE_DTINI)) + " = " + DToC(SToD((_cAliasZLE)->ZLE_DTFIM))
 		_sDtDesIni	:= (_cAliasZLE)->ZLE_DTINI
 		_sDtDesFin	:= (_cAliasZLE)->ZLE_DTFIM
 	EndIf
@@ -278,7 +275,7 @@ If _lRet .And. (At('/',cGProdFora) > 0 .Or. At('/',cGProdFor2) > 0)
 	MsgStop("Utilize ; para separar os produtores.","MGLT02731")
 	_lRet:= .F.	   
 EndIf
-(_cAliasZLE)->(DbCloseArea())
+(_cAliasZLE)->(DBCloseArea())
 
 oSDadMixOr:Refresh()
 oSDadMixDe:Refresh()
@@ -335,18 +332,18 @@ If _nTipoMix == 1
 	If (_cAlias)->NUMREG > 0
 		If !MsgYesNo("Mix fornecido incorretamente no campo Mix de Origem. Deseja continuar mesmo com status aberto?.","MGLT02702")
 			_lRet:= .F.
-		Endif
+		EndIf
 	EndIf
 Else
 	If (_cAlias)->NUMREG > 0
 		If !MsgYesNo("Mix fornecido incorretamente no campo Mix de Destino. Deseja continuar mesmo com status fechado?.","MGLT02703")
 			_lRet:= .F.
-		Endif
+		EndIf
 	EndIf
 EndIf
 
 //Finaliza a area criada anteriormente
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return _lRet
 
@@ -364,7 +361,7 @@ Static Function MGLT027U
 
 Local _lRet:= .T.
 
-If Empty(cGMixOrig) .Or. Empty(cGMixDest) .Or. Empty(cGSetor ) .Or. Empty(cGLinFin) .Or. Empty(cGProdFin) .Or. Empty(cGLjProdFi) .Or. DtoC(cGDtCred) == '  /  /  '
+If Empty(cGMixOrig) .Or. Empty(cGMixDest) .Or. Empty(cGSetor ) .Or. Empty(cGLinFin) .Or. Empty(cGProdFin) .Or. Empty(cGLjProdFi) .Or. DToC(cGDtCred) == '  /  /  '
 	MsgStop("O preenchimento dos campos destacados na cor azul é obrigatório!","MGLT02704")
 	_lRet:= .F.
 EndIf
@@ -421,7 +418,7 @@ _nCountRec := _nContReg
 //=================================================================
 If _nCountRec == 2
 		 
-	(_cAliasZL8)->(dbGotop())
+	(_cAliasZL8)->(DBGoTop())
 
 	//=============================================================
 	//Verifica se existem dois eventos um de credito e um de debito
@@ -435,10 +432,10 @@ If _nCountRec == 2
 			aAdd(_aEventos,{(_cAliasZL8)->ZL8_COD,(_cAliasZL8)->ZL8_NREDUZ,(_cAliasZL8)->ZL8_DEBCRE})
 		EndIf
 
-		(_cAliasZL8)->(dbSkip())
+		(_cAliasZL8)->(DBSkip())
 	EndDo
 
-	(_cAliasZL8)->(DbCloseArea())
+	(_cAliasZL8)->(DBCloseArea())
 
 	//===========================================================
 	//Verifica se foram lancados os dois eventos um de credito e 
@@ -555,7 +552,7 @@ BeginSql Alias _cAliasZLD
 EndSql
 
 COUNT TO _nCountRec //Contabiliza o numero de registros encontrados pela query
-(_cAliasZLD)->(DbGotop())
+(_cAliasZLD)->(DBGoTop())
 ProcRegua(_nCountRec)
 
 If _nCountRec > 0
@@ -566,7 +563,7 @@ If _nCountRec > 0
 		//Inserindo os registros de complemento de pagamento na tabela
 		//ZZF (Itens do complemento de pagamento)
 		//============================================================
-		(_cAliasZLD)->(dbGoTop())
+		(_cAliasZLD)->(DBGoTop())
 
 		While (_cAliasZLD)->(!Eof())
 
@@ -579,7 +576,7 @@ If _nCountRec > 0
 			 MGLP027O(xFilial("ZZF"),cGNumero,(_cAliasZLD)->ZLD_RETIRO,(_cAliasZLD)->ZLD_RETILJ,(_cAliasZLD)->A2_NOME,(_cAliasZLD)->ZLD_LINROT,;
 			 (_cAliasZLD)->ZL3_DESCRI,cGVlrRepor,(_cAliasZLD)->QTDELEITE,_nVlrEvent,'1'), CursorArrow()})
 
-			(_cAliasZLD)->(dbSkip())
+			(_cAliasZLD)->(DBSkip())
 		EndDo
 
 		//======================================================
@@ -598,7 +595,7 @@ Else
 	_lRet:= .F.
 EndIf
 
-(_cAliasZLD)->(dbCloseArea())
+(_cAliasZLD)->(DBCloseArea())
 
 Return _lRet
 
@@ -618,7 +615,7 @@ Retorno-----------: _lRet - Lógico indicando sucesso da gravação
 */
 Static Function MGLT027F(_aDadosCom,_aEventos) 
 
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local _cDesSetor	:= ""    
 Local _nX, _nY		:=0
 Local _nVlrLitro	:= 0
@@ -626,7 +623,7 @@ Local _nFPec	 	:= 0
 Local _nImp		 	:= 0
 Local _cCodFUND		:= AllTrim(SuperGetMV("LT_EVEFUND",.F.,"000014"))
 Local _cAlias		:= ''
-Local _nBase		:= 0 //varivável declarada como private para poder ser lida por macroexecução (ZL8_FORMUL)
+Local _nBase		:= 0 //varivável declarada como Private para poder ser lida por macroexecução (ZL8_FORMUL)
 Local _nVolIncP		:= SuperGetMV("LT_VOLINCP",.F.,657000)
 Local _lCalIncP		:= !Empty(Posicione('F28',1,xFilial('F28')+SuperGetMV("LT_INCINCP",.F.,""),'F28_CODIGO'))
 Local _nRecPrd		:= 0
@@ -660,9 +657,9 @@ For _nX:=1 to Len(_aEventos)
 			If _aEventos[_nX,3] == 'D' 
 
 				//Posiciona no cadatro de fornecedor para que possa usar o cadastro de fórmula
-				DbSelectArea("SA2")
-				SA2->( DbSetOrder(1) )
-				SA2->( DbSeek(xFilial("SA2")+_aDadosCom[_nY,2]+_aDadosCom[_nY,3]) )
+				DBSelectArea("SA2")
+				SA2->( DBSetOrder(1) )
+				SA2->( DBSeek(xFilial("SA2")+_aDadosCom[_nY,2]+_aDadosCom[_nY,3]) )
 				
 				BEGIN TRANSACTION
 					//Realiza tratamentos para Incentivo à Produção em MG
@@ -674,7 +671,7 @@ For _nX:=1 to Len(_aEventos)
 					
 					BeginSql alias _cAlias
 						SELECT R_E_C_N_O_ RECZL8
-						FROM %table:ZL8% ZL8
+						FROM %Table:ZL8% ZL8
 						WHERE ZL8.D_E_L_E_T_ = ' '
 						AND ZL8.ZL8_FILIAL = %xFilial:ZL8%
 						AND ZL8.ZL8_PERTEN = 'P'
@@ -685,7 +682,7 @@ For _nX:=1 to Len(_aEventos)
 					_nImp := 0
 					
 					While (_cAlias)->( !Eof() )
-						ZL8->(dBGoTo((_cAlias)->RECZL8))
+						ZL8->(DBGoTo((_cAlias)->RECZL8))
 						If &( AllTrim( ZL8->ZL8_CONDIC ) ) .And. _cEveInc <> ZL8->ZL8_COD
 							//Calcula Fundesa/Fundepec. Evento tratado como exceção até padronização de todos os impostos na NF-e
 							If ZL8->ZL8_COD == _cCodFUND
@@ -699,8 +696,8 @@ For _nX:=1 to Len(_aEventos)
 					EndDo
 					
 					(_cAlias)->( DBCloseArea() )
-					SA2->( DbCloseArea( ) )
-					ZL8->( DbCloseArea( ) )
+					SA2->( DBCloseArea( ) )
+					ZL8->( DBCloseArea( ) )
 					
 					//Realiza tratamentos para Incentivo à Produção em MG
 					If _lCalIncP
@@ -722,7 +719,7 @@ For _nX:=1 to Len(_aEventos)
 				_nVlrLitro:= (_aDadosCom[_nY,9]/_aDadosCom[_nY,8])
 			EndIf
 
-			Reclock("ZLF", .T.)
+			RecLock("ZLF", .T.)
 
 					ZLF->ZLF_FILIAL	:= xFilial("ZLF")
 					ZLF->ZLF_CODZLE	:= MV_PAR01
@@ -749,7 +746,7 @@ For _nX:=1 to Len(_aEventos)
 					ZLF->ZLF_STATUS := "A"
 					ZLF->ZLF_SEEKCO := _aDadosCom[_nY,1] + "MGLT027"//CAMPO UTILIZADO PARA REALIZAR A BUSCA DO COMPLEMENTO GERADO POSTERIORMENTE
 
-				ZLF->(MsUnlock())
+				ZLF->(MSUnLock())
 
 			EndIf
 
@@ -757,7 +754,7 @@ For _nX:=1 to Len(_aEventos)
 
 Next _nX
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 Return
 
 /*
@@ -824,7 +821,7 @@ Retorno-----------: Nenhum
 Static Function MGLT027I(cGNumero,cGMixOrig,cGMixDest,cGSetor,cGLinIni,cGLinFin,cGProdIni,cGLjProdIn,cGProdFin,cGLjProdFi,;
 						 cGVlrRepor,_nQtdeVolu,cGProdFora,cGProdFor2,_dDtCredit,_cStatus,_cMatUsr)
 
-Local _aArea:= GetArea()
+Local _aArea:= FWGetArea()
 
 RecLock("ZZE",.T.)
 
@@ -844,19 +841,19 @@ RecLock("ZZE",.T.)
 	ZZE->ZZE_VALOR := cGVlrRepor
 	ZZE->ZZE_VOLUME:= _nQtdeVolu
 	ZZE->ZZE_VLRTOT:= _nQtdeVolu * cGVlrRepor 
-	ZZE->ZZE_DATAIN:= date()   
+	ZZE->ZZE_DATAIN:= Date()   
 	ZZE->ZZE_DTCRED:= _dDtCredit
 	ZZE->ZZE_USRINC:= _cMatUsr
 	ZZE->ZZE_USREFE:= ""      	    
 	ZZE->ZZE_STATUS:= _cStatus
 
-ZZE->(MsUnlock())
+ZZE->(MSUnLock())
 
 If ( __lSX8 )
 		ConfirmSX8()
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -886,25 +883,25 @@ _nCountRec := _nContReg
 
 If _nCountRec > 0
 
-	(_cAliasZLE)->(dbGotop())
+	(_cAliasZLE)->(DBGoTop())
 
 	//Mix de Origem
 	If _cTpMix == 1
-		_cDescri:= DtoC(StoD((_cAliasZLE)->ZLE_DTINI)) + " = " + DtoC(StoD((_cAliasZLE)->ZLE_DTFIM))
+		_cDescri:= DToC(SToD((_cAliasZLE)->ZLE_DTINI)) + " = " + DToC(SToD((_cAliasZLE)->ZLE_DTFIM))
 		//Armazena a data inicial e final do mix de origem para ser utilizada em query futura
 		_sDtInic  := (_cAliasZLE)->ZLE_DTINI
 		_sDtFin   := (_cAliasZLE)->ZLE_DTFIM
 
 	//Mix de Destino
 	Else
-		_cDescri	:= DtoC(StoD((_cAliasZLE)->ZLE_DTINI)) + " = " + DtoC(StoD((_cAliasZLE)->ZLE_DTFIM)) 
+		_cDescri	:= DToC(SToD((_cAliasZLE)->ZLE_DTINI)) + " = " + DToC(SToD((_cAliasZLE)->ZLE_DTFIM)) 
 		_sDtDesIni	:= (_cAliasZLE)->ZLE_DTINI
 		_sDtDesFin	:= (_cAliasZLE)->ZLE_DTFIM
 	EndIf
 
 EndIf
 
-(_cAliasZLE)->(dbCloseArea())
+(_cAliasZLE)->(DBCloseArea())
 
 Return _cDescri
 
@@ -1013,7 +1010,7 @@ Else
 	EndSql
 
 	_nCountRec:= (_cAliExMix)->QTD
-	(_cAliExMix)->(dbCloseArea())
+	(_cAliExMix)->(DBCloseArea())
 
 	If _nCountRec == 0
 		//===============================================================
@@ -1030,7 +1027,7 @@ Else
 		EndSql
 		            		
 		COUNT TO _nCountRec //Contabiliza o numero de registros encontrados pela query
-		(_cAliasExc)->(DbGotop())
+		(_cAliasExc)->(DBGoTop())
 
 		If _nCountRec > 0
 
@@ -1101,7 +1098,7 @@ Retorno-----------: _lRet - Lógico indicando sucesso do cancelamento
 */
 Static Function MGLT027A() 
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _lRet		:= .T.
 Local _cCodCompl:= ZZE->ZZE_CODIGO
 Local _nSomtVlr	:= 0
@@ -1111,9 +1108,9 @@ Begin Transaction
 	//===========================================================
 	//Atualiza os registros dos itens do complemento de pagamento
 	//===========================================================
-	dbSelectArea("ZZF")
-	ZZF->(dbSetOrder(1))
-	If ZZF->(dbSeek(xFilial("ZZF") + _cCodCompl))
+	DBSelectArea("ZZF")
+	ZZF->(DBSetOrder(1))
+	If ZZF->(DBSeek(xFilial("ZZF") + _cCodCompl))
 
 		While ZZF->ZZF_FILIAL == xFilial("ZZF") .And. ZZF->ZZF_CODIGO == _cCodCompl
 
@@ -1122,22 +1119,22 @@ Begin Transaction
 			RecLock("ZZF",.F.) 
 			ZZF->ZZF_VALOR := cGVlrRepor
 			ZZF->ZZF_VLRTOT:= ZZF->ZZF_VOLUME * cGVlrRepor 
-			ZZF->(MsUnlock())
-			ZZF->(dbSkip())
+			ZZF->(MSUnLock())
+			ZZF->(DBSkip())
 		EndDo
 
 		//============================================================
 		//Atualiza o registro de cabecalho do complemento de pagamento
 		//============================================================
-		dbSelectArea("ZZE") 
-		ZZE->(dbSetOrder(1))
-		If ZZE->(dbSeek(xFilial("ZZE") + _cCodCompl))
+		DBSelectArea("ZZE") 
+		ZZE->(DBSetOrder(1))
+		If ZZE->(DBSeek(xFilial("ZZE") + _cCodCompl))
 
 			RecLock("ZZE",.F.)
 			ZZE->ZZE_DTCRED:= cGDtCred
 			ZZE->ZZE_VALOR := cGVlrRepor
 			ZZE->ZZE_VLRTOT:= _nSomtVlr
-			ZZE->(MsUnlock())
+			ZZE->(MSUnLock())
 
 		Else
 			MsgStop("Não foi encontrado registro referente ao cabecalho do complemento de pagamento: " + _cCodCompl +;
@@ -1160,7 +1157,7 @@ Begin Transaction
 
 End Transaction
 
-restArea(_aArea)
+FWRestArea(_aArea)
 
 Return _lRet   
 
@@ -1188,7 +1185,7 @@ Retorno-----------: Nenhum
 Static Function MGLP027O(_cFil,_cCodigo,_cFornec,_cLjFornec,_cDescForn,_cCodLinha,;
 						_cDescLinh,_nVlrRepor,_nQtdLeite,_vlrTotal,_cStatus)    
 
-Local _aArea:= GetArea()
+Local _aArea:= FWGetArea()
 
 RecLock("ZZF",.T.)
 
@@ -1204,9 +1201,9 @@ RecLock("ZZF",.T.)
 	ZZF->ZZF_VLRTOT:= _vlrTotal
 	ZZF->ZZF_STATUS:= _cStatus
 
-ZZF->(MsUnLock())
+ZZF->(MSUnLock())
 
-restArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -1223,7 +1220,7 @@ Retorno-----------: Nenhum
 */
 User Function MGLT027Z()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _nContZZF	:= 0
 Local _oPanel
 Local _nHeight	:= 0
@@ -1282,11 +1279,11 @@ BeginSql Alias _cAliasZZF
 	AND ZZF_CODIGO BETWEEN %exp:MV_PAR02% AND %exp:MV_PAR03%
 	AND ZZE_SETOR BETWEEN %exp:MV_PAR04% AND %exp:MV_PAR05%
 	AND ZZF_STATUS <> '2'"
-	AND ZZE_DTCRED >= %exp:DtoS(dDataBase)%
+	AND ZZE_DTCRED >= %exp:DToS(dDataBase)%
 EndSql
 
 COUNT TO _nContZZF //Contabiliza o numero de registros encontrados pela query
-(_cAliasZZF)->(DbGotop())
+(_cAliasZZF)->(DBGoTop())
 
 //============================================
 // Nao existem registros de baixa selecionados
@@ -1305,14 +1302,14 @@ Else
 	_aSize := MSADVSIZE()
 
 	// Obtem tamanhos das telas
-	AAdd( aObjects, { 0, 0, .t., .t., .t. } )
+	aAdd( aObjects, { 0, 0, .T., .T., .T. } )
 	aInfo    := { _aSize[ 1 ], _aSize[ 2 ], _aSize[ 3 ], _aSize[ 4 ], 3, 3 } 
 	aPosObj1 := MsObjSize( aInfo, aObjects,  , .T. ) 
 
 	// Botoes da tela
-	Aadd( _aBotoes, {"PESQUISA" ,{||MGLT0270(_cTab)																		},"Pesquisar...","Pesquisar"				})
-	Aadd( _aBotoes, {"S4WB005N" ,{||MGLT0272()																			},"Visualizar Complemento..." ,"Visualizar"	})
-	Aadd( _aBotoes, {'RELATORIO',{||MsgRun("Imprimindo relatório...",,{||CursorWait(),MGLT0273(_cTab),CursorArrow()})	},"Imprimir"								})
+	aAdd( _aBotoes, {"PESQUISA" ,{||MGLT0270(_cTab)																		},"Pesquisar...","Pesquisar"				})
+	aAdd( _aBotoes, {"S4WB005N" ,{||MGLT0272()																			},"Visualizar Complemento..." ,"Visualizar"	})
+	aAdd( _aBotoes, {'RELATORIO',{||MsgRun("Imprimindo relatório...",,{||CursorWait(),MGLT0273(_cTab),CursorArrow()})	},"Imprimir"								})
 
 	// Cria a tela para selecao dos Titulos
 	DEFINE MSDIALOG oDlg1 TITLE OemToAnsi("ROTINA DE EFETIVAÇÃO DE COMPLEMENTO DE PAGAMETNO") From 0,0 To _aSize[6],_aSize[5] OF oMainWnd PIXEL
@@ -1342,9 +1339,9 @@ Else
 	Else
 		_nHeight:= 143
 		_nWidth	:= 315
-	Endif
+	EndIf
 
-	(_cTab)->(dbGotop())
+	(_cTab)->(DBGoTop())
 
 	oBrowse := TCBrowse():New( 35,01,aPosObj1[1,3] + 7,aPosObj1[1,4] - 10,,;
 		                     ,{20,20,20,02,09,02,02,10,06,04,54,08,08},;
@@ -1353,9 +1350,9 @@ Else
 	For _nX:=1 to Len(aStruct)
 
 		If aStruct[_nX,1] == _cTab + "_STATUS"
-			oBrowse:AddColumn(TCColumn():New("",{|| IIF(&(_cTab + '->' + _cTab + "_STATUS") == Space(2),oNO,oOK)},,,,"CENTER",,.T.,.F.,,,,.F.,))
+			oBrowse:AddColumn(TCColumn():New("",{|| IIf(&(_cTab + '->' + _cTab + "_STATUS") == Space(2),oNO,oOK)},,,,"CENTER",,.T.,.F.,,,,.F.,))
 		Else
-			oBrowse:AddColumn(TCColumn():New(OemToAnsi(aTitulo[_nX,2]),&("{ || " + _cTab + '->' + aStruct[_nX,1]+"}"),aTitulo[_nX,3],,,if(aStruct[_nX,2]=="N","RIGHT","LEFT"),,.F.,.F.,,,,.F.,))
+			oBrowse:AddColumn(TCColumn():New(OemToAnsi(aTitulo[_nX,2]),&("{ || " + _cTab + '->' + aStruct[_nX,1]+"}"),aTitulo[_nX,3],,,If(aStruct[_nX,2]=="N","RIGHT","LEFT"),,.F.,.F.,,,,.F.,))
 		EndIf
 
 	Next _nX
@@ -1369,14 +1366,14 @@ Else
 	//Evento quando o usuario clica na coluna desejada
 	oBrowse:bHeaderClick := { |oBrowse, nCol| _nColuna:= nCol,MsgRun("Realizando Operação...",,{|| MGLT027K(_cTab,_nColuna) }) }
 
-	ACTIVATE MSDIALOG oDlg1 ON INIT (EnchoiceBar(oDlg1,{|| IIF(MGLT027_1(),Eval({|| _nOpca := 1,oDlg1:End(),MsgRun("Efetivando Complemento...",,{||CursorWait(),MGLT027_2(_cTab),CursorArrow()})}),) },{|| _nOpca := 2,oDlg1:End()},,_aBotoes), _oPanel:Align:=CONTROL_ALIGN_TOP, oBrowse:Align:=CONTROL_ALIGN_ALLCLIENT, oBrowse:Refresh() )
+	ACTIVATE MSDIALOG oDlg1 ON INIT (EnchoiceBar(oDlg1,{|| IIf(MGLT027_1(),Eval({|| _nOpca := 1,oDlg1:End(),MsgRun("Efetivando Complemento...",,{||CursorWait(),MGLT027_2(_cTab),CursorArrow()})}),) },{|| _nOpca := 2,oDlg1:End()},,_aBotoes), _oPanel:Align:=CONTROL_ALIGN_TOP, oBrowse:Align:=CONTROL_ALIGN_ALLCLIENT, oBrowse:Refresh() )
 
-	(_cTab)->(DbCloseArea())
+	(_cTab)->(DBCloseArea())
 	_oTempTable:Delete()
 
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 /*
@@ -1395,36 +1392,36 @@ aStruct := {}
 aTitulo := {}
 
 // Criando estrutura da tabela temporaria das unidades
-AAdd(aStruct,{_cTab+"_STATUS"  ,"C",02,0   })
-AAdd(aStruct,{_cTab+"_CODIGO"  ,"C",GetSX3Cache("ZZE_CODIGO","X3_TAMANHO"),GetSX3Cache("ZZE_CODIGO","X3_DECIMAL")})
-AAdd(aStruct,{_cTab+"_SETOR"  ,"C",GetSX3Cache("ZL2_COD","X3_TAMANHO"),GetSX3Cache("ZL2_COD","X3_DECIMAL")})
-AAdd(aStruct,{_cTab+"_FORNEC"  ,"C",GetSX3Cache("A2_COD","X3_TAMANHO"),GetSX3Cache("A2_COD","X3_DECIMAL")})
-AAdd(aStruct,{_cTab+"_LOJA"    ,"C",GetSX3Cache("A2_LOJA","X3_TAMANHO"),GetSX3Cache("A2_LOJA","X3_DECIMAL")})
-AAdd(aStruct,{_cTab+"_A2NOME"  ,"C",GetSX3Cache("A2_NOME","X3_TAMANHO"),GetSX3Cache("A2_NOME","X3_DECIMAL")})
-AAdd(aStruct,{_cTab+"_LINHA"   ,"C",GetSX3Cache("ZL3_COD","X3_TAMANHO"),GetSX3Cache("ZL3_COD","X3_DECIMAL")})
-AAdd(aStruct,{_cTab+"_DCLIN"   ,"C",GetSX3Cache("ZL3_DESCRI","X3_TAMANHO"),GetSX3Cache("ZL3_DESCRI","X3_DECIMAL")})
-AAdd(aStruct,{_cTab+"_DTCRED"  ,"D",GetSX3Cache("ZZE_DTCRED","X3_TAMANHO"),GetSX3Cache("ZZE_DTCRED","X3_DECIMAL")})
-AAdd(aStruct,{_cTab+"_VALOR"   ,"N",GetSX3Cache("ZZE_VALOR","X3_TAMANHO"),GetSX3Cache("ZZE_VALOR","X3_DECIMAL")})
-AAdd(aStruct,{_cTab+"_VOLUME"  ,"N",GetSX3Cache("ZZE_VOLUME","X3_TAMANHO"),GetSX3Cache("ZZE_VOLUME","X3_DECIMAL")})
-AAdd(aStruct,{_cTab+"_VLRTOT"  ,"N",GetSX3Cache("ZZE_VLRTOT","X3_TAMANHO"),GetSX3Cache("ZZE_VLRTOT","X3_DECIMAL") })
-AAdd(aStruct,{_cTab+"_STAT"    ,"C",09,0  })
-AAdd(aStruct,{_cTab+"_RECNO"   ,"N",10,0 })
+aAdd(aStruct,{_cTab+"_STATUS"  ,"C",02,0   })
+aAdd(aStruct,{_cTab+"_CODIGO"  ,"C",GetSX3Cache("ZZE_CODIGO","X3_TAMANHO"),GetSX3Cache("ZZE_CODIGO","X3_DECIMAL")})
+aAdd(aStruct,{_cTab+"_SETOR"  ,"C",GetSX3Cache("ZL2_COD","X3_TAMANHO"),GetSX3Cache("ZL2_COD","X3_DECIMAL")})
+aAdd(aStruct,{_cTab+"_FORNEC"  ,"C",GetSX3Cache("A2_COD","X3_TAMANHO"),GetSX3Cache("A2_COD","X3_DECIMAL")})
+aAdd(aStruct,{_cTab+"_LOJA"    ,"C",GetSX3Cache("A2_LOJA","X3_TAMANHO"),GetSX3Cache("A2_LOJA","X3_DECIMAL")})
+aAdd(aStruct,{_cTab+"_A2NOME"  ,"C",GetSX3Cache("A2_NOME","X3_TAMANHO"),GetSX3Cache("A2_NOME","X3_DECIMAL")})
+aAdd(aStruct,{_cTab+"_LINHA"   ,"C",GetSX3Cache("ZL3_COD","X3_TAMANHO"),GetSX3Cache("ZL3_COD","X3_DECIMAL")})
+aAdd(aStruct,{_cTab+"_DCLIN"   ,"C",GetSX3Cache("ZL3_DESCRI","X3_TAMANHO"),GetSX3Cache("ZL3_DESCRI","X3_DECIMAL")})
+aAdd(aStruct,{_cTab+"_DTCRED"  ,"D",GetSX3Cache("ZZE_DTCRED","X3_TAMANHO"),GetSX3Cache("ZZE_DTCRED","X3_DECIMAL")})
+aAdd(aStruct,{_cTab+"_VALOR"   ,"N",GetSX3Cache("ZZE_VALOR","X3_TAMANHO"),GetSX3Cache("ZZE_VALOR","X3_DECIMAL")})
+aAdd(aStruct,{_cTab+"_VOLUME"  ,"N",GetSX3Cache("ZZE_VOLUME","X3_TAMANHO"),GetSX3Cache("ZZE_VOLUME","X3_DECIMAL")})
+aAdd(aStruct,{_cTab+"_VLRTOT"  ,"N",GetSX3Cache("ZZE_VLRTOT","X3_TAMANHO"),GetSX3Cache("ZZE_VLRTOT","X3_DECIMAL") })
+aAdd(aStruct,{_cTab+"_STAT"    ,"C",09,0  })
+aAdd(aStruct,{_cTab+"_RECNO"   ,"N",10,0 })
 
 // Armazena no array aCampos o nome, descricao dos campos e picture
-AAdd(aTitulo,{_cTab+"_STATUS"  ,"  "                ,"  "})
-AAdd(aTitulo,{_cTab+"_CODIGO"  ,GetSX3Cache("ZZE_CODIGO","X3_TITULO"),GetSX3Cache("ZZF_CODIGO","X3_PICTURE")})
-AAdd(aTitulo,{_cTab+"_SETOR"   ,GetSX3Cache("ZZE_SETOR","X3_TITULO"),GetSX3Cache("ZL2_COD","X3_PICTURE")})  
-AAdd(aTitulo,{_cTab+"_FORNEC"  ,GetSX3Cache("ZZF_FORNEC","X3_TITULO"),GetSX3Cache("ZZF_FORNEC","X3_PICTURE")})  
-AAdd(aTitulo,{_cTab+"_LOJA"    ,GetSX3Cache("ZZF_LJFORN","X3_TITULO"),GetSX3Cache("ZZE_STATUS","X3_PICTURE")})
-AAdd(aTitulo,{_cTab+"_A2NOME"  ,"DESCRIÇÃO PRODUTOR",GetSX3Cache("A2_NOME","X3_PICTURE")})
-AAdd(aTitulo,{_cTab+"_LINHA"   ,GetSX3Cache("ZZF_LINHA","X3_TITULO"),GetSX3Cache("ZL3_COD","X3_PICTURE")})
-AAdd(aTitulo,{_cTab+"_DCLIN"   ,GetSX3Cache("ZZF_DCLINH","X3_TITULO"),GetSX3Cache("ZL3_DESCRI","X3_PICTURE")})
-AAdd(aTitulo,{_cTab+"_DTCRE"   ,"Dt. Cred"          ,GetSX3Cache("ZZE_DTCRED","X3_PICTURE")})
-AAdd(aTitulo,{_cTab+"_VALOR"   ,"VALOR"             ,GetSX3Cache("ZZF_VALOR","X3_PICTURE")})
-AAdd(aTitulo,{_cTab+"_VOLUME"  ,"VOLUME"            ,GetSX3Cache("ZZF_VOLUME","X3_PICTURE")})
-AAdd(aTitulo,{_cTab+"_VLRTOT"  ,"VALOR TOTAL"       ,GetSX3Cache("ZZF_VLRTOT","X3_PICTURE")})
-AAdd(aTitulo,{_cTab+"_STAT"    ,"STATUS"            ,"!!!!!!!!!!"}) 
-AAdd(aTitulo,{_cTab+"_RECNO"   ,"R_E_C_N_O"         ,"9999999999"}) 
+aAdd(aTitulo,{_cTab+"_STATUS"  ,"  "                ,"  "})
+aAdd(aTitulo,{_cTab+"_CODIGO"  ,GetSX3Cache("ZZE_CODIGO","X3_TITULO"),GetSX3Cache("ZZF_CODIGO","X3_PICTURE")})
+aAdd(aTitulo,{_cTab+"_SETOR"   ,GetSX3Cache("ZZE_SETOR","X3_TITULO"),GetSX3Cache("ZL2_COD","X3_PICTURE")})  
+aAdd(aTitulo,{_cTab+"_FORNEC"  ,GetSX3Cache("ZZF_FORNEC","X3_TITULO"),GetSX3Cache("ZZF_FORNEC","X3_PICTURE")})  
+aAdd(aTitulo,{_cTab+"_LOJA"    ,GetSX3Cache("ZZF_LJFORN","X3_TITULO"),GetSX3Cache("ZZE_STATUS","X3_PICTURE")})
+aAdd(aTitulo,{_cTab+"_A2NOME"  ,"DESCRIÇÃO PRODUTOR",GetSX3Cache("A2_NOME","X3_PICTURE")})
+aAdd(aTitulo,{_cTab+"_LINHA"   ,GetSX3Cache("ZZF_LINHA","X3_TITULO"),GetSX3Cache("ZL3_COD","X3_PICTURE")})
+aAdd(aTitulo,{_cTab+"_DCLIN"   ,GetSX3Cache("ZZF_DCLINH","X3_TITULO"),GetSX3Cache("ZL3_DESCRI","X3_PICTURE")})
+aAdd(aTitulo,{_cTab+"_DTCRE"   ,"Dt. Cred"          ,GetSX3Cache("ZZE_DTCRED","X3_PICTURE")})
+aAdd(aTitulo,{_cTab+"_VALOR"   ,"VALOR"             ,GetSX3Cache("ZZF_VALOR","X3_PICTURE")})
+aAdd(aTitulo,{_cTab+"_VOLUME"  ,"VOLUME"            ,GetSX3Cache("ZZF_VOLUME","X3_PICTURE")})
+aAdd(aTitulo,{_cTab+"_VLRTOT"  ,"VALOR TOTAL"       ,GetSX3Cache("ZZF_VLRTOT","X3_PICTURE")})
+aAdd(aTitulo,{_cTab+"_STAT"    ,"STATUS"            ,"!!!!!!!!!!"}) 
+aAdd(aTitulo,{_cTab+"_RECNO"   ,"R_E_C_N_O"         ,"9999999999"}) 
 
 //----------------------------------------------------------------------
 // Cria arquivo de dados temporário
@@ -1453,11 +1450,11 @@ Retorno-----------: Nenhum
 */
 Static Function MGLT027S(_cTab)
  
-(_cAliasZZF)->(dbGoTop())
+(_cAliasZZF)->(DBGoTop())
 
 While (_cAliasZZF)->(!Eof())
 
-	DbSelectArea(_cTab)
+	DBSelectArea(_cTab)
 	RecLock(_cTab,.T.)
 
 		&(_cTab+'->'+_cTab+'_STATUS') 	:= Space(2)
@@ -1472,16 +1469,16 @@ While (_cAliasZZF)->(!Eof())
 		&(_cTab+'->'+_cTab+'_VALOR')  	:= (_cAliasZZF)->ZZF_VALOR
 		&(_cTab+'->'+_cTab+'_VOLUME') 	:= (_cAliasZZF)->ZZF_VOLUME
 		&(_cTab+'->'+_cTab+'_VLRTOT')	:= (_cAliasZZF)->ZZF_VLRTOT
-		&(_cTab+'->'+_cTab+'_STAT')   	:= IIF((_cAliasZZF)->ZZF_STATUS == '1',"Incluido","Cancelado")
+		&(_cTab+'->'+_cTab+'_STAT')   	:= IIf((_cAliasZZF)->ZZF_STATUS == '1',"Incluido","Cancelado")
 		&(_cTab+'->'+_cTab+'_RECNO') 	:= (_cAliasZZF)->RECNOZZF
 
-	(_cTab)->(MsUnlock())
+	(_cTab)->(MSUnLock())
 
-(_cAliasZZF)->(dbSkip())
+(_cAliasZZF)->(DBSkip())
 
 EndDo
 
-(_cAliasZZF)->(dbCloseArea())
+(_cAliasZZF)->(DBCloseArea())
 
 Return
 
@@ -1504,7 +1501,7 @@ If _cStatus == Space(2)
 	nQtdTit++
 	nQtdSelVol+= &(_cTab+'->'+_cTab+'_VOLUME')
 	nVlrSel   += &(_cTab+'->'+_cTab+'_VLRTOT' )
-	(_cTab)->(MsUnlock())  
+	(_cTab)->(MSUnLock())  
 		
 Else
 
@@ -1513,13 +1510,13 @@ Else
 	nQtdTit--
 	nQtdSelVol-= &(_cTab+'->'+_cTab+'_VOLUME')
 	nVlrSel   -= &(_cTab+'->'+_cTab+'_VLRTOT' )
-	(_cTab)->(MsUnlock())  
+	(_cTab)->(MSUnLock())  
 
 EndIf
 
-nQtdTit		:= Iif(nQtdTit<0,0,nQtdTit)
-nQtdSelVol	:= Iif(nQtdSelVol<0,0,nQtdSelVol)
-nVlrSel		:= Iif(nVlrSel<0,0,nVlrSel)
+nQtdTit		:= IIf(nQtdTit<0,0,nQtdTit)
+nQtdSelVol	:= IIf(nQtdSelVol<0,0,nQtdSelVol)
+nVlrSel		:= IIf(nVlrSel<0,0,nVlrSel)
 
 oQtda:Refresh()
 oQtdSelVol:Refresh()
@@ -1542,14 +1539,14 @@ Retorno-----------: Nenhum
 */
 Static Function MGLT027K(_cTab,_nColuna)
 
-Local _aArea:= GetArea()
+Local _aArea:= FWGetArea()
 
 Do Case
 //Marca ou desmarca todos os titulos selecionados
 	Case _nColuna == 1
 
-		dbSelectArea(_cTab)
-		(_cTab)->(dbGotop())
+		DBSelectArea(_cTab)
+		(_cTab)->(DBGoTop())
 
 		While (_cTab)->(!Eof())
 
@@ -1560,7 +1557,7 @@ Do Case
 				nQtdTit++
 				nQtdSelVol+= &(_cTab+'->'+_cTab+'_VOLUME')
 				nVlrSel   += &(_cTab+'->'+_cTab+'_VLRTOT' )
-				(_cTab)->(MsUnlock())
+				(_cTab)->(MSUnLock())
 
 				//Titulo selecionado
 			Else
@@ -1569,49 +1566,49 @@ Do Case
 				nQtdTit--
 				nQtdSelVol-= &(_cTab+'->'+_cTab+'_VOLUME')
 				nVlrSel   -= &(_cTab+'->'+_cTab+'_VLRTOT' )
-				(_cTab)->(MsUnlock())
+				(_cTab)->(MSUnLock())
 
 			EndIf
 
-			(_cTab)->(dbSkip())
+			(_cTab)->(DBSkip())
 		EndDo
 
-		nQtdTit		:= Iif(nQtdTit<0,0,nQtdTit)
-		nQtdSelVol	:= Iif(nQtdSelVol<0,0,nQtdSelVol)
-		nVlrSel		:= Iif(nVlrSel<0,0,nVlrSel)
+		nQtdTit		:= IIf(nQtdTit<0,0,nQtdTit)
+		nQtdSelVol	:= IIf(nQtdSelVol<0,0,nQtdSelVol)
+		nVlrSel		:= IIf(nVlrSel<0,0,nVlrSel)
 
 		oQtda:Refresh()
 		oQtdSelVol:Refresh()
 		oVlrSel:Refresh()
 
-		restArea(_aArea) 
+		FWRestArea(_aArea) 
 
 	//Codigo do Produtor + Loja
 	Case _nColuna == 3
 
-		dbSelectArea(_cTab)
-		(_cTab)->(dbSetOrder(1))
-		(_cTab)->(dbGoTop())
+		DBSelectArea(_cTab)
+		(_cTab)->(DBSetOrder(1))
+		(_cTab)->(DBGoTop())
 
 	//Descricao do Produtor
 	Case _nColuna == 5
 
-		dbSelectArea(_cTab)
-		(_cTab)->(dbSetOrder(2))
-		(_cTab)->(dbGoTop())
+		DBSelectArea(_cTab)
+		(_cTab)->(DBSetOrder(2))
+		(_cTab)->(DBGoTop())
 
 	//Linha
 	Case _nColuna == 6 
 
-		dbSelectArea(_cTab)
-		(_cTab)->(dbSetOrder(3))
-		(_cTab)->(dbGoTop()) 
+		DBSelectArea(_cTab)
+		(_cTab)->(DBSetOrder(3))
+		(_cTab)->(DBGoTop()) 
 
 	Case _nColuna == 9
 
-		dbSelectArea(_cTab)
-		(_cTab)->(dbSetOrder(4))
-		(_cTab)->(dbGoTop())
+		DBSelectArea(_cTab)
+		(_cTab)->(DBSetOrder(4))
+		(_cTab)->(DBGoTop())
 
 	EndCase
 
@@ -1681,8 +1678,8 @@ Private cComboBx1:= ""
 @ 004,003 ComboBox cComboBx1 Items _aComboBx1 Size 213,010 PIXEL OF _oDlg ON CHANGE MGLT0271()
 @ 020,003 MsGet oGet1 Var cGet1 Size 212,009 COLOR CLR_BLACK Picture "X999999999" PIXEL OF _oDlg
 
-DEFINE SBUTTON FROM 004,227 TYPE 1 ENABLE ACTION (_nOpca:=1,_oDlg:End()) OF _oDlg
-DEFINE SBUTTON FROM 021,227 TYPE 2 ENABLE ACTION (_nOpca:=0,_oDlg:End()) OF _oDlg
+DEFINE SBUTTON FROM 004,227 Type 1 ENABLE ACTION (_nOpca:=1,_oDlg:End()) OF _oDlg
+DEFINE SBUTTON FROM 021,227 Type 2 ENABLE ACTION (_nOpca:=0,_oDlg:End()) OF _oDlg
 
 ACTIVATE MSDIALOG _oDlg CENTERED
 
@@ -1692,8 +1689,8 @@ If _nOpca == 1
 
 		For _nI := 1 To Len(_aComboBx1)
 			If cComboBx1 == _aComboBx1[_nI]
-					dbSelectArea(_cTab)
-					(_cTab)->(dbSetOrder(_nI))
+					DBSelectArea(_cTab)
+					(_cTab)->(DBSetOrder(_nI))
 					MsSeek(cGet1,.T.)
 					oBrowse:DrawSelect()
 					oBrowse:Refresh(.T.)
@@ -1705,7 +1702,7 @@ If _nOpca == 1
 
 EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -1750,7 +1747,7 @@ Retorno-----------: Nenhum
 */
 Static Function MGLT0272()
 
-Local _aArea:= GetArea()
+Local _aArea:= FWGetArea()
 
 Local _aRotBack,_cCadBack
 
@@ -1776,7 +1773,7 @@ If Type( "_cCadBack" ) == "C"
 	cCadastro := _cCadBack
 EndIf
 
-restArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -1793,7 +1790,7 @@ Retorno-----------: Nenhum
 */
 Static Function MGLT0273(_cTab)
 
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local   _nSomatVol	:= 0
 Local   _nSomatVlr	:= 0
 
@@ -1835,8 +1832,8 @@ MGLT0274(1)
 nlinha+=nSaltoLinha
 MGLT0275()
 
-dbSelectArea(_cTab)
-(_cTab)->(dbGotop())
+DBSelectArea(_cTab)
+(_cTab)->(DBGoTop())
 
 While (_cTab)->(!Eof())
 
@@ -1852,7 +1849,7 @@ While (_cTab)->(!Eof())
 				&(_cTab+'->'+_cTab+'_LINHA'),&(_cTab+'->'+_cTab+'_DCLIN'  ),&(_cTab+'->'+_cTab+'_VALOR'),&(_cTab+'->'+_cTab+'_VOLUME'),;
 				&(_cTab+'->'+_cTab+'_VLRTOT' ),&(_cTab+'->'+_cTab+'_STAT'))
 
-(_cTab)->(dbSkip())
+(_cTab)->(DBSkip())
 EndDo
 
 nlinha+=nSaltoLinha
@@ -1866,7 +1863,7 @@ MGLT0277(_nSomatVol,_nSomatVlr)
 oPrint:EndPage()	// Finaliza a Pagina.
 oPrint:Preview()	// Visualiza antes de Imprimir.
 
-restArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -1896,7 +1893,7 @@ Else
 	oPrint:Say (nlinha + 100,(nColInic + 2750),"EMPRESA: " + AllTrim(SM0->M0_NOME) + '/' + AllTrim(SM0->M0_FILIAL),oFont12b)
 EndIf
 
-oPrint:Say (nlinha + 50,(nColInic + 2750),"DATA DE EMISSÃO: " + DtoC(DATE()),oFont12b)
+oPrint:Say (nlinha + 50,(nColInic + 2750),"DATA DE EMISSÃO: " + DToC(DATE()),oFont12b)
 nlinha+=(nSaltoLinha * 3)
 
 oPrint:Say (nlinha,nColFinal / 2,_cTitulo,oFont16b,nColFinal,,,2)
@@ -2082,18 +2079,18 @@ If _lRet
 
 	MsgRun("Verificando Status do MIX de destino...",,{||CursorWait(),MGLT027Q(1,MV_PAR01,"","",""), CursorArrow()}) 
 
-	dbSelectArea(_cAliasZLE)
-	(_cAliasZLE)->(dbGotop())
+	DBSelectArea(_cAliasZLE)
+	(_cAliasZLE)->(DBGoTop())
 
 	If (_cAliasZLE)->ZLE_STATUS == 'F'
 		MsgStop("Não será possível realizar a efetivação dos complemento pois o mix de destino: " + MV_PAR01 + " encontra-se fechado.", "MGLT02718")
 		_lRet:= .F.
 	Else
-		_dDtIniMix:= StoD((_cAliasZLE)->ZLE_DTINI)
-		_dDtFinMix:= StoD((_cAliasZLE)->ZLE_DTFIM)
+		_dDtIniMix:= SToD((_cAliasZLE)->ZLE_DTINI)
+		_dDtFinMix:= SToD((_cAliasZLE)->ZLE_DTFIM)
 	EndIf
 
-	(_cAliasZLE)->(dbCloseArea())
+	(_cAliasZLE)->(DBCloseArea())
 
 EndIf
 
@@ -2133,7 +2130,7 @@ Private _cAliasEfe
 //para gerar o financeiro e atualizacao do mix bem como demonstrar
 //os registros de complemento que foram cancelados
 //================================================================
-(_cTab)->(dbGotop())
+(_cTab)->(DBGoTop())
 
 While (_cTab)->(!Eof()) 
 
@@ -2154,7 +2151,7 @@ While (_cTab)->(!Eof())
 
 	EndIf
 
-	(_cTab)->(dbSkip())
+	(_cTab)->(DBSkip())
 EndDo
 
 //====================================================================================
@@ -2176,7 +2173,7 @@ _nCountRec := _nContReg
 If _nCountRec == 2                  
 		 
 
-	(_cAliasZL8)->(dbGotop())
+	(_cAliasZL8)->(DBGoTop())
 					           			
 	//=============================================================
 	//Verifica se existem dois eventos um de credito e um de debito
@@ -2194,10 +2191,10 @@ If _nCountRec == 2
 
 		EndIf
 
-		(_cAliasZL8)->(dbSkip())
+		(_cAliasZL8)->(DBSkip())
 	EndDo
 
-	(_cAliasZL8)->(dbCloseArea())
+	(_cAliasZL8)->(DBCloseArea())
 
 	//==========================================================
 	//Verifica se foram lancados os dois eventos um de credito e
@@ -2240,7 +2237,7 @@ If _nCountRec == 2
 		EndSql
 
 		COUNT TO _nCountRec //Contabiliza o numero de registros encontrados pela query
-		(_cAliasEfe)->(DbGotop())
+		(_cAliasEfe)->(DBGoTop())
 
 		If _nCountRec > 0
 
@@ -2257,12 +2254,12 @@ If _nCountRec == 2
 					EndIf 
 				Next _nX
 
-				(_cAliasEfe)->(dbSkip())
+				(_cAliasEfe)->(DBSkip())
 			EndDo
 
 		EndIf 
 
-		(_cAliasEfe)->(dbCloseArea())
+		(_cAliasEfe)->(DBCloseArea())
 
 		//==========================================================
 		//Emite mensagem dos produtores selecionados que nao poderao
@@ -2301,7 +2298,7 @@ If _nCountRec == 2
 					If TCSqlExec( _cQuery ) < 0
 						MsgStop( "Erro ao atualizar Registros: "+AllTrim(TCSQLError()),"AGLT01501")
 						_lRet := .F.
-					Endif
+					EndIf
 				EndIf
 
 			EndIf
@@ -2351,7 +2348,7 @@ Retorno-----------: Nenhum
 */
 Static Function MGLT027_3(_aRegCompl)
 
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local _lRet			:= .T.
 Local _nX			:= 0
 Local _lDeuErro		:= .F.        
@@ -2362,7 +2359,7 @@ Local _lNoExist		:= .T.
 Local _cNroTit		:= ''
 Local _nTamPar		:= TamSX3("E2_PARCELA")[1]
 Local _cParcela		:= ""
-Local _cTipo		:= PADR("NF",TamSX3("E2_TIPO")[1])     
+Local _cTipo		:= PadR("NF",TamSX3("E2_TIPO")[1])     
 Local _cCodMIX		:= MV_PAR01
 Local _cVersao		:= "1"
 Local _cVencto		:= ''
@@ -2396,27 +2393,27 @@ For _nX:=1 to Len(_aRegCompl)
 		_cSeek	:= _cNroTit + '-' + _cCodMIX + '-' + _cVersao + '-' + "MGLT027"
 		_cVencto:= _aRegCompl[_nX,14]
 
-		dbSelectArea("SA2") 
-		SA2->(dbSetOrder(1))
-		If SA2->(dbSeek(xFilial("SA2") + _aRegCompl[_nX,2] + _aRegCompl[_nX,3]))
+		DBSelectArea("SA2") 
+		SA2->(DBSetOrder(1))
+		If SA2->(DBSeek(xFilial("SA2") + _aRegCompl[_nX,2] + _aRegCompl[_nX,3]))
 
 			//==========================================================
 			// Verifica se o titulo ja existe na base, para nao duplicar
 			//==========================================================
-			dbSelectArea("SE2")
-			SE2->(dbSetOrder(1))
-			If SE2->(DbSeek(xFILIAL("SE2")+_cPrefixo+_cNroTit+_cParcela+_cTipo+SA2->A2_COD+SA2->A2_LOJA))
+			DBSelectArea("SE2")
+			SE2->(DBSetOrder(1))
+			If SE2->(DBSeek(xFilial("SE2")+_cPrefixo+_cNroTit+_cParcela+_cTipo+SA2->A2_COD+SA2->A2_LOJA))
 
 				_lDeuErro := .T.
 				_lNoExist := .F.
 
-				MsgAlert("O titulo: "+xFILIAL("SE2")+_cPrefixo+_cNroTit+_cParcela+_cTipo+;
+				MsgAlert("O titulo: "+xFilial("SE2")+_cPrefixo+_cNroTit+_cParcela+_cTipo+;
 				" ja existe para o produtor: "+SA2->A2_COD+"/"+SA2->A2_LOJA+"-"+SA2->A2_NOME+;
 				". Verifique no financeiro porque ja existe um titulo com estas caracteristicas e exclua-o.","MGLT02722")
 			
-				if MsgYesNo("Deseja gerar o titulo com uma nova parcela?")
+				If MsgYesNo("Deseja gerar o titulo com uma nova parcela?")
 				
-					_cParcela:= soma1(_cParcela)
+					_cParcela:= Soma1(_cParcela)
 					_lNoExist:= .T.
 					_lDeuErro:= .F.
 
@@ -2433,13 +2430,13 @@ For _nX:=1 to Len(_aRegCompl)
 				{"E2_NATUREZ",_cNatureza				,Nil},;
 				{"E2_FORNECE",SA2->A2_COD				,Nil},;
 				{"E2_LOJA"   ,SA2->A2_LOJA				,Nil},;
-				{"E2_EMISSAO",date()					,Nil},;
+				{"E2_EMISSAO",Date()					,Nil},;
 				{"E2_VENCTO" ,_cVencto		 			,Nil},;
 				{"E2_VENCREA",DataValida(_cVencto)		,Nil},;
 				{"E2_HIST"   ,_cHistTit					,Nil},;
 				{"E2_VALOR"  ,_nVlrTit					,Nil},;
 				{"E2_PORCJUR",0							,Nil},;
-				{"E2_DATALIB",date()					,Nil},;
+				{"E2_DATALIB",Date()					,Nil},;
 				{"E2_USUALIB",cUserName					,Nil},;
 				{"E2_L_LINRO",_cLinha					,Nil},;
 				{"E2_L_SETOR",_cSetor					,Nil},;
@@ -2463,12 +2460,12 @@ For _nX:=1 to Len(_aRegCompl)
 					_lDeuErro := .T.
 					Mostraerro() 
 				Else
-					dbSelectArea("SE2")
-					SE2->(dbSetOrder(1))
-					SE2->(dbGotop()) 
-					If SE2->(DbSeek(xFILIAL("SE2")+_cPrefixo+_cNroTit+_cParcela+_cTipo+SA2->A2_COD+SA2->A2_LOJA))
+					DBSelectArea("SE2")
+					SE2->(DBSetOrder(1))
+					SE2->(DBGoTop()) 
+					If SE2->(DBSeek(xFilial("SE2")+_cPrefixo+_cNroTit+_cParcela+_cTipo+SA2->A2_COD+SA2->A2_LOJA))
 
-						RecLock("SE2",.f.)
+						RecLock("SE2",.F.)
 
 							If SA2->A2_L_TPPAG == "B"   
 
@@ -2477,24 +2474,24 @@ For _nX:=1 to Len(_aRegCompl)
 								SE2->E2_L_AGENC := SA2->A2_AGENCIA
 								SE2->E2_L_CONTA	:= SA2->A2_NUMCON   
 
-							Endif
+							EndIf
 
-						SE2->(MsUnlock())
+						SE2->(MSUnLock())
 
 					EndIf
 					//Atualiza Item do registro
-					ZZF->(DbGoto(_aRegCompl[_nX,10])) 
+					ZZF->(DBGoTo(_aRegCompl[_nX,10])) 
 					RecLock("ZZF",.F.)
 						ZZF->ZZF_STATUS	:= '2'
-					ZZF->(MsUnlock())
+					ZZF->(MSUnLock())
 					//Atualiza Cabeçalho do registro
-					If ZZE->(DbSeek(xFilial("ZZE")+_aRegCompl[_nX,1])) .And. ZZE->ZZE_STATUS <> '2'
+					If ZZE->(DBSeek(xFilial("ZZE")+_aRegCompl[_nX,1])) .And. ZZE->ZZE_STATUS <> '2'
 						RecLock("ZZE",.F.)
 							ZZE->ZZE_STATUS	:= '2'
 							ZZE->ZZE_USREFE = _cMatUsr
-						 ZZE->(MsUnlock())
+						 ZZE->(MSUnLock())
 					EndIf
-				Endif
+				EndIf
 			EndIf   
 			//Produtor nao cadastrado no cadastro de fornecedor
 		Else
@@ -2503,14 +2500,14 @@ For _nX:=1 to Len(_aRegCompl)
 					". Favor contactar o departamento de informática, a operação de efetivação será cancelada.","MGLT02723")
 		EndIf
 	Else
-		ZZF->(DbGoto(_aRegCompl[_nX,10])) 
+		ZZF->(DBGoTo(_aRegCompl[_nX,10])) 
 		RecLock("ZZF",.F.)
 			ZZF->ZZF_STATUS	:= '4'
-		ZZF->(MsUnlock())
+		ZZF->(MSUnLock())
 	EndIf
 Next _nX
 
-restArea(_aArea)
+FWRestArea(_aArea)
 
 _lRet:= !_lDeuErro
 
@@ -2536,14 +2533,14 @@ While (_cAliExZZF)->(!Eof())
 
 	IncProc()
 
-	dbSelectArea("ZZF") 
-	ZZF->(dbGoto((_cAliExZZF)->RECNOZZF))
+	DBSelectArea("ZZF") 
+	ZZF->(DBGoTo((_cAliExZZF)->RECNOZZF))
 
 	If ZZF->ZZF_CODIGO == _cCodCompl 
 
 		RecLock("ZZF",.F.)
 			DbDelete()
-		ZZF->(MsUnlock())
+		ZZF->(MSUnLock())
 
 	Else
 		MsgStop("Erro ao excluir um determinado registro dos itens do complemento de pagamento: " + _cCodCompl +;
@@ -2552,10 +2549,10 @@ While (_cAliExZZF)->(!Eof())
 		Exit
 	EndIf
 
-	(_cAliExZZF)->(dbSkip())
+	(_cAliExZZF)->(DBSkip())
 EndDo
 
-(_cAliExZZF)->(dbCloseArea())
+(_cAliExZZF)->(DBCloseArea())
 
 Return _lRet
 
@@ -2588,7 +2585,7 @@ BeginSql Alias _cAliExZZF
 EndSql
 
 COUNT TO _nCountRec //Contabiliza o numero de registros encontrados pela query
-(_cAliExZZF)->(DbGotop())
+(_cAliExZZF)->(DBGoTop())
 
 If _nCountRec > 0
 
@@ -2599,12 +2596,12 @@ If _nCountRec > 0
 	//========================================================
 	If _lRet
 
-		dbSelectArea("ZZE")
-		ZZE->(dbSetOrder(1))
-		If ZZE->(dbSeek(xFilial("ZZE") + _cCodCompl))
+		DBSelectArea("ZZE")
+		ZZE->(DBSetOrder(1))
+		If ZZE->(DBSeek(xFilial("ZZE") + _cCodCompl))
 			RecLock("ZZE",.F.)
 				dbDelete()
-			ZZE->(MsUnlock())
+			ZZE->(MSUnLock())
 		Else
 			MsgStop("Não foi encontrado o registro do cabeçalho do complemento de pagamento: " + _cCodCompl, "MGLT02725")
 			_lRet:= .F.
@@ -2635,19 +2632,19 @@ Local _lRet:= .T.
 
 ProcRegua(_nCountRec)
 
-(_cAliasExc)->(dbGotop())
+(_cAliasExc)->(DBGoTop())
 
 While (_cAliasExc)->(!Eof())
 
 	IncProc()
 
-	dbSelectArea("ZLF")
-	ZLF->(dbGoto((_cAliasExc)->RECNOZLF))
+	DBSelectArea("ZLF")
+	ZLF->(DBGoTo((_cAliasExc)->RECNOZLF))
 
 	If _cCodCompl+"MGLT027" == AllTrim(ZLF->ZLF_SEEKCO)
 		RecLock("ZLF",.F.)
 			dbDelete()
-		ZLF->(MsUnlock())
+		ZLF->(MSUnLock())
 	Else
 		MsgStop("Não foi encontrado um determinado registro selecionado para ser excluido na tabela ZLF do complemento de pagamento: " + _cCodCompl +;
 				"Favor comunicar ao departamento de informática do problema encontrado, o seek para busca é: " + AllTrim(ZLF->ZLF_SEEKCO),"MGLT02727")
@@ -2655,10 +2652,10 @@ While (_cAliasExc)->(!Eof())
 		Exit
 	EndIf
 
-	(_cAliasExc)->(dbSkip())
+	(_cAliasExc)->(DBSkip())
 EndDo
 
-(_cAliasExc)->(dbCloseArea())
+(_cAliasExc)->(DBCloseArea())
 
 Return _lRet
 
@@ -2699,7 +2696,7 @@ BeginSql Alias _cAliasSE2
 EndSql
 
 COUNT TO _nCountRec //Contabiliza o numero de registros encontrados pela query
-(_cAliasSE2)->(DbGotop())
+(_cAliasSE2)->(DBGoTop())
 
 If _nContReg > 0 
 
@@ -2709,9 +2706,9 @@ If _nContReg > 0
 
 		IncProc()
 
-		DbSelectArea("SE2")
-		SE2->(DbSetOrder(1))
-		If SE2->(DbSeek(xFilial("SE2") + (_cAliasSE2)->E2_PREFIXO + (_cAliasSE2)->E2_NUM + (_cAliasSE2)->E2_PARCELA + (_cAliasSE2)->E2_TIPO + (_cAliasSE2)->E2_FORNECE + (_cAliasSE2)->E2_LOJA))
+		DBSelectArea("SE2")
+		SE2->(DBSetOrder(1))
+		If SE2->(DBSeek(xFilial("SE2") + (_cAliasSE2)->E2_PREFIXO + (_cAliasSE2)->E2_NUM + (_cAliasSE2)->E2_PARCELA + (_cAliasSE2)->E2_TIPO + (_cAliasSE2)->E2_FORNECE + (_cAliasSE2)->E2_LOJA))
 
 			// Array com os dados a serem passados para o SigaAuto
 			_aAutoSE2:={{"E2_PREFIXO",SE2->E2_PREFIXO,Nil},;
@@ -2727,7 +2724,7 @@ If _nContReg > 0
 			cModulo := "FIN"
 
 			//Roda SigaAuto de Exclusao de Titulos a Pagar
-			MSExecAuto({|x,y,z| Fina050(x,y,z)},_aAutoSE2,.t.,5)
+			MSExecAuto({|x,y,z| Fina050(x,y,z)},_aAutoSE2,.T.,5)
 
 			// Verifica se houve erro no SigaAuto, caso haja mostra o erro. 
 			If lMsErroAuto 
@@ -2738,7 +2735,7 @@ If _nContReg > 0
 				". Verifique no financeiro se este titulo ja foi baixado ou o motivo pelo qual não pode ser excluído."+;
 				" Ao confimar esta tela, sera apresentada a tela do SigaAuto, que possui informações mais detalhadas.","MGLT02728")
 				Mostraerro()
-			Endif
+			EndIf
 			
 			// Restaura o modulo em uso
 			nModulo := _nModAnt
@@ -2753,7 +2750,7 @@ If _nContReg > 0
 			". Verifique no financeiro se este titulo existe, pois o mesmo não foi encontrado.","MGLT02729")
 		EndIf
 
-		(_cAliasSE2)->(DbSkip())
+		(_cAliasSE2)->(DBSkip())
 
 	EndDo
 
@@ -2765,6 +2762,6 @@ Else
 
 EndIf
 
-(_cAliasSE2)->(dbCloseArea())
+(_cAliasSE2)->(DBCloseArea())
 
 Return _lRet

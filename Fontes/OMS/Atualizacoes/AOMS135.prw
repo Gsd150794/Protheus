@@ -13,7 +13,7 @@ Analista         - Programador       - Inicio     - Envio      - Chamado - Motiv
 Jerry Santiago   -  Igor Melgaço     - 05/09/2024 - 27/09/2024 - 48088   - Ajustes para validações de registros na inclusão e alteração.
 =========================================================================================================================================================
 */
-#INCLUDE 'PROTHEUS.CH'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -32,21 +32,21 @@ User Function AOMS135()
 Local _cTitulo := "Cadastro de Assistente Adm Comercial Responsável"
 Local _aDadosR:={}
 
-ACY->( DBSETORDER(1) )
-ACY->( DBGOTOP() )
-DO WHILE ACY->(!EOF()) 
-	AADD( _aDadosR , ACY->ACY_GRPVEN+"-"+ALLTRIM( ACY->ACY_DESCRI ) )
+ACY->( DBSetOrder(1) )
+ACY->( DBGoTop() )
+While ACY->(!Eof()) 
+	aAdd( _aDadosR , ACY->ACY_GRPVEN+"-"+AllTrim( ACY->ACY_DESCRI ) )
    ACY->( DBSkip() )
-ENDDO
+EndDo
 
-_cSelecZZL:="SELECT  ZZL_MATRIC , ZZL_NOME FROM "+RETSQLNAME("ZZL")+" ZZL WHERE D_E_L_E_T_ <> '*' AND ZZL_PEDPOR  = 'S' ORDER BY ZZL_MATRIC " 
+_cSelecZZL:="SELECT  ZZL_MATRIC , ZZL_NOME FROM "+RETSQLNAME("ZZL")+" ZZL WHERE D_E_L_E_T_ = ' ' AND ZZL_PEDPOR  = 'S' ORDER BY ZZL_MATRIC " 
 
 _aItalac_F3:={}
 //  (_aItalac_F3,{"1CPO_CAMPO1"  ,_cTabela  ,_nCpoChave                , _nCpoDesc              ,_bCondTab, _cTitAux     , _nTamChv           , _aDados  , _nMaxSel , _lFilAtual,_cMVRET,_bValida})
-AADD(_aItalac_F3,{"M->ZPG_ASSCOD",_cSelecZZL,{|Tab| (Tab)->ZZL_MATRIC }, {|Tab| (Tab)->ZZL_NOME},         ,"Assistentes" ,LEN(ZPG->ZPG_ASSCOD),          , 1        } )
+aAdd(_aItalac_F3,{"M->ZPG_ASSCOD",_cSelecZZL,{|Tab| (Tab)->ZZL_MATRIC }, {|Tab| (Tab)->ZZL_NOME},         ,"Assistentes" ,Len(ZPG->ZPG_ASSCOD),          , 1        } )
 
 //AD(_aItalac_F3,{"1CPO_CAMPO1   ,_cTabel,_nCpoChave, _nCpoDesc,_bCondTab, _cTitAux , _nTamChv           , _aDados , _nMaxSel, _lFilAtual,_cMVRET,_bValida})
-AADD(_aItalac_F3,{"M->ZPG_REDCOD",       ,          ,          ,         ,"Redes"   ,LEN(ACY->ACY_GRPVEN),_aDadosR ,1        })
+aAdd(_aItalac_F3,{"M->ZPG_REDCOD",       ,          ,          ,         ,"Redes"   ,Len(ACY->ACY_GRPVEN),_aDadosR ,1        })
 
 //AxCadastro("ZPG",_cTitulo, "U_DelOk()", "U_COK()"            , aRotAdic, bPre, bOK, bTTS, bNoTTS,aAuto,nOpcAuto,aButtons,aACS,cTela)
 //AxCadastro("ZPG",_cTitulo,            , "U_AOMS135V('OKZPG')",         ,     ,    , )
@@ -55,7 +55,7 @@ Private cCadastro	:= _cTitulo
 Private aRotina	:= MenuDef()
 mBrowse(,,,,"ZPG")
 
-Return Nil       
+Return       
 
 /*
 ===============================================================================================================================
@@ -105,7 +105,7 @@ Retorno-----------: .T.
 ===============================================================================================================================*/
 User Function AOM135Inclui(cAlias,nReg,nOpc)
 
-IF nOpc = 3
+If nOpc = 3
    Return AxInclui(cAlias,nReg,nOpc,;
        /*aAcho>     */ ,;
        /*cFunc>     */ ,;
@@ -118,9 +118,9 @@ IF nOpc = 3
        /*aAuto>     */ ,;
        /*lVirtual>  */ ,;
        /*lMaximized>*/ )
-ENDIF
+EndIf
 
-Return .t.
+Return .T.
 
 /*
 ===============================================================================================================================
@@ -140,36 +140,36 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function BuscaAssistente(_cRede,_cVend,_cSupe,_cCoor,_cGere)
-LOCAL _aOrdBusca  :={} , A
-LOCAL _aAssistente:={"",""}
-LOCAL _cRedB:=SPACE(LEN(ZPG->ZPG_REDCOD))
-LOCAL _cVenB:=SPACE(LEN(ZPG->ZPG_VENCOD))
-LOCAL _cSupB:=SPACE(LEN(ZPG->ZPG_SUPCOD))
-LOCAL _cCooB:=SPACE(LEN(ZPG->ZPG_COOCOD))
-LOCAL _cGerB:=SPACE(LEN(ZPG->ZPG_GERCOD))
+Local _aOrdBusca  :={} , A
+Local _aAssistente:={"",""}
+Local _cRedB:=Space(Len(ZPG->ZPG_REDCOD))
+Local _cVenB:=Space(Len(ZPG->ZPG_VENCOD))
+Local _cSupB:=Space(Len(ZPG->ZPG_SUPCOD))
+Local _cCooB:=Space(Len(ZPG->ZPG_COOCOD))
+Local _cGerB:=Space(Len(ZPG->ZPG_GERCOD))
 //Busca com REDE
-AADD(_aOrdBusca,_cRede+_cVend+_cSupe+_cCoor+_cGere)// ORDEM 01
-AADD(_aOrdBusca,_cRede+_cVenB+_cSupe+_cCoor+_cGere)// ORDEM 02
-AADD(_aOrdBusca,_cRede+_cVenB+_cSupB+_cCoor+_cGere)// ORDEM 03
-AADD(_aOrdBusca,_cRede+_cVenB+_cSupB+_cCooB+_cGere)// ORDEM 04
-AADD(_aOrdBusca,_cRede+_cVenB+_cSupB+_cCooB+_cGerB)// ORDEM 05
+aAdd(_aOrdBusca,_cRede+_cVend+_cSupe+_cCoor+_cGere)// ORDEM 01
+aAdd(_aOrdBusca,_cRede+_cVenB+_cSupe+_cCoor+_cGere)// ORDEM 02
+aAdd(_aOrdBusca,_cRede+_cVenB+_cSupB+_cCoor+_cGere)// ORDEM 03
+aAdd(_aOrdBusca,_cRede+_cVenB+_cSupB+_cCooB+_cGere)// ORDEM 04
+aAdd(_aOrdBusca,_cRede+_cVenB+_cSupB+_cCooB+_cGerB)// ORDEM 05
 //Busca sem REDE
-AADD(_aOrdBusca,_cRedB+_cVend+_cSupe+_cCoor+_cGere)// ORDEM 06
-AADD(_aOrdBusca,_cRedB+_cVenB+_cSupe+_cCoor+_cGere)// ORDEM 07
-AADD(_aOrdBusca,_cRedB+_cVenB+_cSupB+_cCoor+_cGere)// ORDEM 08
-AADD(_aOrdBusca,_cRedB+_cVenB+_cSupB+_cCooB+_cGere)// ORDEM 09 
+aAdd(_aOrdBusca,_cRedB+_cVend+_cSupe+_cCoor+_cGere)// ORDEM 06
+aAdd(_aOrdBusca,_cRedB+_cVenB+_cSupe+_cCoor+_cGere)// ORDEM 07
+aAdd(_aOrdBusca,_cRedB+_cVenB+_cSupB+_cCoor+_cGere)// ORDEM 08
+aAdd(_aOrdBusca,_cRedB+_cVenB+_cSupB+_cCooB+_cGere)// ORDEM 09 
 
-ZPG->(DBSETORDER(8))//ZPG_FILIAL+ZPG_REDCOD+ZPG_VENCOD+ZPG_SUPCOD+ZPG_COOCOD+ZPG_GERCOD+ZPG_ASSCOD
-FOR A := 1 TO LEN(_aOrdBusca)
-   IF ZPG->(DBSEEK( xFilial()+_aOrdBusca[A]+"2" )) 
+ZPG->(DBSetOrder(8))//ZPG_FILIAL+ZPG_REDCOD+ZPG_VENCOD+ZPG_SUPCOD+ZPG_COOCOD+ZPG_GERCOD+ZPG_ASSCOD
+For A := 1 TO Len(_aOrdBusca)
+   If ZPG->(DBSeek( xFilial()+_aOrdBusca[A]+"2" )) 
        _aAssistente[1] := ZPG->ZPG_ASSCOD
-       _aAssistente[2] := ZPG->ZPG_ASSNOM//POSICIONE('ZZL',1,xFilial('ZZL')+ZPG->ZPG_ASSCOD,'ZZL_NOME') 
-       EXIT
-   ENDIF
-NEXT
-ZPG->(DBSETORDER(1))
+       _aAssistente[2] := ZPG->ZPG_ASSNOM//Posicione('ZZL',1,xFilial('ZZL')+ZPG->ZPG_ASSCOD,'ZZL_NOME') 
+       Exit
+   EndIf
+Next
+ZPG->(DBSetOrder(1))
 
-RETURN _aAssistente
+Return _aAssistente
 
 
 /*
@@ -186,14 +186,14 @@ Retorno-----------: .T.
 ===============================================================================================================================*/
 User Function AOM135Altera(cAlias,nReg,nOpc)
 
-IF nOpc = 4
+If nOpc = 4
 
           //AxAltera(cAlias,nReg,nOpc,/*aAcho*/,/*aCpos*/,/*nColMens*/,/*cMensagem*/,/*cTudoOk*/,/*cTransact*/,/*cFunc*/,/*aButtons*/,/*aParam*/,/*aAuto*/,/*lVirtual*/,/*lMaximized*/)
    Return AxAltera(cAlias,nReg,nOpc,         ,         ,            ,             ,"U_AOMS135V()",,)
 
-ENDIF
+EndIf
 
-Return .t.
+Return .T.
 
 
 /*
@@ -215,24 +215,24 @@ Local _lRet := .T.
 
 Begin Sequence
 
-   If (Inclui .OR. Altera)
+   If (Inclui .Or. Altera)
    
-      IF EMPTY(M->ZPG_REDCOD+M->ZPG_VENCOD+M->ZPG_SUPCOD+M->ZPG_COOCOD+M->ZPG_GERCOD)
-         U_ITMSG("Não é possivel gravar somente o Assistente.",'Atencao!',;
+      If Empty(M->ZPG_REDCOD+M->ZPG_VENCOD+M->ZPG_SUPCOD+M->ZPG_COOCOD+M->ZPG_GERCOD)
+         U_ITMsg("Não é possivel gravar somente o Assistente.",'Atencao!',;
 		           'Preencha pelo menos mais um campo chave para o pedido poder encontrar o Assistente.',1)         
          _lRet := .F.
-      ENDIF
+      EndIf
 
-      IF _lRet
+      If _lRet
 
          aAreaZPG := Getarea("ZPG")
-         nRecnoZPG := Iif(Inclui,0,ZPG->(Recno()))
+         nRecnoZPG := IIf(Inclui,0,ZPG->(Recno()))
          
          //Verifico se há registro na chave 
-         Dbselectarea("ZPG")
-         Dbsetorder(7)
-         If Dbseek(xFilial("ZPG")+M->ZPG_REDCOD+M->ZPG_VENCOD+M->ZPG_SUPCOD+M->ZPG_COOCOD+M->ZPG_GERCOD+M->ZPG_ASSCOD) 
-            If Inclui .OR. ZPG->(Recno()) <> nRecnoZPG
+         DBSelectArea("ZPG")
+         DBSetOrder(7)
+         If DBSeek(xFilial("ZPG")+M->ZPG_REDCOD+M->ZPG_VENCOD+M->ZPG_SUPCOD+M->ZPG_COOCOD+M->ZPG_GERCOD+M->ZPG_ASSCOD) 
+            If Inclui .Or. ZPG->(Recno()) <> nRecnoZPG
                If Inclui 
                   _lRet := .F.
                ElseIf Altera
@@ -241,17 +241,17 @@ Begin Sequence
                   EndIf  
                EndIf
                If !_lRet
-                  U_ITMSG("Não é possivel concluir a operação pois há outro registro ativo para chave digitada (Rede + Vendedor + Supervisor + Coordenador + Gerente + Assistente)!",'Atencao!',;
+                  U_ITMsg("Não é possivel concluir a operação pois há outro registro ativo para chave digitada (Rede + Vendedor + Supervisor + Coordenador + Gerente + Assistente)!",'Atencao!',;
                      'Preencha uma chave diferente para concluir a operação.',1)     
                EndIf
             EndIf
          EndIf
 
-         If _lRet .AND. M->ZPG_MSBLQL == "2"
+         If _lRet .And. M->ZPG_MSBLQL == "2"
             //Verifico se há registro ativo para estrutura sem o Assistente pois só pode haver um
-            Dbselectarea("ZPG")
-            Dbsetorder(8)
-            If Dbseek(xFilial("ZPG")+M->ZPG_REDCOD+M->ZPG_VENCOD+M->ZPG_SUPCOD+M->ZPG_COOCOD+M->ZPG_GERCOD+"2") 
+            DBSelectArea("ZPG")
+            DBSetOrder(8)
+            If DBSeek(xFilial("ZPG")+M->ZPG_REDCOD+M->ZPG_VENCOD+M->ZPG_SUPCOD+M->ZPG_COOCOD+M->ZPG_GERCOD+"2") 
                If Inclui 
                   _lRet := .F.
                ElseIf Altera
@@ -261,14 +261,14 @@ Begin Sequence
                EndIf
 
                If !_lRet
-                  U_ITMSG("Não é possivel concluir a operação pois há outro registro ativo para chave digitada (Rede + Vendedor + Supervisor + Coordenador + Gerente)!",'Atencao!',;
+                  U_ITMsg("Não é possivel concluir a operação pois há outro registro ativo para chave digitada (Rede + Vendedor + Supervisor + Coordenador + Gerente)!",'Atencao!',;
                      'Bloqueie o registro ativo dessa chave anteriormente e inclua ou preencha uma chave diferente para concluir a operação.',1)         
                EndIf
 
             EndIf
          EndIf
-         RestArea(aAreaZPG)
-      ENDIF
+         FWRestArea(aAreaZPG)
+      EndIf
 
    EndIf
    

@@ -1,6 +1,6 @@
-#include "protheus.ch"
-#include "topconn.ch"
-#include "rwmake.ch"
+#Include "TOTVS.ch"
+#Include "topconn.ch"
+#Include "rwmake.ch"
 /*/
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -31,25 +31,25 @@
 */
 User Function AOMS022()
 
-	Local aArea		:=	GetArea()
+	Local aArea		:=	FWGetArea()
 	Local _cRet		:= 	""
 
-	dbSelectArea("SB1")
-	dbSetOrder(1)
-	dbSeek(xFilial("SB1")+GDFIELDGET("C6_PRODUTO",n))
-	If GDFIELDGET("C6_I_QESP",n) == "1"
-		_cRet	:=	ALLTRIM(SB1->B1_I_QESP)
-	ElseIf GDFIELDGET("C6_I_QESP",n) == "2"
-		_cRet	:=	ALLTRIM(SB1->B1_I_QESP2)
-	Endif
+	DBSelectArea("SB1")
+	DBSetOrder(1)
+	DBSeek(xFilial("SB1")+GdFieldGet("C6_PRODUTO",n))
+	If GdFieldGet("C6_I_QESP",n) == "1"
+		_cRet	:=	AllTrim(SB1->B1_I_QESP)
+	ElseIf GdFieldGet("C6_I_QESP",n) == "2"
+		_cRet	:=	AllTrim(SB1->B1_I_QESP2)
+	EndIf
 		  
-	If !Empty(GDFIELDGET("C6_I_QESP",n))	
+	If !Empty(GdFieldGet("C6_I_QESP",n))	
 		If Empty(_cRet)
-			xmaghelpfis("Descricao nao Cadastrada.","Nao existem descricao cadastrada para esse Queijo Especial!",;
+			xMagHelpFis("Descricao nao Cadastrada.","Nao existem descricao cadastrada para esse Queijo Especial!",;
 					"Avise o Administrador do Sistema")
-		Endif
+		EndIf
 	EndIf
 	
-	RestArea(aArea)                   
+	FWRestArea(aArea)                   
 	
 Return (_cRet)

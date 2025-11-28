@@ -9,8 +9,8 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
 
-#include "report.ch"
-#include "protheus.ch"
+#Include "report.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -38,7 +38,7 @@ Private oBrkFilial
 
 Private cNomFilial:= "" //Armazena o nome da filial corrente para que seja utilizada na impressao da quebra  
 
-pergunte(cPerg,.F.)
+Pergunte(cPerg,.F.)
 
 DEFINE REPORT oReport NAME cPerg TITLE "Relatório de Divergencias Frete" PARAMETER cPerg ACTION {|oReport| PrintReport(oReport)} Description "Este relatório emitirá a divergencia de valores de Frete gerados." 
 
@@ -48,14 +48,14 @@ oReport:SetTotalInLine(.F.)
 
 
 //Secao dados da Filial
-DEFINE SECTION oSecFilial OF oReport TITLE "FILIAL" TABLES "DAK"
+DEFINE Section oSecFilial OF oReport TITLE "FILIAL" TABLES "DAK"
 
 DEFINE CELL NAME "DAK_FILIAL"	OF oSecFilial ALIAS "DAK" TITLE "FILIAL"    SIZE 12
 DEFINE CELL NAME "NOMFIL"	    OF oSecFilial ALIAS ""    TITLE "DESCRICAO" SIZE 40 BLOCK{|| FWFilialName(,QRY1->DAK_FILIAL)}
 
 oSecFilial:SetTotalInLine(.F.)
 
-DEFINE SECTION oSecDados OF oSecFilial TITLE "DADOS FRETE" TABLES "DAK"
+DEFINE Section oSecDados OF oSecFilial TITLE "DADOS FRETE" TABLES "DAK"
 
 DEFINE CELL NAME "DAK_COD"	    OF oSecDados ALIAS "DAK" TITLE "CARGA"        	    SIZE 10
 DEFINE CELL NAME "DAK_DATA"     OF oSecDados ALIAS "DAK" TITLE "DT MONTAGEM CARGA" 	SIZE 20     
@@ -99,22 +99,22 @@ Static Function PrintReport(oReport)
 Local cFiltro   := "%"       
 Local cFilFil   := "%"  
 
-oReport:SetTitle("RELAÇÃO DE DIVERGENCIA DE VALORES FRETE MONTAGEM DE CARGA de " + dtoc(mv_par02) + " até "  + dtoc(mv_par03))
+oReport:SetTitle("RELAÇÃO DE DIVERGENCIA DE VALORES FRETE MONTAGEM DE CARGA de " + DToC(MV_PAR02) + " até "  + DToC(MV_PAR03))
 
 //Define o filtro de acordo com os parametros digitados
-if !empty(alltrim(mv_par01))	
+If !Empty(AllTrim(MV_PAR01))	
 	
-	if !empty(xFilial("DAK"))
-		cFiltro   += " AND DAK.DAK_FILIAL IN " + FormatIn(mv_par01,";") 
-		cFilFil   += " AND DAK.DAK_FILIAL IN " + FormatIn(mv_par01,";") 
-	endif	                          
+	If !Empty(xFilial("DAK"))
+		cFiltro   += " AND DAK.DAK_FILIAL IN " + FormatIn(MV_PAR01,";") 
+		cFilFil   += " AND DAK.DAK_FILIAL IN " + FormatIn(MV_PAR01,";") 
+	EndIf	                          
 
-endif 
+EndIf 
 
 //Filtra Emissao da DAK
-if !empty(mv_par02) .and. !empty(mv_par03)
-	cFiltro  += " AND DAK.DAK_DATA BETWEEN '" + dtos(mv_par02) + "' AND '" + dtos(mv_par03) + "'"
-endif
+If !Empty(MV_PAR02) .And. !Empty(MV_PAR03)
+	cFiltro  += " AND DAK.DAK_DATA BETWEEN '" + DToS(MV_PAR02) + "' AND '" + DToS(MV_PAR03) + "'"
+EndIf
 
 cFiltro   += "%"   
 cFilFil   += "%" 
@@ -140,7 +140,7 @@ cFilFil   += "%"
 					(SELECT SUM(SD2.D2_I_FRET)  FROM SD2010 SD2 JOIN SF2010 SF2 ON SF2.F2_FILIAL = SD2.D2_FILIAL AND SF2.F2_DOC = SD2.D2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SF2.F2_CLIENTE = SD2.D2_CLIENTE
 					AND SF2.F2_LOJA = SD2.D2_LOJA WHERE SD2.D_E_L_E_T_ = ' ' AND SF2.D_E_L_E_T_ = ' ' AND DAK.DAK_FILIAL = SF2.F2_FILIAL AND DAK.DAK_COD = SF2.F2_CARGA %exp:cFilFil%) FRTSD2
 				FROM 
-					%table:DAK% DAK
+					%Table:DAK% DAK
 				WHERE 
 					DAK.%notDel%                                                                                                                                                           
 					%exp:cFiltro%

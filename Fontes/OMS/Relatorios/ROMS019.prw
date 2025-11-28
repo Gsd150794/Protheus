@@ -10,7 +10,7 @@ Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para cont
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -50,11 +50,11 @@ Private oBrush      := TBrush():New( ,CLR_LIGHTGRAY)
 Private _cPerg 		:= "ROMS019"
 Private _aItalac_F3:={}
 
-AADD(_aItalac_F3,{"MV_PAR03"   ,"SA3"    ,2,3 ,{|| SA3->A3_I_TIPV ='S' },"Supervisores",LEN(SA3->A3_COD),,16 } )
+aAdd(_aItalac_F3,{"MV_PAR03"   ,"SA3"    ,2,3 ,{|| SA3->A3_I_TIPV ='S' },"Supervisores",Len(SA3->A3_COD),,16 } )
 
 If !Pergunte( _cPerg )
 	Aviso( 'Atenção!' , 'Operação cancelada pelo usuário!' , {'Fechar'} )
-	Return()
+	Return
 EndIf
 
 If MV_PAR06 == 1
@@ -85,7 +85,7 @@ If MV_PAR09 == 2  // Relatório impresso
    ROMS019PAR()
 EndIf
 
-cTimeInicial:=TIME()
+cTimeInicial:=Time()
 
 Processa( {|| ROMS019PRC() } , "Hora Inicial: "+cTimeInicial+' Aguarde!' , 'Iniciando o relatório...' )
 
@@ -94,7 +94,7 @@ If MV_PAR09 == 2  // Relatório impresso
    oPrint:Preview() // Visualiza antes de Imprimir.
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -133,7 +133,7 @@ Else
 	oPrint:Say( nlinha + 100 , nColFinal - 550 , "EMPRESA: "+ AllTrim( SM0->M0_NOME ) +'/'+ AllTrim( SM0->M0_FILIAL ) , oFont12b )
 EndIf
 
-oPrint:Say(     nlinha + 050 , nColFinal - 550 , "DATA DE EMISSÃO: "+ DtoC( DATE() )                                  , oFont12b )
+oPrint:Say(     nlinha + 050 , nColFinal - 550 , "DATA DE EMISSÃO: "+ DToC( Date() )                                  , oFont12b )
 
 nlinha += ( nSaltoLinha * 3 )
 
@@ -143,7 +143,7 @@ nlinha += ( nSaltoLinha * 2 )
 
 oPrint:Line( nLinha , nColInic , nLinha , nColFinal )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -184,7 +184,7 @@ oPrint:Line( nLinha , nColInic + 2910 , nLinha + nSaltoLinha , nColInic + 2910 )
 oPrint:Line( nLinha , nColInic + 3120 , nLinha + nSaltoLinha , nColInic + 3120 ) //Primeira Compra     // 3795
 nlinha += nSaltoLinha
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -209,7 +209,7 @@ EndIf
 
 nlinha += ( nSaltoLinha )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -235,7 +235,7 @@ EndIf
 
 nlinha += ( nSaltoLinha )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -261,7 +261,7 @@ EndIf
 
 nlinha += ( nSaltoLinha )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -283,7 +283,7 @@ oPrint:Say( nlinha + nAjustAltu , nColInic + 15 , "Vendedor: "+ SubStr(cCodVen +
 nlinha += ( nSaltoLinha * 2 )
 nLinInBox := nlinha
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -309,12 +309,12 @@ EndIf
                                                                             
 oPrint:FillRect( { (nlinha+3) , nColInic , nlinha + nSaltoLinha , 2360 } , oBrush )
 oPrint:Box( nlinha , nColInic , nLinha + nSaltoLinha , 2360 )
-oPrint:Say( nlinha + nAjustAltu , nColInic + 15 , _cSubTitulo , oFont12b ) // IIF( _nOpc == 1 , 'Coordenador(es)' , 'Vendedor(es)' ) 
+oPrint:Say( nlinha + nAjustAltu , nColInic + 15 , _cSubTitulo , oFont12b ) // IIf( _nOpc == 1 , 'Coordenador(es)' , 'Vendedor(es)' ) 
 
 nlinha += ( nSaltoLinha )
 nLinInBox := nlinha
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -330,17 +330,17 @@ Static Function ROMS019PRT( cCliente , cCnpj , cRede , cUf , cMunicip , cTel , c
 
 oPrint:Say( nlinha + nAjustAltu , nColInic + 0015 , SubStr( cCliente , 1 , 42 )	, oFont10 )    
 oPrint:Say( nlinha + nAjustAltu , nColInic + 0800 , SubStr( cNomeFan , 1 , 39 )	, oFont10 ) // 0800
-oPrint:Say( nlinha + nAjustAltu , nColInic + 1220 , IIF( Len( AllTrim(cCnpj) ) <= 11 , Transform( PadL(cCnpj,11) , "@R 999.999.999-99" ) , Transform( AllTrim( cCnpj ) , "@R! NN.NNN.NNN/NNNN-99" ) ) , oFont10 ) // 1520
+oPrint:Say( nlinha + nAjustAltu , nColInic + 1220 , IIf( Len( AllTrim(cCnpj) ) <= 11 , Transform( PadL(cCnpj,11) , "@R 999.999.999-99" ) , Transform( AllTrim( cCnpj ) , "@R! NN.NNN.NNN/NNNN-99" ) ) , oFont10 ) // 1520
 oPrint:Say( nlinha + nAjustAltu , nColInic + 1550 , SubStr( cRede , 1 , 25 )	, oFont10 )  // 1850
 oPrint:Say( nlinha + nAjustAltu , nColInic + 2060 , cUf							, oFont10 )     // 2360
 oPrint:Say( nlinha + nAjustAltu , nColInic + 2120 , SubStr( cMunicip , 1 , 19 )	, oFont10 )  // 2420
 oPrint:Say( nlinha + nAjustAltu , nColInic + 2495 , cTel						, oFont10 )  // 2795
-oPrint:Say( nlinha + nAjustAltu , nColInic + 2730 , DtoC( StoD( cUltCompra ) )	, oFont10 )  // 3130 // 2830
+oPrint:Say( nlinha + nAjustAltu , nColInic + 2730 , DToC( SToD( cUltCompra ) )	, oFont10 )  // 3130 // 2830
 
 oPrint:Say( nlinha + nAjustAltu , nColInic + 2915 , Transform( _nLimCred, "@E 999,999,999.99" )	, oFont10 ) // 3465
-oPrint:Say( nlinha + nAjustAltu , nColInic + 3165 , DtoC( StoD( _cDtPriCom) )	, oFont10 ) // 3800
+oPrint:Say( nlinha + nAjustAltu , nColInic + 3165 , DToC( SToD( _cDtPriCom) )	, oFont10 ) // 3800
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -390,7 +390,7 @@ If nLinha > nqbrPagina
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -417,7 +417,7 @@ oPrint:Line( nLinInBox , nColInic + 3120 , nLinha , nColInic + 3120 ) //Primeira
 
 oPrint:Box( nLinInBox , nColInic , nLinha , nColFinal )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -460,8 +460,8 @@ If MV_PAR06 == 4 // Listagem por clientes / para emissão das notas fiscais.
    _cQuery += "     (SELECT COUNT(*) FROM " + RETSQLNAME("SF2") + " SF2 " + "WHERE SF2.F2_CLIENTE = SA1.A1_COD AND SF2.F2_LOJA = SA1.A1_LOJA AND SF2.d_e_l_e_t_ = ' ' AND SF2.F2_TIPO = 'N') NFS_CLIENTE , "
 
    //----------- QUERY TOTAL DE NOTAS EMITIDAS PARA A REDE
-   _cQuery += "     (  CASE WHEN SA1.A1_GRPVEN  = '999999' THEN 0 "
-   _cQuery += "             ELSE (SELECT COUNT(*) FROM " + RETSQLNAME("SF2")+ " SF2, " + RETSQLNAME("SA10") +" REDE "
+   _cQuery += "     (  Case WHEN SA1.A1_GRPVEN  = '999999' THEN 0 "
+   _cQuery += "             Else (SELECT COUNT(*) FROM " + RETSQLNAME("SF2")+ " SF2, " + RETSQLNAME("SA10") +" REDE "
    _cQuery += "                   where SF2.d_e_l_e_t_ = ' ' AND SF2.F2_TIPO = 'N'  AND REDE.A1_COD = SF2.F2_CLIENTE AND REDE.A1_LOJA = SF2.F2_LOJA  AND "
    _cQuery += "             REDE.A1_GRPVEN = SA1.A1_GRPVEN  )   
    _cQuery += "                END ) NFS_REDE, "
@@ -604,13 +604,13 @@ EndIf
 DBUseArea( .T. , "TOPCONN" , TcGenQry(,,_cQuery) , _cAlias , .T. , .F. )
 COUNT TO nCountRec
 
-IF  nCountRec > 1000
-   IF !U_ITMSG("Serão lidos "+ALLTRIM(STR(nCountRec))+" Registros. Continua?","Hr Ini: "+cTimeInicial+" Hr final "+TIME(),,3,2,2)
-      RETURN .F.
-   ENDIF
-ENDIF
-_cTot:=ALLTRIM(STR(nCountRec))
-_nTam:=LEN(_cTot)+1
+If  nCountRec > 1000
+   If !U_ITMsg("Serão lidos "+AllTrim(Str(nCountRec))+" Registros. Continua?","Hr Ini: "+cTimeInicial+" Hr final "+TIME(),,3,2,2)
+      Return .F.
+   EndIf
+EndIf
+_cTot:=AllTrim(Str(nCountRec))
+_nTam:=Len(_cTot)+1
 
 ProcRegua( nCountRec )
 
@@ -625,7 +625,7 @@ If nCountRec > 0
 	  nlinha += nSaltoLinha	// Salta Linha
 	
 	  DBSelectArea(_cAlias)
-	  (_cAlias)->( DBGotop() )
+	  (_cAlias)->( DBGoTop() )
 	  While (_cAlias)->( !Eof() )
 		
 		 _nConAtu++
@@ -638,7 +638,7 @@ If nCountRec > 0
 		
 		    _lEntrCo := .F. // Variavel utilizada para veririficar se entrou no coordenador no registro corrente
 		
-			If aScan( _aCoord , {|x| Alltrim(x[1]) == AllTrim((_cAlias)->A3_SUPER) } ) == 0 // Verifica se é a primeira ocorrencia do supervisor
+			If aScan( _aCoord , {|x| AllTrim(x[1]) == AllTrim((_cAlias)->A3_SUPER) } ) == 0 // Verifica se é a primeira ocorrencia do supervisor
 			    
 			    If  Len(_aCoord) > 0 .And. !_lEntrCo // Verifica se nao é o primeiro registro relacionado a um vendedor
 			    
@@ -667,7 +667,7 @@ If nCountRec > 0
 			
 			EndIf
 					
-			If aScan( _aSuper , {|x| Alltrim(x[1]) == AllTrim((_cAlias)->A3_I_SUPE) } ) == 0 // Verifica se é a primeira ocorrencia do supervisor
+			If aScan( _aSuper , {|x| AllTrim(x[1]) == AllTrim((_cAlias)->A3_I_SUPE) } ) == 0 // Verifica se é a primeira ocorrencia do supervisor
 			    
 			    If  Len(_aSuper) > 0 .And. !_lEntrSu // Verifica se nao é o primeiro registro relacionado a um vendedor
 			    
@@ -696,7 +696,7 @@ If nCountRec > 0
 			
 			EndIf
 			
-			If aScan( _aVend , {|x| Alltrim(x[1]) == AllTrim((_cAlias)->A3_COD) } ) == 0 // Verifica se eh a primeira ocorrencia do vendedor
+			If aScan( _aVend , {|x| AllTrim(x[1]) == AllTrim((_cAlias)->A3_COD) } ) == 0 // Verifica se eh a primeira ocorrencia do vendedor
 			    
 			    If Len(_aVend) > 0 .And. !_lEntrCo .And. nLinInBox <> nlinha // Verifica se não é o primeiro registro relacionado a um vendedor
 			    
@@ -755,7 +755,7 @@ If nCountRec > 0
 			      ROMS019CLV(2)											    // Imprime Cabecalho - Vendedores
 			      _lImprCab := .T.
 			   EndIf
-			ElseIf _cCooAtu <> AllTrim((_cAlias)->A3_SUPER) .OR. _cSupAtu <> AllTrim((_cAlias)->A3_I_SUPE)  // Verifica se mudou o coordenador  // _cCooAtu <> AllTrim((_cAlias)->A3_SUPER)
+			ElseIf _cCooAtu <> AllTrim((_cAlias)->A3_SUPER) .Or. _cSupAtu <> AllTrim((_cAlias)->A3_I_SUPE)  // Verifica se mudou o coordenador  // _cCooAtu <> AllTrim((_cAlias)->A3_SUPER)
 			    
 			   If !Empty( _cCooAtu ) .Or. _lImprCab // Verifica se nao é o primeiro registro relacionado a um coordenador
 				  oPrint:Box( nLinInBox , nColInic , nLinha , nColFinal )
@@ -828,7 +828,7 @@ If nCountRec > 0
 		//====================================================================================================
 		ElseIf MV_PAR06 == 1
 			
-			If aScan( _aCoord , {|x| Alltrim(x[1]) == AllTrim((_cAlias)->A3_GEREN) } ) == 0 // Verifica se é a primeira ocorrencia do gerente
+			If aScan( _aCoord , {|x| AllTrim(x[1]) == AllTrim((_cAlias)->A3_GEREN) } ) == 0 // Verifica se é a primeira ocorrencia do gerente
 			    
 				If  Len( _aCoord ) > 0 // Verifica se nao é o primeiro registro relacionado a um coordenador
 				
@@ -1042,17 +1042,17 @@ If nCountRec > 0
                      "Condição Pagamento",;
                      "Descrição Condição"}
 
-         AADD(_aCabec,"Cód. Segmento"   )        
-         AADD(_aCabec,"Segmento"        )  
-         AADD(_aCabec,"Cód. Subsegmento")        
-         AADD(_aCabec,"Subsegmento"     )  
+         aAdd(_aCabec,"Cód. Segmento"   )        
+         aAdd(_aCabec,"Segmento"        )  
+         aAdd(_aCabec,"Cód. Subsegmento")        
+         aAdd(_aCabec,"Subsegmento"     )  
                      
       EndIf   
       
-      SA3->(DbSetOrder(1)) // A3_FILIAL+A3_COD
+      SA3->(DBSetOrder(1)) // A3_FILIAL+A3_COD
       
       DBSelectArea(_cAlias)
-	  (_cAlias)->( DBGotop() )
+	  (_cAlias)->( DBGoTop() )
 	  
 	  While (_cAlias)->( !Eof() )
 		
@@ -1071,7 +1071,7 @@ If nCountRec > 0
 		    //=================================================================
 		    // Busca dados complementares do Gerente.
 		    //=================================================================
-	        SA3->(DbSeek(xFilial("SA3")+(_cAlias)->A3_GEREN))
+	        SA3->(DBSeek(xFilial("SA3")+(_cAlias)->A3_GEREN))
 	        _cEndGer   := SA3->A3_END    
             _cBairGer  := SA3->A3_BAIRRO 
             _cCEPGer   := SA3->A3_CEP    
@@ -1084,7 +1084,7 @@ If nCountRec > 0
 	        //=================================================================
 		    // Busca dados complementares do Coordenador.
 		    //=================================================================
-	        SA3->(DbSeek(xFilial("SA3")+(_cAlias)->A3_SUPER))
+	        SA3->(DBSeek(xFilial("SA3")+(_cAlias)->A3_SUPER))
 	        _cEndCoord   := SA3->A3_END    
             _cBairCoord  := SA3->A3_BAIRRO 
             _cCEPCoord   := SA3->A3_CEP    
@@ -1097,7 +1097,7 @@ If nCountRec > 0
 	        //=================================================================
 		    // Busca dados complementares do Supervisor
 		    //=================================================================
-	        SA3->(DbSeek(xFilial("SA3")+(_cAlias)->A3_I_SUPE))
+	        SA3->(DBSeek(xFilial("SA3")+(_cAlias)->A3_I_SUPE))
 	        _cEndSup   := SA3->A3_END    
             _cBairSup  := SA3->A3_BAIRRO 
             _cCEPSup   := SA3->A3_CEP    
@@ -1110,7 +1110,7 @@ If nCountRec > 0
 	        //=================================================================
 		    // Busca dados complementares do Vendedor
 		    //=================================================================
-	        SA3->(DbSeek(xFilial("SA3")+(_cAlias)->A3_COD))
+	        SA3->(DBSeek(xFilial("SA3")+(_cAlias)->A3_COD))
 	        _cEndVend   := SA3->A3_END    
             _cBairVend  := SA3->A3_BAIRRO 
             _cCEPVend   := SA3->A3_CEP    
@@ -1123,7 +1123,7 @@ If nCountRec > 0
 		    //=======================================================================================================
 		    // Monta Array de Dados do Relatorio de Gerentes x Coordenadores x Supervisores x Vendedores x Clientes
 		    //=======================================================================================================
-		    Aadd(_aDadosRel,{(_cAlias)->A3_GEREN,;                 // Cod.Gerente <<< ===== >>> // Grava dados do Gerente
+		    aAdd(_aDadosRel,{(_cAlias)->A3_GEREN,;                 // Cod.Gerente <<< ===== >>> // Grava dados do Gerente
 		                     (_cAlias)->DESCGER,;                  // Nome Gerente 
 		                     _cEndGer,;                            // Endereço Ger.
                            _cBairGer,;                           // Bairro Ger.
@@ -1176,10 +1176,10 @@ If nCountRec > 0
 		                     (_cAlias)->A1_MUN,;                   // Município Clien. 
 		                     (_cAlias)->A1_DDD,;                   // DDD Clien.
 		                     (_cAlias)->A1_TEL,;                   // Telefone Clien.
-		                     DtoC( StoD((_cAlias)->DT_ULTIMANF)),; // A1_ULTCOM,;	// Dt.Última Compra Clien.
+		                     DToC( SToD((_cAlias)->DT_ULTIMANF)),; // A1_ULTCOM,;	// Dt.Última Compra Clien.
 		                     (_cAlias)->A1_NREDUZ,;                // Nome Fantasia Clien.
 		                     (_cAlias)->A1_LC,;                    // Limite de Credito
-                           DtoC( StoD((_cAlias)->A1_PRICOM)),;   // Primeira Compra
+                           DToC( SToD((_cAlias)->A1_PRICOM)),;   // Primeira Compra
                            (_cAlias)->NFS_CLIENTE,;              // Notas fiscais emitidas p/cliente
                            (_cAlias)->NFS_REDE,;                 // Notas fiscais emitidas para rede do cliente
                            (_cAlias)->CONDPAGTO,;                // Condição de Pagamento
@@ -1187,7 +1187,7 @@ If nCountRec > 0
                            (_cAlias)->A1_I_GRCLI,;                     //"Cód. Segmento"   
                            Posicione("ZZ6",1,xFilial("ZZ6") + (_cAlias)->A1_I_GRCLI, "ZZ6_DESCRO"),;//"Segmento"        
                            (_cAlias)->A1_I_SUBCO,;                     //"Cód. Subsegmento"
-                           POSICIONE("ZS6",1,XFILIAL()+(_cAlias)->A1_I_GRCLI+(_cAlias)->A1_I_SUBCO,"ZS6_DESCRI");//"Subsegmento"     
+                           Posicione("ZS6",1,xFilial()+(_cAlias)->A1_I_GRCLI+(_cAlias)->A1_I_SUBCO,"ZS6_DESCRI");//"Subsegmento"     
                            })           
 
 		 //======================================================================
@@ -1197,7 +1197,7 @@ If nCountRec > 0
 		    //=================================================================
 		    // Busca dados complementares do Gerente.
 		    //=================================================================
-	        SA3->(DbSeek(xFilial("SA3")+(_cAlias)->A3_GEREN))
+	        SA3->(DBSeek(xFilial("SA3")+(_cAlias)->A3_GEREN))
 	        _cEndGer   := SA3->A3_END    
             _cBairGer  := SA3->A3_BAIRRO 
             _cCEPGer   := SA3->A3_CEP    
@@ -1210,7 +1210,7 @@ If nCountRec > 0
 	        //=================================================================
 		    // Busca dados complementares do Coordenador.
 		    //=================================================================
-	        SA3->(DbSeek(xFilial("SA3")+(_cAlias)->A3_SUPER))
+	        SA3->(DBSeek(xFilial("SA3")+(_cAlias)->A3_SUPER))
 	        _cEndCoord   := SA3->A3_END    
             _cBairCoord  := SA3->A3_BAIRRO 
             _cCEPCoord   := SA3->A3_CEP    
@@ -1223,7 +1223,7 @@ If nCountRec > 0
 	        //=================================================================
 		    // Busca dados complementares do Supervisor
 		    //=================================================================
-	        SA3->(DbSeek(xFilial("SA3")+(_cAlias)->A3_I_SUPE))
+	        SA3->(DBSeek(xFilial("SA3")+(_cAlias)->A3_I_SUPE))
 	        _cEndSup   := SA3->A3_END    
             _cBairSup  := SA3->A3_BAIRRO 
             _cCEPSup   := SA3->A3_CEP    
@@ -1236,7 +1236,7 @@ If nCountRec > 0
 	        //=================================================================
 		    // Busca dados complementares do Vendedor
 		    //=================================================================
-	        SA3->(DbSeek(xFilial("SA3")+(_cAlias)->A3_COD))
+	        SA3->(DBSeek(xFilial("SA3")+(_cAlias)->A3_COD))
 	        _cEndVend   := SA3->A3_END    
             _cBairVend  := SA3->A3_BAIRRO 
             _cCEPVend   := SA3->A3_CEP    
@@ -1249,7 +1249,7 @@ If nCountRec > 0
             //============================================================================================
 		    // Monta Array de Dados do Relatorio de Gerentes x Coordenadores x Supervisores x Vendedores
 		    //============================================================================================
-            Aadd(_aDadosRel,{(_cAlias)->A3_GEREN,;  // Cod.Gerente <<< ===== >>> // Grava dados do Gerente
+            aAdd(_aDadosRel,{(_cAlias)->A3_GEREN,;  // Cod.Gerente <<< ===== >>> // Grava dados do Gerente
 		                     (_cAlias)->DESCGER,;   // Nome Gerente 
 		                     _cEndGer,; // Endereço Ger.
                              _cBairGer,; // Bairro Ger.
@@ -1297,7 +1297,7 @@ If nCountRec > 0
             //=================================================================
 		    // Busca dados complementares do Gerente.
 		    //=================================================================
-	        SA3->(DbSeek(xFilial("SA3")+(_cAlias)->A3_GEREN))
+	        SA3->(DBSeek(xFilial("SA3")+(_cAlias)->A3_GEREN))
 	        _cEndGer   := SA3->A3_END    
             _cBairGer  := SA3->A3_BAIRRO 
             _cCEPGer   := SA3->A3_CEP    
@@ -1310,7 +1310,7 @@ If nCountRec > 0
 	        //=================================================================
 		    // Busca dados complementares do Coordenador.
 		    //=================================================================
-	        SA3->(DbSeek(xFilial("SA3")+(_cAlias)->A3_SUPER))
+	        SA3->(DBSeek(xFilial("SA3")+(_cAlias)->A3_SUPER))
 	        _cEndCoord   := SA3->A3_END    
             _cBairCoord  := SA3->A3_BAIRRO 
             _cCEPCoord   := SA3->A3_CEP    
@@ -1323,8 +1323,8 @@ If nCountRec > 0
 	        //=================================================================
 		    // Busca dados complementares do Supervisor
 		    //=================================================================
-	        //SA3->(DbSeek(xFilial("SA3")+(_cAlias)->A3_I_SUPE))
-	        SA3->(DbSeek(xFilial("SA3")+(_cAlias)->A3_COD))
+	        //SA3->(DBSeek(xFilial("SA3")+(_cAlias)->A3_I_SUPE))
+	        SA3->(DBSeek(xFilial("SA3")+(_cAlias)->A3_COD))
 	        _cEndSup   := SA3->A3_END              
             _cBairSup  := SA3->A3_BAIRRO 
             _cCEPSup   := SA3->A3_CEP    
@@ -1337,7 +1337,7 @@ If nCountRec > 0
 	        //==============================================================================
 		    // Monta Array de Dados do Relatorio de Gerentes x Coordenadores x Supervisores 
 		    //==============================================================================
-            Aadd(_aDadosRel,{(_cAlias)->A3_GEREN,;  // Cod.Gerente <<< ===== >>> // Grava dados do Gerente
+            aAdd(_aDadosRel,{(_cAlias)->A3_GEREN,;  // Cod.Gerente <<< ===== >>> // Grava dados do Gerente
 		                     (_cAlias)->DESCGER,;   // Nome Gerente 
 		                     _cEndGer,; // Endereço Ger.
                              _cBairGer,; // Bairro Ger.
@@ -1375,7 +1375,7 @@ If nCountRec > 0
             //=================================================================
 		    // Busca dados complementares do Gerente.
 		    //=================================================================
-	        SA3->(DbSeek(xFilial("SA3")+(_cAlias)->A3_GEREN))
+	        SA3->(DBSeek(xFilial("SA3")+(_cAlias)->A3_GEREN))
 	        _cEndGer   := SA3->A3_END    
             _cBairGer  := SA3->A3_BAIRRO 
             _cCEPGer   := SA3->A3_CEP    
@@ -1388,7 +1388,7 @@ If nCountRec > 0
 	        //=================================================================
 		    // Busca dados complementares do Coordenador.
 		    //=================================================================
-	        SA3->(DbSeek(xFilial("SA3")+(_cAlias)->A3_COD)) // (_cAlias)->A3_SUPER))
+	        SA3->(DBSeek(xFilial("SA3")+(_cAlias)->A3_COD)) // (_cAlias)->A3_SUPER))
 	        _cEndCoord   := SA3->A3_END    
             _cBairCoord  := SA3->A3_BAIRRO 
             _cCEPCoord   := SA3->A3_CEP    
@@ -1401,7 +1401,7 @@ If nCountRec > 0
             //==============================================================================
 		    // Monta Array de Dados do Relatorio de Gerentes x Coordenadores x Supervisores 
 		    //==============================================================================
-            Aadd(_aDadosRel,{(_cAlias)->A3_GEREN,;  // Cod.Gerente <<< ===== >>> // Grava dados do Gerente
+            aAdd(_aDadosRel,{(_cAlias)->A3_GEREN,;  // Cod.Gerente <<< ===== >>> // Grava dados do Gerente
 		                     (_cAlias)->DESCGER,;   // Nome Gerente 
 		                     _cEndGer,; // Endereço Ger.
                              _cBairGer,; // Bairro Ger.
@@ -1428,7 +1428,7 @@ If nCountRec > 0
 	  EndDo
     
       If Empty(_aDadosRel)
-         U_ITMSG("Com base nas condições de filtros informados, não foram encontrados dados para emissão do relatório.","Atenção", ,1) 
+         U_ITMsg("Com base nas condições de filtros informados, não foram encontrados dados para emissão do relatório.","Atenção", ,1) 
       Else
          _cTitulo:=_cTitulo+" (ROMS019)"
          U_ITListBox(_cTitulo , _aCabec , _aDadosRel , .T. , 1 , "Exportação excel/arquivo")
@@ -1439,7 +1439,7 @@ EndIf
 
 (_cAlias)->( DBCloseArea() )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1457,16 +1457,16 @@ Local _crelat := ""
 
 If MV_PAR06 == 1
 	_CRELAT := "Ger-Coo"
-Endif
+EndIf
 If MV_PAR06 == 2
 	_CRELAT := "Ger-Coo-Sup"
-Endif
+EndIf
 If MV_PAR06 == 3
 	_CRELAT := "Ger-Coo-Sup-Ven"
-Endif
+EndIf
 If MV_PAR06 == 4
 	_CRELAT := "Ge-Co-Su-Ve-Cli"
-Endif
+EndIf
 
 nLinha += 60
 oPrint:Say (nLinha,nColInic + 10,"Pergunta 01 : Gerente ?",oFont14Prb)    
@@ -1494,19 +1494,19 @@ oPrint:Say( nLinha , 1200 , _crelat , oFont14Prb )
 nLinha += 60
 
 oPrint:Say (nLinha,nColInic + 10,"Pergunta 07 : Coord/Vend Bloqueado ?",oFont14Prb)    
-oPrint:Say( nLinha , 1200 , iif(MV_PAR07==1,"Sim","Não") , oFont14Prb )
+oPrint:Say( nLinha , 1200 , IIf(MV_PAR07==1,"Sim","Não") , oFont14Prb )
 nLinha += 60
 
 oPrint:Say (nLinha,nColInic + 10,"Pergunta 08 : Cliente Bloqueado ?",oFont14Prb)    
-oPrint:Say( nLinha , 1200 , iif(MV_PAR08==1,"Sim",iif(MV_PAR08==2,"Não","Ambos")) , oFont14Prb )
+oPrint:Say( nLinha , 1200 , IIf(MV_PAR08==1,"Sim",IIf(MV_PAR08==2,"Não","Ambos")) , oFont14Prb )
 nLinha += 60
 
 oPrint:Say (nLinha,nColInic + 10,"Pergunta 09 : Gera Relat. Excel ?",oFont14Prb)    
-oPrint:Say( nLinha , 1200 , iif(MV_PAR08==1,"Sim",iif(MV_PAR08==2,"Não","Ambos")) , oFont14Prb )
+oPrint:Say( nLinha , 1200 , IIf(MV_PAR08==1,"Sim",IIf(MV_PAR08==2,"Não","Ambos")) , oFont14Prb )
 nLinha += 60
 
 nLinha += 60
 oPrint:Line( nLinha , nColInic , nLinha , nColFinal )
 oPrint:EndPage()
 
-Return()
+Return

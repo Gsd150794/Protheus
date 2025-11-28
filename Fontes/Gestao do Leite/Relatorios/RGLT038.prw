@@ -2,15 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 30/07/2019 | Chamado 28346. Revisão de fontes
-Lucas Borges  | 09/02/2021 | Chamado 35569. Corrigido error.log quando não há registros a serem exibidos
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |30/07/2019| Chamado 28346. Revisão de fontes
+Lucas Borges  |09/02/2021| Chamado 35569. Corrigido error.log quando não há registros a serem exibidos
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -77,7 +77,7 @@ _oPrint:Line(_nLinha,0100,_nLinha,2380)
 _nLinha+=_nSalto - 30
 //DADOS DA EMPRESA
 _oPrint:Say (_nLinha,0100,SM0->M0_NOMECOM,_oFont11b)
-_oPrint:Say (_nLinha,1250,"C.N.P.J.: " + Transform(SM0->M0_CGC, IIF(Len(AllTrim(SM0->M0_CGC))>11,'@R! NN.NNN.NNN/NNNN-99','@R 999.999.999-99')) ,_oFont11b) // Picture "@R! NN.NNN.NNN/NNNN-99"
+_oPrint:Say (_nLinha,1250,"C.N.P.J.: " + Transform(SM0->M0_CGC, IIf(Len(AllTrim(SM0->M0_CGC))>11,'@R! NN.NNN.NNN/NNNN-99','@R 999.999.999-99')) ,_oFont11b) // Picture "@R! NN.NNN.NNN/NNNN-99"
 _nLinha+=_nSalto
 	
 _oPrint:Say (_nLinha,0100,AllTrim(SM0->M0_ENDCOB),_oFont11b)
@@ -107,7 +107,7 @@ _nColuna:=_nColIni + Int(((_nColFin-_nColIni) - (Len(_cTitulo)* 17.7))/2)
 _oPrint:Say (_nLinha,_nColuna,_cTitulo,_oFont11b)
 _nLinha+=_nSalto
 
-_cTitulo:="Período: " + DtoC(MV_PAR01) + " à " + DtoC(MV_PAR02)
+_cTitulo:="Período: " + DToC(MV_PAR01) + " à " + DToC(MV_PAR02)
 
 //====================================================================================================
 // Calculo para que o nome fica alinhado no centro coluna INSS   
@@ -227,7 +227,7 @@ While (_cAlias)->(!Eof())
        	aAdd(_aDadosFret,{(_cAlias)->ZLF_A2COD,(_cAlias)->ZLF_A2LOJA,(_cAlias)->zlf_dtini,(_cAlias)->zlf_evento,(_cAlias)->zlf_debcre,(_cAlias)->QTDBOM,(_cAlias)->TOTAL,(_cAlias)->VLRPAG, (_cAlias)->A2_TIPO, (_cAlias)->VOLUME})
 	EndIf
 
-	(_cAlias)->(dbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 If _nCountRec > 0
@@ -248,15 +248,15 @@ Programa----------: RGLT038FRET
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 05/12/2009
 Descrição---------: Imprime corpo relatório
-Parametros--------: _cALias
+Parametros--------: _cAlias
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function RGLT038FRET(codFretist,lojFretist)
 
-DbSelectArea("SA2")
-SA2->(DbSetOrder(1))
-SA2->(DbSeek(xFilial("SA2") + codFretist + lojFretist))
+DBSelectArea("SA2")
+SA2->(DBSetOrder(1))
+SA2->(DBSeek(xFilial("SA2") + codFretist + lojFretist))
 
 _oPrint:Say(_nLinha,0100,"TRANSPORTADOR: " + AllTrim(SA2->A2_COD) + " - " + SA2->A2_LOJA + "  " + AllTrim(SA2->A2_NOME),_oFont11b) 
 _nLinha+=_nSalto
@@ -340,7 +340,7 @@ While _nCont <= Len(_aDadosMesR)
 	//fretista, loja fretista e mes corrente
 	_oPrint:Say(_nLinha,0150,_aDadosMesR[_nCont,1] + " - "+ _aMes[Val(_aDadosMesR[_nCont,1])],_oFont11b) //Mes
 	_oPrint:Say(_nLinha,0850,transform(_aDadosMesR[_nCont,6],"@E 999,999,999"),_oFont11b) //Litragem
-	_oPrint:Say(_nLinha,1310,transform(IIF(aDadosRend[1,9] = 'F',_aDadosMesR[_nCont,3] * 0.40,_aDadosMesR[_nCont,3]),"@E 99,999,999.99"),_oFont11b) //Tributaveis
+	_oPrint:Say(_nLinha,1310,transform(IIf(aDadosRend[1,9] = 'F',_aDadosMesR[_nCont,3] * 0.40,_aDadosMesR[_nCont,3]),"@E 99,999,999.99"),_oFont11b) //Tributaveis
 	_oPrint:Say(_nLinha,1840,transform(_aDadosMesR[_nCont,4],"@E 9,999,999.99"),_oFont11b) //Funrural - INSS
 	_oPrint:Say(_nLinha,2140,transform(_aDadosMesR[_nCont,5],"@E 9,999,999.99"),_oFont11b) //Fundepec
 	_oPrint:Line(_nLinha,0100,_nLinha,2380)

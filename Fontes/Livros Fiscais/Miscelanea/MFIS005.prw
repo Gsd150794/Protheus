@@ -10,7 +10,7 @@ Lucas Borges  |30/07/2025| Chamado 51396. Removido changequery indevido
 ===============================================================================================================================
 */
 
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -67,7 +67,7 @@ Local _aTitulos 	:= {} As Array
 Local _aDocs		:= {} As Array
 Local _aCabec		:= {} As Array
 Local _nX			:= 0 As Numeric
-Local _cArqLog		:= SuperGetMV("MV_RELT",.F.,"\spool\") + "wfstsnf_"+ DtoS(Date()) +"_"+ StrTran(Time(),":","") + ".htm" As Character//Nome do arquivo anexo a ser enviado ao usuario
+Local _cArqLog		:= SuperGetMV("MV_RELT",.F.,"\spool\") + "wfstsnf_"+ DToS(Date()) +"_"+ StrTran(Time(),":","") + ".htm" As Character//Nome do arquivo anexo a ser enviado ao usuario
 Local _oArquivo		:= Nil As Object
 
 _oArquivo:= FWFileWriter():New(_cArqLog)
@@ -125,7 +125,7 @@ Else
 				_aSelFil := AdmGetFil(.F.,.F.,"SF1")
 			EndIf
 		Else
-			Aadd(_aSelFil,cFilAnt)
+			aAdd(_aSelFil,cFilAnt)
 		EndIf
 	EndIf
 
@@ -200,11 +200,11 @@ _aDocs		:= {}
 
 If _nX == 1
 		
-	BeginSQL alias _cAlias
+	BeginSql alias _cAlias
 		SELECT F3_FILIAL, F3_SERIE, PROXIMA NOTA_DE, LPAD(NEXTFAIXA - 1, 9, 0) NOTA_ATE,
-			CASE
+			Case
 				WHEN LPAD(NEXTFAIXA, 9, 0) - PROXIMA < 10 THEN TO_CHAR(LPAD(NEXTFAIXA, 9, 0) - PROXIMA)
-				ELSE TO_CHAR(LPAD(NEXTFAIXA, 9, 0) - PROXIMA) || ' - Possivel problema. Acionar a TI.'
+				Else TO_CHAR(LPAD(NEXTFAIXA, 9, 0) - PROXIMA) || ' - Possivel problema. Acionar a TI.'
 			END QTD
 		FROM (SELECT F3_FILIAL, F3_SERIE, LPAD(F3_NFISCAL + 1, 9, 0) PROXIMA,
 					LEAD(F3_NFISCAL, 1) OVER(PARTITION BY F3_FILIAL, F3_SERIE ORDER BY F3_FILIAL, F3_SERIE, F3_NFISCAL) AS NEXTFAIXA
@@ -229,11 +229,11 @@ If _nX == 1
 				AND A.F3_NFISCAL = LPAD(PROXIMA - 1, 9, 0)
 				AND F3_ENTRADA BETWEEN %exp:MV_PAR01% AND %exp:MV_PAR02%)
 		ORDER BY F3_FILIAL, F3_SERIE, PROXIMA
-	EndSQL
+	EndSql
 	//Adiciono os cabeçalhos das colunas
 	_aCabec :=  {"Filial","Série do Documento","Documento de","Documento até","Quantidade de Inutilizações"}
 
-	While !(_cAlias)->(EOF())
+	While !(_cAlias)->(Eof())
 		aAdd(_aDocs, {(_cAlias)->F3_FILIAL, (_cAlias)->F3_SERIE, (_cAlias)->NOTA_DE, (_cAlias)->NOTA_ATE, (_cAlias)->QTD})
 		(_cAlias)->(DBSkip())
 	EndDo
@@ -241,7 +241,7 @@ If _nX == 1
 ElseIf (_nX >= 2 .And. _nX <= 17) .Or. _nX == 27
 	If	_nX == 2
 		_cFiltro := "% AND (F3_FORMUL = 'S' OR (F3_FORMUL = ' ' AND F3_CFO > '5000')) "
-		_cFiltro += " AND SUBSTR(F3_CHVNFE, 26, 9) <> F3_NFISCAL "
+		_cFiltro += " AND SubStr(F3_CHVNFE, 26, 9) <> F3_NFISCAL "
 		_cFiltro += " AND F3_CHVNFE <> ' ' "
 	ElseIf _nX == 3
 		_cFiltro := "% AND F3_CODRSEF NOT IN ('101','155','205','301','302','303','205') "
@@ -282,7 +282,7 @@ ElseIf (_nX >= 2 .And. _nX <= 17) .Or. _nX == 27
 		_cFiltro += " AND (F3_FORMUL = 'S' OR (F3_FORMUL = ' ' AND F3_CFO > '5000')) "
 	ElseIf _nX == 10
 		_cFiltro := "% AND F3_CHVNFE <> ' ' "
-		_cFiltro += " AND SUBSTR( F3_CHVNFE,3,4) <> SUBSTR(F3_EMISSAO,3,4) "
+		_cFiltro += " AND SubStr( F3_CHVNFE,3,4) <> SubStr(F3_EMISSAO,3,4) "
 	ElseIf _nX == 11
 		_cFiltro := "% AND LENGTH(RTRIM(F3_CHVNFE)) <> '44' "
 	ElseIf _nX == 12
@@ -291,13 +291,13 @@ ElseIf (_nX >= 2 .And. _nX <= 17) .Or. _nX == 27
 		_cFiltro += " 		AND F3_SERIE NOT BETWEEN '890' AND '899' "
 		_cFiltro += " 		AND F3_SERIE NOT BETWEEN '910' AND '969' "
 		_cFiltro += " AND (((F3_TIPO NOT IN ('B','D') "
-		_cFiltro += " 		AND SUBSTR(F3_CHVNFE,7,14) <> (SELECT LPAD(TRIM(SA2.A2_CGC),14,'0') "
+		_cFiltro += " 		AND SubStr(F3_CHVNFE,7,14) <> (SELECT LPAD(TRIM(SA2.A2_CGC),14,'0') "
 		_cFiltro += " 															FROM "+ RetSqlName("SA2") +" SA2 "
 		_cFiltro += " 															WHERE SA2.D_E_L_E_T_	= ' ' "
 		_cFiltro += " 															AND	F3_CLIEFOR = SA2.A2_COD "
 		_cFiltro += " 															AND F3_LOJA	= SA2.A2_LOJA) "
 		_cFiltro += " 			)) OR (F3_TIPO IN ('B','D') "
-		_cFiltro += " 				AND	SUBSTR(F3_CHVNFE,7,14) <> ( SELECT LPAD(TRIM(SA1.A1_CGC),14,'0') "
+		_cFiltro += " 				AND	SubStr(F3_CHVNFE,7,14) <> ( SELECT LPAD(TRIM(SA1.A1_CGC),14,'0') "
 		_cFiltro += " 															FROM "+ RetSqlName("SA1") +" SA1 "
 		_cFiltro += " 															WHERE SA1.D_E_L_E_T_	= ' ' "
 		_cFiltro += " 															AND F3_CLIEFOR = SA1.A1_COD "
@@ -307,7 +307,7 @@ ElseIf (_nX >= 2 .And. _nX <= 17) .Or. _nX == 27
 		_cFiltro += " AND F3_SERIE NOT BETWEEN '890' AND '899' "
 		_cFiltro += " AND F3_SERIE NOT BETWEEN '910' AND '969' "
 		_cFiltro += " AND (F3_FORMUL = 'S' OR (F3_FORMUL = ' ' AND F3_CFO > '5000' ) ) "
-		_cFiltro += " AND SUBSTR(F3_CHVNFE,7,14) <> (SELECT DISTINCT M0_CGC
+		_cFiltro += " AND SubStr(F3_CHVNFE,7,14) <> (SELECT DISTINCT M0_CGC
 		_cFiltro += " 												FROM SYS_COMPANY S "
 		_cFiltro += " 												WHERE S.D_E_L_E_T_	= ' ' "
 		_cFiltro += " 										 		AND	S.M0_CODFIL = F3_FILIAL "
@@ -315,10 +315,10 @@ ElseIf (_nX >= 2 .And. _nX <= 17) .Or. _nX == 27
 	ElseIf _nX == 14
 		_cFiltro := "% AND F3_CHVNFE <> ' ' "
 		_cFiltro += " AND (F3_ESPECIE NOT IN ('SPED', 'CTE', 'CTEOS', 'NF3E') "
-		_cFiltro += " OR ( SUBSTR(F3_CHVNFE,21,2) <> '55' AND F3_ESPECIE = 'SPED') "
-		_cFiltro += " OR (SUBSTR(F3_CHVNFE,21,2) <> '57' AND F3_ESPECIE = 'CTE' ) "
-		_cFiltro += " OR (SUBSTR( F3_CHVNFE,21,2) <> '67' AND F3_ESPECIE = 'CTEOS') "
-		_cFiltro += " OR (SUBSTR( F3_CHVNFE,21,2) <> '66' AND F3_ESPECIE = 'NF3E')) "
+		_cFiltro += " OR ( SubStr(F3_CHVNFE,21,2) <> '55' AND F3_ESPECIE = 'SPED') "
+		_cFiltro += " OR (SubStr(F3_CHVNFE,21,2) <> '57' AND F3_ESPECIE = 'CTE' ) "
+		_cFiltro += " OR (SubStr( F3_CHVNFE,21,2) <> '67' AND F3_ESPECIE = 'CTEOS') "
+		_cFiltro += " OR (SubStr( F3_CHVNFE,21,2) <> '66' AND F3_ESPECIE = 'NF3E')) "
 	ElseIf _nX == 15
 		_cFiltro := "% AND F3_CODRSEF IN ('101','155') "
 		_cFiltro += " AND F3_DTCANC = ' ' "
@@ -326,7 +326,7 @@ ElseIf (_nX >= 2 .And. _nX <= 17) .Or. _nX == 27
 		_cFiltro := "% AND SF3.F3_CHVNFE <> ' ' "
 		_cFiltro += " AND (SF3.F3_FORMUL = 'S' OR "
 		_cFiltro += "     (SF3.F3_FORMUL = ' ' AND SF3.F3_CFO > '5000')) "
-		_cFiltro += " AND SUBSTR(SF3.F3_CHVNFE, 7, 14) <> "
+		_cFiltro += " AND SubStr(SF3.F3_CHVNFE, 7, 14) <> "
 		_cFiltro += "     (SELECT S.M0_CGC "
 		_cFiltro += "        FROM SYS_COMPANY S"
 		_cFiltro += "       WHERE D_E_L_E_T_ = ' ' "
@@ -352,12 +352,12 @@ ElseIf (_nX >= 2 .And. _nX <= 17) .Or. _nX == 27
 	EndIf
 	_cFiltro += StrTran(_cFilSF3,"%","")+ " %"
 
-	BeginSQL alias _cAlias
+	BeginSql alias _cAlias
 		column F3_EMISSAO as Date
 		column F3_ENTRADA as Date
 		column F3_DTCANC as Date
 		SELECT F3_FILIAL, F3_NFISCAL, F3_SERIE, F3_ESPECIE, F3_FORMUL,
-			CASE WHEN MAX(F3_CFO) < '5000' THEN 'ENTRADA' ELSE 'SAIDA' END TP_OPER,
+			Case WHEN MAX(F3_CFO) < '5000' THEN 'ENTRADA' Else 'SAIDA' END TP_OPER,
 			F3_EMISSAO, F3_ENTRADA, F3_CLIEFOR, F3_LOJA, F3_DTCANC, F3_CODRSEF, F3_CHVNFE
 		FROM %Table:SF3% SF3
 		WHERE D_E_L_E_T_ = ' '
@@ -366,12 +366,12 @@ ElseIf (_nX >= 2 .And. _nX <= 17) .Or. _nX == 27
 		GROUP BY F3_FILIAL, F3_NFISCAL, F3_SERIE, F3_ESPECIE, F3_FORMUL, F3_EMISSAO, F3_ENTRADA,
 				F3_CLIEFOR, F3_LOJA, F3_DTCANC, F3_CODRSEF, F3_CHVNFE
 		ORDER BY F3_FILIAL, F3_ENTRADA, F3_NFISCAL, F3_SERIE
-	EndSQL
+	EndSql
 	//Adiciono os cabeçalhos das colunas
 	_aCabec :=  {"Filial","Número do Documento","Série","Espécie","Form Próprio","Tipo de Operação","Data de Emissão",;
 				"Data de Entrada","Cod Cli/For","Loja","Data de Cancelamento","Cod Retorno Sefaz","Chave Eletrônica"}
 
-	While !(_cAlias)->(EOF())
+	While !(_cAlias)->(Eof())
 		aAdd(_aDocs, {(_cAlias)->F3_FILIAL, (_cAlias)->F3_NFISCAL, (_cAlias)->F3_SERIE, (_cAlias)->F3_ESPECIE, (_cAlias)->F3_FORMUL,;
 				(_cAlias)->TP_OPER, (_cAlias)->F3_EMISSAO, (_cAlias)->F3_ENTRADA, (_cAlias)->F3_CLIEFOR, (_cAlias)->F3_LOJA,;
 				(_cAlias)->F3_DTCANC, (_cAlias)->F3_CODRSEF, (_cAlias)->F3_CHVNFE})
@@ -380,12 +380,12 @@ ElseIf (_nX >= 2 .And. _nX <= 17) .Or. _nX == 27
 
 ElseIf _nX == 18
 			
-	BeginSQL alias _cAlias
+	BeginSql alias _cAlias
 		column F3_EMISSAO as Date
 		column F3_ENTRADA as Date
 		column F3_DTCANC as Date
 		SELECT F3_FILIAL, F3_NFISCAL, F3_SERIE, F3_ESPECIE, F3_FORMUL,
-			CASE WHEN MAX(F3_CFO) < '5000' THEN 'ENTRADA' ELSE 'SAIDA' END TP_OPER,
+			Case WHEN MAX(F3_CFO) < '5000' THEN 'ENTRADA' Else 'SAIDA' END TP_OPER,
 			F3_EMISSAO, F3_ENTRADA, F3_CLIEFOR, F3_LOJA, F3_DTCANC, F3_CODRSEF, F3_CHVNFE,
 			TO_DATE(F3_ENTRADA,'YYYYMMDD') - TO_DATE(F3_EMISSAO,'YYYYMMDD') DIAS_LANC
 		FROM %Table:SF3%
@@ -396,12 +396,12 @@ ElseIf _nX == 18
 		GROUP BY F3_FILIAL, F3_NFISCAL, F3_SERIE, F3_ESPECIE, F3_FORMUL, F3_EMISSAO, F3_ENTRADA,
 				F3_CLIEFOR, F3_LOJA, F3_DTCANC, F3_CODRSEF, F3_CHVNFE
 		ORDER BY F3_FILIAL, F3_ENTRADA, F3_NFISCAL, F3_SERIE
-	EndSQL
+	EndSql
 	//Adiciono os cabeçalhos das colunas
 	_aCabec :=  {"Filial","Número do Documento","Série","Espécie","Form Próprio","Tipo de Operação","Data de Emissão",;
 				"Data de Entrada","Cod Cli/For","Loja","Data de Cancelamento","Cod Retorno Sefaz","Chave Eletrônica","Qtd de Dias Lanc"}
 
-	While !(_cAlias)->(EOF())
+	While !(_cAlias)->(Eof())
 		aAdd(_aDocs, {(_cAlias)->F3_FILIAL, (_cAlias)->F3_NFISCAL, (_cAlias)->F3_SERIE, (_cAlias)->F3_ESPECIE, (_cAlias)->F3_FORMUL,;
 				(_cAlias)->TP_OPER, (_cAlias)->F3_EMISSAO, (_cAlias)->F3_ENTRADA, (_cAlias)->F3_CLIEFOR, (_cAlias)->F3_LOJA,;
 				(_cAlias)->F3_DTCANC, (_cAlias)->F3_CODRSEF, (_cAlias)->F3_CHVNFE, (_cAlias)->DIAS_LANC})
@@ -414,43 +414,43 @@ ElseIf _nX == 19
 	_cQuery:= "UPDATE "+RETSQLNAME('SF3')+" SET F3_DTCANC = F3_EMISSAO "
 	_cQuery+= "WHERE D_E_L_E_T_ = ' ' "
 	_cQuery+= Replace(_cFilSF3,'%','')
-	_cQuery+= "AND SUBSTR(F3_DTCANC,1,6) <> SUBSTR(F3_EMISSAO,1,6) "
+	_cQuery+= "AND SubStr(F3_DTCANC,1,6) <> SubStr(F3_EMISSAO,1,6) "
 	_cQuery+= "AND F3_DTCANC <> ' ' "
-	//Ajustar automaticamente apenas quando o cancelamento for 1 dia depois. Após isso o Moacir quer ver caso a caso.
+	//Ajustar automaticamente apenas quando o cancelamento For 1 dia depois. Após isso o Moacir quer ver caso a caso.
 	If MV_PAR05 == 2
 		_cQuery+= "AND TO_DATE(F3_DTCANC,'YYYYMMDD')-TO_DATE(F3_EMISSAO,'YYYYMMDD') = 1 "
 	EndIf
 	_cQuery+= "AND (F3_FORMUL = 'S' OR (F3_FORMUL = ' ' AND F3_CFO > '5000')) "
-	_cQuery+= "AND F3_EMISSAO BETWEEN '"+ DTOS(MV_PAR01) +"' AND '"+ DTOS(MV_PAR02) +"'"
+	_cQuery+= "AND F3_EMISSAO BETWEEN '"+ DToS(MV_PAR01) +"' AND '"+ DToS(MV_PAR02) +"'"
 	TCSqlExec(_cQuery)
 
 	_cQuery:= "UPDATE "+RETSQLNAME('SFT')+" SET FT_DTCANC = FT_EMISSAO "
 	_cQuery+= "WHERE D_E_L_E_T_ = ' ' "
 	_cQuery+= Replace(_cFilSFT,'%','')
-	_cQuery+= "AND SUBSTR(FT_DTCANC,1,6) <> SUBSTR(FT_EMISSAO,1,6) "
+	_cQuery+= "AND SubStr(FT_DTCANC,1,6) <> SubStr(FT_EMISSAO,1,6) "
 	_cQuery+= "AND FT_DTCANC > '19500101' " //após migração do banco ou o comportamento mudou ou apareceu algum registro inválido que não consegui localizar e precisei contornar
-	//Ajustar automaticamente apenas quando o cancelamento for 1 dia depois. Após isso o Moacir quer ver caso a caso.
+	//Ajustar automaticamente apenas quando o cancelamento For 1 dia depois. Após isso o Moacir quer ver caso a caso.
 	If MV_PAR05 == 2
 		_cQuery+= "AND TO_DATE(FT_DTCANC,'YYYYMMDD')-TO_DATE(FT_EMISSAO,'YYYYMMDD') = 1 "
 	EndIf
 	_cQuery+= "AND (FT_FORMUL = 'S' OR (FT_FORMUL = ' ' AND FT_CFOP > '5000')) "
-	_cQuery+= "AND FT_EMISSAO BETWEEN '"+ DTOS(MV_PAR01) +"' AND '"+ DTOS(MV_PAR02) +"'"
+	_cQuery+= "AND FT_EMISSAO BETWEEN '"+ DToS(MV_PAR01) +"' AND '"+ DToS(MV_PAR02) +"'"
 	TCSqlExec(_cQuery)
 
 	/*_cQuery:= "UPDATE "+RETSQLNAME('SE5')+" SET E5_TPDESC = 'I' "
 	_cQuery+= "WHERE D_E_L_E_T_ = ' ' "
 	_cQuery+= "AND E5_TIPODOC = 'P' "
 	_cQuery+= "AND E5_TPDESC ='C' "
-	_cQuery+= "AND E5_TIPODOC BETWEEN '"+ DTOS(MV_PAR01) +"' AND '"+ DTOS(MV_PAR02) +"'"
+	_cQuery+= "AND E5_TIPODOC BETWEEN '"+ DToS(MV_PAR01) +"' AND '"+ DToS(MV_PAR02) +"'"
 	TCSqlExec(_cQuery)*/
 
-	BeginSQL alias _cAlias
+	BeginSql alias _cAlias
 		column F3_EMISSAO as Date
 		column F3_ENTRADA as Date
 		column F3_DTCANC as Date
 		column CANC_SEFAZ as Date
 		SELECT F3_FILIAL, F3_NFISCAL, F3_SERIE, F3_ESPECIE, F3_FORMUL,
-			CASE WHEN MAX(F3_CFO) < '5000' THEN 'ENTRADA' ELSE 'SAIDA' END TP_OPER,
+			Case WHEN MAX(F3_CFO) < '5000' THEN 'ENTRADA' Else 'SAIDA' END TP_OPER,
 			F3_EMISSAO, F3_ENTRADA, F3_CLIEFOR, F3_LOJA, F3_DTCANC, F3_CODRSEF, F3_CHVNFE, CANC_SEF.DTREC_SEFR CANC_SEFAZ
 		FROM %Table:SF3%,
        (SELECT DTREC_SEFR, S.M0_CODFIL, NFE_ID
@@ -469,16 +469,16 @@ ElseIf _nX == 19
 		AND F3_DTCANC <> ' '
 		AND F3_FILIAL = M0_CODFIL
 		AND F3_SERIE || F3_NFISCAL = NFE_ID
-		AND SUBSTR(DTREC_SEFR,1,6) <> SUBSTR(F3_DTCANC,1,6)
+		AND SubStr(DTREC_SEFR,1,6) <> SubStr(F3_DTCANC,1,6)
 		GROUP BY F3_FILIAL, F3_NFISCAL, F3_SERIE, F3_ESPECIE, F3_FORMUL, F3_EMISSAO, F3_ENTRADA,
 				F3_CLIEFOR, F3_LOJA, F3_DTCANC, F3_CODRSEF, F3_CHVNFE, CANC_SEF.DTREC_SEFR
 		ORDER BY F3_FILIAL, F3_ENTRADA, F3_NFISCAL, F3_SERIE
-	EndSQL
+	EndSql
 	//Adiciono os cabeçalhos das colunas
 	_aCabec :=  {"Filial","Número do Documento","Série","Espécie","Form Próprio","Tipo de Operação","Data de Emissão",;
 				"Data de Entrada","Cod Cli/For","Loja","Data de Cancelamento","Cod Retorno Sefaz","Chave Eletrônica","Data Cancelamento Sefaz"}
 
-	While !(_cAlias)->(EOF())
+	While !(_cAlias)->(Eof())
 		aAdd(_aDocs, {(_cAlias)->F3_FILIAL, (_cAlias)->F3_NFISCAL, (_cAlias)->F3_SERIE, (_cAlias)->F3_ESPECIE, (_cAlias)->F3_FORMUL,;
 				(_cAlias)->TP_OPER, (_cAlias)->F3_EMISSAO, (_cAlias)->F3_ENTRADA, (_cAlias)->F3_CLIEFOR, (_cAlias)->F3_LOJA,;
 				(_cAlias)->F3_DTCANC, (_cAlias)->F3_CODRSEF, (_cAlias)->F3_CHVNFE, (_cAlias)->CANC_SEFAZ})
@@ -487,13 +487,13 @@ ElseIf _nX == 19
 
 ElseIf _nX == 20
 			
-	BeginSQL alias _cAlias
+	BeginSql alias _cAlias
 		column F3_EMISSAO as Date
 		column F3_ENTRADA as Date
 		column F3_DTCANC as Date
 		SELECT *
 		FROM (SELECT F3_FILIAL, F3_NFISCAL, F3_SERIE, F3_ESPECIE, F3_FORMUL,
-					CASE WHEN MAX(F3_CFO) < '5000' THEN 'ENTRADA' ELSE 'SAIDA' END TP_OPER,
+					Case WHEN MAX(F3_CFO) < '5000' THEN 'ENTRADA' Else 'SAIDA' END TP_OPER,
 					F3_EMISSAO, F3_ENTRADA, F3_CLIEFOR, F3_LOJA, F3_DTCANC, F3_CODRSEF, F3_CHVNFE,
 					(SELECT CSTAT_SEFR
 						FROM SPED054
@@ -518,12 +518,12 @@ ElseIf _nX == 20
 						F3_CLIEFOR, F3_LOJA, F3_DTCANC, F3_CODRSEF, F3_CHVNFE
 				ORDER BY F3_FILIAL, F3_ENTRADA, F3_NFISCAL, F3_SERIE)
 		WHERE RET_SPED054 <> F3_CODRSEF
-	EndSQL
+	EndSql
 	//Adiciono os cabeçalhos das colunas
 	_aCabec :=  {"Filial","Número do Documento","Série","Espécie","Form Próprio","Tipo de Operação","Data de Emissão",;
 				"Data de Entrada","Cod Cli/For","Loja","Data de Cancelamento","Cod Retorno Sefaz","Chave Eletrônica","Cod Retorno do SPED Fiscal"}
 
-	While !(_cAlias)->(EOF())
+	While !(_cAlias)->(Eof())
 		aAdd(_aDocs, {(_cAlias)->F3_FILIAL, (_cAlias)->F3_NFISCAL, (_cAlias)->F3_SERIE, (_cAlias)->F3_ESPECIE, (_cAlias)->F3_FORMUL,;
 				(_cAlias)->TP_OPER, (_cAlias)->F3_EMISSAO, (_cAlias)->F3_ENTRADA, (_cAlias)->F3_CLIEFOR, (_cAlias)->F3_LOJA,;
 				(_cAlias)->F3_DTCANC, (_cAlias)->F3_CODRSEF, (_cAlias)->F3_CHVNFE, (_cAlias)->RET_SPED054})
@@ -532,12 +532,12 @@ ElseIf _nX == 20
 
 ElseIf _nX == 21
 			
-	BeginSQL alias _cAlias
+	BeginSql alias _cAlias
 		column FT_EMISSAO as Date
 		column FT_ENTRADA as Date
 		column FT_DTCANC as Date
 		SELECT FT_FILIAL, FT_NFISCAL, FT_SERIE, FT_ESPECIE, FT_FORMUL,
-			CASE WHEN MAX(FT_CFOP) < '5000' THEN 'ENTRADA' ELSE 'SAIDA' END TP_OPER,
+			Case WHEN MAX(FT_CFOP) < '5000' THEN 'ENTRADA' Else 'SAIDA' END TP_OPER,
 			FT_EMISSAO, FT_ENTRADA, FT_CLIEFOR, FT_LOJA, FT_DTCANC, FT_CHVNFE, FT_NFORI, FT_SERORI, FT_ITEMORI
 		FROM %Table:SFT%
 		WHERE D_E_L_E_T_ = ' '
@@ -552,12 +552,12 @@ ElseIf _nX == 21
 		GROUP BY FT_FILIAL, FT_NFISCAL, FT_SERIE, FT_ESPECIE, FT_FORMUL, FT_EMISSAO, FT_ENTRADA,
 				FT_CLIEFOR, FT_LOJA, FT_DTCANC, FT_CHVNFE, FT_NFORI, FT_SERORI, FT_ITEMORI
 		ORDER BY FT_FILIAL, FT_NFISCAL, FT_SERIE
-	EndSQL
+	EndSql
 	//Adiciono os cabeçalhos das colunas
 	_aCabec :=  {"Filial","Número do Documento","Série","Espécie","Form Próprio","Tipo de Operação","Data de Emissão",;
 				"Data de Entrada","Cod Cli/For","Loja","Data de Cancelamento","Chave Eletrônica","NF Ori", "Serie Ori", "Item Ori"}
 
-	While !(_cAlias)->(EOF())
+	While !(_cAlias)->(Eof())
 		aAdd(_aDocs, {(_cAlias)->FT_FILIAL, (_cAlias)->FT_NFISCAL, (_cAlias)->FT_SERIE, (_cAlias)->FT_ESPECIE, (_cAlias)->FT_FORMUL,;
 				(_cAlias)->TP_OPER, (_cAlias)->FT_EMISSAO, (_cAlias)->FT_ENTRADA, (_cAlias)->FT_CLIEFOR, (_cAlias)->FT_LOJA,;
 				(_cAlias)->FT_DTCANC, (_cAlias)->FT_CHVNFE, (_cAlias)->FT_NFORI, (_cAlias)->FT_SERORI, (_cAlias)->FT_ITEMORI})
@@ -566,7 +566,7 @@ ElseIf _nX == 21
 
 ElseIf _nX == 22
 			
-	BeginSQL alias _cAlias
+	BeginSql alias _cAlias
 		column E2_EMISSAO as Date
 		column E2_VENCREA as Date
 		column E2_BAIXA as Date
@@ -598,11 +598,11 @@ ElseIf _nX == 22
 		AND E2_ORIGEM = 'MATA953'
 		AND E2_BAIXA = ' '
 		ORDER BY E2_FILIAL, E2_EMISSAO, E2_PREFIXO, E2_NUM
-	EndSQL
+	EndSql
 	//Adiciono os cabeçalhos das colunas
 	_aCabec :=  {"Filial","Prefixo","Número","Tipo","Fornecedor","Loja","Valor","Apuração","Emissão","Vencimento","Baixa","Status"}
 
-	While !(_cAlias)->(EOF())
+	While !(_cAlias)->(Eof())
 		aAdd(_aDocs, {(_cAlias)->E2_FILIAL, (_cAlias)->E2_PREFIXO, (_cAlias)->E2_NUM, (_cAlias)->E2_TIPO, (_cAlias)->E2_FORNECE,;
 				(_cAlias)->E2_LOJA, (_cAlias)->E2_VALOR, (_cAlias)->APURACAO, (_cAlias)->E2_EMISSAO, (_cAlias)->E2_VENCREA,;
 				(_cAlias)->E2_BAIXA, (_cAlias)->NUMTIT})
@@ -644,7 +644,7 @@ ElseIf _nX == 23 .Or. _nX == 28 .Or. _nX == 31
 	EndIf
 	_cFiltro += StrTran(_cFilSF1,"%","")+ " %"
 
-	BeginSQL alias _cAlias
+	BeginSql alias _cAlias
 		column F1_EMISSAO as Date
 		column F1_DTDIGIT as Date
 		SELECT F1_FILIAL, F1_DOC, F1_SERIE, F1_ESPECIE, F1_FORMUL, 'ENTRADA' TP_OPER, F1_EMISSAO, F1_DTDIGIT, 
@@ -654,12 +654,12 @@ ElseIf _nX == 23 .Or. _nX == 28 .Or. _nX == 31
 		%exp:_cFiltro%
 		AND F1_DTDIGIT BETWEEN %exp:MV_PAR01% AND %exp:MV_PAR02%
 		ORDER BY F1_FILIAL, F1_DTDIGIT, F1_DOC, F1_SERIE
-	EndSQL
+	EndSql
 	//Adiciono os cabeçalhos das colunas
 	_aCabec :=  {"Filial","Número do Documento","Série","Espécie","Form Próprio","Tipo de Operação","Data de Emissão",;
 				"Data de Entrada","Cod Cli/For","Loja","Chave Eletrônica"}
 
-	While !(_cAlias)->(EOF())
+	While !(_cAlias)->(Eof())
 		aAdd(_aDocs, {(_cAlias)->F1_FILIAL, (_cAlias)->F1_DOC, (_cAlias)->F1_SERIE, (_cAlias)->F1_ESPECIE, (_cAlias)->F1_FORMUL,;
 				(_cAlias)->TP_OPER, (_cAlias)->F1_EMISSAO, (_cAlias)->F1_DTDIGIT, (_cAlias)->F1_FORNECE, (_cAlias)->F1_LOJA, (_cAlias)->F1_CHVNFE})
 		(_cAlias)->(DBSkip())
@@ -670,14 +670,14 @@ ElseIf _nX >= 24 .And. _nX <= 25
 		_cFiltro := "% AND DOC_CHV = F3_CHVNFE %"
 		_cFiltro2 := "% NOT %"
 	ElseIf _nX == 25
-		_cFiltro := "% AND SUBSTR(A.NFE_ID, 4, 9) = B.F3_NFISCAL "
-        _cFiltro += " AND SUBSTR(A.NFE_ID, 1, 3) = B.F3_SERIE "
+		_cFiltro := "% AND SubStr(A.NFE_ID, 4, 9) = B.F3_NFISCAL "
+        _cFiltro += " AND SubStr(A.NFE_ID, 1, 3) = B.F3_SERIE "
         _cFiltro += " AND (B.F3_FORMUL = 'S' OR (B.F3_FORMUL = ' ' AND B.F3_CFO > '5000')) %"
 	EndIf
 
-	BeginSQL alias _cAlias
+	BeginSql alias _cAlias
 		column DATE_NFE as Date
-		SELECT S.M0_CODFIL, A.ID_ENT, DATE_NFE, STATUS, STATUSCANC, DOC_CHV, SUBSTR(NFE_ID, 4, 9) DOCUMENTO, SUBSTR(NFE_ID, 1, 3) SERIE
+		SELECT S.M0_CODFIL, A.ID_ENT, DATE_NFE, STATUS, STATUSCANC, DOC_CHV, SubStr(NFE_ID, 4, 9) DOCUMENTO, SubStr(NFE_ID, 1, 3) SERIE
 		FROM SPED050 A, SPED001, SYS_COMPANY S
 		WHERE A.D_E_L_E_T_ = ' '
 		AND SPED001.D_E_L_E_T_ = ' '
@@ -699,12 +699,12 @@ ElseIf _nX >= 24 .And. _nX <= 25
 					AND A.ID_ENT = C.ID_ENT
 					AND A.NFE_ID = C.NFE_ID
 					AND CSTAT_SEFR = '102'))
-		ORDER BY M0_CODFIL, DATE_NFE, SUBSTR(NFE_ID, 4, 9), SUBSTR(NFE_ID, 1, 3)
-	EndSQL
+		ORDER BY M0_CODFIL, DATE_NFE, SubStr(NFE_ID, 4, 9), SubStr(NFE_ID, 1, 3)
+	EndSql
 	//Adiciono os cabeçalhos das colunas
 	_aCabec :=  {"Filial","Data Transmissão","Chave Eletrônica","Número do Documento","Série","Status Transmissão","Status Cancelamento"}
 
-	While !(_cAlias)->(EOF())
+	While !(_cAlias)->(Eof())
 		aAdd(_aDocs, {(_cAlias)->M0_CODFIL, (_cAlias)->DATE_NFE, (_cAlias)->DOC_CHV, (_cAlias)->DOCUMENTO, (_cAlias)->SERIE,;
 						(_cAlias)->STATUS, (_cAlias)->STATUSCANC})
 		(_cAlias)->(DBSkip())
@@ -712,7 +712,7 @@ ElseIf _nX >= 24 .And. _nX <= 25
 
 ElseIf _nX == 26
 			
-	BeginSQL alias _cAlias
+	BeginSql alias _cAlias
 		column D1_EMISSAO as Date
 		column D1_DTDIGIT as Date
 		column D2_EMISSAO as Date
@@ -750,12 +750,12 @@ ElseIf _nX == 26
 		AND D1_ITEMORI = D2_ITEM
 		AND D2_EMISSAO < D1_EMISSAO
 		ORDER BY TP_OPER, D1_FILIAL, D1_DTDIGIT, D1_DOC, D1_SERIE
-	EndSQL
+	EndSql
 	//Adiciono os cabeçalhos das colunas
 	_aCabec :=  {"Tipo de Operação","Filial","Número do Documento","Série","Cod Cli/For","Loja","Data de Emissão",;
 				"Data de Entrada","NF Ori", "Serie Ori", "Item Ori","Dt Emissão Ori"}
 
-	While !(_cAlias)->(EOF())
+	While !(_cAlias)->(Eof())
 		aAdd(_aDocs, {(_cAlias)->TP_OPER, (_cAlias)->D1_FILIAL, (_cAlias)->D1_DOC, (_cAlias)->D1_SERIE, (_cAlias)->D1_FORNECE, (_cAlias)->D1_LOJA,;
 			(_cAlias)->D1_EMISSAO, (_cAlias)->D1_DTDIGIT, (_cAlias)->D1_NFORI, (_cAlias)->D1_SERIORI, (_cAlias)->D1_ITEMORI, (_cAlias)->D2_EMISSAO })
 		(_cAlias)->(DBSkip())
@@ -763,75 +763,75 @@ ElseIf _nX == 26
 
 ElseIf _nX == 29
 			
-	BeginSQL alias _cAlias
+	BeginSql alias _cAlias
 		column F1_EMISSAO as Date
 		column F1_DTDIGIT as Date
 		SELECT * FROM (
 		SELECT F1_FILIAL,
-			CASE
+			Case
 				WHEN F1_EMISSAO IS NOT NULL THEN F1_EMISSAO
 				WHEN DS_EMISSA IS NOT NULL THEN DS_EMISSA
 				WHEN C00_DTEMI IS NOT NULL THEN C00_DTEMI
-				ELSE CKO_I_EMIS
+				Else CKO_I_EMIS
 			END F1_EMISSAO,
 			F1_DTDIGIT,
 			F1_EST,
-			CASE
+			Case
 				WHEN F1_ESPECIE = 'NFE' THEN
-				CASE
+				Case
 					WHEN EST_FIL = 'RO' AND F1_EST = 'RO' THEN 20
 					WHEN EST_FIL = 'RO' AND F1_EST <> 'RO' THEN 35
-					ELSE 180
-				END - ROUND(SYSDATE - TO_DATE(CASE
+					Else 180
+				END - Round(SYSDATE - TO_DATE(Case
 												WHEN F1_EMISSAO IS NOT NULL THEN F1_EMISSAO
 												WHEN DS_EMISSA IS NOT NULL THEN DS_EMISSA
 												WHEN C00_DTEMI IS NOT NULL THEN C00_DTEMI
-												ELSE CKO_I_EMIS
+												Else CKO_I_EMIS
 												END,'YYYYMMDD'),0)
 			END CONF_NREAL,
-			CASE
+			Case
 				WHEN F1_ESPECIE = 'NFE' THEN
-				CASE
+				Case
 					WHEN EST_FIL = 'RO' AND F1_EST = 'RO' THEN 10
 					WHEN EST_FIL = 'RO' AND F1_EST <> 'RO' THEN 15
-					ELSE 180
+					Else 180
 				END
-				ELSE 45
-			END - ROUND(SYSDATE - TO_DATE(CASE
+				Else 45
+			END - Round(SYSDATE - TO_DATE(Case
 											WHEN F1_EMISSAO IS NOT NULL THEN F1_EMISSAO
 											WHEN DS_EMISSA IS NOT NULL THEN DS_EMISSA
 											WHEN C00_DTEMI IS NOT NULL THEN C00_DTEMI
-											ELSE CKO_I_EMIS
+											Else CKO_I_EMIS
 											END, 'YYYYMMDD'),0) REST_DESC,
 			F1_CHVNFE,
 			F1_ESPECIE,
-			CASE
+			Case
 				WHEN F1_TIPO IS NOT NULL THEN 
 				DECODE(F1_TIPO,'N','Normal','D','Devolucao','I','Compl. ICMS','P','Compl. IPI','B','Beneficiamento','C','Compl. Preco') 
-				ELSE DECODE(DS_TIPO,'N','Normal','O','Bonificacao','D','Devolucao','B','Beneficiamento','C','Compl. Preco','T','Transporte','')
+				Else DECODE(DS_TIPO,'N','Normal','O','Bonificacao','D','Devolucao','B','Beneficiamento','C','Compl. Preco','T','Transporte','')
 			END TIPO,
 			ENT_FOR,
-			CASE
+			Case
 				WHEN F1_STATUS = 'A' THEN 'Classificado'
 				WHEN F1_STATUS = ' ' THEN 'Pre-nota'
 				WHEN DS_TIPO IS NOT NULL THEN 'Monitor'
 				WHEN CKO_I_EMIS IS NOT NULL THEN 'Reprocessamento'
-				ELSE 'Manifestacao'
+				Else 'Manifestacao'
 			END STATUS_ESCRITURACAO
 		FROM (SELECT BASE.F1_FILIAL, SY.M0_ESTENT EST_FIL, SF11.F1_EMISSAO, SF11.F1_DTDIGIT, C001.C00_DTEMI, SDS1.DS_EMISSA,
 					CKO1.CKO_I_EMIS,
-					CASE WHEN SF11.F1_EST IS NOT NULL THEN SF11.F1_EST ELSE
-					DECODE(SUBSTR(BASE.F1_CHVNFE,1,2),'11','RO','12','AC','13','AM','14','RR','15','PA','16','AP','17','TO','21','MA','22','PI','23','CE','24','RN',
+					Case WHEN SF11.F1_EST IS NOT NULL THEN SF11.F1_EST Else
+					DECODE(SubStr(BASE.F1_CHVNFE,1,2),'11','RO','12','AC','13','AM','14','RR','15','PA','16','AP','17','TO','21','MA','22','PI','23','CE','24','RN',
 					'25','PB','26','PE','27','AL','31','MG','32','ES','33','RJ','35','SP','41','PR','42','SC','43','RS','50','MS','51','MT','52','GO',
 					'53','DF','28','SE','29','BA','99','EX') END F1_EST,
 					SF11.F1_TIPO, SDS1.DS_TIPO,
-					CASE
+					Case
 						WHEN (SELECT COUNT(1) FROM SPED156 WHERE SPED156.D_E_L_E_T_ = ' ' AND BASE.F1_CHVNFE = DOCCHV AND DOCTPOP = '0') = 1 THEN 'Sim'
-						ELSE 'Nao'
+						Else 'Nao'
 					END ENT_FOR,
-					BASE.F1_CHVNFE, DECODE(SUBSTR(BASE.F1_CHVNFE, 21, 2), '55', 'NFE', '57','CTE','67','CTEOS') F1_ESPECIE,
+					BASE.F1_CHVNFE, DECODE(SubStr(BASE.F1_CHVNFE, 21, 2), '55', 'NFE', '57','CTE','67','CTEOS') F1_ESPECIE,
 					SF11.F1_STATUS
-				FROM (SELECT RTRIM(CKO.CKO_FILPRO) F1_FILIAL, SUBSTR(CKO.CKO_ARQUIV, 4, 44) F1_CHVNFE
+				FROM (SELECT RTRIM(CKO.CKO_FILPRO) F1_FILIAL, SubStr(CKO.CKO_ARQUIV, 4, 44) F1_CHVNFE
 						FROM %Table:CKO% CKO
 						WHERE CKO.D_E_L_E_T_ = ' '
 						%exp:_cFilCKO%
@@ -840,7 +840,7 @@ ElseIf _nX == 29
 						AND NOT EXISTS (SELECT 1 FROM %Table:SF1%
 								WHERE D_E_L_E_T_ = ' '
 									AND F1_FILIAL = RTRIM(CKO_FILPRO)
-									AND F1_CHVNFE = SUBSTR(CKO_ARQUIV, 4, 44))
+									AND F1_CHVNFE = SubStr(CKO_ARQUIV, 4, 44))
 						UNION
 						SELECT F1_FILIAL, F1_CHVNFE
 						FROM %Table:SF1% SF1
@@ -867,7 +867,7 @@ ElseIf _nX == 29
 				LEFT JOIN %Table:CKO% CKO1
 					ON (CKO1.D_E_L_E_T_ = ' ' AND
 					RTRIM(CKO1.CKO_FILPRO) = BASE.F1_FILIAL AND
-					SUBSTR(CKO1.CKO_ARQUIV, 4, 44) = BASE.F1_CHVNFE)
+					SubStr(CKO1.CKO_ARQUIV, 4, 44) = BASE.F1_CHVNFE)
 				LEFT JOIN %Table:SF1% SF11
 					ON (SF11.D_E_L_E_T_ = ' ' AND SF11.F1_FILIAL = BASE.F1_FILIAL AND SF11.F1_CHVNFE = BASE.F1_CHVNFE)
 				LEFT JOIN %Table:C00% C001
@@ -906,12 +906,12 @@ ElseIf _nX == 29
 			AND (CONF_NREAL BETWEEN 0 AND 5 OR REST_DESC BETWEEN 0 AND 5)
 		ORDER BY F1_FILIAL, REST_DESC
 
-	EndSQL
+	EndSql
 	//Adiciono os cabeçalhos das colunas
 	_aCabec :=  {"Filial","Data de Emissão","Data de Entrada","Estado","Conf/Não Real.","Desac./Desc.","Chave","Espécie","Tipo",;
 				"Ent.For.","Escrituração"}
 
-	While !(_cAlias)->(EOF())
+	While !(_cAlias)->(Eof())
 		aAdd(_aDocs, {(_cAlias)->F1_FILIAL, (_cAlias)->F1_EMISSAO, (_cAlias)->F1_DTDIGIT, (_cAlias)->F1_EST,(_cAlias)->CONF_NREAL,;
 			(_cAlias)->REST_DESC,(_cAlias)->F1_CHVNFE, (_cAlias)->F1_ESPECIE,(_cAlias)->TIPO, (_cAlias)->ENT_FOR, (_cAlias)->STATUS_ESCRITURACAO})
 		(_cAlias)->(DBSkip())
@@ -919,17 +919,17 @@ ElseIf _nX == 29
 
 ElseIf _nX == 30
 			
-	BeginSQL alias _cAlias
-		SELECT SUBSTR(CKO_ARQUIV,1,44) CHAVE, CKO_CODERR, CKO_MSGERR
+	BeginSql alias _cAlias
+		SELECT SubStr(CKO_ARQUIV,1,44) CHAVE, CKO_CODERR, CKO_MSGERR
 		FROM %Table:CKO% CKO
 		WHERE CKO.D_E_L_E_T_ = ' '
 		AND CKO_CODERR IN ('COM001','COM016','COM017','COM026','COM043','COM049')
-	EndSQL
+	EndSql
 	//Adiciono os cabeçalhos das colunas
 	_aCabec :=  {"Chave","Cod. Erro","Erro"}
 
-	While !(_cAlias)->(EOF())
-		aAdd(_aDocs, {(_cAlias)->CHAVE, (_cAlias)->CKO_CODERR, Substr((_cAlias)->CKO_MSGERR,1,200)})
+	While !(_cAlias)->(Eof())
+		aAdd(_aDocs, {(_cAlias)->CHAVE, (_cAlias)->CKO_CODERR, SubStr((_cAlias)->CKO_MSGERR,1,200)})
 		(_cAlias)->(DBSkip())
 	EndDo
 EndIf
@@ -970,7 +970,7 @@ If _nX == 1 //No primeiro registro, monto o cabeçalho
 	_cText += '<HEAD><TITLE>:: WF - Analise de NF ::</TITLE></HEAD>'+CRLF
 	_cText += '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">'+CRLF
 	
-	_cText += '<style type="text/css">'+CRLF
+	_cText += '<style Type="text/css">'+CRLF
 	_cText += '<!--'+CRLF
 	_cText += 'table.bordasimples { border-collapse: collapse; }'+CRLF
 	_cText += 'table.bordasimples tr td { border:1px solid #777777; }'+CRLF
@@ -1010,7 +1010,7 @@ For _nY := 1 to Len(_aDocs)
 	_cText += '  <tr>'+CRLF
 	For _nJ := 1 to Len(_aDocs[_nY])
 		_cText += '    <td class="ditens" align="center"><pre>'+IIf(ValType(_aDocs[_nY][_nJ]) == 'C',;
-		_aDocs[_nY][_nJ],IIf(ValType(_aDocs[_nY][_nJ])=='D',DtoC(_aDocs[_nY][_nJ]),cValToChar(_aDocs[_nY][_nJ]))) +'</pre></td>'+CRLF
+		_aDocs[_nY][_nJ],IIf(ValType(_aDocs[_nY][_nJ])=='D',DToC(_aDocs[_nY][_nJ]),cValToChar(_aDocs[_nY][_nJ]))) +'</pre></td>'+CRLF
 	Next _nJ
 	_cText += '  </tr>'+CRLF
 Next _nY
@@ -1043,7 +1043,7 @@ Retorno-----------: Nenhum
 */
 Static Function MFIS005E(_cArqLog as String)
 
-Local _cAssunto	:= "Analise de Emissão das NF - Data/Hora de Criação: "+ DtoC( Date() ) +' / '+ Transform( Time() , "@R 99:99" ) As Character
+Local _cAssunto	:= "Analise de Emissão das NF - Data/Hora de Criação: "+ DToC( Date() ) +' / '+ Transform( Time() , "@R 99:99" ) As Character
 Local _cMensagem:= "" As Character
 Local _cErro	:= "" As Character
 Local _cAlias	:= GetNextAlias() As Character
@@ -1077,7 +1077,7 @@ Else
 	_cMensagem += ' 			<br>
 	_cMensagem += ' 			<b>&nbsp;&nbsp;Prezado,</b>
 	_cMensagem += ' 			<br><br>
-	_cMensagem += ' 			&nbsp;&nbsp;Segue anexo arquivo contendo a Analise dos documentos fiscais do período de '+ DtoC(MV_PAR01) +' até '+ DtoC(MV_PAR02) +'.<br><br><br>
+	_cMensagem += ' 			&nbsp;&nbsp;Segue anexo arquivo contendo a Analise dos documentos fiscais do período de '+ DToC(MV_PAR01) +' até '+ DToC(MV_PAR02) +'.<br><br><br>
 	_cMensagem += ' 		</td>
 	_cMensagem += ' 	</tr>
 	_cMensagem += ' 	<tr>
@@ -1090,13 +1090,13 @@ Else
 	_cMensagem += ' </BODY>
 	_cMensagem += ' </HTML>
 
-	BeginSQL Alias _cAlias
+	BeginSql Alias _cAlias
 		SELECT ZZL_EMAIL 
 		FROM %Table:ZZL%
 		WHERE D_E_L_E_T_ =' '
 		AND ZZL_FILIAL = %xFilial:ZZL%
 		AND ZZL_ENVANF	= 'S'
-	EndSQL
+	EndSql
 
 	While (_cAlias)->( !Eof() )
 		_cErro := ""
@@ -1124,11 +1124,11 @@ Static Function Scheddef()
 Local aParam	:= {} As Array
 Local aOrd		:= {} As Array
 
-Aadd(aParam, "P"        ) // 01 - Tipo R para relatorio P para processo
-Aadd(aParam, "MFIS005"  ) // 02 - Pergunte do relatorio, caso nao use passar ParamDef
-Aadd(aParam, ""         ) // 03 - Alias
-Aadd(aParam, aOrd       ) // 04 - Array de ordens
-Aadd(aParam, ""         ) // 05 - Titulo
-Aadd(aParam, ""         ) // 06 - Nome do relatório (parametro 1 do metodo new da classe TReport)
+aAdd(aParam, "P"        ) // 01 - Tipo R para relatorio P para processo
+aAdd(aParam, "MFIS005"  ) // 02 - Pergunte do relatorio, caso nao use passar ParamDef
+aAdd(aParam, ""         ) // 03 - Alias
+aAdd(aParam, aOrd       ) // 04 - Array de ordens
+aAdd(aParam, ""         ) // 05 - Titulo
+aAdd(aParam, ""         ) // 06 - Nome do relatório (parametro 1 do metodo new da classe TReport)
  
 Return aParam

@@ -4,17 +4,13 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |07/05/2025| Chamado 50617. Limpeza de comentários
-Lucas Borges  |22/06/2025| Chamado 50617. Revisões diversas visando padronizar os fontes
 Lucas Borges  |23/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
-===============================================================================================================================
-Analista       - Programador     - Inicio   - Envio    - Chamado - Motivo da Alteração
-===============================================================================================================================
-Lucas          - Alex Wallauer   - 02/05/25 - 06/05/25 - 50525   - Ajuste para remoção de diretório local C:\SMARTCLIENT\.
+Lucas Borges  |14/09/2025| Chamado 51799. Implementada função para validar ambiente de teste totvs.framework.environment.Type.get()
+Lucas Borges  |02/10/2025| Chamado 51526. Modificada forma para recuperar a matrícula do usuário.
 ===============================================================================================================================
 */ 
 
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -45,7 +41,7 @@ Private bLegenda	:= {|| AGLT003P() } As Codeblock
 Private aCores		:=  {{ 'ZLD->ZLD_STATUS==" "'	, 'BR_VERDE'		} ,;
                    { 'ZLD->ZLD_STATUS=="F"'	, 'BR_VERMELHO'		}  } As Array
 
-ZLD->(DBSetorder(3))
+ZLD->(DBSetOrder(3))
 MBrowse(,,,,cAlias,,,,,,aCores,,,,,,,,_cFilter)
 
 Return
@@ -111,13 +107,13 @@ Private nDIf		:= Nil As Numeric
 Private cCodRec 	:= If( nOpc==3 , Space( TamSX3("ZLD_CODREC")[1] )		, ZLD->ZLD_CODREC ) As Character//Codigo Recebimento
 Private cTicket	:= If( nOpc==3 , Space(Len(ZLD->ZLD_TICKET))			   , ZLD->ZLD_TICKET ) As Character//Codigo Entrada
 Private dData		:= If( nOpc==3 , Date()									      , ZLD->ZLD_DTLANC ) As Date//Data Entrada
-Private cSetor		:= If( nOpc==3 , criaVar("ZLD_SETOR")					   , ZLD->ZLD_SETOR )  As Character//space(TamSX3("ZLD_SETOR")[1])
-Private cDescSet	:= If( nOpc==3 , Space(20)								      , Substr(Posicione("ZL2",1,xFilial("ZL2")+cSetor,"ZL2_DESCRI"),1,20) ) As Character
-Private cLinRot	:= If( nOpc==3 , Criavar("ZLD_LINROT")					   , ZLD->ZLD_LINROT ) As Character //space(TamSX3("ZLD_LINROT")[1])
+Private cSetor		:= If( nOpc==3 , criaVar("ZLD_SETOR")					   , ZLD->ZLD_SETOR )  As Character//Space(TamSX3("ZLD_SETOR")[1])
+Private cDescSet	:= If( nOpc==3 , Space(20)								      , SubStr(Posicione("ZL2",1,xFilial("ZL2")+cSetor,"ZL2_DESCRI"),1,20) ) As Character
+Private cLinRot	:= If( nOpc==3 , Criavar("ZLD_LINROT")					   , ZLD->ZLD_LINROT ) As Character //Space(TamSX3("ZLD_LINROT")[1])
 Private cDescLin	:= If( nOpc==3 , Space( TamSX3("ZL3_DESCRI")[1]-20 )	, LEFT(Posicione("ZL3",1,xFilial("ZL3")+cLinRot,"ZL3_DESCRI"),20) ) As Character
 Private cFretist	:= If( nOpc==3 , Space( TamSX3("ZLD_FRETIS")[1] )		, ZLD->ZLD_FRETIS ) As Character
 Private cLjFret	:= If( nOpc==3 , Space( TamSX3("ZLD_LJFRET")[1] )		, ZLD->ZLD_LJFRET ) As Character
-Private cDescFret	:= If( nOpc==3 , Space( TamSX3("A2_NOME")[1]-4 )		, Substr(Posicione("SA2",1,xFilial("SA2")+cFretist+cLjFret,"A2_NOME"),1,TamSX3("A2_NOME")[1]-4) ) As Character
+Private cDescFret	:= If( nOpc==3 , Space( TamSX3("A2_NOME")[1]-4 )		, SubStr(Posicione("SA2",1,xFilial("SA2")+cFretist+cLjFret,"A2_NOME"),1,TamSX3("A2_NOME")[1]-4) ) As Character
 Private cVeicul	:= If( nOpc==3 , Space( TamSX3("ZLD_VEICUL")[1] )		, ZLD->ZLD_VEICUL ) As Character
 Private cMotor		:= If( nOpc==3 , Space( TamSX3("ZLD_MOTOR")[1] )		, ZLD->ZLD_MOTOR ) As Character
 Private cDescMot	:= If( nOpc==3 , Space( TamSX3("ZL0_NOME")[1]-20 )		, LEFT(Posicione("ZL0",1,xFilial("ZL0")+cMotor,"ZL0_NOME"),20) ) As Character
@@ -138,7 +134,7 @@ Private nPosNomRet:= 0 As Numeric
 Private nPosAtendi:= 0 As Numeric
 Private nPosCodZLX:= 0 As Numeric
 Private cSeek	   := xFilial("ZLD")+ZLD->ZLD_CODREC As Character
-Private bSeekFor	:= {|| ZLD->ZLD_CODREC == cCodRec  .AND. cTicket == ZLD->ZLD_TICKET } As Codeblock
+Private bSeekFor	:= {|| ZLD->ZLD_CODREC == cCodRec  .And. cTicket == ZLD->ZLD_TICKET } As Codeblock
 Private bSeekWhile:= {|| ZLD->ZLD_FILIAL + ZLD->ZLD_CODREC } As Codeblock//Condicao While para montar o aCols
 Private aColsAux 	:= {} As Array//Armazena aCols para Controle de Alteracao/Exclusao
 Private nVolAnt	:= If( nOpc==3 , 0 , AGLT003W( cCodRec , cTicket , cSetor ) ) As Numeric// Volume do ticket lancado (anteriores)
@@ -147,19 +143,17 @@ Private nTotCodRec:= 0 As Numeric
 Private oTotCodRec:= Nil As Object
 Private crotaori  := "" As Character
 
-//================================================================================
 // Validacao - O ticket nao pode sofrer alteracoes caso ja tenha sido fechado
-//================================================================================
 If nOpc == 4 .Or. nOpc == 5
 
    If ZLD->ZLD_STATUS == "F"
-      FWAlertWarning("Ticket não pode ser alterado/excluído por já estar fechado! Esse Ticket somente pode ser alterado/excluído se o Fechamento do Leite for cancelado.","AGLT00301")
-      Return()
+      FWAlertWarning("Ticket não pode ser alterado/excluído por já estar fechado! Esse Ticket somente pode ser alterado/excluído se o Fechamento do Leite For cancelado.","AGLT00301")
+      Return
    EndIf
 
    If nOpc == 5 
       If !Empty(ZLD->ZLD_ATENDI)
-         FWAlertWarning("Ticket não pode ser excluído por ser integrado do SmartQuestion! Tickets somente podem ser excluídos se a inclusão for manual.","AGLT00302")
+         FWAlertWarning("Ticket não pode ser excluído por ser integrado do SmartQuestion! Tickets somente podem ser excluídos se a inclusão For manual.","AGLT00302")
          Return .F.
       EndIf
 
@@ -169,12 +163,12 @@ If nOpc == 4 .Or. nOpc == 5
       EndIf
 
        ZLX->(dbOrderNickname("IT_I_TISET"))//ZLX_FILIAL+ZLX_TICKET+ZLX_SETOR// INDICE 10
-       If ZLX->( Dbseek(xFilial()+ZLD->ZLD_TICKET+ZLD->ZLD_SETOR)) .AND. ZLX->ZLX_STATUS $ '2,3' //VALIDACAO DO SETOR PRIMARIO  = "1"
+       If ZLX->( DBSeek(xFilial()+ZLD->ZLD_TICKET+ZLD->ZLD_SETOR)) .And. ZLX->ZLX_STATUS $ '2,3' //VALIDACAO DO SETOR PRIMARIO  = "1"
         FWAlertWarning("Ticket não pode ser excluído por estar vinculado à Recepção de Leite de Terceiros NÃO PENDENTE. Altere o status para pendente da Recepção de Leite de terceiros: "+ZLX->ZLX_CODIGO,"AGLT004")
-          ZLX->(DBSETORDER(1))
+          ZLX->(DBSetOrder(1))
          Return .F.
       EndIf
-       ZLX->(DBSETORDER(1))
+       ZLX->(DBSetOrder(1))
    EndIf
 EndIf
 
@@ -183,41 +177,31 @@ aButtons  := If(Type("aButtons") == "U", {}, aButtons)
 //================================================================================
 // Esta rotina de inclusao dos produtores de um outro ticket em um ticket que está
 // sendo incluido no momento somente podera ser realizada nas unidades de JARU e 
-// quando a opcao for de inclusao.
+// quando a opcao For de inclusao.
 //================================================================================
 If SubStr(cFilAnt,1,1) == '1' .And. nOpc == 3
    aAdd( aButtons, {"RESPONSA" ,{|| MsgRun("Aguarde...Selecionando Produtores...",,{||CursorWait(),AGLT003Z(),CursorArrow()})},"Inserir Produtores de um ticket..."    ,"Produtores"})
 EndIf
 
-//================================================================================
 // Monta a entrada de dados do arquivo
-//================================================================================
 cSeek := xFilial("ZLD") + cCodRec
 
-//================================================================================
 // Monta aHeader e aCols utilizando a funcao FillGetDados
-//================================================================================
 Private aHeader[0]
 Private aCols[0]
 
-//================================================================================
 // Variaveis privadas para montagem da tela
-//================================================================================
-SetPrvt("AROTINA,CCADASTRO,CALIAS")
+SetPrvt("aRotina,CCADASTRO,CALIAS")
 SetPrvt("NOPCE,NOPCG,NUSADO")
 SetPrvt("CTITULO,CALIASENCHOICE,CLINOK,CTUDOK,CFIELDOK")
 SetPrvt("NREG,NOPC")
 
-//================================================================================
 // Inclusao
-//================================================================================
 If nOpc == 3
    cTitulo+=" - INCLUSAO"
    FillGetDados( nOpc , cAlias , 1 ,,,,, aYesFields ,,,, .T. ,,,,,, )
 
-//================================================================================
 // Alteracao,Visualizacao,Exclusao
-//================================================================================
 Else
    If nOpc == 4
       cTitulo+=" - ALTERACAO"
@@ -234,9 +218,7 @@ aAdd( aObjects , { 100 , 055 , .T. , .F. , .T. } )
 aAdd( aObjects , { 100 , 100 , .T. , .T. } )
 aAdd( aObjects , { 100 , 002 , .T. , .F. } )
 
-//================================================================================
 // Obte posicao dos campos no cabecalho os itens
-//================================================================================
 nPosRecno 	:= aScan( aHeader , {|x| AllTrim(x[2]) == "ZLD_REC_WT"	} )
 nPosRetiro	:= aScan( aHeader , {|x| AllTrim(x[2]) == "ZLD_RETIRO"	} )
 nPosLoja	:= aScan( aHeader , {|x| AllTrim(x[2]) == "ZLD_RETILJ"	} )
@@ -252,10 +234,8 @@ nTotCodRec	:= U_AGLT003S()
 nLtDIf		:= nTotBom - nLeiteBom
 _lacols := Type( "aCols" ) <> "U"
 
-Do While .T.
-   //================================================================================
+While .T.
    // Tela do model 2 - Rececpcao de Leite
-   //================================================================================
    DEFINE MSDIALOG oDlg TITLE cTitulo OF oMainWnd PIXEL FROM aSize[7],0 TO aSize[6],aSize[5]
 
     oPanel := TPanel():New(0,0,'',oDlg,,.F.,.F.,,,300,100,.T.,.T. )
@@ -263,54 +243,54 @@ Do While .T.
    @ 1.3 , 0.3 TO 2.3 , 43.0 OF oPanel
    @ 5.9 , 0.3 TO 7.0 , 43.0 OF oPanel
 
-   @ 1.6 , 00.7 SAY	"Data Coleta" OF oPanel
-   @ 1.5 , 04.7 MSGET	dDtColeta		Valid CheckSX3("ZLD_DTLANC") WHEN (nOpc==3 .AND. lAbleTicket) OF oPanel
-   @ 1.6 , 12.2 SAY	"Data Lanc." OF oPanel
+   @ 1.6 , 00.7 Say	"Data Coleta" OF oPanel
+   @ 1.5 , 04.7 MSGET	dDtColeta		Valid CheckSX3("ZLD_DTLANC") WHEN (nOpc==3 .And. lAbleTicket) OF oPanel
+   @ 1.6 , 12.2 Say	"Data Lanc." OF oPanel
    @ 1.5 , 16.0 MSGET	dData			Valid CheckSX3("ZLD_DTLANC") WHEN .F. OF oPanel
       
-   @ 2.6 , 00.7 SAY	"Transport." OF oPanel
+   @ 2.6 , 00.7 Say	"Transport." OF oPanel
    @ 2.5 , 04.7 MSGET	cFretist		Valid CheckSX3("ZLD_FRETIS") .And. IIf( Empty(cFretist)	, .T. , AGLT003C() .And. AGLT003F() ) WHEN ((nOpc==3)) F3 GetSX3Cache("ZLD_FRETIS","X3_F3") OF oPanel
    @ 2.5 , 09.5 MSGET	cLjFret			Valid CheckSX3("ZLD_LJFRET") .And. IIf( Empty(cLjFret)	, .T. , AGLT003C() .And. AGLT003F() ) WHEN ((nOpc==3)) OF oPanel
    @ 2.5 , 12.8 MSGET	cDescFret		WHEN .F. OF oPanel
    
-   @ 3.6 , 00.5 SAY	"Setor" OF oPanel
+   @ 3.6 , 00.5 Say	"Setor" OF oPanel
    @ 3.5 , 04.7 MSGET	oSetor			VAR cSetor Valid CheckSX3("ZLD_SETOR") .And. Eval({||cDescSet:= Posicione("ZL2",1,xFilial("ZL2")+cSetor,"ZL2_DESCRI"),.T.});
                                           .And. U_getNwTicket(.T.) WHEN (nOpc==3) F3 GetSX3Cache("ZLD_SETOR","X3_F3") OF oPanel
    @ 3.5 , 09.5 MSGET	cDescSet		WHEN .F. OF oPanel
 
-   @ 4.6 , 00.7 SAY	"Linha/Rota" OF oPanel
+   @ 4.6 , 00.7 Say	"Linha/Rota" OF oPanel
    @ 4.5 , 04.7 MSGET	oLinRota		VAR cLinRot  Valid CheckSX3("ZLD_LINROT") .And. IIf(Empty(cLinRot),.T., AGLT003N(cLinRot,nOpc,lAbleticket)) WHEN (nOpc==3) F3 GetSX3Cache("ZLD_LINROT","X3_F3") OF oPanel
    @ 4.5 , 09.5 MSGET	cDescLin		WHEN .F. OF oPanel
 
-   @ 4.6 , 26.5 SAY	"Total KM" 	OF oPanel
-   @ 4.5 , 29.3 MSGET	nTotKm 			Picture GetSX3Cache("ZLD_KM","X3_PICTURE") Valid (nTotKm >= 0 ) WHEN (nOpc==3.or.nOpc==4)  OF oPanel
+   @ 4.6 , 26.5 Say	"Total KM" 	OF oPanel
+   @ 4.5 , 29.3 MSGET	nTotKm 			Picture GetSX3Cache("ZLD_KM","X3_PICTURE") Valid (nTotKm >= 0 ) WHEN (nOpc==3.Or.nOpc==4)  OF oPanel
    
-   @ 5.6 , 00.7 SAY	"Motorista" OF oPanel
-   @ 5.5 , 04.7 MSGET	cMotor			Valid CheckSX3("ZLD_MOTOR") .And. IIf(Empty(cMotor),.t., AGLT003M(cMotor) ) WHEN (nOpc==3.or.nOpc==4) F3 GetSX3Cache("ZLD_MOTOR","X3_F3") OF oPanel
+   @ 5.6 , 00.7 Say	"Motorista" OF oPanel
+   @ 5.5 , 04.7 MSGET	cMotor			Valid CheckSX3("ZLD_MOTOR") .And. IIf(Empty(cMotor),.T., AGLT003M(cMotor) ) WHEN (nOpc==3.Or.nOpc==4) F3 GetSX3Cache("ZLD_MOTOR","X3_F3") OF oPanel
    @ 5.5 , 09.5 MSGET	cDescMot		WHEN .F. OF oPanel
    
-   @ 5.6 , 26.7 SAY	"Veiculo" OF oPanel
+   @ 5.6 , 26.7 Say	"Veiculo" OF oPanel
    @ 5.5 , 29.2 MSGET	cVeicul		Picture GetSX3Cache("ZLD_VEICUL","X3_PICTURE") Valid CheckSX3("ZLD_VEICUL") .And. IIf(Empty(cVeicul),Eval({||cPlacaVeic:="" ,.T.}), Eval({||cPlacaVeic:= Posicione("ZL1",1,xFilial("ZL1")+cVeicul,"ZL1_PLACA"),.T.}));
-                           WHEN (nOpc==3.or.nOpc==4)  F3 GetSX3Cache("ZLD_VEICUL","X3_F3") OF oPanel
+                           WHEN (nOpc==3.Or.nOpc==4)  F3 GetSX3Cache("ZLD_VEICUL","X3_F3") OF oPanel
    @ 5.5 , 34.2 MSGET	cPlacaVeic	WHEN .F. OF oPanel
       
    
    DEFINE FONT oFont1 NAME "Tahoma" BOLD
    
-   @ 6.6 , 00.7 SAY	"Ticket"			FONT oFont1 OF oPanel
+   @ 6.6 , 00.7 Say	"Ticket"			FONT oFont1 OF oPanel
    @ 6.5 , 04.7 MSGET	cTicket							Valid CheckSX3("ZLD_TICKET") .And. !AGLT003B(cTicket) WHEN (nOpc==3) FONT oFont1 SIZE 50,7 OF oPanel
-   @ 6.5 , 12.0 SAY	"Vol. Veiculo" OF oPanel
+   @ 6.5 , 12.0 Say	"Vol. Veiculo" OF oPanel
    @ 6.5 , 15.7 MSGET	nTotBom							Picture "@E 999,999,999" Valid (nTotBom >= 0 ) WHEN ((nOpc==3).and.lAbleTicket) SIZE 50,7 OF oPanel
    
-   @ 6.5 , 22.6 SAY	"Vol. Coletado" OF oPanel
+   @ 6.5 , 22.6 Say	"Vol. Coletado" OF oPanel
    @ 6.5 , 27.1 MSGET	oLteBom			var nLeiteBom	Picture GetSX3Cache("ZLD_QTDBOM","X3_PICTURE")  WHEN .F. SIZE 50,7 OF oPanel
-   @ 6.5 , 33.5 SAY	"DIferenca" OF oPanel
+   @ 6.5 , 33.5 Say	"DIferenca" OF oPanel
    @ 6.5 , 36.8 MSGET	nDIf			var nLtDIf		Picture GetSX3Cache("ZLD_TOTBOM","X3_PICTURE")  WHEN .F.  SIZE 50,7 OF oPanel
       
-   _lDeleta:=((nOpc == 3) .or. (nOpc == 4))
+   _lDeleta:=((nOpc == 3) .Or. (nOpc == 4))
    _nLINHAS:=999
-   If nOpc = 4 .AND. !Empty(ZLD->ZLD_ATENDI)
-   _nLINHAS:=LEN(aCols)
+   If nOpc = 4 .And. !Empty(ZLD->ZLD_ATENDI)
+   _nLINHAS:=Len(aCols)
    EndIf
 
    //      MsGetDados():New( < nTop>       , < nLeft>   , < nBottom>    ,< nRight>,< nOpc>,[ cLinhaOk]    , [ cTudoOk],[cIniCpos],[ lDeleta],[aAlter],[nFreeze],[lEmpty], [ nMax], [ cFieldOk], [ cSuperDel], [ uPar], [ cDelOk]  , [ oWnd], [ lUseFreeze], [ cTela] )
@@ -318,15 +298,13 @@ Do While .T.
    
    // RODAPE DA TELA
     oPanelRoda := TPanel():New(aPosObj[2,3],0,'',oDlg,, .F., .F.,,,300,20,.F.,.F. )
-   @4,005 SAY "Total de Volume do Lancamento:"  Pixel   OF oPanelRoda
+   @4,005 Say "Total de Volume do Lancamento:"  Pixel   OF oPanelRoda
    @2,090 MSGET oTotCodRec var nTotCodRec Picture GetSX3Cache("ZLD_TOTBOM","X3_PICTURE")  WHEN .F. Pixel of oPanelRoda 
    
    If _lacols 
       aColsAux := aClone( aCols )
    EndIf
-   //================================================================================
    // Atualiza campo nomeRetiro na getdados
-   //================================================================================
    For _nI := 1 To Len(aCols)
       If !Empty( aCols[_nI][nPosRetiro] ) .And. !Empty( aCols[_nI][nPosLoja] )
          aCols[_nI][nPosNomRet] := Posicione( "SA2" , 1 , xFilial("SA2") + aCols[_nI][nPosRetiro] + aCols[_nI][nPosLoja] , "A2_NOME" )
@@ -337,9 +315,7 @@ Do While .T.
                                    oPanel:Align:=CONTROL_ALIGN_TOP,oPanelRoda:Align:=CONTROL_ALIGN_BOTTOM,;
                                    oGet:oBrowse:Align:=CONTROL_ALIGN_ALLCLIENT,oGet:oBrowse:Refresh())
    
-   //================================================================================
    // Grava dados da ZLD
-   //================================================================================
    If lConfirmou
       
       DBSelectArea("ZLD")
@@ -384,7 +360,7 @@ Do While .T.
       EndIf
       
    Else
-      If (nOpc == 3 .OR. nOpc == 4) .AND. !FWAlertYesNo("Confirma saída sem salvar?","AGLT00306")
+      If (nOpc == 3 .Or. nOpc == 4) .And. !FWAlertYesNo("Confirma saída sem salvar?","AGLT00306")
          Loop
       EndIf
    EndIf
@@ -439,9 +415,9 @@ If ValType(oDlg) == 'O'
    oDlg:Refresh()
 EndIf
 
-If lDel .and. Altera .AND. !Empty(ZLD->ZLD_ATENDI)
-   If nleiteant == nLeiteBom .and. !aTail(aCols[n])
-         If _lvalida .and. !MsgYesNo("Atendimento integrado do SmartQuestion, confirma exclusão? Atendimento continuará ativo no SmartQuestion","AGLT00307")
+If lDel .And. Altera .And. !Empty(ZLD->ZLD_ATENDI)
+   If nleiteant == nLeiteBom .And. !aTail(aCols[n])
+         If _lvalida .And. !MsgYesNo("Atendimento integrado do SmartQuestion, confirma exclusão? Atendimento continuará ativo no SmartQuestion","AGLT00307")
            _lvalida := .F.
            Return .F.
          EndIf
@@ -455,14 +431,14 @@ If aTail(aCols[n])
    Return( .T. )
 EndIf
 
-If Len( aCols ) > 1 .AND. !(Altera .AND. !Empty(ZLD->ZLD_ATENDI))
+If Len( aCols ) > 1 .And. !(Altera .And. !Empty(ZLD->ZLD_ATENDI))
    For _nX := 1 to Len(aCols)
-      If _nX != n .and. !aTail(aCols[_nX])
+      If _nX != n .And. !aTail(aCols[_nX])
          aAdd(aAux1,aCols[_nX])
       EndIf
    Next _nX
    
-   nIndex	:= ascan(aAux1,{|x| x[nPosRetiro] == aAux[nPosRetiro] .and. x[nPosLoja] == aAux[nPosLoja] })
+   nIndex	:= aScan(aAux1,{|x| x[nPosRetiro] == aAux[nPosRetiro] .And. x[nPosLoja] == aAux[nPosLoja] })
    lRet	:= nIndex == 0
    
    If !lRet
@@ -472,10 +448,10 @@ If Len( aCols ) > 1 .AND. !(Altera .AND. !Empty(ZLD->ZLD_ATENDI))
 EndIf
 
 // VerIfica se o retiro esta dentro da linha informada
-If !aTail( aCols[n] ) .AND. !lDel
+If !aTail( aCols[n] ) .And. !lDel
    
    cLinhaRota	:= Posicione("SA2",1,xFilial("SA2")+aAux[nPosRetiro]+aAux[nPosLoja],"A2_L_LI_RO")
-   lRet		:= (cLinhaRota == cLinRot) .OR. (Altera .AND. !Empty(ZLD->ZLD_ATENDI))
+   lRet		:= (cLinhaRota == cLinRot) .Or. (Altera .And. !Empty(ZLD->ZLD_ATENDI))
    
    If !lRet
       FWAlertWarning("Produtor informado não pertence a linha/rota informada, linha/rota do Produtor: "+cLinhaRota+ ". Selecione um Produtor que seja da linha informada.","AGLT00309")
@@ -493,7 +469,7 @@ If !aTail( aCols[n] ) .AND. !lDel
       EndIf
    EndIf
    
-   If Len( AllTrim(aAux[nPosRetiro]) ) > 0 .And. aAux[nPosQtdBom] == 0  .AND. !(Altera .AND. !Empty(ZLD->ZLD_ATENDI))
+   If Len( AllTrim(aAux[nPosRetiro]) ) > 0 .And. aAux[nPosQtdBom] == 0  .And. !(Altera .And. !Empty(ZLD->ZLD_ATENDI))
       FWAlertWarning("Ao informar um código de produtor deverá ser fornecida a sua litragem de coleta. Favor informa a litragem do produtor corrente.","AGLT00311")
       Return( .F. )
    EndIf
@@ -550,7 +526,7 @@ EndIf
 //================================================================================
 If _lRet
    For _nX := 1 To Len( aCols )
-      If !aTail( aCols[_nX] ) .AND. !(Len( aCols ) == 1 .And. Empty( aCols[1][nPosRetiro] ) .And. Empty( aCols[1][nPosQtdBom] ))
+      If !aTail( aCols[_nX] ) .And. !(Len( aCols ) == 1 .And. Empty( aCols[1][nPosRetiro] ) .And. Empty( aCols[1][nPosQtdBom] ))
          If AGLT003R( dDtcoleta , aCols[_nX,nPosRetiro] , aCols[_nX,nPosLoja] , cSetor , cLinRot )
             _lRet := .F.
          EndIf
@@ -562,7 +538,7 @@ If _lRet
    Next _nX
 EndIf
 
-If !_lRetLitr .AND. !(Altera .AND. !Empty(ZLD->ZLD_ATENDI))
+If !_lRetLitr .And. !(Altera .And. !Empty(ZLD->ZLD_ATENDI))
    _lRet := .F.
    FWAlertWarning("Ao informar um codigo de produtor devera ser fornecida a sua litragem de coleta."+;
               "Existe(m) produtor(es) sem litragem informada, favor verIficar os registros de dados da recepção.","AGLT00312")
@@ -574,7 +550,7 @@ If _lRet
       Return( .T. )
    EndIf
    
-   _lRet := ( AGLT003Q() .and. (!Empty(cFretist)) .and. (!Empty(cMotor)) .and.  (!Empty(cLjFret)) .and. (!Empty(dDtColeta))  .and.  (!Empty(cLinRot)) .and.  (!Empty(cSetor))   )
+   _lRet := ( AGLT003Q() .And. (!Empty(cFretist)) .And. (!Empty(cMotor)) .And.  (!Empty(cLjFret)) .And. (!Empty(dDtColeta))  .And.  (!Empty(cLinRot)) .And.  (!Empty(cSetor))   )
    
    If !_lRet
       If nOpcao == 3 .Or. nOpcao == 4
@@ -585,13 +561,13 @@ If _lRet
       EndIf
    EndIf
    
-   If _lRet .AND. !(Altera .AND. !Empty(ZLD->ZLD_ATENDI))
+   If _lRet .And. !(Altera .And. !Empty(ZLD->ZLD_ATENDI))
       // Valida a insercao de um mesmo produtor e loja na mesma recepcao de leite
       For _nX := 1 To Len(aCols)
          If !aTail(aCols[_nX])  
             For _nI := 1 To Len(aCols)       
                If !aTail(aCols[_nI]).And. _nX <> _nI
-                  If aCols[_nX,nPosRetiro] == aCols[_nI,nPosRetiro] .and. aCols[_nX,nPosLoja] == aCols[_nI,nPosLoja]
+                  If aCols[_nX,nPosRetiro] == aCols[_nI,nPosRetiro] .And. aCols[_nX,nPosLoja] == aCols[_nI,nPosLoja]
                      FWAlertWarning("Produtor já incluído neste recebimento. Na linha: " + AllTrim(Str(_nX,3)) + " e " + AllTrim(Str(_nI,3))	+;
                            ". Nao pode haver dois produtores na mesma coleta! Lance todos os volumes num só Produtor!","AGLT00314")
                      _lRet := .F.
@@ -611,7 +587,7 @@ EndIf
 
 If _lRet .And. dDtcoleta > dDataBase
    _lRet := .F.
-   FWAlertWarning("A Data de Coleta informada, é maior que "+dToC(dDataBase)+". VerIficar o conteúdo informado na Data de Coleta.","AGLT00315")
+   FWAlertWarning("A Data de Coleta informada, é maior que "+DToC(dDataBase)+". VerIficar o conteúdo informado na Data de Coleta.","AGLT00315")
 EndIf
 //Valida se o usuário tem acesso ao setor informado.
 If _lRet .And. (nOpcao == 3 .Or. nOpcao == 4)
@@ -660,8 +636,8 @@ If !Empty( AllTrim(cLinRot) )
             EndIf
          EndIf
          
-         cMotor		:= POSICIONE( "ZL1" , 1 , XFILIAL("ZL1") + cVeicul	, "ZL1_MOTORI"	)
-         cDescMot	:= POSICIONE( "ZL0" , 1 , XFILIAL("ZL0") + cMotor	, "ZL0_NOME"	)
+         cMotor		:= Posicione( "ZL1" , 1 , xFilial("ZL1") + cVeicul	, "ZL1_MOTORI"	)
+         cDescMot	:= Posicione( "ZL0" , 1 , xFilial("ZL0") + cMotor	, "ZL0_NOME"	)
       EndIf
       
       cDescLin := ZL3->ZL3_DESCRI
@@ -704,7 +680,7 @@ If !Empty( cFretist ) .And. !Empty(cLjFret)
    cDescFret := Posicione( 'SA2' , 1 , xFilial('SA2') + cFretist + cLjFret , 'A2_NOME' )
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return _lRet
 
@@ -822,14 +798,14 @@ Autor-------------: Jeovane
 Data da Criacao---: 15/09/2008
 Descrição---------: Funcao usada para inserir registros na ZLD
 Parametros--------: aregs - arrays com dados a incluir
-Retorno-----------: _lret - se completou o processamento
+Retorno-----------: _lRet - se completou o processamento
 ===============================================================================================================================
 */
 Static Function AGLT003I(aRegs As Array)
 
 Local bOk			:= .T. As Logical
 Local _nI			:= 0 As Numeric
-Local _lret       := .T. As Logical
+Local _lRet       := .T. As Logical
 Local _lGrava_ZLX := .F. As Logical
 Local aDados      := {} As Array
 Local _oDlg			:= Nil As Logical
@@ -861,36 +837,34 @@ Else
 EndIf
 Begin Sequence
 
-//================================================================================
 // Projeto Automação das Recepções Tipo Plataforma
-//================================================================================
 Private _lGerou_ZLX:=.F. //Alterada na Funcao U_AGLTGrv_ZLX()
-ZLX->(dbOrderNickname("IT_I_TISET"))//ZLX_FILIAL+ZLX_TICKET+ZLX_SETOR //ZLX->(DBSETORDER(10))
-_lGrava_ZLX:=_lGerou_ZLX:=ZLX->( Dbseek(xFilial()+cTicket+cSetor))
+ZLX->(dbOrderNickname("IT_I_TISET"))//ZLX_FILIAL+ZLX_TICKET+ZLX_SETOR //ZLX->(DBSetOrder(10))
+_lGrava_ZLX:=_lGerou_ZLX:=ZLX->( DBSeek(xFilial()+cTicket+cSetor))
 ZLX->(DBSetOrder(1))
 
 If Inclui 
    // Projeto Automação das Recepções Tipo Plataforma
-   _lGrava_ZLX:=ZL2->( Dbseek(xFilial()+cSetor)) .AND. ZL2->ZL2_CRIRT = "1"
-   If _lGrava_ZLX .AND. !_lGerou_ZLX .AND. Empty( (aDados:=U_AGLTTela_ZLX("ORI_ZLD")) )//Se o setor é para gerar e o Ticket não tem ainda no ZLX mostra a tela
+   _lGrava_ZLX:=ZL2->( DBSeek(xFilial()+cSetor)) .And. ZL2->ZL2_CRIRT = "1"
+   If _lGrava_ZLX .And. !_lGerou_ZLX .And. Empty( (aDados:=U_AGLTTela_ZLX("ORI_ZLD")) )//Se o setor é para gerar e o Ticket não tem ainda no ZLX mostra a tela
       Return .F.
    EndIf
 
-   // Grava Mov. Interno caso for inclusao
-   fwmsgrun(,{|| bOk := U_AGLT003G( cTicket , 3 ) }, "Aguarde...", "Gravando entrada de estoque...")
+   // Grava Mov. Interno caso For inclusao
+   FWMsgRun(,{|| bOk := U_AGLT003G( cTicket , 3 ) }, "Aguarde...", "Gravando entrada de estoque...")
 EndIf
 
 
 // Valida movimento interno para inclusão
-If Inclui .and. !(bOk .and. SD3->D3_QUANT == nTotBom) .and. lAbleTicket //não teve movimento de estoque por ser complemento de ticket
-   _lret := .F.
+If Inclui .And. !(bOk .And. SD3->D3_QUANT == nTotBom) .And. lAbleTicket //não teve movimento de estoque por ser complemento de ticket
+   _lRet := .F.
    FWAlertWarning("Movimento de estoque não foi efetuado!","AGLT00322")
    Break
 EndIf
 
 // Se gravou Mi entrao grava recepcao
 If bOk .Or. Altera
-   If Inclui .and. lAbleTicket  //só grava como nova recepção se for novo ticket
+   If Inclui .And. lAbleTicket  //só grava como nova recepção se For novo ticket
       cCodRec := u_GetNumRec()
    ElseIf Inclui  //Se é complemento vê se precisa gerar novo número de recepção para rota dIferente na mesma viagem
       If !(AllTrim(crotaori) == AllTrim(cLinRot))
@@ -919,17 +893,17 @@ If bOk .Or. Altera
       ZLD->ZLD_MOTOR	:= cMotor
       ZLD->ZLD_KM		:= nTotKm
       ZLD->ZLD_STATUS	:= ' '
-      ZLD->ZLD_USER	:= U_UCFG001(1)
+      ZLD->ZLD_USER	:= FWSFAllUsers({__cUserID},{"USR_FILIAL"})[1][3]+FWSFAllUsers({__cUserID},{"USR_CODFUNC"})[1][3]
       ZLD->ZLD_TOTBOM	:= nTotBom
-      If nPosAtendi # 0 .AND. !Empty(aRegs[1][nPosAtendi])
+      If nPosAtendi # 0 .And. !Empty(aRegs[1][nPosAtendi])
          ZLD->ZLD_ATENDI:=aRegs[1][nPosAtendi]
       EndIf
-      If nPosCodZLX # 0 .AND. !Empty(aRegs[1][nPosCodZLX])
+      If nPosCodZLX # 0 .And. !Empty(aRegs[1][nPosCodZLX])
          ZLD->ZLD_CODZLX:=aRegs[1][nPosCodZLX]
       EndIf
       ZLD->ZLD_KMDIVE := _cDivKM
       ZLD->ZLD_KMJUST	:= _cJustKM
-      ZLD->( MsUnlock() )
+      ZLD->( MSUnLock() )
    EndIf
 
    _lPrimieraVez:=.T.
@@ -940,7 +914,7 @@ If bOk .Or. Altera
             If aRegs[_nI][nPosRecno] = 0
                ZLD->( RecLock( "ZLD" , .T. ) )
             Else
-               ZLD->( DBGOTO( aRegs[_nI][nPosRecno] ) )//OS DELETADOS JÁ APAGADOS NA FUNCAO AGLT003D()
+               ZLD->( DBGoTo( aRegs[_nI][nPosRecno] ) )//OS DELETADOS JÁ APAGADOS NA FUNCAO AGLT003D()
                ZLD->( RecLock( "ZLD" , .F. ) )
             EndIf
             
@@ -961,24 +935,22 @@ If bOk .Or. Altera
             ZLD->ZLD_TQ_LT	:= aRegs[_nI][nPosTqLt]
             ZLD->ZLD_KM		:= nTotKm
             ZLD->ZLD_STATUS	:= ' '
-            ZLD->ZLD_USER 	:= U_UCFG001(1)
+            ZLD->ZLD_USER 	:= FWSFAllUsers({__cUserID},{"USR_FILIAL"})[1][3]+FWSFAllUsers({__cUserID},{"USR_CODFUNC"})[1][3]
             ZLD->ZLD_TOTBOM	:= nTotBom
             If nPosAtendi # 0
                ZLD->ZLD_ATENDI:=aRegs[_nI][nPosAtendi]
             EndIf
-            If nPosCodZLX # 0 .AND. !Empty(aRegs[_nI][nPosCodZLX])
+            If nPosCodZLX # 0 .And. !Empty(aRegs[_nI][nPosCodZLX])
                ZLD->ZLD_CODZLX:=aRegs[_nI][nPosCodZLX]
             EndIf
             ZLD->ZLD_KMDIVE := _cDivKM
             ZLD->ZLD_KMJUST	:= _cJustKM
-            //================================================================================
             // Projeto Automação das Recepções Tipo Plataforma
-            //================================================================================
-            If _lGrava_ZLX .AND. _lPrimieraVez
+            If _lGrava_ZLX .And. _lPrimieraVez
                _lPrimieraVez:=.F.
                U_AGLTGrv_ZLX("ORI_ZLD",aDados)//Essa funcao esta no rdmake AGLT021.PRW
             EndIf
-            ZLD->( MsUnlock() )
+            ZLD->( MSUnLock() )
          EndIf
       EndIf
    Next _nI
@@ -986,7 +958,7 @@ EndIf
 
 End Sequence
 
-Return _lret
+Return _lRet
 
 /*
 ===============================================================================================================================
@@ -1009,7 +981,7 @@ Local _aToSD31    :={} As Array
 Local cTm         := AllTrim(SuperGetMv("LT_ENTTM",.F.,"002")) As Character
 Local cProduto    := AllTrim(SuperGetMv("LT_ENTPRO",.F.,"08000000004")) As Character
 Local cLocal      := "" As Character
-Local nVlrMix     := POSICIONE("ZL2",1,XFILIAL("ZL2")+cSetor,"ZL2_ULTMIX") As Numeric
+Local nVlrMix     := Posicione("ZL2",1,xFilial("ZL2")+cSetor,"ZL2_ULTMIX") As Numeric
 Local bret        := .T. As Logical
 Local _cArmaz     := "" As Character
 Local _nmodant    := nModulo As Numeric
@@ -1019,7 +991,7 @@ Local _cFileLog   := "" As Character
 Local _aOrd       := SaveOrd({"ZLJ","ZLD"}) As Array
 Local _cFiltro    :="%" As Character
 Local _cDirLog    := SuperGetMV("IT_DIRLOG",.F.,"\temp\") + "AGLT003\" As Character
-Local _cALias     := "" As Character
+Local _cAlias     := "" As Character
 Local _cFilVld34  := SuperGetMV('IT_FILVLD3',.F.,'') As Character
 Local cChave      := "" As Character
 Local _nRec04     := 0 As Numeric
@@ -1030,9 +1002,9 @@ Local _lEnvEmailErro:= .F. As Logical
 Local _cPicD3QUAN   := PesqPict("SD3","D3_QUANT") As Character
 Local _cPicB2QATU   := "@E 999,999,999,999,999.999"  As Character
 Private _cFilTer    := AllTrim(SuperGetMV('IT_EST3FIL',.F.,'')) As Character // VerIfica parâmetro de configurações das Filiais que usam estoque em poder de terceiros
-PRIVATE _cLocTer    := AllTrim(SuperGetMV('IT_EST3LOC',.F.,'')) As Character // VerIfica parâmetro de configurações dos Armazéns que usam estoque em poder de terceiros
+Private _cLocTer    := AllTrim(SuperGetMV('IT_EST3LOC',.F.,'')) As Character // VerIfica parâmetro de configurações dos Armazéns que usam estoque em poder de terceiros
 Private _eccod      := ccod As Character
-Private _lAmbTeste  := SuperGetMV("IT_AMBTEST",.F.,.T.) As Logical
+Private _lAmbTeste  := !totvs.framework.environment.Type.get() == '1' As Logical //1-Produção, 2-Homologação,3-Desenvolvimento
 Private _cITFLNGRA  := SuperGetMV('IT_FLNGRA',.F.,'10') As Character
 
 DEFAULT nCusto  := 0
@@ -1048,16 +1020,16 @@ If nVlrMix <= 0
    Return(.F.)
 EndIf
 
-_cArmaz		:= POSICIONE( "ZL2" , 1 , XFILIAL("ZL2") + cSetor , "ZL2_LOCAL" )
-cProduto	   := POSICIONE( "SB1" , 1 , XFILIAL("SB1") + cProduto , "B1_COD" )
+_cArmaz		:= Posicione( "ZL2" , 1 , xFilial("ZL2") + cSetor , "ZL2_LOCAL" )
+cProduto	   := Posicione( "SB1" , 1 , xFilial("SB1") + cProduto , "B1_COD" )
 nModulo		:= 4
 cModulo		:= "EST"
 
 // Cria o armazém se nao existir
-cLocal		:= POSICIONE( "ZL2" , 1 , XFILIAL("ZL2") + cSetor , "ZL2_LOCAL" )
+cLocal		:= Posicione( "ZL2" , 1 , xFilial("ZL2") + cSetor , "ZL2_LOCAL" )
 
 SB2->( DBSetOrder(1) )
-If !SB2->( DBSeek( xfilial("SB2") + cProduto + cLocal ) )
+If !SB2->( DBSeek( xFilial("SB2") + cProduto + cLocal ) )
    CriaSB2( cProduto , cLocal )
 EndIf
 //***********  INCLUSAO ***************************************************************//
@@ -1099,7 +1071,7 @@ If lMsErroAuto   //Para recepção automatica esta dentro de transacao
       _cErroSche+="[ MostraErro(): "+AllTrim(MostraErro())+" ]"
       FWAlertWarning(_cErroSche+". Tente novamente, se o erro persistir comunique urgentemente ao Suporte!","AGLT00325")
    Else
-      _cErroSche+="[ MostraErro(): "+MostraErro(_cDirLog,'aglt003_'+AllTrim(cCod)+"_"+(DTOS(DATE())+"_"+StrTran(Time(),":",""))+"_mostraerro.log")+" ]"
+      _cErroSche+="[ MostraErro(): "+MostraErro(_cDirLog,'aglt003_'+AllTrim(cCod)+"_"+(DToS(DATE())+"_"+StrTran(Time(),":",""))+"_mostraerro.log")+" ]"
       FWLogMsg("WARN"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "AGLT00325"/*cMsgId*/, _cErroSche/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
    EndIf
 
@@ -1110,7 +1082,7 @@ ElseIf !bret
 ElseIf SD3->D3_DOC == _CDOC //Se completou o movimento interno com sucesso já faz a transferência para produto consumível
    ConfirmSX8() //Confirma movimento anterior
    If !(cFilAnt $ _cITFLNGRA ); //Filiais que não fazem transferência de leite a granel 
-      .and. !(AllTrim(SuperGetMV("IT_LTMP",.F.,'08000000034')) == AllTrim(cProduto)) //Produto destino igual ao produto origem não precisa de transferência
+      .And. !(AllTrim(SuperGetMV("IT_LTMP",.F.,'08000000034')) == AllTrim(cProduto)) //Produto destino igual ao produto origem não precisa de transferência
 
       //****** Cabecalho a Incluir ***
       cDoc:=GetSxENum("SD3","D3_DOC",1)
@@ -1120,21 +1092,21 @@ ElseIf SD3->D3_DOC == _CDOC //Se completou o movimento interno com sucesso já fa
       //****** Cabecalho a Incluir ***
 
       //****** Itens a Incluir  ******
-      SB1->(Dbsetorder(1))
-      SB1->(DBSEEK(xFilial()+cProduto)) // ORIGEM
+      SB1->(DBSetOrder(1))
+      SB1->(DBSeek(xFilial()+cProduto)) // ORIGEM
       aItem:={}
       aAdd(aItem,cProduto)//D3_COD
       aAdd(aItem,SB1->B1_DESC)//D3_DESCRI
       aAdd(aItem,SB1->B1_UM)  //D3_UM
-      aAdd(aItem,POSICIONE("ZL2",1,XFILIAL("ZL2")+cSetor,"ZL2_LOCAL"))  //D3_LOCAL
+      aAdd(aItem,Posicione("ZL2",1,xFilial("ZL2")+cSetor,"ZL2_LOCAL"))  //D3_LOCAL
       aAdd(aItem,"")		    //D3_LOCALIZ //Endereço Orig
 
       _cDesCodProd := AVKEY(SuperGetMV("IT_LTMP",.F.,'08000000034'),"D3_COD")
-      SB1->(DBSEEK(xFilial()+_cDesCodProd)) // DESTINO
+      SB1->(DBSeek(xFilial()+_cDesCodProd)) // DESTINO
       aAdd(aItem,_cDesCodProd)//D3_COD
       aAdd(aItem,SB1->B1_DESC)//D3_DESCRI
       aAdd(aItem,SB1->B1_UM)  //D3_UM
-      aAdd(aItem,POSICIONE("ZL2",1,XFILIAL("ZL2")+cSetor,"ZL2_LOCAL"))  //D3_LOCAL
+      aAdd(aItem,Posicione("ZL2",1,xFilial("ZL2")+cSetor,"ZL2_LOCAL"))  //D3_LOCAL
       aAdd(aItem,"")		    //D3_LOCALIZ //Endereço Dest
       aAdd(aItem,"")          //D3_NUMSERI
       aAdd(aItem,"")  	    //D3_LOTECTL
@@ -1176,7 +1148,7 @@ ElseIf SD3->D3_DOC == _CDOC //Se completou o movimento interno com sucesso já fa
                   "Realize a transferência manualmente para garantir saldo para as OPs","AGLT00327")
             _cErroSche:="[ MostraErro(): "+AllTrim(MostraErro())+" ]"
          Else
-            _cErroSche+="[ MostraErro(): "+MostraErro(_cDirLog,'aglt003_'+AllTrim(cCod)+"_"+(DTOS(DATE())+"_"+StrTran(Time(),":",""))+"_mostraerro.log")+" ]"
+            _cErroSche+="[ MostraErro(): "+MostraErro(_cDirLog,'aglt003_'+AllTrim(cCod)+"_"+(DToS(DATE())+"_"+StrTran(Time(),":",""))+"_mostraerro.log")+" ]"
             FWLogMsg("WARN"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "AGLT00327"/*cMsgId*/, _cErroSche/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
          EndIf
          bret := .F.
@@ -1194,7 +1166,7 @@ Else
 EndIf
 
 Else
-   If !Empty(cTm) .and. !Empty(cProduto) .and. noption == 3
+   If !Empty(cTm) .And. !Empty(cProduto) .And. noption == 3
       _cErroSche:="Parâmetros LT_ENTPRO e LT_ENTTM não foram preenchidos ou já existe esse Ticket de Recepcao de Leite! Não foi possível gerar estoque!"
       FWLogMsg("WARN"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "AGLT00329"/*cMsgId*/, _cErroSche/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
       If !lSchedule
@@ -1216,26 +1188,26 @@ If nOption == 5 // EXCLUIR ESTOQUE
    _nRec04:=0
    _nRec34:=0
    _aTLinhas:={}
-   _cUserName:= UsrFullName(__cUserID)
+   _cUserName:= UsrFullName(__cUserId)
    _cMostraCalls:=MostraCalls()
    //             1  2  3  4  5  6  7  8  9
    _aDadosEmail:={"","","","","","","","",""}
    _aDadosEmail[8]:=StrTran(AllTrim(ZLJ->ZLJ_MOTIVO),"<br>")
    _aDadosEmail[9]:=StrTran(_cMostraCalls,CRLF,"<br>")
 
-   _cTextoLog+="[ ddatabase: "+DTOC(ddatabase)+" - "+_cUserName+" - DATE(): "+DTOC(DATE())+" ]"+CRLF
+   _cTextoLog+="[ ddatabase: "+DToC(ddatabase)+" - "+_cUserName+" - DATE(): "+DToC(DATE())+" ]"+CRLF
    _cTextoLog+="Caminho da chamada [ "+CRLF+_cMostraCalls+" ]"+CRLF+CRLF
    _cTextoLog+="ZLJ_MOTIVO: [ "+AllTrim(ZLJ->ZLJ_MOTIVO)+" ]"+CRLF+CRLF
 
-   SD3->(Dbsetorder(13)) //D3_FILIAL + D3_CHAVEF1
-   If SD3->(Dbseek(CFILANT + "AGLT003" + ccod+cSetor)) 
+   SD3->(DBSetOrder(13)) //D3_FILIAL + D3_CHAVEF1
+   If SD3->(DBSeek(CFILANT + "AGLT003" + ccod+cSetor)) 
       cChave:="AGLT003" + ccod+cSetor
-   ElseIf SD3->(Dbseek(CFILANT + "AGLT003" + ccod))
+   ElseIf SD3->(DBSeek(CFILANT + "AGLT003" + ccod))
       cChave:="AGLT003" + ccod
    EndIf   
 
    If !Empty(cChave)
-      Do While SD3->D3_FILIAL == CFILANT .AND. AllTrim(SD3->D3_CHAVEF1) = AllTrim(cChave)
+      While SD3->D3_FILIAL == CFILANT .And. AllTrim(SD3->D3_CHAVEF1) = AllTrim(cChave)
          If SD3->D3_ESTORNO != 'S'
             _lAchouTransf := .T.
             If SD3->D3_COD = "08000000004"
@@ -1249,15 +1221,15 @@ If nOption == 5 // EXCLUIR ESTOQUE
                _cTextoLog+="[ Lançamento de transferencia destino: ( "+SD3->D3_COD+" / "+SD3->D3_NUMSEQ+" / "+CFILANT+" / "+AllTrim(SD3->D3_CHAVEF1)+" / D3_ESTORNO='"+SD3->D3_ESTORNO+"') FOI ENCONTRADO ]"+CRLF+CRLF
             EndIf
          EndIf
-         SD3->(Dbskip())
-      Enddo
+         SD3->(DBSkip())
+      EndDo
    Else 
       _aDadosEmail[1]:="Essa filial não possui movimento de transferência de leite a granel."
       _aDadosEmail[2]:="Filiais que não fazem transferência de leite a granel : "+_cITFLNGRA//Filiais que não fazem transferência de leite a granel 
       cChave:="AGLT003 / " + ccod+" / "+cSetor
    EndIf
    _cErroSche:=""
-   ZLJ->(Dbsetorder(2))
+   ZLJ->(DBSetOrder(2))
    
    If ZLJ->( DBSeek( xFilial() + cCod) )
       _cErroSche+="Achou na ZLJ c/ Status: "+ZLJ->ZLJ_STATUS+CRLF+CRLF
@@ -1282,34 +1254,34 @@ If nOption == 5 // EXCLUIR ESTOQUE
       _cCab1:="Transferencia;Filial;D3_NUMSEQ;Cod.Produto;Local;D3_EMISSAO;Qtde.SD3;B2_QATU;Saldo;D3_ESTORNO;Usuario.SD3"
       _cTextoLog+=_cCab1 + CRLF
 
-      SB2->(DBSETORDER(1))
+      SB2->(DBSetOrder(1))
       If _nRec04 > 0
-         SD3->(DBGOTO(_nRec04))
+         SD3->(DBGoTo(_nRec04))
 
          SB2->(DBSeek(xFilial("SB2")+SD3->D3_COD+SD3->D3_LOCAL))
          _lSomaPTer :=(SB2->B2_FILIAL $ _cFilTer .And. SB2->B2_LOCAL $ _cLocTer)
          _nSaldoDisp:=SB2->B2_QATU - SB2->B2_RESERVA - SB2->B2_QEMP + If(_lSomaPTer,SB2->B2_QNPT,0)
 
-         _cLinha:="Antes.mata261;"+xFilial("SD3")+";"+SD3->D3_NUMSEQ+";"+SD3->D3_COD+";"+SD3->D3_LOCAL+";"+DTOC(SD3->D3_EMISSAO)+";"+TRANS((SD3->D3_QUANT),_cPicD3QUAN)+";"+TRANS((SB2->B2_QATU),_cPicB2QATU)+";"+TRANS((_nSaldoDisp),_cPicB2QATU)+";"+SD3->D3_ESTORNO+";"+SD3->D3_USUARIO
+         _cLinha:="Antes.mata261;"+xFilial("SD3")+";"+SD3->D3_NUMSEQ+";"+SD3->D3_COD+";"+SD3->D3_LOCAL+";"+DToC(SD3->D3_EMISSAO)+";"+TRANS((SD3->D3_QUANT),_cPicD3QUAN)+";"+TRANS((SB2->B2_QATU),_cPicB2QATU)+";"+TRANS((_nSaldoDisp),_cPicB2QATU)+";"+SD3->D3_ESTORNO+";"+SD3->D3_USUARIO
          aAdd(_aTLinhas,_cLinha)
          _cTextoLog+=_cLinha
          _cTextoLog+=CRLF
       EndIf
 
       If _nRec34 > 0
-         SD3->(DBGOTO(_nRec34))
+         SD3->(DBGoTo(_nRec34))
          SB2->(DBSeek(xFilial()+SD3->D3_COD+SD3->D3_LOCAL))
          _lSomaPTer :=(SB2->B2_FILIAL $ _cFilTer .And. SB2->B2_LOCAL $ _cLocTer)
          _nSaldoDisp:=SB2->B2_QATU - SB2->B2_RESERVA - SB2->B2_QEMP + If(_lSomaPTer,SB2->B2_QNPT,0)
 
-         _cLinha:="Antes.mata261;"+xFilial("SD3")+";"+SD3->D3_NUMSEQ+";"+SD3->D3_COD+";"+SD3->D3_LOCAL+";"+DTOC(SD3->D3_EMISSAO)+";"+TRANS((SD3->D3_QUANT),_cPicD3QUAN)+";"+TRANS((SB2->B2_QATU),_cPicB2QATU)+";"+TRANS((_nSaldoDisp),_cPicB2QATU)+";"+SD3->D3_ESTORNO+";"+SD3->D3_USUARIO
+         _cLinha:="Antes.mata261;"+xFilial("SD3")+";"+SD3->D3_NUMSEQ+";"+SD3->D3_COD+";"+SD3->D3_LOCAL+";"+DToC(SD3->D3_EMISSAO)+";"+TRANS((SD3->D3_QUANT),_cPicD3QUAN)+";"+TRANS((SB2->B2_QATU),_cPicB2QATU)+";"+TRANS((_nSaldoDisp),_cPicB2QATU)+";"+SD3->D3_ESTORNO+";"+SD3->D3_USUARIO
          aAdd(_aTLinhas,_cLinha)
          _cTextoLog+=_cLinha
          _cTextoLog+=CRLF
       EndIf
 
       If _nRec04 > 0//DEIXA POSICIONADO NA PRODUTO 08000000004
-         SD3->(DBGOTO(_nRec04))
+         SD3->(DBGoTo(_nRec04))
       EndIf
 
       //FAZ ESTORNO DA TRANSFERÊNCIA
@@ -1320,40 +1292,40 @@ If nOption == 5 // EXCLUIR ESTOQUE
       MSExecAuto({|x,y| mata261(x,y)},aAuto,6) //ESTORNO DA TRANSFERÊNCIA
       ddatabase := _ddataori
 
-      SB2->(DBSETORDER(1))//Reordeno pq o mata261 pode pode tirar da ordem 1
+      SB2->(DBSetOrder(1))//Reordeno pq o mata261 pode pode tirar da ordem 1
       _lEstonornou:=.T.
       If _nRec04 > 0
-         SD3->(DBGOTO(_nRec04))
+         SD3->(DBGoTo(_nRec04))
          SB2->(DBSeek(xFilial()+SD3->D3_COD+SD3->D3_LOCAL))
          _lSomaPTer :=(SB2->B2_FILIAL $ _cFilTer .And. SB2->B2_LOCAL $ _cLocTer)
          _nSaldoDisp:=SB2->B2_QATU - SB2->B2_RESERVA - SB2->B2_QEMP + If(_lSomaPTer,SB2->B2_QNPT,0)
 
-         _cLinha:="Depois.mata261;"+xFilial("SD3")+";"+SD3->D3_NUMSEQ+";"+SD3->D3_COD+";"+SD3->D3_LOCAL+";"+DTOC(SD3->D3_EMISSAO)+";"+TRANS((SD3->D3_QUANT),_cPicD3QUAN)+";"+TRANS((SB2->B2_QATU),_cPicB2QATU)+";"+TRANS((_nSaldoDisp),_cPicB2QATU)+";"+SD3->D3_ESTORNO+";"+SD3->D3_USUARIO
+         _cLinha:="Depois.mata261;"+xFilial("SD3")+";"+SD3->D3_NUMSEQ+";"+SD3->D3_COD+";"+SD3->D3_LOCAL+";"+DToC(SD3->D3_EMISSAO)+";"+TRANS((SD3->D3_QUANT),_cPicD3QUAN)+";"+TRANS((SB2->B2_QATU),_cPicB2QATU)+";"+TRANS((_nSaldoDisp),_cPicB2QATU)+";"+SD3->D3_ESTORNO+";"+SD3->D3_USUARIO
          aAdd(_aTLinhas,_cLinha)
          _cTextoLog+=_cLinha+CRLF
          _lEstonornou:=(SD3->D3_ESTORNO = 'S')
       EndIf
       
       If _nRec34 > 0
-         SD3->(DBGOTO(_nRec34))
+         SD3->(DBGoTo(_nRec34))
          SB2->(DBSeek(xFilial()+SD3->D3_COD+SD3->D3_LOCAL))
          _lSomaPTer :=(SB2->B2_FILIAL $ _cFilTer .And. SB2->B2_LOCAL $ _cLocTer)
          _nSaldoDisp:=SB2->B2_QATU - SB2->B2_RESERVA - SB2->B2_QEMP + If(_lSomaPTer,SB2->B2_QNPT,0)
 
-         _cLinha:="Depois.mata261;"+xFilial("SD3")+";"+SD3->D3_NUMSEQ+";"+SD3->D3_COD+";"+SD3->D3_LOCAL+";"+DTOC(SD3->D3_EMISSAO)+";"+TRANS((SD3->D3_QUANT),_cPicD3QUAN)+";"+TRANS((SB2->B2_QATU),_cPicB2QATU)+";"+TRANS((_nSaldoDisp),_cPicB2QATU)+";"+SD3->D3_ESTORNO+";"+SD3->D3_USUARIO
+         _cLinha:="Depois.mata261;"+xFilial("SD3")+";"+SD3->D3_NUMSEQ+";"+SD3->D3_COD+";"+SD3->D3_LOCAL+";"+DToC(SD3->D3_EMISSAO)+";"+TRANS((SD3->D3_QUANT),_cPicD3QUAN)+";"+TRANS((SB2->B2_QATU),_cPicB2QATU)+";"+TRANS((_nSaldoDisp),_cPicB2QATU)+";"+SD3->D3_ESTORNO+";"+SD3->D3_USUARIO
          aAdd(_aTLinhas,_cLinha)
          _cTextoLog+=_cLinha+CRLF+CRLF
-         _lEstonornou:=(_lEstonornou .AND. (SD3->D3_ESTORNO = 'S'))
+         _lEstonornou:=(_lEstonornou .And. (SD3->D3_ESTORNO = 'S'))
       EndIf
 
-      If lMsErroAuto .OR. !_lEstonornou//Se ainda está posicionado em um SD3 válido com mesmo número de sequência é porque a exclusão não deu certo
+      If lMsErroAuto .Or. !_lEstonornou//Se ainda está posicionado em um SD3 válido com mesmo número de sequência é porque a exclusão não deu certo
          _lEnvEmailErro:=.T.
          _cErroSche:="( "+CFILANT+" / "+SD3->D3_NUMSEQ+" / "+AllTrim(SD3->D3_CHAVEF1)+" / D3_ESTORNO='"+SD3->D3_ESTORNO+"' ) NÃO foi estornado."+CRLF
          If lMsErroAuto			
             _cErroME:=AllTrim(MostraErro())
-            Do While RIGHT(_cErroME,2) = CRLF .AND. LEN(_cErroME) > 0
-               _cErroME:=LEFT(_cErroME,LEN(_cErroME)-2)//TIRA OS ENTERs FINAIS
-            Enddo
+            While RIGHT(_cErroME,2) = CRLF .And. Len(_cErroME) > 0
+               _cErroME:=LEFT(_cErroME,Len(_cErroME)-2)//TIRA OS ENTERs FINAIS
+            EndDo
             _cErroSche+="[ MostraErro(): "+AllTrim(_cErroME)+" ]"
             _aDadosEmail[5]:=StrTran(_cErroSche,CRLF,"<br>")
          Else
@@ -1378,7 +1350,7 @@ If nOption == 5 // EXCLUIR ESTOQUE
    EndIf
    _aDadosEmail[5]:=StrTran(_cErroSche,CRLF,"<br>")
 
-   SD3->(Dbsetorder(1))
+   SD3->(DBSetOrder(1))
    _cAlias := GetNextAlias()
 
    If !Empty(cSetor)
@@ -1403,13 +1375,13 @@ If nOption == 5 // EXCLUIR ESTOQUE
       _cCab1:=_cCab2
    EndIf
 
-   Do While (_cAlias)->( !Eof() )
+   While (_cAlias)->( !Eof() )
 
       _aDadosEmail[6]:=_aDadosEmail[6]+" foi encontrado. "
       _cTextoLog+="SELECT da busca do Estoque: "+_aDadosEmail[6]+CRLF+CRLF
       _cTextoLog+=_cCab2 + CRLF
 
-      SD3->(Dbsetorder(1))
+      SD3->(DBSetOrder(1))
       _aAutoSD3 := {}
       SD3->(DBGoTo((_cAlias)->SD3REC))
 
@@ -1426,30 +1398,30 @@ If nOption == 5 // EXCLUIR ESTOQUE
       _lSomaPTer :=(SB2->B2_FILIAL $ _cFilTer .And. SB2->B2_LOCAL $ _cLocTer)
       _nSaldoDisp:=SB2->B2_QATU - SB2->B2_RESERVA - SB2->B2_QEMP + If(_lSomaPTer,SB2->B2_QNPT,0)
 
-      _cLinha:="Antes.mata240;"+xFilial("SD3")+";"+SD3->D3_NUMSEQ+";"+SD3->D3_COD+";"+SD3->D3_LOCAL+";"+DTOC(SD3->D3_EMISSAO)+";"+TRANS((SD3->D3_QUANT),_cPicD3QUAN)+";"+TRANS((SB2->B2_QATU),_cPicB2QATU)+";"+TRANS((_nSaldoDisp),_cPicB2QATU)+";"+SD3->D3_ESTORNO+";"+SD3->D3_USUARIO
+      _cLinha:="Antes.mata240;"+xFilial("SD3")+";"+SD3->D3_NUMSEQ+";"+SD3->D3_COD+";"+SD3->D3_LOCAL+";"+DToC(SD3->D3_EMISSAO)+";"+TRANS((SD3->D3_QUANT),_cPicD3QUAN)+";"+TRANS((SB2->B2_QATU),_cPicB2QATU)+";"+TRANS((_nSaldoDisp),_cPicB2QATU)+";"+SD3->D3_ESTORNO+";"+SD3->D3_USUARIO
       _cTextoLog+=_cLinha
       _cTextoLog+=CRLF
       aAdd(_aTLinhas,_cLinha)
       MSExecAuto( {|x,y| Mata240(x,y) } , _aAutoSD3 , 5 ) //ESTORNO DO ESTOQUE
       SD3->(DBGoTo((_cAlias)->SD3REC))
 
-      SB2->(DBSETORDER(1))//Reordeno pq o Mata240 pode pode tirar da ordem 1
-      SB2->(DBSEEK(xFilial()+SD3->D3_COD+SD3->D3_LOCAL))
+      SB2->(DBSetOrder(1))//Reordeno pq o Mata240 pode pode tirar da ordem 1
+      SB2->(DBSeek(xFilial()+SD3->D3_COD+SD3->D3_LOCAL))
       _lSomaPTer :=(SB2->B2_FILIAL $ _cFilTer .And. SB2->B2_LOCAL $ _cLocTer)
       _nSaldoDisp:=SB2->B2_QATU - SB2->B2_RESERVA - SB2->B2_QEMP + If(_lSomaPTer,SB2->B2_QNPT,0)
       
-      _cLinha:="Depois.mata240;"+xFilial("SD3")+";"+SD3->D3_NUMSEQ+";"+SD3->D3_COD+";"+SD3->D3_LOCAL+";"+DTOC(SD3->D3_EMISSAO)+";"+TRANS((SD3->D3_QUANT),_cPicD3QUAN)+";"+TRANS((SB2->B2_QATU),_cPicB2QATU)+";"+TRANS((_nSaldoDisp),_cPicB2QATU)+";"+SD3->D3_ESTORNO+";"+SD3->D3_USUARIO
+      _cLinha:="Depois.mata240;"+xFilial("SD3")+";"+SD3->D3_NUMSEQ+";"+SD3->D3_COD+";"+SD3->D3_LOCAL+";"+DToC(SD3->D3_EMISSAO)+";"+TRANS((SD3->D3_QUANT),_cPicD3QUAN)+";"+TRANS((SB2->B2_QATU),_cPicB2QATU)+";"+TRANS((_nSaldoDisp),_cPicB2QATU)+";"+SD3->D3_ESTORNO+";"+SD3->D3_USUARIO
       _cTextoLog+=_cLinha
       aAdd(_aTLinhas,_cLinha)
       
-      If lMsErroAuto .OR. SD3->D3_ESTORNO <> 'S'//Se ainda está posicionado em um SD3 válido com mesmo número de sequência é porque a exclusão não deu certo
+      If lMsErroAuto .Or. SD3->D3_ESTORNO <> 'S'//Se ainda está posicionado em um SD3 válido com mesmo número de sequência é porque a exclusão não deu certo
          _lEnvEmailErro:=.T.
          _cErroSche:="( "+CFILANT+" / "+SD3->D3_NUMSEQ+" / "+AllTrim(SD3->D3_L_ORIG)+" / D3_ESTORNO='"+SD3->D3_ESTORNO+"') NÃO foi estornado. "+CRLF
          If lMsErroAuto			
             _cErroME:=AllTrim(MostraErro())
-            Do While RIGHT(_cErroME,2) = CRLF .AND. LEN(_cErroME) > 0
-               _cErroME:=LEFT(_cErroME,LEN(_cErroME)-2)//TIRA OS ENTERs FINAIS
-            Enddo
+            While RIGHT(_cErroME,2) = CRLF .And. Len(_cErroME) > 0
+               _cErroME:=LEFT(_cErroME,Len(_cErroME)-2)//TIRA OS ENTERs FINAIS
+            EndDo
             _cErroSche +="[ MostraErro(): "+_cErroME+" ]"
             _aDadosEmail[7]:=StrTran(_cErroSche,CRLF,"<br>")
          Else
@@ -1468,10 +1440,10 @@ If nOption == 5 // EXCLUIR ESTOQUE
          _cTextoLog+=CRLF+CRLF+"Resultado do estorno do estoque: "+_cErroSche
       EndIf
             
-      (_cAlias)->( DBSKIP() )
+      (_cAlias)->( DBSkip() )
    EndDo
 
-   If (_cAlias)->( Eof() ) .AND. (_cAlias)->( BOF() )
+   If (_cAlias)->( Eof() ) .And. (_cAlias)->( Bof() )
       If !lSchedule
          FWAlertWarning("Não foram encontrados movimentos de estoque para essa Viagem: "+cCod+;
                   ". A recusa ou exclusão da viagem será feita mesmo sem os movimentos!","AGLT00333")
@@ -1489,11 +1461,11 @@ If nOption == 5 // EXCLUIR ESTOQUE
 
    End Sequence
 
-   _cFileLog:= _cDirLog+'aglt003_'+AllTrim(cCod)+"_"+(DTOS(DATE())+"_"+StrTran(Time(),":",""))+".csv" 
+   _cFileLog:= _cDirLog+'aglt003_'+AllTrim(cCod)+"_"+(DToS(DATE())+"_"+StrTran(Time(),":",""))+".csv" 
    MemoWrite(LOWER(_cFileLog),_cTextoLog)
 EndIf
 
-If nOption == 5 .AND. !lSchedule .AND. ( _lEnvEmailErro .OR. !_lAmbTeste  )
+If nOption == 5 .And. !lSchedule .And. ( _lEnvEmailErro .Or. !_lAmbTeste  )
    
    _aConfig:= U_ITCFGEML('') 
    _cEmail:="sistema@italac.com.br"
@@ -1525,7 +1497,7 @@ Data da Criacao---: 09/10/2008
 Descrição---------: Funcao usada verIficar se existe um movimento interno relativo a entrada
 Parametros--------: ccod - ticket do movimento
                cpsetor - setor do movimento
-Retorno-----------: _lret - se existe ou não o movimento
+Retorno-----------: _lRet - se existe ou não o movimento
 ===============================================================================================================================
 */
 Static Function AGLT003O(cCod As Character,cpSetor As Character)
@@ -1562,7 +1534,7 @@ Data da Criacao---: 15/09/2008
 Descrição---------: Funcao usada para apagar registros na ZLD
 Parametros--------: aregs - array com registros a apagar
                lDelestoque - Se faz estorno do estoque ou não
-Retorno-----------: _lret - Se gravou os movimentos com sucesso ou não
+Retorno-----------: _lRet - Se gravou os movimentos com sucesso ou não
 ===============================================================================================================================
 */
 Static Function AGLT003D(aRegs As Array,lDelEstoque As Logical)
@@ -1577,7 +1549,7 @@ Private _llret	:= .F. As Logical
 // Interno e continua exclusao
 //================================================================================
 If AGLT003A( cTicket , cSetor ) .And. lDelEstoque
-   fwmsgrun(,{|| _llret := U_AGLT003G( cTicket , 5 ) }, "Aguarde...", "Gravando estorno de estoque...")
+   FWMsgRun(,{|| _llret := U_AGLT003G( cTicket , 5 ) }, "Aguarde...", "Gravando estorno de estoque...")
 
    If _llret
       lContinue := .T.
@@ -1592,11 +1564,11 @@ If lContinue
    ZLD->( DBSetOrder(2) ) //ZLD_FILIAL+ZLD_CODREC+ZLD_RETIRO+ZLD_RETILJ
    For _nI := 1 To Len( aRegs )
       If  aRegs[_nI][nPosRecno] # 0 //ZLD->( DBSeek( xFilial("ZLD")+cCodRec + aRegs[_nI][nPosRetiro] + aRegs[_nI][nPosLoja] ) )
-            If lDelEstoque .OR. aTail( aRegs[_nI] )//VerIfica se é exlcusao do Ticket OU se o item foi deletado
-              ZLD->( DBGOTO( aRegs[_nI][nPosRecno] ) ) 
+            If lDelEstoque .Or. aTail( aRegs[_nI] )//VerIfica se é exlcusao do Ticket OU se o item foi deletado
+              ZLD->( DBGoTo( aRegs[_nI][nPosRecno] ) ) 
               ZLD->( RecLock( "ZLD" , .F. ) )
               ZLD->( DBDelete() )
-              ZLD->( MSUnlock() )
+              ZLD->( MSUnLock() )
             EndIf
 
             If _lPrimieraVez
@@ -1657,9 +1629,9 @@ If (_cAlias)->( !Eof() )
    cSetor		:= (_cAlias)->ZL3_SETOR
    cDescSet	:= (_cAlias)->ZL2_DESCRI
    cVeicul		:= (_cAlias)->ZL3_VEICUL
-   cMotor		:= POSICIONE( "ZL1" , 1 , XFILIAL("ZL1") + cVeicul	, "ZL1_MOTORI"	)
-   cPlacaVeic	:= POSICIONE( "ZL1" , 1 , XFILIAL("ZL1") + cVeicul	, "ZL1_PLACA"	)
-   cDescMot	:= POSICIONE( "ZL0" , 1 , XFILIAL("ZL0") + cMotor	, "ZL0_NOME"	)
+   cMotor		:= Posicione( "ZL1" , 1 , xFilial("ZL1") + cVeicul	, "ZL1_MOTORI"	)
+   cPlacaVeic	:= Posicione( "ZL1" , 1 , xFilial("ZL1") + cVeicul	, "ZL1_PLACA"	)
+   cDescMot	:= Posicione( "ZL0" , 1 , xFilial("ZL0") + cMotor	, "ZL0_NOME"	)
    nTotKm		:= (_cAlias)->ZL3_KM
    _lRet		:= .T.
    
@@ -1699,7 +1671,7 @@ If Empty(cpVlr)
    u_getNwTicket(.T.)
    cpVlr := cTicket
 Else
-   If Inclui .AND. ISALPHA(cpVlr)//LEFT(cpVlr,1) = "S"
+   If Inclui .And. ISALPHA(cpVlr)//LEFT(cpVlr,1) = "S"
       FWAlertWarning("Ticket nao pode começar com letras, reservado para o SmartQuestion","AGLT00335")
       Return .T.//.T. BLOQUEIA
    EndIf
@@ -1743,7 +1715,7 @@ nTotBom		:= 0
 
 If _lRet
    If FWAlertYesNo("O Ticket digitado já existe! Deseja complementar os lancamentos desse Ticket?","AGLT00336")
-      (_cAlias)->(DbGoTop())
+      (_cAlias)->(DBGoTop())
       //Atualiza campos de cabeçalho e muda condição para inclusão de complemento 
        nVolAnt		:= _nT1
       nLeiteBom	:= _nT1
@@ -1752,10 +1724,10 @@ If _lRet
        _lRet		:= .F.
        lAbleTicket := .F. //Flag que indica se é complemento ou não, .F. é complemento
        cCodRec     := (_cAlias)->ZLD_CODREC
-       dDtcoleta   := stod((_cAlias)->ZLD_DTCOLE)
-       dData       := stod((_cAlias)->ZLD_DTLANC)
+       dDtcoleta   := SToD((_cAlias)->ZLD_DTCOLE)
+       dData       := SToD((_cAlias)->ZLD_DTLANC)
        csetor      := (_cAlias)->ZLD_SETOR
-       cDescSet    := Substr(Posicione("ZL2",1,xFilial("ZL2")+cSetor,"ZL2_DESCRI"),1,20) 
+       cDescSet    := SubStr(Posicione("ZL2",1,xFilial("ZL2")+cSetor,"ZL2_DESCRI"),1,20) 
        _culticket  := cTicket
        crotaori    := (_cAlias)->ZLD_LINROT
    Else
@@ -1827,7 +1799,7 @@ Retorno-----------: Nenhum
 */
 Static Function AGLT003W(cpCodRec As Character,cpTicket As Character,cpSetor As Character)
 
-Local _aArea	:= GetArea() As Array
+Local _aArea	:= FWGetArea() As Array
 Local _nRet		:= 0 As Numeric
 Local _cAlias	:= GetNextAlias() As Character
 
@@ -1856,7 +1828,7 @@ Autor-------------: Abrahao
 Data da Criacao---: 09/01/2009
 Descrição---------: VerIfica se todos produtores no aCols pertencem a linha da recepcao
 Parametros--------: Nenhum
-Retorno-----------: _lret - Se produtores pertecem a linha da recepção
+Retorno-----------: _lRet - Se produtores pertecem a linha da recepção
 ===============================================================================================================================
 */
 Static Function AGLT003Q
@@ -1866,9 +1838,9 @@ Local _nI	:= 0 As Numeric
 Local _cAux	:= '' As Character
 
 For _nI := 1 To Len( aCols )
-   If !aTail( aCols[_nI] ) .AND. !(Len( aCols ) == 1 .And. Empty( aCols[1][nPosRetiro] ) .And. Empty( aCols[1][nPosQtdBom] ))
-      _cAux := POSICIONE( "SA2" , 1 , XFILIAL("SA2") + aCols[_nI][nPosRetiro] + aCols[_nI][nPosLoja] , "A2_L_LI_RO" )
-      If _cAux != cLinRot .and. Empty( aCols[_nI][nPosAtendi] )
+   If !aTail( aCols[_nI] ) .And. !(Len( aCols ) == 1 .And. Empty( aCols[1][nPosRetiro] ) .And. Empty( aCols[1][nPosQtdBom] ))
+      _cAux := Posicione( "SA2" , 1 , xFilial("SA2") + aCols[_nI][nPosRetiro] + aCols[_nI][nPosLoja] , "A2_L_LI_RO" )
+      If _cAux != cLinRot .And. Empty( aCols[_nI][nPosAtendi] )
            _lRet := .F.  
            Exit
       EndIf
@@ -1924,10 +1896,10 @@ If SA2->( DBSeek( xFilial('SA2') + cCodProd + cLjProd ) )
       EndSql
       
       DBSelectArea( cAliasZLF )
-      (cAliasZLF)->( DBGotop() )
+      (cAliasZLF)->( DBGoTop() )
       
       COUNT TO nCountRec //Contabiliza o numero de registros encontrados pela query
-      (cAliasZLF)->( DBGotop() )
+      (cAliasZLF)->( DBGoTop() )
       
       If nCountRec > 0
          lRet := .T.
@@ -1965,7 +1937,7 @@ Static Function AGLT003Z
 Local _sDtInic		:= "" As Character
 Local _sDtFina		:= "" As Character
 Local _cAlias		:= "" As Character
-Local _aAreaZLM	:= ZLM->( GetArea() ) As Array
+Local _aAreaZLM	:= ZLM->( FWGetArea() ) As Array
 Local _nPosCodig	:= aScan( aHeader , {|x| AllTrim( Upper(x[2]) ) == "ZLD_RETIRO"	} ) As Numeric
 Local _nPosLoja	:= aScan( aHeader , {|x| AllTrim( Upper(x[2]) ) == "ZLD_RETILJ"	} ) As Numeric
 Local _nPosNome	:= aScan( aHeader , {|x| AllTrim( Upper(x[2]) ) == "ZLD_DCRRET"	} ) As Numeric
@@ -1987,18 +1959,18 @@ EndIf
 // Somente serao aceitos tickets que estejam compreendidos dentro do intervalo de
 // dia inicial e final do mes corrente.
 //================================================================================
-_sDtInic := DtoS( firstDay( Date()	) )
-_sDtFina := DtoS( lastday( Date()	) )
+_sDtInic := DToS( firstDay( Date()	) )
+_sDtFina := DToS( lastday( Date()	) )
 
 If !Pergunte( _cPerg , .T. )
-     Return()
+     Return
 EndIf
 
 _cAlias := GetNextAlias()
 
 BeginSql alias _cAlias
-   SELECT SA2.A2_COD CODIGO, SA2.A2_LOJA LOJA, SUBSTR(SA2.A2_NOME,1,40) NOME, SA2.A2_L_CLASS
-   FROM %table:ZLD% ZLD, %table:SA2% SA2 
+   SELECT SA2.A2_COD CODIGO, SA2.A2_LOJA LOJA, SubStr(SA2.A2_NOME,1,40) NOME, SA2.A2_L_CLASS
+   FROM %Table:ZLD% ZLD, %Table:SA2% SA2 
    WHERE ZLD.D_E_L_E_T_ = ' '
    AND SA2.D_E_L_E_T_ = ' '
    AND ZLD.ZLD_FILIAL =  %exp:cFilAnt%
@@ -2109,7 +2081,7 @@ Local _aCab       := {} As Array
 _cMsgEml := '<html>'
 _cMsgEml += '<head><title>'+cGetAssun+'</title></head>'
 _cMsgEml += '<body>'
-_cMsgEml += '<style type="text/css"><!--'
+_cMsgEml += '<style Type="text/css"><!--'
 _cMsgEml += 'table.bordasimples { border-collapse: collapse; }'
 _cMsgEml += 'table.bordasimples tr td { border:1px solid #777777; }'
 _cMsgEml += 'td.titulos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #C6E2FF; }'
@@ -2130,7 +2102,7 @@ _cMsgEml += '      <td align="center" colspan="2" class="grupos">Dados detalhado
 _cMsgEml += '    </tr>'
 _cMsgEml += '    <tr>'
 _cMsgEml += '      <td class="itens" align="center" width="30%"><b>Feito por: </b></td>'
-_cMsgEml += '      <td class="itens" >'+ UsrFullName(__cUserID) +'</td>' 
+_cMsgEml += '      <td class="itens" >'+ UsrFullName(__cUserId) +'</td>' 
 _cMsgEml += '    </tr>'
 _cMsgEml += '    <tr>'
 _cMsgEml += '      <td class="itens" align="center" width="30%"><b>Filial:</b></td>'
@@ -2138,7 +2110,7 @@ _cMsgEml += '      <td class="itens" >'+ _cNomeFil +'</td>'
 _cMsgEml += '    </tr>'
 _cMsgEml += '    <tr>'
 _cMsgEml += '      <td class="itens" align="center" width="30%"><b>Data / Hora:</b></td>'
-_cMsgEml += '      <td class="itens" >'+ DTOC(DATE())+" / "+TIME() +'</td>'
+_cMsgEml += '      <td class="itens" >'+ DToC(DATE())+" / "+Time() +'</td>'
 _cMsgEml += '    </tr>'
 _cMsgEml += '    <tr>'
 _cMsgEml += '      <td class="itens" align="center" width="30%"><b>Lançamento de transferencia origem:</b></td>'
@@ -2189,24 +2161,24 @@ _cMsgEml += '    <tr>'
 _aCab:=StrToKarr2(_cCab1,";",.T.)
 
 _cMsgEml += '    <tr>'
-_cMsgEml += '      <td align="center" colspan="'+STR(LEN(_aCab),2)+'" class="grupos">Detalhamento dos dados do SD3 antes e depois do estorno da tranferencia e/ou do estoque</b></td>'
+_cMsgEml += '      <td align="center" colspan="'+Str(Len(_aCab),2)+'" class="grupos">Detalhamento dos dados do SD3 antes e depois do estorno da tranferencia e/ou do estoque</b></td>'
 _cMsgEml += '    </tr>'
 
-_cSize:= STR(INT(100/LEN(_aCab)),2,0)//deixa o % igual para todos os campos
+_cSize:= Str(INT(100/Len(_aCab)),2,0)//deixa o % igual para todos os campos
 
 _cMsgEml += '<tr>'
-For _nI := 1 To LEN(_aCab)
+For _nI := 1 To Len(_aCab)
    _cMsgEml += ' <td class="itens" align="center" width="'+_cSize+'%"><b>'+_aCab[_nI]+'</b></td>'
 Next _nI
 _aCab:=StrToKarr2(_cCab2,";",.T.)
 _cMsgEml += '</tr>'
 
-For _n1 := 1 To LEN(_aLinhas)
+For _n1 := 1 To Len(_aLinhas)
    _cMsgEml += '<tr>'
-   If _n1 >= 5 .AND. LEN(_aCab) > 0
+   If _n1 >= 5 .And. Len(_aCab) > 0
       _cMsgEml += '</tr>'
       _cMsgEml += '<tr>'
-      For _nC := 1 To LEN(_aCab)
+      For _nC := 1 To Len(_aCab)
             _cMsgEml += '<td class="itens" align="center" width="'+_cSize+'%"><b>'+_aCab[_nC]+'</b></td>'
       Next _nC
       _aCab    := {}//ZERA PARA NÃO POR DE NOVO O CABEC
@@ -2214,7 +2186,7 @@ For _n1 := 1 To LEN(_aLinhas)
       _cMsgEml += '<tr>'
    EndIf
    _aILinhas:=StrToKarr2(_aLinhas[_n1],";",.T.)
-   For _nI := 1 To LEN(_aILinhas)
+   For _nI := 1 To Len(_aILinhas)
       //StrTran(_cTextoLog,CRLF,"<br><br>")
       _cMsgEml += '<td class="itens" align="center" width="'+_cSize+'%">'+_aILinhas[_nI]+'</td>'
    Next _nI
@@ -2252,10 +2224,10 @@ Local cPilha   := "" As Character
 Local cPilhas  := "" As Character
 Local cProcName:= "XX" As Character
 
-Do While !Empty(cProcName) .AND. nConta < 25
+While !Empty(cProcName) .And. nConta < 25
    cProcName:=Upper(AllTrim(ProcName(nConta)))
    cPilha:=""
-   If !Empty(cProcName) .AND. !cProcName $ "ACTIVATE/FWMSGRUN/PROCESSA/__EXECUTE/FWPREEXECUTE/SIGAIXB/{|SELF|(EVAL(OSELF:BINIT))}"
+   If !Empty(cProcName) .And. !cProcName $ "ACTIVATE/FWMsgRun/Processa/__EXECUTE/FWPREEXECUTE/SIGAIXB/{|SELF|(EVAL(OSELF:BINIT))}"
       aTipo:={};   aArquivo:={};   aLinha:={};   aData:={};   aHora:={}
       aRet :=GetFuncArray( ProcName(nConta),aTipo,aArquivo,aLinha,aData,aHora)       
       cPilha+=StrTran(ProcName(nConta),"  ","")
@@ -2263,7 +2235,7 @@ Do While !Empty(cProcName) .AND. nConta < 25
          cPilha+=" Fonte: ("+aArquivo[1]+")"
       EndIf
       If Eval(_bType,"aData[1]") = "D" 
-         cPilha+=" "+DTOC(aData[1])
+         cPilha+=" "+DToC(aData[1])
       EndIf
       If Eval(_bType,"aHora[1]") = "C" 
          cPilha+=" "+aHora[1]
@@ -2275,6 +2247,6 @@ Do While !Empty(cProcName) .AND. nConta < 25
    EndIf
    nConta++   
 EndDo
-cPilhas:=LEFT(cPilhas,LEN(cPilhas)-2)//Tira o último enter
+cPilhas:=LEFT(cPilhas,Len(cPilhas)-2)//Tira o último enter
 
 Return cPilhas

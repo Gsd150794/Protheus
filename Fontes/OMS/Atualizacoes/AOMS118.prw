@@ -7,13 +7,14 @@
 Julio Paz     | 08/03/2024 | Chamado 45006. Ajustar variável __cUserId em ambiente Scheduller p/ Protheus criar e preencher
 Julio Paz     | 27/03/2024 | Chamado 46748. Ajustar as integrações Protheus x Sistema Krona p/funcionar no novo servidor Linux
 Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Jose Gavetti  | 26/11/2025 | Chamado 51341. __cUserId não deve ter seu conteúdo alterado orientação TOTVS. 
 ===============================================================================================================================
 */
 
-#include "Protheus.ch" 
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "XMLXFUN.CH"
-#INCLUDE "TBICONN.CH"
+#Include "TOTVS.ch" 
+#Include "FWMVCDEF.CH"
+#Include "XMLXFUN.CH"
+#Include "TBICONN.CH"
 
 /*
 ===============================================================================================================================
@@ -383,34 +384,34 @@ Begin Sequence
    //=======================================================================================================
    // Lista de erros de retorno na integração com o sistema Krona.
    //=======================================================================================================
-   Aadd(_aErroRet,{'ERRO_LOGIN_001'        , 'Chave não encontrada para o Login.'})                                                           // Erro_login_001
-   Aadd(_aErroRet,{'ERRO_LOGIN_002'        , 'Usuario ou senha incorretos ou não existem.'})                                                  // Erro_login_002
-   Aadd(_aErroRet,{'ERRO_ENTRADA'          , 'URL ou método incorreto.'})                                                                     // Erro_entrada
-   Aadd(_aErroRet,{'ERRO_TRANSPORTADOR_001', 'Chave não encontrada para transportador.'})                                                     // Erro_transportador_001
-   Aadd(_aErroRet,{'ERRO_TRANSPORTADOR_002', 'Não foi possível adicionar transportador.'})                                                    // Erro_transportador_002
-   Aadd(_aErroRet,{'ERRO_MOTORISTA_1_001'  , 'Chave não encontrada para o motorista.'})                                                       // Erro_motorista_1_001
-   Aadd(_aErroRet,{'ERRO_MOTORISTA_01_002' , 'Não foi possível adicionar motorista 1.'})                                                      // Erro_motorista_01_002
-   Aadd(_aErroRet,{'ERRO_MOTORISTA_02_002' , 'Não foi possível adicionar motorista 2.'})                                                      // Erro_motorista_02_002
-   Aadd(_aErroRet,{'ERRO_VEICULO_001'      , 'Chave não encontrada para veículo.'})                                                           // Erro_veiculo_001
-   Aadd(_aErroRet,{'ERRO_VEICULO_002'      , 'Não foi possível adicionar veículo.'})                                                          // Erro_veiculo_002
-   Aadd(_aErroRet,{'ERRO_REBOQUE_1_002'    , 'Não encontrado ou não foi possível adicionar Reboque_1'})                                       // Erro_reboque_1_002
-   Aadd(_aErroRet,{'ERRO_REBOQUE_2_002'    , 'Não encontrado ou não foi possível adicionar Reboque_2'})                                       // Erro_reboque_2_002
-   Aadd(_aErroRet,{'ERRO_REBOQUE_3_002'    , 'Não encontrado ou não foi possível adicionar Reboque_3'})                                       // Erro_reboque_3_002
-   Aadd(_aErroRet,{'ERRO_ORIGEM_001'       , 'Chave não encontrada para origem.'})                                                            // Erro_origem_001
-   Aadd(_aErroRet,{'ERRO_ORIGEM_002'       , 'Não foi possível adicionar origem.'})                                                           // Erro_origem_002
-   Aadd(_aErroRet,{'ERRO_DESTINO_1_001'    , 'Chave não encontrada para destino.'})                                                           // Erro_destino_1_001
-   Aadd(_aErroRet,{'ERRO_DESTINO_1_002'    , 'Não foi possível adicionar destino.'})                                                          // Erro_destino_1_002
-   Aadd(_aErroRet,{'ERRO_DESTINO_N_002'    , 'Origem nco encontrado ou nco foi possmvel adicionar.'})                                         // Erro_destino_N_002
-   Aadd(_aErroRet,{'ERRO_VIAGEM_LIBERACAO' , 'Código de liberação da viagem não enviado.'})                                                   // Erro_viagem_liberacao
-   Aadd(_aErroRet,{'ERRO_VIAGEM_001'       , 'Chave não encontrada para viagem.'})                                                            // Erro_viagem_001
-   Aadd(_aErroRet,{'ERRO_VIAGEM_002'       , 'Não foi possível cadastrar a viagem.'})                                                         // Erro_viagem_002
-   Aadd(_aErroRet,{'ERRO_VIAGEM_003'       , 'Consulta de Maxxi Cadastro não aprovada para a viagem.'})                                                       // Erro_viagem_003
-   Aadd(_aErroRet,{'ERRO_VIAGEM_004'       , 'Tecnologia PRINCIPAL não é compatível com as tecnologias validas para a viagem.'})                              // Erro_viagem_004
-   Aadd(_aErroRet,{'ERRO_VIAGEM_005'       , 'Tecnologia REDUNDANTE FIXA DO VEICULO / REBOQUE não é compatível com as tecnologias validas para Viagem.'})     // Erro_viagem_005
-   Aadd(_aErroRet,{'ERRO_VIAGEM_006'       , 'Erro ao cadastrar resultados da pesquisa do Maxxi Cadastro para a viagem.'})                                    // Erro_viagem_006
-   Aadd(_aErroRet,{'ERRO_VIAGEM_007'       , 'Tecnologias LOCALIZADOR / ISCA não é compatível com as tecnologias validas para a viagem.'})                    // Erro_viagem_007
-   Aadd(_aErroRet,{'ERRO_VIAGEM_008'       , 'Tecnologias LOCALIZADOR / ISCA não informada para a viagem.'})                                                  // Erro_viagem_008    
-   Aadd(_aErroRet,{'ERRO_PERFIL_001'       , 'Valor da SM(Solicitação de Monitoramento) informada esta acima do valor maximo permitido para esta operação!'}) // Erro_perfil_001
+   aAdd(_aErroRet,{'ERRO_LOGIN_001'        , 'Chave não encontrada para o Login.'})                                                           // Erro_login_001
+   aAdd(_aErroRet,{'ERRO_LOGIN_002'        , 'Usuario ou senha incorretos ou não existem.'})                                                  // Erro_login_002
+   aAdd(_aErroRet,{'ERRO_ENTRADA'          , 'URL ou método incorreto.'})                                                                     // Erro_entrada
+   aAdd(_aErroRet,{'ERRO_TRANSPORTADOR_001', 'Chave não encontrada para transportador.'})                                                     // Erro_transportador_001
+   aAdd(_aErroRet,{'ERRO_TRANSPORTADOR_002', 'Não foi possível adicionar transportador.'})                                                    // Erro_transportador_002
+   aAdd(_aErroRet,{'ERRO_MOTORISTA_1_001'  , 'Chave não encontrada para o motorista.'})                                                       // Erro_motorista_1_001
+   aAdd(_aErroRet,{'ERRO_MOTORISTA_01_002' , 'Não foi possível adicionar motorista 1.'})                                                      // Erro_motorista_01_002
+   aAdd(_aErroRet,{'ERRO_MOTORISTA_02_002' , 'Não foi possível adicionar motorista 2.'})                                                      // Erro_motorista_02_002
+   aAdd(_aErroRet,{'ERRO_VEICULO_001'      , 'Chave não encontrada para veículo.'})                                                           // Erro_veiculo_001
+   aAdd(_aErroRet,{'ERRO_VEICULO_002'      , 'Não foi possível adicionar veículo.'})                                                          // Erro_veiculo_002
+   aAdd(_aErroRet,{'ERRO_REBOQUE_1_002'    , 'Não encontrado ou não foi possível adicionar Reboque_1'})                                       // Erro_reboque_1_002
+   aAdd(_aErroRet,{'ERRO_REBOQUE_2_002'    , 'Não encontrado ou não foi possível adicionar Reboque_2'})                                       // Erro_reboque_2_002
+   aAdd(_aErroRet,{'ERRO_REBOQUE_3_002'    , 'Não encontrado ou não foi possível adicionar Reboque_3'})                                       // Erro_reboque_3_002
+   aAdd(_aErroRet,{'ERRO_ORIGEM_001'       , 'Chave não encontrada para origem.'})                                                            // Erro_origem_001
+   aAdd(_aErroRet,{'ERRO_ORIGEM_002'       , 'Não foi possível adicionar origem.'})                                                           // Erro_origem_002
+   aAdd(_aErroRet,{'ERRO_DESTINO_1_001'    , 'Chave não encontrada para destino.'})                                                           // Erro_destino_1_001
+   aAdd(_aErroRet,{'ERRO_DESTINO_1_002'    , 'Não foi possível adicionar destino.'})                                                          // Erro_destino_1_002
+   aAdd(_aErroRet,{'ERRO_DESTINO_N_002'    , 'Origem nco encontrado ou nco foi possmvel adicionar.'})                                         // Erro_destino_N_002
+   aAdd(_aErroRet,{'ERRO_VIAGEM_LIBERACAO' , 'Código de liberação da viagem não enviado.'})                                                   // Erro_viagem_liberacao
+   aAdd(_aErroRet,{'ERRO_VIAGEM_001'       , 'Chave não encontrada para viagem.'})                                                            // Erro_viagem_001
+   aAdd(_aErroRet,{'ERRO_VIAGEM_002'       , 'Não foi possível cadastrar a viagem.'})                                                         // Erro_viagem_002
+   aAdd(_aErroRet,{'ERRO_VIAGEM_003'       , 'Consulta de Maxxi Cadastro não aprovada para a viagem.'})                                                       // Erro_viagem_003
+   aAdd(_aErroRet,{'ERRO_VIAGEM_004'       , 'Tecnologia PRINCIPAL não é compatível com as tecnologias validas para a viagem.'})                              // Erro_viagem_004
+   aAdd(_aErroRet,{'ERRO_VIAGEM_005'       , 'Tecnologia REDUNDANTE FIXA DO VEICULO / REBOQUE não é compatível com as tecnologias validas para Viagem.'})     // Erro_viagem_005
+   aAdd(_aErroRet,{'ERRO_VIAGEM_006'       , 'Erro ao cadastrar resultados da pesquisa do Maxxi Cadastro para a viagem.'})                                    // Erro_viagem_006
+   aAdd(_aErroRet,{'ERRO_VIAGEM_007'       , 'Tecnologias LOCALIZADOR / ISCA não é compatível com as tecnologias validas para a viagem.'})                    // Erro_viagem_007
+   aAdd(_aErroRet,{'ERRO_VIAGEM_008'       , 'Tecnologias LOCALIZADOR / ISCA não informada para a viagem.'})                                                  // Erro_viagem_008    
+   aAdd(_aErroRet,{'ERRO_PERFIL_001'       , 'Valor da SM(Solicitação de Monitoramento) informada esta acima do valor maximo permitido para esta operação!'}) // Erro_perfil_001
 
    //============================================================
    // Validações Iniciais.
@@ -428,7 +429,7 @@ Begin Sequence
    
    If DAK->DAK_I_PREC == "1"
       If _cChamada == "M" // Chamada via menu.
-         U_ItMsg("Esta é uma pré-carga. Não é permitido integrar uma pré-carga para o sistema Krona.","Atenção","É necessário efetivar a pré-carga para poder integrar para o sistema Krona.",1)
+         U_ITMsg("Esta é uma pré-carga. Não é permitido integrar uma pré-carga para o sistema Krona.","Atenção","É necessário efetivar a pré-carga para poder integrar para o sistema Krona.",1)
       Else
          U_ItConOut("[AOMS118] - Esta é uma pré-carga. Não é permitido integrar uma pré-carga para o sistema Krona.")
       EndIf 
@@ -438,7 +439,7 @@ Begin Sequence
 
    _lAltViagem := .F.                                    
    If DAK->DAK_I_ENVK == "S"  .And. _cChamada == "M" // Chamada via menu.
-      U_ItMsg("A carga seleciondada já foi integrada para o sistema Krona.","Atenção","Clique em OK para exibir os dados da integração.",2)   
+      U_ITMsg("A carga seleciondada já foi integrada para o sistema Krona.","Atenção","Clique em OK para exibir os dados da integração.",2)   
     
       U_AOMS118V(DAK->DAK_COD, DAK->DAK_I_JSON, DAK->DAK_I_RETK, DAK->DAK_I_MSGK, DAK->DAK_I_PROT)
 
@@ -458,18 +459,18 @@ Begin Sequence
          _cTextoMsg := "Confirma o envio dos dados da carga/viagem posicionada para o sistema Krona?"
       EndIf
 
-      If ! U_ItMsg(_cTextoMsg,"Atenção", ,2 , 2)  
+      If ! U_ITMsg(_cTextoMsg,"Atenção", ,2 , 2)  
          Break
       EndIf              
    EndIf 
 
-   ZFM->(DbSetOrder(1))
-   If ZFM->(DbSeek(xFilial("ZFM")+_cEmpWebService))
+   ZFM->(DBSetOrder(1))
+   If ZFM->(DBSeek(xFilial("ZFM")+_cEmpWebService))
       _cDirJSon := ZFM->ZFM_LOCXML 
       _cLinkWS  := ZFM->ZFM_LINK01
    Else 
       If _cChamada == "M" // Chamada via menu.
-         U_ItMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
+         U_ITMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[AOMS118] - Empresa WebService para envio dos dados não localizada.")
       EndIf 
@@ -479,7 +480,7 @@ Begin Sequence
    
    If Empty(_cDirJSon)
       If _cChamada == "M" // Chamada via menu.
-         U_ItMsg("Diretório dos arquivos JSON modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)     
+         U_ITMsg("Diretório dos arquivos JSON modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)     
       Else // Chamada via Scheduller
          U_ItConOut("[AOMS118] - Diretório dos arquivos JSON modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".")
       EndIf 
@@ -487,7 +488,7 @@ Begin Sequence
       Break                                     
    EndIf
       
-   _cDirJSon := Alltrim(_cDirJSon)
+   _cDirJSon := AllTrim(_cDirJSon)
    If Right(_cDirJSon,1) <> "\"
       _cDirJSon := _cDirJSon + "\"
    EndIf
@@ -498,7 +499,7 @@ Begin Sequence
    _cCabLogin := U_AOMS118X(_cDirJSon+"Krona1_Cab_Login.txt") 
    If Empty(_cCabLogin)
       If _cChamada == "M" // Chamada via menu.   
-         U_ItMsg("Erro na leitura do arquivo modelo JSON modelo do cabeçalho de envio e login da integração Krona.","Atenção",,1) 
+         U_ITMsg("Erro na leitura do arquivo modelo JSON modelo do cabeçalho de envio e login da integração Krona.","Atenção",,1) 
       Else // Chamada via Scheduller
          U_ItConOut("[AOMS118] - Erro na leitura do arquivo modelo JSON modelo do cabeçalho de envio e login da integração Krona.")
       EndIf 
@@ -510,7 +511,7 @@ Begin Sequence
 
    If Empty(_cDetViagem)
       If _cChamada == "M" // Chamada via menu.   
-         U_ItMsg("Erro na leitura do arquivo modelo JSON detalhe de Viagem da integração Krona.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo modelo JSON detalhe de Viagem da integração Krona.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[AOMS118] - Erro na leitura do arquivo modelo JSON detalhe de Viagem da integração Krona.")
       EndIf
@@ -521,7 +522,7 @@ Begin Sequence
    _cDetDestA := U_AOMS118X(_cDirJSon+"Krona1_Det_Destino_A.txt") 
    If Empty(_cDetDestA)
       If _cChamada == "M" // Chamada via menu.   
-         U_ItMsg("Erro na leitura do arquivo modelo JSON detalhe de Destino (A), da integração REST Italac x Krona.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo modelo JSON detalhe de Destino (A), da integração REST Italac x Krona.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[AOMS118] - Erro na leitura do arquivo modelo JSON detalhe de Destino (A), da integração REST Italac x Krona.")
       EndIf 
@@ -532,7 +533,7 @@ Begin Sequence
    _cDetDestB := U_AOMS118X(_cDirJSon+"Krona1_Det_Destino_B.txt") 
    If Empty(_cDetDestB)
       If _cChamada == "M" // Chamada via menu.   
-         U_ItMsg("Erro na leitura do arquivo modelo JSON detalhe de Destino (B), da integração REST Italac x Krona.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo modelo JSON detalhe de Destino (B), da integração REST Italac x Krona.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[AOMS118] - Erro na leitura do arquivo modelo JSON detalhe de Destino (B), da integração REST Italac x Krona.")
       EndIf 
@@ -543,7 +544,7 @@ Begin Sequence
    _cDetDestC := U_AOMS118X(_cDirJSon+"Krona1_Det_Destino_C.txt") 
    If Empty(_cDetDestC)
       If _cChamada == "M" // Chamada via menu.   
-         U_ItMsg("Erro na leitura do arquivo modelo JSON detalhe de Destino (C), da integração REST Italac x Krona.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo modelo JSON detalhe de Destino (C), da integração REST Italac x Krona.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[AOMS118] - Erro na leitura do arquivo modelo JSON detalhe de Destino (C), da integração REST Italac x Krona.")
       EndIf 
@@ -554,7 +555,7 @@ Begin Sequence
    _cDetMotorista := U_AOMS118X(_cDirJSon+"Krona1_Det_Motorista.txt") 
    If Empty(_cDetMotorista)
       If _cChamada == "M" // Chamada via menu.   
-         U_ItMsg("Erro na leitura do arquivo modelo JSON detalhe de Motorista, da integração REST Italac x Krona.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo modelo JSON detalhe de Motorista, da integração REST Italac x Krona.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[AOMS118] - Erro na leitura do arquivo modelo JSON detalhe de Motorista, da integração REST Italac x Krona.")
       EndIf 
@@ -565,7 +566,7 @@ Begin Sequence
    _cDetOrigem := U_AOMS118X(_cDirJSon+"Krona1_Det_Origem.txt") 
    If Empty(_cDetOrigem)
       If _cChamada == "M" // Chamada via menu.   
-         U_ItMsg("Erro na leitura do arquivo modelo JSON detalhe de Origem, da integração REST Italac x Krona.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo modelo JSON detalhe de Origem, da integração REST Italac x Krona.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[AOMS118] - Erro na leitura do arquivo modelo JSON detalhe de Origem, da integração REST Italac x Krona.")
       EndIf 
@@ -576,7 +577,7 @@ Begin Sequence
    _cDetTransportador := U_AOMS118X(_cDirJSon+"Krona1_Det_Transportador.txt") 
    If Empty(_cDetTransportador)
       If _cChamada == "M" // Chamada via menu.   
-         U_ItMsg("Erro na leitura do arquivo modelo JSON detalhe de Transportador, da integração REST Italac x Krona.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo modelo JSON detalhe de Transportador, da integração REST Italac x Krona.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[AOMS118] - Erro na leitura do arquivo modelo JSON detalhe de Transportador, da integração REST Italac x Krona.")
       EndIf 
@@ -588,7 +589,7 @@ Begin Sequence
    _cDetVeiculo := U_AOMS118X(_cDirJSon+"Krona1_Det_Veiculo.txt") 
    If Empty(_cDetVeiculo)
       If _cChamada == "M" // Chamada via menu.    
-         U_ItMsg("Erro na leitura do arquivo modelo JSON do detalhe de Veículo, da integração REST Italac x Krona.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo modelo JSON do detalhe de Veículo, da integração REST Italac x Krona.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[AOMS118] - Erro na leitura do arquivo modelo JSON do detalhe de Veículo, da integração REST Italac x Krona.")
       EndIf 
@@ -600,7 +601,7 @@ Begin Sequence
    _cReboque1 := U_AOMS118X(_cDirJSon+"Krona1_Det_Reboque_1.txt") 
    If Empty(_cReboque1)
       If _cChamada == "M" // Chamada via menu.   
-         U_ItMsg("Erro na leitura do arquivo modelo JSON do reboque_1 de Veículo, da integração REST Italac x Krona.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo modelo JSON do reboque_1 de Veículo, da integração REST Italac x Krona.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[AOMS118] - Erro na leitura do arquivo modelo JSON do reboque_1 de Veículo, da integração REST Italac x Krona.")
       EndIf 
@@ -611,7 +612,7 @@ Begin Sequence
    _cReboque2 := U_AOMS118X(_cDirJSon+"Krona1_Det_Reboque_2.txt") 
    If Empty(_cReboque2)
       If _cChamada == "M" // Chamada via menu.   
-         U_ItMsg("Erro na leitura do arquivo modelo JSON do reboque_2 de Veículo, da integração REST Italac x Krona.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo modelo JSON do reboque_2 de Veículo, da integração REST Italac x Krona.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[AOMS118] - Erro na leitura do arquivo modelo JSON do reboque_2 de Veículo, da integração REST Italac x Krona.")
       EndIf 
@@ -622,7 +623,7 @@ Begin Sequence
    _cReboque3 := U_AOMS118X(_cDirJSon+"Krona1_Det_Reboque_3.txt") 
    If Empty(_cReboque3)
       If _cChamada == "M" // Chamada via menu.   
-         U_ItMsg("Erro na leitura do arquivo modelo JSON do reboque_3 de Veículo, da integração REST Italac x Krona.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo modelo JSON do reboque_3 de Veículo, da integração REST Italac x Krona.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[AOMS118] - Erro na leitura do arquivo modelo JSON do reboque_3 de Veículo, da integração REST Italac x Krona.")
       EndIf 
@@ -632,7 +633,7 @@ Begin Sequence
    _cRodaPe := U_AOMS118X(_cDirJSon+"Krona1_Rodape.txt") 
    If Empty(_cRodaPe)
       If _cChamada == "M" // Chamada via menu.   
-         U_ItMsg("Erro na leitura do arquivo modelo JSON do rodape, da integração REST Italac x Krona.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo modelo JSON do rodape, da integração REST Italac x Krona.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[AOMS118] - Erro na leitura do arquivo modelo JSON do rodape, da integração REST Italac x Krona.")
       EndIf 
@@ -654,28 +655,28 @@ Begin Sequence
    _cFornZG9  := ""
    _cLojaZG9  := ""
 
-   SD2->(DbSetOrder(3)) // D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM
-   ZZM->(DbSetOrder(1)) // ZZM_FILIAL+ZZM_CODIGO   
-   ZG9->(DbSetOrder(1)) // ZG9_FILIAL+ZG9_CODFIL+ZG9_ARMAZE 
-   DAI->(DbSetOrder(1)) // DAI_FILIAL+DAI_COD+DAI_SEQCAR+DAI_SEQUEN+DAI_PEDIDO  
-   DAI->(DbSeek(DAK->DAK_FILIAL+DAK->DAK_COD))
+   SD2->(DBSetOrder(3)) // D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM
+   ZZM->(DBSetOrder(1)) // ZZM_FILIAL+ZZM_CODIGO   
+   ZG9->(DBSetOrder(1)) // ZG9_FILIAL+ZG9_CODFIL+ZG9_ARMAZE 
+   DAI->(DBSetOrder(1)) // DAI_FILIAL+DAI_COD+DAI_SEQCAR+DAI_SEQUEN+DAI_PEDIDO  
+   DAI->(DBSeek(DAK->DAK_FILIAL+DAK->DAK_COD))
       
    _lTemZG9 := .F.
    _aPedidoDAI := {}
 
-   Do While ! DAI->(Eof()) .And. DAI->(DAI_FILIAL+DAI_COD) == DAK->DAK_FILIAL+DAK->DAK_COD      
+   While ! DAI->(Eof()) .And. DAI->(DAI_FILIAL+DAI_COD) == DAK->DAK_FILIAL+DAK->DAK_COD      
       
-      _nI := Ascan(_aPedidoDAI,DAI->DAI_FILIAL+DAI->DAI_PEDIDO)
+      _nI := aScan(_aPedidoDAI,DAI->DAI_FILIAL+DAI->DAI_PEDIDO)
       If _nI > 0
-         DAI->(DbSkip())
+         DAI->(DBSkip())
          Loop 
       EndIf 
-      Aadd(_aPedidoDAI,DAI->DAI_FILIAL+DAI->DAI_PEDIDO) 
+      aAdd(_aPedidoDAI,DAI->DAI_FILIAL+DAI->DAI_PEDIDO) 
 
       SC6->(MsSeek(DAI->DAI_FILIAL+DAI->DAI_PEDIDO))   
          
-      Do While ! SC6->(Eof()) .And. SC6->(C6_FILIAL+C6_NUM) == DAI->DAI_FILIAL+DAI->DAI_PEDIDO
-         If ZG9->(DbSeek(xFilial("ZG9")+SC6->C6_FILIAL+SC6->C6_LOCAL))   
+      While ! SC6->(Eof()) .And. SC6->(C6_FILIAL+C6_NUM) == DAI->DAI_FILIAL+DAI->DAI_PEDIDO
+         If ZG9->(DBSeek(xFilial("ZG9")+SC6->C6_FILIAL+SC6->C6_LOCAL))   
             _cUsrZG9   := ZG9->ZG9_USRKRO
             _cPswZG9   := ZG9->ZG9_PSWKRO            
             _cFornZG9  := ZG9->ZG9_CODFOR
@@ -684,7 +685,7 @@ Begin Sequence
             Exit 
          EndIf 
 
-         SC6->(DbSkip())
+         SC6->(DBSkip())
       EndDo
          
       If _lTemZG9
@@ -694,9 +695,9 @@ Begin Sequence
       //------------------------------------------------------
       If ! Empty(DAI->DAI_NFISCA)
          SD2->(MsSeek(DAI->DAI_FILIAL+DAI->DAI_NFISCA+DAI->DAI_SERIE))   
-         Do While ! SD2->(Eof()) .And. SD2->(D2_FILIAL+D2_DOC+D2_SERIE) == DAI->DAI_FILIAL+DAI->DAI_NFISCA+DAI->DAI_SERIE
+         While ! SD2->(Eof()) .And. SD2->(D2_FILIAL+D2_DOC+D2_SERIE) == DAI->DAI_FILIAL+DAI->DAI_NFISCA+DAI->DAI_SERIE
             If DAI->DAI_PEDIDO == SD2->D2_PEDIDO
-               If ZG9->(DbSeek(xFilial("ZG9")+SD2->D2_FILIAL+SD2->D2_LOCAL))   
+               If ZG9->(DBSeek(xFilial("ZG9")+SD2->D2_FILIAL+SD2->D2_LOCAL))   
                   _cUsrZG9   := ZG9->ZG9_USRKRO
                   _cPswZG9   := ZG9->ZG9_PSWKRO            
                   _cFornZG9  := ZG9->ZG9_CODFOR
@@ -707,7 +708,7 @@ Begin Sequence
 
             EndIf
          
-            SD2->(DbSkip())
+            SD2->(DBSkip())
          EndDo
       
          If _lTemZG9
@@ -717,12 +718,12 @@ Begin Sequence
 
       //------------------------------------------------------
 
-      DAI->(DbSkip()) 
+      DAI->(DBSkip()) 
 
    EndDo          
 
    If ! _lTemZG9 .Or. Empty(_cUsrZG9 )   
-      If ZZM->(DbSeek(xFilial("ZZM")+DAK->DAK_FILIAL))
+      If ZZM->(DBSeek(xFilial("ZZM")+DAK->DAK_FILIAL))
          _cUsrZG9   := ZZM->ZZM_USRKRO
          _cPswZG9   := ZZM->ZZM_PSWKRO     
       EndIf 
@@ -742,8 +743,8 @@ Begin Sequence
    
    //--------------------------->> 3 - Motorista 1 
    // _cDetMotorista           
-   DA4->(DbSetOrder(1)) // DA4_FILIAL+DA4_COD   
-   If DA4->(DbSeek(xFilial("DA4")+DAK->DAK_MOTORI))
+   DA4->(DBSetOrder(1)) // DA4_FILIAL+DA4_COD   
+   If DA4->(DBSeek(xFilial("DA4")+DAK->DAK_MOTORI))
       _cNomeMoto        := DA4->DA4_NOME  
       _cCpfMoto         := Transform(DA4->DA4_CGC,"@R 999.999.999-99")  // DA4->DA4_CGC   
       _cRgMoto          := Transform(DA4->DA4_RG,"@R 999.999.999-!!")      
@@ -807,7 +808,7 @@ Begin Sequence
    //=====================================================
    If Empty(_cTransp)
       If _cChamada == "M" // Chamada via menu.   
-         U_ItMsg("A carga seleciondada não possui transportadora informada. Não será possível integrar para o sistema Krona.","Atenção",,1)
+         U_ITMsg("A carga seleciondada não possui transportadora informada. Não será possível integrar para o sistema Krona.","Atenção",,1)
       Else // Chamada via Scheduller
          U_ItConOut("[AOMS118] - A carga seleciondada não possui transportadora informada. Não será possível integrar para o sistema Krona.")
       EndIf 
@@ -817,9 +818,9 @@ Begin Sequence
    
    //--------------------------->> 2 - Transportador
    // _cDetTransportador      
-   SA2->(DbSetOrder(1)) // A2_FILIAL+A2_COD+A2_LOJA
+   SA2->(DBSetOrder(1)) // A2_FILIAL+A2_COD+A2_LOJA
    
-   If SA2->(DbSeek(xFilial("SA2")+_cTransp + _cLjTransp)) 
+   If SA2->(DBSeek(xFilial("SA2")+_cTransp + _cLjTransp)) 
       _cTipoTransp      := "TRANSPORTADOR"
       _cCNPJTransp      := "0"+Transform(SA2->A2_CGC,"@R! NN.NNN.NNN/NNNN-99") // Na Krona os CNPJ são cadastrados com 15 digitos + as pontuações.
       _cRazaoTransp     := SA2->A2_NOME 
@@ -880,7 +881,7 @@ Begin Sequence
    // Transportador: Login e Senha.
    //=====================================================
    //If Empty(_cUsuario) .Or. Empty(_cSenha)
-   //   U_ItMsg("Não foram informados nome de usuário e senha para o transportador: Codigo: '"+ _cTransp + "' e Loja: '" + _cLjTransp + "', acessar o sistema Krona.",;
+   //   U_ITMsg("Não foram informados nome de usuário e senha para o transportador: Codigo: '"+ _cTransp + "' e Loja: '" + _cLjTransp + "', acessar o sistema Krona.",;
    //           "Atenção","Acesse o cadastro de fornecedores, localize o transportador e informe nome de usuário e senha.",1)
    //   Break   
    //EndIf 
@@ -892,8 +893,8 @@ Begin Sequence
    //========================================== 
    //DAK->DAK_CAMINH ---> DA3
    _cVeiculo := ""
-   DA3->(DbSetOrder(1)) // DA3_FILIAL+DA3_COD    
-   If DA3->(DbSeek(xFilial("DA3")+DAK->DAK_CAMINH))
+   DA3->(DBSetOrder(1)) // DA3_FILIAL+DA3_COD    
+   If DA3->(DBSeek(xFilial("DA3")+DAK->DAK_CAMINH))
       //=====================================================================================
       // // 2 = Caminhão / 4 = Utilitário
       //=====================================================================================
@@ -1363,15 +1364,15 @@ Begin Sequence
    //========================================== 
    _lAchouForn  := .F.
    If Empty(_cFornZG9)
-      ZZM->(DbSetOrder(1))
-      ZZM->(DbSeek(xFilial("ZZM")+DAK->DAK_FILIAL))
-      SA2->(DbSetOrder(3)) // A2_FILIAL+A2_CGC 
-      If SA2->(DbSeek(xFilial("SA2")+ZZM->ZZM_CGC))
+      ZZM->(DBSetOrder(1))
+      ZZM->(DBSeek(xFilial("ZZM")+DAK->DAK_FILIAL))
+      SA2->(DBSetOrder(3)) // A2_FILIAL+A2_CGC 
+      If SA2->(DBSeek(xFilial("SA2")+ZZM->ZZM_CGC))
          _lAchouForn  := .T. 
       EndIf 
    Else 
-      SA2->(DbSetOrder(1)) // A2_FILIAL+A2_COD+A2_LOJA
-      If SA2->(DbSeek(xFilial("SA2")+_cFornZG9 + _cLojaZG9))
+      SA2->(DBSetOrder(1)) // A2_FILIAL+A2_COD+A2_LOJA
+      If SA2->(DBSeek(xFilial("SA2")+_cFornZG9 + _cLojaZG9))
          _lAchouForn  := .T. 
       EndIf 
    EndIf 
@@ -1486,24 +1487,24 @@ Begin Sequence
    _cObserv    := ""     
    _lDestItalac := .F. 
    
-   SC5->(DbSetOrder(1)) // C5_FILIAL+C5_NUM  
-   SC6->(DbSetOrder(1)) // C6_FILIAL+C6_NUM+C6_ITEM+C6_PRODUTO
-   SA1->(DbSetOrder(1)) // A1_FILIAL+A1_COD+A1_LOJA     
-   //SF2->(DbSetOrder(20)) // F2_FILIAL+F2_I_PEDID // K
+   SC5->(DBSetOrder(1)) // C5_FILIAL+C5_NUM  
+   SC6->(DBSetOrder(1)) // C6_FILIAL+C6_NUM+C6_ITEM+C6_PRODUTO
+   SA1->(DBSetOrder(1)) // A1_FILIAL+A1_COD+A1_LOJA     
+   //SF2->(DBSetOrder(20)) // F2_FILIAL+F2_I_PEDID // K
    
    //===============================================================================================
    // Faz agrupamento de dados para pedido de vendas Troca Nota.
    //===============================================================================================      
    // DAK_FILIAL+DAK_COD+DAK_SEQCAR                                                                                                                                    
-   DAI->(DbSetOrder(1)) // DAI_FILIAL+DAI_COD+DAI_SEQCAR+DAI_SEQUEN+DAI_PEDIDO  
+   DAI->(DBSetOrder(1)) // DAI_FILIAL+DAI_COD+DAI_SEQCAR+DAI_SEQUEN+DAI_PEDIDO  
       
    _aPvTrcNf := {}
    
-   DAI->(DbSeek(DAK->DAK_FILIAL+DAK->DAK_COD))
-   Do While ! DAI->(Eof()) .And. DAI->(DAI_FILIAL+DAI_COD) == DAK->DAK_FILIAL+DAK->DAK_COD    
-      SC5->(DbSeek(DAI->(DAI_FILIAL+DAI_PEDIDO)))
+   DAI->(DBSeek(DAK->DAK_FILIAL+DAK->DAK_COD))
+   While ! DAI->(Eof()) .And. DAI->(DAI_FILIAL+DAI_COD) == DAK->DAK_FILIAL+DAK->DAK_COD    
+      SC5->(DBSeek(DAI->(DAI_FILIAL+DAI_PEDIDO)))
       If SC5->C5_I_TRCNF == "S" .And. !Empty(SC5->C5_I_PDFT)
-         Aadd(_aPvTrcNf, {DAI->DAI_FILIAL,;  // 1
+         aAdd(_aPvTrcNf, {DAI->DAI_FILIAL,;  // 1
                           DAI->DAI_PEDIDO,;  // 2 
                           SC5->C5_I_FILFT,;  // 3
                           SC5->C5_I_PDFT,;   // 4
@@ -1515,10 +1516,10 @@ Begin Sequence
                           "00:00:00"} )      // 10 
       EndIf 
 
-      DAI->(DbSkip())
+      DAI->(DBSkip())
    EndDo 
    
-   DAI->(DbSetOrder(4)) // DAI_FILIAL+DAI_PEDIDO+DAI_COD+DAI_SEQCAR
+   DAI->(DBSetOrder(4)) // DAI_FILIAL+DAI_PEDIDO+DAI_COD+DAI_SEQCAR
    
    _aItensCarga := {}
    
@@ -1526,14 +1527,14 @@ Begin Sequence
    _cHoraFinal := "00:00"
 
    For _nJ := 1 To Len(_aPvTrcNf)
-       SC5->(DbSeek(_aPvTrcNf[_nJ,3]+_aPvTrcNf[_nJ,4]))  
-       SC6->(DbSeek(SC5->C5_FILIAL+SC5->C5_NUM))
+       SC5->(DBSeek(_aPvTrcNf[_nJ,3]+_aPvTrcNf[_nJ,4]))  
+       SC6->(DBSeek(SC5->C5_FILIAL+SC5->C5_NUM))
       
        _nValMerc := 0
-       Do While ! SC6->(Eof()) .And. SC6->(C6_FILIAL+C6_NUM) == SC5->(C5_FILIAL+C5_NUM)
+       While ! SC6->(Eof()) .And. SC6->(C6_FILIAL+C6_NUM) == SC5->(C5_FILIAL+C5_NUM)
           _nValMerc += SC6->C6_VALOR
 
-          SC6->(DbSkip())
+          SC6->(DBSkip())
        EndDo
 
        //-------------------------------------------------------------------//
@@ -1545,7 +1546,7 @@ Begin Sequence
       _cNrNotas := AllTrim(_aPvTrcNf[_nJ,5]) + "-" + AllTrim(_aPvTrcNf[_nJ,6])+"; "
                         
                         // Filial    + Pedido de vendas
-      If DAI->(DbSeek(_aPvTrcNf[_nJ,3]+_aPvTrcNf[_nJ,4]))
+      If DAI->(DBSeek(_aPvTrcNf[_nJ,3]+_aPvTrcNf[_nJ,4]))
 
          _cFilCarreg := SC5->C5_FILIAL
          If ! Empty(SC5->C5_I_FLFNC)
@@ -1572,7 +1573,7 @@ Begin Sequence
             _cHoraAux := "00:00:00" // SC5->C5_I_HOREN
          EndIf 
 
-         If Dtos(_dDataAux + _nDias) < Dtos(SC5->C5_I_DTENT)
+         If DToS(_dDataAux + _nDias) < DToS(SC5->C5_I_DTENT)
             _dDataAux := SC5->C5_I_DTENT
          Else
             _dDataAux := _dDataAux + _nDias
@@ -1589,10 +1590,10 @@ Begin Sequence
          EndIf 
       
          If ! Empty(DAI->DAI_I_OPLO)
-            _nI := Ascan(_aItensCarga, {|x| x[1] == DAI->DAI_I_OPLO .And. x[2] == DAI->DAI_I_LOPL }) 
+            _nI := aScan(_aItensCarga, {|x| x[1] == DAI->DAI_I_OPLO .And. x[2] == DAI->DAI_I_LOPL }) 
             If _nI == 0 
                                 //    1                  2             3        4          5              6          7           8
-               Aadd(_aItensCarga, {DAI->DAI_I_OPLO, DAI->DAI_I_LOPL, "SA2", _cNrNotas , _cIniViagem, _cFimViagem, _nValMerc, _dDtFinal})
+               aAdd(_aItensCarga, {DAI->DAI_I_OPLO, DAI->DAI_I_LOPL, "SA2", _cNrNotas , _cIniViagem, _cFimViagem, _nValMerc, _dDtFinal})
             Else
                If ! Empty(_cNrNotas)
                   _aItensCarga[_nI, 4] += _cNrNotas                  
@@ -1601,10 +1602,10 @@ Begin Sequence
             EndIf
 
          ElseIf !Empty(DAI->DAI_I_TRED)
-            _nI := Ascan(_aItensCarga, {|x| x[1] == DAI->DAI_I_TRED .And. x[2] == DAI->DAI_I_LTRE }) 
+            _nI := aScan(_aItensCarga, {|x| x[1] == DAI->DAI_I_TRED .And. x[2] == DAI->DAI_I_LTRE }) 
             If _nI == 0
                                 //    1                  2             3        4          5              6          7           8
-               Aadd(_aItensCarga, {DAI->DAI_I_TRED, DAI->DAI_I_LTRE, "SA2", _cNrNotas , _cIniViagem, _cFimViagem, _nValMerc, _dDtFinal})
+               aAdd(_aItensCarga, {DAI->DAI_I_TRED, DAI->DAI_I_LTRE, "SA2", _cNrNotas , _cIniViagem, _cFimViagem, _nValMerc, _dDtFinal})
             Else
                If ! Empty(_cNrNotas)
                   _aItensCarga[_nI, 4] += _cNrNotas
@@ -1612,10 +1613,10 @@ Begin Sequence
                _aItensCarga[_nI, 7] += _nValMerc
             EndIf
          Else
-            _nI := Ascan(_aItensCarga, {|x| x[1] == DAI->DAI_CLIENT .And. x[2] == DAI->DAI_LOJA }) 
+            _nI := aScan(_aItensCarga, {|x| x[1] == DAI->DAI_CLIENT .And. x[2] == DAI->DAI_LOJA }) 
             If _nI == 0
                                 //    1                  2             3        4          5              6          7          8
-               Aadd(_aItensCarga, {DAI->DAI_CLIENT, DAI->DAI_LOJA, "SA1", _cNrNotas , _cIniViagem, _cFimViagem, _nValMerc, _dDtFinal})
+               aAdd(_aItensCarga, {DAI->DAI_CLIENT, DAI->DAI_LOJA, "SA1", _cNrNotas , _cIniViagem, _cFimViagem, _nValMerc, _dDtFinal})
             Else
                If ! Empty(_cNrNotas)
                   _aItensCarga[_nI, 4] += _cNrNotas
@@ -1624,10 +1625,10 @@ Begin Sequence
             EndIf
          EndIf 
       Else 
-         _nI := Ascan(_aItensCarga, {|x| x[1] == SC5->C5_CLIENTE .And. x[2] == SC5->C5_LOJACLI }) 
+         _nI := aScan(_aItensCarga, {|x| x[1] == SC5->C5_CLIENTE .And. x[2] == SC5->C5_LOJACLI }) 
          If _nI == 0
                              //    1                  2             3        4          5              6          7            8
-            Aadd(_aItensCarga, {SC5->C5_CLIENTE, SC5->C5_LOJACLI, "SA1", _cNrNotas , _cIniViagem, _cFimViagem, _nValMerc, _dDtFinal})
+            aAdd(_aItensCarga, {SC5->C5_CLIENTE, SC5->C5_LOJACLI, "SA1", _cNrNotas , _cIniViagem, _cFimViagem, _nValMerc, _dDtFinal})
          Else
             _aItensCarga[_nI, 7] += _nValMerc
          EndIf
@@ -1639,8 +1640,8 @@ Begin Sequence
    // Faz agrupamento de dados para pedido de vendas normais.
    //===============================================================================================
    // DAK_FILIAL+DAK_COD+DAK_SEQCAR                                                                                                                                    
-   DAI->(DbSetOrder(1)) // DAI_FILIAL+DAI_COD+DAI_SEQCAR+DAI_SEQUEN+DAI_PEDIDO  
-   DAI->(DbSeek(DAK->DAK_FILIAL+DAK->DAK_COD))
+   DAI->(DBSetOrder(1)) // DAI_FILIAL+DAI_COD+DAI_SEQCAR+DAI_SEQUEN+DAI_PEDIDO  
+   DAI->(DBSeek(DAK->DAK_FILIAL+DAK->DAK_COD))
   
    //_aItensCarga := {}
    //_cNotaTRCNf  := ""
@@ -1648,28 +1649,28 @@ Begin Sequence
    _dDtFinal   := Ctod("  /  /  ")
    _cHoraFinal := "00:00"
   
-   Do While ! DAI->(Eof()) .And. DAI->(DAI_FILIAL+DAI_COD) == DAK->DAK_FILIAL+DAK->DAK_COD    
+   While ! DAI->(Eof()) .And. DAI->(DAI_FILIAL+DAI_COD) == DAK->DAK_FILIAL+DAK->DAK_COD    
       
       //===============================================================================================
       // Verifica se o pedido de vendas do item da carga já foi processado como Troca nota.
       //===============================================================================================
-      _nI := Ascan(_aPvTrcNf, {|x| x[1] == DAI->DAI_FILIAL .And. x[2] == DAI->DAI_PEDIDO }) 
+      _nI := aScan(_aPvTrcNf, {|x| x[1] == DAI->DAI_FILIAL .And. x[2] == DAI->DAI_PEDIDO }) 
       If _nI > 0
-         DAI->(DbSkip())
+         DAI->(DBSkip())
          Loop
       EndIf
 
       //===============================================================================================
       // Faz o processamento dos pedidos de vendas normais contidos na carga.
       //===============================================================================================
-      SC5->(DbSeek(DAI->DAI_FILIAL+DAI->DAI_PEDIDO))
-      SC6->(DbSeek(DAI->DAI_FILIAL+DAI->DAI_PEDIDO))
+      SC5->(DBSeek(DAI->DAI_FILIAL+DAI->DAI_PEDIDO))
+      SC6->(DBSeek(DAI->DAI_FILIAL+DAI->DAI_PEDIDO))
       
        _nValMerc := 0
-       Do While ! SC6->(Eof()) .And. SC6->(C6_FILIAL+C6_NUM) == DAI->DAI_FILIAL+DAI->DAI_PEDIDO
+       While ! SC6->(Eof()) .And. SC6->(C6_FILIAL+C6_NUM) == DAI->DAI_FILIAL+DAI->DAI_PEDIDO
           _nValMerc += SC6->C6_VALOR
 
-          SC6->(DbSkip())
+          SC6->(DBSkip())
        EndDo
 
        _cFilCarreg := SC5->C5_FILIAL
@@ -1700,7 +1701,7 @@ Begin Sequence
          _cHoraAux := "00:00:00"  
       EndIf 
       
-      If Dtos(_dDataAux + _nDias) < Dtos(SC5->C5_I_DTENT)
+      If DToS(_dDataAux + _nDias) < DToS(SC5->C5_I_DTENT)
          _dDataAux := SC5->C5_I_DTENT
       Else
          _dDataAux := _dDataAux + _nDias
@@ -1717,10 +1718,10 @@ Begin Sequence
       EndIf 
 
       If ! Empty(DAI->DAI_I_OPLO)
-         _nI := Ascan(_aItensCarga, {|x| x[1] == DAI->DAI_I_OPLO .And. x[2] == DAI->DAI_I_LOPL }) 
+         _nI := aScan(_aItensCarga, {|x| x[1] == DAI->DAI_I_OPLO .And. x[2] == DAI->DAI_I_LOPL }) 
          If _nI == 0             
                              //    1                  2             3        4          5              6          7           8
-            Aadd(_aItensCarga, {DAI->DAI_I_OPLO, DAI->DAI_I_LOPL, "SA2", _cNrNotas , _cIniViagem, _cFimViagem, _nValMerc, _dDtFinal})
+            aAdd(_aItensCarga, {DAI->DAI_I_OPLO, DAI->DAI_I_LOPL, "SA2", _cNrNotas , _cIniViagem, _cFimViagem, _nValMerc, _dDtFinal})
          Else
             _aItensCarga[_nI, 7]    += _nValMerc
 
@@ -1730,10 +1731,10 @@ Begin Sequence
          EndIf
 
       ElseIf !Empty(DAI->DAI_I_TRED)
-         _nI := Ascan(_aItensCarga, {|x| x[1] == DAI->DAI_I_TRED .And. x[2] == DAI->DAI_I_LTRE }) 
+         _nI := aScan(_aItensCarga, {|x| x[1] == DAI->DAI_I_TRED .And. x[2] == DAI->DAI_I_LTRE }) 
          If _nI == 0
                             //    1                  2             3        4          5              6          7             8
-            Aadd(_aItensCarga, {DAI->DAI_I_TRED, DAI->DAI_I_LTRE, "SA2", _cNrNotas , _cIniViagem, _cFimViagem, _nValMerc, _dDtFinal})
+            aAdd(_aItensCarga, {DAI->DAI_I_TRED, DAI->DAI_I_LTRE, "SA2", _cNrNotas , _cIniViagem, _cFimViagem, _nValMerc, _dDtFinal})
          Else    
             _aItensCarga[_nI, 7]    += _nValMerc        
 
@@ -1743,10 +1744,10 @@ Begin Sequence
          EndIf
       
       Else
-         _nI := Ascan(_aItensCarga, {|x| x[1] == DAI->DAI_CLIENT .And. x[2] == DAI->DAI_LOJA }) 
+         _nI := aScan(_aItensCarga, {|x| x[1] == DAI->DAI_CLIENT .And. x[2] == DAI->DAI_LOJA }) 
          If _nI == 0
                            //    1                  2             3        4          5              6          7             8
-            Aadd(_aItensCarga, {DAI->DAI_CLIENT, DAI->DAI_LOJA, "SA1", _cNrNotas , _cIniViagem, _cFimViagem, _nValMerc, _dDtFinal})
+            aAdd(_aItensCarga, {DAI->DAI_CLIENT, DAI->DAI_LOJA, "SA1", _cNrNotas , _cIniViagem, _cFimViagem, _nValMerc, _dDtFinal})
          Else
             _aItensCarga[_nI, 7]    += _nValMerc
 
@@ -1756,7 +1757,7 @@ Begin Sequence
          EndIf
       EndIf 
      
-      DAI->(DbSkip()) 
+      DAI->(DBSkip()) 
 
    EndDo          
    
@@ -1772,7 +1773,7 @@ Begin Sequence
    EndIf 
 
    For _nI := 1 To Len(_aItensCarga)
-       If Dtos(_aItensCarga[_nI,8]) > Dtos(_dDtFinal)
+       If DToS(_aItensCarga[_nI,8]) > DToS(_dDtFinal)
           _cFimViagem := _aItensCarga[_nI,6]
        EndIf
    Next 
@@ -1787,7 +1788,7 @@ Begin Sequence
    For _nI := 1 To Len(_aItensCarga)
        
        If _aItensCarga[_nI,3] == "SA1"
-          SA1->(DbSeek(xFilial("SA1")+_aItensCarga[_nI,1]+_aItensCarga[_nI,2]))
+          SA1->(DBSeek(xFilial("SA1")+_aItensCarga[_nI,1]+_aItensCarga[_nI,2]))
           //--------------------------->> 6 - Destino 
           // _cDetDestino
           //==========================================
@@ -1823,7 +1824,7 @@ Begin Sequence
           EndIf                                                                                                                                                        
                           
           _cFimViagem := _aItensCarga[_nI,6]
-          _cDestFim   := " ATE " + Alltrim(SA1->A1_MUN) + "/" + AllTrim(SA1->A1_BAIRRO)
+          _cDestFim   := " ATE " + AllTrim(SA1->A1_MUN) + "/" + AllTrim(SA1->A1_BAIRRO)
       
           _cUf_Munic := Upper(AllTrim(SA1->A1_EST)+AllTrim(SA1->A1_MUN)) 
 
@@ -1842,7 +1843,7 @@ Begin Sequence
 
        Else // "SA2"
 
-          SA2->(DbSeek(xFilial("SA2")+_aItensCarga[_nI,1]+_aItensCarga[_nI,2]))
+          SA2->(DBSeek(xFilial("SA2")+_aItensCarga[_nI,1]+_aItensCarga[_nI,2]))
           //--------------------------->> 6 - Destino 
           // _cDetDestino
           //==========================================
@@ -1878,7 +1879,7 @@ Begin Sequence
           EndIf                                                                                                                                                        
                           
           _cFimViagem := _aItensCarga[_nI,6]
-          _cDestFim   := " ATE " + Alltrim(SA2->A2_MUN) + "/" + AllTrim(SA2->A2_BAIRRO)
+          _cDestFim   := " ATE " + AllTrim(SA2->A2_MUN) + "/" + AllTrim(SA2->A2_BAIRRO)
       
           _cUf_Munic := Upper(AllTrim(SA2->A2_EST)+AllTrim(SA2->A2_MUN)) 
 
@@ -1924,19 +1925,19 @@ Begin Sequence
    _cFornZG9  := ""
    _cLojaZG9  := ""
 
-   ZZM->(DbSetOrder(1)) // ZZM_FILIAL+ZZM_CODIGO   
-   ZG9->(DbSetOrder(1)) // ZG9_FILIAL+ZG9_CODFIL+ZG9_ARMAZE 
-   DAI->(DbSetOrder(1)) // DAI_FILIAL+DAI_COD+DAI_SEQCAR+DAI_SEQUEN+DAI_PEDIDO  
-   DAI->(DbSeek(DAK->DAK_FILIAL+DAK->DAK_COD))
+   ZZM->(DBSetOrder(1)) // ZZM_FILIAL+ZZM_CODIGO   
+   ZG9->(DBSetOrder(1)) // ZG9_FILIAL+ZG9_CODFIL+ZG9_ARMAZE 
+   DAI->(DBSetOrder(1)) // DAI_FILIAL+DAI_COD+DAI_SEQCAR+DAI_SEQUEN+DAI_PEDIDO  
+   DAI->(DBSeek(DAK->DAK_FILIAL+DAK->DAK_COD))
       
    _lTemZG9 := .F.
 
-   Do While ! DAI->(Eof()) .And. DAI->(DAI_FILIAL+DAI_COD) == DAK->DAK_FILIAL+DAK->DAK_COD      
+   While ! DAI->(Eof()) .And. DAI->(DAI_FILIAL+DAI_COD) == DAK->DAK_FILIAL+DAK->DAK_COD      
       
-      SC6->(DbSeek(DAI->DAI_FILIAL+DAI->DAI_PEDIDO))   
+      SC6->(DBSeek(DAI->DAI_FILIAL+DAI->DAI_PEDIDO))   
          
-      Do While ! SC6->(Eof()) .And. SC6->(C6_FILIAL+C6_NUM) == DAI->DAI_FILIAL+DAI->DAI_PEDIDO
-         If ZG9->(DbSeek(xFilial("ZG9")+SC6->C6_FILIAL+SC6->C6_LOCAL))   
+      While ! SC6->(Eof()) .And. SC6->(C6_FILIAL+C6_NUM) == DAI->DAI_FILIAL+DAI->DAI_PEDIDO
+         If ZG9->(DBSeek(xFilial("ZG9")+SC6->C6_FILIAL+SC6->C6_LOCAL))   
             //_cUsuario := ZG9->ZG9_USRKRO
             //_cSenha   := ZG9->ZG9_PSWKRO
             _cUsrZG9   := ZG9->ZG9_USRKRO
@@ -1948,19 +1949,19 @@ Begin Sequence
             Exit 
          EndIf 
 
-         SC6->(DbSkip())
+         SC6->(DBSkip())
       EndDo
          
       If _lTemZG9
          Exit 
       EndIf 
 
-      DAI->(DbSkip()) 
+      DAI->(DBSkip()) 
 
    EndDo          
 
    If ! _lTemZG9 .Or. Empty(_cUsuario)   
-      If ZZM->(DbSeek(xFilial("ZZM")+DAK->DAK_FILIAL))
+      If ZZM->(DBSeek(xFilial("ZZM")+DAK->DAK_FILIAL))
          //_cUsuario  := ZZM->ZZM_USRKRO
          //_cSenha    := ZZM->ZZM_PSWKRO
          _cUsrZG9   := ZZM->ZZM_USRKRO
@@ -1983,14 +1984,14 @@ Begin Sequence
    If Empty(_cUsuario) .Or. Empty(_cSenha)
       If _lUsuarioTransp
          If _cChamada == "M" // Chamada via menu.   
-            U_ItMsg("Não foram informados nome de usuário e senha para o transportador: Codigo: '"+ _cTransp + "' e Loja: '" + _cLjTransp + "', para acessar o sistema Krona.",;
+            U_ITMsg("Não foram informados nome de usuário e senha para o transportador: Codigo: '"+ _cTransp + "' e Loja: '" + _cLjTransp + "', para acessar o sistema Krona.",;
                     "Atenção","Acesse o cadastro de fornecedores no Protheus, localize o transportador e informe nome de usuário e senha.",1)
          Else // Chamada via Scheduller
             U_ItConOut("[AOMS118] - Não foram informados nome de usuário e senha para o transportador: Codigo: '"+ _cTransp + "' e Loja: '" + _cLjTransp + "', para acessar o sistema Krona.")
          EndIf 
       Else 
          If _cChamada == "M" // Chamada via menu.   
-            U_ItMsg("Não foram informados nome de usuário e senha nos cadastros: Endereço Embarcador Mercadorias(ZG9) e Cadastro de Filiais Scheduller(ZZM).",;
+            U_ITMsg("Não foram informados nome de usuário e senha nos cadastros: Endereço Embarcador Mercadorias(ZG9) e Cadastro de Filiais Scheduller(ZZM).",;
                     "Atenção","Acesse no Protheus os cadastros: Endereço Embarcador Mercadorias(ZG9) e Cadastro de Filiais Scheduller(ZZM), localize e preencha os campos Usuário e Senha Krona.",1)
          Else // Chamada via Scheduller
             U_ItConOut("[AOMS118] - Não foram informados nome de usuário e senha nos cadastros: Endereço Embarcador Mercadorias(ZG9) e Cadastro de Filiais Scheduller(ZZM).")
@@ -2028,7 +2029,7 @@ Begin Sequence
                                   "VIAGEM CANCELADA. PROTOCOLO REMOVIDO: " + DAK->DAK_I_PROT
                DAK->DAK_I_ENVK := "S"
                DAK->DAK_I_PROT := ""
-               DAK->(MsUnlock())
+               DAK->(MSUnLock())
                _lAltViagem := .T.
                Break
             EndIf
@@ -2044,13 +2045,13 @@ Begin Sequence
       _aDadosViagem := U_AOMS118P("P", _cPlacaVeic , .F. ) 
       If Empty(_aDadosViagem)
          If _cChamada == "M" // Chamada via menu.   
-            U_ItMsg("Inclusão de nova viagem no sistema Krona. Para a placa de Veículo: " +_cPlacaVeic + " não foram encontradas viagens em aberto." , "Atenção","",1)
+            U_ITMsg("Inclusão de nova viagem no sistema Krona. Para a placa de Veículo: " +_cPlacaVeic + " não foram encontradas viagens em aberto." , "Atenção","",1)
          Else // Chamada via Scheduller
             U_ItConOut("[AOMS118] - Inclusão de nova viagem no sistema Krona. Para a placa de Veículo: " +_cPlacaVeic + " não foram encontradas viagens em aberto.")
          EndIf 
       Else
          If _cChamada == "M" // Chamada via menu.   
-            If ! U_ItMsg("Inclusão de nova viagem no sistema Krona. Para a placa de veículo: " +_cPlacaVeic + ", foi encontrado a viagem: " + _aDadosViagem[1] +;
+            If ! U_ITMsg("Inclusão de nova viagem no sistema Krona. Para a placa de veículo: " +_cPlacaVeic + ", foi encontrado a viagem: " + _aDadosViagem[1] +;
                         ", para transportadora de codigo/loja: " + _aDadosViagem[2] + "/" + _aDadosViagem[3] + ;
                         " Código carga Protheus: " + _aDadosViagem[4] + ", com Status: " + _aDadosViagem[5] + ; 
                         ". Deseja continuar a integração para o sitema Krona?","Atenção", ,2 , 2)  
@@ -2067,7 +2068,7 @@ Begin Sequence
          If ! Empty(_cIdViagem)
             DAK->(RecLock("DAK",.F.))
             DAK->DAK_I_PROT := _cIdViagem
-            DAK->(MsUnlock())
+            DAK->(MSUnLock())
             _lAltViagem := .T.
          EndIf
       EndIf 
@@ -2168,8 +2169,8 @@ Begin Sequence
    // Google Chrome está atualizado
    //Versão 79.0.3945.88 (Versão oficial) 64 bits
    
-   //Aadd(_aHeadOut,'User-Agent: Google Chrome/79.0.3945.88 ( compatible; Protheus '+GetBuild()+')') 
-   Aadd(_aHeadOut,'Content-Type: application/json')
+   //aAdd(_aHeadOut,'User-Agent: Google Chrome/79.0.3945.88 ( compatible; Protheus '+GetBuild()+')') 
+   aAdd(_aHeadOut,'Content-Type: application/json')
 
    _cRetHttp := AllTrim( HttpPost( _cLinkWS , '' , _cJSonEnv , _nTimOut , _aHeadOut , @_cJSonRet ) )
    If ! Empty(_cRetHttp)
@@ -2226,10 +2227,10 @@ Begin Sequence
       _cMsgInt        := "Integrado com sucesso para o sistema Krona." 
 
       _aNames := _oJson:GetNames()
-      _nI := Ascan(_aNames,'PROTOCOLO')
+      _nI := aScan(_aNames,'PROTOCOLO')
 
       If _nI == 0
-         _nI := Ascan(_aNames,'Protocolo') 
+         _nI := aScan(_aNames,'Protocolo') 
       EndIf
       
       _cProtocolo := ""
@@ -2247,19 +2248,19 @@ Begin Sequence
       _cMsgInt        := _cMsgErro
    EndIf
    
-   DAK->(MsUnLock())    
+   DAK->(MSUnLock())    
    
    If _cChamada == "M" // Chamada via menu.   
       U_AOMS118V(DAK->DAK_COD, _cJSonEnv, _cRetHttp, _cMsgInt, _cProtocolo)
     
-      U_ItMsg("Termino de processamento.","Atenção",,1)   
+      U_ITMsg("Termino de processamento.","Atenção",,1)   
    Else // Chamada via Scheduller
       U_ItConOut("[AOMS118] - Termino de processamento.")
    EndIf 
 
 End Sequence
 
-Return Nil                
+Return                
 
 /*
 ===============================================================================================================================
@@ -2282,7 +2283,7 @@ Begin Sequence
    // Se houver erro de abertura abandona processamento
    If _nStatusArq = -1  
       Break
-   Endif
+   EndIf
    
    // Posiciona na primeria linha
    FT_FGoTop()
@@ -2430,7 +2431,7 @@ Begin Sequence
    
       If DAK->DAK_I_ENVK <> "S"  
          If _lExibeTela
-            U_ItMsg("A carga seleciondada ainda não foi integrada para o sistema Krona.","Atenção",,1) 
+            U_ITMsg("A carga seleciondada ainda não foi integrada para o sistema Krona.","Atenção",,1) 
          Else
             U_ItConOut("[AOMS118P] - A carga seleciondada ainda não foi integrada para o sistema Krona.")  
          EndIf 
@@ -2439,7 +2440,7 @@ Begin Sequence
    
       If Empty(DAK->DAK_I_PROT)
          If _lExibeTela
-            U_ItMsg("Não existe numero de protocolo gerado para a carga selecionada.","Atenção",;
+            U_ITMsg("Não existe numero de protocolo gerado para a carga selecionada.","Atenção",;
                     "Para consultar o status de uma viagem, um protocolo precisa ser gerado na integração da carga para o sistema Krona.",1) 
          Else
             U_ItConOut("[AOMS118P] - Não existe numero de protocolo gerado para a carga selecionada.")
@@ -2452,19 +2453,19 @@ Begin Sequence
    EndIf
    
    If _lExibeTela
-      If ! U_ItMsg("Confirma a consulta de status de viagem no sistema Krona ?","Atenção", ,2 , 2)  
+      If ! U_ITMsg("Confirma a consulta de status de viagem no sistema Krona ?","Atenção", ,2 , 2)  
          Break
       EndIf              
    EndIf  
 
    _cLinkWS := ""
-   ZFM->(DbSetOrder(1))
-   If ZFM->(DbSeek(xFilial("ZFM")+_cEmpWebService))
+   ZFM->(DBSetOrder(1))
+   If ZFM->(DBSeek(xFilial("ZFM")+_cEmpWebService))
       _cDirJSon := ZFM->ZFM_LOCXML 
       _cLinkWS  := ZFM->ZFM_LINK02
    Else
       If _lExibeTela
-         U_ItMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
+         U_ITMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
       Else 
          U_ItConOut("[AOMS118P] - Empresa WebService para envio dos dados não localizada.") 
       EndIf 
@@ -2476,8 +2477,8 @@ Begin Sequence
             
       //--------------------------->> 3 - Motorista 1 
       // _cDetMotorista           
-      DA4->(DbSetOrder(1)) // DA4_FILIAL+DA4_COD   
-      If DA4->(DbSeek(xFilial("DA4")+DAK->DAK_MOTORI))
+      DA4->(DBSetOrder(1)) // DA4_FILIAL+DA4_COD   
+      If DA4->(DBSeek(xFilial("DA4")+DAK->DAK_MOTORI))
          //----------------------------------------------//
          _cTransp   := DA4->DA4_FORNECE
          _cLjTransp := DA4->DA4_LOJA   
@@ -2485,9 +2486,9 @@ Begin Sequence
 
       //--------------------------->> 2 - Transportador
       // _cDetTransportador      
-      SA2->(DbSetOrder(1)) // A2_FILIAL+A2_COD+A2_LOJA
+      SA2->(DBSetOrder(1)) // A2_FILIAL+A2_COD+A2_LOJA
    
-      If SA2->(DbSeek(xFilial("SA2")+_cTransp + _cLjTransp)) 
+      If SA2->(DBSeek(xFilial("SA2")+_cTransp + _cLjTransp)) 
          _cUsuario := SA2->A2_I_USRKR
          _cSenha   := SA2->A2_I_PSWKR
       EndIf
@@ -2506,14 +2507,14 @@ Begin Sequence
 
    If Empty(_cDirJSon)
       If _lExibeTela
-         U_ItMsg("Diretório dos arquivos JSON modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)     
+         U_ITMsg("Diretório dos arquivos JSON modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)     
       Else 
          U_ItConOut("[AOMS118P] - Diretório dos arquivos JSON modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".")
       EndIf 
       Break                                     
    EndIf
       
-   _cDirJSon := Alltrim(_cDirJSon)
+   _cDirJSon := AllTrim(_cDirJSon)
    If Right(_cDirJSon,1) <> "\"
       _cDirJSon := _cDirJSon + "\"
    EndIf
@@ -2524,7 +2525,7 @@ Begin Sequence
    _cLoginStatus := U_AOMS118X(_cDirJSon+"Krona1_Login_2.txt") 
    If Empty(_cLoginStatus)
       If _lExibeTela
-         U_ItMsg("Erro na leitura do arquivo modelo JSON modelo de Login da integração Krona.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo modelo JSON modelo de Login da integração Krona.","Atenção",,1)
       Else 
          U_ItConOut("[AOMS118P] - Erro na leitura do arquivo modelo JSON modelo de Login da integração Krona.") 
       EndIf 
@@ -2537,7 +2538,7 @@ Begin Sequence
    _cPesqViagem := U_AOMS118X(_cDirJSon+"Krona1_Requisicao_Status.txt") 
    If Empty(_cPesqViagem)
       If _lExibeTela
-         U_ItMsg("Erro na leitura do arquivo modelo JSON modelo de Requisição de Status da integração Krona.","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo modelo JSON modelo de Requisição de Status da integração Krona.","Atenção",,1)
       Else 
          U_ItConOut("[AOMS118P] - Erro na leitura do arquivo modelo JSON modelo de Requisição de Status da integração Krona.")
       EndIf 
@@ -2557,10 +2558,10 @@ Begin Sequence
    
    _aHeadOut := {}              
    
-   Aadd(_aHeadOut,'Content-Type: application/json') 
+   aAdd(_aHeadOut,'Content-Type: application/json') 
      
-   Aadd(_aHeadOut,"usuario: " + AllTrim(_cUsuario))
-   Aadd(_aHeadOut,"senha: "+ AllTrim(_cSenha)) 
+   aAdd(_aHeadOut,"usuario: " + AllTrim(_cUsuario))
+   aAdd(_aHeadOut,"senha: "+ AllTrim(_cSenha)) 
    
    If _cTipoPesq == "C" // Pesquisa por carga posicionada.
       _cLinkWS := AllTrim(_cLinkWS) + "?id_pesquisa="+AllTrim(_cIdPesquisa) +"&tipo_entrada=plano_k1"   
@@ -2661,28 +2662,28 @@ Begin Sequence
    _operacao    := Space(20)   //      "operacao":"ITALAC.TRANS LAG
   
    //_aNames := _oJson:GetNames()
-   _nI := Ascan(_aNames,'numero_viagem')
+   _nI := aScan(_aNames,'numero_viagem')
 
    If _nI > 0 .And. !Empty(_oJson[_aNames[_nI]])
 
       //--------------------------->> 3 - Motorista 1 
       //_cCodMotor := Posicione("DAK",1,AllTrim(_oRetJSon[1]:numero_cliente),'DAK_MOTORI')
-      _nJ := Ascan(_aNames, 'numero_cliente')
+      _nJ := aScan(_aNames, 'numero_cliente')
       If _nJ > 0
          _NrCliente := AllTrim(_oJson[_aNames[_nJ]])
          _cCodMotor := Posicione("DAK",1, _NrCliente,'DAK_MOTORI')
       EndIf 
 
       If Empty(_cTransp)
-         DA4->(DbSetOrder(1)) // DA4_FILIAL+DA4_COD   
-         If DA4->(DbSeek(xFilial("DA4")+_cCodMotor))
+         DA4->(DBSetOrder(1)) // DA4_FILIAL+DA4_COD   
+         If DA4->(DBSeek(xFilial("DA4")+_cCodMotor))
             //----------------------------------------------//
             _cTransp   := DA4->DA4_FORNECE
             _cLjTransp := DA4->DA4_LOJA   
          EndIf
       EndIf
 
-      _nJ := Ascan(_aNames, 'status')
+      _nJ := aScan(_aNames, 'status')
       If _nJ > 0
          _Status := _oJson[_aNames[_nJ]]
       EndIf
@@ -2692,22 +2693,22 @@ Begin Sequence
       _aRet        := {_NrViagem, _cTransp, _cLjTransp, _NrCliente , _Status }
    EndIf 
 
-   _nI := Ascan(_aNames,'numero_cliente')
+   _nI := aScan(_aNames,'numero_cliente')
    If _nI > 0 .And. ! Empty(_oJson[_aNames[_nI]]) // ! Empty(_oRetJSon.numero_cliente)
       _NrCliente   := _oJson[_aNames[_nI]] // _oRetJSon[1]:numero_cliente                          //      "numero_cliente":"01151381",
    EndIf
    
-   _nI := Ascan(_aNames,'numero_pamcary')
+   _nI := aScan(_aNames,'numero_pamcary')
    If _nI > 0 .And. ! Empty(_oJson[_aNames[_nI]]) //  ! Empty(_oRetJSon[1]:numero_pamcary)
       _NrPamcary   := _oJson[_aNames[_nI]] // _oRetJSon[1]:numero_pamcary                          //      "numero_pamcary":"0",
    EndIf
    
-   _nI := Ascan(_aNames,'status')
+   _nI := aScan(_aNames,'status')
    If _nI > 0 .And. ! Empty(_oJson[_aNames[_nI]]) //  ! Empty(_oRetJSon[1]:status)
       _Status      := _oJson[_aNames[_nI]] // _oRetJSon[1]:status                                  //      "status":"AGENDADA",
    EndIf
    
-   _nI := Ascan(_aNames,'operacao')
+   _nI := aScan(_aNames,'operacao')
    If _nI > 0 .And. ! Empty(_oJson[_aNames[_nI]]) //  ! Empty(_oRetJSon[1]:operacao)
       _operacao    := _oJson[_aNames[_nI]] // _oRetJSon[1]:operacao                                //      "operacao":"ITALAC.TRANS LAG (LAGOINHA)"
    EndIf 
@@ -2718,85 +2719,85 @@ Begin Sequence
       _cExcecao := "FINALIZADA/ENCERRADA/FINAL"
    EndIf 
    
-   _nI := Ascan(_aNames,'evento_datahora')
+   _nI := aScan(_aNames,'evento_datahora')
    If _nI > 0 .And. ! Empty(_oJson[_aNames[_nI]]) // ! Empty(_oRetJSon[1]:evento_datahora)
       _EveDataH    := _oJson[_aNames[_nI]] // _oRetJSon[1]:evento_datahora                         //      "evento_datahora":null,
    EndIf
    
-   _nI := Ascan(_aNames,'evento_tipo')
+   _nI := aScan(_aNames,'evento_tipo')
    If _nI > 0 .And. ! Empty(_oJson[_aNames[_nI]]) //  ! Empty(_oRetJSon[1]:evento_tipo)
       _EveTipo     := _oJson[_aNames[_nI]] // _oRetJSon[1]:evento_tipo                             //      "evento_tipo":null,
    EndIf
 
-   _nI := Ascan(_aNames,'referencia')
+   _nI := aScan(_aNames,'referencia')
    If _nI > 0 .And. ! Empty(_oJson[_aNames[_nI]]) //  ! Empty(_oRetJSon[1]:referencia)
       _Referencia  := _oJson[_aNames[_nI]] // _oRetJSon[1]:referencia                              //      "referencia":null,
    EndIf
    
-   _nI := Ascan(_aNames,'latitude')
+   _nI := aScan(_aNames,'latitude')
    If _nI > 0 .And. ! Empty(_oJson[_aNames[_nI]]) // ! Empty(_oRetJSon[1]:latitude)
       _Latitude    := _oJson[_aNames[_nI]] // _oRetJSon[1]:latitude                                //      "latitude":null,
    EndIf
 
-   _nI := Ascan(_aNames,'longitude')
+   _nI := aScan(_aNames,'longitude')
    If _nI > 0 .And. ! Empty(_oJson[_aNames[_nI]]) // ! Empty(_oRetJSon[1]:longitude)
       _Longitude   := _oJson[_aNames[_nI]] // _oRetJSon[1]:longitude                               //      "longitude":null,
    EndIf
 
-   _nI := Ascan(_aNames,'distancia')
+   _nI := aScan(_aNames,'distancia')
    If _nI > 0 .And. ! Empty(_oJson[_aNames[_nI]]) // ! Empty(_oRetJSon[1]:distancia)
       _Distancia   := _oJson[_aNames[_nI]] // _oRetJSon[1]:distancia                               //      "distancia":null,
    EndIf
 
-   _nI := Ascan(_aNames,'direcao')
+   _nI := aScan(_aNames,'direcao')
    If _nI > 0 .And. ! Empty(_oJson[_aNames[_nI]]) // ! Empty(_oRetJSon[1]:direcao)
       _Direcao     := _oJson[_aNames[_nI]] // _oRetJSon[1]:direcao                                 //      "direcao":null,
    EndIf
  
-   _nI := Ascan(_aNames,'inicio_previsto')
+   _nI := aScan(_aNames,'inicio_previsto')
    If _nI > 0 .And. ! Empty(_oJson[_aNames[_nI]]) // ! Empty(_oRetJSon[1]:inicio_previsto)
       _InicPrev    := _oJson[_aNames[_nI]] // _oRetJSon[1]:inicio_previsto                         //      "inicio_previsto":"31\/08\/2019 00:00:00",
    EndIf
    
-   _nI := Ascan(_aNames,'inicio_real')
+   _nI := aScan(_aNames,'inicio_real')
    If _nI > 0 .And. ! Empty(_oJson[_aNames[_nI]]) // ! Empty(_oRetJSon[1]:inicio_real)
       _InicReal    := _oJson[_aNames[_nI]] // _oRetJSon[1]:inicio_real                             //      "inicio_real":"",
    EndIf
    
-   _nI := Ascan(_aNames,'chegada_destino_datahora')
+   _nI := aScan(_aNames,'chegada_destino_datahora')
    If _nI > 0 .And. ! Empty(_oJson[_aNames[_nI]]) // ! Empty(_oRetJSon[1]:chegada_destino_datahora)
       _ChegDest    := _oJson[_aNames[_nI]] // _oRetJSon[1]:chegada_destino_datahora                //      "chegada_destino_datahora":"",
    EndIf
 
-   _nI := Ascan(_aNames,'saida_destino_datahora')
+   _nI := aScan(_aNames,'saida_destino_datahora')
    If _nI > 0 .And. ! Empty(_oJson[_aNames[_nI]]) //  ! Empty(_oRetJSon[1]:saida_destino_datahora)
       _SaidaDest   := _oJson[_aNames[_nI]] // _oRetJSon[1]:saida_destino_datahora                  //      "saida_destino_datahora":"",
    EndIf
 
-   _nI := Ascan(_aNames,'tempo_entrega')
+   _nI := aScan(_aNames,'tempo_entrega')
    If _nI > 0 .And. ! Empty(_oJson[_aNames[_nI]]) // ! Empty(_oRetJSon[1]:tempo_entrega)
       _tempoEntr   := _oJson[_aNames[_nI]] // _oRetJSon[1]:tempo_entrega                           //      "tempo_entrega":"",
    EndIf
 
-   _nI := Ascan(_aNames,'fim_previsto')
+   _nI := aScan(_aNames,'fim_previsto')
    If _nI > 0 .And. ! Empty(_oJson[_aNames[_nI]]) // ! Empty(_oRetJSon[1]:fim_previsto)
       _FimPrev     := _oJson[_aNames[_nI]] // _oRetJSon[1]:fim_previsto                            //      "fim_previsto":"31\/08\/2019 08:00:00",
    EndIf
     
-   _nI := Ascan(_aNames,'fim_real') 
+   _nI := aScan(_aNames,'fim_real') 
    If _nI > 0 .And. ! Empty(_oJson[_aNames[_nI]]) // ! Empty(_oRetJSon[1]:fim_real)
       _FimReal     := _oJson[_aNames[_nI]] // _oRetJSon[1]:fim_real                                //      "fim_real":"",
    EndIf
 
-   _nI := Ascan(_aNames,'tempo_total')
+   _nI := aScan(_aNames,'tempo_total')
    If _nI > 0 .And. ! Empty(_oJson[_aNames[_nI]]) // ! Empty(_oRetJSon[1]:tempo_total)
       _TempoTot    := _oJson[_aNames[_nI]] // _oRetJSon[1]:tempo_total                             //      "tempo_total":"",
    EndIf
    
-   _nI := Ascan(_aNames,'numero_viagem')
+   _nI := aScan(_aNames,'numero_viagem')
    If _nI > 0 .And. ! Empty(_oJson[_aNames[_nI]]) // ! Empty(_oRetJSon[1]:numero_viagem)
-      Aadd(_aRet, _operacao)
-      Aadd(_aRet, _InicPrev)
+      aAdd(_aRet, _operacao)
+      aAdd(_aRet, _InicPrev)
    EndIf
    
    If Upper(AllTrim(_Status)) $ _cExcecao
@@ -2819,7 +2820,7 @@ Begin Sequence
    _cItem4 := _oItemDest[_aItemNames[4]]
 */
 
-   _nJ := Ascan(_aDestinos,"nome")
+   _nJ := aScan(_aDestinos,"nome")
    If _nJ > 0 // Isso indica que só há um destino
       _NomeDest    := ""   //      "destinos":["nome":"ITALAC - PASSO FUNDO\/RS - PASSO FUNDO\/RS",
       _ChegDest    := ""   //      "chegada_destino_datahora":null,
@@ -2827,27 +2828,27 @@ Begin Sequence
       _TempCheSaid := ""   //      "tempo_chegada_saida_destino":null,
       _ordem       := ""   //      "ordem":"1"
        
-      _nJ := Ascan(_aDestinos,'nome')
+      _nJ := aScan(_aDestinos,'nome')
       If _nJ > 0 .And. !Empty(_oDestinos[_aDestinos[_nJ]]) // ! Empty(_oRetJSon[1]:destinos[_nI]:nome)
          _NomeDest    := _oDestinos[_aDestinos[_nJ]] // _oRetJSon[1]:destinos[_nI]:nome                        //      "destinos":["nome":"ITALAC - PASSO FUNDO\/RS - PASSO FUNDO\/RS",
       EndIf       
        
-      _nJ := Ascan(_aDestinos,'chegada_destino_datahora')
+      _nJ := aScan(_aDestinos,'chegada_destino_datahora')
       If _nJ > 0 .And. !Empty(_oDestinos[_aDestinos[_nJ]]) // ! Empty(_oRetJSon[1]:destinos[_nI]:chegada_destino_datahora)
          _ChegDest    := _oDestinos[_aDestinos[_nJ]] // _oRetJSon[1]:destinos[_nI]:chegada_destino_datahora    //      "chegada_destino_datahora":null,
       EndIf
        
-      _nJ := Ascan(_aDestinos,'saida_destino_datahora')
+      _nJ := aScan(_aDestinos,'saida_destino_datahora')
       If _nJ > 0 .And. !Empty(_oDestinos[_aDestinos[_nJ]]) // ! Empty(_oRetJSon[1]:destinos[_nI]:saida_destino_datahora)
          _SaidaDest   := _oDestinos[_aDestinos[_nJ]] // _oRetJSon[1]:destinos[_nI]:saida_destino_datahora      //      "saida_destino_datahora":null,  
       EndIf
        
-      _nJ := Ascan(_aDestinos,'tempo_chegada_saida_destino')
+      _nJ := aScan(_aDestinos,'tempo_chegada_saida_destino')
       If _nJ > 0 .And. !Empty(_oDestinos[_aDestinos[_nJ]]) // ! Empty(_oRetJSon[1]:destinos[_nI]:tempo_chegada_saida_destino )
          _TempCheSaid := _oDestinos[_aDestinos[_nJ]] // _oRetJSon[1]:destinos[_nI]:tempo_chegada_saida_destino //      "tempo_chegada_saida_destino":null,
       EndIf
        
-      _nJ := Ascan(_aDestinos,'ordem')
+      _nJ := aScan(_aDestinos,'ordem')
       If _nJ > 0 .And. !Empty(_oDestinos[_aDestinos[_nJ]]) // ! Empty(_oRetJSon[1]:destinos[_nI]:ordem)
          _Ordem       := _oDestinos[_aDestinos[_nJ]] // _oRetJSon[1]:destinos[_nI]:ordem                       //      "ordem":"1"
       EndIf
@@ -2866,27 +2867,27 @@ Begin Sequence
           _TempCheSaid := ""   //      "tempo_chegada_saida_destino":null,
           _ordem       := ""   //      "ordem":"1"
        
-          _nJ := Ascan(_aItemNames,'nome')
+          _nJ := aScan(_aItemNames,'nome')
           If _nJ > 0 .And. !Empty(_oItemDest[_aItemNames[_nJ]]) // ! Empty(_oRetJSon[1]:destinos[_nI]:nome)
              _NomeDest    := _oItemDest[_aItemNames[_nJ]] // _oRetJSon[1]:destinos[_nI]:nome                        //      "destinos":["nome":"ITALAC - PASSO FUNDO\/RS - PASSO FUNDO\/RS",
           EndIf       
        
-          _nJ := Ascan(_aItemNames,'chegada_destino_datahora')
+          _nJ := aScan(_aItemNames,'chegada_destino_datahora')
           If _nJ > 0 .And. !Empty(_oItemDest[_aItemNames[_nJ]]) // ! Empty(_oRetJSon[1]:destinos[_nI]:chegada_destino_datahora)
              _ChegDest    := _oItemDest[_aItemNames[_nJ]] // _oRetJSon[1]:destinos[_nI]:chegada_destino_datahora    //      "chegada_destino_datahora":null,
           EndIf
        
-          _nJ := Ascan(_aItemNames,'saida_destino_datahora')
+          _nJ := aScan(_aItemNames,'saida_destino_datahora')
           If _nJ > 0 .And. !Empty(_oItemDest[_aItemNames[_nJ]]) // ! Empty(_oRetJSon[1]:destinos[_nI]:saida_destino_datahora)
              _SaidaDest   := _oItemDest[_aItemNames[_nJ]] // _oRetJSon[1]:destinos[_nI]:saida_destino_datahora      //      "saida_destino_datahora":null,  
           EndIf
        
-          _nJ := Ascan(_aItemNames,'tempo_chegada_saida_destino')
+          _nJ := aScan(_aItemNames,'tempo_chegada_saida_destino')
           If _nJ > 0 .And. !Empty(_oItemDest[_aItemNames[_nJ]]) // ! Empty(_oRetJSon[1]:destinos[_nI]:tempo_chegada_saida_destino )
              _TempCheSaid := _oItemDest[_aItemNames[_nJ]] // _oRetJSon[1]:destinos[_nI]:tempo_chegada_saida_destino //      "tempo_chegada_saida_destino":null,
           EndIf
        
-          _nJ := Ascan(_aItemNames,'ordem')
+          _nJ := aScan(_aItemNames,'ordem')
           If _nJ > 0 .And. !Empty(_oItemDest[_aItemNames[_nJ]]) // ! Empty(_oRetJSon[1]:destinos[_nI]:ordem)
              _Ordem       := _oItemDest[_aItemNames[_nJ]] // _oRetJSon[1]:destinos[_nI]:ordem                       //      "ordem":"1"
           EndIf
@@ -2907,77 +2908,77 @@ Begin Sequence
    If _lExibeTela
       Define Dialog _oDlgL Title _cTitulo From 00,00 To 600,1060 Pixel   
       
-         @ _nLinha, _nCol1 SAY _oSId	PROMPT "Nr.Viagem" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+         @ _nLinha, _nCol1 Say _oSId	PROMPT "Nr.Viagem" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	      @ _nLinha, _nCol2 MSGET _oNrViagem VAR _NrViagem SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	  
-	      @ _nLinha, _nCol3 SAY _oSUsrI	PROMPT "Nr.Cliente" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	      @ _nLinha, _nCol3 Say _oSUsrI	PROMPT "Nr.Cliente" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	      @ _nLinha, _nCol4 MSGET _oNrCliente VAR _NrCliente SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
          _nLinha += 15     
       
-         @ _nLinha, _nCol1 SAY _oSId	PROMPT "Nr.Pancary" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+         @ _nLinha, _nCol1 Say _oSId	PROMPT "Nr.Pancary" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	      @ _nLinha, _nCol2 MSGET _oNrPamcary VAR _NrPamcary SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	  
-	      @ _nLinha, _nCol3 SAY _oSUsrI	PROMPT "Status" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	      @ _nLinha, _nCol3 Say _oSUsrI	PROMPT "Status" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	      @ _nLinha, _nCol4 MSGET _oStatus VAR _Status SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
          _nLinha += 15
       
-         @ _nLinha, _nCol1 SAY _oSId	PROMPT "Evento Data/Hora" SIZE 060, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+         @ _nLinha, _nCol1 Say _oSId	PROMPT "Evento Data/Hora" SIZE 060, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	      @ _nLinha, _nCol2 MSGET _oEveDataH VAR _EveDataH SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	  
-	      @ _nLinha, _nCol3 SAY _oSUsrI	PROMPT "Evento Tipo" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	      @ _nLinha, _nCol3 Say _oSUsrI	PROMPT "Evento Tipo" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	      @ _nLinha, _nCol4 MSGET _oEveTipo VAR _EveTipo SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
          _nLinha += 15
 
-         @ _nLinha, _nCol1 SAY _oSId	PROMPT "Referência" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+         @ _nLinha, _nCol1 Say _oSId	PROMPT "Referência" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	      @ _nLinha, _nCol2 MSGET _oReferencia VAR _Referencia SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	  
-	      @ _nLinha, _nCol3 SAY _oSUsrI	PROMPT "Latitude" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	      @ _nLinha, _nCol3 Say _oSUsrI	PROMPT "Latitude" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	      @ _nLinha, _nCol4 MSGET _oLatitude VAR _Latitude SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
          _nLinha += 15
       
-         @ _nLinha, _nCol1 SAY _oSId	PROMPT "Longitude" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+         @ _nLinha, _nCol1 Say _oSId	PROMPT "Longitude" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	      @ _nLinha, _nCol2 MSGET _oLongitude  VAR _Longitude SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	  
-	      @ _nLinha, _nCol3 SAY _oSUsrI	PROMPT "Distância" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	      @ _nLinha, _nCol3 Say _oSUsrI	PROMPT "Distância" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	      @ _nLinha, _nCol4 MSGET _oDistancia VAR _Distancia SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
          _nLinha += 15
       
-         @ _nLinha, _nCol1 SAY _oSId	PROMPT "Direção" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+         @ _nLinha, _nCol1 Say _oSId	PROMPT "Direção" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	      @ _nLinha, _nCol2 MSGET _oDirecao VAR _Direcao SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	  
-	      @ _nLinha, _nCol3 SAY _oSUsrI	PROMPT "Inicio Previsto" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	      @ _nLinha, _nCol3 Say _oSUsrI	PROMPT "Inicio Previsto" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	      @ _nLinha, _nCol4 MSGET _oInicPrev VAR _InicPrev SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
          _nLinha += 15
       
-         @ _nLinha, _nCol1 SAY _oSId	PROMPT "Inicio Real" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+         @ _nLinha, _nCol1 Say _oSId	PROMPT "Inicio Real" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	      @ _nLinha, _nCol2 MSGET _oInicReal VAR _InicReal SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	  
-	      @ _nLinha, _nCol3 SAY _oSUsrI	PROMPT "Chegada ao Destino" SIZE 060, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	      @ _nLinha, _nCol3 Say _oSUsrI	PROMPT "Chegada ao Destino" SIZE 060, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	      @ _nLinha, _nCol4 MSGET _oChegDest VAR _ChegDest SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
          _nLinha += 15
       
-         @ _nLinha, _nCol1 SAY _oSId	PROMPT "Saída do Destino" SIZE 060, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+         @ _nLinha, _nCol1 Say _oSId	PROMPT "Saída do Destino" SIZE 060, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	      @ _nLinha, _nCol2 MSGET _oSaidaDest VAR _SaidaDest SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	  
-	      @ _nLinha, _nCol3 SAY _oSUsrI	PROMPT "Tempo de Entrega" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	      @ _nLinha, _nCol3 Say _oSUsrI	PROMPT "Tempo de Entrega" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	      @ _nLinha, _nCol4 MSGET _otempoEntr VAR _tempoEntr SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
          _nLinha += 15
       
-         @ _nLinha, _nCol1 SAY _oSId	PROMPT "Final Previsto" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+         @ _nLinha, _nCol1 Say _oSId	PROMPT "Final Previsto" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	      @ _nLinha, _nCol2 MSGET _oFimPrev VAR _FimPrev  SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	  
-	      @ _nLinha, _nCol3 SAY _oSUsrI	PROMPT "Final Real" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	      @ _nLinha, _nCol3 Say _oSUsrI	PROMPT "Final Real" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	      @ _nLinha, _nCol4 MSGET _oFimReal VAR _FimReal SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
          _nLinha += 15
       
-         @ _nLinha, _nCol1 SAY _oSId	PROMPT "Tempo Total" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+         @ _nLinha, _nCol1 Say _oSId	PROMPT "Tempo Total" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	      @ _nLinha, _nCol2 MSGET _oTempoTot VAR _TempoTot SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	      _nLinha += 15             
 	      _nLinha += 15
 	  
 	      Define Font _oFont Name "Courrier New" Size 7, 12
 	  
-	      @ _nLinha, _nCol1 SAY _oSUsrI	PROMPT "Destinos:" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL 
+	      @ _nLinha, _nCol1 Say _oSUsrI	PROMPT "Destinos:" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL 
 	      _nLinha += 15
 	  
 	      @ _nLinha, _nCol1 Get _oLinha Var _cLinha Memo Size 510, 50 Of _oDlgL COLORS 16711680, 16777215 PIXEL
@@ -2993,10 +2994,10 @@ Begin Sequence
 End Sequence
 
 If ! Empty(_cMsgErro) .And. _lExibeTela
-   U_ItMsg(_cMsgErro,"Atenção",,1)
+   U_ITMsg(_cMsgErro,"Atenção",,1)
 EndIf
 
-DAK->(DbGoTo(_nRegAtu))
+DAK->(DBGoTo(_nRegAtu))
 
 Return _aRet     
 
@@ -3129,27 +3130,27 @@ Private _oMark, _cMarca := GetMark(), _oMarkJSon
 
 Begin Sequence        
 
-   If ! U_ItMsg("Confirma a consulta das posições dos Motoristas/Veículos no sistema Krona ?","Atenção", ,2 , 2)  
+   If ! U_ITMsg("Confirma a consulta das posições dos Motoristas/Veículos no sistema Krona ?","Atenção", ,2 , 2)  
       Break
    EndIf              
    
    _cLinkWS := ""
-   ZFM->(DbSetOrder(1))
-   If ZFM->(DbSeek(xFilial("ZFM")+_cEmpWebService))
+   ZFM->(DBSetOrder(1))
+   If ZFM->(DBSeek(xFilial("ZFM")+_cEmpWebService))
       _cDirJSon    := ZFM->ZFM_LOCXML 
       _cLinkWSLog := AllTrim(ZFM->ZFM_LINK06) // Link de Login
       _cLinkWSMot := AllTrim(ZFM->ZFM_LINK07) // Link posição dos motoristas
    Else
-      U_ItMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
+      U_ITMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
       Break
    EndIf
      
    If Empty(_cDirJSon)
-      U_ItMsg("Diretório dos arquivos JSON modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)     
+      U_ITMsg("Diretório dos arquivos JSON modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)     
       Break                                     
    EndIf
       
-   _cDirJSon := Alltrim(_cDirJSon)
+   _cDirJSon := AllTrim(_cDirJSon)
    If Right(_cDirJSon,1) <> "\"
       _cDirJSon := _cDirJSon + "\"
    EndIf
@@ -3161,7 +3162,7 @@ Begin Sequence
    //================================================================================
    _cLoginStatus := U_AOMS118X(_cDirJSon+"Krona1_Login_2.txt") 
    If Empty(_cLoginStatus)
-      U_ItMsg("Erro na leitura do arquivo modelo JSON modelo de Login da integração Krona.","Atenção",,1)
+      U_ITMsg("Erro na leitura do arquivo modelo JSON modelo de Login da integração Krona.","Atenção",,1)
       Break
    EndIf                                                                                                                                        
 
@@ -3181,7 +3182,7 @@ Begin Sequence
    _cJSonEnv    := &(_cLoginStatus)
    
    _aHeadOut := {}              
-   Aadd(_aHeadOut,'Content-Type: application/json')
+   aAdd(_aHeadOut,'Content-Type: application/json')
 
    _cRetHttp := AllTrim( HttpPost( _cLinkWSLog, '' , _cJSonEnv , _nTimOut , _aHeadOut , @_cJSonRet ) )
    If ! Empty(_cRetHttp)
@@ -3219,8 +3220,8 @@ Begin Sequence
    
    _aHeadOut := {}              
    
-   Aadd(_aHeadOut,'Content-Type: application/json')     
-   Aadd(_aHeadOut, _cAutentic)
+   aAdd(_aHeadOut,'Content-Type: application/json')     
+   aAdd(_aHeadOut, _cAutentic)
    
    _cLinkWS := AllTrim(_cLinkWS) 
    
@@ -3237,7 +3238,7 @@ Begin Sequence
    EndIf        
 
    If ! ("documentid" $ Lower(_cRetHttp) )   
-      U_ItMsg("Não há dados de entregas disponíveis para visualizão.","Atenção",,1)
+      U_ITMsg("Não há dados de entregas disponíveis para visualizão.","Atenção",,1)
       Break
    EndIf
    
@@ -3247,34 +3248,34 @@ Begin Sequence
    // Cria Tabela Temporária para armazenar dados do JSon
    //==========================================================================
    _aStruct := {}
-   Aadd(_aStruct,{"id"        ,"C",30	,0 })  // :"591b2bf8fb6c25358f68248d",
-   Aadd(_aStruct,{"documentId","C",20	,0 })  // :"7897123883022",
-   Aadd(_aStruct,{"docType"   ,"C",30	,0 })  // :null,
-   Aadd(_aStruct,{"accountId" ,"C",30	,0 })  // :"5834f7718273f92cc326f620",
-   Aadd(_aStruct,{"companyId" ,"C",30	,0 })  // :null,
-   Aadd(_aStruct,{"companyNam","C",30	,0 })  // :null,
-   Aadd(_aStruct,{"motoristId","C",30	,0 })  // :"58d90705346b164247cf83fc",
-   Aadd(_aStruct,{"motorDocId","C",20	,0 })  // :"99570378620",
-   Aadd(_aStruct,{"status"    ,"C",30	,0 })  // :null,
-   Aadd(_aStruct,{"observatio","C",30	,0 })  // :null,
-   Aadd(_aStruct,{"latitude"  ,"C",20	,0 })  // :-23.5748342,
-   Aadd(_aStruct,{"longitude" ,"C",20	,0 })  // :-46.6452698,
-   Aadd(_aStruct,{"hasDocImag","C",10	,0 })  // :true,
-   Aadd(_aStruct,{"hasSigImag","C",10	,0 })  // :true,
-   Aadd(_aStruct,{"imgAmount" ,"C",10	,0 })  // :1,
-   Aadd(_aStruct,{"docImage"  ,"C",30	,0 })  // :null,
-   Aadd(_aStruct,{"signaImage","C",30	,0 })  // :null,
-   Aadd(_aStruct,{"statusText","C",30	,0 })  // :"ENTREGUE",
-   Aadd(_aStruct,{"sendStatus","C",30	,0 })  // :null,
-   Aadd(_aStruct,{"docImgPath","C",30	,0 })  // :null,
-   Aadd(_aStruct,{"sigImgPath","C",30	,0 })  // :null,
-   Aadd(_aStruct,{"created"   ,"C",20	,0 })  // :1494952939528,
-   Aadd(_aStruct,{"inserted"  ,"C",20	,0 })  // :1494952952192,
-   Aadd(_aStruct,{"imgExpiry" ,"C",30	,0 })  // :null
-   Aadd(_aStruct,{"JSONDOCDIG","M",10	,0 })  // :null
-   Aadd(_aStruct,{"JSONASSDIG","M",10	,0 })  // :null
-   Aadd(_aStruct,{"NOMDOCDIG" ,"C",20	,0 })  // :null
-   Aadd(_aStruct,{"NOMASSDIG" ,"C",20	,0 })  // :null
+   aAdd(_aStruct,{"id"        ,"C",30	,0 })  // :"591b2bf8fb6c25358f68248d",
+   aAdd(_aStruct,{"documentId","C",20	,0 })  // :"7897123883022",
+   aAdd(_aStruct,{"docType"   ,"C",30	,0 })  // :null,
+   aAdd(_aStruct,{"accountId" ,"C",30	,0 })  // :"5834f7718273f92cc326f620",
+   aAdd(_aStruct,{"companyId" ,"C",30	,0 })  // :null,
+   aAdd(_aStruct,{"companyNam","C",30	,0 })  // :null,
+   aAdd(_aStruct,{"motoristId","C",30	,0 })  // :"58d90705346b164247cf83fc",
+   aAdd(_aStruct,{"motorDocId","C",20	,0 })  // :"99570378620",
+   aAdd(_aStruct,{"status"    ,"C",30	,0 })  // :null,
+   aAdd(_aStruct,{"observatio","C",30	,0 })  // :null,
+   aAdd(_aStruct,{"latitude"  ,"C",20	,0 })  // :-23.5748342,
+   aAdd(_aStruct,{"longitude" ,"C",20	,0 })  // :-46.6452698,
+   aAdd(_aStruct,{"hasDocImag","C",10	,0 })  // :true,
+   aAdd(_aStruct,{"hasSigImag","C",10	,0 })  // :true,
+   aAdd(_aStruct,{"imgAmount" ,"C",10	,0 })  // :1,
+   aAdd(_aStruct,{"docImage"  ,"C",30	,0 })  // :null,
+   aAdd(_aStruct,{"signaImage","C",30	,0 })  // :null,
+   aAdd(_aStruct,{"statusText","C",30	,0 })  // :"ENTREGUE",
+   aAdd(_aStruct,{"sendStatus","C",30	,0 })  // :null,
+   aAdd(_aStruct,{"docImgPath","C",30	,0 })  // :null,
+   aAdd(_aStruct,{"sigImgPath","C",30	,0 })  // :null,
+   aAdd(_aStruct,{"created"   ,"C",20	,0 })  // :1494952939528,
+   aAdd(_aStruct,{"inserted"  ,"C",20	,0 })  // :1494952952192,
+   aAdd(_aStruct,{"imgExpiry" ,"C",30	,0 })  // :null
+   aAdd(_aStruct,{"JSONDOCDIG","M",10	,0 })  // :null
+   aAdd(_aStruct,{"JSONASSDIG","M",10	,0 })  // :null
+   aAdd(_aStruct,{"NOMDOCDIG" ,"C",20	,0 })  // :null
+   aAdd(_aStruct,{"NOMASSDIG" ,"C",20	,0 })  // :null
 
    //================================================================================
    // Abre o arquivo TRBZF5 criado dentro do banco de dados protheus.
@@ -3318,8 +3319,8 @@ Begin Sequence
    
        _aHeadOut := {}              
    
-       Aadd(_aHeadOut,'Content-Type: application/json') 
-       Aadd(_aHeadOut,_cAutentic)
+       aAdd(_aHeadOut,'Content-Type: application/json') 
+       aAdd(_aHeadOut,_cAutentic)
    
        _cLinkWS := AllTrim(_cLinkWS)
    
@@ -3356,8 +3357,8 @@ Begin Sequence
    
        _aHeadOut := {}              
    
-       Aadd(_aHeadOut,'Content-Type: application/json') 
-       Aadd(_aHeadOut,_cAutentic)
+       aAdd(_aHeadOut,'Content-Type: application/json') 
+       aAdd(_aHeadOut,_cAutentic)
    
        _cLinkWS := AllTrim(_cLinkWS)
    
@@ -3382,7 +3383,7 @@ Begin Sequence
        // substitui os dados já acessados por novos dados. Então é preciso gravar os dados em 
        // uma tabela de histórico. Pois no proxímo acesso os dados serão outros, até zerar a fila de dados.
        //==================================================================================================== 
-       ZM3->(Reclock("ZM3",.T.))
+       ZM3->(RecLock("ZM3",.T.))
        ZM3->ZM3_FILIAL := xFilial("ZM3")
        ZM3->ZM3_DATA   := Date()
 	    ZM3->ZM3_HORA   := Time()
@@ -3417,18 +3418,18 @@ Begin Sequence
        
        If ! "FALSO" $ Upper(_cRetHttpD)
           ZM3->ZM3_NDOCDI := "DOCDIG"+StrZero(ZM3->(Recno()),10)+".png"
-       ENDIF
+       EndIf
 
        If ! "FALSO" $ Upper(_cRetHttpA)
           ZM3->ZM3_NASSDI := "ASSINADIG"+StrZero(ZM3->(Recno()),10)+".png"
        EndIf
                                                                                // JSON assinaturas digitalizados      
-       ZM3->(MsUnLock())
+       ZM3->(MSUnLock())
 
        //=====================================================================
        // Grava tabela terporária com os dados do JSon principal.
        //=====================================================================   
-       TRBJSON->(Reclock("TRBJSON",.T.)) 
+       TRBJSON->(RecLock("TRBJSON",.T.)) 
        TRBJSON->id         := _oRetJSon[_nJ]:id                                                                    // id
        TRBJSON->documentId := If(Empty(_oRetJSon[_nJ]:documentId)         ,"", _oRetJSon[_nJ]:documentId)          // documentId
        TRBJSON->docType    := If(Empty(_oRetJSon[_nJ]:documentType)       ,"", _oRetJSon[_nJ]:documentType)        // docType
@@ -3456,7 +3457,7 @@ Begin Sequence
 
        If ! "FALSO" $ Upper(_cRetHttpD)
           TRBJSON->NOMDOCDIG := "DOCDIG"+StrZero(ZM3->(Recno()),10)+".png"
-       ENDIF
+       EndIf
 
        If ! "FALSO" $ Upper(_cRetHttpA)
           TRBJSON->NOMASSDIG := "ASSINADIG"+StrZero(ZM3->(Recno()),10)+".png"
@@ -3465,7 +3466,7 @@ Begin Sequence
        TRBJSON->JSONDOCDIG := _cRetHttpD                                                                           // JSON documentos digitalizados
        TRBJSON->JSONASSDIG := _cRetHttpA                                                                           // JSON assinaturas digitalizados
        
-       TRBJSON->(MsUnLock())                                                
+       TRBJSON->(MSUnLock())                                                
 
        //==================================================================================
        // Grava os arquivos de imagens para posterior exibição.
@@ -3473,7 +3474,7 @@ Begin Sequence
        If ! "FALSO" $ Upper(_cRetHttpD)
           _cArq := AllTrim(_cDirImg) + "DOCDIG"+StrZero(ZM3->(Recno()),10)+".png"      
           MemoWrite(_cArq,_cRetHttpD)
-       ENDIF
+       EndIf
 
        If ! "FALSO" $ Upper(_cRetHttpA)
           _cArq := AllTrim(_cDirImg) + "ASSINADIG"+StrZero(ZM3->(Recno()),10)+".png"  
@@ -3486,39 +3487,39 @@ Begin Sequence
    // Monta as colunas do MSSELECT para a tabela temporária TRBZFQ 
    //================================================================================                  
    _aCmpJSon := {}
-   Aadd( _aCmpJSon , {"id"        ,    , "ID"                  ,"@!"})  // :"591b2bf8fb6c25358f68248d",
-   Aadd( _aCmpJSon , {"documentId",    , "Document ID"         ,"@!"})  // :"7897123883022",
-   Aadd( _aCmpJSon , {"docType"   ,    , "Document Type"       ,"@!"})  // :null,
-   Aadd( _aCmpJSon , {"accountId" ,    , "Account ID"          ,"@!"})  // :"5834f7718273f92cc326f620",
-   Aadd( _aCmpJSon , {"companyId" ,    , "Company ID"          ,"@!"})  // :null,
-   Aadd( _aCmpJSon , {"companyNam",    , "Company Name"        ,"@!"})  // :null,
-   Aadd( _aCmpJSon , {"motoristId",    , "Motorist ID"         ,"@!"})  // :"58d90705346b164247cf83fc",  
-   Aadd( _aCmpJSon , {"motorDocId",    , "Motorist Docum.Id."  ,"@!"})  // :"99570378620",
-   Aadd( _aCmpJSon , {"status"    ,    , "Status"              ,"@!"})  // :null,
-   Aadd( _aCmpJSon , {"observatio",    , "Observation"         ,"@!"})  // :null,
-   Aadd( _aCmpJSon , {"latitude"  ,    , "Latitude"            ,"@!"})  // :-23.5748342,
-   Aadd( _aCmpJSon , {"longitude" ,    , "Longitude"           ,"@!"})  // :-46.6452698,
-   Aadd( _aCmpJSon , {"hasDocImag",    , "Has.Document Image"  ,"@!"})  // :true,
-   Aadd( _aCmpJSon , {"hasSigImag",    , "Has.Signature Image" ,"@!"})  // :true,
-   Aadd( _aCmpJSon , {"imgAmount" ,    , "Image Amount"        ,"@!"})  // :1,
-   Aadd( _aCmpJSon , {"docImage"  ,    , "Document Image"      ,"@!"})  // :null,
-   Aadd( _aCmpJSon , {"signaImage",    , "Signature Image"     ,"@!"})  // :null,
-   Aadd( _aCmpJSon , {"statusText",    , "Status Text"         ,"@!"})  // :"ENTREGUE",
-   Aadd( _aCmpJSon , {"sendStatus",    , "Send Status"         ,"@!"})  // :null,
-   Aadd( _aCmpJSon , {"docImgPath",    , "Document Image Path" ,"@!"})  // :null,
-   Aadd( _aCmpJSon , {"sigImgPath",    , "Signature Image Path","@!"})  // :null,
-   Aadd( _aCmpJSon , {"created"   ,    , "Created"             ,"@!"})  // :1494952939528,
-   Aadd( _aCmpJSon , {"inserted"  ,    , "Inserted"            ,"@!"})  // :1494952952192,
-   Aadd( _aCmpJSon , {"imgExpiry" ,    , "Image Expiry"        ,"@!"})  // :null     
+   aAdd( _aCmpJSon , {"id"        ,    , "ID"                  ,"@!"})  // :"591b2bf8fb6c25358f68248d",
+   aAdd( _aCmpJSon , {"documentId",    , "Document ID"         ,"@!"})  // :"7897123883022",
+   aAdd( _aCmpJSon , {"docType"   ,    , "Document Type"       ,"@!"})  // :null,
+   aAdd( _aCmpJSon , {"accountId" ,    , "Account ID"          ,"@!"})  // :"5834f7718273f92cc326f620",
+   aAdd( _aCmpJSon , {"companyId" ,    , "Company ID"          ,"@!"})  // :null,
+   aAdd( _aCmpJSon , {"companyNam",    , "Company Name"        ,"@!"})  // :null,
+   aAdd( _aCmpJSon , {"motoristId",    , "Motorist ID"         ,"@!"})  // :"58d90705346b164247cf83fc",  
+   aAdd( _aCmpJSon , {"motorDocId",    , "Motorist Docum.Id."  ,"@!"})  // :"99570378620",
+   aAdd( _aCmpJSon , {"status"    ,    , "Status"              ,"@!"})  // :null,
+   aAdd( _aCmpJSon , {"observatio",    , "Observation"         ,"@!"})  // :null,
+   aAdd( _aCmpJSon , {"latitude"  ,    , "Latitude"            ,"@!"})  // :-23.5748342,
+   aAdd( _aCmpJSon , {"longitude" ,    , "Longitude"           ,"@!"})  // :-46.6452698,
+   aAdd( _aCmpJSon , {"hasDocImag",    , "Has.Document Image"  ,"@!"})  // :true,
+   aAdd( _aCmpJSon , {"hasSigImag",    , "Has.Signature Image" ,"@!"})  // :true,
+   aAdd( _aCmpJSon , {"imgAmount" ,    , "Image Amount"        ,"@!"})  // :1,
+   aAdd( _aCmpJSon , {"docImage"  ,    , "Document Image"      ,"@!"})  // :null,
+   aAdd( _aCmpJSon , {"signaImage",    , "Signature Image"     ,"@!"})  // :null,
+   aAdd( _aCmpJSon , {"statusText",    , "Status Text"         ,"@!"})  // :"ENTREGUE",
+   aAdd( _aCmpJSon , {"sendStatus",    , "Send Status"         ,"@!"})  // :null,
+   aAdd( _aCmpJSon , {"docImgPath",    , "Document Image Path" ,"@!"})  // :null,
+   aAdd( _aCmpJSon , {"sigImgPath",    , "Signature Image Path","@!"})  // :null,
+   aAdd( _aCmpJSon , {"created"   ,    , "Created"             ,"@!"})  // :1494952939528,
+   aAdd( _aCmpJSon , {"inserted"  ,    , "Inserted"            ,"@!"})  // :1494952952192,
+   aAdd( _aCmpJSon , {"imgExpiry" ,    , "Image Expiry"        ,"@!"})  // :null     
 
    _bOk := {|| _oDlgJ:End()}
    _bCancel := {|| _oDlgJ:End()}
    
    _aButtons := {}
-   AADD(_aButtons,{"",{|| U_AOMS118T() },"Visualizar","Visualizar" })    
-   AADD(_aButtons,{"",{|| U_AOMS118H() },"Histórico Entregas Krona","Histórico Entregas Krona"})
+   aAdd(_aButtons,{"",{|| U_AOMS118T() },"Visualizar","Visualizar" })    
+   aAdd(_aButtons,{"",{|| U_AOMS118H() },"Histórico Entregas Krona","Histórico Entregas Krona"})
                 
-   TRBJSON->(DbGoTop())
+   TRBJSON->(DBGoTop())
                                              
    _cTitulo := "Entregas Realizadas - Integração Sistema Krona"
    //================================================================================
@@ -3534,7 +3535,7 @@ Begin Sequence
  
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -3590,7 +3591,7 @@ Begin Sequence
 
 End Sequence
 
-Return Nil              
+Return              
 
 /*
 ===============================================================================================================================
@@ -3623,31 +3624,31 @@ Private _oMark, _cMarca := GetMark(), _oMarkJSon
 
 Begin Sequence        
 
-   If ! U_ItMsg("Confirma a consulta de entregas registradas no sistema Krona ?","Atenção", ,2 , 2)  
+   If ! U_ITMsg("Confirma a consulta de entregas registradas no sistema Krona ?","Atenção", ,2 , 2)  
       Break
    EndIf      
 
    _cDirImg   := U_ItGetMv("ITDIRIMGKRO","\data\Italac\jsonKrona\Imagens\")         
    
    _cLinkWS := ""
-   ZFM->(DbSetOrder(1))
-   If ZFM->(DbSeek(xFilial("ZFM")+_cEmpWebService))
+   ZFM->(DBSetOrder(1))
+   If ZFM->(DBSeek(xFilial("ZFM")+_cEmpWebService))
       _cDirJSon    := ZFM->ZFM_LOCXML 
       _cLinkWS    := AllTrim(ZFM->ZFM_LINK03) // Link Entregas
       _cLinkWSDoc := AllTrim(ZFM->ZFM_LINK04) // Link Documentos Digitalizados
       _cLinkWSAss := AllTrim(ZFM->ZFM_LINK05) // Link Assinaturas Digitalizadas
       _cLinkWSLog := AllTrim(ZFM->ZFM_LINK06) // Link de Login
    Else
-      U_ItMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
+      U_ITMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
       Break
    EndIf
      
    If Empty(_cDirJSon)
-      U_ItMsg("Diretório dos arquivos JSON modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)     
+      U_ITMsg("Diretório dos arquivos JSON modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)     
       Break                                     
    EndIf
       
-   _cDirJSon := Alltrim(_cDirJSon)
+   _cDirJSon := AllTrim(_cDirJSon)
    If Right(_cDirJSon,1) <> "\"
       _cDirJSon := _cDirJSon + "\"
    EndIf
@@ -3657,7 +3658,7 @@ Begin Sequence
    //================================================================================
    _cLoginStatus := U_AOMS118X(_cDirJSon+"Krona1_Login_2.txt") 
    If Empty(_cLoginStatus)
-      U_ItMsg("Erro na leitura do arquivo modelo JSON modelo de Login da integração Krona.","Atenção",,1)
+      U_ITMsg("Erro na leitura do arquivo modelo JSON modelo de Login da integração Krona.","Atenção",,1)
       Break
    EndIf                                                                                                                                        
 
@@ -3678,7 +3679,7 @@ Begin Sequence
    _cJSonEnv    := &(_cLoginStatus)
    
    _aHeadOut := {}              
-   Aadd(_aHeadOut,'Content-Type: application/json')
+   aAdd(_aHeadOut,'Content-Type: application/json')
 
    _cRetHttp := AllTrim( HttpPost( _cLinkWSLog, '' , _cJSonEnv , _nTimOut , _aHeadOut , @_cJSonRet ) )
    If ! Empty(_cRetHttp)
@@ -3716,8 +3717,8 @@ Begin Sequence
    
    _aHeadOut := {}              
    
-   Aadd(_aHeadOut,'Content-Type: application/json')     
-   Aadd(_aHeadOut, _cAutentic)
+   aAdd(_aHeadOut,'Content-Type: application/json')     
+   aAdd(_aHeadOut, _cAutentic)
    
    _cLinkWS := AllTrim(_cLinkWS) 
    
@@ -3725,7 +3726,7 @@ Begin Sequence
    
    _cRetHttp := AllTrim(HttpGet( _cLinkWS, _cGetParms, _nTimOut, _aHeadOut, @_cJSonRet))   
    
-   If U_ItMsg("Deseja utilizar JSON de Testes (dados fixos) ?","Atenção", ,2 , 2)  
+   If U_ITMsg("Deseja utilizar JSON de Testes (dados fixos) ?","Atenção", ,2 , 2)  
  
       //_cRetHttp := '[{"id":"5e72756f26a0a8119d4a5569","documentId":"33343","documentType":null,"accountId":"5e188b6da216220aca104171","companyId":null,"companyName":null,"motoristId":"5e4d67a626a0a80312c9a0d9","motoristDocumentId":"99570378620","status":null,"observation":null,"latitude":-23.2367096,"longitude":-45.8980124,"hasDocumentImage":true,"hasSignatureImage":false,"imagesAmount":1,"documentImage":null,"listImages":null,"signatureImage":null,"statusText":"ENTREGUE","sendStatus":null,"documentImagePath":null,"listImagesPaths":null,"signatureImagePath":null,"created":1584559446726,"inserted":1584559471261,"imagesExpiry":null}]'
    
@@ -3746,7 +3747,7 @@ Begin Sequence
    EndIf        
 
    If ! ("documentid" $ Lower(_cRetHttp) )   
-      U_ItMsg("Não há dados de entregas disponíveis para visualizão.","Atenção",,1)
+      U_ITMsg("Não há dados de entregas disponíveis para visualizão.","Atenção",,1)
       Break
    EndIf
    
@@ -3756,34 +3757,34 @@ Begin Sequence
    // Cria Tabela Temporária para armazenar dados do JSon
    //==========================================================================
    _aStruct := {}
-   Aadd(_aStruct,{"id"        ,"C",30	,0 })  // :"591b2bf8fb6c25358f68248d",
-   Aadd(_aStruct,{"documentId","C",20	,0 })  // :"7897123883022",
-   Aadd(_aStruct,{"docType"   ,"C",30	,0 })  // :null,
-   Aadd(_aStruct,{"accountId" ,"C",30	,0 })  // :"5834f7718273f92cc326f620",
-   Aadd(_aStruct,{"companyId" ,"C",30	,0 })  // :null,
-   Aadd(_aStruct,{"companyNam","C",30	,0 })  // :null,
-   Aadd(_aStruct,{"motoristId","C",30	,0 })  // :"58d90705346b164247cf83fc",
-   Aadd(_aStruct,{"motorDocId","C",20	,0 })  // :"99570378620",
-   Aadd(_aStruct,{"status"    ,"C",30	,0 })  // :null,
-   Aadd(_aStruct,{"observatio","C",30	,0 })  // :null,
-   Aadd(_aStruct,{"latitude"  ,"C",20	,0 })  // :-23.5748342,
-   Aadd(_aStruct,{"longitude" ,"C",20	,0 })  // :-46.6452698,
-   Aadd(_aStruct,{"hasDocImag","C",10	,0 })  // :true,
-   Aadd(_aStruct,{"hasSigImag","C",10	,0 })  // :true,
-   Aadd(_aStruct,{"imgAmount" ,"C",10	,0 })  // :1,
-   Aadd(_aStruct,{"docImage"  ,"C",30	,0 })  // :null,
-   Aadd(_aStruct,{"signaImage","C",30	,0 })  // :null,
-   Aadd(_aStruct,{"statusText","C",30	,0 })  // :"ENTREGUE",
-   Aadd(_aStruct,{"sendStatus","C",30	,0 })  // :null,
-   Aadd(_aStruct,{"docImgPath","C",30	,0 })  // :null,
-   Aadd(_aStruct,{"sigImgPath","C",30	,0 })  // :null,
-   Aadd(_aStruct,{"created"   ,"C",20	,0 })  // :1494952939528,
-   Aadd(_aStruct,{"inserted"  ,"C",20	,0 })  // :1494952952192,
-   Aadd(_aStruct,{"imgExpiry" ,"C",30	,0 })  // :null
-   Aadd(_aStruct,{"JSONDOCDIG","M",10	,0 })  // :null
-   Aadd(_aStruct,{"JSONASSDIG","M",10	,0 })  // :null
-   Aadd(_aStruct,{"NOMDOCDIG" ,"C",20	,0 })  // :null
-   Aadd(_aStruct,{"NOMASSDIG" ,"C",20	,0 })  // :null
+   aAdd(_aStruct,{"id"        ,"C",30	,0 })  // :"591b2bf8fb6c25358f68248d",
+   aAdd(_aStruct,{"documentId","C",20	,0 })  // :"7897123883022",
+   aAdd(_aStruct,{"docType"   ,"C",30	,0 })  // :null,
+   aAdd(_aStruct,{"accountId" ,"C",30	,0 })  // :"5834f7718273f92cc326f620",
+   aAdd(_aStruct,{"companyId" ,"C",30	,0 })  // :null,
+   aAdd(_aStruct,{"companyNam","C",30	,0 })  // :null,
+   aAdd(_aStruct,{"motoristId","C",30	,0 })  // :"58d90705346b164247cf83fc",
+   aAdd(_aStruct,{"motorDocId","C",20	,0 })  // :"99570378620",
+   aAdd(_aStruct,{"status"    ,"C",30	,0 })  // :null,
+   aAdd(_aStruct,{"observatio","C",30	,0 })  // :null,
+   aAdd(_aStruct,{"latitude"  ,"C",20	,0 })  // :-23.5748342,
+   aAdd(_aStruct,{"longitude" ,"C",20	,0 })  // :-46.6452698,
+   aAdd(_aStruct,{"hasDocImag","C",10	,0 })  // :true,
+   aAdd(_aStruct,{"hasSigImag","C",10	,0 })  // :true,
+   aAdd(_aStruct,{"imgAmount" ,"C",10	,0 })  // :1,
+   aAdd(_aStruct,{"docImage"  ,"C",30	,0 })  // :null,
+   aAdd(_aStruct,{"signaImage","C",30	,0 })  // :null,
+   aAdd(_aStruct,{"statusText","C",30	,0 })  // :"ENTREGUE",
+   aAdd(_aStruct,{"sendStatus","C",30	,0 })  // :null,
+   aAdd(_aStruct,{"docImgPath","C",30	,0 })  // :null,
+   aAdd(_aStruct,{"sigImgPath","C",30	,0 })  // :null,
+   aAdd(_aStruct,{"created"   ,"C",20	,0 })  // :1494952939528,
+   aAdd(_aStruct,{"inserted"  ,"C",20	,0 })  // :1494952952192,
+   aAdd(_aStruct,{"imgExpiry" ,"C",30	,0 })  // :null
+   aAdd(_aStruct,{"JSONDOCDIG","M",10	,0 })  // :null
+   aAdd(_aStruct,{"JSONASSDIG","M",10	,0 })  // :null
+   aAdd(_aStruct,{"NOMDOCDIG" ,"C",20	,0 })  // :null
+   aAdd(_aStruct,{"NOMASSDIG" ,"C",20	,0 })  // :null
 
    //================================================================================
    // Abre o arquivo TRBZF5 criado dentro do banco de dados protheus.
@@ -3827,8 +3828,8 @@ Begin Sequence
    
        _aHeadOut := {}              
    
-       Aadd(_aHeadOut,'Content-Type: application/json') 
-       Aadd(_aHeadOut,_cAutentic)
+       aAdd(_aHeadOut,'Content-Type: application/json') 
+       aAdd(_aHeadOut,_cAutentic)
    
        _cLinkWS := AllTrim(_cLinkWS)
    
@@ -3865,8 +3866,8 @@ Begin Sequence
    
        _aHeadOut := {}              
    
-       Aadd(_aHeadOut,'Content-Type: application/json') 
-       Aadd(_aHeadOut,_cAutentic)
+       aAdd(_aHeadOut,'Content-Type: application/json') 
+       aAdd(_aHeadOut,_cAutentic)
    
        _cLinkWS := AllTrim(_cLinkWS)
    
@@ -3891,7 +3892,7 @@ Begin Sequence
        // substitui os dados já acessados por novos dados. Então é preciso gravar os dados em 
        // uma tabela de histórico. Pois no proxímo acesso os dados serão outros, até zerar a fila de dados.
        //==================================================================================================== 
-       ZM3->(Reclock("ZM3",.T.))
+       ZM3->(RecLock("ZM3",.T.))
        ZM3->ZM3_FILIAL := xFilial("ZM3")
        ZM3->ZM3_DATA   := Date()
 	    ZM3->ZM3_HORA   := Time()
@@ -3926,18 +3927,18 @@ Begin Sequence
        
        If ! "FALSO" $ Upper(_cRetHttpD)
           ZM3->ZM3_NDOCDI := "DOCDIG"+StrZero(ZM3->(Recno()),10)+".png"
-       ENDIF
+       EndIf
 
        If ! "FALSO" $ Upper(_cRetHttpA)
           ZM3->ZM3_NASSDI := "ASSINADIG"+StrZero(ZM3->(Recno()),10)+".png"
        EndIf
                                                                                // JSON assinaturas digitalizados      
-       ZM3->(MsUnLock())
+       ZM3->(MSUnLock())
 
        //=====================================================================
        // Grava tabela terporária com os dados do JSon principal.
        //=====================================================================   
-       TRBJSON->(Reclock("TRBJSON",.T.)) 
+       TRBJSON->(RecLock("TRBJSON",.T.)) 
        TRBJSON->id         := _oRetJSon[_nJ]:id                                                                    // id
        TRBJSON->documentId := If(Empty(_oRetJSon[_nJ]:documentId)         ,"", _oRetJSon[_nJ]:documentId)          // documentId
        TRBJSON->docType    := If(Empty(_oRetJSon[_nJ]:documentType)       ,"", _oRetJSon[_nJ]:documentType)        // docType
@@ -3965,7 +3966,7 @@ Begin Sequence
 
        If ! "FALSO" $ Upper(_cRetHttpD)
           TRBJSON->NOMDOCDIG := "DOCDIG"+StrZero(ZM3->(Recno()),10)+".png"
-       ENDIF
+       EndIf
 
        If ! "FALSO" $ Upper(_cRetHttpA)
           TRBJSON->NOMASSDIG := "ASSINADIG"+StrZero(ZM3->(Recno()),10)+".png"
@@ -3974,7 +3975,7 @@ Begin Sequence
        TRBJSON->JSONDOCDIG := _cRetHttpD                                                                           // JSON documentos digitalizados
        TRBJSON->JSONASSDIG := _cRetHttpA                                                                           // JSON assinaturas digitalizados
        
-       TRBJSON->(MsUnLock())                                                
+       TRBJSON->(MSUnLock())                                                
 
        //==================================================================================
        // Grava os arquivos de imagens para posterior exibição.
@@ -3982,7 +3983,7 @@ Begin Sequence
        If ! "FALSO" $ Upper(_cRetHttpD)
           _cArq := AllTrim(_cDirImg) + "DOCDIG"+StrZero(ZM3->(Recno()),10)+".png"     
           MemoWrite(_cArq,_cRetHttpD)
-       ENDIF
+       EndIf
 
        If ! "FALSO" $ Upper(_cRetHttpA)
           _cArq := AllTrim(_cDirImg) + "ASSINADIG"+StrZero(ZM3->(Recno()),10)+".png"  
@@ -3995,39 +3996,39 @@ Begin Sequence
    // Monta as colunas do MSSELECT para a tabela temporária TRBZFQ 
    //================================================================================                  
    _aCmpJSon := {}
-   Aadd( _aCmpJSon , {"id"        ,    , "ID"                  ,"@!"})  // :"591b2bf8fb6c25358f68248d",
-   Aadd( _aCmpJSon , {"documentId",    , "Document ID"         ,"@!"})  // :"7897123883022",
-   Aadd( _aCmpJSon , {"docType"   ,    , "Document Type"       ,"@!"})  // :null,
-   Aadd( _aCmpJSon , {"accountId" ,    , "Account ID"          ,"@!"})  // :"5834f7718273f92cc326f620",
-   Aadd( _aCmpJSon , {"companyId" ,    , "Company ID"          ,"@!"})  // :null,
-   Aadd( _aCmpJSon , {"companyNam",    , "Company Name"        ,"@!"})  // :null,
-   Aadd( _aCmpJSon , {"motoristId",    , "Motorist ID"         ,"@!"})  // :"58d90705346b164247cf83fc",  
-   Aadd( _aCmpJSon , {"motorDocId",    , "Motorist Docum.Id."  ,"@!"})  // :"99570378620",
-   Aadd( _aCmpJSon , {"status"    ,    , "Status"              ,"@!"})  // :null,
-   Aadd( _aCmpJSon , {"observatio",    , "Observation"         ,"@!"})  // :null,
-   Aadd( _aCmpJSon , {"latitude"  ,    , "Latitude"            ,"@!"})  // :-23.5748342,
-   Aadd( _aCmpJSon , {"longitude" ,    , "Longitude"           ,"@!"})  // :-46.6452698,
-   Aadd( _aCmpJSon , {"hasDocImag",    , "Has.Document Image"  ,"@!"})  // :true,
-   Aadd( _aCmpJSon , {"hasSigImag",    , "Has.Signature Image" ,"@!"})  // :true,
-   Aadd( _aCmpJSon , {"imgAmount" ,    , "Image Amount"        ,"@!"})  // :1,
-   Aadd( _aCmpJSon , {"docImage"  ,    , "Document Image"      ,"@!"})  // :null,
-   Aadd( _aCmpJSon , {"signaImage",    , "Signature Image"     ,"@!"})  // :null,
-   Aadd( _aCmpJSon , {"statusText",    , "Status Text"         ,"@!"})  // :"ENTREGUE",
-   Aadd( _aCmpJSon , {"sendStatus",    , "Send Status"         ,"@!"})  // :null,
-   Aadd( _aCmpJSon , {"docImgPath",    , "Document Image Path" ,"@!"})  // :null,
-   Aadd( _aCmpJSon , {"sigImgPath",    , "Signature Image Path","@!"})  // :null,
-   Aadd( _aCmpJSon , {"created"   ,    , "Created"             ,"@!"})  // :1494952939528,
-   Aadd( _aCmpJSon , {"inserted"  ,    , "Inserted"            ,"@!"})  // :1494952952192,
-   Aadd( _aCmpJSon , {"imgExpiry" ,    , "Image Expiry"        ,"@!"})  // :null     
+   aAdd( _aCmpJSon , {"id"        ,    , "ID"                  ,"@!"})  // :"591b2bf8fb6c25358f68248d",
+   aAdd( _aCmpJSon , {"documentId",    , "Document ID"         ,"@!"})  // :"7897123883022",
+   aAdd( _aCmpJSon , {"docType"   ,    , "Document Type"       ,"@!"})  // :null,
+   aAdd( _aCmpJSon , {"accountId" ,    , "Account ID"          ,"@!"})  // :"5834f7718273f92cc326f620",
+   aAdd( _aCmpJSon , {"companyId" ,    , "Company ID"          ,"@!"})  // :null,
+   aAdd( _aCmpJSon , {"companyNam",    , "Company Name"        ,"@!"})  // :null,
+   aAdd( _aCmpJSon , {"motoristId",    , "Motorist ID"         ,"@!"})  // :"58d90705346b164247cf83fc",  
+   aAdd( _aCmpJSon , {"motorDocId",    , "Motorist Docum.Id."  ,"@!"})  // :"99570378620",
+   aAdd( _aCmpJSon , {"status"    ,    , "Status"              ,"@!"})  // :null,
+   aAdd( _aCmpJSon , {"observatio",    , "Observation"         ,"@!"})  // :null,
+   aAdd( _aCmpJSon , {"latitude"  ,    , "Latitude"            ,"@!"})  // :-23.5748342,
+   aAdd( _aCmpJSon , {"longitude" ,    , "Longitude"           ,"@!"})  // :-46.6452698,
+   aAdd( _aCmpJSon , {"hasDocImag",    , "Has.Document Image"  ,"@!"})  // :true,
+   aAdd( _aCmpJSon , {"hasSigImag",    , "Has.Signature Image" ,"@!"})  // :true,
+   aAdd( _aCmpJSon , {"imgAmount" ,    , "Image Amount"        ,"@!"})  // :1,
+   aAdd( _aCmpJSon , {"docImage"  ,    , "Document Image"      ,"@!"})  // :null,
+   aAdd( _aCmpJSon , {"signaImage",    , "Signature Image"     ,"@!"})  // :null,
+   aAdd( _aCmpJSon , {"statusText",    , "Status Text"         ,"@!"})  // :"ENTREGUE",
+   aAdd( _aCmpJSon , {"sendStatus",    , "Send Status"         ,"@!"})  // :null,
+   aAdd( _aCmpJSon , {"docImgPath",    , "Document Image Path" ,"@!"})  // :null,
+   aAdd( _aCmpJSon , {"sigImgPath",    , "Signature Image Path","@!"})  // :null,
+   aAdd( _aCmpJSon , {"created"   ,    , "Created"             ,"@!"})  // :1494952939528,
+   aAdd( _aCmpJSon , {"inserted"  ,    , "Inserted"            ,"@!"})  // :1494952952192,
+   aAdd( _aCmpJSon , {"imgExpiry" ,    , "Image Expiry"        ,"@!"})  // :null     
 
    _bOk := {|| _oDlgJ:End()}
    _bCancel := {|| _oDlgJ:End()}
    
    _aButtons := {}
-   AADD(_aButtons,{"",{|| U_AOMS118T() },"Visualizar","Visualizar" })    
-   AADD(_aButtons,{"",{|| U_AOMS118H() },"Histórico Entregas Krona","Histórico Entregas Krona"})
+   aAdd(_aButtons,{"",{|| U_AOMS118T() },"Visualizar","Visualizar" })    
+   aAdd(_aButtons,{"",{|| U_AOMS118H() },"Histórico Entregas Krona","Histórico Entregas Krona"})
                 
-   TRBJSON->(DbGoTop())
+   TRBJSON->(DBGoTop())
                                              
    _cTitulo := "Entregas Realizadas - Integração Sistema Krona"
    //================================================================================
@@ -4043,9 +4044,9 @@ Begin Sequence
        
 End Sequence
 
-U_ItMsg("Final da integração Deliveres.","Atenção",,1) 
+U_ITMsg("Final da integração Deliveres.","Atenção",,1) 
 
-Return Nil     
+Return     
 
 /*
 ===============================================================================================================================
@@ -4112,87 +4113,87 @@ Begin Sequence
 
    Define Dialog _oDlgL Title _cTitulo From 00,00 To 600,1060 Pixel   
       
-      @ _nLinha, _nCol1 SAY _oSId	PROMPT "ID" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+      @ _nLinha, _nCol1 Say _oSId	PROMPT "ID" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _oID VAR id  SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	  
-	   @ _nLinha, _nCol3 SAY _oSDocId	PROMPT "Document ID" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	   @ _nLinha, _nCol3 Say _oSDocId	PROMPT "Document ID" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol4 MSGET _odocumentId VAR documentId SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
       _nLinha += 15     
       
-      @ _nLinha, _nCol1 SAY _oSDocType	PROMPT "Document Type" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+      @ _nLinha, _nCol1 Say _oSDocType	PROMPT "Document Type" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _odocType VAR docType SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	  
-	   @ _nLinha, _nCol3 SAY _oSAccId	PROMPT "Account ID" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	   @ _nLinha, _nCol3 Say _oSAccId	PROMPT "Account ID" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol4 MSGET _oaccountId VAR accountId SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
       _nLinha += 15
       
-      @ _nLinha, _nCol1 SAY _oSCompID   PROMPT "Company ID" SIZE 060, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+      @ _nLinha, _nCol1 Say _oSCompID   PROMPT "Company ID" SIZE 060, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _ocompanyId VAR companyId SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	  
-	   @ _nLinha, _nCol3 SAY _oSCompName	PROMPT "Company Name" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	   @ _nLinha, _nCol3 Say _oSCompName	PROMPT "Company Name" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol4 MSGET _ocompanyNam VAR companyNam SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
       _nLinha += 15
 
-      @ _nLinha, _nCol1 SAY _oSMotorId	PROMPT "Motorist ID" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+      @ _nLinha, _nCol1 Say _oSMotorId	PROMPT "Motorist ID" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _omotoristId VAR motoristId SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	  
-	   @ _nLinha, _nCol3 SAY _oSMotordoc	PROMPT "Motorist Docum.Id." SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	   @ _nLinha, _nCol3 Say _oSMotordoc	PROMPT "Motorist Docum.Id." SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol4 MSGET _omotorDocId VAR motorDocId SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
       _nLinha += 15
       
-      @ _nLinha, _nCol1 SAY _oSStatus   PROMPT "Status" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+      @ _nLinha, _nCol1 Say _oSStatus   PROMPT "Status" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _ostatus  VAR status SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	  
-	   @ _nLinha, _nCol3 SAY _oSObs   	PROMPT "Observation" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	   @ _nLinha, _nCol3 Say _oSObs   	PROMPT "Observation" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol4 MSGET _oobservatio VAR observatio SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
       _nLinha += 15
                                     
-      @ _nLinha, _nCol1 SAY _oSLatit	PROMPT "Latitude" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+      @ _nLinha, _nCol1 Say _oSLatit	PROMPT "Latitude" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _olatitude VAR latitude SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
           
-      @ _nLinha, _nCol3 SAY _oSLongit	PROMPT "Longitude" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+      @ _nLinha, _nCol3 Say _oSLongit	PROMPT "Longitude" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol4 MSGET _olongitude  VAR longitude SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
       _nLinha += 15
        
-      @ _nLinha, _nCol1 SAY _oSHasDocI	PROMPT "Has.Document Image" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+      @ _nLinha, _nCol1 Say _oSHasDocI	PROMPT "Has.Document Image" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _ohasDocImag VAR hasDocImag SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	  
-	   @ _nLinha, _nCol3 SAY _oSHasSigI	PROMPT "Has.Signature Image" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	   @ _nLinha, _nCol3 Say _oSHasSigI	PROMPT "Has.Signature Image" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol4 MSGET _ohasSigImag VAR hasSigImag SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
       _nLinha += 15
       
-      @ _nLinha, _nCol1 SAY _oSImgAmout	PROMPT "Image Amount" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+      @ _nLinha, _nCol1 Say _oSImgAmout	PROMPT "Image Amount" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _oimgAmount VAR imgAmount SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	  
-	   @ _nLinha, _nCol3 SAY _oSDocImg	PROMPT "Document Image" SIZE 060, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	   @ _nLinha, _nCol3 Say _oSDocImg	PROMPT "Document Image" SIZE 060, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol4 MSGET _odocImage VAR docImage SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
       _nLinha += 15
       
-      @ _nLinha, _nCol1 SAY _oSSigImg	PROMPT "Signature Image" SIZE 060, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+      @ _nLinha, _nCol1 Say _oSSigImg	PROMPT "Signature Image" SIZE 060, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _osignaImage VAR signaImage SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	  
-	   @ _nLinha, _nCol3 SAY _oSStatText	PROMPT "Status Text" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	   @ _nLinha, _nCol3 Say _oSStatText	PROMPT "Status Text" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol4 MSGET _ostatusText VAR statusText SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
       _nLinha += 15
       
-      @ _nLinha, _nCol1 SAY _oSSendStat	PROMPT "Send Status" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+      @ _nLinha, _nCol1 Say _oSSendStat	PROMPT "Send Status" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _osendStatus VAR sendStatus  SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	  
-	   @ _nLinha, _nCol3 SAY _oSDocImgP	PROMPT "Document Image Path" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	   @ _nLinha, _nCol3 Say _oSDocImgP	PROMPT "Document Image Path" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol4 MSGET _odocImgPath VAR docImgPath SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
       _nLinha += 15    
       
-      @ _nLinha, _nCol1 SAY _oSSigImgP  PROMPT "Signature Image Path" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+      @ _nLinha, _nCol1 Say _oSSigImgP  PROMPT "Signature Image Path" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _osigImgPath VAR sigImgPath  SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	  
-	   @ _nLinha, _nCol3 SAY _oSCreat	PROMPT "Created" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	   @ _nLinha, _nCol3 Say _oSCreat	PROMPT "Created" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol4 MSGET _ocreated VAR created SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
       _nLinha += 15
       
-      @ _nLinha, _nCol1 SAY _oSInsert   PROMPT "Inserted" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+      @ _nLinha, _nCol1 Say _oSInsert   PROMPT "Inserted" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _oinserted VAR inserted  SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
 	  
-	   @ _nLinha, _nCol3 SAY _oSImgExp	PROMPT "Image Expiry" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	   @ _nLinha, _nCol3 Say _oSImgExp	PROMPT "Image Expiry" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol4 MSGET _oimgExpiry VAR imgExpiry SIZE 100, 012 OF _oDlgL WHEN .F. PIXEL
       _nLinha += 15
 	   _nLinha += 15
@@ -4206,7 +4207,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -4227,7 +4228,7 @@ Local _oTBitmap
 Begin Sequence  
    
    If Empty(_cArqImage)
-      U_ItMsg("Não há imagens a serem exibidas.","Atenção",,1) 
+      U_ITMsg("Não há imagens a serem exibidas.","Atenção",,1) 
    EndIf
 
    If _cChamada == "DOCUMENTOS_DIG"
@@ -4247,7 +4248,7 @@ Begin Sequence
         
 End Sequence
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -4280,11 +4281,11 @@ Begin Sequence
 
    Define Dialog _oDlgL Title _cTitulo From 00,00 To 200,400 Pixel   
       
-      @ _nLinha, _nCol1 SAY _oSDtIn	PROMPT "Data Inicial" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+      @ _nLinha, _nCol1 Say _oSDtIn	PROMPT "Data Inicial" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _oDtIni VAR _dDtIni SIZE 40, 012 Picture "@D" OF _oDlgL PIXEL
 	   _nLinha += 15
 
-	   @ _nLinha, _nCol1 SAY _oSDtFim	PROMPT "Data Final" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	   @ _nLinha, _nCol1 Say _oSDtFim	PROMPT "Data Final" SIZE 046, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _oDtFim VAR _dDtFim SIZE 40, 012 Picture "@D" OF _oDlgL PIXEL
       _nLinha += 15     
       _nLinha += 15
@@ -4295,51 +4296,51 @@ Begin Sequence
    Activate Dialog _oDlgL Centered   
    
    If _nOpc == 1
-      //ZM3->(DbSetOrder(1)) // ZM3_FILIAL+DTOS(ZM3_DATA)+ZM3_HORA+ZM3_ID 
+      //ZM3->(DBSetOrder(1)) // ZM3_FILIAL+DToS(ZM3_DATA)+ZM3_HORA+ZM3_ID 
 
       _cQry := "SELECT ZM3.R_E_C_N_O_ NRRECNO" // Filial do Pedido de vendas
       _cQry += " FROM " + RETSQLNAME("ZM3") + " ZM3 "
       _cQry += " WHERE 
-      _cQry += " ZM3.D_E_L_E_T_ <> '*' "
+      _cQry += " ZM3.D_E_L_E_T_ = ' ' "
 
       If ! Empty(_dDtIni)
-         _cQry += " AND ZM3_DATA >= '" + Dtos(_dDtIni) + "' "
+         _cQry += " AND ZM3_DATA >= '" + DToS(_dDtIni) + "' "
       EndIf 
 
       If ! Empty(_dDtFim)
-         _cQry += " AND ZM3_DATA <= '" + Dtos(_dDtFim) + "' "
+         _cQry += " AND ZM3_DATA <= '" + DToS(_dDtFim) + "' "
       EndIf
     
       If Select("TRBZM3") > 0
-         TRBZM3->(DbCloseArea())
+         TRBZM3->(DBCloseArea())
       EndIf
 
       DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQry ) , "TRBZM3" , .F. , .T. )
-      //DbSelectArea("TRBSC5")
+      //DBSelectArea("TRBSC5")
    
       TCSetField( "TRBZM3", "ZM3_DATA", "D", 8 )
    
       Count To _nTotRegs
 
       If _nTotRegs == 0
-         U_ItMsg("Não há dados que satisfaçam as condições de filtro para exibir o histórico.","Atenção",,1) 
+         U_ITMsg("Não há dados que satisfaçam as condições de filtro para exibir o histórico.","Atenção",,1) 
          Break
       EndIf
       
-      TRBJSON->(DbGoTop())
-      Do While ! TRBJSON->(Eof())
+      TRBJSON->(DBGoTop())
+      While ! TRBJSON->(Eof())
          TRBJSON->(RecLock("TRBJSON",.F.))
          TRBJSON->(DbDelete())
-         TRBJSON->(MsUnlock())
+         TRBJSON->(MSUnLock())
 
-         TRBJSON->(DbSkip())
+         TRBJSON->(DBSkip())
       EndDo
 
-      TRBZM3->(DbGoTop())
+      TRBZM3->(DBGoTop())
 
-      Do While ! TRBZM3->(Eof())
+      While ! TRBZM3->(Eof())
          
-         ZM3->(DbGoto(TRBZM3->NRRECNO))
+         ZM3->(DBGoTo(TRBZM3->NRRECNO))
 
          TRBJSON->(RecLock("TRBJSON",.T.))
          TRBJSON->id         := ZM3->ZM3_ID                              // id
@@ -4368,12 +4369,12 @@ Begin Sequence
          TRBJSON->imgExpiry  := ZM3->ZM3_IMGEXP                          // imgExpiry  
          TRBJSON->NOMDOCDIG  := ZM3->ZM3_NDOCDI 
          TRBJSON->NOMASSDIG  := ZM3->ZM3_NASSDI
-         TRBJSON->(MsUnlock())
+         TRBJSON->(MSUnLock())
          
-         TRBZM3->(DbSkip())
+         TRBZM3->(DBSkip())
       EndDo
       
-      TRBJSON->(DbGotop())
+      TRBJSON->(DBGoTop())
       _oMarkJSon:oBrowse:Refresh()
 
    EndIf
@@ -4381,10 +4382,10 @@ Begin Sequence
 End Sequence 
 
 If Select("TRBZM3") > 0
-   TRBZM3->(DbCloseArea())
+   TRBZM3->(DBCloseArea())
 EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -4419,19 +4420,19 @@ Private _cMotivoCanc := Space(100)
 Begin Sequence        
    
    If DAK->DAK_I_ENVK <> "S"  
-      U_ItMsg("A carga seleciondada ainda não foi integrada para o sistema Krona.","Atenção",,1) 
+      U_ITMsg("A carga seleciondada ainda não foi integrada para o sistema Krona.","Atenção",,1) 
       Break
    EndIf  
    
    If Empty(DAK->DAK_I_PROT)
-      U_ItMsg("Não existe numero de protocolo gerado para a carga selecionada.","Atenção",;
+      U_ITMsg("Não existe numero de protocolo gerado para a carga selecionada.","Atenção",;
               "Para consultar o status de uma viagem, um protocolo precisa ser gerado na integração da carga para o sistema Krona.",1) 
       Break
    EndIf
    
    _cIdViagem := DAK->DAK_I_PROT  
    
-   If ! U_ItMsg("Confirma o cancelamento viagem/carga integrada para o sistema Krona ?","Atenção", ,2 , 2)  
+   If ! U_ITMsg("Confirma o cancelamento viagem/carga integrada para o sistema Krona ?","Atenção", ,2 , 2)  
       Break
    EndIf        
    
@@ -4444,7 +4445,7 @@ Begin Sequence
    _nOpc    := 0
    Define Dialog _oDlgL Title _cTitulo From 00,00 To 200,600 Pixel   
       
-      @ _nLinha, _nCol1 SAY _oSId	PROMPT "Motivo Cancelamento" SIZE 100, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+      @ _nLinha, _nCol1 Say _oSId	PROMPT "Motivo Cancelamento" SIZE 100, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	  @ _nLinha, _nCol2 MSGET _oGId VAR _cMotivoCanc SIZE 200, 012 OF _oDlgL  PIXEL
 	  _nLinha += 25
 
@@ -4454,47 +4455,47 @@ Begin Sequence
    Activate Dialog _oDlgL Centered
   
    If _nOpc == 0
-      U_ItMsg("Rotina de cancelamento de viagem integrada para o sistema Krona interrompida.","Atenção",,1) 
+      U_ITMsg("Rotina de cancelamento de viagem integrada para o sistema Krona interrompida.","Atenção",,1) 
       Break
    EndIf    
                                                     
    If Empty(_cMotivoCanc)
-      U_ItMsg("O preenchimento do motivo de cancelamento de viagem é obrigatório. Rotina interrompida.","Atenção",,1) 
+      U_ITMsg("O preenchimento do motivo de cancelamento de viagem é obrigatório. Rotina interrompida.","Atenção",,1) 
       Break
    EndIf
    
    //--------------------------->> 3 - Motorista 1 
-   DA4->(DbSetOrder(1)) // DA4_FILIAL+DA4_COD   
-   If DA4->(DbSeek(xFilial("DA4")+DAK->DAK_MOTORI))
+   DA4->(DBSetOrder(1)) // DA4_FILIAL+DA4_COD   
+   If DA4->(DBSeek(xFilial("DA4")+DAK->DAK_MOTORI))
       //----------------------------------------------//
       _cTransp   := DA4->DA4_FORNECE
       _cLjTransp := DA4->DA4_LOJA   
    EndIf
 
    //--------------------------->> 2 - Transportador
-   SA2->(DbSetOrder(1)) // A2_FILIAL+A2_COD+A2_LOJA
+   SA2->(DBSetOrder(1)) // A2_FILIAL+A2_COD+A2_LOJA
    
-   If SA2->(DbSeek(xFilial("SA2")+_cTransp + _cLjTransp)) 
+   If SA2->(DBSeek(xFilial("SA2")+_cTransp + _cLjTransp)) 
       _cUsuario := SA2->A2_I_USRKR
       _cSenha   := SA2->A2_I_PSWKR
    EndIf
          
    //--------------------------------------------------------------------------------------------------------------------------------//   
-   ZFM->(DbSetOrder(1))
-   If ZFM->(DbSeek(xFilial("ZFM")+_cEmpWebService))
+   ZFM->(DBSetOrder(1))
+   If ZFM->(DBSeek(xFilial("ZFM")+_cEmpWebService))
       _cDirJSon := AllTrim(ZFM->ZFM_LOCXML)
       _cLinkWS  := AllTrim(ZFM->ZFM_LINK01)
    Else
-      U_ItMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
+      U_ITMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
       Break
    EndIf
      
    If Empty(_cDirJSon)
-      U_ItMsg("Diretório dos arquivos JSON modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)     
+      U_ITMsg("Diretório dos arquivos JSON modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)     
       Break                                     
    EndIf
       
-   _cDirJSon := Alltrim(_cDirJSon)
+   _cDirJSon := AllTrim(_cDirJSon)
    If Right(_cDirJSon,1) <> "\"
       _cDirJSon := _cDirJSon + "\"
    EndIf
@@ -4504,19 +4505,19 @@ Begin Sequence
    //================================================================================      
    _cCabLogin := U_AOMS118X(_cDirJSon+"Krona1_Cab_Login.txt") 
    If Empty(_cCabLogin)
-      U_ItMsg("Erro na leitura do arquivo modelo JSON modelo do cabeçalho de envio e login da integração Krona.","Atenção",,1)
+      U_ITMsg("Erro na leitura do arquivo modelo JSON modelo do cabeçalho de envio e login da integração Krona.","Atenção",,1)
       Break
    EndIf
 
    _cCancelViagem := U_AOMS118X(_cDirJSon+"Krona1_Cancelamento_viagem.txt") 
    If Empty(_cCancelViagem)
-      U_ItMsg("Erro na leitura do arquivo modelo JSON modelo de cancelamento de viagem da integração Krona.","Atenção",,1)
+      U_ITMsg("Erro na leitura do arquivo modelo JSON modelo de cancelamento de viagem da integração Krona.","Atenção",,1)
       Break
    EndIf
 
    _cRodaPe := U_AOMS118X(_cDirJSon+"Krona1_Rodape.txt") 
    If Empty(_cRodaPe)
-      U_ItMsg("Erro na leitura do arquivo modelo JSON do rodape, da integração REST Italac x Krona.","Atenção",,1)
+      U_ITMsg("Erro na leitura do arquivo modelo JSON do rodape, da integração REST Italac x Krona.","Atenção",,1)
       Break
    EndIf
    
@@ -4533,7 +4534,7 @@ Begin Sequence
    
    _aHeadOut := {}              
    
-   Aadd(_aHeadOut,'Content-Type: application/json')
+   aAdd(_aHeadOut,'Content-Type: application/json')
 
    _cRetHttp := AllTrim( HttpPost( _cLinkWS , '' , _cJSonEnv , _nTimOut , _aHeadOut , @_cJSonRet ) )   
    If ! Empty(_cRetHttp)
@@ -4557,7 +4558,7 @@ Begin Sequence
    Else
       DAK->DAK_I_RETC := _cJSonRet
    EndIf
-   DAK->(MsUnLock())  
+   DAK->(MSUnLock())  
    
    //===========================================================================
    // Verifica retorno de erros na integração.
@@ -4631,9 +4632,9 @@ Begin Sequence
 
 End Sequence  
 
-U_ItMsg("Final da integração Cancelamento de Viagem.","Atenção",,1)
+U_ITMsg("Final da integração Cancelamento de Viagem.","Atenção",,1)
 
-Return Nil     
+Return     
 
 /*
 ===============================================================================================================================
@@ -4670,19 +4671,19 @@ Private _cInicioViagem := "1"
 Begin Sequence        
    
    If DAK->DAK_I_ENVK <> "S"  
-      U_ItMsg("A carga seleciondada ainda não foi integrada para o sistema Krona.","Atenção",,1) 
+      U_ITMsg("A carga seleciondada ainda não foi integrada para o sistema Krona.","Atenção",,1) 
       Break
    EndIf  
    
    If Empty(DAK->DAK_I_PROT)
-      U_ItMsg("Não existe numero de protocolo gerado para a carga selecionada.","Atenção",;
+      U_ITMsg("Não existe numero de protocolo gerado para a carga selecionada.","Atenção",;
               "Para consultar o status de uma viagem, um protocolo precisa ser gerado na integração da carga para o sistema Krona.",1) 
       Break
    EndIf
    
    _cIdViagem := DAK->DAK_I_PROT  
    
-   If ! U_ItMsg("Confirma a solicitação de liberação de viagem/carga no sistema Krona ?","Atenção", ,2 , 2)  
+   If ! U_ITMsg("Confirma a solicitação de liberação de viagem/carga no sistema Krona ?","Atenção", ,2 , 2)  
       Break
    EndIf   
    
@@ -4691,38 +4692,38 @@ Begin Sequence
    //=====================================================================
    
    //--------------------------->> 3 - Motorista 1 
-   DA4->(DbSetOrder(1)) // DA4_FILIAL+DA4_COD   
-   If DA4->(DbSeek(xFilial("DA4")+DAK->DAK_MOTORI))
+   DA4->(DBSetOrder(1)) // DA4_FILIAL+DA4_COD   
+   If DA4->(DBSeek(xFilial("DA4")+DAK->DAK_MOTORI))
       //----------------------------------------------//
       _cTransp   := DA4->DA4_FORNECE
       _cLjTransp := DA4->DA4_LOJA   
    EndIf
 
    //--------------------------->> 2 - Transportador
-   SA2->(DbSetOrder(1)) // A2_FILIAL+A2_COD+A2_LOJA
+   SA2->(DBSetOrder(1)) // A2_FILIAL+A2_COD+A2_LOJA
    
-   If SA2->(DbSeek(xFilial("SA2")+_cTransp + _cLjTransp)) 
+   If SA2->(DBSeek(xFilial("SA2")+_cTransp + _cLjTransp)) 
       _cUsuario := SA2->A2_I_USRKR
       _cSenha   := SA2->A2_I_PSWKR
    EndIf           
    
-   ZFM->(DbSetOrder(1))
-   If ZFM->(DbSeek(xFilial("ZFM")+_cEmpWebService))
-      _cDirJSon := Alltrim(ZFM->ZFM_LOCXML)
+   ZFM->(DBSetOrder(1))
+   If ZFM->(DBSeek(xFilial("ZFM")+_cEmpWebService))
+      _cDirJSon := AllTrim(ZFM->ZFM_LOCXML)
       _cLinkWS  := AllTrim(ZFM->ZFM_LINK01)
    Else
-      U_ItMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
+      U_ITMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
       Break
    EndIf
    
    //_cLinkWS  := "http://grupokrona.dyndns.org/k1/api/viagem_status.php"
    
    If Empty(_cDirJSon)
-      U_ItMsg("Diretório dos arquivos JSON modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)     
+      U_ITMsg("Diretório dos arquivos JSON modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)     
       Break                                     
    EndIf
       
-   _cDirJSon := Alltrim(_cDirJSon)
+   _cDirJSon := AllTrim(_cDirJSon)
    If Right(_cDirJSon,1) <> "\"
       _cDirJSon := _cDirJSon + "\"
    EndIf
@@ -4732,19 +4733,19 @@ Begin Sequence
    //================================================================================
    _cCabLogin := U_AOMS118X(_cDirJSon+"Krona1_Cab_Login.txt") 
    If Empty(_cCabLogin)
-      U_ItMsg("Erro na leitura do arquivo modelo JSON modelo do cabeçalho de envio e login da integração Krona.","Atenção",,1)
+      U_ITMsg("Erro na leitura do arquivo modelo JSON modelo do cabeçalho de envio e login da integração Krona.","Atenção",,1)
       Break
    EndIf
 
    _cLiberaViagem := U_AOMS118X(_cDirJSon+"Krona1_Liberacao_Inicio_Viagem.txt") 
    If Empty(_cLiberaViagem)
-      U_ItMsg("Erro na leitura do arquivo modelo JSON modelo de liberação de incio de viagem da integração Krona.","Atenção",,1)
+      U_ITMsg("Erro na leitura do arquivo modelo JSON modelo de liberação de incio de viagem da integração Krona.","Atenção",,1)
       Break
    EndIf
 
    _cRodaPe := U_AOMS118X(_cDirJSon+"Krona1_Rodape.txt") 
    If Empty(_cRodaPe)
-      U_ItMsg("Erro na leitura do arquivo modelo JSON do rodape, da integração REST Italac x Krona.","Atenção",,1)
+      U_ITMsg("Erro na leitura do arquivo modelo JSON do rodape, da integração REST Italac x Krona.","Atenção",,1)
       Break
    EndIf
    
@@ -4763,8 +4764,8 @@ Begin Sequence
    // Google Chrome está atualizado
    //Versão 79.0.3945.88 (Versão oficial) 64 bits
    
-   //Aadd(_aHeadOut,'User-Agent: Google Chrome/79.0.3945.88 ( compatible; Protheus '+GetBuild()+')') 
-   Aadd(_aHeadOut,'Content-Type: application/json')
+   //aAdd(_aHeadOut,'User-Agent: Google Chrome/79.0.3945.88 ( compatible; Protheus '+GetBuild()+')') 
+   aAdd(_aHeadOut,'Content-Type: application/json')
 
    _cRetHttp := AllTrim( HttpPost( _cLinkWS , '' , _cJSonEnv , _nTimOut , _aHeadOut , @_cJSonRet ) )
    If ! Empty(_cRetHttp)
@@ -4787,7 +4788,7 @@ Begin Sequence
    Else
       DAK->DAK_I_RETL := _cJSonRet
    EndIf
-   DAK->(MsUnLock())  
+   DAK->(MSUnLock())  
    
    //===========================================================================
    // Verifica retorno de erros na integração.
@@ -4861,7 +4862,7 @@ Begin Sequence
 
 End Sequence
 
-Return Nil     
+Return     
 
 /*
 ===============================================================================================================================
@@ -4927,35 +4928,35 @@ Begin Sequence
       
    Define Dialog _oDlgL Title _cTitulo From 00,00 To 360,600 Pixel   
       
-      @ _nLinha, _nCol1 SAY _oSId	PROMPT "Tipo de Pesquisa" SIZE 100, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+      @ _nLinha, _nCol1 Say _oSId	PROMPT "Tipo de Pesquisa" SIZE 100, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
       @ _nLinha, _nCol2 ComboBox _cComboBx1	Items _aComboBx1  Valid U_AOMS118Z(_cComboBx1,"COMBOBOX") Size 140, 012 OF _oDlgL PIXEL
       _nLinha += 15
             
-      @ _nLinha, _nCol1 SAY _oSId	PROMPT "Placa do Veiculo" SIZE 100, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+      @ _nLinha, _nCol1 Say _oSId	PROMPT "Placa do Veiculo" SIZE 100, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _oPlacaVeic VAR _cPlacaVeic Picture "@!" SIZE 050, 012 OF _oDlgL  PIXEL
 	   _nLinha += 15
 	  
-	   @ _nLinha, _nCol1 SAY _oSId	PROMPT "Filial Nota F." SIZE 100, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	   @ _nLinha, _nCol1 Say _oSId	PROMPT "Filial Nota F." SIZE 100, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _oFilNf VAR _cFilNf SIZE 30, 012 OF _oDlgL  PIXEL
 	   _nLinha += 15
 	  
-	   @ _nLinha, _nCol1 SAY _oSId	PROMPT "Nr.Nota Fiscal" SIZE 100, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	   @ _nLinha, _nCol1 Say _oSId	PROMPT "Nr.Nota Fiscal" SIZE 100, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _oNrNf VAR _cNrNf SIZE 60, 012 OF _oDlgL  PIXEL
 	   _nLinha += 15
 	  
-	   @ _nLinha, _nCol1 SAY _oSId	PROMPT "Serie Nota Fisc" SIZE 100, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	   @ _nLinha, _nCol1 Say _oSId	PROMPT "Serie Nota Fisc" SIZE 100, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _oSerieNf VAR _cSerieNf SIZE 20, 012 OF _oDlgL  PIXEL
 	   _nLinha += 15
 	  
-	   @ _nLinha, _nCol1 SAY _oSId	PROMPT "Id.Viagem/Protocolo" SIZE 100, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	   @ _nLinha, _nCol1 Say _oSId	PROMPT "Id.Viagem/Protocolo" SIZE 100, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _oIdViagem VAR _cIdViagem SIZE 70, 012 OF _oDlgL  PIXEL
 	   _nLinha += 15
 
-      @ _nLinha, _nCol1 SAY _oSFilCarga PROMPT "Filial da Carga/Doc.Cliente" SIZE 100, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+      @ _nLinha, _nCol1 Say _oSFilCarga PROMPT "Filial da Carga/Doc.Cliente" SIZE 100, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _oFilCarga VAR _cFilCarga SIZE 30, 012 OF _oDlgL  PIXEL
 	   _nLinha += 15
 	  
-	   @ _nLinha, _nCol1 SAY _oSNRCARGA	PROMPT "Nr. da Carga/Doc.Cliente" SIZE 100, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
+	   @ _nLinha, _nCol1 Say _oSNRCARGA	PROMPT "Nr. da Carga/Doc.Cliente" SIZE 100, 012 OF _oDlgL COLORS 16711680, 16777215	PIXEL
 	   @ _nLinha, _nCol2 MSGET _oNrCarga VAR _cNrCarga SIZE 60, 012 OF _oDlgL  PIXEL
 	   _nLinha += 25
                             
@@ -4973,7 +4974,7 @@ Begin Sequence
    Activate Dialog _oDlgL Centered
 
    If _nOpc == 0
-      U_ItMsg("Rotina de cancelamento de pesquisa de status de viagem cancelada pelo usuário.","Atenção",,1) 
+      U_ITMsg("Rotina de cancelamento de pesquisa de status de viagem cancelada pelo usuário.","Atenção",,1) 
       Break
    EndIf    
              
@@ -4987,8 +4988,8 @@ Begin Sequence
       U_AOMS118P("P", _cPlacaVeic)              
       
    ElseIf AllTrim(_cComboBx1) == "NOTA FISCAL" 
-      SF2->(DbSetOrder(1))
-      SF2->(DbSeek(U_ItKey(_cFilNf,"F2_FILIAL") + U_ItKey(_cNrNf,"F2_DOC") + U_ItKey(_cSerieNf,"F2_SERIE")))
+      SF2->(DBSetOrder(1))
+      SF2->(DBSeek(U_ItKey(_cFilNf,"F2_FILIAL") + U_ItKey(_cNrNf,"F2_DOC") + U_ItKey(_cSerieNf,"F2_SERIE")))
       
       _cPlacaVeic := ""
       
@@ -5016,7 +5017,7 @@ Begin Sequence
 
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -5025,7 +5026,7 @@ Autor--------------: Julio de Paula Paz
 Data da Criacao----: 04/03/2020
 Descrição----------: Permite pesquisar o status de uma viagem informando uma placa, ou nota fiscal, ou Id de uma viagem.
 Parametros---------: _cOpcao = Opcao selecionada para consulta.
-                     _cChamada = Campo / local da chamada da validação.
+                     _cChamada = Campo / Local da chamada da validação.
 Retorno------------: Nenhum
 ===============================================================================================================================
 */  
@@ -5081,31 +5082,31 @@ Begin Sequence
 
    If AllTrim(_cOpcao) == "PLACA DO VEICULO" 
       If Empty(_cPlacaVeic)
-         U_ItMsg("O preenchimento da palca do veículo é obrigatório.","Atenção",,1) 
+         U_ITMsg("O preenchimento da palca do veículo é obrigatório.","Atenção",,1) 
          _lRet := .F.
       EndIf 
    EndIf
    
    If AllTrim(_cOpcao) == "NOTA FISCAL" 
       If Empty(_cFilNf)
-         U_ItMsg("O preenchimento da filial da nota fiscal é obrigatório.","Atenção",,1) 
+         U_ITMsg("O preenchimento da filial da nota fiscal é obrigatório.","Atenção",,1) 
          _lRet := .F.
       EndIf
       
       If Empty(_cNrNf)
-         U_ItMsg("O preenchimento do número da nota fiscal é obrigatório.","Atenção",,1) 
+         U_ITMsg("O preenchimento do número da nota fiscal é obrigatório.","Atenção",,1) 
          _lRet := .F.
       EndIf
       
       If Empty(_cSerieNf)
-         U_ItMsg("O preenchimento da série da nota fiscal é obrigatório.","Atenção",,1) 
+         U_ITMsg("O preenchimento da série da nota fiscal é obrigatório.","Atenção",,1) 
          _lRet := .F.
       EndIf
               
       If _lRet
-         SF2->(DbSetOrder(1))
-         If ! SF2->(DbSeek(U_ItKey(_cFilNf,"F2_FILIAL")+U_ItKey(_cNrNf,"F2_DOC")+U_ItKey(_cSerieNf,"F2_SERIE")))
-            U_ItMsg("A nota fiscal informada não foi localizada no cadastro de notas fiscais.","Atenção",,1) 
+         SF2->(DBSetOrder(1))
+         If ! SF2->(DBSeek(U_ItKey(_cFilNf,"F2_FILIAL")+U_ItKey(_cNrNf,"F2_DOC")+U_ItKey(_cSerieNf,"F2_SERIE")))
+            U_ITMsg("A nota fiscal informada não foi localizada no cadastro de notas fiscais.","Atenção",,1) 
             _lRet := .F.
          EndIf   
       EndIf
@@ -5114,19 +5115,19 @@ Begin Sequence
       
    If AllTrim(_cOpcao) == "ID VIAGEM" 
       If Empty(_cIdViagem)
-         U_ItMsg("O preenchimento do Id da Viagem é obrigatório.","Atenção",,1) 
+         U_ITMsg("O preenchimento do Id da Viagem é obrigatório.","Atenção",,1) 
          _lRet := .F.
       EndIf 
    EndIf
    
    If AllTrim(_cOpcao) == "FILIAL+NR_CARGA/DOC.CLIENTE" 
       If Empty(_cFilCarga)
-         U_ItMsg("O preenchimento da filial da carga / doc.cliente é obrigatório.","Atenção",,1) 
+         U_ITMsg("O preenchimento da filial da carga / doc.cliente é obrigatório.","Atenção",,1) 
          _lRet := .F.
       EndIf
       
       If Empty(_cNrCarga)
-         U_ItMsg("O preenchimento do número da carga / doc.cliente é obrigatório.","Atenção",,1) 
+         U_ITMsg("O preenchimento do número da carga / doc.cliente é obrigatório.","Atenção",,1) 
          _lRet := .F.
       EndIf
       
@@ -5162,19 +5163,19 @@ Begin Sequence
       Break
    EndIf 
 
-   ZZM->(DbGoTop())
-   Do While ! ZZM->(Eof())
-      If AllTrim(ZZM->ZZM_CGC) == Alltrim(_cCnpj)
+   ZZM->(DBGoTop())
+   While ! ZZM->(Eof())
+      If AllTrim(ZZM->ZZM_CGC) == AllTrim(_cCnpj)
          _lRet := .T.
          Exit 
       EndIf 
-      ZZM->(DbSkip())
+      ZZM->(DBSkip())
    EndDo
 
 
 End Sequence 
 
-ZZM->(DbGoTo(_nRegAtu))
+ZZM->(DBGoTo(_nRegAtu))
 
 Return _lRet 
 
@@ -5220,9 +5221,8 @@ Begin Sequence
       
    cFilAnt := _cfilial 
     
-	cUSUARIO := SPACE(06)+"Administrador  "
-	cUsername:= "Schedule"
-	//__CUSERID:= "SCHEDULE"
+	cUSUARIO := Space(06)+"Administrador  "
+	cUserName:= "Schedule"
 
    U_ItConOut( '[AOMS118] - Iniciando schedule de integração de carga para o sistema Krona. ' )
 
@@ -5232,8 +5232,8 @@ Begin Sequence
 
    _cQry := " SELECT DISTINCT F2_FILIAL, F2_CARGA "
    _cQry += " FROM " + RetSqlName("SF2") + " SF2, " + RetSqlName("DAK") + " DAK "
-   _cQry += " WHERE SF2.D_E_L_E_T_ <> '*' AND DAK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND F2_EMISSAO >= '" + Dtos(_dDtInicInteg) +"' AND DAK_FILIAL = F2_FILIAL "
+   _cQry += " WHERE SF2.D_E_L_E_T_ = ' ' AND DAK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND F2_EMISSAO >= '" + DToS(_dDtInicInteg) +"' AND DAK_FILIAL = F2_FILIAL "
    _cQry += " AND DAK_COD = F2_CARGA "  // AND DAK_I_PROT = ' ' 
    _cQry += " AND DAK_VALOR >= " + AllTrim(Str(_nPrcMinCarga,16,2))
    _cQry += " AND NOT EXISTS (SELECT 'X' FROM " + RetSqlName("DAI") + " DAI "
@@ -5243,20 +5243,20 @@ Begin Sequence
    _cQry += "                       AND DAI.D_E_L_E_T_ = ' ' ) "
 
    If Select("TRBSF2") > 0
-         TRBSF2->(DbCloseArea())
+         TRBSF2->(DBCloseArea())
    EndIf
 
    DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQry ) , "TRBSF2" , .F. , .T. )
    
-   DAK->(DbSetOrder(1)) // DAK_FILIAL+DAK_COD+DAK_SEQCAR 
+   DAK->(DBSetOrder(1)) // DAK_FILIAL+DAK_COD+DAK_SEQCAR 
 
-   TRBSF2->(DbGoTop())
-   Do While ! TRBSF2->(Eof())
-      If DAK->(DbSeek(TRBSF2->F2_FILIAL+TRBSF2->F2_CARGA))
+   TRBSF2->(DBGoTop())
+   While ! TRBSF2->(Eof())
+      If DAK->(DBSeek(TRBSF2->F2_FILIAL+TRBSF2->F2_CARGA))
          U_AOMS118("S")  // Chama a integração Webservice Krona via Scheduller.
       EndIf 
 
-      TRBSF2->(DbSkip())
+      TRBSF2->(DBSkip())
    EndDo
 /*   
    //===========================================================================================
@@ -5264,15 +5264,15 @@ Begin Sequence
    // Integrar as filias do parâmetro IT_FILINT2K (Itapetininga) com cargas abaixo de 100.000.
    //===========================================================================================
    If Select("TRBSF2") > 0
-      TRBSF2->(DbCloseArea())
+      TRBSF2->(DBCloseArea())
    EndIf
    
    //_cFilInte2 := U_ItGetMv("IT_FILINT2K","9036;") 
 
    _cQry := " SELECT DISTINCT F2_FILIAL, F2_CARGA "
    _cQry += " FROM " + RetSqlName("SF2") + " SF2, " + RetSqlName("DAK") + " DAK "
-   _cQry += " WHERE SF2.D_E_L_E_T_ <> '*' AND DAK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND F2_EMISSAO >= '" + Dtos(_dDtInicInteg) +"' AND DAK_FILIAL = F2_FILIAL "
+   _cQry += " WHERE SF2.D_E_L_E_T_ = ' ' AND DAK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND F2_EMISSAO >= '" + DToS(_dDtInicInteg) +"' AND DAK_FILIAL = F2_FILIAL "
    _cQry += " AND DAK_COD = F2_CARGA "  // AND DAK_I_PROT = ' ' 
    _cQry += " AND DAK_VALOR < " + AllTrim(Str(_nPrcMinCarga,16,2))
    _cQry += " AND DAK_FILIAL = '90' AND DAK_I_FRDC = '90  ' "
@@ -5284,15 +5284,15 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQry ) , "TRBSF2" , .F. , .T. )
    
-   DAK->(DbSetOrder(1)) // DAK_FILIAL+DAK_COD+DAK_SEQCAR 
+   DAK->(DBSetOrder(1)) // DAK_FILIAL+DAK_COD+DAK_SEQCAR 
 
-   TRBSF2->(DbGoTop())
-   Do While ! TRBSF2->(Eof())
-      If DAK->(DbSeek(TRBSF2->F2_FILIAL+TRBSF2->F2_CARGA))
+   TRBSF2->(DBGoTop())
+   While ! TRBSF2->(Eof())
+      If DAK->(DBSeek(TRBSF2->F2_FILIAL+TRBSF2->F2_CARGA))
          U_AOMS118("S")  // Chama a integração Webservice Krona via Scheduller.
       EndIf 
 
-      TRBSF2->(DbSkip())
+      TRBSF2->(DBSkip())
    EndDo
 */  
 	u_itconout( '[AOMS118] -  Finalizado schedule de integração de cargas para o sistema Krona. ' )
@@ -5301,7 +5301,7 @@ Begin Sequence
  
  End Sequence 
 
- Return Nil 
+ Return 
 
 /*
 ===============================================================================================================================
@@ -5332,22 +5332,22 @@ Begin Sequence
 	// Prepara aheader e acols para a função omsvldent
    //==============================================================================================
 	aHeader := {}
-	aadd(aHeader,{1,"C6_ITEM"})
-	aadd(aHeader,{2,"C6_PRODUTO"})
-	aadd(aHeader,{3,"C6_LOCAL"})
+	aAdd(aHeader,{1,"C6_ITEM"})
+	aAdd(aHeader,{2,"C6_PRODUTO"})
+	aAdd(aHeader,{3,"C6_LOCAL"})
 
-	SC6->(Dbsetorder(1))
-	SC6->(Dbseek(_cFilPedVenda + _cNrPedVendas))
+	SC6->(DBSetOrder(1))
+	SC6->(DBSeek(_cFilPedVenda + _cNrPedVendas))
 	
 	aCols := {}
 		
-	Do While SC6->(!EOF()) .And. _cFilPedVenda == SC6->C6_FILIAL .And. _cNrPedVendas == SC6->C6_NUM
+	While SC6->(!Eof()) .And. _cFilPedVenda == SC6->C6_FILIAL .And. _cNrPedVendas == SC6->C6_NUM
 		
-		Aadd(aCols,{SC6->C6_ITEM,SC6->C6_PRODUTO,SC6->C6_LOCAL})
+		aAdd(aCols,{SC6->C6_ITEM,SC6->C6_PRODUTO,SC6->C6_LOCAL})
 		
-		SC6->(Dbskip())
+		SC6->(DBSkip())
 			
-	Enddo
+	EndDo
 
 	_nRet :=  U_OmsVldEnt(_dDtEntrega, _cCodCliPV, _cLojaCliPV, _cFilPedVenda, _cNrPedVendas, 1, ,_cFilCar,_cOper,_cTPVEN) // Carrega dias de transit time
 
@@ -5397,9 +5397,8 @@ Begin Sequence
       
    cFilAnt := _cfilial 
     
-	cUSUARIO := SPACE(06)+"Administrador  "
-	cUsername:= "Schedule"
-	//__CUSERID:= "SCHEDULE"
+	cUSUARIO := Space(06)+"Administrador  "
+	cUserName:= "Schedule"
 
    U_ItConOut( 'Iniciando schedule de integração de carga para o sistema Krona. ' )
 
@@ -5411,15 +5410,15 @@ Begin Sequence
    // Integrar as filias do parâmetro IT_FILINT2K (Itapetininga) com cargas abaixo de 100.000.
    //===========================================================================================
    If Select("TRBSF2") > 0
-      TRBSF2->(DbCloseArea())
+      TRBSF2->(DBCloseArea())
    EndIf
    
    //_cFilInte2 := U_ItGetMv("IT_FILINT2K","9036;") 
 
    _cQry := " SELECT DISTINCT F2_FILIAL, F2_CARGA "
    _cQry += " FROM " + RetSqlName("SF2") + " SF2, " + RetSqlName("DAK") + " DAK "
-   _cQry += " WHERE SF2.D_E_L_E_T_ <> '*' AND DAK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND F2_EMISSAO >= '" + Dtos(_dDtInicInteg) +"' AND DAK_FILIAL = F2_FILIAL "
+   _cQry += " WHERE SF2.D_E_L_E_T_ = ' ' AND DAK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND F2_EMISSAO >= '" + DToS(_dDtInicInteg) +"' AND DAK_FILIAL = F2_FILIAL "
    _cQry += " AND DAK_COD = F2_CARGA "  // AND DAK_I_PROT = ' ' 
    _cQry += " AND DAK_VALOR < " + AllTrim(Str(_nPrcMinCarga,16,2))
    _cQry += " AND DAK_FILIAL = '90' AND DAK_I_FRDC = '90  ' "
@@ -5432,22 +5431,22 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQry ) , "TRBSF2" , .F. , .T. )
    
-   DAK->(DbSetOrder(1)) // DAK_FILIAL+DAK_COD+DAK_SEQCAR 
+   DAK->(DBSetOrder(1)) // DAK_FILIAL+DAK_COD+DAK_SEQCAR 
 
-   TRBSF2->(DbGoTop())
-   Do While ! TRBSF2->(Eof())
-      If DAK->(DbSeek(TRBSF2->F2_FILIAL+TRBSF2->F2_CARGA))
+   TRBSF2->(DBGoTop())
+   While ! TRBSF2->(Eof())
+      If DAK->(DBSeek(TRBSF2->F2_FILIAL+TRBSF2->F2_CARGA))
          U_AOMS118("S")  // Chama a integração Webservice Krona via Scheduller.
       EndIf 
 
-      TRBSF2->(DbSkip())
+      TRBSF2->(DBSkip())
    EndDo
   
 	u_itconout( 'Finalizado schedule de integração de cargas para o sistema Krona. ' )
 	
  End Sequence 
 
- Return Nil 
+ Return 
 
 /*
 ===============================================================================================================================
@@ -5491,9 +5490,8 @@ Begin Sequence
       
    cFilAnt := _cfilial 
     
-	//cUSUARIO := SPACE(06)+"Administrador  "
-	//cUsername:= "Schedule"
-	//__CUSERID:= "SCHEDULE"
+	//cUSUARIO := Space(06)+"Administrador  "
+	//cUserName:= "Schedule"
 
    U_ItConOut( 'Iniciando schedule de integração de carga para o sistema Krona. ' )
 
@@ -5502,14 +5500,14 @@ Begin Sequence
    _dDtInicInteg := Date() - _nDiasDescDt 
 
    If Select("TRBSF2") > 0
-      TRBSF2->(DbCloseArea())
+      TRBSF2->(DBCloseArea())
    EndIf
 
    _cQry := " SELECT DISTINCT F2_FILIAL, F2_CARGA "
    _cQry += " FROM " + RetSqlName("SF2") + " SF2, " + RetSqlName("DAK") + " DAK "
-   _cQry += " WHERE     SF2.D_E_L_E_T_ <> '*' "
-   _cQry += "       AND DAK.D_E_L_E_T_ <> '*' "
-   _cQry += "       AND F2_EMISSAO >= '" + Dtos(_dDtInicInteg) + "' "
+   _cQry += " WHERE     SF2.D_E_L_E_T_ = ' ' "
+   _cQry += "       AND DAK.D_E_L_E_T_ = ' ' "
+   _cQry += "       AND F2_EMISSAO >= '" + DToS(_dDtInicInteg) + "' "
    _cQry += "       AND DAK_FILIAL = F2_FILIAL "
    _cQry += "       AND DAK_COD = F2_CARGA "
    _cQry += "       AND DAK_VALOR < 100000 "
@@ -5538,23 +5536,23 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQry ) , "TRBSF2" , .F. , .T. )
 
-   TRBSF2->(DbGoTop())
+   TRBSF2->(DBGoTop())
    nConta:=0
    COUNT TO nConta
    
-   DAK->(DbSetOrder(1)) // DAK_FILIAL+DAK_COD+DAK_SEQCAR 
+   DAK->(DBSetOrder(1)) // DAK_FILIAL+DAK_COD+DAK_SEQCAR 
 
-   TRBSF2->(DbGoTop())
-   Do While ! TRBSF2->(Eof())
-      If DAK->(DbSeek(TRBSF2->F2_FILIAL+TRBSF2->F2_CARGA))
+   TRBSF2->(DBGoTop())
+   While ! TRBSF2->(Eof())
+      If DAK->(DBSeek(TRBSF2->F2_FILIAL+TRBSF2->F2_CARGA))
          U_AOMS118("S")  // Chama a integração Webservice Krona via Scheduller.
       EndIf 
 
-      TRBSF2->(DbSkip())
+      TRBSF2->(DBSkip())
    EndDo
   
 	u_itconout( 'Finalizado schedule de integração de cargas para o sistema Krona.' )
 	
  End Sequence 
 
- Return Nil 
+ Return 

@@ -11,7 +11,7 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 */
 
 #Include "Report.ch"
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "fileio.ch"
 
 /*
@@ -24,7 +24,7 @@ Parametros------: Nenhum
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-User function ROMS062()
+User Function ROMS062()
 Local _aDadosRel
 Local _cArq, _cDir, _cTitulo, _aTitulos
 
@@ -45,7 +45,7 @@ Begin Sequence
    Processa( {|| _aDadosRel := U_ROMS062Q() }, "Aguarde...", "Gerando dados do relatório...",.F.)
 
    If Empty(_aDadosRel)
-      U_ItMsg("Não existem dados para emissão do relatório","Atenção",,1)
+      U_ITMsg("Não existem dados para emissão do relatório","Atenção",,1)
       Break
    EndIf
  
@@ -55,83 +55,83 @@ Begin Sequence
 
    _aTitulos := {}
     
-   Aadd(_aTitulos,{"EMBARQUE"       , 2 , 4 , .F.})
+   aAdd(_aTitulos,{"EMBARQUE"       , 2 , 4 , .F.})
 
    If MV_PAR07 = 1
-       Aadd(_aTitulos,{"COD CLIENTE"    , 1 , 1 , .F.})
-       Aadd(_aTitulos,{"LOJA"           , 1 , 1 , .F.})
-       Aadd(_aTitulos,{"CLIENTE"        , 1 , 1 , .F.})
-       Aadd(_aTitulos,{"CIDADE"         , 1 , 1 , .F.})
-       Aadd(_aTitulos,{"UF"             , 1 , 1 , .F.})
+       aAdd(_aTitulos,{"COD CLIENTE"    , 1 , 1 , .F.})
+       aAdd(_aTitulos,{"LOJA"           , 1 , 1 , .F.})
+       aAdd(_aTitulos,{"CLIENTE"        , 1 , 1 , .F.})
+       aAdd(_aTitulos,{"CIDADE"         , 1 , 1 , .F.})
+       aAdd(_aTitulos,{"UF"             , 1 , 1 , .F.})
    EndIf
    
-   Aadd(_aTitulos,{"ORDEM DE CARGA" , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"CÓDIGO"         , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"DESCRIÇÃO"      , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"UNIDADES"       , 3 , 2 , .F.})
-   Aadd(_aTitulos,{"1a. UM"         , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"CX AVULSA"      , 3 , 2 , .F.})
-   Aadd(_aTitulos,{"2a.UM"          , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"VOLUME 1"       , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"FABRICAÇÃO"     , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"MÁQUINA"        , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"LOTE"           , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"HORÁRIO"        , 1 , 1 , .F.})  
-   Aadd(_aTitulos,{"VOLUME 2"       , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"FABRICAÇÃO"     , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"MÁQUINA"        , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"LOTE"           , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"HORÁRIO"        , 1 , 1 , .F.})  
+   aAdd(_aTitulos,{"ORDEM DE CARGA" , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"CÓDIGO"         , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"DESCRIÇÃO"      , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"UNIDADES"       , 3 , 2 , .F.})
+   aAdd(_aTitulos,{"1a. UM"         , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"CX AVULSA"      , 3 , 2 , .F.})
+   aAdd(_aTitulos,{"2a.UM"          , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"VOLUME 1"       , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"FABRICAÇÃO"     , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"MÁQUINA"        , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"LOTE"           , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"HORÁRIO"        , 1 , 1 , .F.})  
+   aAdd(_aTitulos,{"VOLUME 2"       , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"FABRICAÇÃO"     , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"MÁQUINA"        , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"LOTE"           , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"HORÁRIO"        , 1 , 1 , .F.})  
 //--------------------------------------------------
-   Aadd(_aTitulos,{"VOLUME 3"       , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"FABRICAÇÃO"     , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"MÁQUINA"        , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"LOTE"           , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"HORÁRIO"        , 1 , 1 , .F.})  
-   Aadd(_aTitulos,{"VOLUME 4"       , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"FABRICAÇÃO"     , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"MÁQUINA"        , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"LOTE"           , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"HORÁRIO"        , 1 , 1 , .F.})  
+   aAdd(_aTitulos,{"VOLUME 3"       , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"FABRICAÇÃO"     , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"MÁQUINA"        , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"LOTE"           , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"HORÁRIO"        , 1 , 1 , .F.})  
+   aAdd(_aTitulos,{"VOLUME 4"       , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"FABRICAÇÃO"     , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"MÁQUINA"        , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"LOTE"           , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"HORÁRIO"        , 1 , 1 , .F.})  
 //--------------------------------------------------
-   Aadd(_aTitulos,{"VOLUME 5"       , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"FABRICAÇÃO"     , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"MÁQUINA"        , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"LOTE"           , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"HORÁRIO"        , 1 , 1 , .F.})  
-   Aadd(_aTitulos,{"VOLUME 6"       , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"FABRICAÇÃO"     , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"MÁQUINA"        , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"LOTE"           , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"HORÁRIO"        , 1 , 1 , .F.})  
+   aAdd(_aTitulos,{"VOLUME 5"       , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"FABRICAÇÃO"     , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"MÁQUINA"        , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"LOTE"           , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"HORÁRIO"        , 1 , 1 , .F.})  
+   aAdd(_aTitulos,{"VOLUME 6"       , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"FABRICAÇÃO"     , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"MÁQUINA"        , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"LOTE"           , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"HORÁRIO"        , 1 , 1 , .F.})  
 //--------------------------------------------------
-   Aadd(_aTitulos,{"VOLUME 7"       , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"FABRICAÇÃO"     , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"MÁQUINA"        , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"LOTE"           , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"HORÁRIO"        , 1 , 1 , .F.})  
-   Aadd(_aTitulos,{"VOLUME 8"       , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"FABRICAÇÃO"     , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"MÁQUINA"        , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"LOTE"           , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"HORÁRIO"        , 1 , 1 , .F.})  
+   aAdd(_aTitulos,{"VOLUME 7"       , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"FABRICAÇÃO"     , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"MÁQUINA"        , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"LOTE"           , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"HORÁRIO"        , 1 , 1 , .F.})  
+   aAdd(_aTitulos,{"VOLUME 8"       , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"FABRICAÇÃO"     , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"MÁQUINA"        , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"LOTE"           , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"HORÁRIO"        , 1 , 1 , .F.})  
 //--------------------------------------------------
-   Aadd(_aTitulos,{"VOLUME 9"       , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"FABRICAÇÃO"     , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"MÁQUINA"        , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"LOTE"           , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"HORÁRIO"        , 1 , 1 , .F.})  
-   Aadd(_aTitulos,{"VOLUME 10"       , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"FABRICAÇÃO"     , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"MÁQUINA"        , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"LOTE"           , 1 , 1 , .F.})
-   Aadd(_aTitulos,{"HORÁRIO"        , 1 , 1 , .F.})  
+   aAdd(_aTitulos,{"VOLUME 9"       , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"FABRICAÇÃO"     , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"MÁQUINA"        , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"LOTE"           , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"HORÁRIO"        , 1 , 1 , .F.})  
+   aAdd(_aTitulos,{"VOLUME 10"       , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"FABRICAÇÃO"     , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"MÁQUINA"        , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"LOTE"           , 1 , 1 , .F.})
+   aAdd(_aTitulos,{"HORÁRIO"        , 1 , 1 , .F.})  
 
    U_ITGEREXCEL(_cArq,_cDir,_cTitulo,"Relatorio",_aTitulos,_aDadosRel,.F.)
 
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -143,7 +143,7 @@ Parametros------: Nenhum
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-User function ROMS062Q()
+User Function ROMS062Q()
 Local _cQry, _aDados := {}
 Local _nI, _nTotRegs, _nJ
 Local _cFiltro := ""
@@ -158,15 +158,15 @@ Begin Sequence
 
    //Filtra Emissao da NOTA FISCAL
    If ! Empty(MV_PAR01) 
-	   _cFiltro += " AND SD2.D2_EMISSAO >= '" + DTOS(MV_PAR01) + "' "
+	   _cFiltro += " AND SD2.D2_EMISSAO >= '" + DToS(MV_PAR01) + "' "
    EndIf
 
    If ! Empty(MV_PAR02) 
-	   _cFiltro += " AND SD2.D2_EMISSAO <= '" + DTOS(MV_PAR02) + "' "
+	   _cFiltro += " AND SD2.D2_EMISSAO <= '" + DToS(MV_PAR02) + "' "
    EndIf
    
-   If !Empty(Alltrim(MV_PAR03))
-       _cFiltro += " AND SD2.D2_LOCAL IN "+FORMATIN(MV_PAR03,";") 
+   If !Empty(AllTrim(MV_PAR03))
+       _cFiltro += " AND SD2.D2_LOCAL IN "+FormatIn(MV_PAR03,";") 
    EndIf
 
    If MV_PAR04 = 1
@@ -177,7 +177,7 @@ Begin Sequence
        _cTipo += ";B"
    EndIf
 
-    _cFiltro += " AND SF2.F2_TIPO IN "+FORMATIN(_cTipo,";") 
+    _cFiltro += " AND SF2.F2_TIPO IN "+FormatIn(_cTipo,";") 
 
    If MV_PAR06 = 1
        _cFiltro += " AND SF2.F2_CARGA <> ' ' "
@@ -238,11 +238,11 @@ Begin Sequence
    _cQry += " SB1.B1_COD  "
 
    If Select("TRBSF2") > 0
-      TRBSF2->(DbCloseArea())
+      TRBSF2->(DBCloseArea())
    EndIf
 
    DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQry ) , "TRBSF2" , .F. , .T. )
-   DbSelectArea("TRBSF2")
+   DBSelectArea("TRBSF2")
    
    TCSetField( "TRBSF2", "D2_EMISSAO", "D", 8 )
 
@@ -251,7 +251,7 @@ Begin Sequence
    
    ProcRegua(_nTotRegs)
    
-   TRBSF2->(DbGoTop())
+   TRBSF2->(DBGoTop())
   
    _aDados := {}
    
@@ -260,16 +260,16 @@ Begin Sequence
    _cEstado  := ""
 
 
-   Do While ! TRBSF2->(Eof())
+   While ! TRBSF2->(Eof())
       _nI += 1
-      IncProc("Lendo dados: " + StrZero(_nI,6) + "/" + Strzero(_nTotRegs,6))
+      IncProc("Lendo dados: " + StrZero(_nI,6) + "/" + StrZero(_nTotRegs,6))
       
       If MV_PAR07 = 1 
       
          _nJ := aScan(_aDados,{|x| x[1] == TRBSF2->D2_EMISSAO .And. x[7] == TRBSF2->F2_CARGA .And. x[2] == TRBSF2->D2_CLIENTE .And. x[3] == TRBSF2->D2_LOJA .And. x[8] == TRBSF2->B1_COD})
 
           If _nJ == 0
-             Aadd(_aDados,{TRBSF2->D2_EMISSAO,; // EMBARQUE             - 1	
+             aAdd(_aDados,{TRBSF2->D2_EMISSAO,; // EMBARQUE             - 1	
                            TRBSF2->D2_CLIENTE,; // COD CLIENTE          - 2
                            TRBSF2->D2_LOJA,;    // LOJA                 - 3 
                            TRBSF2->A1_NOME,;    // CLIENTE	            - 4
@@ -343,7 +343,7 @@ Begin Sequence
          _nJ := aScan(_aDados,{|x| x[1] == TRBSF2->D2_EMISSAO .And. x[2] == TRBSF2->F2_CARGA .And. x[3] == TRBSF2->B1_COD})
       
          If _nJ == 0
-             Aadd(_aDados,{TRBSF2->D2_EMISSAO,; // EMBARQUE             - 1	
+             aAdd(_aDados,{TRBSF2->D2_EMISSAO,; // EMBARQUE             - 1	
                            TRBSF2->F2_CARGA,;   // ORDEM DE CARGA       - 2	
                            TRBSF2->B1_COD,;     // CÓDIGO	            - 3
                            TRBSF2->B1_DESC,;    // DESCRIÇÃO	         - 4
@@ -408,14 +408,14 @@ Begin Sequence
     	  
       EndIf
       
-      TRBSF2->(DbSkip())
+      TRBSF2->(DBSkip())
 
    EndDo
   
 End Sequence
 
 If Select("TRBSF2") > 0
-   TRBSF2->(DbCloseArea())
+   TRBSF2->(DBCloseArea())
 EndIf 
 
 Return _aDados

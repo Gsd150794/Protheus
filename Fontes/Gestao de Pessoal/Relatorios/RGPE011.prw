@@ -2,30 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 17/09/2019 | Retirada chamada da função itputx1. Chamado 28346 
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 02/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Lucas Borges  |17/09/2019| Chamado 28346. Retirada chamada da função itputx1.
+Lucas Borges  |02/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "TOPCONN.CH"
+#Include "TOTVS.ch"
+#Include "TOPCONN.CH"
 
 /*
 ===============================================================================================================================
 Programa----------: RGPE011
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 07/07/2014
-===============================================================================================================================
 Descrição---------: Relatório de benefícios dos funcionários
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -49,11 +42,8 @@ Return
 Programa----------: RGPE011
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 07/07/2014
-===============================================================================================================================
 Descrição---------: Relatório de benefícios dos funcionários
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -126,11 +116,8 @@ Return oReport
 Programa----------: RGPE011
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 07/07/2014
-===============================================================================================================================
 Descrição---------: Impressao do relatorio
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -155,7 +142,7 @@ Local nIndexRHP		:= 0
 Private cAliasQ		:= "SRA"
 Private cFilialAnt 	:= "  "
 Private cCcAnt     	:= Space(20)
-Private cMatAnt    	:= space(08)
+Private cMatAnt    	:= Space(08)
 Private cTpOrigem	:= ""
 Private cCodUsu		:= ""
 Private cAntMat 	:= ""
@@ -194,20 +181,20 @@ TRFunction():New(oSection1:Cell("VLREMP"),/* cID */,"SUM",/*oBreak*/,/*cTitle*/,
 TRFunction():New(oSection1:Cell("VLRCOPAR"),/* cID */,"SUM",/*oBreak*/,/*cTitle*/,PesqPict("RHO","RHO_VLRFUN"),/*uFormula*/,.F./*lEndSection*/,/*lEndReport*/,/*lEndPage*/)
 
 //===========================================================================
-//| Carregando variaveis mv_par?? para Variaveis do Sistema.                |
+//| Carregando variaveis MV_PAR?? para Variaveis do Sistema.                |
 //===========================================================================
 
-dDataRef	:=	mv_par01	//	Data de Referencia
-cAnoMes		:=	Substr(DTOS( dDataRef ), 1, 6)
-cFilDe     	:= mv_par02 	// Filial De
-cFilAte    	:= mv_par03		// Filial Ate
-cMatDe     	:= mv_par04		// Matricula De
-cMatAte    	:= mv_par05		// Matricula Ate
-cCcDe      	:= mv_par06		// Centro de Custo De
-cCcAte     	:= mv_par07		// Centro de Custo Ate
-cTpPlano	:= mv_par08		// Tipo do plano 1- Medico, 2- Odontologico, 3- Ambos
-cSituacao  	:= mv_par09		// Situacao do Funcionario
-cDepen 		:= mv_par10 	// Gera somente de funcionarios com dependentes? 1- Sim, 2- Nao, 3-Ambos
+dDataRef	:=	MV_PAR01	//	Data de Referencia
+cAnoMes		:=	SubStr(DToS( dDataRef ), 1, 6)
+cFilDe     	:= MV_PAR02 	// Filial De
+cFilAte    	:= MV_PAR03		// Filial Ate
+cMatDe     	:= MV_PAR04		// Matricula De
+cMatAte    	:= MV_PAR05		// Matricula Ate
+cCcDe      	:= MV_PAR06		// Centro de Custo De
+cCcAte     	:= MV_PAR07		// Centro de Custo Ate
+cTpPlano	:= MV_PAR08		// Tipo do plano 1- Medico, 2- Odontologico, 3- Ambos
+cSituacao  	:= MV_PAR09		// Situacao do Funcionario
+cDepen 		:= MV_PAR10 	// Gera somente de funcionarios com dependentes? 1- Sim, 2- Nao, 3-Ambos
 lMovAberto 	:= .T.
 
 If cAnoMes < cFolMes
@@ -223,18 +210,18 @@ EndIf
 
 #IFDEF TOP
 	lExeQry		:= 	!ExeInAs400()
-#ENDIF
+#EndIf
 
-DbSelectArea( "SRA" )
+DBSelectArea( "SRA" )
 If !lExeQry
 	//Cria indice temporario para buscar pela filial+mat+competencia
-	DbSelectArea( cAliasRHP )
-	DbSetOrder( 1 )
+	DBSelectArea( cAliasRHP )
+	DBSetOrder( 1 )
 	cIndKeyRHP	:= "RHP_FILIAL+RHP_MAT+RHP_COMPPG+RHP_ORIGEM+RHP_CODIGO+RHP_TPLAN+RHP_TPFORN+RHP_CODFOR+RHP_PD"
 	cArqRHP		:= CriaTrab( Nil, .F. )
 	IndRegua( "RHP", cArqRHP, cIndKeyRHP, , , , .F. )
 	nIndexRHP	:= RHP->( RetIndex( ) ) + 1
-	DbSetOrder( nIndexRHP )
+	DBSetOrder( nIndexRHP )
 Else
 	cAliasQ		:= "QSRA"
 	cOrder	:= "1, 4, 2, 8, 9, 10"
@@ -245,11 +232,11 @@ Else
 	// Monta query de selecao da informacao
 	cQuery	:= "SELECT DISTINCT SRA.RA_FILIAL, SRA.RA_MAT, SRA.RA_NOME, SRA.RA_CC, SRA.RA_ADMISSA,  "
 	cQuery	+= "CTT.CTT_CUSTO, CTT.CTT_DESC01 CTT_DESC01, MOV." + cAliasMov + "_ORIGEM ORIGEM, "
-	If cAliasMov == "RHM" .or. cAliasMov == "RHK" .or. cAliasMov == "RHL"
+	If cAliasMov == "RHM" .Or. cAliasMov == "RHK" .Or. cAliasMov == "RHL"
 		cQuery  += "MOV." + cAliasMov + "_CODIGO CODIGO, MOV." + cAliasMov + "_TPFORN TPFORN,MOV." + cAliasMov + "_PERINI PERINI,MOV." + cAliasMov + "_PERFIM PERFIM MOV.* "
 	Else
 		cQuery  += "MOV." + cAliasMov + "_CODIGO CODIGO, MOV." + cAliasMov + "_TPFORN TPFORN, MOV.* "
-	Endif
+	EndIf
 	cQuery	+= "FROM "+RetSqlName(cAliasMov)+" MOV "
 	cQuery  += "INNER JOIN " + RetSqlName("SRA") + " SRA "
 	cQuery  += "ON MOV." + cAliasMov + "_FILIAL = SRA.RA_FILIAL "
@@ -266,12 +253,12 @@ Else
 	If cTpPlano == 1 //Tipo: Medico
 		cQuery += " AND MOV."+cAliasMov+"_TPPLAN = '3' "
 		cQuery += " AND MOV."+cAliasMov+"_TPFORN = '1' "
-	Elseif cTpPlano == 2 //Tipo: Odontologico
+	ElseIf cTpPlano == 2 //Tipo: Odontologico
 		cQuery += " AND MOV."+cAliasMov+"_TPPLAN = '1' "
 		cQuery += " AND MOV."+cAliasMov+"_TPFORN = '2' "
-	Elseif cTpPlano ==  3 //Tipo: Ambos
+	ElseIf cTpPlano ==  3 //Tipo: Ambos
 		cQuery += " AND MOV."+cAliasMov+"_TPPLAN IN('3','1')"
-	Endif
+	EndIf
 	cQuery	+= " AND SRA.RA_MAT BETWEEN '"	+ cMatDe	+"' AND '" + cMatAte	+ "' "
 	cQuery	+= " AND SRA.RA_CC BETWEEN '"	+ cCcDe		+"' AND '" + cCcAte		+ "' "
 	cQuery	+= " AND SRA.RA_SITFOLH IN("		+ cSituacao	+") "
@@ -287,7 +274,7 @@ Else
 	dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery), cAliasQ, .F., .T.)
 EndIf
 
-dbSelectArea( cAliasQ )
+DBSelectArea( cAliasQ )
 
 cAntMat := ""
 
@@ -321,18 +308,18 @@ While !(cAliasQ)->(Eof()) .And. If( lExeQry, .T., &(cInicio) <= cFim )
 			cQuery	:= ChangeQuery( cQuery )
 			
 			If Select("RHP") > 0
-				(cAliasRHP)->(dbclosearea())
+				(cAliasRHP)->(DBCloseArea())
 			EndIf
 			
 			dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery), cAliasRHP, .F., .T.)
 			
 			While !(cAliasRHP)->(Eof()) .And. If( lExeQry, .T., &(cInicio) <= cFim )
-				SRA->(DbSeek( ( cAliasQ )->RA_FILIAL + ( cAliasQ )->RA_MAT ))
+				SRA->(DBSeek( ( cAliasQ )->RA_FILIAL + ( cAliasQ )->RA_MAT ))
 				fImpFun(2)
 				fTestaTotal(2)
 			End Do
-			(cAliasRHP)->(dbclosearea())
-			dbSelectArea( cAliasQ )
+			(cAliasRHP)->(DBCloseArea())
+			DBSelectArea( cAliasQ )
 		EndIf
 		
 	EndIf
@@ -347,23 +334,23 @@ While !(cAliasQ)->(Eof()) .And. If( lExeQry, .T., &(cInicio) <= cFim )
 			( ( cAliasQ )->RA_CC < cCcDe )   	.Or. ( ( cAliasQ )->RA_CC > cCcAte )	.Or. ;
 			!( ( cAliasQ )->RA_SITFOLH $ cSituacao )
 			
-			dbSelectArea( cAliasQ )
+			DBSelectArea( cAliasQ )
 			fTestaTotal()
 			Loop
 		EndIf
 		
 		//Se a competencia selecionada ja estiver fechada
 		If !lMovAberto
-			DbSelectArea( cAliasRHP )
-			DbSetOrder( nIndexRHP )
-			DbSeek( ( cAliasQ )->RA_FILIAL + ( cAliasQ )->RA_MAT + cAnoMes, .F. )
+			DBSelectArea( cAliasRHP )
+			DBSetOrder( nIndexRHP )
+			DBSeek( ( cAliasQ )->RA_FILIAL + ( cAliasQ )->RA_MAT + cAnoMes, .F. )
 			
-			While !Eof() .and. (cAliasRHP)->( &(cAliasRHP + "_FILIAL") + &(cAliasRHP + "_MAT") + &(cAliasRHP + "_COMPPG")) == ( cAliasQ )->RA_FILIAL + ( cAliasQ )->RA_MAT + cAnoMes
+			While !Eof() .And. (cAliasRHP)->( &(cAliasRHP + "_FILIAL") + &(cAliasRHP + "_MAT") + &(cAliasRHP + "_COMPPG")) == ( cAliasQ )->RA_FILIAL + ( cAliasQ )->RA_MAT + cAnoMes
 				//===========================================================================
 				//| Impressao do Funcionario                                                |
 				//===========================================================================
 								
-				SRA->( DbSeek( ( cAliasQ )->RA_FILIAL + ( cAliasQ )->RA_CC + ( cAliasQ )->RA_MAT ))
+				SRA->( DBSeek( ( cAliasQ )->RA_FILIAL + ( cAliasQ )->RA_CC + ( cAliasQ )->RA_MAT ))
 				lErro := .F.				
 				fImpFun(2)
 		        
@@ -381,34 +368,34 @@ While !(cAliasQ)->(Eof()) .And. If( lExeQry, .T., &(cInicio) <= cFim )
 					oSection1:Cell("PLANO"):SetValue(cPlano)
 					oSection1:Cell("PERINI"):SetValue(cPerIni)
 					oSection1:Cell("PERFIM"):SetValue(cPerFim)
-					oSection1:Cell("VLRFUN"):SetValue(VAL(ALLTRIM(cVlrFun)))
-					oSection1:Cell("VLREMP"):SetValue(VAL(ALLTRIM(cVlrEmp)))
-					oSection1:Cell("VLRCOPAR"):SetValue(VAL(ALLTRIM(cVlrCop)))
+					oSection1:Cell("VLRFUN"):SetValue(Val(AllTrim(cVlrFun)))
+					oSection1:Cell("VLREMP"):SetValue(Val(AllTrim(cVlrEmp)))
+					oSection1:Cell("VLRCOPAR"):SetValue(Val(AllTrim(cVlrCop)))
 					oSection1:PrintLine()  
 					oReport:IncMeter()
-				Endif					
+				EndIf					
 				fTestaTotal(2)
 			EndDo
 			cAliasMov := If(!lMovAberto, "RHS", "RHR")
 		
 		EndIf
 		
-		DbSelectArea( cAliasMov )
-		DbSetOrder( 1 )
-		DbSeek( ( cAliasQ )->RA_FILIAL + ( cAliasQ )->RA_MAT + cAnoMes, .F. )
+		DBSelectArea( cAliasMov )
+		DBSetOrder( 1 )
+		DBSeek( ( cAliasQ )->RA_FILIAL + ( cAliasQ )->RA_MAT + cAnoMes, .F. )
 		If Eof()
-			dbSelectArea( cAliasQ )
+			DBSelectArea( cAliasQ )
 			fTestaTotal()
 			Loop
 		EndIf
 		
-		While !Eof() .and. (cAliasMov)->( &(cAliasMov + "_FILIAL") + &(cAliasMov + "_MAT") + &(cAliasMov + "_COMPPG")) == ( cAliasQ )->RA_FILIAL + ( cAliasQ )->RA_MAT + cAnoMes
+		While !Eof() .And. (cAliasMov)->( &(cAliasMov + "_FILIAL") + &(cAliasMov + "_MAT") + &(cAliasMov + "_COMPPG")) == ( cAliasQ )->RA_FILIAL + ( cAliasQ )->RA_MAT + cAnoMes
 			
 			//===========================================================================
 			//| Impressao do Funcionario                                                |
 			//===========================================================================
 			
-			SRA->( DbSeek( ( cAliasQ )->RA_FILIAL + ( cAliasQ )->RA_CC + ( cAliasQ )->RA_MAT ))
+			SRA->( DBSeek( ( cAliasQ )->RA_FILIAL + ( cAliasQ )->RA_CC + ( cAliasQ )->RA_MAT ))
 			lErro := .F.				
 			fImpFun()
 
@@ -426,14 +413,14 @@ While !(cAliasQ)->(Eof()) .And. If( lExeQry, .T., &(cInicio) <= cFim )
 				oSection1:Cell("PLANO"):SetValue(cPlano)
 				oSection1:Cell("PERINI"):SetValue(cPerIni)
 				oSection1:Cell("PERFIM"):SetValue(cPerFim)
-				oSection1:Cell("VLRFUN"):SetValue(VAL(ALLTRIM(cVlrFun)))
-				oSection1:Cell("VLREMP"):SetValue(VAL(ALLTRIM(cVlrEmp)))
-				oSection1:Cell("VLRCOPAR"):SetValue(VAL(ALLTRIM(cVlrCop)))
+				oSection1:Cell("VLRFUN"):SetValue(Val(AllTrim(cVlrFun)))
+				oSection1:Cell("VLREMP"):SetValue(Val(AllTrim(cVlrEmp)))
+				oSection1:Cell("VLRCOPAR"):SetValue(Val(AllTrim(cVlrCop)))
 				oSection1:PrintLine()  
 				oReport:IncMeter()
-			Endif
-			DbSelectArea( cAliasMov )
-			DbSkip()
+			EndIf
+			DBSelectArea( cAliasMov )
+			DBSkip()
 		EndDo       
 		fTestaTotal()
 	Else
@@ -442,7 +429,7 @@ While !(cAliasQ)->(Eof()) .And. If( lExeQry, .T., &(cInicio) <= cFim )
 		//| Impressao do Funcionario                                                |
 		//===========================================================================		
 		
-		SRA->( DbSeek( ( cAliasQ )->RA_FILIAL + ( cAliasQ )->RA_CC + ( cAliasQ )->RA_MAT ))
+		SRA->( DBSeek( ( cAliasQ )->RA_FILIAL + ( cAliasQ )->RA_CC + ( cAliasQ )->RA_MAT ))
 		lErro := .F.
 		fImpFun()
 		If lErro == .F.		
@@ -459,12 +446,12 @@ While !(cAliasQ)->(Eof()) .And. If( lExeQry, .T., &(cInicio) <= cFim )
 			oSection1:Cell("PLANO"):SetValue(cPlano)
 			oSection1:Cell("PERINI"):SetValue(cPerIni)
 			oSection1:Cell("PERFIM"):SetValue(cPerFim)
-			oSection1:Cell("VLRFUN"):SetValue(VAL(ALLTRIM(cVlrFun)))
-			oSection1:Cell("VLREMP"):SetValue(VAL(ALLTRIM(cVlrEmp)))
-			oSection1:Cell("VLRCOPAR"):SetValue(VAL(ALLTRIM(cVlrCop)))
+			oSection1:Cell("VLRFUN"):SetValue(Val(AllTrim(cVlrFun)))
+			oSection1:Cell("VLREMP"):SetValue(Val(AllTrim(cVlrEmp)))
+			oSection1:Cell("VLRCOPAR"):SetValue(Val(AllTrim(cVlrCop)))
 			oSection1:PrintLine()  
 			oReport:IncMeter()
-		Endif			      
+		EndIf			      
 		fTestaTotal()
 	EndIf
 
@@ -472,7 +459,7 @@ EndDo
 If !lExeQry
 	lTotal:= .T.
 	fTestaTotal()
-Endif
+EndIf
 
 //===========================================================================
 //| Termino do Relatorio 													|
@@ -481,16 +468,16 @@ Endif
 oSection1:Finish()                                                                                                     
 
 If lExeQry
-	(cAliasQ)->(dbclosearea())
+	(cAliasQ)->(DBCloseArea())
 Else
 	If File(cArqRHP+OrdBagExt())
 		fErase(cArqRHP+OrdBagExt())
-	Endif
+	EndIf
 	RHP->( retIndex() )
 EndIf
 
-dbSelectArea("SRA")
-dbSetOrder(1)
+DBSelectArea("SRA")
+DBSetOrder(1)
 
 oSection2:Init()
 oSection2:Cell("QTDDEP"):SetValue(nQtdDep)
@@ -507,11 +494,8 @@ Return
 Programa----------: RGPE011
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 07/07/2014
-===============================================================================================================================
 Descrição---------: Impressao de funcionario
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -534,23 +518,23 @@ Default nOpcao := 1
 
 
 If cDepen == 1 //Sim- Somente com Dependentes
-   	DbSelectArea( "RHL" )
-	DbSetOrder( RetOrdem( "RHL", "RHL_FILIAL+RHL_MAT"))
-	DbSeek( (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT)
-	IF( (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT <> RHL->RHL_FILIAL + RHL->RHL_MAT) .AND. (cAliasMov)->( &(cAliasMov + "_ORIGEM")) <> "2" 
+   	DBSelectArea( "RHL" )
+	DBSetOrder( RetOrdem( "RHL", "RHL_FILIAL+RHL_MAT"))
+	DBSeek( (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT)
+	If( (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT <> RHL->RHL_FILIAL + RHL->RHL_MAT) .And. (cAliasMov)->( &(cAliasMov + "_ORIGEM")) <> "2" 
 		lErro := .T.
-		Return Nil
+		Return
 	EndIf
 	
 ElseIf cDepen == 2 //Não-Somente sem Dependentes
-	DbSelectArea( "RHL" )
-	DbSetOrder( RetOrdem( "RHL", "RHL_FILIAL+RHL_MAT"))
-	DbSeek( (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT)
-	IF( (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT == RHL->RHL_FILIAL + RHL->RHL_MAT) .AND. (cAliasMov)->( &(cAliasMov + "_ORIGEM")) <> "2" 
+	DBSelectArea( "RHL" )
+	DBSetOrder( RetOrdem( "RHL", "RHL_FILIAL+RHL_MAT"))
+	DBSeek( (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT)
+	If( (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT == RHL->RHL_FILIAL + RHL->RHL_MAT) .And. (cAliasMov)->( &(cAliasMov + "_ORIGEM")) <> "2" 
 	    lErro := .T.
-		Return Nil
+		Return
 	EndIf
-Endif  
+EndIf  
 	
 If nOpcao == 1
 	If lExeQry
@@ -571,7 +555,7 @@ Else
 	cCcDesc := fDesc("CTT",(cAliasQ)->RA_CC,"CTT->CTT_DESC01",30)
 EndIf
 
-_cCcusto := ALLTRIM(cCcDesc)
+_cCcusto := AllTrim(cCcDesc)
 aCC	:=	{} // Limpa o Array, para evitar que sejam somados Centro de Custo com o mesmo codigo, de outras filiais.
 
 // Imprime o cabecalho inicial do primeiro registro a ser impresso.
@@ -615,29 +599,29 @@ If cCodUsu <> cAtCodUsu
 	If cTpOrigem == "1" //Titular
 		cNome := (cAliasQ)->RA_NOME
 	ElseIf cTpOrigem == "2" //Dependente
-		DbSelectArea( "SRB" )
-		DbSetOrder( RetOrdem( "SRB", "RB_FILIAL+RB_MAT" ) )
-		DbSeek( (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT, .F. )
+		DBSelectArea( "SRB" )
+		DBSetOrder( RetOrdem( "SRB", "RB_FILIAL+RB_MAT" ) )
+		DBSeek( (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT, .F. )
 		lHasDep := .F.
-		While SRB->( !EOF() ) .and. SRB->RB_FILIAL + SRB->RB_MAT == (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT
+		While SRB->( !Eof() ) .And. SRB->RB_FILIAL + SRB->RB_MAT == (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT
 			If SRB->RB_COD == cCodUsu
 				lHasDep := .T.
 				Exit
 			EndIf
-			SRB->( DbSkip() )
+			SRB->( DBSkip() )
 		EndDo
                 cNome := SRB->RB_NOME
 	Else
-		DbSelectArea( "RHM" )
-		DbSetOrder( RetOrdem( "RHM", "RHM_FILIAL+RHM_MAT+RHM_TPFORN+RHM_CODFOR+RHM_CODIGO"))
-		DbSeek( (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT + (cAliasImp)->(&(cAliasMov + "_TPFORN")) + (cAliasImp)->(&(cAliasMov + "_CODFOR")) + (cAliasImp)->(&(cAliasMov + "_CODIGO")), .F.)
+		DBSelectArea( "RHM" )
+		DBSetOrder( RetOrdem( "RHM", "RHM_FILIAL+RHM_MAT+RHM_TPFORN+RHM_CODFOR+RHM_CODIGO"))
+		DBSeek( (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT + (cAliasImp)->(&(cAliasMov + "_TPFORN")) + (cAliasImp)->(&(cAliasMov + "_CODFOR")) + (cAliasImp)->(&(cAliasMov + "_CODIGO")), .F.)
 		If !Eof()
 			cNome := RHM->RHM_NOME
 		EndIf
 	EndIf
-Endif
+EndIf
 cMat := cCodUsu
-_cNome := Alltrim(cNome)
+_cNome := AllTrim(cNome)
 
 // Impressao do Tipo de Lancamentos
 If nOpcao == 1
@@ -744,32 +728,32 @@ Else
 	cAtCodUsu := (cAliasImp)->( &(cAliasMov + "_CODIGO" ) )
 EndIf
 If cTpOrigem == "1" //Titular
-	DbSelectArea( "RHK" )
-	DbSetOrder( RetOrdem( "RHK", "RHK_FILIAL+RHK_MAT+RHK_TPFORN+RHK_CODFOR+RHK_CODIGO"))
-	DbSeek( (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT + (cAliasImp)->(&(cAliasMov + "_TPFORN")) + (cAliasImp)->(&(cAliasMov + "_CODFOR")) + (cAliasImp)->(&(cAliasMov + "_CODIGO")), .F.)
+	DBSelectArea( "RHK" )
+	DBSetOrder( RetOrdem( "RHK", "RHK_FILIAL+RHK_MAT+RHK_TPFORN+RHK_CODFOR+RHK_CODIGO"))
+	DBSeek( (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT + (cAliasImp)->(&(cAliasMov + "_TPFORN")) + (cAliasImp)->(&(cAliasMov + "_CODFOR")) + (cAliasImp)->(&(cAliasMov + "_CODIGO")), .F.)
 	cPerIni := RHK->RHK_PERINI
 	cPerFim := RHK->RHK_PERFIM
 ElseIf cTpOrigem == "2" //Dependente
-	DbSelectArea( "SRB" )
-	DbSetOrder( RetOrdem( "SRB", "RB_FILIAL+RB_MAT" ) )
-	DbSeek( (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT, .F. )
+	DBSelectArea( "SRB" )
+	DBSetOrder( RetOrdem( "SRB", "RB_FILIAL+RB_MAT" ) )
+	DBSeek( (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT, .F. )
 	lHasDep := .F.
-	While SRB->( !EOF() ) .and. SRB->RB_FILIAL + SRB->RB_MAT == (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT
+	While SRB->( !Eof() ) .And. SRB->RB_FILIAL + SRB->RB_MAT == (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT
 		If SRB->RB_COD == cCodUsu
 			lHasDep := .T.
 			Exit
 		EndIf
-		SRB->( DbSkip() )
+		SRB->( DBSkip() )
 	EndDo
-	DbSelectArea( "RHL" )
-	DbSetOrder( RetOrdem( "RHL", "RHL_FILIAL+RHL_MAT+RHL_TPFORN+RHL_CODFOR+RHL_CODIGO"))
-	DbSeek( (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT + (cAliasImp)->(&(cAliasMov + "_TPFORN")) + (cAliasImp)->(&(cAliasMov + "_CODFOR")) + (cAliasImp)->(&(cAliasMov + "_CODIGO")), .F.)
+	DBSelectArea( "RHL" )
+	DBSetOrder( RetOrdem( "RHL", "RHL_FILIAL+RHL_MAT+RHL_TPFORN+RHL_CODFOR+RHL_CODIGO"))
+	DBSeek( (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT + (cAliasImp)->(&(cAliasMov + "_TPFORN")) + (cAliasImp)->(&(cAliasMov + "_CODFOR")) + (cAliasImp)->(&(cAliasMov + "_CODIGO")), .F.)
 	cPerIni := RHL->RHL_PERINI
 	cPerFim := RHL->RHL_PERFIM
 Else
-	DbSelectArea( "RHM" )
-	DbSetOrder( RetOrdem( "RHM", "RHM_FILIAL+RHM_MAT+RHM_TPFORN+RHM_CODFOR+RHM_CODIGO"))
-	DbSeek( (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT + (cAliasImp)->(&(cAliasMov + "_TPFORN")) + (cAliasImp)->(&(cAliasMov + "_CODFOR")) + (cAliasImp)->(&(cAliasMov + "_CODIGO")), .F.)
+	DBSelectArea( "RHM" )
+	DBSetOrder( RetOrdem( "RHM", "RHM_FILIAL+RHM_MAT+RHM_TPFORN+RHM_CODFOR+RHM_CODIGO"))
+	DBSeek( (cAliasQ)->RA_FILIAL + (cAliasQ)->RA_MAT + (cAliasImp)->(&(cAliasMov + "_TPFORN")) + (cAliasImp)->(&(cAliasMov + "_CODFOR")) + (cAliasImp)->(&(cAliasMov + "_CODIGO")), .F.)
 	If !Eof()
 		cNome := RHM->RHM_NOME
 		cPerIni := RHM->RHM_PERINI
@@ -795,38 +779,38 @@ If _cAlias == "RHP"
 	cVlrCop := cQry->RHP_VLRFUN
 Else
 	cVlrCop := cQry->RHO_VLRFUN
-Endif
+EndIf
 
 cVlrCop := cValToChar(cVlrCop) //Vlr Co-Particip
-cQry->(dbCloseArea())
+cQry->(DBCloseArea())
 
 //-- Acumula Centro de custo / filial / empresa / Co Participacao
-If ( nPos := Ascan(aCC,{|x| x[1] == (cAliasQ)->RA_CC}) ) > 0
+If ( nPos := aScan(aCC,{|x| x[1] == (cAliasQ)->RA_CC}) ) > 0
 	aCC[nPos,2]		+= 1
 	aCC[nPos,3]		+= (cAliasImp)->( &(cAliasMov + "_VLRFUN"))
 	aCC[nPos,4]		+= (cAliasImp)->( &(cAliasMov + "_VLREMP"))
 	aCC[nPos,5]		+= cVlrCop  
 Else
-	Aadd(aCC,{(cAliasQ)->RA_CC, 1, (cAliasImp)->( &(cAliasMov + "_VLRFUN")), (cAliasImp)->( &(cAliasMov + "_VLREMP")),cVlrCop})
+	aAdd(aCC,{(cAliasQ)->RA_CC, 1, (cAliasImp)->( &(cAliasMov + "_VLRFUN")), (cAliasImp)->( &(cAliasMov + "_VLREMP")),cVlrCop})
 
 EndIf
 
-If ( nPos	:= Ascan(aFil,{|x| x[1] == (cAliasQ)->RA_FILIAL}) ) > 0
+If ( nPos	:= aScan(aFil,{|x| x[1] == (cAliasQ)->RA_FILIAL}) ) > 0
 	aFil[nPos,2]	+= 1
 	aFil[nPos,3]	+= (cAliasImp)->( &(cAliasMov + "_VLRFUN"))
 	aFil[nPos,4]	+= (cAliasImp)->( &(cAliasMov + "_VLREMP"))
 	aFil[nPos,5]	+= cVlrCop    
 Else
-	Aadd(aFil,{(cAliasQ)->RA_FILIAL, 1, (cAliasImp)->( &(cAliasMov + "_VLRFUN")), (cAliasImp)->( &(cAliasMov + "_VLREMP")),cVlrCop}) 
+	aAdd(aFil,{(cAliasQ)->RA_FILIAL, 1, (cAliasImp)->( &(cAliasMov + "_VLRFUN")), (cAliasImp)->( &(cAliasMov + "_VLREMP")),cVlrCop}) 
 EndIf
 
-If ( nPos	:= Ascan(aEmp,{|X| X[1] == cEmpAnt}) ) > 0
+If ( nPos	:= aScan(aEmp,{|X| X[1] == cEmpAnt}) ) > 0
 	aEmp[nPos,2]	+= 1
 	aEmp[nPos,3]	+= (cAliasImp)->( &(cAliasMov + "_VLRFUN"))
 	aEmp[nPos,4]	+= (cAliasImp)->( &(cAliasMov + "_VLREMP"))
 	aEmp[nPos,5]	+= cVlrCop                
 Else
-	Aadd(aEmp,{cEmpAnt, 1, (cAliasImp)->( &(cAliasMov + "_VLRFUN")), (cAliasImp)->( &(cAliasMov + "_VLREMP")),cVlrCop})
+	aAdd(aEmp,{cEmpAnt, 1, (cAliasImp)->( &(cAliasMov + "_VLRFUN")), (cAliasImp)->( &(cAliasMov + "_VLREMP")),cVlrCop})
 EndIf 
 
 Return
@@ -836,11 +820,8 @@ Return
 Programa----------: RGPE011
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 07/07/2014
-===============================================================================================================================
 Descrição---------: Impressao do totalizador
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -849,13 +830,13 @@ Static Function fTestaTotal(nOpcao)
 Default nOpcao := 1
 
 If nOpcao == 1
-	dbSelectArea( cAliasQ )
+	DBSelectArea( cAliasQ )
 Else
-	dbSelectArea( cAliasRHP )
+	DBSelectArea( cAliasRHP )
 EndIf
 
 cFilialAnt := (cAliasQ)->RA_FILIAL              // Iguala Variaveis
 cCcAnt     := (cAliasQ)->RA_CC
-dbSkip()
+DBSkip()
 
 Return

@@ -2,37 +2,29 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 24/12/2021 | Tratamento para uso do Configurador de Tributos para o Reinf (R-2055). Chamado 38549 e 38663
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 25/05/2022 | Modifiado tratamento do Incentivo à Produção. Chamado 40238
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 15/03/2024 | Substituida a coluna Total Base. Chamado 46626
+Lucas Borges  |25/05/2022| Chamado 40238. Modifiado tratamento do Incentivo à Produção.
+Lucas Borges  |15/03/2024| Chamado 46626. Substituida a coluna Total Base.
+Lucas Borges  |30/09/2025| Chamado 52232. Corrigida amarração entre tabelas
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT066
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 10/07/2020
-===============================================================================================================================
 Descrição---------: Relatório Composição de Preços do Mix - Chamado 33479
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function RGLT066
 
-Local oReport
+Local oReport := Nil as Object
 Pergunte("RGLT066",.F.)
 //Inferface de Impressão
 oReport := ReportDef()
@@ -45,19 +37,16 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 10/07/2020
-===============================================================================================================================
 Descrição---------: Processa a montagem do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function ReportDef()
+Static Function ReportDef() As Object
 
-Local oReport
-Local oSection
-Local _aOrdem   := {"Filial","Filial+Setor","Filial+Setor+Linha"}
+Local oReport := Nil As Object
+Local oSection:= Nil As Object
+Local _aOrdem := {"Filial","Filial+Setor","Filial+Setor+Linha"} As Array
 
 //Criacao do componente de impressao
 //TReport():New
@@ -114,34 +103,31 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 10/07/2020
-===============================================================================================================================
 Descrição---------: Processa a impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function ReportPrint(oReport,_aOrdem)
+Static Function ReportPrint(oReport As Object,_aOrdem As Array)
 
-Local _cFiltro	:= "%"
-Local _cAlias		:= ""
-Local _aSelFil	:= {}
-Local _nOrdem		:= oReport:Section(1):GetOrder() 
-Local _lPlanilha:= oReport:nDevice == 4
-Local _cFilial	:= ""
-Local _cSetor		:= ""
-Local _cLinha		:= ""
-Local _nCountRec:= 0
+Local _cFiltro	:= "%" As Character
+Local _cAlias		:= "" As Character
+Local _aSelFil	:= {} As Array
+Local _nOrdem		:= oReport:Section(1):GetOrder() As Numeric
+Local _lPlanilha:= oReport:nDevice == 4 As Logical
+Local _cFilial	:= "" As Character
+Local _cSetor		:= "" As Character
+Local _cLinha		:= "" As Character
+Local _nCountRec:= 0 As Numeric
 
 //Chama função que permitirá a seleção das filiais
 If MV_PAR02 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZL2")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -226,9 +212,9 @@ oReport:SetMeter(0)
 
 BeginSql alias _cAlias
 SELECT B.*,
-       ROUND((TOT_CRED / DECODE(VOLUME,0,1,VOLUME)) + (TOT_IMP / DECODE(VOLUME,0,1,VOLUME)) - TOT_DEB, 4) TOT_LIQ,
-       ROUND(TOT_GERAL / DECODE(VOLUME,0,1,VOLUME), 4) VLR_P_LITRO,
-       ROUND((TOT_CRED  - TOT_DEB2) / DECODE(VOLUME,0,1,VOLUME), 4) LLIQSI
+       Round((TOT_CRED / DECODE(VOLUME,0,1,VOLUME)) + (TOT_IMP / DECODE(VOLUME,0,1,VOLUME)) - TOT_DEB, 4) TOT_LIQ,
+       Round(TOT_GERAL / DECODE(VOLUME,0,1,VOLUME), 4) VLR_P_LITRO,
+       Round((TOT_CRED  - TOT_DEB2) / DECODE(VOLUME,0,1,VOLUME), 4) LLIQSI
   FROM (SELECT ZL2_FILIAL, A2_COD||'-'||A2_LOJA PROD, A2_NOME, ZL2_COD, ZL2_DESCRI, ZL3_COD, ZL3_DESCRI,
                NVL((SELECT SUM(ZLD_QTDBOM)
                      FROM %Table:ZLD% ZLD
@@ -239,13 +225,14 @@ SELECT B.*,
                       AND ZLD_RETIRO = A2_COD
                       AND ZLD_RETILJ = A2_LOJA
                       AND ZLD_DTCOLE BETWEEN ZLE_DTINI AND ZLE_DTFIM),0) VOLUME,
-               NVL((SELECT SUM(CASE WHEN ZL8_DEBCRE = 'C' AND ZL8_QUALID = 'S' THEN ZLF_VLRLTR
+               NVL((SELECT SUM(Case WHEN ZL8_DEBCRE = 'C' AND ZL8_QUALID = 'S' THEN ZLF_VLRLTR
                                 WHEN ZL8_DEBCRE = 'D' AND ZL8_QUALID = 'S' THEN ZLF_VLRLTR * -1 END)
                      FROM %Table:ZLF% ZLF1, %Table:ZL8% ZL81
                     WHERE ZL81.D_E_L_E_T_ = ' '
                       AND ZLF1.D_E_L_E_T_ = ' '
                       AND ZLF1.ZLF_FILIAL = ZL81.ZL8_FILIAL
                       AND ZLF1.ZLF_EVENTO = ZL81.ZL8_COD
+                      AND ZLF1.ZLF_FILIAL = ZL2_FILIAL
                       AND ZLF1.ZLF_A2COD = A2_COD
                       AND ZLF1.ZLF_A2LOJA = A2_LOJA
                       AND ZLF1.ZLF_SETOR = ZL2_COD
@@ -264,7 +251,7 @@ SELECT B.*,
                       AND ZLF2.ZLF_TP_MIX = 'L'
                       AND ZLF2.ZLF_ENTMIX = 'S'
                       AND ZLF2.ZLF_DEBCRE = 'C'),0) TOT_CRED,
-               NVL((SELECT SUM(CASE WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL ELSE ZLF_TOTAL * -1 END)
+               NVL((SELECT SUM(Case WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL Else ZLF_TOTAL * -1 END)
                      FROM %Table:ZLF% ZLF4, %Table:ZL8% ZL84
                     WHERE ZLF4.D_E_L_E_T_ = ' '
                       AND ZL84.D_E_L_E_T_ = ' '
@@ -278,7 +265,7 @@ SELECT B.*,
                       AND ZLF4.ZLF_CODZLE = ZLE_COD
                       AND ZL84.ZL8_PERTEN = 'P'
                       AND ZL84.ZL8_GRUPO = '000007'),0) TOT_IMP,
-               NVL((SELECT SUM(CASE WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL ELSE ZLF_TOTAL * -1 END)
+               NVL((SELECT SUM(Case WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL Else ZLF_TOTAL * -1 END)
                      FROM %Table:ZLF% ZLF5
                     WHERE ZLF5.D_E_L_E_T_ = ' '
                       AND ZLF5.ZLF_FILIAL = ZL2_FILIAL
@@ -330,7 +317,7 @@ SELECT B.*,
                NVL(OUT_PG_IMP, 0) OUT_PG_IMP,
                NVL(DIVERSOS, 0) DIVERSOS
           FROM (SELECT ZLF_FILIAL, ZLF_A2COD, ZLF_A2LOJA, ZLF_SETOR, ZLF_LINROT, ZLF_CODZLE,
-                       CASE
+                       Case
                          WHEN ZL8_NREDUZ = 'LEITE COTA' THEN 'LEITE_COTA'
                          WHEN ZL8_NREDUZ = 'GORDURA' THEN 'GORDURA'
                          WHEN ZL8_NREDUZ = 'PROTEINA' THEN 'PROTEINA'
@@ -349,7 +336,7 @@ SELECT B.*,
                          WHEN ZL8_NREDUZ = 'PGT.MG' THEN 'PGT_MG'
                          WHEN ZL8_NREDUZ = 'AJ.CUS.VET' THEN 'AJ_CUS_VET'
                          WHEN ZL8_NREDUZ = 'OUT PG IMP' THEN 'OUT_PG_IMP'
-                         ELSE'DIVERSOS' END EVENTO,
+                         Else'DIVERSOS' END EVENTO,
                        ZLF_VLRLTR
                   FROM %Table:ZLF% ZLF, %Table:ZL8% ZL8
                  WHERE ZL8.D_E_L_E_T_ = ' '
@@ -363,7 +350,7 @@ SELECT B.*,
                    AND ZLF_A2LOJA BETWEEN %exp:MV_PAR04% AND %exp:MV_PAR06%
                    AND ZLF_ENTMIX = 'S')
         PIVOT(SUM(ZLF_VLRLTR)
-           FOR EVENTO IN('LEITE_COTA' LEITE_COTA,
+           For EVENTO IN('LEITE_COTA' LEITE_COTA,
                         'GORDURA' GORDURA,
                         'PROTEINA' PROTEINA,
                         'CCS' CCS,
@@ -410,20 +397,20 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->ZL2_FILIAL
 	_cSetor	:= (_cAlias)->ZL2_COD + ' - ' + (_cAlias)->ZL2_DESCRI
    _cLinha	:= (_cAlias)->ZL3_COD + ' - ' + (_cAlias)->ZL3_DESCRI
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

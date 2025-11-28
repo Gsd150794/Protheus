@@ -2,37 +2,28 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 22/01/2019 | Corrigida passsagem da Espécie. Chamado 31801
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 07/07/2023 | Incluído controle dos documentos marcados e área de trabalho. Chamado 44403
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 02/04/2024 | Criado tratamento para quando não é retornado o status do documento. Chamado 46806
+Lucas Borges  |22/01/2019| Chamado 31801. Corrigida passsagem da Espécie
+Lucas Borges  |07/07/2023| Chamado 44403. Incluído controle dos documentos marcados e área de trabalho
+Lucas Borges  |02/04/2024| Chamado 46806. Criado tratamento para quando não é retornado o status do documento.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE 'Protheus.ch' 
+#Include "TOTVS.ch" 
 
 /*
 ===============================================================================================================================
 Programa----------: MCOM005
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 24/03/2017
-===============================================================================================================================
 Descrição---------: Rotina para excluir e reprocessar os documentos no COMXCOL
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T. - Executou operação - .F. Operação abortada pelo usuário
 ===============================================================================================================================
 */
 User Function MCOM005
 
-//Private aRegMark  := {} Variável declara no COMXCOL. Ao exlcuir uma nota, excluir ela da variável para que não seja processada idenvidamente mesmo estando deletada
 Local _nProcOpc := 1
 Local _cAlias	:= GetNextAlias()
 Local _cAlias150:= ""
@@ -53,8 +44,8 @@ If _nProcOpc == 2
 	  	//Obtem o codigo da entidade 
 		oWS := WsSPEDAdm():New()
 		oWS:cUSERTOKEN := "TOTVS"
-		oWS:oWSEMPRESA:cCNPJ       := IIF(SM0->M0_TPINSC==2 .Or. Empty(SM0->M0_TPINSC),SM0->M0_CGC,"")	
-		oWS:oWSEMPRESA:cCPF        := IIF(SM0->M0_TPINSC==3,SM0->M0_CGC,"")
+		oWS:oWSEMPRESA:cCNPJ       := IIf(SM0->M0_TPINSC==2 .Or. Empty(SM0->M0_TPINSC),SM0->M0_CGC,"")	
+		oWS:oWSEMPRESA:cCPF        := IIf(SM0->M0_TPINSC==3,SM0->M0_CGC,"")
 		oWS:oWSEMPRESA:cIE         := SM0->M0_INSC
 		oWS:oWSEMPRESA:cIM         := SM0->M0_INSCM		
 		oWS:oWSEMPRESA:cNOME       := SM0->M0_NOMECOM
@@ -76,7 +67,7 @@ If _nProcOpc == 2
 		oWS:oWSEMPRESA:cEMAIL      := UsrRetMail(RetCodUsr())
 		oWS:oWSEMPRESA:cNIRE       := SM0->M0_NIRE
 		oWS:oWSEMPRESA:dDTRE       := SM0->M0_DTRE
-		oWS:oWSEMPRESA:cNIT        := IIF(SM0->M0_TPINSC==1,SM0->M0_CGC,"")
+		oWS:oWSEMPRESA:cNIT        := IIf(SM0->M0_TPINSC==1,SM0->M0_CGC,"")
 		oWS:oWSEMPRESA:cINDSITESP  := ""
 		oWS:oWSEMPRESA:cID_MATRIZ  := ""
 		oWS:oWSOUTRASINSCRICOES:oWSInscricao := SPEDADM_ARRAYOFSPED_GENERICSTRUCT():New()
@@ -100,40 +91,40 @@ If _nProcOpc == 2
 	EndIf
 		
 	//Traz documentos marcados
-	BeginSQL Alias _cAlias
+	BeginSql Alias _cAlias
 		SELECT SDS.DS_FILIAL, SDS.DS_DOC, SDS.DS_SERIE, SDS.DS_FORNEC, SDS.DS_LOJA, SDS.DS_ARQUIVO, SDS.DS_ESPECI
 		FROM %Table:SDS% SDS
 		WHERE SDS.DS_OK = %Exp:cMarca% AND SDS.DS_STATUS != 'P' AND SDS.%NotDel%
-	EndSQL
+	EndSql
 
-	SDT->(dbSetOrder(3))
-	SDS->(dbSetorder(1))
+	SDT->(DBSetOrder(3))
+	SDS->(DBSetOrder(1))
 
-	While !(_cAlias)->(EOF())
+	While !(_cAlias)->(Eof())
 		
-		oWS:cCHVNFE := SUBSTR((_cAlias)->DS_ARQUIVO,4,44)
+		oWS:cCHVNFE := SubStr((_cAlias)->DS_ARQUIVO,4,44)
 		If oWS:ConsultaChaveNFE()
 
 			//-- Deleta itens do documento 
-			If SDT->(dbSeek((_cAlias)->(DS_FILIAL+DS_FORNEC+DS_LOJA+DS_DOC+DS_SERIE)))
-				While !SDT->(EOF()) .And. SDT->(DT_FILIAL+DT_FORNEC+DT_LOJA+DT_DOC+DT_SERIE) == (_cAlias)->(DS_FILIAL+DS_FORNEC+DS_LOJA+DS_DOC+DS_SERIE) 
+			If SDT->(DBSeek((_cAlias)->(DS_FILIAL+DS_FORNEC+DS_LOJA+DS_DOC+DS_SERIE)))
+				While !SDT->(Eof()) .And. SDT->(DT_FILIAL+DT_FORNEC+DT_LOJA+DT_DOC+DT_SERIE) == (_cAlias)->(DS_FILIAL+DS_FORNEC+DS_LOJA+DS_DOC+DS_SERIE) 
 					RecLock("SDT",.F.)
 					SDT->(dbDelete())
-					SDT->(MsUnLock())		
-					SDT->(dbSkip())
+					SDT->(MSUnLock())		
+					SDT->(DBSkip())
 				End
 			EndIf
 		
 			//-- Deleta cabecalho do documento
-			If SDS->(dbSeek((_cAlias)->(DS_FILIAL+DS_DOC+DS_SERIE+DS_FORNEC+DS_LOJA)))
+			If SDS->(DBSeek((_cAlias)->(DS_FILIAL+DS_DOC+DS_SERIE+DS_FORNEC+DS_LOJA)))
 				_nPos := aScan(aRegMark,SDS->(RECNO()))
 				If _nPos > 0
 					aDel(aRegMark,_nPos)
 					aSize(aRegMark,Len(aRegMark)-1)
-				Endif
+				EndIf
 				RecLock("SDS",.F.)
 				SDS->(dbDelete())
-				SDS->(MsUnLock())	
+				SDS->(MSUnLock())	
 			EndIf		
             
 			//====================================
@@ -148,9 +139,9 @@ If _nProcOpc == 2
 			_cCodRet	:= AllTrim(oWS:oWSCONSULTACHAVENFERESULT:cCODRETNFE)
 			_cAmbiente	:= oWS:oWSCONSULTACHAVENFERESULT:nAMBIENTE
 
-			DbSelectArea("CKO")
-			CKO->(dbSetorder(1))
-			If CKO->(DbSeek((_cAlias)->DS_ARQUIVO))
+			DBSelectArea("CKO")
+			CKO->(DBSetOrder(1))
+			If CKO->(DBSeek((_cAlias)->DS_ARQUIVO))
 				If _cCodRet $ '101/155'
 					RecLock("CKO",.F.)
 					CKO->CKO_FLAG := '9'
@@ -161,7 +152,7 @@ If _nProcOpc == 2
 					ElseIf AllTrim((_cAlias)->DS_ESPECI)=='CTEOS'
 						CKO->CKO_CODERR := 'COM045'
 					EndIf
-					CKO->(MsUnLock())
+					CKO->(MSUnLock())
 				ElseIf _cCodRet $ '102/205/301/302/303'
 					RecLock("CKO",.F.)
 					CKO->CKO_FLAG := '9'
@@ -172,30 +163,30 @@ If _nProcOpc == 2
 					ElseIf AllTrim((_cAlias)->DS_ESPECI)=='CTEOS'
 						CKO->CKO_CODERR := 'COM046'
 					EndIf
-					CKO->(MsUnLock())
+					CKO->(MSUnLock())
 				ElseIf AllTrim((_cAlias)->DS_ESPECI) == 'SPED'
 					//============================================================================
 					//Verifica se NF-e recebeu alguma manifestação informando que a operçação não 
 					//foi realizada (3) ou que é desconhecida (2). Nesses status não é necessário
 					//reprocessar o documeto.
 					//============================================================================
-					DbSelectArea("C00")
-					C00->(dbSetorder(1))
-					If C00->(dbSeek((_cAlias)->(DS_FILIAL+SUBSTR(DS_ARQUIVO,4,44)))) .And. C00->C00_CODEVE=="3  "
+					DBSelectArea("C00")
+					C00->(DBSetOrder(1))
+					If C00->(DBSeek((_cAlias)->(DS_FILIAL+SubStr(DS_ARQUIVO,4,44)))) .And. C00->C00_CODEVE=="3  "
 						If C00->C00_STATUS $ "2/3"
 							RecLock("CKO",.F.)
 							CKO->CKO_FLAG := '9'
 							CKO->CKO_CODERR := IIf(C00->C00_STATUS=='2','MCOM01','MCOM02')
-							CKO->(MsUnLock())
+							CKO->(MSUnLock())
 						Else
 							RecLock("CKO",.F.)
 							CKO->CKO_FLAG := '0'
-							CKO->(MsUnLock())
+							CKO->(MSUnLock())
 						EndIf
 					Else
 						RecLock("CKO",.F.)
 						CKO->CKO_FLAG := '0'
-						CKO->(MsUnLock())
+						CKO->(MSUnLock())
 	               	EndIf
 	               	C00->(DBCloseArea())
 	     		ElseIf AllTrim((_cAlias)->DS_ESPECI) == 'CTE' .And. !Empty(_cCodRet)
@@ -205,59 +196,59 @@ If _nProcOpc == 2
 					//============================================================================
 					_cAlias150	:= GetNextAlias()
 					
-					BeginSQL Alias _cAlias150
+					BeginSql Alias _cAlias150
 				      SELECT 1 ACHOU
 				      	FROM SPED150
 				      WHERE SPED150.D_E_L_E_T_ = ' '
-				         AND SPED150.NFE_CHV = %exp:SUBSTR((_cAlias)->DS_ARQUIVO,4,44)%
+				         AND SPED150.NFE_CHV = %exp:SubStr((_cAlias)->DS_ARQUIVO,4,44)%
 				         AND SPED150.ID_ENT = %exp:cIdEnt%
 				         AND SPED150.TPEVENTO = '610110'
 				         AND SPED150.AMBIENTE = %exp:_cAmbiente%
 				      	 AND SPED150.STATUS = 6
-					EndSQL
+					EndSql
 					
 					If (_cAlias150)->ACHOU == 1
 						RecLock("CKO",.F.)
 						CKO->CKO_FLAG := '9'
 						CKO->CKO_CODERR := 'MCOM03'
-						CKO->(MsUnLock())
+						CKO->(MSUnLock())
 					Else
 						RecLock("CKO",.F.)
 						CKO->CKO_FLAG := '0'
-						CKO->(MsUnLock())
+						CKO->(MSUnLock())
 					EndIf
-					(_cAlias150)->(dbCloseArea())
+					(_cAlias150)->(DBCloseArea())
 	     		Else
 					If Empty(_cCodRet)
-						MsgAlert("Não foi possível realizar a consulta da chave "+SUBSTR((_cAlias)->DS_ARQUIVO,4,44)+" corretamente. O documento será colocado novamente na fila de processamento. Acione a TI.","MCOM00501")
+						MsgAlert("Não foi possível realizar a consulta da chave "+SubStr((_cAlias)->DS_ARQUIVO,4,44)+" corretamente. O documento será colocado novamente na fila de processamento. Acione a TI.","MCOM00501")
 					EndIf
 					RecLock("CKO",.F.)
 					CKO->CKO_FLAG := '0'
-					CKO->(MsUnLock())
+					CKO->(MSUnLock())
 	         	EndIf
 	 		EndIf
 	 		//============================================================================
-			//Se o documento for cancelado não se deve realizar nenhum tipo de manifestação
+			//Se o documento For cancelado não se deve realizar nenhum tipo de manifestação
 			//Excluir registro para evitar manifestação indevida.
 			//============================================================================
-			DbSelectArea("C00")
-			C00->(dbSetorder(1))
-			If AllTrim((_cAlias)->DS_ESPECI) == 'SPED' .And. _cCodRet $ '101/155' .And. C00->(dbSeek((_cAlias)->(DS_FILIAL+SUBSTR(DS_ARQUIVO,4,44)))) ;
+			DBSelectArea("C00")
+			C00->(DBSetOrder(1))
+			If AllTrim((_cAlias)->DS_ESPECI) == 'SPED' .And. _cCodRet $ '101/155' .And. C00->(DBSeek((_cAlias)->(DS_FILIAL+SubStr(DS_ARQUIVO,4,44)))) ;
 				.And. C00->C00_STATUS == '0' .And. C00->C00_CODEVE == '1  '
 				RecLock("C00",.F.)
 				C00->C00_SITDOC := '3'
 				C00->(dbDelete())
-				C00->(MsUnLock())
+				C00->(MSUnLock())
 			EndIf
 			C00->(DBCloseArea())
 		Else	
 			Aviso("SPED",IIf(Empty(GetWscError(3)),GetWscError(1),GetWscError(3)),{"OK"},3)
 		EndIf
-		(_cAlias)->(dbSkip())
+		(_cAlias)->(DBSkip())
 	End
 
-	(_cAlias)->(dbCloseArea())
-	SDS->(dbGoTop())
+	(_cAlias)->(DBCloseArea())
+	SDS->(DBGoTop())
 
 EndIf
 

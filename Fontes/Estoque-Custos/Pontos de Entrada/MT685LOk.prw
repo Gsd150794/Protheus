@@ -1,38 +1,29 @@
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "rwmake.ch"
-/*/
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
-ฑฑษออออออออออัออออออออออหอออออออัอออออออออออออออออออออออหออออออออออออออออออัออออออออออออออออออออออออออออออออออออออออออออออออปฑฑ
-ฑฑบPrograma  ณ MT685LOk บ Autor ณ Renato de Morcerf     บ Data da Criacao  ณ 03/02/2009                						บฑฑ
-ฑฑฬออออออออออุออออออออออสอออออออฯอออออออออออออออออออออออสออออออออออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบDescricao ณ Ponto de Entrada que valida lancamento do apontamento de perda    					                      	บฑฑ
-ฑฑบ          ณ 															                               						บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ Valida a obrigatoriedade do preenchimento da segunda unidade de medida quando os produtos pertence ao		บฑฑ
-ฑฑบ          ณ grupo de produto 0006(Queijo) para controle de estoque de pecas de queijo. 	                                บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบParametrosณ                                                                                        						บฑฑ
-ฑฑบ			 ณ 		                                                                                                        บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบRetorno   ณ .T. = Permite confirmar lancamento                                                                          	บฑฑ
-ฑฑบ			 ณ .F. = Nao Permite confirmar lancamento                                                                      	บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUsuario   ณ															                             						บฑฑ
-ฑฑฬออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบSetor     ณ                                                                                      						บฑฑ
-ฑฑฬออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบ            						ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL                   						บฑฑ
-ฑฑฬออออออออออัออออออออออัออออออออออออออออออออออออออออออออออออออออออออออออออัออออออออออออออออออออออออออออออออออัอออออออออออออนฑฑ
-ฑฑบAutor     ณ Data     ณ Motivo da Alteracao  				               ณUsuario(Filial+Matricula+Nome)    ณSetor        บฑฑ
-ฑฑฬฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤลฤฤฤฤฤฤฤฤฤฤฤฤฤนฑฑ
-ฑฑศออออออออออฯออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออฯออออออออออออออออออออออออออออออออออฯอออออออออออออผฑฑ
-ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
-฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
-/*/
+/*
+===============================================================================================================================
+               ULTIMAS ATUALIZAวีES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+===============================================================================================================================
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+===============================================================================================================================
+*/
+
+#Include "TOTVS.ch"
+
+/*
+===============================================================================================================================
+Programa----------: MT685LOk
+Autor-------------: Renato de Morcerf
+Data da Criacao---: 03/02/2009
+Descri็ใo---------: Ponto de Entrada que valida lancamento do apontamento de perda. Valida a obrigatoriedade do preenchimento 
+					da segunda unidade de medida quando os produtos pertence ao grupo de produto 0006(Queijo) para controle de
+					estoque de pecas de queijo.
+Parametros--------: Nenhum
+Retorno-----------: .T. = Permite confirmar lancamento - .F. = Nao Permite confirmar lancamento 	   
+===============================================================================================================================
+*/
 User Function MT685LOK()
 
-	Local	aArea	:=	GetArea()
+	Local	aArea	:=	FWGetArea()
 	Local 	nPa   	:= 	""
 	Local 	_npl  	:= 	""
 	Local 	nPa2  	:= 	""
@@ -41,20 +32,21 @@ User Function MT685LOK()
 
 	If aCols[n][Len(aHeader)+1] == .F. //Linha nao Deletada
 
-		nPa  :=  aScan( aHeader, { |x| Alltrim(x[2])== "BC_PRODUTO" } )
+		nPa  :=  aScan( aHeader, { |x| AllTrim(x[2])== "BC_PRODUTO" } )
 		_npl := acols[n,nPa]
 	
-		if substr(_npl,1,4) = "0006"
+		If SubStr(_npl,1,4) = "0006"
 	
-			nPa2  :=  aScan( aHeader, { |x| Alltrim(x[2])== "BC_QTSEGUM" } )
+			nPa2  :=  aScan( aHeader, { |x| AllTrim(x[2])== "BC_QTSEGUM" } )
 			_npl2 := acols[n,nPa2]
-			if _npl2 = 0
-				xmaghelpfis("Segunda Unidade de Medida Vazio","Para esse produto e obrigatorio o preenchimento da segunda unidade de medida (Pe็as).",;
+			If _npl2 = 0
+				xMagHelpFis("Segunda Unidade de Medida Vazio","Para esse produto e obrigatorio o preenchimento da segunda unidade de medida (Pe็as).",;
 							"Favor preencher a segunda unidade de medida (Pe็as)!!")
 				n_ret := .F.
-			endif
-		endif
-	Endif
+			EndIf
+		EndIf
+	EndIf
 	
-	RestArea(aArea)
-return n_ret
+	FWRestArea(aArea)
+
+Return n_ret

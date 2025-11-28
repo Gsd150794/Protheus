@@ -11,8 +11,8 @@
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#include "TopConn.ch" 
-#INCLUDE "PROTHEUS.CH"
+#Include "TopConn.ch" 
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -42,10 +42,10 @@ Begin Sequence
    _aDadosAlt := {}
    
    For _nI := 1 To Len(_aDadosSA3)
-       Aadd(_aDadosAlt, {_aDadosSA3[_nI,1] ,_aDadosSA3[_nI,2], &("SA3->"+_aDadosSA3[_nI,1])})
+       aAdd(_aDadosAlt, {_aDadosSA3[_nI,1] ,_aDadosSA3[_nI,2], &("SA3->"+_aDadosSA3[_nI,1])})
    Next 
 
-   U_ITGrvLog( _aDadosAlt , "SA3" , 1 , xFilial("SA3") + SA3->A3_COD , "E" , __CUSERID, date() , time() )           
+   U_ITGrvLog( _aDadosAlt , "SA3" , 1 , xFilial("SA3") + SA3->A3_COD , "E" , __cUserId, Date() , Time() )           
 
 End Sequence
 

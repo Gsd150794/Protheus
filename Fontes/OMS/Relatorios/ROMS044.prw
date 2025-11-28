@@ -12,8 +12,8 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#Include 'Protheus.ch'
-#INCLUDE 'TOPCONN.CH'
+#Include "TOTVS.ch"
+#Include 'TOPCONN.CH'
 
 /*
 ===============================================================================================================================
@@ -32,7 +32,7 @@ Private cPerg	:= "ROMS044"
 Private aOrd	:= {"Filial","Cliente","Estado","Rede","Contrato"} 
 
 If !Pergunte(cPerg,.T.)
-     return
+     Return
 EndIf
 
 oReport := RptDef(cPerg)
@@ -152,11 +152,11 @@ If MV_PAR10 == 1
 	cQry1 += "JOIN " + RetSqlName("SA1") + " SA1 ON A1_FILIAL = '" + xFilial("SA1") + "' "
 	cQry1 += "				AND (( A1_COD = ZAZ_CLIENT AND A1_LOJA = ZAZ_LOJA) OR A1_GRPVEN = ZAZ_GRPVEN)  "
 	
-	IF !Empty(MV_PAR01)	
+	If !Empty(MV_PAR01)	
 	
 		cQry1 += "				AND A1_EST IN " + FormatIn(MV_PAR01,";") + " "
 		
-	Endif
+	EndIf
 	
 	cQry1 += "				AND SA1.D_E_L_E_T_ = ' ' "
 	cQry1 += "WHERE "
@@ -203,8 +203,8 @@ If MV_PAR10 == 1
 	//Se o alias estiver aberto, irei fechar, isso ajuda a evitar erros
 	//=================================================================
 	If Select("TRBPED") <> 0
-		DbSelectArea("TRBPED")
-		DbCloseArea()
+		DBSelectArea("TRBPED")
+		DBCloseArea()
 	EndIf
 
 	//=================
@@ -212,8 +212,8 @@ If MV_PAR10 == 1
 	//=================
 	TCQUERY cQry1 NEW ALIAS "TRBPED"
 		
-	dbSelectArea("TRBPED")
-	TRBPED->(dbGoTop())
+	DBSelectArea("TRBPED")
+	TRBPED->(DBGoTop())
 		
 	oReport:SetMeter(TRBPED->(LastRec()))
 
@@ -233,7 +233,7 @@ If MV_PAR10 == 1
 	
 		oReport:IncMeter()
 	
-		IncProc("Imprimindo Filial " + Alltrim(TRBPED->ZAZ_FILIAL) + " - " + AllTrim(FWFilialName(cEmpAnt,TRBPED->ZAZ_FILIAL)))
+		IncProc("Imprimindo Filial " + AllTrim(TRBPED->ZAZ_FILIAL) + " - " + AllTrim(FWFilialName(cEmpAnt,TRBPED->ZAZ_FILIAL)))
 
 		//========================
 		//imprimo a primeira seção
@@ -244,17 +244,17 @@ If MV_PAR10 == 1
 		oSection1:Cell("ZAZ_CLIENT")	:SetValue(TRBPED->ZAZ_CLIENT)
 		oSection1:Cell("ZAZ_LOJA")		:SetValue(TRBPED->ZAZ_LOJA)
 		oSection1:Cell("ZAZ_NOME")		:SetValue(TRBPED->ZAZ_NOME)
-		oSection1:Cell("ZAZ_DTINI")		:SetValue(StoD(TRBPED->ZAZ_DTINI))
-		oSection1:Cell("ZAZ_DTFIM")		:SetValue(StoD(TRBPED->ZAZ_DTFIM))
-		oSection1:Cell("ZAZ_MSBLQL")	:SetValue(Iif(TRBPED->ZAZ_MSBLQL == "1", "SIM", "NAO"))
+		oSection1:Cell("ZAZ_DTINI")		:SetValue(SToD(TRBPED->ZAZ_DTINI))
+		oSection1:Cell("ZAZ_DTFIM")		:SetValue(SToD(TRBPED->ZAZ_DTFIM))
+		oSection1:Cell("ZAZ_MSBLQL")	:SetValue(IIf(TRBPED->ZAZ_MSBLQL == "1", "SIM", "NAO"))
 		oSection1:Cell("ZAZ_ABATIM")	:SetValue(TRBPED->ZAZ_ABATIM)
 		oSection1:Cell("ZAZ_MATAPR")	:SetValue(TRBPED->ZAZ_MATAPR)
-		oSection1:Cell("ZAZ_DTAPRO")	:SetValue(StoD(TRBPED->ZAZ_DTAPRO))
+		oSection1:Cell("ZAZ_DTAPRO")	:SetValue(SToD(TRBPED->ZAZ_DTAPRO))
 		oSection1:Cell("ZAZ_HRAPRO")	:SetValue(TRBPED->ZAZ_HRAPRO)
 		oSection1:Cell("ZAZ_STATUS")	:SetValue(TRBPED->ZAZ_STATUS)
 		oSection1:Cell("ZAZ_STBAS")		:SetValue(TRBPED->ZAZ_STBAS)
 		oSection1:Cell("A1_EST")		:SetValue(TRBPED->A1_EST)
-		oSection1:Printline()
+		oSection1:PrintLine()
 
 		//==========================
 		//inicializo a segunda seção
@@ -271,14 +271,14 @@ If MV_PAR10 == 1
 		cQry2 += "ORDER BY ZB0_FILIAL, ZB0_COD, ZB0_ITEM "
 	
 		If Select("TRBDAD") <> 0
-			DbSelectArea("TRBDAD")
-			DbCloseArea()
+			DBSelectArea("TRBDAD")
+			DBCloseArea()
 		EndIf
 	
 		TCQUERY cQry2 NEW ALIAS "TRBDAD"
 		
-		dbSelectArea("TRBDAD")
-		TRBDAD->(dbGoTop())
+		DBSelectArea("TRBDAD")
+		TRBDAD->(DBGoTop())
 		
 		oReport:SetMeter(TRBDAD->(LastRec()))
 	
@@ -288,7 +288,7 @@ If MV_PAR10 == 1
 			//=======================
 			//Imprime a segunda seção
 			//=======================
-			IncProc("Imprimindo produto "+alltrim(TRBDAD->ZB0_SB1COD))
+			IncProc("Imprimindo produto "+AllTrim(TRBDAD->ZB0_SB1COD))
 			oSection2:Cell("ZB0_ITEM")		:SetValue(TRBDAD->ZB0_ITEM)
 			oSection2:Cell("B1_GRUPO")	    :SetValue(TRBDAD->B1_GRUPO)
 			oSection2:Cell("BM_DESC")	    :SetValue(TRBDAD->BM_DESC)
@@ -302,13 +302,13 @@ If MV_PAR10 == 1
 			oSection2:Cell("ZB0_ABATIM")	:SetValue(TRBDAD->ZB0_ABATIM)
 			oSection2:Cell("ZB0_DESCPA")	:SetValue(TRBDAD->ZB0_DESCPA)
 			oSection2:Cell("ZB0_EST")		:SetValue(TRBDAD->ZB0_EST)
-			oSection2:Printline()
+			oSection2:PrintLine()
 	
-			TRBDAD->(dbSkip())
+			TRBDAD->(DBSkip())
 		End
 		oReport:ThinLine()
 		oSection2:Finish()
-		TRBPED->(dbSkip())
+		TRBPED->(DBSkip())
 	End
 	oSection1:Finish()
 	oSection1:Enable()
@@ -320,11 +320,11 @@ Else
 	cQry1 += "JOIN " + RetSqlName("SA1") + " SA1 ON A1_FILIAL = '" + xFilial("SA1") + "' "
 	cQry1 += "				AND (( A1_COD = ZAZ_CLIENT AND A1_LOJA = ZAZ_LOJA) OR A1_GRPVEN = ZAZ_GRPVEN)  "
 	
-	IF !Empty(MV_PAR01)
+	If !Empty(MV_PAR01)
 	
 	  cQry1 += "				AND A1_EST IN " + FormatIn(MV_PAR01,";") + " "
 	
-	Endif
+	EndIf
 	
 	cQry1 += "				AND SA1.D_E_L_E_T_ = ' ' "
 	cQry1 += "WHERE "
@@ -373,15 +373,15 @@ Else
 
 	//Se o alias estiver aberto, irei fechar, isso ajuda a evitar erros
 	If Select("TRBPED") <> 0
-		DbSelectArea("TRBPED")
-		DbCloseArea()
+		DBSelectArea("TRBPED")
+		DBCloseArea()
 	EndIf
 		
 	//crio o novo alias
 	TCQUERY cQry1 NEW ALIAS "TRBPED"
 		
-	dbSelectArea("TRBPED")
-	TRBPED->(dbGoTop())
+	DBSelectArea("TRBPED")
+	TRBPED->(DBGoTop())
 		
 	oReport:SetMeter(TRBPED->(LastRec()))
 	
@@ -397,7 +397,7 @@ Else
 	
 		oReport:IncMeter()
 	
-		IncProc("Imprimindo Filial " + Alltrim(TRBPED->ZAZ_FILIAL) + " - " + AllTrim(FWFilialName(cEmpAnt,TRBPED->ZAZ_FILIAL)))
+		IncProc("Imprimindo Filial " + AllTrim(TRBPED->ZAZ_FILIAL) + " - " + AllTrim(FWFilialName(cEmpAnt,TRBPED->ZAZ_FILIAL)))
 
 		//imprimo a primeira seção
 		oSection1:Cell("ZAZ_FILIAL")	:SetValue(TRBPED->ZAZ_FILIAL)
@@ -406,19 +406,19 @@ Else
 		oSection1:Cell("ZAZ_CLIENT")	:SetValue(TRBPED->ZAZ_CLIENT)
 		oSection1:Cell("ZAZ_LOJA")		:SetValue(TRBPED->ZAZ_LOJA)
 		oSection1:Cell("ZAZ_NOME")		:SetValue(TRBPED->ZAZ_NOME)
-		oSection1:Cell("ZAZ_DTINI")		:SetValue(StoD(TRBPED->ZAZ_DTINI))
-		oSection1:Cell("ZAZ_DTFIM")		:SetValue(StoD(TRBPED->ZAZ_DTFIM))
-		oSection1:Cell("ZAZ_MSBLQL")	:SetValue(Iif(TRBPED->ZAZ_MSBLQL == "1", "SIM", "NAO"))
+		oSection1:Cell("ZAZ_DTINI")		:SetValue(SToD(TRBPED->ZAZ_DTINI))
+		oSection1:Cell("ZAZ_DTFIM")		:SetValue(SToD(TRBPED->ZAZ_DTFIM))
+		oSection1:Cell("ZAZ_MSBLQL")	:SetValue(IIf(TRBPED->ZAZ_MSBLQL == "1", "SIM", "NAO"))
 		oSection1:Cell("ZAZ_ABATIM")	:SetValue(TRBPED->ZAZ_ABATIM)
 		oSection1:Cell("ZAZ_MATAPR")	:SetValue(TRBPED->ZAZ_MATAPR)
-		oSection1:Cell("ZAZ_DTAPRO")	:SetValue(StoD(TRBPED->ZAZ_DTAPRO))
+		oSection1:Cell("ZAZ_DTAPRO")	:SetValue(SToD(TRBPED->ZAZ_DTAPRO))
 		oSection1:Cell("ZAZ_HRAPRO")	:SetValue(TRBPED->ZAZ_HRAPRO)
 		oSection1:Cell("ZAZ_STATUS")	:SetValue(TRBPED->ZAZ_STATUS)
 		oSection1:Cell("ZAZ_STBAS")		:SetValue(TRBPED->ZAZ_STBAS)
 		oSection1:Cell("A1_EST")		:SetValue(TRBPED->A1_EST)
-		oSection1:Printline()
+		oSection1:PrintLine()
 
-		TRBPED->(dbSkip())
+		TRBPED->(DBSkip())
 	End
 	oSection1:Finish()
 	oSection1:Enable()
